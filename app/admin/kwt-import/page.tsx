@@ -25,8 +25,20 @@ const COURSE_CODE_MAP: Record<string, string> = {
   ZZE: "Zanzibar",
   ZZH: "Zanzibar",
 
+  QVE: "Quixote Valley",
+  QVH: "Quixote Valley",
+
+  LBE: "Laser Lair",
+  LBH: "Laser Lair",
+
   LLE: "Laser Lair",
   LLH: "Laser Lair",
+
+  ATE: "Atlantis",
+  ATH: "Atlantis",
+
+  ALE: "Atlantis",
+  ALH: "Atlantis",
 
   TTE: "Tourist Trap",
   TTH: "Tourist Trap",
@@ -45,9 +57,6 @@ const COURSE_CODE_MAP: Record<string, string> = {
 
   SLE: "Shangri-La",
   SLH: "Shangri-La",
-
-  ALE: "Atlantis",
-  ALH: "Atlantis",
 
   GTE: "Gothic",
   GTH: "Gothic",
@@ -132,7 +141,6 @@ export default function KWTImportPage() {
     }
 
     const rows = parsed.data.filter((r) => clean(r.Player))
-
     const missingCodes = findMissingCourseCodes(rows)
 
     if (missingCodes.length > 0) {
