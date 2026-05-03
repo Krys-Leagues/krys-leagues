@@ -48,11 +48,12 @@ const ADMIN_LINKS = [
   { label: "PYP Schedule", href: "/admin/pyp/schedule", roles: ["super_admin", "pyp_admin"] },
   { label: "PYP Results", href: "/admin/pyp/results", roles: ["super_admin", "pyp_admin"] },
 
-  // 🏆 NEW
   { label: "Trophies", href: "/admin/trophies", roles: ["super_admin", "trophy_admin"] },
 
   { label: "Players", href: "/admin/players", roles: ["super_admin"] },
   { label: "Standings", href: "/admin/standings", roles: ["super_admin"] },
+
+  { label: "KWT Import", href: "/admin/kwt-import", roles: ["super_admin"] },
 ]
 
 const ROLE_ACCESS: Record<AdminRole, string[]> = {
@@ -64,7 +65,7 @@ const ROLE_ACCESS: Record<AdminRole, string[]> = {
   pro_admin: ["/admin", "/admin/pro"],
   doubles_admin: ["/admin", "/admin/doubles"],
   pyp_admin: ["/admin", "/admin/pyp"],
-  trophy_admin: ["/admin", "/admin/trophies"], // 🏆 FIXED
+  trophy_admin: ["/admin", "/admin/trophies"],
 }
 
 function routeAllowed(pathname: string, role: AdminRole) {
@@ -154,7 +155,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       provider: "discord",
       options: {
         scopes: "identify email",
-        redirectTo: `${window.location.origin}/admin`,
+        redirectTo: `${window.location.origin}${pathname}`,
       },
     })
   }
