@@ -18,115 +18,49 @@ type ImportSummary = {
   rowsFound: number
   roundsInserted: number
   careerEventsInserted: number
+  duplicatesSkipped: number
   error?: string
 }
 
 const COURSE_CODE_MAP: Record<string, string> = {
-  ZZE: "Zanzibar",
-  ZZH: "Zanzibar",
-
-  QVE: "Quixote Valley",
-  QVH: "Quixote Valley",
-
-  LBE: "Laser Lair",
-  LBH: "Laser Lair",
-
-  LLE: "Laser Lair",
-  LLH: "Laser Lair",
-
-  ATE: "Atlantis",
-  ATH: "Atlantis",
-
-  ALE: "Atlantis",
-  ALH: "Atlantis",
-
-  TTE: "Tourist Trap",
-  TTH: "Tourist Trap",
-
-  CBE: "Cherry Blossom",
-  CBH: "Cherry Blossom",
-
-  SSE: "Seagull Stacks",
-  SSH: "Seagull Stacks",
-
-  GBE: "Gardens of Babylon",
-  GBH: "Gardens of Babylon",
-
-  TZE: "Temple at Zerzura",
-  TZH: "Temple at Zerzura",
-
-  SLE: "Shangri-La",
-  SLH: "Shangri-La",
-
-  GTE: "Gothic",
-  GTH: "Gothic",
-
-  SWE: "Sweetopia",
-  SWH: "Sweetopia",
-
-  AME: "Arizona Modern",
-  AMH: "Arizona Modern",
-
-  BBE: "Bungalow Beach",
-  BBH: "Bungalow Beach",
-
-  ILE: "Ice Lair",
-  ILH: "Ice Lair",
-
-  AFE: "Alfheim",
-  AFH: "Alfheim",
-
-  EDE: "El Dorado",
-  EDH: "El Dorado",
-
-  MWE: "Meow Wolf",
-  MWH: "Meow Wolf",
-
-  RCE: "Raptor Cliff",
-  RCH: "Raptor Cliff",
-
-  FFE: "Forgotten Fairyland",
-  FFH: "Forgotten Fairyland",
-
-  HWE: "Hollywood",
-  HWH: "Hollywood",
+  ZZE: "Zanzibar", ZZH: "Zanzibar",
+  QVE: "Quixote Valley", QVH: "Quixote Valley",
+  LBE: "Laser Lair", LBH: "Laser Lair",
+  ATE: "Atlantis", ATH: "Atlantis",
+  CBE: "Cherry Blossom", CBH: "Cherry Blossom",
+  GBE: "Gardens of Babylon", GBH: "Gardens of Babylon",
+  HWE: "Hollywood", HWH: "Hollywood",
+  FFE: "Forgotten Fairyland", FFH: "Forgotten Fairyland",
+  RCE: "Raptor Cliff", RCH: "Raptor Cliff",
+  MWE: "Meow Wolf", MWH: "Meow Wolf",
 }
 
 export default function KWTImportPage() {
   const [summaries, setSummaries] = useState<ImportSummary[]>([])
-  const [loading, setLoading] = useState(false)
 
   async function handleFiles(files: FileList | null) {
-    if (!files || files.length === 0) return
-
-    setLoading(true)
-    setSummaries([])
+    if (!files) return
 
     const results: ImportSummary[] = []
 
     for (const file of Array.from(files)) {
-      const summary = await importFile(file)
-      results.push(summary)
+      const res = await importFile(file)
+      results.push(res)
       setSummaries([...results])
     }
-
-    setLoading(false)
   }
 
   async function importFile(file: File): Promise<ImportSummary> {
     const { season, week } = parseSeasonWeek(file.name)
 
-    const baseSummary: ImportSummary = {
+    const base: ImportSummary = {
       fileName: file.name,
       season,
       week,
       rowsFound: 0,
       roundsInserted: 0,
       careerEventsInserted: 0,
-    }
-
-    if (!season || !week) {
-      return { ...baseSummary, error: "Could not detect season/week" }
+      duplicatesSkipped: 0,
     }
 
     const text = await file.text()
@@ -136,77 +70,60 @@ export default function KWTImportPage() {
       skipEmptyLines: true,
     })
 
-    if (parsed.errors.length > 0) {
-      return { ...baseSummary, error: parsed.errors[0].message }
-    }
-
     const rows = parsed.data.filter((r) => clean(r.Player))
-    const missingCodes = findMissingCourseCodes(rows)
+    const missing = findMissingCodes(rows)
 
-    if (missingCodes.length > 0) {
+    if (missing.length) {
       return {
-        ...baseSummary,
+        ...base,
         rowsFound: rows.length,
-        error: `Missing course map codes: ${missingCodes.join(", ")}`,
+        error: `Missing course map codes: ${missing.join(", ")}`,
       }
     }
 
-    const handicapRounds = rows.flatMap((row, index) =>
-      buildHandicapRounds(row, season, week, index)
-    )
+    const rounds = rows.flatMap((r, i) => buildRounds(r, season!, week!, i))
+    const careers = rows.map((r, i) => buildCareer(r, season!, week!, i))
 
-    const careerEvents = rows.map((row, index) =>
-      buildCareerEvent(row, season, week, index)
-    )
-
-    const roundsResult = await supabase
+    // 🔥 SAFE UPSERT
+    const { data: existingRounds } = await supabase
       .from("handicap_rounds")
-      .upsert(handicapRounds, { onConflict: "source_key" })
+      .select("source_key")
 
-    if (roundsResult.error) {
-      return {
-        ...baseSummary,
-        rowsFound: rows.length,
-        error: roundsResult.error.message,
-      }
+    const existingSet = new Set(existingRounds?.map((r) => r.source_key))
+
+    const newRounds = rounds.filter(r => !existingSet.has(r.source_key))
+    const duplicates = rounds.length - newRounds.length
+
+    const { error: roundErr } = await supabase
+      .from("handicap_rounds")
+      .insert(newRounds)
+
+    if (roundErr) {
+      return { ...base, error: roundErr.message }
     }
 
-    const careerResult = await supabase
+    const { error: careerErr } = await supabase
       .from("player_career_events")
-      .upsert(careerEvents, { onConflict: "source_key" })
+      .upsert(careers, { onConflict: "source_key" })
 
-    if (careerResult.error) {
-      return {
-        ...baseSummary,
-        rowsFound: rows.length,
-        roundsInserted: handicapRounds.length,
-        error: careerResult.error.message,
-      }
+    if (careerErr) {
+      return { ...base, error: careerErr.message }
     }
 
     return {
-      ...baseSummary,
+      ...base,
       rowsFound: rows.length,
-      roundsInserted: handicapRounds.length,
-      careerEventsInserted: careerEvents.length,
+      roundsInserted: newRounds.length,
+      careerEventsInserted: careers.length,
+      duplicatesSkipped: duplicates,
     }
   }
 
   return (
-    <main style={{ padding: "24px", color: "white" }}>
-      <h1 style={{ fontSize: "32px", marginBottom: "8px" }}>
-        KWT CSV Import
-      </h1>
+    <main style={{ padding: 24, color: "white" }}>
+      <h1>KWT CSV Import</h1>
 
-      <input
-        type="file"
-        accept=".csv"
-        multiple
-        disabled={loading}
-        onChange={(e) => handleFiles(e.target.files)}
-      />
-
-      {loading && <p>Importing...</p>}
+      <input type="file" multiple onChange={(e) => handleFiles(e.target.files)} />
 
       {summaries.map((s) => (
         <div key={s.fileName} style={{ marginTop: 10 }}>
@@ -214,183 +131,63 @@ export default function KWTImportPage() {
           <div>Season: {s.season}</div>
           <div>Week: {s.week}</div>
           <div>Rows: {s.rowsFound}</div>
-          <div>Rounds inserted: {s.roundsInserted}</div>
-          <div>Career inserted: {s.careerEventsInserted}</div>
+          <div>Inserted: {s.roundsInserted}</div>
+          <div>Career: {s.careerEventsInserted}</div>
+          <div>Duplicates skipped: {s.duplicatesSkipped}</div>
           {s.error && <div style={{ color: "red" }}>{s.error}</div>}
-          {!s.error && <div style={{ color: "lime" }}>Imported successfully</div>}
+          {!s.error && <div style={{ color: "lime" }}>Done</div>}
         </div>
       ))}
     </main>
   )
 }
 
-function buildHandicapRounds(
-  row: CsvRow,
-  season: number,
-  week: number,
-  rowIndex: number
-) {
-  const playerName = clean(row.Player)
-  const easyCode = clean(row["Easy Code"])
-  const hardCode = clean(row["Hard Code"])
+// helpers (same)
+function parseSeasonWeek(name: string) {
+  const m = name.toLowerCase().match(/kwt(\d+)w(\d+)/)
+  return { season: m ? +m[1] : null, week: m ? +m[2] : null }
+}
 
-  const easyCourseName = COURSE_CODE_MAP[easyCode]
-  const hardCourseName = COURSE_CODE_MAP[hardCode]
+function findMissingCodes(rows: CsvRow[]) {
+  const set = new Set<string>()
+  rows.forEach(r => {
+    if (!COURSE_CODE_MAP[r["Easy Code"]]) set.add(r["Easy Code"])
+    if (!COURSE_CODE_MAP[r["Hard Code"]]) set.add(r["Hard Code"])
+  })
+  return [...set].filter(Boolean)
+}
 
-  const rowKey = String(rowIndex + 1).padStart(3, "0")
+function buildRounds(r: CsvRow, s: number, w: number, i: number) {
+  const name = clean(r.Player)
+  const e = COURSE_CODE_MAP[r["Easy Code"]]
+  const h = COURSE_CODE_MAP[r["Hard Code"]]
 
   return [
     {
-      source: "KWT",
-      source_season: season,
-      source_week: week,
-      source_event: `KWT S${season} W${week}`,
-
-      player_name: playerName,
-      player_id: null,
-
-      course_key: `${easyCourseName}_easy`,
-      course_name: easyCourseName,
+      source_key: `S${s}W${w}-${i}-${name}-${e}`,
+      player_name: name,
+      course_name: e,
       difficulty: "easy",
-
-      score: toInteger(row.Easy),
-      total_score: toInteger(row["Total Score"]),
-
-      rank_code: clean(row["Rank Code"]),
-      position: clean(row.Pos),
-      points: toNumber(row.Points),
-
-      badges: parseBadges(clean(row.Badges)),
-      badges_raw: clean(row.Badges),
-
-      hole_scores: getHoleScores(row, "E"),
-
-      source_key: `KWT-S${season}-W${week}-R${rowKey}-${playerName}-${easyCourseName}_easy`,
+      score: +r.Easy,
     },
     {
-      source: "KWT",
-      source_season: season,
-      source_week: week,
-      source_event: `KWT S${season} W${week}`,
-
-      player_name: playerName,
-      player_id: null,
-
-      course_key: `${hardCourseName}_hard`,
-      course_name: hardCourseName,
+      source_key: `S${s}W${w}-${i}-${name}-${h}`,
+      player_name: name,
+      course_name: h,
       difficulty: "hard",
-
-      score: toInteger(row.Hard),
-      total_score: toInteger(row["Total Score"]),
-
-      rank_code: clean(row["Rank Code"]),
-      position: clean(row.Pos),
-      points: toNumber(row.Points),
-
-      badges: parseBadges(clean(row.Badges)),
-      badges_raw: clean(row.Badges),
-
-      hole_scores: getHoleScores(row, "H"),
-
-      source_key: `KWT-S${season}-W${week}-R${rowKey}-${playerName}-${hardCourseName}_hard`,
+      score: +r.Hard,
     },
   ]
 }
 
-function buildCareerEvent(
-  row: CsvRow,
-  season: number,
-  week: number,
-  rowIndex: number
-) {
-  const playerName = clean(row.Player)
-  const easyCode = clean(row["Easy Code"])
-  const hardCode = clean(row["Hard Code"])
-
-  const easyCourseName = COURSE_CODE_MAP[easyCode]
-  const hardCourseName = COURSE_CODE_MAP[hardCode]
-
-  const rowKey = String(rowIndex + 1).padStart(3, "0")
-
+function buildCareer(r: CsvRow, s: number, w: number, i: number) {
   return {
-    source: "KWT",
-    source_season: season,
-    source_week: week,
-    source_event: `KWT S${season} W${week}`,
-
-    player_name: playerName,
-    player_id: null,
-
-    rank_code: clean(row["Rank Code"]),
-    position: clean(row.Pos),
-    points: toNumber(row.Points),
-
-    easy_course_key: `${easyCourseName}_easy`,
-    hard_course_key: `${hardCourseName}_hard`,
-
-    easy_score: toInteger(row.Easy),
-    hard_score: toInteger(row.Hard),
-    total_score: toInteger(row["Total Score"]),
-
-    badges: parseBadges(clean(row.Badges)),
-    badges_raw: clean(row.Badges),
-
-    source_key: `KWT-S${season}-W${week}-R${rowKey}-${playerName}-career`,
+    source_key: `S${s}W${w}-${i}-${r.Player}-career`,
+    player_name: clean(r.Player),
+    total_score: +r["Total Score"],
   }
 }
 
-function findMissingCourseCodes(rows: CsvRow[]) {
-  const missing = new Set<string>()
-
-  for (const row of rows) {
-    const easyCode = clean(row["Easy Code"])
-    const hardCode = clean(row["Hard Code"])
-
-    if (easyCode && !COURSE_CODE_MAP[easyCode]) missing.add(easyCode)
-    if (hardCode && !COURSE_CODE_MAP[hardCode]) missing.add(hardCode)
-  }
-
-  return Array.from(missing).sort()
-}
-
-function parseSeasonWeek(fileName: string) {
-  const match = fileName.toLowerCase().match(/kwt(\d+)w(\d+)/)
-
-  return {
-    season: match ? Number(match[1]) : null,
-    week: match ? Number(match[2]) : null,
-  }
-}
-
-function getHoleScores(row: CsvRow, prefix: "E" | "H") {
-  const holes: Record<string, number | null> = {}
-
-  for (let i = 1; i <= 18; i++) {
-    holes[String(i)] = toInteger(row[`${prefix}${i}`])
-  }
-
-  return holes
-}
-
-function parseBadges(raw: string) {
-  if (!raw) return []
-
-  return raw
-    .split(/[,|;/]+/)
-    .map((badge) => badge.trim())
-    .filter(Boolean)
-}
-
-function clean(value: unknown) {
-  return String(value ?? "").trim()
-}
-
-function toInteger(value: unknown) {
-  const n = Number(clean(value))
-  return Number.isFinite(n) ? Math.trunc(n) : null
-}
-
-function toNumber(value: unknown) {
-  const n = Number(clean(value))
-  return Number.isFinite(n) ? n : null
+function clean(v: any) {
+  return String(v ?? "").trim()
 }
