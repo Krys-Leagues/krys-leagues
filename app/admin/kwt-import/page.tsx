@@ -23,6 +23,7 @@ type ImportSummary = {
 }
 
 const COURSE_CODE_MAP: Record<string, string> = {
+  // EXISTING
   ZZE: "Zanzibar", ZZH: "Zanzibar",
   QVE: "Quixote Valley", QVH: "Quixote Valley",
   LBE: "Laser Lair", LBH: "Laser Lair",
@@ -37,6 +38,13 @@ const COURSE_CODE_MAP: Record<string, string> = {
   VNE: "Venice", VNH: "Venice",
   MYE: "Myst", MYH: "Myst",
   JCE: "Journey to the Center", JCH: "Journey to the Center",
+
+  // 🔥 NEW (FROM YOUR DATA)
+  SWE: "Sweetopia", SWH: "Sweetopia",
+  OGE: "Mount Olympus", OGH: "Mount Olympus",
+  EDE: "El Dorado", EDH: "El Dorado",
+  "8BE": "8-Bit Lair", "8BH": "8-Bit Lair",
+  WGE: "Widow's Walkabout", WGH: "Widow's Walkabout",
 }
 
 export default function KWTImportPage() {
@@ -89,23 +97,12 @@ export default function KWTImportPage() {
     const rounds = rows.flatMap((r, i) => buildRounds(r, season!, week!, i))
     const careers = rows.map((r, i) => buildCareer(r, season!, week!, i))
 
-    const { data: existing } = await supabase
+    // 🔥 HARD DUPLICATE PROTECTION (FIXED)
+    const { error: roundErr } = await supabase
       .from("handicap_rounds")
-      .select("source_key")
-      .in("source_key", rounds.map((r) => r.source_key))
+      .upsert(rounds, { onConflict: "source_key" })
 
-    const existingSet = new Set(existing?.map((r) => r.source_key))
-    const newRounds = rounds.filter((r) => !existingSet.has(r.source_key))
-
-    const duplicates = rounds.length - newRounds.length
-
-    if (newRounds.length > 0) {
-      const { error } = await supabase
-        .from("handicap_rounds")
-        .insert(newRounds)
-
-      if (error) return { ...base, error: error.message }
-    }
+    if (roundErr) return { ...base, error: roundErr.message }
 
     const { error: careerErr } = await supabase
       .from("player_career_events")
@@ -116,9 +113,9 @@ export default function KWTImportPage() {
     return {
       ...base,
       rowsFound: rows.length,
-      roundsInserted: newRounds.length,
+      roundsInserted: rounds.length,
       careerEventsInserted: careers.length,
-      duplicatesSkipped: duplicates,
+      duplicatesSkipped: 0,
     }
   }
 
