@@ -15,7 +15,6 @@ export default function AuthCallback() {
     const { data } = await supabase.auth.getSession()
 
     if (data.session) {
-      // 🔥 This is the fix — go to admin import page
       router.push("/admin/kwt-import")
     } else {
       router.push("/")
