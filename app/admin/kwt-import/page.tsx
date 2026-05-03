@@ -23,7 +23,6 @@ type ImportSummary = {
 }
 
 const COURSE_CODE_MAP: Record<string, string> = {
-  // EXISTING
   ZZE: "Zanzibar", ZZH: "Zanzibar",
   QVE: "Quixote Valley", QVH: "Quixote Valley",
   LBE: "Laser Lair", LBH: "Laser Lair",
@@ -39,12 +38,21 @@ const COURSE_CODE_MAP: Record<string, string> = {
   MYE: "Myst", MYH: "Myst",
   JCE: "Journey to the Center", JCH: "Journey to the Center",
 
-  // 🔥 NEW (FROM YOUR DATA)
   SWE: "Sweetopia", SWH: "Sweetopia",
   OGE: "Mount Olympus", OGH: "Mount Olympus",
   EDE: "El Dorado", EDH: "El Dorado",
   "8BE": "8-Bit Lair", "8BH": "8-Bit Lair",
   WGE: "Widow's Walkabout", WGH: "Widow's Walkabout",
+
+  // 🔥 NEW FIXES
+  ELE: "El Dorado", ELH: "El Dorado",
+  WOE: "Around the World", WOH: "Around the World",
+  AWE: "Around the World 80 Days", AWH: "Around the World 80 Days",
+  MOE: "Mars Garden", MOH: "Mars Garden",
+  TSE: "Tethys Station", TSH: "Tethys Station",
+  WWE: "Widow's Walkabout", WWH: "Widow's Walkabout",
+  "20E": "20,000 Leagues", "20H": "20,000 Leagues",
+  SLE: "Shangri-La", SLH: "Shangri-La",
 }
 
 export default function KWTImportPage() {
@@ -97,10 +105,14 @@ export default function KWTImportPage() {
     const rounds = rows.flatMap((r, i) => buildRounds(r, season!, week!, i))
     const careers = rows.map((r, i) => buildCareer(r, season!, week!, i))
 
-    // 🔥 HARD DUPLICATE PROTECTION (FIXED)
+    // 🔥 remove duplicates BEFORE upsert (critical fix)
+    const uniqueRounds = Array.from(
+      new Map(rounds.map(r => [r.source_key, r])).values()
+    )
+
     const { error: roundErr } = await supabase
       .from("handicap_rounds")
-      .upsert(rounds, { onConflict: "source_key" })
+      .upsert(uniqueRounds, { onConflict: "source_key" })
 
     if (roundErr) return { ...base, error: roundErr.message }
 
@@ -113,9 +125,9 @@ export default function KWTImportPage() {
     return {
       ...base,
       rowsFound: rows.length,
-      roundsInserted: rounds.length,
+      roundsInserted: uniqueRounds.length,
       careerEventsInserted: careers.length,
-      duplicatesSkipped: 0,
+      duplicatesSkipped: rounds.length - uniqueRounds.length,
     }
   }
 
@@ -143,19 +155,22 @@ export default function KWTImportPage() {
 
 function buildRounds(r: CsvRow, s: number, w: number, i: number) {
   const name = clean(getVal(r, ["Player"]))
-  const e = COURSE_CODE_MAP[clean(getVal(r, ["Easy Code", "EasyCode"]))]
-  const h = COURSE_CODE_MAP[clean(getVal(r, ["Hard Code", "HardCode"]))]
+  const eCode = clean(getVal(r, ["Easy Code", "EasyCode"]))
+  const hCode = clean(getVal(r, ["Hard Code", "HardCode"]))
+
+  const e = COURSE_CODE_MAP[eCode]
+  const h = COURSE_CODE_MAP[hCode]
 
   return [
     {
-      source_key: `S${s}W${w}-${i}-${name}-${e}`,
+      source_key: `S${s}W${w}-${i}-${name}-${eCode}-E`,
       player_name: name,
       course_key: `${e}_easy`,
       difficulty: "easy",
       score: toInt(getVal(r, ["Easy"]))
     },
     {
-      source_key: `S${s}W${w}-${i}-${name}-${h}`,
+      source_key: `S${s}W${w}-${i}-${name}-${hCode}-H`,
       player_name: name,
       course_key: `${h}_hard`,
       difficulty: "hard",
