@@ -145,7 +145,9 @@ export default function StrokeSetup() {
   )
 }
 
-const page = {
+/* ✅ FIXED: TypeScript-safe styles */
+
+const page: React.CSSProperties = {
   minHeight: "100vh",
   background: "black",
   color: "white",
@@ -153,29 +155,29 @@ const page = {
   justifyContent: "center",
 }
 
-const container = {
+const container: React.CSSProperties = {
   width: "100%",
   maxWidth: 1200,
   padding: 30,
 }
 
-const section = {
+const section: React.CSSProperties = {
   marginTop: 30,
 }
 
-const row = {
+const row: React.CSSProperties = {
   display: "flex",
   gap: 16,
   flexWrap: "wrap",
 }
 
-const grid = {
+const grid: React.CSSProperties = {
   display: "grid",
   gridTemplateColumns: "repeat(2, 1fr)",
   gap: 16,
 }
 
-const input = {
+const input: React.CSSProperties = {
   width: "100%",
   padding: 12,
   background: "#111",
@@ -184,7 +186,7 @@ const input = {
   borderRadius: 8,
 }
 
-const button = {
+const button: React.CSSProperties = {
   marginTop: 30,
   padding: 14,
   width: "100%",
