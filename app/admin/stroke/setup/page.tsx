@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import { supabase } from "@/lib/supabase"
 
 type Player = {
@@ -18,8 +18,6 @@ export default function StrokeSetup() {
   const [player4, setPlayer4] = useState("")
 
   const [players, setPlayers] = useState<Player[]>([])
-  const [playerSearch, setPlayerSearch] = useState("")
-
   const [course1, setCourse1] = useState("")
   const [course2, setCourse2] = useState("")
   const [course3, setCourse3] = useState("")
@@ -63,25 +61,13 @@ export default function StrokeSetup() {
     return match?.id || null
   }
 
-  const filteredPlayers = useMemo(() => {
-    const q = playerSearch.trim().toLowerCase()
-
-    if (!q) return players
-
-    return players.filter((p) => p.screen_name.toLowerCase().includes(q))
-  }, [players, playerSearch])
-
-  function playerSelect(
-    label: string,
-    value: string,
-    setValue: (value: string) => void
-  ) {
+  function playerSelect(label: string, value: string, setValue: (value: string) => void) {
     return (
       <div style={field}>
-        <label style={labelStyle}>{label}</label>
-        <select value={value} onChange={(e) => setValue(e.target.value)} style={selectStyle}>
+        <label style={label}>{label}</label>
+        <select value={value} onChange={(e) => setValue(e.target.value)} style={input}>
           <option value="">Select player</option>
-          {filteredPlayers.map((p) => (
+          {players.map((p) => (
             <option key={p.id} value={p.screen_name}>
               {p.screen_name}
             </option>
@@ -89,35 +75,6 @@ export default function StrokeSetup() {
         </select>
       </div>
     )
-  }
-
-  async function sendDiscordSchedule(seasonNumber: number) {
-    const fixtures = [
-      { round: "Game 1", player1, player2, course: course1, dueDate },
-      { round: "Game 1", player1: player3, player2: player4, course: course1, dueDate },
-
-      { round: "Game 2", player1: player4, player2: player1, course: course2, dueDate },
-      { round: "Game 2", player1: player2, player2: player3, course: course2, dueDate },
-
-      { round: "Game 3", player1, player2: player3, course: course3, dueDate },
-      { round: "Game 3", player1: player2, player2: player4, course: course3, dueDate },
-    ]
-
-    await fetch("/api/discord", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        leagueType: "Stroke",
-        division,
-        season: seasonNumber,
-        dueDate,
-        fixtures,
-        message:
-          "Stroke season schedule is set. Please complete all games before the due date.",
-      }),
-    })
   }
 
   async function handleCreateStrokeSchedule() {
@@ -137,7 +94,6 @@ export default function StrokeSetup() {
     }
 
     const uniquePlayers = new Set(selectedPlayers.map((p) => p.toLowerCase()))
-
     if (uniquePlayers.size !== 4) {
       alert("Players must be unique.")
       return
@@ -159,182 +115,131 @@ export default function StrokeSetup() {
     }
 
     const rows = [
-      {
-        ...base,
-        game: "1",
-        course: clean(course1),
-        player1: clean(player1),
-        player2: clean(player2),
-        player1_id: p1Id,
-        player2_id: p2Id,
-      },
-      {
-        ...base,
-        game: "1",
-        course: clean(course1),
-        player1: clean(player3),
-        player2: clean(player4),
-        player1_id: p3Id,
-        player2_id: p4Id,
-      },
-      {
-        ...base,
-        game: "2",
-        course: clean(course2),
-        player1: clean(player4),
-        player2: clean(player1),
-        player1_id: p4Id,
-        player2_id: p1Id,
-      },
-      {
-        ...base,
-        game: "2",
-        course: clean(course2),
-        player1: clean(player2),
-        player2: clean(player3),
-        player1_id: p2Id,
-        player2_id: p3Id,
-      },
-      {
-        ...base,
-        game: "3",
-        course: clean(course3),
-        player1: clean(player1),
-        player2: clean(player3),
-        player1_id: p1Id,
-        player2_id: p3Id,
-      },
-      {
-        ...base,
-        game: "3",
-        course: clean(course3),
-        player1: clean(player2),
-        player2: clean(player4),
-        player1_id: p2Id,
-        player2_id: p4Id,
-      },
+      { ...base, game: "1", course: clean(course1), player1: clean(player1), player2: clean(player2), player1_id: p1Id, player2_id: p2Id },
+      { ...base, game: "1", course: clean(course1), player1: clean(player3), player2: clean(player4), player1_id: p3Id, player2_id: p4Id },
+      { ...base, game: "2", course: clean(course2), player1: clean(player4), player2: clean(player1), player1_id: p4Id, player2_id: p1Id },
+      { ...base, game: "2", course: clean(course2), player1: clean(player2), player2: clean(player3), player1_id: p2Id, player2_id: p3Id },
+      { ...base, game: "3", course: clean(course3), player1: clean(player1), player2: clean(player3), player1_id: p1Id, player2_id: p3Id },
+      { ...base, game: "3", course: clean(course3), player1: clean(player2), player2: clean(player4), player1_id: p2Id, player2_id: p4Id },
     ]
 
     const { error } = await supabase.from("schedule").insert(rows)
 
+    setLoading(false)
+
     if (error) {
-      setLoading(false)
       alert("Insert failed: " + error.message)
       return
     }
 
-    await sendDiscordSchedule(seasonNumber)
-
-    setLoading(false)
-    alert("Stroke schedule created + Discord posted ✔")
+    alert("Stroke schedule created ✔")
   }
 
   return (
     <main style={page}>
-      <div style={header}>
-        <div>
-          <h1 style={title}>Stroke Setup</h1>
-          <p style={subtitle}>Create a 4-player Stroke Play schedule using global players.</p>
-        </div>
+      <div style={wrap}>
+        <header style={header}>
+          <div>
+            <h1 style={title}>Stroke Setup</h1>
+            <p style={subtitle}>Create a 4-player Stroke Play schedule.</p>
+          </div>
 
-        <button onClick={loadPlayers} disabled={playersLoading} style={secondaryButton}>
-          {playersLoading ? "Loading..." : "Refresh Players"}
+          <button onClick={loadPlayers} disabled={playersLoading} style={blueButton}>
+            {playersLoading ? "Loading Players..." : "Refresh Player List"}
+          </button>
+        </header>
+
+        <section style={card}>
+          <h2 style={sectionTitle}>Season Info</h2>
+
+          <div style={threeGrid}>
+            <div style={field}>
+              <label style={label}>Season</label>
+              <input value={season} onChange={(e) => setSeason(e.target.value)} style={input} />
+            </div>
+
+            <div style={field}>
+              <label style={label}>Division</label>
+              <select value={division} onChange={(e) => setDivision(e.target.value)} style={input}>
+                <option>Stroke D1</option>
+                <option>Stroke D2</option>
+                <option>Stroke D3</option>
+                <option>Stroke D4</option>
+                <option>Stroke D5</option>
+              </select>
+            </div>
+
+            <div style={field}>
+              <label style={label}>Due Date</label>
+              <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} style={input} />
+            </div>
+          </div>
+        </section>
+
+        <section style={card}>
+          <h2 style={sectionTitle}>Players</h2>
+
+          <div style={twoGrid}>
+            {playerSelect("Player 1", player1, setPlayer1)}
+            {playerSelect("Player 2", player2, setPlayer2)}
+            {playerSelect("Player 3", player3, setPlayer3)}
+            {playerSelect("Player 4", player4, setPlayer4)}
+          </div>
+        </section>
+
+        <section style={card}>
+          <h2 style={sectionTitle}>Courses</h2>
+
+          <div style={threeGrid}>
+            <div style={field}>
+              <label style={label}>Game 1 Course</label>
+              <input value={course1} onChange={(e) => setCourse1(e.target.value)} style={input} />
+            </div>
+
+            <div style={field}>
+              <label style={label}>Game 2 Course</label>
+              <input value={course2} onChange={(e) => setCourse2(e.target.value)} style={input} />
+            </div>
+
+            <div style={field}>
+              <label style={label}>Game 3 Course</label>
+              <input value={course3} onChange={(e) => setCourse3(e.target.value)} style={input} />
+            </div>
+          </div>
+        </section>
+
+        <button onClick={handleCreateStrokeSchedule} disabled={loading} style={greenButton}>
+          {loading ? "Creating..." : "Create Stroke Schedule"}
         </button>
       </div>
-
-      <section style={panel}>
-        <h2 style={sectionTitle}>Season</h2>
-
-        <div style={grid}>
-          <div style={field}>
-            <label style={labelStyle}>Season Number</label>
-            <input value={season} onChange={(e) => setSeason(e.target.value)} style={inputStyle} />
-          </div>
-
-          <div style={field}>
-            <label style={labelStyle}>Division</label>
-            <select value={division} onChange={(e) => setDivision(e.target.value)} style={selectStyle}>
-              <option>Stroke D1</option>
-              <option>Stroke D2</option>
-              <option>Stroke D3</option>
-              <option>Stroke D4</option>
-              <option>Stroke D5</option>
-            </select>
-          </div>
-
-          <div style={field}>
-            <label style={labelStyle}>Due Date</label>
-            <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} style={inputStyle} />
-          </div>
-        </div>
-      </section>
-
-      <section style={panel}>
-        <h2 style={sectionTitle}>Players</h2>
-
-        <div style={field}>
-          <label style={labelStyle}>Search player list</label>
-          <input
-            value={playerSearch}
-            onChange={(e) => setPlayerSearch(e.target.value)}
-            placeholder="Type to filter player dropdowns..."
-            style={inputStyle}
-          />
-        </div>
-
-        <div style={grid}>
-          {playerSelect("Player 1", player1, setPlayer1)}
-          {playerSelect("Player 2", player2, setPlayer2)}
-          {playerSelect("Player 3", player3, setPlayer3)}
-          {playerSelect("Player 4", player4, setPlayer4)}
-        </div>
-      </section>
-
-      <section style={panel}>
-        <h2 style={sectionTitle}>Courses</h2>
-
-        <div style={grid}>
-          <div style={field}>
-            <label style={labelStyle}>Game 1 Course</label>
-            <input value={course1} onChange={(e) => setCourse1(e.target.value)} style={inputStyle} />
-          </div>
-
-          <div style={field}>
-            <label style={labelStyle}>Game 2 Course</label>
-            <input value={course2} onChange={(e) => setCourse2(e.target.value)} style={inputStyle} />
-          </div>
-
-          <div style={field}>
-            <label style={labelStyle}>Game 3 Course</label>
-            <input value={course3} onChange={(e) => setCourse3(e.target.value)} style={inputStyle} />
-          </div>
-        </div>
-      </section>
-
-      <button onClick={handleCreateStrokeSchedule} disabled={loading} style={primaryButton}>
-        {loading ? "Creating..." : "Create Stroke Schedule"}
-      </button>
     </main>
   )
 }
 
 const page: React.CSSProperties = {
   minHeight: "100vh",
-  padding: 24,
   background: "black",
   color: "white",
+  padding: "32px",
+}
+
+const wrap: React.CSSProperties = {
+  width: "100%",
+  maxWidth: 1200,
+  margin: "0 auto",
 }
 
 const header: React.CSSProperties = {
   display: "flex",
   justifyContent: "space-between",
-  gap: 16,
   alignItems: "center",
+  gap: 18,
   flexWrap: "wrap",
+  marginBottom: 24,
 }
 
 const title: React.CSSProperties = {
-  fontSize: 34,
+  fontSize: 38,
   margin: 0,
 }
 
@@ -343,71 +248,71 @@ const subtitle: React.CSSProperties = {
   marginTop: 8,
 }
 
-const panel: React.CSSProperties = {
-  marginTop: 22,
-  padding: 18,
-  borderRadius: 14,
-  border: "1px solid #333",
+const card: React.CSSProperties = {
   background: "#111",
+  border: "1px solid #333",
+  borderRadius: 16,
+  padding: 22,
+  marginBottom: 22,
 }
 
 const sectionTitle: React.CSSProperties = {
-  fontSize: 22,
+  fontSize: 24,
   marginTop: 0,
+  marginBottom: 18,
 }
 
-const grid: React.CSSProperties = {
+const twoGrid: React.CSSProperties = {
   display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-  gap: 14,
-  marginTop: 14,
+  gridTemplateColumns: "repeat(2, minmax(260px, 1fr))",
+  gap: 18,
+}
+
+const threeGrid: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(3, minmax(220px, 1fr))",
+  gap: 18,
 }
 
 const field: React.CSSProperties = {
   display: "flex",
   flexDirection: "column",
-  gap: 6,
+  gap: 8,
 }
 
-const labelStyle: React.CSSProperties = {
+const label: React.CSSProperties = {
   color: "#ddd",
-  fontSize: 14,
+  fontSize: 15,
+  fontWeight: 700,
 }
 
-const inputStyle: React.CSSProperties = {
+const input: React.CSSProperties = {
   width: "100%",
-  padding: 11,
-  borderRadius: 8,
-  border: "1px solid #444",
-  background: "#050505",
-  color: "white",
-}
-
-const selectStyle: React.CSSProperties = {
-  width: "100%",
-  padding: 11,
-  borderRadius: 8,
-  border: "1px solid #444",
-  background: "#050505",
-  color: "white",
-}
-
-const primaryButton: React.CSSProperties = {
-  marginTop: 22,
-  padding: "12px 18px",
+  padding: "12px 14px",
   borderRadius: 10,
-  border: "none",
-  background: "#16a34a",
+  border: "1px solid #444",
+  background: "#050505",
   color: "white",
+  fontSize: 16,
+}
+
+const blueButton: React.CSSProperties = {
+  background: "#2563eb",
+  color: "white",
+  border: "none",
+  borderRadius: 10,
+  padding: "12px 16px",
   cursor: "pointer",
   fontWeight: 700,
 }
 
-const secondaryButton: React.CSSProperties = {
-  padding: "10px 14px",
-  borderRadius: 10,
-  border: "none",
-  background: "#2563eb",
+const greenButton: React.CSSProperties = {
+  background: "#16a34a",
   color: "white",
+  border: "none",
+  borderRadius: 12,
+  padding: "14px 22px",
   cursor: "pointer",
+  fontWeight: 800,
+  fontSize: 16,
 }
