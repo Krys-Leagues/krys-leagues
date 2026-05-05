@@ -14,33 +14,16 @@ type ScheduleMatch = {
   player2: string
 }
 
-type ResultRow = {
-  player1: string
-  player2: string
-  player1_score: number | null
-  player2_score: number | null
-  winner: string | null
-  is_draw: boolean | null
-}
-
-type Standing = {
-  player: string
-  played: number
-  wins: number
-  draws: number
-  losses: number
-  points: number
-  strokes: number
+type Player = {
+  id: string
+  screen_name: string
 }
 
 export default function StrokeResultsPage() {
   const router = useRouter()
 
   const [division, setDivision] = useState("Stroke D1")
-
-  // 🔥 DEFAULT SEASON
   const [season, setSeason] = useState("59")
-
   const [game, setGame] = useState("1")
   const [dueDate, setDueDate] = useState("")
 
@@ -53,6 +36,9 @@ export default function StrokeResultsPage() {
 
   const [score1, setScore1] = useState("")
   const [score2, setScore2] = useState("")
+
+  // 🔥 NEW
+  const [players, setPlayers] = useState<Player[]>([])
 
   const [loading, setLoading] = useState(false)
   const [matchesLoading, setMatchesLoading] = useState(false)
@@ -67,9 +53,28 @@ export default function StrokeResultsPage() {
   }
 
   useEffect(() => {
+    loadPlayers()
+  }, [])
+
+  useEffect(() => {
     loadSeasonInfo()
     loadScheduledMatches()
   }, [division, season, game])
+
+  async function loadPlayers() {
+    const { data } = await supabase
+      .from("players")
+      .select("id, screen_name")
+
+    setPlayers(data || [])
+  }
+
+  function findPlayerId(name: string) {
+    const found = players.find(
+      (p) => p.screen_name.trim().toLowerCase() === name.trim().toLowerCase()
+    )
+    return found?.id || null
+  }
 
   function resetMatchFields() {
     setSelectedMatchIndex("")
@@ -87,11 +92,6 @@ export default function StrokeResultsPage() {
   async function loadSeasonInfo() {
     const seasonNumber = Number(season)
 
-    if (!seasonNumber) {
-      setDueDate("")
-      return
-    }
-
     const { data } = await supabase
       .from("seasons")
       .select("due_date")
@@ -104,11 +104,6 @@ export default function StrokeResultsPage() {
 
   async function loadScheduledMatches() {
     const seasonNumber = Number(season)
-
-    if (!seasonNumber) {
-      setScheduledMatches([])
-      return
-    }
 
     setMatchesLoading(true)
 
@@ -133,10 +128,10 @@ export default function StrokeResultsPage() {
     const allMatches =
       scheduleData?.filter((row: any) => row.player1 && row.player2) || []
 
-    const scoredResults = (resultData || []) as ResultRow[]
+    const scoredResults = resultData || []
 
     const unscoredMatches = allMatches.filter((match: ScheduleMatch) => {
-      return !scoredResults.some((result) =>
+      return !scoredResults.some((result: any) =>
         sameMatch(match.player1, match.player2, result.player1, result.player2)
       )
     })
@@ -164,16 +159,11 @@ export default function StrokeResultsPage() {
   async function handleSubmit() {
     const seasonNumber = Number(season)
 
-    if (!seasonNumber || !player1 || !player2) {
-      alert("Pick a scheduled match first")
-      return
-    }
-
     const s1 = Number(score1)
     const s2 = Number(score2)
 
-    if (isNaN(s1) || isNaN(s2)) {
-      alert("Enter valid scores")
+    if (!player1 || !player2 || isNaN(s1) || isNaN(s2)) {
+      alert("Invalid data")
       return
     }
 
@@ -186,24 +176,30 @@ export default function StrokeResultsPage() {
     else if (s2 < s1) winner = player2
     else isDraw = true
 
-    const resultRow = {
-      league_type: LEAGUE_TYPE,
-      division,
-      season_number: seasonNumber,
-      game,
-      course,
-      player1,
-      player2,
-      result_type: "league_result",
-      player1_score: s1,
-      player2_score: s2,
-      player1_hw: 0,
-      player2_hw: 0,
-      winner,
-      is_draw: isDraw,
-    }
+    // 🔥 NEW (ID LOOKUP)
+    const player1_id = findPlayerId(player1)
+    const player2_id = findPlayerId(player2)
 
-    await supabase.from("results").insert([resultRow])
+    await supabase.from("results").insert([
+      {
+        league_type: LEAGUE_TYPE,
+        division,
+        season_number: seasonNumber,
+        game,
+        course,
+        player1,
+        player2,
+        player1_id,
+        player2_id,
+        result_type: "league_result",
+        player1_score: s1,
+        player2_score: s2,
+        player1_hw: 0,
+        player2_hw: 0,
+        winner,
+        is_draw: isDraw,
+      },
+    ])
 
     setLoading(false)
 
@@ -214,7 +210,6 @@ export default function StrokeResultsPage() {
   return (
     <main style={{ padding: 24, background: "black", color: "white", minHeight: "100vh" }}>
 
-      {/* 🔥 BACK BUTTON */}
       <button onClick={() => router.push("/admin")} style={{ marginBottom: 20 }}>
         ← Back to Admin
       </button>
@@ -230,7 +225,6 @@ export default function StrokeResultsPage() {
         </select>
       </div>
 
-      {/* 🔥 SEASON DROPDOWN */}
       <div style={{ marginTop: 16 }}>
         <label>Season</label><br />
         <select value={season} onChange={(e) => setSeason(e.target.value)} style={inputStyle}>
