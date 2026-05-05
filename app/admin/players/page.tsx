@@ -8,11 +8,20 @@ type Player = {
   screen_name: string
 }
 
+const LEAGUES = ["stroke", "pyp", "skins", "kwt"]
+
 export default function PlayersAdminPage() {
   const [players, setPlayers] = useState<Player[]>([])
   const [loading, setLoading] = useState(false)
   const [importing, setImporting] = useState(false)
   const [search, setSearch] = useState("")
+
+  // 🔥 NEW STATE
+  const [selectedPlayer, setSelectedPlayer] = useState("")
+  const [league, setLeague] = useState("stroke")
+  const [season, setSeason] = useState("59")
+  const [division, setDivision] = useState("Stroke D1")
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     loadPlayers()
@@ -38,6 +47,36 @@ export default function PlayersAdminPage() {
     }
 
     setPlayers(data || [])
+  }
+
+  // 🔥 REGISTER PLAYER
+  async function registerPlayer() {
+    if (!selectedPlayer || !league || !season || !division) {
+      alert("Fill all fields")
+      return
+    }
+
+    setSaving(true)
+
+    const { error } = await supabase
+      .from("player_league_memberships")
+      .insert([
+        {
+          player_id: selectedPlayer,
+          league_type: league,
+          season_number: Number(season),
+          division,
+        },
+      ])
+
+    setSaving(false)
+
+    if (error) {
+      alert(error.message)
+      return
+    }
+
+    alert("Player registered ✔")
   }
 
   async function importPlayers() {
@@ -83,12 +122,6 @@ export default function PlayersAdminPage() {
 
       const allNames = Array.from(uniqueImportMap.values())
 
-      if (allNames.length === 0) {
-        alert("No players found to import.")
-        setImporting(false)
-        return
-      }
-
       const { data: existing } = await supabase
         .from("players")
         .select("screen_name")
@@ -104,24 +137,13 @@ export default function PlayersAdminPage() {
           active: true,
         }))
 
-      if (newPlayers.length === 0) {
-        alert("All players already imported.")
-        setImporting(false)
-        return
+      if (newPlayers.length > 0) {
+        await supabase.from("players").insert(newPlayers)
       }
 
-      const { error } = await supabase.from("players").insert(newPlayers)
-
-      if (error) {
-        alert(error.message)
-        setImporting(false)
-        return
-      }
-
-      alert(`Imported ${newPlayers.length} players ✔`)
       await loadPlayers()
+      alert(`Imported ${newPlayers.length} players ✔`)
     } catch (err) {
-      console.error(err)
       alert("Import failed")
     }
 
@@ -138,44 +160,58 @@ export default function PlayersAdminPage() {
     <main style={page}>
       <h1>Global Players</h1>
 
-      <p style={{ color: "#aaa" }}>
-        Master player list used across all leagues.
-      </p>
+      {/* 🔥 NEW REGISTRATION BLOCK */}
+      <div style={{ marginTop: 20, padding: 16, border: "1px solid #444", borderRadius: 10 }}>
+        <h2>Register Player to League</h2>
 
-      <div style={{ marginTop: 16, display: "flex", gap: 12, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+          <select value={selectedPlayer} onChange={(e) => setSelectedPlayer(e.target.value)} style={input}>
+            <option value="">Select Player</option>
+            {players.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.screen_name}
+              </option>
+            ))}
+          </select>
+
+          <select value={league} onChange={(e) => setLeague(e.target.value)} style={input}>
+            {LEAGUES.map((l) => (
+              <option key={l}>{l}</option>
+            ))}
+          </select>
+
+          <select value={season} onChange={(e) => setSeason(e.target.value)} style={input}>
+            {Array.from({ length: 300 - 59 + 1 }, (_, i) => 59 + i).map((num) => (
+              <option key={num} value={num}>
+                Season {num}
+              </option>
+            ))}
+          </select>
+
+          <input value={division} onChange={(e) => setDivision(e.target.value)} style={input} placeholder="Division" />
+        </div>
+
+        <button onClick={registerPlayer} disabled={saving} style={{ ...button, marginTop: 12 }}>
+          {saving ? "Saving..." : "Register Player"}
+        </button>
+      </div>
+
+      {/* EXISTING UI */}
+      <div style={{ marginTop: 16, display: "flex", gap: 12 }}>
         <button onClick={loadPlayers} disabled={loading} style={button}>
           {loading ? "Loading..." : "Refresh Players"}
         </button>
 
-        <button
-          onClick={importPlayers}
-          disabled={importing}
-          style={{ ...button, background: "#16a34a" }}
-        >
+        <button onClick={importPlayers} disabled={importing} style={{ ...button, background: "#16a34a" }}>
           {importing ? "Importing..." : "Import Existing Players"}
         </button>
       </div>
 
       <div style={{ marginTop: 16 }}>
-        <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search players..."
-          style={input}
-        />
+        <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search players..." style={input} />
       </div>
 
-      <p style={{ marginTop: 14, color: "#aaa" }}>
-        Showing {filteredPlayers.length} / {players.length}
-      </p>
-
       <table style={table}>
-        <thead>
-          <tr>
-            <th style={th}>Player</th>
-          </tr>
-        </thead>
-
         <tbody>
           {filteredPlayers.map((p) => (
             <tr key={p.id}>
@@ -184,24 +220,18 @@ export default function PlayersAdminPage() {
           ))}
         </tbody>
       </table>
-
-      {filteredPlayers.length === 0 && !loading && (
-        <p style={{ marginTop: 24, color: "orange" }}>
-          No players found.
-        </p>
-      )}
     </main>
   )
 }
 
-const page: React.CSSProperties = {
+const page = {
   minHeight: "100vh",
   padding: 24,
   background: "black",
   color: "white",
 }
 
-const button: React.CSSProperties = {
+const button = {
   background: "#2563eb",
   border: "none",
   padding: "10px 16px",
@@ -210,9 +240,7 @@ const button: React.CSSProperties = {
   cursor: "pointer",
 }
 
-const input: React.CSSProperties = {
-  width: "100%",
-  maxWidth: 420,
+const input = {
   padding: 10,
   borderRadius: 8,
   border: "1px solid #444",
@@ -220,19 +248,13 @@ const input: React.CSSProperties = {
   color: "white",
 }
 
-const table: React.CSSProperties = {
+const table = {
   marginTop: 18,
   borderCollapse: "collapse",
   minWidth: 400,
 }
 
-const th: React.CSSProperties = {
-  borderBottom: "1px solid #555",
-  textAlign: "left",
-  padding: 8,
-}
-
-const td: React.CSSProperties = {
+const td = {
   borderBottom: "1px solid #333",
   padding: 8,
 }
