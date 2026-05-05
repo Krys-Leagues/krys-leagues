@@ -24,8 +24,6 @@ export default function StrokeResultsPage() {
 
   const [division, setDivision] = useState("Stroke D1")
   const [season, setSeason] = useState("59")
-  const [game, setGame] = useState("1")
-  const [dueDate, setDueDate] = useState("")
 
   const [scheduledMatches, setScheduledMatches] = useState<ScheduleMatch[]>([])
   const [selectedMatchIndex, setSelectedMatchIndex] = useState("")
@@ -33,6 +31,7 @@ export default function StrokeResultsPage() {
   const [player1, setPlayer1] = useState("")
   const [player2, setPlayer2] = useState("")
   const [course, setCourse] = useState("")
+  const [game, setGame] = useState("")
 
   const [score1, setScore1] = useState("")
   const [score2, setScore2] = useState("")
@@ -40,7 +39,6 @@ export default function StrokeResultsPage() {
   const [players, setPlayers] = useState<Player[]>([])
 
   const [loading, setLoading] = useState(false)
-  const [matchesLoading, setMatchesLoading] = useState(false)
 
   const inputStyle: React.CSSProperties = {
     background: "#111",
@@ -56,19 +54,13 @@ export default function StrokeResultsPage() {
   }, [])
 
   useEffect(() => {
-    loadSeasonInfo()
     loadScheduledMatches()
-  }, [division, season, game])
+  }, [division, season])
 
   async function loadPlayers() {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("players")
       .select("id, screen_name")
-
-    if (error) {
-      alert(error.message)
-      return
-    }
 
     setPlayers(data || [])
   }
@@ -77,79 +69,29 @@ export default function StrokeResultsPage() {
     const found = players.find(
       (p) => p.screen_name.trim().toLowerCase() === name.trim().toLowerCase()
     )
-
     return found?.id || null
-  }
-
-  function resetMatchFields() {
-    setSelectedMatchIndex("")
-    setPlayer1("")
-    setPlayer2("")
-    setCourse("")
-    setScore1("")
-    setScore2("")
   }
 
   function sameMatch(a1: string, a2: string, b1: string, b2: string) {
     return (a1 === b1 && a2 === b2) || (a1 === b2 && a2 === b1)
   }
 
-  async function loadSeasonInfo() {
-    const seasonNumber = Number(season)
-
-    if (!seasonNumber) {
-      setDueDate("")
-      return
-    }
-
-    const { data } = await supabase
-      .from("seasons")
-      .select("due_date")
-      .eq("league_type", LEAGUE_TYPE)
-      .eq("season_number", seasonNumber)
-      .maybeSingle()
-
-    setDueDate(data?.due_date || "")
-  }
-
   async function loadScheduledMatches() {
     const seasonNumber = Number(season)
 
-    if (!seasonNumber) {
-      setScheduledMatches([])
-      return
-    }
-
-    setMatchesLoading(true)
-
-    const { data: scheduleData, error: scheduleError } = await supabase
+    const { data: scheduleData } = await supabase
       .from("schedule")
       .select("game, course, player1, player2")
       .eq("league_type", LEAGUE_TYPE)
       .eq("division", division)
       .eq("season_number", seasonNumber)
-      .eq("game", game)
 
-    if (scheduleError) {
-      setMatchesLoading(false)
-      alert(scheduleError.message)
-      return
-    }
-
-    const { data: resultData, error: resultError } = await supabase
+    const { data: resultData } = await supabase
       .from("results")
       .select("player1, player2")
       .eq("league_type", LEAGUE_TYPE)
       .eq("division", division)
       .eq("season_number", seasonNumber)
-      .eq("game", game)
-
-    setMatchesLoading(false)
-
-    if (resultError) {
-      alert(resultError.message)
-      return
-    }
 
     const allMatches =
       scheduleData?.filter((row: any) => row.player1 && row.player2) || []
@@ -162,17 +104,13 @@ export default function StrokeResultsPage() {
       )
     })
 
-    setScheduledMatches(unscoredMatches as ScheduleMatch[])
-    resetMatchFields()
+    setScheduledMatches(unscoredMatches)
   }
 
   function handlePickMatch(indexValue: string) {
     setSelectedMatchIndex(indexValue)
 
-    if (indexValue === "") {
-      resetMatchFields()
-      return
-    }
+    if (indexValue === "") return
 
     const match = scheduledMatches[Number(indexValue)]
     if (!match) return
@@ -180,6 +118,7 @@ export default function StrokeResultsPage() {
     setPlayer1(match.player1)
     setPlayer2(match.player2)
     setCourse(match.course || "")
+    setGame(match.game)
   }
 
   async function handleSubmit() {
@@ -188,13 +127,8 @@ export default function StrokeResultsPage() {
     const s1 = Number(score1)
     const s2 = Number(score2)
 
-    if (!seasonNumber || !player1 || !player2) {
-      alert("Pick a scheduled match first")
-      return
-    }
-
-    if (isNaN(s1) || isNaN(s2)) {
-      alert("Enter valid scores")
+    if (!player1 || !player2 || isNaN(s1) || isNaN(s2)) {
+      alert("Invalid data")
       return
     }
 
@@ -224,23 +158,20 @@ export default function StrokeResultsPage() {
         result_type: "league_result",
         player1_score: s1,
         player2_score: s2,
-        player1_hw: 0,
-        player2_hw: 0,
         winner,
         is_draw: isDraw,
       },
     ])
 
+    setLoading(false)
+
     if (error) {
       alert(error.message)
-      setLoading(false)
       return
     }
 
-    setLoading(false)
-
     alert("Result saved ✔")
-    await loadScheduledMatches()
+    loadScheduledMatches()
   }
 
   return (
@@ -272,16 +203,7 @@ export default function StrokeResultsPage() {
       </div>
 
       <div style={{ marginTop: 16 }}>
-        <label>Game</label><br />
-        <select value={game} onChange={(e) => setGame(e.target.value)} style={inputStyle}>
-          <option value="1">Game 1</option>
-          <option value="2">Game 2</option>
-          <option value="3">Game 3</option>
-        </select>
-      </div>
-
-      <div style={{ marginTop: 16 }}>
-        <label>Pick Scheduled Match</label><br />
+        <label>Pick Match</label><br />
         <select value={selectedMatchIndex} onChange={(e) => handlePickMatch(e.target.value)} style={inputStyle}>
           <option value="">Select match</option>
           {scheduledMatches.map((match, index) => (
