@@ -15,9 +15,7 @@ export default function StrokeSetup() {
   const [players, setPlayers] = useState<Player[]>([])
   const [loading, setLoading] = useState(false)
 
-  // 🔥 DEFAULT TO CURRENT SEASON
   const [season, setSeason] = useState("59")
-
   const [division, setDivision] = useState("Stroke D1")
 
   const [p1, setP1] = useState("")
@@ -35,11 +33,16 @@ export default function StrokeSetup() {
   }, [])
 
   async function loadPlayers() {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("players")
       .select("id, screen_name")
       .eq("active", true)
       .order("screen_name")
+
+    if (error) {
+      alert(error.message)
+      return
+    }
 
     setPlayers(data || [])
   }
@@ -60,47 +63,137 @@ export default function StrokeSetup() {
       return
     }
 
+    const selectedPlayers = [p1, p2, p3, p4]
+    const uniquePlayers = new Set(
+      selectedPlayers.map((name) => name.trim().toLowerCase())
+    )
+
+    if (uniquePlayers.size !== 4) {
+      alert("Pick 4 different players")
+      return
+    }
+
+    const seasonNumber = Number(season)
+
+    if (!seasonNumber) {
+      alert("Invalid season")
+      return
+    }
+
     setLoading(true)
 
     const base = {
       league_type: "stroke",
       division,
-      season_number: Number(season),
+      season_number: seasonNumber,
       due_date: due,
       status: "scheduled",
     }
 
     const rows = [
-      { ...base, game: "1", course: c1, player1: p1, player2: p2, player1_id: findId(p1), player2_id: findId(p2) },
-      { ...base, game: "1", course: c1, player1: p3, player2: p4, player1_id: findId(p3), player2_id: findId(p4) },
-      { ...base, game: "2", course: c2, player1: p4, player2: p1, player1_id: findId(p4), player2_id: findId(p1) },
-      { ...base, game: "2", course: c2, player1: p2, player2: p3, player1_id: findId(p2), player2_id: findId(p3) },
-      { ...base, game: "3", course: c3, player1: p1, player2: p3, player1_id: findId(p1), player2_id: findId(p3) },
-      { ...base, game: "3", course: c3, player1: p2, player2: p4, player1_id: findId(p2), player2_id: findId(p4) },
+      {
+        ...base,
+        game: "1",
+        course: c1,
+        player1: p1,
+        player2: p2,
+        player1_id: findId(p1),
+        player2_id: findId(p2),
+      },
+      {
+        ...base,
+        game: "1",
+        course: c1,
+        player1: p3,
+        player2: p4,
+        player1_id: findId(p3),
+        player2_id: findId(p4),
+      },
+      {
+        ...base,
+        game: "2",
+        course: c2,
+        player1: p4,
+        player2: p1,
+        player1_id: findId(p4),
+        player2_id: findId(p1),
+      },
+      {
+        ...base,
+        game: "2",
+        course: c2,
+        player1: p2,
+        player2: p3,
+        player1_id: findId(p2),
+        player2_id: findId(p3),
+      },
+      {
+        ...base,
+        game: "3",
+        course: c3,
+        player1: p1,
+        player2: p3,
+        player1_id: findId(p1),
+        player2_id: findId(p3),
+      },
+      {
+        ...base,
+        game: "3",
+        course: c3,
+        player1: p2,
+        player2: p4,
+        player1_id: findId(p2),
+        player2_id: findId(p4),
+      },
     ]
 
-    await supabase.from("schedule").insert(rows)
+    const missingIds = rows.some((row) => !row.player1_id || !row.player2_id)
+
+    if (missingIds) {
+      setLoading(false)
+      alert("One or more players could not be matched to a player ID")
+      return
+    }
+
+    const { error: deleteError } = await supabase
+      .from("schedule")
+      .delete()
+      .eq("league_type", "stroke")
+      .eq("division", division)
+      .eq("season_number", seasonNumber)
+
+    if (deleteError) {
+      setLoading(false)
+      alert(deleteError.message)
+      return
+    }
+
+    const { error: insertError } = await supabase
+      .from("schedule")
+      .insert(rows)
 
     setLoading(false)
-    alert("Created ✔")
+
+    if (insertError) {
+      alert(insertError.message)
+      return
+    }
+
+    alert("Stroke schedule created ✔")
   }
 
   return (
     <main style={page}>
       <div style={container}>
-
         <button onClick={() => router.push("/admin")} style={backButton}>
           ← Back to Admin
         </button>
 
         <h1 style={{ fontSize: 36 }}>Stroke Setup</h1>
 
-        {/* SEASON */}
         <section style={section}>
           <h2>Season</h2>
           <div style={row}>
-
-            {/* 🔥 FINAL SEASON DROPDOWN */}
             <select value={season} onChange={(e) => setSeason(e.target.value)} style={input}>
               {Array.from({ length: 300 - 59 + 1 }, (_, i) => 59 + i).map((num) => (
                 <option key={num} value={num}>
@@ -121,7 +214,6 @@ export default function StrokeSetup() {
           </div>
         </section>
 
-        {/* PLAYERS */}
         <section style={section}>
           <h2>Players</h2>
           <div style={grid}>
@@ -140,14 +232,15 @@ export default function StrokeSetup() {
               >
                 <option value="">Player {i + 1}</option>
                 {players.map((p) => (
-                  <option key={p.id}>{p.screen_name}</option>
+                  <option key={p.id} value={p.screen_name}>
+                    {p.screen_name}
+                  </option>
                 ))}
               </select>
             ))}
           </div>
         </section>
 
-        {/* COURSES */}
         <section style={section}>
           <h2>Courses</h2>
           <div style={grid}>
@@ -157,15 +250,13 @@ export default function StrokeSetup() {
           </div>
         </section>
 
-        <button onClick={createSchedule} style={button}>
+        <button onClick={createSchedule} disabled={loading} style={button}>
           {loading ? "Creating..." : "Create Stroke Schedule"}
         </button>
       </div>
     </main>
   )
 }
-
-/* styles */
 
 const page: React.CSSProperties = {
   minHeight: "100vh",
