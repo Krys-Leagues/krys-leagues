@@ -37,7 +37,6 @@ export default function StrokeResultsPage() {
   const [score1, setScore1] = useState("")
   const [score2, setScore2] = useState("")
 
-  // 🔥 NEW
   const [players, setPlayers] = useState<Player[]>([])
 
   const [loading, setLoading] = useState(false)
@@ -62,9 +61,14 @@ export default function StrokeResultsPage() {
   }, [division, season, game])
 
   async function loadPlayers() {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("players")
       .select("id, screen_name")
+
+    if (error) {
+      alert(error.message)
+      return
+    }
 
     setPlayers(data || [])
   }
@@ -73,6 +77,7 @@ export default function StrokeResultsPage() {
     const found = players.find(
       (p) => p.screen_name.trim().toLowerCase() === name.trim().toLowerCase()
     )
+
     return found?.id || null
   }
 
@@ -92,6 +97,11 @@ export default function StrokeResultsPage() {
   async function loadSeasonInfo() {
     const seasonNumber = Number(season)
 
+    if (!seasonNumber) {
+      setDueDate("")
+      return
+    }
+
     const { data } = await supabase
       .from("seasons")
       .select("due_date")
@@ -105,9 +115,14 @@ export default function StrokeResultsPage() {
   async function loadScheduledMatches() {
     const seasonNumber = Number(season)
 
+    if (!seasonNumber) {
+      setScheduledMatches([])
+      return
+    }
+
     setMatchesLoading(true)
 
-    const { data: scheduleData } = await supabase
+    const { data: scheduleData, error: scheduleError } = await supabase
       .from("schedule")
       .select("game, course, player1, player2")
       .eq("league_type", LEAGUE_TYPE)
@@ -115,7 +130,13 @@ export default function StrokeResultsPage() {
       .eq("season_number", seasonNumber)
       .eq("game", game)
 
-    const { data: resultData } = await supabase
+    if (scheduleError) {
+      setMatchesLoading(false)
+      alert(scheduleError.message)
+      return
+    }
+
+    const { data: resultData, error: resultError } = await supabase
       .from("results")
       .select("player1, player2")
       .eq("league_type", LEAGUE_TYPE)
@@ -124,6 +145,11 @@ export default function StrokeResultsPage() {
       .eq("game", game)
 
     setMatchesLoading(false)
+
+    if (resultError) {
+      alert(resultError.message)
+      return
+    }
 
     const allMatches =
       scheduleData?.filter((row: any) => row.player1 && row.player2) || []
@@ -162,8 +188,13 @@ export default function StrokeResultsPage() {
     const s1 = Number(score1)
     const s2 = Number(score2)
 
-    if (!player1 || !player2 || isNaN(s1) || isNaN(s2)) {
-      alert("Invalid data")
+    if (!seasonNumber || !player1 || !player2) {
+      alert("Pick a scheduled match first")
+      return
+    }
+
+    if (isNaN(s1) || isNaN(s2)) {
+      alert("Enter valid scores")
       return
     }
 
@@ -176,11 +207,10 @@ export default function StrokeResultsPage() {
     else if (s2 < s1) winner = player2
     else isDraw = true
 
-    // 🔥 NEW (ID LOOKUP)
     const player1_id = findPlayerId(player1)
     const player2_id = findPlayerId(player2)
 
-    await supabase.from("results").insert([
+    const { error } = await supabase.from("results").insert([
       {
         league_type: LEAGUE_TYPE,
         division,
@@ -201,6 +231,12 @@ export default function StrokeResultsPage() {
       },
     ])
 
+    if (error) {
+      alert(error.message)
+      setLoading(false)
+      return
+    }
+
     setLoading(false)
 
     alert("Result saved ✔")
@@ -209,7 +245,6 @@ export default function StrokeResultsPage() {
 
   return (
     <main style={{ padding: 24, background: "black", color: "white", minHeight: "100vh" }}>
-
       <button onClick={() => router.push("/admin")} style={{ marginBottom: 20 }}>
         ← Back to Admin
       </button>
@@ -260,6 +295,7 @@ export default function StrokeResultsPage() {
       {player1 && player2 && (
         <div style={{ marginTop: 20 }}>
           <p>{player1} vs {player2}</p>
+          {course && <p>Course: {course}</p>}
         </div>
       )}
 
@@ -272,7 +308,7 @@ export default function StrokeResultsPage() {
       </div>
 
       <div style={{ marginTop: 24 }}>
-        <button onClick={handleSubmit}>
+        <button onClick={handleSubmit} disabled={loading}>
           {loading ? "Saving..." : "Submit Result"}
         </button>
       </div>
