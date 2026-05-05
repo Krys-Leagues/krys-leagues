@@ -26,13 +26,15 @@ export default function StrokeSetup() {
     loadPlayerOptions()
   }, [])
 
+  // ✅ NEW: pull from global players table
   async function loadPlayerOptions() {
     setPlayersLoading(true)
 
     const { data, error } = await supabase
-      .from("schedule")
-      .select("player1, player2")
-      .eq("league_type", "stroke")
+      .from("players")
+      .select("screen_name")
+      .eq("active", true)
+      .order("screen_name", { ascending: true })
 
     setPlayersLoading(false)
 
@@ -42,19 +44,9 @@ export default function StrokeSetup() {
       return
     }
 
-    const names: string[] = []
+    const names = (data || []).map((p: any) => p.screen_name)
 
-    data?.forEach((row: any) => {
-      if (row.player1 && !names.includes(row.player1)) {
-        names.push(row.player1)
-      }
-
-      if (row.player2 && !names.includes(row.player2)) {
-        names.push(row.player2)
-      }
-    })
-
-    setPlayerOptions(names.sort())
+    setPlayerOptions(names)
   }
 
   async function sendDiscordSchedule(seasonNumber: number) {
@@ -208,46 +200,24 @@ export default function StrokeSetup() {
           {playersLoading ? "Loading Players..." : "Refresh Player List"}
         </button>
 
-        {playerOptions.length === 0 && (
-          <p style={{ color: "orange" }}>
-            No saved player list found yet. Type names manually this time.
-          </p>
-        )}
-
         <div style={{ marginTop: 12 }}>
           <label>Player 1</label><br />
-          <input
-            list="stroke-player-options"
-            value={player1}
-            onChange={(e) => setPlayer1(e.target.value)}
-          />
+          <input list="stroke-player-options" value={player1} onChange={(e) => setPlayer1(e.target.value)} />
         </div>
 
         <div style={{ marginTop: 12 }}>
           <label>Player 2</label><br />
-          <input
-            list="stroke-player-options"
-            value={player2}
-            onChange={(e) => setPlayer2(e.target.value)}
-          />
+          <input list="stroke-player-options" value={player2} onChange={(e) => setPlayer2(e.target.value)} />
         </div>
 
         <div style={{ marginTop: 12 }}>
           <label>Player 3</label><br />
-          <input
-            list="stroke-player-options"
-            value={player3}
-            onChange={(e) => setPlayer3(e.target.value)}
-          />
+          <input list="stroke-player-options" value={player3} onChange={(e) => setPlayer3(e.target.value)} />
         </div>
 
         <div style={{ marginTop: 12 }}>
           <label>Player 4</label><br />
-          <input
-            list="stroke-player-options"
-            value={player4}
-            onChange={(e) => setPlayer4(e.target.value)}
-          />
+          <input list="stroke-player-options" value={player4} onChange={(e) => setPlayer4(e.target.value)} />
         </div>
       </div>
 
@@ -270,11 +240,7 @@ export default function StrokeSetup() {
 
       <div style={{ marginTop: 16 }}>
         <label>Due Date</label><br />
-        <input
-          type="date"
-          value={dueDate}
-          onChange={(e) => setDueDate(e.target.value)}
-        />
+        <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
       </div>
 
       <div style={{ marginTop: 24 }}>
