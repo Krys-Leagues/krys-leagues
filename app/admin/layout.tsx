@@ -40,7 +40,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       provider: "discord",
       options: {
         scopes: "identify email",
-        redirectTo: `${window.location.origin}${pathname}`,
+redirectTo: `${window.location.origin}/admin`,
       },
     })
   }
