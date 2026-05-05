@@ -15,14 +15,15 @@ export default function AuthCallback() {
     const { data } = await supabase.auth.getSession()
 
     if (data.session) {
-      router.push("/admin/kwt-import")
+      // 🔥 ALWAYS go to admin home after login
+      router.replace("/admin")
     } else {
-      router.push("/")
+      router.replace("/")
     }
   }
 
   return (
-    <main style={{ padding: 40 }}>
+    <main style={{ padding: 40, background: "black", color: "white", minHeight: "100vh" }}>
       <h2>Logging you in...</h2>
     </main>
   )
