@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { supabase } from "@/lib/supabase"
 
 type Player = {
@@ -49,7 +49,6 @@ export default function PlayersAdminPage() {
     setPlayers(data || [])
   }
 
-  // 🔥 REGISTER PLAYER
   async function registerPlayer() {
     if (!selectedPlayer || !league || !season || !division) {
       alert("Fill all fields")
@@ -153,14 +152,15 @@ export default function PlayersAdminPage() {
   const filteredPlayers = useMemo(() => {
     const q = normalizeName(search)
     if (!q) return players
-    return players.filter((p) => normalizeName(p.screen_name).includes(q))
+    return players.filter((p) =>
+      normalizeName(p.screen_name).includes(q)
+    )
   }, [players, search])
 
   return (
     <main style={page}>
       <h1>Global Players</h1>
 
-      {/* 🔥 NEW REGISTRATION BLOCK */}
       <div style={{ marginTop: 20, padding: 16, border: "1px solid #444", borderRadius: 10 }}>
         <h2>Register Player to League</h2>
 
@@ -188,7 +188,12 @@ export default function PlayersAdminPage() {
             ))}
           </select>
 
-          <input value={division} onChange={(e) => setDivision(e.target.value)} style={input} placeholder="Division" />
+          <input
+            value={division}
+            onChange={(e) => setDivision(e.target.value)}
+            style={input}
+            placeholder="Division"
+          />
         </div>
 
         <button onClick={registerPlayer} disabled={saving} style={{ ...button, marginTop: 12 }}>
@@ -196,7 +201,6 @@ export default function PlayersAdminPage() {
         </button>
       </div>
 
-      {/* EXISTING UI */}
       <div style={{ marginTop: 16, display: "flex", gap: 12 }}>
         <button onClick={loadPlayers} disabled={loading} style={button}>
           {loading ? "Loading..." : "Refresh Players"}
@@ -208,7 +212,12 @@ export default function PlayersAdminPage() {
       </div>
 
       <div style={{ marginTop: 16 }}>
-        <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search players..." style={input} />
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search players..."
+          style={input}
+        />
       </div>
 
       <table style={table}>
@@ -224,14 +233,15 @@ export default function PlayersAdminPage() {
   )
 }
 
-const page = {
+// ✅ FIXED TYPES (THIS WAS BREAKING BUILD)
+const page: React.CSSProperties = {
   minHeight: "100vh",
   padding: 24,
   background: "black",
   color: "white",
 }
 
-const button = {
+const button: React.CSSProperties = {
   background: "#2563eb",
   border: "none",
   padding: "10px 16px",
@@ -240,7 +250,7 @@ const button = {
   cursor: "pointer",
 }
 
-const input = {
+const input: React.CSSProperties = {
   padding: 10,
   borderRadius: 8,
   border: "1px solid #444",
@@ -248,13 +258,13 @@ const input = {
   color: "white",
 }
 
-const table = {
+const table: React.CSSProperties = {
   marginTop: 18,
   borderCollapse: "collapse",
   minWidth: 400,
 }
 
-const td = {
+const td: React.CSSProperties = {
   borderBottom: "1px solid #333",
   padding: 8,
 }
