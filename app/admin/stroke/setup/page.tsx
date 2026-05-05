@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 
 type Player = {
@@ -9,10 +10,14 @@ type Player = {
 }
 
 export default function StrokeSetup() {
+  const router = useRouter()
+
   const [players, setPlayers] = useState<Player[]>([])
   const [loading, setLoading] = useState(false)
 
-  const [season, setSeason] = useState("")
+  // 🔥 DEFAULT TO CURRENT SEASON
+  const [season, setSeason] = useState("59")
+
   const [division, setDivision] = useState("Stroke D1")
 
   const [p1, setP1] = useState("")
@@ -83,13 +88,27 @@ export default function StrokeSetup() {
   return (
     <main style={page}>
       <div style={container}>
+
+        <button onClick={() => router.push("/admin")} style={backButton}>
+          ← Back to Admin
+        </button>
+
         <h1 style={{ fontSize: 36 }}>Stroke Setup</h1>
 
         {/* SEASON */}
         <section style={section}>
           <h2>Season</h2>
           <div style={row}>
-            <input placeholder="Season" value={season} onChange={(e) => setSeason(e.target.value)} style={input} />
+
+            {/* 🔥 FINAL SEASON DROPDOWN */}
+            <select value={season} onChange={(e) => setSeason(e.target.value)} style={input}>
+              {Array.from({ length: 300 - 59 + 1 }, (_, i) => 59 + i).map((num) => (
+                <option key={num} value={num}>
+                  Season {num}
+                </option>
+              ))}
+            </select>
+
             <select value={division} onChange={(e) => setDivision(e.target.value)} style={input}>
               <option>Stroke D1</option>
               <option>Stroke D2</option>
@@ -97,6 +116,7 @@ export default function StrokeSetup() {
               <option>Stroke D4</option>
               <option>Stroke D5</option>
             </select>
+
             <input type="date" value={due} onChange={(e) => setDue(e.target.value)} style={input} />
           </div>
         </section>
@@ -145,7 +165,7 @@ export default function StrokeSetup() {
   )
 }
 
-/* ✅ FIXED: TypeScript-safe styles */
+/* styles */
 
 const page: React.CSSProperties = {
   minHeight: "100vh",
@@ -195,5 +215,15 @@ const button: React.CSSProperties = {
   borderRadius: 10,
   color: "white",
   fontWeight: 700,
+  cursor: "pointer",
+}
+
+const backButton: React.CSSProperties = {
+  marginBottom: 20,
+  padding: "8px 14px",
+  background: "#222",
+  border: "1px solid #555",
+  borderRadius: 8,
+  color: "white",
   cursor: "pointer",
 }
