@@ -1,300 +1,184 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
+import { useParams, useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 
 type Player = {
   id: string
   screen_name: string
-  discord_id: string | null
   discord_username: string | null
-  active: boolean | null
 }
 
-export default function PlayersAdminPage() {
-  const [players, setPlayers] = useState<Player[]>([])
-  const [loading, setLoading] = useState(false)
+type Trophy = {
+  id: string
+  trophy_title: string | null
+  placement: string | null
+  event_name: string | null
+  division: string | null
+  season: string | null
+  week: string | null
+  image_url: string | null
+}
 
-  const [search, setSearch] = useState("")
-  const [screenName, setScreenName] = useState("")
-  const [discordId, setDiscordId] = useState("")
-  const [discordUsername, setDiscordUsername] = useState("")
+export default function PlayerProfilePage() {
+  const { id } = useParams()
+  const router = useRouter()
+
+  const [player, setPlayer] = useState<Player | null>(null)
+  const [trophies, setTrophies] = useState<Trophy[]>([])
 
   useEffect(() => {
-    loadPlayers()
+    loadData()
   }, [])
 
-  async function loadPlayers() {
-    setLoading(true)
-
-    const { data, error } = await supabase
+  async function loadData() {
+    // load player
+    const { data: playerData } = await supabase
       .from("players")
-      .select("id, screen_name, discord_id, discord_username, active")
-      .order("screen_name", { ascending: true })
-
-    setLoading(false)
-
-    if (error) {
-      alert(error.message)
-      setPlayers([])
-      return
-    }
-
-    setPlayers((data || []) as Player[])
-  }
-
-  async function addPlayer() {
-    const cleanName = screenName.trim()
-
-    if (!cleanName) {
-      alert("Enter a player screen name")
-      return
-    }
-
-    const { error } = await supabase.from("players").insert({
-      screen_name: cleanName,
-      discord_id: discordId.trim() || null,
-      discord_username: discordUsername.trim() || null,
-      active: true,
-    })
-
-    if (error) {
-      alert(error.message)
-      return
-    }
-
-    setScreenName("")
-    setDiscordId("")
-    setDiscordUsername("")
-    await loadPlayers()
-  }
-
-  async function updatePlayer(id: string, field: keyof Player, value: any) {
-    const { error } = await supabase
-      .from("players")
-      .update({ [field]: value })
+      .select("*")
       .eq("id", id)
+      .single()
 
-    if (error) {
-      alert(error.message)
-      return
-    }
+    setPlayer(playerData)
 
-    await loadPlayers()
+    // load trophies
+    const { data: trophyData } = await supabase
+      .from("player_trophies")
+      .select("*")
+      .eq("player_id", id)
+      .order("created_at", { ascending: false })
+
+    setTrophies(trophyData || [])
   }
 
-  const filteredPlayers = useMemo(() => {
-    const q = search.trim().toLowerCase()
-
-    if (!q) return players
-
-    return players.filter((p) => {
-      const text = `${p.screen_name || ""} ${p.discord_id || ""} ${p.discord_username || ""}`
-      return text.toLowerCase().includes(q)
-    })
-  }, [players, search])
+  if (!player) {
+    return <p style={{ color: "white", padding: 20 }}>Loading player...</p>
+  }
 
   return (
     <main style={page}>
-      <h1 style={title}>Global Players</h1>
+      <div style={container}>
 
-      <p style={subtitle}>
-        One master player list used by every league dropdown.
-      </p>
-
-      <section style={panel}>
-        <h2>Add Player</h2>
-
-        <div style={formGrid}>
-          <input
-            value={screenName}
-            onChange={(e) => setScreenName(e.target.value)}
-            placeholder="Screen name"
-            style={input}
-          />
-
-          <input
-            value={discordUsername}
-            onChange={(e) => setDiscordUsername(e.target.value)}
-            placeholder="Discord username"
-            style={input}
-          />
-
-          <input
-            value={discordId}
-            onChange={(e) => setDiscordId(e.target.value)}
-            placeholder="Discord ID"
-            style={input}
-          />
-
-          <button onClick={addPlayer} style={button}>
-            Add Player
+        {/* NAV */}
+        <div style={topBar}>
+          <button onClick={() => router.push("/admin/players")} style={backButton}>
+            ← Players
           </button>
-        </div>
-      </section>
 
-      <section style={panel}>
-        <div style={topRow}>
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search players..."
-            style={input}
-          />
-
-          <button onClick={loadPlayers} disabled={loading} style={button}>
-            {loading ? "Loading..." : "Refresh"}
+          <button onClick={() => router.push("/admin")} style={backButtonSecondary}>
+            ← Admin
           </button>
         </div>
 
-        <p style={count}>
-          Showing {filteredPlayers.length} / {players.length}
-        </p>
+        {/* PLAYER INFO */}
+        <div style={card}>
+          <h1 style={{ fontSize: 36 }}>{player.screen_name}</h1>
 
-        <div style={{ overflowX: "auto" }}>
-          <table style={table}>
-            <thead>
-              <tr>
-                <th style={th}>Screen Name</th>
-                <th style={th}>Discord Username</th>
-                <th style={th}>Discord ID</th>
-                <th style={th}>Active</th>
-              </tr>
-            </thead>
+          {player.discord_username && (
+            <p style={{ color: "#aaa" }}>
+              Discord: {player.discord_username}
+            </p>
+          )}
+        </div>
 
-            <tbody>
-              {filteredPlayers.map((p) => (
-                <tr key={p.id}>
-                  <td style={td}>
-                    <input
-                      value={p.screen_name || ""}
-                      onChange={(e) => updatePlayer(p.id, "screen_name", e.target.value)}
-                      style={input}
+        {/* TROPHIES */}
+        <div style={card}>
+          <h2>🏆 Trophies ({trophies.length})</h2>
+
+          {trophies.length === 0 ? (
+            <p style={{ color: "#888" }}>No trophies yet.</p>
+          ) : (
+            <div style={grid}>
+              {trophies.map((t) => (
+                <div key={t.id} style={trophyCard}>
+                  <h3>{t.trophy_title || t.placement || "Trophy"}</h3>
+
+                  <p>{t.event_name}</p>
+                  <p>{t.division}</p>
+
+                  <p style={{ color: "#aaa" }}>
+                    {[t.season, t.week].filter(Boolean).join(" / ")}
+                  </p>
+
+                  {t.image_url && (
+                    <img
+                      src={t.image_url}
+                      style={{
+                        width: "100%",
+                        borderRadius: 10,
+                        marginTop: 10,
+                      }}
                     />
-                  </td>
-
-                  <td style={td}>
-                    <input
-                      value={p.discord_username || ""}
-                      onChange={(e) =>
-                        updatePlayer(p.id, "discord_username", e.target.value || null)
-                      }
-                      style={input}
-                    />
-                  </td>
-
-                  <td style={td}>
-                    <input
-                      value={p.discord_id || ""}
-                      onChange={(e) =>
-                        updatePlayer(p.id, "discord_id", e.target.value || null)
-                      }
-                      style={input}
-                    />
-                  </td>
-
-                  <td style={td}>
-                    <select
-                      value={p.active === false ? "false" : "true"}
-                      onChange={(e) =>
-                        updatePlayer(p.id, "active", e.target.value === "true")
-                      }
-                      style={input}
-                    >
-                      <option value="true">Active</option>
-                      <option value="false">Inactive</option>
-                    </select>
-                  </td>
-                </tr>
+                  )}
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+          )}
         </div>
-
-        {filteredPlayers.length === 0 && !loading && (
-          <p style={{ color: "orange", marginTop: 18 }}>No players found.</p>
-        )}
-      </section>
+      </div>
     </main>
   )
 }
 
+/* styles */
+
 const page: React.CSSProperties = {
   minHeight: "100vh",
-  padding: 24,
   background: "black",
   color: "white",
-}
-
-const title: React.CSSProperties = {
-  fontSize: 34,
-  marginBottom: 8,
-}
-
-const subtitle: React.CSSProperties = {
-  color: "#cfcfcf",
-  marginBottom: 28,
-}
-
-const panel: React.CSSProperties = {
-  marginTop: 22,
-  padding: 18,
-  borderRadius: 14,
-  border: "1px solid #333",
-  background: "#111",
-}
-
-const formGrid: React.CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-  gap: 12,
-  marginTop: 12,
-}
-
-const topRow: React.CSSProperties = {
   display: "flex",
-  gap: 12,
-  flexWrap: "wrap",
-  alignItems: "center",
+  justifyContent: "center",
 }
 
-const input: React.CSSProperties = {
-  padding: 10,
-  borderRadius: 8,
-  border: "1px solid #444",
-  background: "#050505",
-  color: "white",
+const container: React.CSSProperties = {
   width: "100%",
+  maxWidth: 1100,
+  padding: 30,
 }
 
-const button: React.CSSProperties = {
+const topBar: React.CSSProperties = {
+  display: "flex",
+  gap: 10,
+  marginBottom: 20,
+}
+
+const backButton: React.CSSProperties = {
+  padding: "10px 16px",
   background: "#2563eb",
   border: "none",
+  borderRadius: 8,
+  color: "white",
+  fontWeight: 700,
+  cursor: "pointer",
+}
+
+const backButtonSecondary: React.CSSProperties = {
   padding: "10px 16px",
+  background: "#222",
+  border: "1px solid #555",
   borderRadius: 8,
   color: "white",
   cursor: "pointer",
 }
 
-const count: React.CSSProperties = {
-  color: "#aaa",
-  marginTop: 14,
+const card: React.CSSProperties = {
+  background: "#050505",
+  border: "1px solid #333",
+  borderRadius: 18,
+  padding: 24,
+  marginBottom: 20,
 }
 
-const table: React.CSSProperties = {
-  marginTop: 14,
-  borderCollapse: "collapse",
-  minWidth: 900,
-  width: "100%",
+const grid: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
+  gap: 16,
 }
 
-const th: React.CSSProperties = {
-  borderBottom: "1px solid #555",
-  textAlign: "left",
-  padding: 8,
-}
-
-const td: React.CSSProperties = {
-  borderBottom: "1px solid #333",
-  padding: 8,
+const trophyCard: React.CSSProperties = {
+  background: "#111",
+  border: "1px solid #444",
+  borderRadius: 12,
+  padding: 14,
 }
