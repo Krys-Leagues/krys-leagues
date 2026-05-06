@@ -163,7 +163,6 @@ export default function PlayersAdminPage() {
     <main style={page}>
       <h1>Global Players</h1>
 
-      {/* REGISTER */}
       <div style={panel}>
         <h2>Register Player to League</h2>
 
@@ -204,7 +203,6 @@ export default function PlayersAdminPage() {
         </button>
       </div>
 
-      {/* CONTROLS */}
       <div style={{ marginTop: 16, display: "flex", gap: 12 }}>
         <button onClick={loadPlayers} disabled={loading} style={button}>
           {loading ? "Loading..." : "Refresh Players"}
@@ -215,7 +213,6 @@ export default function PlayersAdminPage() {
         </button>
       </div>
 
-      {/* SEARCH */}
       <div style={{ marginTop: 16 }}>
         <input
           value={search}
@@ -225,21 +222,28 @@ export default function PlayersAdminPage() {
         />
       </div>
 
-      {/* LIST */}
       <table style={table}>
         <tbody>
           {filteredPlayers.map((p) => (
             <tr key={p.id}>
               <td style={td}>{p.screen_name}</td>
 
-              {/* 🔥 NEW PROFILE BUTTON */}
               <td style={td}>
-                <button
-                  onClick={() => router.push(`/admin/players/${p.id}`)}
-                  style={profileButton}
-                >
-                  View Profile
-                </button>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button
+                    onClick={() => router.push(`/admin/players/${p.id}`)}
+                    style={profileButton}
+                  >
+                    Profile
+                  </button>
+
+                  <button
+                    onClick={() => router.push(`/admin/players/merge?remove=${p.id}`)}
+                    style={mergeButton}
+                  >
+                    Merge
+                  </button>
+                </div>
               </td>
             </tr>
           ))}
@@ -248,8 +252,6 @@ export default function PlayersAdminPage() {
     </main>
   )
 }
-
-/* styles */
 
 const page: React.CSSProperties = {
   minHeight: "100vh",
@@ -280,6 +282,16 @@ const profileButton: React.CSSProperties = {
   padding: "6px 12px",
   borderRadius: 6,
   color: "white",
+  cursor: "pointer",
+}
+
+const mergeButton: React.CSSProperties = {
+  background: "#f59e0b",
+  border: "none",
+  padding: "6px 12px",
+  borderRadius: 6,
+  color: "black",
+  fontWeight: 700,
   cursor: "pointer",
 }
 
