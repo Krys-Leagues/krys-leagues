@@ -19,6 +19,10 @@ export default function PlayersAdminPage() {
   const [importing, setImporting] = useState(false)
   const [search, setSearch] = useState("")
 
+  const [showAddPlayer, setShowAddPlayer] = useState(false)
+  const [newPlayerName, setNewPlayerName] = useState("")
+  const [creatingPlayer, setCreatingPlayer] = useState(false)
+
   const [selectedPlayer, setSelectedPlayer] = useState("")
   const [league, setLeague] = useState("stroke")
   const [season, setSeason] = useState("59")
@@ -49,6 +53,45 @@ export default function PlayersAdminPage() {
     }
 
     setPlayers(data || [])
+  }
+
+  async function createPlayer() {
+    if (!newPlayerName.trim()) {
+      alert("Enter player name")
+      return
+    }
+
+    const existing = players.find(
+      (p) => normalizeName(p.screen_name) === normalizeName(newPlayerName)
+    )
+
+    if (existing) {
+      alert("Player already exists")
+      return
+    }
+
+    setCreatingPlayer(true)
+
+    const { error } = await supabase.from("players").insert([
+      {
+        screen_name: newPlayerName.trim(),
+        active: true,
+      },
+    ])
+
+    setCreatingPlayer(false)
+
+    if (error) {
+      alert(error.message)
+      return
+    }
+
+    setNewPlayerName("")
+    setShowAddPlayer(false)
+
+    await loadPlayers()
+
+    alert("Player added ✔")
   }
 
   async function registerPlayer() {
@@ -103,6 +146,7 @@ export default function PlayersAdminPage() {
         if (!clean) return
 
         const key = normalizeName(clean)
+
         if (!uniqueImportMap.has(key)) {
           uniqueImportMap.set(key, clean)
         }
@@ -143,8 +187,9 @@ export default function PlayersAdminPage() {
       }
 
       await loadPlayers()
+
       alert(`Imported ${newPlayers.length} players ✔`)
-    } catch (err) {
+    } catch {
       alert("Import failed")
     }
 
@@ -153,7 +198,9 @@ export default function PlayersAdminPage() {
 
   const filteredPlayers = useMemo(() => {
     const q = normalizeName(search)
+
     if (!q) return players
+
     return players.filter((p) =>
       normalizeName(p.screen_name).includes(q)
     )
@@ -161,14 +208,28 @@ export default function PlayersAdminPage() {
 
   return (
     <main style={page}>
-      <h1>Global Players</h1>
+      <div style={topBar}>
+        <h1>Global Players</h1>
+
+        <button
+          onClick={() => setShowAddPlayer(true)}
+          style={addPlayerButton}
+        >
+          + Add Player
+        </button>
+      </div>
 
       <div style={panel}>
         <h2>Register Player to League</h2>
 
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-          <select value={selectedPlayer} onChange={(e) => setSelectedPlayer(e.target.value)} style={input}>
+          <select
+            value={selectedPlayer}
+            onChange={(e) => setSelectedPlayer(e.target.value)}
+            style={input}
+          >
             <option value="">Select Player</option>
+
             {players.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.screen_name}
@@ -176,13 +237,21 @@ export default function PlayersAdminPage() {
             ))}
           </select>
 
-          <select value={league} onChange={(e) => setLeague(e.target.value)} style={input}>
+          <select
+            value={league}
+            onChange={(e) => setLeague(e.target.value)}
+            style={input}
+          >
             {LEAGUES.map((l) => (
               <option key={l}>{l}</option>
             ))}
           </select>
 
-          <select value={season} onChange={(e) => setSeason(e.target.value)} style={input}>
+          <select
+            value={season}
+            onChange={(e) => setSeason(e.target.value)}
+            style={input}
+          >
             {Array.from({ length: 300 - 59 + 1 }, (_, i) => 59 + i).map((num) => (
               <option key={num} value={num}>
                 Season {num}
@@ -198,7 +267,11 @@ export default function PlayersAdminPage() {
           />
         </div>
 
-        <button onClick={registerPlayer} disabled={saving} style={{ ...button, marginTop: 12 }}>
+        <button
+          onClick={registerPlayer}
+          disabled={saving}
+          style={{ ...button, marginTop: 12 }}
+        >
           {saving ? "Saving..." : "Register Player"}
         </button>
       </div>
@@ -208,7 +281,11 @@ export default function PlayersAdminPage() {
           {loading ? "Loading..." : "Refresh Players"}
         </button>
 
-        <button onClick={importPlayers} disabled={importing} style={{ ...button, background: "#16a34a" }}>
+        <button
+          onClick={importPlayers}
+          disabled={importing}
+          style={{ ...button, background: "#16a34a" }}
+        >
           {importing ? "Importing..." : "Import Existing Players"}
         </button>
       </div>
@@ -238,7 +315,9 @@ export default function PlayersAdminPage() {
                   </button>
 
                   <button
-                    onClick={() => router.push(`/admin/players/merge?remove=${p.id}`)}
+                    onClick={() =>
+                      router.push(`/admin/players/merge?remove=${p.id}`)
+                    }
                     style={mergeButton}
                   >
                     Merge
@@ -249,6 +328,44 @@ export default function PlayersAdminPage() {
           ))}
         </tbody>
       </table>
+
+      {showAddPlayer && (
+        <div style={overlay}>
+          <div style={modal}>
+            <div style={modalTop}>
+              <h2>Add Player</h2>
+
+              <button
+                onClick={() => setShowAddPlayer(false)}
+                style={closeButton}
+              >
+                ✕
+              </button>
+            </div>
+
+            <input
+              value={newPlayerName}
+              onChange={(e) => setNewPlayerName(e.target.value)}
+              placeholder="Player Name"
+              style={{
+                ...input,
+                width: "100%",
+                marginTop: 16,
+              }}
+            />
+
+            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 20 }}>
+              <button
+                onClick={createPlayer}
+                disabled={creatingPlayer}
+                style={addPlayerSaveButton}
+              >
+                {creatingPlayer ? "Adding..." : "Add Player"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   )
 }
@@ -258,6 +375,12 @@ const page: React.CSSProperties = {
   padding: 24,
   background: "black",
   color: "white",
+}
+
+const topBar: React.CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
 }
 
 const panel: React.CSSProperties = {
@@ -273,6 +396,26 @@ const button: React.CSSProperties = {
   padding: "10px 16px",
   borderRadius: 8,
   color: "white",
+  cursor: "pointer",
+}
+
+const addPlayerButton: React.CSSProperties = {
+  background: "#16a34a",
+  border: "none",
+  padding: "12px 18px",
+  borderRadius: 8,
+  color: "white",
+  fontWeight: 700,
+  cursor: "pointer",
+}
+
+const addPlayerSaveButton: React.CSSProperties = {
+  background: "#16a34a",
+  border: "none",
+  padding: "12px 20px",
+  borderRadius: 8,
+  color: "white",
+  fontWeight: 700,
   cursor: "pointer",
 }
 
@@ -307,9 +450,42 @@ const table: React.CSSProperties = {
   marginTop: 18,
   borderCollapse: "collapse",
   minWidth: 400,
+  width: "100%",
 }
 
 const td: React.CSSProperties = {
   borderBottom: "1px solid #333",
   padding: 8,
+}
+
+const overlay: React.CSSProperties = {
+  position: "fixed",
+  inset: 0,
+  background: "rgba(0,0,0,0.7)",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  zIndex: 1000,
+}
+
+const modal: React.CSSProperties = {
+  width: 500,
+  background: "#111",
+  border: "1px solid #444",
+  borderRadius: 14,
+  padding: 24,
+}
+
+const modalTop: React.CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+}
+
+const closeButton: React.CSSProperties = {
+  background: "transparent",
+  border: "none",
+  color: "white",
+  fontSize: 20,
+  cursor: "pointer",
 }
