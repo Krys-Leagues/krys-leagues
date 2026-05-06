@@ -59,7 +59,6 @@ export default function StrokeResultsPage() {
     const found = players.find(
       (p) => p.screen_name.trim().toLowerCase() === name.trim().toLowerCase()
     )
-
     return found?.id || null
   }
 
@@ -184,9 +183,17 @@ export default function StrokeResultsPage() {
   return (
     <main style={page}>
       <div style={container}>
-        <button onClick={() => router.push("/admin")} style={backButton}>
-          ← Back to Admin
-        </button>
+
+        {/* 🔥 NEW NAV */}
+        <div style={topBar}>
+          <button onClick={() => router.push("/admin/stroke")} style={backButtonPrimary}>
+            ← Stroke Hub
+          </button>
+
+          <button onClick={() => router.push("/admin")} style={backButtonSecondary}>
+            ← Admin
+          </button>
+        </div>
 
         <div style={card}>
           <h1 style={title}>Stroke Results Admin</h1>
@@ -247,12 +254,12 @@ export default function StrokeResultsPage() {
             <div style={grid}>
               <div>
                 <label style={label}>{player1 || "Player 1"} Score</label>
-                <input value={score1} onChange={(e) => setScore1(e.target.value)} placeholder="-28" style={input} />
+                <input value={score1} onChange={(e) => setScore1(e.target.value)} placeholder={player1 || "-28"} style={input} />
               </div>
 
               <div>
                 <label style={label}>{player2 || "Player 2"} Score</label>
-                <input value={score2} onChange={(e) => setScore2(e.target.value)} placeholder="-25" style={input} />
+                <input value={score2} onChange={(e) => setScore2(e.target.value)} placeholder={player2 || "-25"} style={input} />
               </div>
             </div>
           </section>
@@ -265,6 +272,8 @@ export default function StrokeResultsPage() {
     </main>
   )
 }
+
+/* styles */
 
 const page: React.CSSProperties = {
   minHeight: "100vh",
@@ -280,8 +289,23 @@ const container: React.CSSProperties = {
   padding: 30,
 }
 
-const backButton: React.CSSProperties = {
+const topBar: React.CSSProperties = {
+  display: "flex",
+  gap: 10,
   marginBottom: 20,
+}
+
+const backButtonPrimary: React.CSSProperties = {
+  padding: "10px 16px",
+  background: "#2563eb",
+  border: "none",
+  borderRadius: 8,
+  color: "white",
+  fontWeight: 700,
+  cursor: "pointer",
+}
+
+const backButtonSecondary: React.CSSProperties = {
   padding: "10px 16px",
   background: "#222",
   border: "1px solid #555",
