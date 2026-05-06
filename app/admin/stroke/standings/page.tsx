@@ -114,9 +114,17 @@ export default function StrokeStandingsPage() {
   return (
     <main style={page}>
       <div style={container}>
-        <button onClick={() => router.push("/admin")} style={backButton}>
-          ← Back to Admin
-        </button>
+
+        {/* 🔥 NEW NAV BAR */}
+        <div style={topBar}>
+          <button onClick={() => router.push("/admin/stroke")} style={backButtonPrimary}>
+            ← Stroke Hub
+          </button>
+
+          <button onClick={() => router.push("/admin")} style={backButtonSecondary}>
+            ← Admin
+          </button>
+        </div>
 
         <div style={card}>
           <h1 style={title}>Stroke Standings</h1>
@@ -184,6 +192,8 @@ export default function StrokeStandingsPage() {
   )
 }
 
+/* styles */
+
 const page: React.CSSProperties = {
   minHeight: "100vh",
   background: "black",
@@ -198,9 +208,24 @@ const container: React.CSSProperties = {
   padding: 30,
 }
 
-const backButton: React.CSSProperties = {
+const topBar: React.CSSProperties = {
+  display: "flex",
+  gap: 10,
   marginBottom: 20,
-  padding: "8px 14px",
+}
+
+const backButtonPrimary: React.CSSProperties = {
+  padding: "10px 16px",
+  background: "#2563eb",
+  border: "none",
+  borderRadius: 8,
+  color: "white",
+  fontWeight: 700,
+  cursor: "pointer",
+}
+
+const backButtonSecondary: React.CSSProperties = {
+  padding: "10px 16px",
   background: "#222",
   border: "1px solid #555",
   borderRadius: 8,
