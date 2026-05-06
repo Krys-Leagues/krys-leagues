@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useEffect, useMemo, useState } from "react"
+import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 
 type Player = {
@@ -11,12 +12,13 @@ type Player = {
 const LEAGUES = ["stroke", "pyp", "skins", "kwt"]
 
 export default function PlayersAdminPage() {
+  const router = useRouter()
+
   const [players, setPlayers] = useState<Player[]>([])
   const [loading, setLoading] = useState(false)
   const [importing, setImporting] = useState(false)
   const [search, setSearch] = useState("")
 
-  // 🔥 NEW STATE
   const [selectedPlayer, setSelectedPlayer] = useState("")
   const [league, setLeague] = useState("stroke")
   const [season, setSeason] = useState("59")
@@ -161,7 +163,8 @@ export default function PlayersAdminPage() {
     <main style={page}>
       <h1>Global Players</h1>
 
-      <div style={{ marginTop: 20, padding: 16, border: "1px solid #444", borderRadius: 10 }}>
+      {/* REGISTER */}
+      <div style={panel}>
         <h2>Register Player to League</h2>
 
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
@@ -201,6 +204,7 @@ export default function PlayersAdminPage() {
         </button>
       </div>
 
+      {/* CONTROLS */}
       <div style={{ marginTop: 16, display: "flex", gap: 12 }}>
         <button onClick={loadPlayers} disabled={loading} style={button}>
           {loading ? "Loading..." : "Refresh Players"}
@@ -211,6 +215,7 @@ export default function PlayersAdminPage() {
         </button>
       </div>
 
+      {/* SEARCH */}
       <div style={{ marginTop: 16 }}>
         <input
           value={search}
@@ -220,11 +225,22 @@ export default function PlayersAdminPage() {
         />
       </div>
 
+      {/* LIST */}
       <table style={table}>
         <tbody>
           {filteredPlayers.map((p) => (
             <tr key={p.id}>
               <td style={td}>{p.screen_name}</td>
+
+              {/* 🔥 NEW PROFILE BUTTON */}
+              <td style={td}>
+                <button
+                  onClick={() => router.push(`/admin/players/${p.id}`)}
+                  style={profileButton}
+                >
+                  View Profile
+                </button>
+              </td>
             </tr>
           ))}
         </tbody>
@@ -233,7 +249,8 @@ export default function PlayersAdminPage() {
   )
 }
 
-// ✅ FIXED TYPES (THIS WAS BREAKING BUILD)
+/* styles */
+
 const page: React.CSSProperties = {
   minHeight: "100vh",
   padding: 24,
@@ -241,11 +258,27 @@ const page: React.CSSProperties = {
   color: "white",
 }
 
+const panel: React.CSSProperties = {
+  marginTop: 20,
+  padding: 16,
+  border: "1px solid #444",
+  borderRadius: 10,
+}
+
 const button: React.CSSProperties = {
   background: "#2563eb",
   border: "none",
   padding: "10px 16px",
   borderRadius: 8,
+  color: "white",
+  cursor: "pointer",
+}
+
+const profileButton: React.CSSProperties = {
+  background: "#16a34a",
+  border: "none",
+  padding: "6px 12px",
+  borderRadius: 6,
   color: "white",
   cursor: "pointer",
 }
