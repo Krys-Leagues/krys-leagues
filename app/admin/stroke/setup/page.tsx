@@ -185,9 +185,17 @@ export default function StrokeSetup() {
   return (
     <main style={page}>
       <div style={container}>
-        <button onClick={() => router.push("/admin")} style={backButton}>
-          ← Back to Admin
-        </button>
+
+        {/* 🔥 NEW NAV */}
+        <div style={topBar}>
+          <button onClick={() => router.push("/admin/stroke")} style={backButtonPrimary}>
+            ← Stroke Hub
+          </button>
+
+          <button onClick={() => router.push("/admin")} style={backButtonSecondary}>
+            ← Admin
+          </button>
+        </div>
 
         <h1 style={{ fontSize: 36 }}>Stroke Setup</h1>
 
@@ -258,6 +266,8 @@ export default function StrokeSetup() {
   )
 }
 
+/* styles */
+
 const page: React.CSSProperties = {
   minHeight: "100vh",
   background: "black",
@@ -270,6 +280,31 @@ const container: React.CSSProperties = {
   width: "100%",
   maxWidth: 1200,
   padding: 30,
+}
+
+const topBar: React.CSSProperties = {
+  display: "flex",
+  gap: 10,
+  marginBottom: 20,
+}
+
+const backButtonPrimary: React.CSSProperties = {
+  padding: "10px 16px",
+  background: "#2563eb",
+  border: "none",
+  borderRadius: 8,
+  color: "white",
+  fontWeight: 700,
+  cursor: "pointer",
+}
+
+const backButtonSecondary: React.CSSProperties = {
+  padding: "10px 16px",
+  background: "#222",
+  border: "1px solid #555",
+  borderRadius: 8,
+  color: "white",
+  cursor: "pointer",
 }
 
 const section: React.CSSProperties = {
@@ -306,15 +341,5 @@ const button: React.CSSProperties = {
   borderRadius: 10,
   color: "white",
   fontWeight: 700,
-  cursor: "pointer",
-}
-
-const backButton: React.CSSProperties = {
-  marginBottom: 20,
-  padding: "8px 14px",
-  background: "#222",
-  border: "1px solid #555",
-  borderRadius: 8,
-  color: "white",
   cursor: "pointer",
 }
