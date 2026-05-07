@@ -7,7 +7,8 @@ import { supabase } from "@/lib/supabase"
 type Player = {
   id: string
   screen_name: string
-  status: string
+  status: string | null
+  active: boolean | null
 }
 
 type LeagueKey = "stroke" | "pyp" | "skins" | "kwt"
@@ -49,12 +50,7 @@ const TOURNAMENT_BRACKETS = [
   "D5",
 ]
 
-const PLAYER_STATUSES = [
-  "active",
-  "inactive",
-  "archived",
-  "memorial",
-]
+const PLAYER_STATUSES = ["active", "inactive", "archived", "memorial"]
 
 const STATUS_COLORS: Record<string, string> = {
   active: "#16a34a",
@@ -98,12 +94,20 @@ export default function PlayersAdminPage() {
     return String(name || "").trim().toLowerCase()
   }
 
+  function getPlayerStatus(player: Player) {
+    return player.status || (player.active === false ? "inactive" : "active")
+  }
+
+  function isStatusActive(status: string) {
+    return status === "active"
+  }
+
   async function loadPlayers() {
     setLoading(true)
 
     const { data, error } = await supabase
       .from("players")
-      .select("id, screen_name, status")
+      .select("id, screen_name, status, active")
       .order("screen_name", { ascending: true })
 
     setLoading(false)
@@ -157,6 +161,13 @@ export default function PlayersAdminPage() {
   }
 
   function openLeagueModal(player: Player) {
+    const status = getPlayerStatus(player)
+
+    if (!isStatusActive(status)) {
+      alert("Only active players can be added to leagues.")
+      return
+    }
+
     setLeaguePlayer(player)
     setLeague("stroke")
     setDivision("Stroke D1")
@@ -199,6 +210,13 @@ export default function PlayersAdminPage() {
   }
 
   function openTournamentModal(player: Player) {
+    const status = getPlayerStatus(player)
+
+    if (!isStatusActive(status)) {
+      alert("Only active players can be added to tournaments.")
+      return
+    }
+
     setTourneyPlayer(player)
     setTournamentType("KWT")
     setTournamentBracket("Open")
@@ -238,7 +256,7 @@ export default function PlayersAdminPage() {
 
   function openStatusModal(player: Player) {
     setStatusPlayer(player)
-    setPlayerStatus(player.status || "active")
+    setPlayerStatus(getPlayerStatus(player))
   }
 
   async function savePlayerStatus() {
@@ -246,10 +264,13 @@ export default function PlayersAdminPage() {
 
     setSavingStatus(true)
 
+    const shouldBeActive = playerStatus === "active"
+
     const { error } = await supabase
       .from("players")
       .update({
         status: playerStatus,
+        active: shouldBeActive,
       })
       .eq("id", statusPlayer.id)
 
@@ -345,13 +366,15 @@ export default function PlayersAdminPage() {
     const q = normalizeName(search)
 
     return players.filter((p) => {
+      const currentStatus = getPlayerStatus(p)
+
       const matchesSearch =
         !q || normalizeName(p.screen_name).includes(q)
 
       const matchesStatus =
         statusFilter === "all"
           ? true
-          : (p.status || "active") === statusFilter
+          : currentStatus === statusFilter
 
       return matchesSearch && matchesStatus
     })
@@ -416,63 +439,67 @@ export default function PlayersAdminPage() {
 
       <table style={table}>
         <tbody>
-          {filteredPlayers.map((p) => (
-            <tr key={p.id}>
-              <td style={playerTd}>{p.screen_name}</td>
+          {filteredPlayers.map((p) => {
+            const currentStatus = getPlayerStatus(p)
 
-              <td style={td}>
-                <span
-                  style={{
-                    ...statusBadge,
-                    background: STATUS_COLORS[p.status || "active"],
-                  }}
-                >
-                  {(p.status || "active").toUpperCase()}
-                </span>
-              </td>
+            return (
+              <tr key={p.id}>
+                <td style={playerTd}>{p.screen_name}</td>
 
-              <td style={td}>
-                <div style={actionRow}>
-                  <button
-                    onClick={() => router.push(`/admin/players/${p.id}`)}
-                    style={profileButton}
+                <td style={td}>
+                  <span
+                    style={{
+                      ...statusBadge,
+                      background: STATUS_COLORS[currentStatus],
+                    }}
                   >
-                    Profile
-                  </button>
+                    {currentStatus.toUpperCase()}
+                  </span>
+                </td>
 
-                  <button
-                    onClick={() => openLeagueModal(p)}
-                    style={leagueButton}
-                  >
-                    League
-                  </button>
+                <td style={td}>
+                  <div style={actionRow}>
+                    <button
+                      onClick={() => router.push(`/admin/players/${p.id}`)}
+                      style={profileButton}
+                    >
+                      Profile
+                    </button>
 
-                  <button
-                    onClick={() => openTournamentModal(p)}
-                    style={tournamentButton}
-                  >
-                    Tournament
-                  </button>
+                    <button
+                      onClick={() => openLeagueModal(p)}
+                      style={leagueButton}
+                    >
+                      League
+                    </button>
 
-                  <button
-                    onClick={() => openStatusModal(p)}
-                    style={statusButton}
-                  >
-                    Status
-                  </button>
+                    <button
+                      onClick={() => openTournamentModal(p)}
+                      style={tournamentButton}
+                    >
+                      Tournament
+                    </button>
 
-                  <button
-                    onClick={() =>
-                      router.push(`/admin/players/merge?remove=${p.id}`)
-                    }
-                    style={mergeButton}
-                  >
-                    Merge
-                  </button>
-                </div>
-              </td>
-            </tr>
-          ))}
+                    <button
+                      onClick={() => openStatusModal(p)}
+                      style={statusButton}
+                    >
+                      Status
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        router.push(`/admin/players/merge?remove=${p.id}`)
+                      }
+                      style={mergeButton}
+                    >
+                      Merge
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            )
+          })}
         </tbody>
       </table>
 
@@ -595,6 +622,10 @@ export default function PlayersAdminPage() {
               </option>
             ))}
           </select>
+
+          <p style={hint}>
+            Active players show in league and tournament tools. Inactive, Archived, and Memorial players are preserved but removed from active assignment.
+          </p>
 
           <button
             onClick={savePlayerStatus}
@@ -850,6 +881,7 @@ const modalPlayerName: React.CSSProperties = {
 const hint: React.CSSProperties = {
   color: "#aaa",
   margin: 0,
+  lineHeight: 1.4,
 }
 
 const saveButton: React.CSSProperties = {
