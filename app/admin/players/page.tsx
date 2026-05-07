@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase"
 type Player = {
   id: string
   screen_name: string
+  status: string
 }
 
 type LeagueKey = "stroke" | "pyp" | "skins" | "kwt"
@@ -48,6 +49,20 @@ const TOURNAMENT_BRACKETS = [
   "D5",
 ]
 
+const PLAYER_STATUSES = [
+  "active",
+  "inactive",
+  "archived",
+  "memorial",
+]
+
+const STATUS_COLORS: Record<string, string> = {
+  active: "#16a34a",
+  inactive: "#6b7280",
+  archived: "#dc2626",
+  memorial: "#9333ea",
+}
+
 export default function PlayersAdminPage() {
   const router = useRouter()
 
@@ -55,6 +70,7 @@ export default function PlayersAdminPage() {
   const [loading, setLoading] = useState(false)
   const [importing, setImporting] = useState(false)
   const [search, setSearch] = useState("")
+  const [statusFilter, setStatusFilter] = useState("active")
 
   const [showAddPlayer, setShowAddPlayer] = useState(false)
   const [newPlayerName, setNewPlayerName] = useState("")
@@ -70,6 +86,10 @@ export default function PlayersAdminPage() {
   const [tournamentBracket, setTournamentBracket] = useState("Open")
   const [savingTournament, setSavingTournament] = useState(false)
 
+  const [statusPlayer, setStatusPlayer] = useState<Player | null>(null)
+  const [playerStatus, setPlayerStatus] = useState("active")
+  const [savingStatus, setSavingStatus] = useState(false)
+
   useEffect(() => {
     loadPlayers()
   }, [])
@@ -83,7 +103,7 @@ export default function PlayersAdminPage() {
 
     const { data, error } = await supabase
       .from("players")
-      .select("id, screen_name")
+      .select("id, screen_name, status")
       .order("screen_name", { ascending: true })
 
     setLoading(false)
@@ -117,6 +137,7 @@ export default function PlayersAdminPage() {
       {
         screen_name: newPlayerName.trim(),
         active: true,
+        status: "active",
       },
     ])
 
@@ -129,7 +150,9 @@ export default function PlayersAdminPage() {
 
     setNewPlayerName("")
     setShowAddPlayer(false)
+
     await loadPlayers()
+
     alert("Player added ✔")
   }
 
@@ -171,6 +194,7 @@ export default function PlayersAdminPage() {
     }
 
     setLeaguePlayer(null)
+
     alert(`${leaguePlayer.screen_name} added to ${division} ✔`)
   }
 
@@ -208,7 +232,39 @@ export default function PlayersAdminPage() {
     }
 
     setTourneyPlayer(null)
+
     alert(`${tourneyPlayer.screen_name} added to ${tournamentType} ✔`)
+  }
+
+  function openStatusModal(player: Player) {
+    setStatusPlayer(player)
+    setPlayerStatus(player.status || "active")
+  }
+
+  async function savePlayerStatus() {
+    if (!statusPlayer) return
+
+    setSavingStatus(true)
+
+    const { error } = await supabase
+      .from("players")
+      .update({
+        status: playerStatus,
+      })
+      .eq("id", statusPlayer.id)
+
+    setSavingStatus(false)
+
+    if (error) {
+      alert(error.message)
+      return
+    }
+
+    await loadPlayers()
+
+    setStatusPlayer(null)
+
+    alert(`Player status updated to ${playerStatus} ✔`)
   }
 
   async function importPlayers() {
@@ -268,6 +324,7 @@ export default function PlayersAdminPage() {
         .map((name) => ({
           screen_name: name,
           active: true,
+          status: "active",
         }))
 
       if (newPlayers.length > 0) {
@@ -275,6 +332,7 @@ export default function PlayersAdminPage() {
       }
 
       await loadPlayers()
+
       alert(`Imported ${newPlayers.length} players ✔`)
     } catch {
       alert("Import failed")
@@ -286,22 +344,34 @@ export default function PlayersAdminPage() {
   const filteredPlayers = useMemo(() => {
     const q = normalizeName(search)
 
-    if (!q) return players
+    return players.filter((p) => {
+      const matchesSearch =
+        !q || normalizeName(p.screen_name).includes(q)
 
-    return players.filter((p) =>
-      normalizeName(p.screen_name).includes(q)
-    )
-  }, [players, search])
+      const matchesStatus =
+        statusFilter === "all"
+          ? true
+          : (p.status || "active") === statusFilter
+
+      return matchesSearch && matchesStatus
+    })
+  }, [players, search, statusFilter])
 
   return (
     <main style={page}>
       <div style={topBar}>
         <div>
           <h1 style={title}>Global Players</h1>
-          <p style={subtitle}>Player command center for leagues, tournaments, profiles, and merges.</p>
+
+          <p style={subtitle}>
+            Player command center for leagues, tournaments, profiles, merges, and legacy management.
+          </p>
         </div>
 
-        <button onClick={() => setShowAddPlayer(true)} style={addPlayerButton}>
+        <button
+          onClick={() => setShowAddPlayer(true)}
+          style={addPlayerButton}
+        >
           + Add Player
         </button>
       </div>
@@ -321,6 +391,21 @@ export default function PlayersAdminPage() {
       </div>
 
       <div style={{ marginTop: 16 }}>
+        <div style={filterRow}>
+          {["active", "inactive", "archived", "memorial", "all"].map((status) => (
+            <button
+              key={status}
+              onClick={() => setStatusFilter(status)}
+              style={{
+                ...filterButton,
+                background: statusFilter === status ? "#2563eb" : "#222",
+              }}
+            >
+              {status.toUpperCase()}
+            </button>
+          ))}
+        </div>
+
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -334,6 +419,17 @@ export default function PlayersAdminPage() {
           {filteredPlayers.map((p) => (
             <tr key={p.id}>
               <td style={playerTd}>{p.screen_name}</td>
+
+              <td style={td}>
+                <span
+                  style={{
+                    ...statusBadge,
+                    background: STATUS_COLORS[p.status || "active"],
+                  }}
+                >
+                  {(p.status || "active").toUpperCase()}
+                </span>
+              </td>
 
               <td style={td}>
                 <div style={actionRow}>
@@ -359,7 +455,16 @@ export default function PlayersAdminPage() {
                   </button>
 
                   <button
-                    onClick={() => router.push(`/admin/players/merge?remove=${p.id}`)}
+                    onClick={() => openStatusModal(p)}
+                    style={statusButton}
+                  >
+                    Status
+                  </button>
+
+                  <button
+                    onClick={() =>
+                      router.push(`/admin/players/merge?remove=${p.id}`)
+                    }
                     style={mergeButton}
                   >
                     Merge
@@ -380,7 +485,11 @@ export default function PlayersAdminPage() {
             style={modalInput}
           />
 
-          <button onClick={createPlayer} disabled={creatingPlayer} style={saveButton}>
+          <button
+            onClick={createPlayer}
+            disabled={creatingPlayer}
+            style={saveButton}
+          >
             {creatingPlayer ? "Adding..." : "Add Player"}
           </button>
         </Modal>
@@ -391,7 +500,12 @@ export default function PlayersAdminPage() {
           <p style={modalPlayerName}>{leaguePlayer.screen_name}</p>
 
           <label style={label}>League</label>
-          <select value={league} onChange={(e) => changeLeague(e.target.value as LeagueKey)} style={modalInput}>
+
+          <select
+            value={league}
+            onChange={(e) => changeLeague(e.target.value as LeagueKey)}
+            style={modalInput}
+          >
             {LEAGUES.map((item) => (
               <option key={item.value} value={item.value}>
                 {item.label}
@@ -400,7 +514,12 @@ export default function PlayersAdminPage() {
           </select>
 
           <label style={label}>Division</label>
-          <select value={division} onChange={(e) => setDivision(e.target.value)} style={modalInput}>
+
+          <select
+            value={division}
+            onChange={(e) => setDivision(e.target.value)}
+            style={modalInput}
+          >
             {DIVISIONS_BY_LEAGUE[league].map((div) => (
               <option key={div}>{div}</option>
             ))}
@@ -408,32 +527,81 @@ export default function PlayersAdminPage() {
 
           <p style={hint}>Season auto-applied: S{CURRENT_SEASON}</p>
 
-          <button onClick={saveLeagueRegistration} disabled={savingLeague} style={saveButton}>
+          <button
+            onClick={saveLeagueRegistration}
+            disabled={savingLeague}
+            style={saveButton}
+          >
             {savingLeague ? "Saving..." : "Save League"}
           </button>
         </Modal>
       )}
 
       {tourneyPlayer && (
-        <Modal title="Add To Tournament" onClose={() => setTourneyPlayer(null)}>
+        <Modal
+          title="Add To Tournament"
+          onClose={() => setTourneyPlayer(null)}
+        >
           <p style={modalPlayerName}>{tourneyPlayer.screen_name}</p>
 
           <label style={label}>Tournament</label>
-          <select value={tournamentType} onChange={(e) => setTournamentType(e.target.value)} style={modalInput}>
+
+          <select
+            value={tournamentType}
+            onChange={(e) => setTournamentType(e.target.value)}
+            style={modalInput}
+          >
             {TOURNAMENTS.map((item) => (
               <option key={item}>{item}</option>
             ))}
           </select>
 
           <label style={label}>Bracket / Division</label>
-          <select value={tournamentBracket} onChange={(e) => setTournamentBracket(e.target.value)} style={modalInput}>
+
+          <select
+            value={tournamentBracket}
+            onChange={(e) => setTournamentBracket(e.target.value)}
+            style={modalInput}
+          >
             {TOURNAMENT_BRACKETS.map((item) => (
               <option key={item}>{item}</option>
             ))}
           </select>
 
-          <button onClick={saveTournamentRegistration} disabled={savingTournament} style={saveButton}>
+          <button
+            onClick={saveTournamentRegistration}
+            disabled={savingTournament}
+            style={saveButton}
+          >
             {savingTournament ? "Saving..." : "Save Tournament"}
+          </button>
+        </Modal>
+      )}
+
+      {statusPlayer && (
+        <Modal title="Player Status" onClose={() => setStatusPlayer(null)}>
+          <p style={modalPlayerName}>{statusPlayer.screen_name}</p>
+
+          <label style={label}>Status</label>
+
+          <select
+            value={playerStatus}
+            onChange={(e) => setPlayerStatus(e.target.value)}
+            style={modalInput}
+          >
+            {PLAYER_STATUSES.map((status) => (
+              <option key={status} value={status}>
+                {status}
+              </option>
+            ))}
+          </select>
+
+          <button
+            onClick={savePlayerStatus}
+            disabled={savingStatus}
+            style={saveButton}
+          >
+            {savingStatus ? "Saving..." : "Save Status"}
           </button>
         </Modal>
       )}
@@ -585,6 +753,38 @@ const mergeButton: React.CSSProperties = {
   color: "black",
   fontWeight: 700,
   cursor: "pointer",
+}
+
+const statusButton: React.CSSProperties = {
+  background: "#52525b",
+  border: "none",
+  padding: "7px 12px",
+  borderRadius: 6,
+  color: "white",
+  cursor: "pointer",
+}
+
+const filterRow: React.CSSProperties = {
+  display: "flex",
+  gap: 8,
+  flexWrap: "wrap",
+  marginBottom: 14,
+}
+
+const filterButton: React.CSSProperties = {
+  border: "none",
+  color: "white",
+  padding: "8px 14px",
+  borderRadius: 8,
+  cursor: "pointer",
+}
+
+const statusBadge: React.CSSProperties = {
+  color: "white",
+  padding: "5px 10px",
+  borderRadius: 999,
+  fontSize: 12,
+  fontWeight: 700,
 }
 
 const overlay: React.CSSProperties = {
