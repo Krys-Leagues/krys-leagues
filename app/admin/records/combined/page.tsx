@@ -78,12 +78,24 @@ export default function CombinedRecordsPage() {
     const { data: recordData } = await supabase
       .from("combined_course_records")
       .select("*")
+      .order("course_name", { ascending: true })
       .order("combined_score", { ascending: true })
 
     setPlayers(playerData || [])
     setRecords(recordData || [])
 
     setLoading(false)
+  }
+
+  function formatDate(value: string | null) {
+    if (!value) return ""
+
+    const date = new Date(`${value}T00:00:00`)
+    const month = date.getMonth() + 1
+    const day = date.getDate()
+    const year = String(date.getFullYear()).slice(-2)
+
+    return `${month}/${day}/${year}`
   }
 
   const selectedPlayer = useMemo(() => {
@@ -119,18 +131,23 @@ export default function CombinedRecordsPage() {
 
     const { error } = await supabase
       .from("combined_course_records")
-      .insert([
+      .upsert(
+        [
+          {
+            player_id: selectedPlayer.id,
+            player_name: selectedPlayer.screen_name,
+            course_name: courseName,
+            easy_score: Number(easyScore),
+            hard_score: Number(hardScore),
+            combined_score: combinedScore,
+            played_at: playedAt || null,
+            notes: notes || null,
+          },
+        ],
         {
-          player_id: selectedPlayer.id,
-          player_name: selectedPlayer.screen_name,
-          course_name: courseName,
-          easy_score: Number(easyScore),
-          hard_score: Number(hardScore),
-          combined_score: combinedScore,
-          played_at: playedAt || null,
-          notes: notes || null,
-        },
-      ])
+          onConflict: "player_name,course_name",
+        }
+      )
 
     setSaving(false)
 
@@ -154,20 +171,38 @@ export default function CombinedRecordsPage() {
     return records.filter((r) => r.course_name === courseFilter)
   }, [records, courseFilter])
 
+  const recordsByCourse = useMemo(() => {
+    const grouped: Record<string, CombinedRecord[]> = {}
+
+    filteredRecords.forEach((record) => {
+      if (!grouped[record.course_name]) {
+        grouped[record.course_name] = []
+      }
+
+      grouped[record.course_name].push(record)
+    })
+
+    Object.keys(grouped).forEach((course) => {
+      grouped[course].sort((a, b) => a.combined_score - b.combined_score)
+    })
+
+    return grouped
+  }, [filteredRecords])
+
+  const coursesToShow = useMemo(() => {
+    if (courseFilter !== "ALL") return [courseFilter]
+
+    return COURSES.filter((course) => recordsByCourse[course]?.length)
+  }, [courseFilter, recordsByCourse])
+
   return (
     <main style={page}>
       <div style={topBar}>
-        <button
-          onClick={() => router.push("/admin")}
-          style={backButton}
-        >
+        <button onClick={() => router.push("/admin")} style={backButton}>
           ← Admin
         </button>
 
-        <button
-          onClick={() => router.push("/admin/players")}
-          style={backButton}
-        >
+        <button onClick={() => router.push("/admin/players")} style={backButton}>
           ← Players
         </button>
       </div>
@@ -286,42 +321,37 @@ export default function CombinedRecordsPage() {
           </div>
 
           <div style={recordsList}>
-            {filteredRecords.map((record, index) => (
-              <div key={record.id} style={recordCard}>
-                <div style={placement}>
-                  #{index + 1}
-                </div>
+            {coursesToShow.map((course) => (
+              <div key={course} style={courseGroup}>
+                <h3 style={courseHeader}>{course}</h3>
 
-                <div style={recordMain}>
-                  <div style={recordPlayer}>
-                    {record.player_name}
-                  </div>
+                {(recordsByCourse[course] || []).map((record, index) => (
+                  <div key={record.id} style={recordCard}>
+                    <div style={placement}>#{index + 1}</div>
 
-                  <div style={recordCourse}>
-                    {record.course_name}
-                  </div>
+                    <div style={recordMain}>
+                      <div style={recordPlayer}>{record.player_name}</div>
 
-                  <div style={recordScores}>
-                    Easy {record.easy_score} • Hard {record.hard_score}
-                  </div>
+                      <div style={recordScores}>
+                        Easy {record.easy_score} • Hard {record.hard_score}
+                        {record.played_at && (
+                          <span style={dateText}> • {formatDate(record.played_at)}</span>
+                        )}
+                      </div>
 
-                  {record.notes && (
-                    <div style={recordNotes}>
-                      {record.notes}
+                      {record.notes && (
+                        <div style={recordNotes}>{record.notes}</div>
+                      )}
                     </div>
-                  )}
-                </div>
 
-                <div style={combinedBox}>
-                  {record.combined_score}
-                </div>
+                    <div style={combinedBox}>{record.combined_score}</div>
+                  </div>
+                ))}
               </div>
             ))}
 
             {!filteredRecords.length && (
-              <div style={emptyState}>
-                No combined records yet.
-              </div>
+              <div style={emptyState}>No combined records yet.</div>
             )}
           </div>
         </div>
@@ -458,7 +488,20 @@ const filterSelect: React.CSSProperties = {
 const recordsList: React.CSSProperties = {
   marginTop: 18,
   display: "grid",
-  gap: 12,
+  gap: 22,
+}
+
+const courseGroup: React.CSSProperties = {
+  display: "grid",
+  gap: 10,
+}
+
+const courseHeader: React.CSSProperties = {
+  fontSize: 28,
+  margin: "8px 0",
+  paddingBottom: 8,
+  borderBottom: "1px solid #333",
+  color: "#60a5fa",
 }
 
 const recordCard: React.CSSProperties = {
@@ -486,14 +529,13 @@ const recordPlayer: React.CSSProperties = {
   fontWeight: 900,
 }
 
-const recordCourse: React.CSSProperties = {
-  color: "#60a5fa",
-  marginTop: 4,
-}
-
 const recordScores: React.CSSProperties = {
   marginTop: 8,
   color: "#ddd",
+}
+
+const dateText: React.CSSProperties = {
+  color: "#aaa",
 }
 
 const recordNotes: React.CSSProperties = {
