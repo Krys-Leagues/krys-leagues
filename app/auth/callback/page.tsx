@@ -15,7 +15,8 @@ function CallbackHandler() {
 
   useEffect(() => {
     async function handleLogin() {
-      const next = searchParams.get("next") || "/join";
+      const next =
+        searchParams.get("next") || "/join";
 
       await supabase.auth.getSession();
 
@@ -31,7 +32,9 @@ function CallbackHandler() {
         minHeight: "100vh",
         background: "black",
         color: "white",
-        padding: 40,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
       }}
     >
       <h2>Logging you in...</h2>
@@ -41,7 +44,22 @@ function CallbackHandler() {
 
 export default function AuthCallbackPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense
+      fallback={
+        <main
+          style={{
+            minHeight: "100vh",
+            background: "black",
+            color: "white",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <h2>Loading...</h2>
+        </main>
+      }
+    >
       <CallbackHandler />
     </Suspense>
   );
