@@ -15,10 +15,12 @@ function CallbackHandler() {
 
   useEffect(() => {
     async function handleLogin() {
-      const next =
-        searchParams.get("next") || "/join";
+      const code = searchParams.get("code");
+      const next = searchParams.get("next") || "/join";
 
-      await supabase.auth.getSession();
+      if (code) {
+        await supabase.auth.exchangeCodeForSession(code);
+      }
 
       router.replace(next);
     }
