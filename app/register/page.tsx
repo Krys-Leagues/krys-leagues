@@ -78,9 +78,11 @@ export default function RegisterPage() {
       setUser(data.user);
     });
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
 
     return () => {
       listener.subscription.unsubscribe();
@@ -152,17 +154,46 @@ export default function RegisterPage() {
 
   if (!league) {
     return (
-      <main style={{ minHeight: "100vh", background: "black", color: "white", padding: 24 }}>
+      <main
+        style={{
+          minHeight: "100vh",
+          background: "black",
+          color: "white",
+          padding: 24,
+        }}
+      >
         <h1>Choose a League First</h1>
-        <Link href="/join" style={{ color: "#a855f7", fontWeight: "bold" }}>
-          ← Back to League Selection
-        </Link>
       </main>
     );
   }
 
   return (
-    <main style={{ minHeight: "100vh", background: "black", color: "white" }}>
+    <main
+      style={{
+        minHeight: "100vh",
+        background: "black",
+        color: "white",
+      }}
+    >
+      <Link
+        href="/join"
+        style={{
+          position: "fixed",
+          top: 16,
+          left: 16,
+          zIndex: 9999,
+          background: "#a855f7",
+          color: "white",
+          padding: "10px 14px",
+          borderRadius: 8,
+          fontWeight: "bold",
+          textDecoration: "none",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
+        }}
+      >
+        ← Back to League Selection
+      </Link>
+
       <img
         src={league.image}
         alt={league.title}
@@ -175,23 +206,24 @@ export default function RegisterPage() {
         }}
       />
 
-      <section style={{ maxWidth: 720, padding: 24 }}>
-        <Link
-          href="/join"
+      <section
+        style={{
+          maxWidth: 720,
+          padding: 24,
+        }}
+      >
+        <h1 style={{ marginBottom: 8 }}>
+          {league.title}
+        </h1>
+
+        <p
           style={{
-            display: "inline-block",
-            marginBottom: 18,
-            color: "#a855f7",
-            fontWeight: "bold",
-            textDecoration: "none",
+            color: "#ff4d4d",
+            fontSize: 18,
           }}
         >
-          ← Back to League Selection
-        </Link>
-
-        <h1 style={{ marginBottom: 8 }}>{league.title}</h1>
-
-        <p style={{ color: "#ff4d4d", fontSize: 18 }}>{league.subtitle}</p>
+          {league.subtitle}
+        </p>
 
         {!user ? (
           <button
@@ -212,7 +244,12 @@ export default function RegisterPage() {
           </button>
         ) : (
           <>
-            <p style={{ marginTop: 24, fontSize: 18 }}>
+            <p
+              style={{
+                marginTop: 24,
+                fontSize: 18,
+              }}
+            >
               Logged in as{" "}
               <strong>
                 {user.user_metadata?.preferred_username ||
@@ -278,7 +315,13 @@ export default function RegisterPage() {
         )}
 
         {status && (
-          <p style={{ marginTop: 20, color: "#facc15", fontWeight: "bold" }}>
+          <p
+            style={{
+              marginTop: 20,
+              color: "#facc15",
+              fontWeight: "bold",
+            }}
+          >
             {status}
           </p>
         )}
