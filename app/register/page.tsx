@@ -10,41 +10,77 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-const leagues = [
-  { key: "stroke", label: "Stroke League" },
-  { key: "match", label: "Match Play League" },
-  { key: "pyp", label: "Pick Your Poison" },
-  { key: "pro", label: "Pro League" },
-  { key: "doubles", label: "Doubles League" },
-  { key: "cups", label: "Bracket / Cup Players" },
-  { key: "community", label: "Community / Records / Leaderboards" },
-];
+const LEAGUES: Record<
+  string,
+  {
+    title: string;
+    subtitle: string;
+    image: string;
+    ageNote: string;
+  }
+> = {
+  match: {
+    title: "Match League Registration",
+    subtitle: "Head-to-head leagues are 18+.",
+    image: "/league-media/match.png",
+    ageNote: "18+ only",
+  },
+  stroke: {
+    title: "Stroke League Registration",
+    subtitle: "Stroke play league signup.",
+    image: "/league-media/stroke-preview.png",
+    ageNote: "18+ only",
+  },
+  pyp: {
+    title: "Pick Your Poison Registration",
+    subtitle: "Home and away course-pick strategy league.",
+    image: "/league-media/pyp-preview.png",
+    ageNote: "18+ only",
+  },
+  pro: {
+    title: "Pro League Registration",
+    subtitle: "Top competitive divisions and advanced play.",
+    image: "/league-media/pro-preview.png",
+    ageNote: "18+ only",
+  },
+  doubles: {
+    title: "Doubles League Registration",
+    subtitle: "Team-based league play.",
+    image: "/league-media/doubles-preview.png",
+    ageNote: "18+ only",
+  },
+  cups: {
+    title: "Bracket / Cup Registration",
+    subtitle: "Spicy, Krys, and Champion cup tracking.",
+    image: "/league-media/match.png",
+    ageNote: "Admins assign tiers",
+  },
+  community: {
+    title: "Community Registration",
+    subtitle: "Records, leaderboards, scoreboards, and community events.",
+    image: "/league-media/stroke-preview.png",
+    ageNote: "All skill levels",
+  },
+};
 
 export default function RegisterPage() {
   const searchParams = useSearchParams();
+  const leagueKey = searchParams.get("league") || "";
+  const league = useMemo(() => LEAGUES[leagueKey], [leagueKey]);
 
-  const selectedLeague = searchParams.get("league");
-
-  const leagueInfo = useMemo(
-    () => leagues.find((l) => l.key === selectedLeague),
-    [selectedLeague]
-  );
-
-  const [sessionUser, setSessionUser] = useState<any>(null);
+  const [user, setUser] = useState<any>(null);
   const [screenName, setScreenName] = useState("");
   const [notes, setNotes] = useState("");
   const [status, setStatus] = useState("");
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      setSessionUser(data.user);
+      setUser(data.user);
     });
 
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSessionUser(session?.user ?? null);
-      }
-    );
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
 
     return () => {
       listener.subscription.unsubscribe();
@@ -52,42 +88,53 @@ export default function RegisterPage() {
   }, []);
 
   async function signInWithDiscord() {
-    const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(
-      window.location.pathname + window.location.search
-    )}`;
+    const nextPath = `/register?league=${leagueKey}`;
 
     await supabase.auth.signInWithOAuth({
       provider: "discord",
-      options: { redirectTo },
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(
+          nextPath
+        )}`,
+      },
     });
   }
 
   async function submitRegistration() {
-    if (!leagueInfo) return;
-
-    if (!screenName.trim()) {
-      setStatus("Please enter your player/screen name.");
+    if (!league) {
+      setStatus("Please choose a league first.");
       return;
     }
 
-    if (!sessionUser) {
+    if (!user) {
       setStatus("Please sign in with Discord first.");
       return;
     }
 
-    setStatus("Saving registration...");
+    if (!screenName.trim()) {
+      setStatus("Please enter your Walkabout screen name.");
+      return;
+    }
+
+    setStatus("Saving...");
 
     const discordName =
-      sessionUser.user_metadata?.full_name ||
-      sessionUser.user_metadata?.name ||
-      sessionUser.user_metadata?.preferred_username ||
-      sessionUser.email ||
+      user.user_metadata?.full_name ||
+      user.user_metadata?.name ||
+      user.user_metadata?.preferred_username ||
+      user.user_metadata?.user_name ||
+      user.email ||
       "Discord User";
+
+    const discordId =
+      user.user_metadata?.provider_id ||
+      user.user_metadata?.sub ||
+      user.id;
 
     const { error } = await supabase.from("player_waitlist").insert({
       screen_name: screenName.trim(),
-      league_type: leagueInfo.key,
-      discord_id: sessionUser.user_metadata?.provider_id || sessionUser.id,
+      league_type: leagueKey,
+      discord_id: discordId,
       discord_username: discordName,
       notes: notes.trim() || null,
       status: "pending",
@@ -98,69 +145,42 @@ export default function RegisterPage() {
       return;
     }
 
-    setStatus("Registration saved! You are on the waitlist.");
+    setStatus("Registration saved! You are on the admin waitlist.");
     setScreenName("");
     setNotes("");
   }
 
-  if (!leagueInfo) {
+  if (!league) {
     return (
-      <main
-        style={{
-          minHeight: "100vh",
-          background: "black",
-          color: "white",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: 24,
-        }}
-      >
-        <div>
-          <h1>League Not Found</h1>
-
-          <Link
-            href="/join"
-            style={{
-              color: "#a855f7",
-              fontWeight: "bold",
-              textDecoration: "none",
-            }}
-          >
-            ← Back to League Selection
-          </Link>
-        </div>
+      <main style={{ minHeight: "100vh", background: "black", color: "white", padding: 24 }}>
+        <h1>Choose a League First</h1>
+        <Link href="/join" style={{ color: "#a855f7", fontWeight: "bold" }}>
+          ← Back to League Selection
+        </Link>
       </main>
     );
   }
 
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        background: "black",
-        color: "white",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        padding: 24,
-      }}
-    >
-      <div
+    <main style={{ minHeight: "100vh", background: "black", color: "white" }}>
+      <img
+        src={league.image}
+        alt={league.title}
         style={{
           width: "100%",
-          maxWidth: 600,
-          background: "#111",
-          border: "1px solid #333",
-          borderRadius: 16,
-          padding: 24,
+          maxHeight: 620,
+          objectFit: "contain",
+          display: "block",
+          background: "black",
         }}
-      >
+      />
+
+      <section style={{ maxWidth: 720, padding: 24 }}>
         <Link
           href="/join"
           style={{
             display: "inline-block",
-            marginBottom: 20,
+            marginBottom: 18,
             color: "#a855f7",
             fontWeight: "bold",
             textDecoration: "none",
@@ -169,109 +189,100 @@ export default function RegisterPage() {
           ← Back to League Selection
         </Link>
 
-        <h1 style={{ marginBottom: 8 }}>
-          {leagueInfo.label} Registration
-        </h1>
+        <h1 style={{ marginBottom: 8 }}>{league.title}</h1>
 
-        <p style={{ color: "#aaa", marginBottom: 24 }}>
-          Sign in with Discord, then complete your registration.
-        </p>
+        <p style={{ color: "#ff4d4d", fontSize: 18 }}>{league.subtitle}</p>
 
-        {!sessionUser ? (
+        {!user ? (
           <button
             onClick={signInWithDiscord}
             style={{
-              width: "100%",
-              padding: 14,
+              marginTop: 24,
+              padding: "14px 22px",
               background: "#5865F2",
-              border: "none",
-              borderRadius: 10,
               color: "white",
+              border: "none",
+              borderRadius: 8,
+              fontSize: 18,
               fontWeight: "bold",
               cursor: "pointer",
-              marginBottom: 20,
             }}
           >
             Sign in with Discord
           </button>
         ) : (
-          <div
-            style={{
-              marginBottom: 20,
-              color: "#22c55e",
-              fontWeight: "bold",
-            }}
-          >
-            Discord signed in ✅
-          </div>
+          <>
+            <p style={{ marginTop: 24, fontSize: 18 }}>
+              Logged in as{" "}
+              <strong>
+                {user.user_metadata?.preferred_username ||
+                  user.user_metadata?.name ||
+                  user.email}
+              </strong>
+            </p>
+
+            <input
+              value={screenName}
+              onChange={(e) => setScreenName(e.target.value)}
+              placeholder="Walkabout screen name"
+              style={{
+                width: "100%",
+                maxWidth: 520,
+                padding: 14,
+                background: "#111",
+                color: "white",
+                border: "1px solid #444",
+                borderRadius: 8,
+                fontSize: 18,
+                marginTop: 14,
+                display: "block",
+              }}
+            />
+
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Optional notes"
+              style={{
+                width: "100%",
+                maxWidth: 520,
+                padding: 14,
+                background: "#111",
+                color: "white",
+                border: "1px solid #444",
+                borderRadius: 8,
+                fontSize: 16,
+                marginTop: 14,
+                minHeight: 90,
+                display: "block",
+              }}
+            />
+
+            <button
+              onClick={submitRegistration}
+              style={{
+                marginTop: 24,
+                padding: "14px 22px",
+                background: "#22c55e",
+                color: "white",
+                border: "none",
+                borderRadius: 8,
+                fontSize: 18,
+                fontWeight: "bold",
+                cursor: "pointer",
+              }}
+            >
+              Submit Registration
+            </button>
+          </>
         )}
 
-        <label style={{ display: "block", marginBottom: 8 }}>
-          Player / Screen Name
-        </label>
-
-        <input
-          value={screenName}
-          onChange={(e) => setScreenName(e.target.value)}
-          placeholder="Enter exact player name"
-          style={{
-            width: "100%",
-            padding: 12,
-            borderRadius: 10,
-            border: "1px solid #444",
-            background: "#222",
-            color: "white",
-            marginBottom: 20,
-          }}
-        />
-
-        <label style={{ display: "block", marginBottom: 8 }}>
-          Notes
-        </label>
-
-        <textarea
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          placeholder="Optional notes"
-          style={{
-            width: "100%",
-            padding: 12,
-            borderRadius: 10,
-            border: "1px solid #444",
-            background: "#222",
-            color: "white",
-            minHeight: 100,
-            marginBottom: 20,
-          }}
-        />
-
-        <button
-          onClick={submitRegistration}
-          style={{
-            width: "100%",
-            padding: 14,
-            background: "#a855f7",
-            border: "none",
-            borderRadius: 10,
-            color: "white",
-            fontWeight: "bold",
-            cursor: "pointer",
-          }}
-        >
-          Submit Registration
-        </button>
-
         {status && (
-          <p
-            style={{
-              marginTop: 20,
-              color: "#facc15",
-            }}
-          >
+          <p style={{ marginTop: 20, color: "#facc15", fontWeight: "bold" }}>
             {status}
           </p>
         )}
-      </div>
+      </section>
     </main>
   );
 }
