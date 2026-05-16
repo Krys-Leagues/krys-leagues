@@ -1,226 +1,194 @@
-"use client"
+"use client";
 
-import { Suspense, useEffect, useMemo, useState } from "react"
-import { useSearchParams, useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabase"
+import { useEffect, useMemo, useState } from "react";
+import { createClient } from "@supabase/supabase-js";
+import { useSearchParams, useRouter } from "next/navigation";
 
-type LeagueKey = "pyp" | "match" | "stroke" | "pro" | "doubles" | "community" | "cups"
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
-const LEAGUE_INFO: Record<LeagueKey, any> = {
-  pyp: { title: "Pick Your Poison", leagueType: "pyp", media: "/league-media/pyp.mov", type: "video" },
-  match: { title: "Match League", leagueType: "match", media: "/league-media/match.png", type: "image", headToHead: true },
-  stroke: { title: "Stroke League", leagueType: "stroke", media: "/league-media/stroke.mov", type: "video", headToHead: true },
-  pro: { title: "Pro League", leagueType: "pro", media: "/league-media/pro.mov", type: "video", headToHead: true },
-  doubles: { title: "Doubles League", leagueType: "doubles", media: "/league-media/doubles.png", type: "image", headToHead: true },
-  community: { title: "Community / Leaderboards", leagueType: "community", media: "/league-media/match.png", type: "image" },
-  cups: { title: "Bracket / Cup System", leagueType: "cups", media: "/league-media/match.png", type: "image" },
-}
+const leagues = [
+  { key: "stroke", label: "Stroke Play" },
+  { key: "match", label: "Match Play" },
+  { key: "pyp", label: "Pick Your Poison" },
+  { key: "pro", label: "Pro League" },
+  { key: "doubles", label: "Doubles" },
+];
 
-function RegisterContent() {
-  const params = useSearchParams()
-  const router = useRouter()
+export default function RegisterPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
-  const leagueParam = params.get("league") as LeagueKey | null
-  const leagueKey: LeagueKey = leagueParam && LEAGUE_INFO[leagueParam] ? leagueParam : "match"
-  const league = LEAGUE_INFO[leagueKey]
+  const selectedLeague = searchParams.get("league");
+  const leagueInfo = useMemo(
+    () => leagues.find((l) => l.key === selectedLeague),
+    [selectedLeague]
+  );
 
-  const [user, setUser] = useState<any>(null)
-  const [screenName, setScreenName] = useState("")
-  const [message, setMessage] = useState("")
-  const [loading, setLoading] = useState(true)
-  const [submitting, setSubmitting] = useState(false)
+  const [sessionUser, setSessionUser] = useState<any>(null);
+  const [screenName, setScreenName] = useState("");
+  const [notes, setNotes] = useState("");
+  const [status, setStatus] = useState("");
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setUser(data.session?.user || null)
-      setLoading(false)
-    })
+    supabase.auth.getUser().then(({ data }) => {
+      setSessionUser(data.user);
+    });
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user || null)
-    })
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSessionUser(session?.user ?? null);
+    });
 
-    return () => subscription.unsubscribe()
-  }, [])
+    return () => {
+      listener.subscription.unsubscribe();
+    };
+  }, []);
 
-  const discordInfo = useMemo(() => {
-    if (!user) return null
+  async function signInWithDiscord() {
+    const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(
+      window.location.pathname + window.location.search
+    )}`;
 
-    const identity = user.identities?.find((item: any) => item.provider === "discord")
-    const identityData = identity?.identity_data || {}
-    const meta = user.user_metadata || {}
-
-    return {
-      discord_id:
-        identityData.sub ||
-        identityData.provider_id ||
-        meta.sub ||
-        meta.provider_id ||
-        user.id,
-      discord_username:
-        identityData.full_name ||
-        identityData.name ||
-        identityData.preferred_username ||
-        meta.full_name ||
-        meta.name ||
-        meta.preferred_username ||
-        user.email ||
-        "Discord User",
-      discord_avatar:
-        identityData.avatar_url ||
-        identityData.picture ||
-        meta.avatar_url ||
-        meta.picture ||
-        null,
-    }
-  }, [user])
-
-  async function loginWithDiscord() {
-    setMessage("")
-
-    const { error } = await supabase.auth.signInWithOAuth({
+    await supabase.auth.signInWithOAuth({
       provider: "discord",
-      options: {
-        scopes: "identify email", // 🔥 FIX
-        redirectTo: `${window.location.origin}/auth/callback?league=${leagueKey}`,
-      },
-    })
-
-    if (error) {
-      setMessage("Login failed. Please try again or check your Discord email settings.")
-    }
+      options: { redirectTo },
+    });
   }
 
   async function submitRegistration() {
-    if (!discordInfo) {
-      setMessage("Please login with Discord first.")
-      return
-    }
-
+    if (!leagueInfo) return;
     if (!screenName.trim()) {
-      setMessage("Please enter your Walkabout screen name.")
-      return
+      setStatus("Please enter your player/screen name.");
+      return;
     }
 
-    setSubmitting(true)
-    setMessage("")
+    if (!sessionUser) {
+      setStatus("Please sign in with Discord first.");
+      return;
+    }
+
+    setStatus("Saving...");
+
+    const discordName =
+      sessionUser.user_metadata?.full_name ||
+      sessionUser.user_metadata?.name ||
+      sessionUser.user_metadata?.preferred_username ||
+      sessionUser.email ||
+      "Discord User";
 
     const { error } = await supabase.from("player_waitlist").insert({
       screen_name: screenName.trim(),
-      league_type: league.leagueType,
-      discord_id: discordInfo.discord_id,
-      discord_username: discordInfo.discord_username,
-      discord_avatar: discordInfo.discord_avatar,
-    })
-
-    setSubmitting(false)
+      league_type: leagueInfo.key,
+      discord_id: sessionUser.user_metadata?.provider_id || sessionUser.id,
+      discord_username: discordName,
+      notes: notes.trim() || null,
+      status: "pending",
+    });
 
     if (error) {
-      setMessage("Registration failed. Try again or contact an admin.")
-      return
+      setStatus(`Error: ${error.message}`);
+      return;
     }
 
-    router.push("/register/success") // ✅ redirect
+    setStatus("Registration saved! You are on the waitlist.");
+    setScreenName("");
+    setNotes("");
+  }
+
+  if (!selectedLeague) {
+    return (
+      <main className="min-h-screen bg-slate-950 text-white p-6 flex items-center justify-center">
+        <div className="w-full max-w-3xl">
+          <h1 className="text-4xl font-bold text-center mb-3">Krys’ Leagues Registration</h1>
+          <p className="text-center text-slate-300 mb-8">
+            Choose the league you want to join.
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {leagues.map((league) => (
+              <button
+                key={league.key}
+                onClick={() => router.push(`/register?league=${league.key}`)}
+                className="rounded-2xl bg-purple-700 hover:bg-purple-600 p-6 text-xl font-bold shadow-lg"
+              >
+                {league.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (!leagueInfo) {
+    return (
+      <main className="min-h-screen bg-slate-950 text-white p-6 flex items-center justify-center">
+        <div className="max-w-xl text-center">
+          <h1 className="text-3xl font-bold mb-4">League not found</h1>
+          <button
+            onClick={() => router.push("/register")}
+            className="rounded-xl bg-purple-700 px-5 py-3 font-bold"
+          >
+            Choose Another League
+          </button>
+        </div>
+      </main>
+    );
   }
 
   return (
-    <main style={{ background: "#000", color: "#fff", minHeight: "100vh", padding: 12 }}>
-      <div style={{ maxWidth: 900 }}>
-        {league.type === "video" ? (
-          <video src={league.media} autoPlay loop muted playsInline style={{ width: "100%" }} />
+    <main className="min-h-screen bg-slate-950 text-white p-6 flex items-center justify-center">
+      <div className="w-full max-w-xl rounded-2xl bg-slate-900 p-6 shadow-xl border border-purple-700">
+        <button
+          onClick={() => router.push("/register")}
+          className="mb-5 text-purple-300 hover:text-purple-200 font-bold"
+        >
+          ← Choose Another League
+        </button>
+
+        <h1 className="text-3xl font-bold mb-2">{leagueInfo.label} Registration</h1>
+        <p className="text-slate-300 mb-6">
+          Sign in with Discord, then enter your player name.
+        </p>
+
+        {!sessionUser ? (
+          <button
+            onClick={signInWithDiscord}
+            className="w-full rounded-xl bg-indigo-600 hover:bg-indigo-500 p-4 font-bold mb-5"
+          >
+            Sign in with Discord
+          </button>
         ) : (
-          <img src={league.media} alt={league.title} style={{ width: "100%" }} />
+          <p className="mb-5 text-green-300 font-bold">Discord signed in ✅</p>
         )}
 
-        <h1 style={{ fontSize: 18, marginTop: 16 }}>{league.title} Registration</h1>
+        <label className="block mb-2 font-bold">Player / Screen Name</label>
+        <input
+          value={screenName}
+          onChange={(e) => setScreenName(e.target.value)}
+          className="w-full rounded-xl p-3 text-black mb-4"
+          placeholder="Enter exact player name"
+        />
 
-        {league.headToHead && (
-          <p style={{ color: "#f87171" }}>
-            Head-to-head leagues are 18+.
-          </p>
-        )}
+        <label className="block mb-2 font-bold">Notes</label>
+        <textarea
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          className="w-full rounded-xl p-3 text-black mb-4"
+          placeholder="Optional notes"
+        />
 
-        {!league.headToHead && (
-          <p style={{ color: "#aaa" }}>
-            Open to all skill levels.
-          </p>
-        )}
+        <button
+          onClick={submitRegistration}
+          className="w-full rounded-xl bg-purple-700 hover:bg-purple-600 p-4 font-bold"
+        >
+          Submit Registration
+        </button>
 
-        {loading ? (
-          <p>Checking Discord login...</p>
-        ) : !user ? (
-          <>
-            <p>Login with Discord first, then enter your Walkabout screen name.</p>
-
-            <button
-              onClick={loginWithDiscord}
-              style={{
-                background: "#5865F2",
-                color: "white",
-                border: "none",
-                borderRadius: 7,
-                padding: "14px 18px",
-                fontSize: 16,
-                cursor: "pointer",
-              }}
-            >
-              Login with Discord
-            </button>
-          </>
-        ) : (
-          <div style={{ marginTop: 16 }}>
-            <p>
-              Logged in as <strong>{discordInfo?.discord_username}</strong>
-            </p>
-
-            <input
-              value={screenName}
-              onChange={(e) => setScreenName(e.target.value)}
-              placeholder="Walkabout screen name"
-              style={{
-                width: "100%",
-                maxWidth: 420,
-                padding: 12,
-                borderRadius: 7,
-                border: "1px solid #444",
-                background: "#111",
-                color: "white",
-                fontSize: 16,
-              }}
-            />
-
-            <br /><br />
-
-            <button
-              onClick={submitRegistration}
-              disabled={submitting}
-              style={{
-                background: submitting ? "#555" : "#22c55e",
-                color: "white",
-                border: "none",
-                borderRadius: 7,
-                padding: "12px 16px",
-                fontSize: 16,
-                cursor: submitting ? "not-allowed" : "pointer",
-              }}
-            >
-              {submitting ? "Submitting..." : "Submit Registration"}
-            </button>
-          </div>
-        )}
-
-        {message && <p style={{ marginTop: 16, color: "#f87171" }}>{message}</p>}
+        {status && <p className="mt-4 text-center text-yellow-300">{status}</p>}
       </div>
     </main>
-  )
-}
-
-export default function RegisterPage() {
-  return (
-    <Suspense fallback={<main style={{ background: "#000", color: "#fff", minHeight: "100vh" }}>Loading...</main>}>
-      <RegisterContent />
-    </Suspense>
-  )
+  );
 }
