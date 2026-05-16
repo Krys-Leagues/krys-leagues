@@ -77,7 +77,7 @@ function RegisterContent() {
       discord_id: discordId,
       discord_username: discordName,
       notes: notes.trim() || null,
-      status: "pending",
+      status: "waiting",
     });
 
     if (error) return setStatus(`Error: ${error.message}`);
