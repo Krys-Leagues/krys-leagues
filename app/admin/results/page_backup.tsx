@@ -8,15 +8,11 @@ type ScheduleMatch = {
   course: string | null
   player1: string
   player2: string
-  player1_id: string | null
-  player2_id: string | null
 }
 
 type ResultRow = {
   player1: string
   player2: string
-  player1_id: string | null
-  player2_id: string | null
 }
 
 const DIVISIONS: Record<string, string[]> = {
@@ -45,8 +41,6 @@ export default function ResultsPage() {
 
   const [player1, setPlayer1] = useState("")
   const [player2, setPlayer2] = useState("")
-  const [player1Id, setPlayer1Id] = useState<string | null>(null)
-  const [player2Id, setPlayer2Id] = useState<string | null>(null)
   const [course, setCourse] = useState("")
 
   const [score1, setScore1] = useState("")
@@ -80,8 +74,6 @@ export default function ResultsPage() {
     setSelectedMatchIndex("")
     setPlayer1("")
     setPlayer2("")
-    setPlayer1Id(null)
-    setPlayer2Id(null)
     setCourse("")
     setScore1("")
     setScore2("")
@@ -90,16 +82,6 @@ export default function ResultsPage() {
   }
 
   function sameMatch(a1: string, a2: string, b1: string, b2: string) {
-    return (a1 === b1 && a2 === b2) || (a1 === b2 && a2 === b1)
-  }
-
-  function sameMatchById(
-    a1: string | null,
-    a2: string | null,
-    b1: string | null,
-    b2: string | null
-  ) {
-    if (!a1 || !a2 || !b1 || !b2) return false
     return (a1 === b1 && a2 === b2) || (a1 === b2 && a2 === b1)
   }
 
@@ -115,7 +97,7 @@ export default function ResultsPage() {
 
     const { data: scheduleData, error: scheduleError } = await supabase
       .from("schedule")
-      .select("game, course, player1, player2, player1_id, player2_id")
+      .select("game, course, player1, player2")
       .eq("league_type", leagueType)
       .eq("division", division)
       .eq("season_number", seasonNumber)
@@ -123,7 +105,7 @@ export default function ResultsPage() {
 
     const { data: resultData, error: resultError } = await supabase
       .from("results")
-      .select("player1, player2, player1_id, player2_id")
+      .select("player1, player2")
       .eq("league_type", leagueType)
       .eq("division", division)
       .eq("season_number", seasonNumber)
@@ -144,23 +126,14 @@ export default function ResultsPage() {
     }
 
     const allMatches =
-      scheduleData?.filter(
-        (row: any) => row.player1 && row.player2 && row.player1_id && row.player2_id
-      ) || []
+      scheduleData?.filter((row: any) => row.player1 && row.player2) || []
 
     const scoredResults = (resultData || []) as ResultRow[]
 
     const unscoredMatches = allMatches.filter((match: ScheduleMatch) => {
-      return !scoredResults.some((result) => {
-        return (
-          sameMatchById(
-            match.player1_id,
-            match.player2_id,
-            result.player1_id,
-            result.player2_id
-          ) || sameMatch(match.player1, match.player2, result.player1, result.player2)
-        )
-      })
+      return !scoredResults.some((result) =>
+        sameMatch(match.player1, match.player2, result.player1, result.player2)
+      )
     })
 
     setScheduledMatches(unscoredMatches as ScheduleMatch[])
@@ -173,8 +146,6 @@ export default function ResultsPage() {
     if (indexValue === "") {
       setPlayer1("")
       setPlayer2("")
-      setPlayer1Id(null)
-      setPlayer2Id(null)
       setCourse("")
       return
     }
@@ -184,8 +155,6 @@ export default function ResultsPage() {
 
     setPlayer1(match.player1)
     setPlayer2(match.player2)
-    setPlayer1Id(match.player1_id)
-    setPlayer2Id(match.player2_id)
     setCourse(match.course || "")
   }
 
@@ -218,8 +187,8 @@ export default function ResultsPage() {
   async function handleSubmit() {
     const seasonNumber = Number(season)
 
-    if (!seasonNumber || !player1 || !player2 || !player1Id || !player2Id) {
-      alert("Pick a scheduled match first. Player IDs are required.")
+    if (!seasonNumber || !player1 || !player2) {
+      alert("Pick a scheduled match first")
       return
     }
 
@@ -275,7 +244,7 @@ export default function ResultsPage() {
 
     const { data: existingResults, error: duplicateError } = await supabase
       .from("results")
-      .select("player1, player2, player1_id, player2_id")
+      .select("player1, player2")
       .eq("league_type", leagueType)
       .eq("division", division)
       .eq("season_number", seasonNumber)
@@ -287,12 +256,9 @@ export default function ResultsPage() {
       return
     }
 
-    const alreadyEntered = (existingResults || []).some((result: ResultRow) => {
-      return (
-        sameMatchById(player1Id, player2Id, result.player1_id, result.player2_id) ||
-        sameMatch(player1, player2, result.player1, result.player2)
-      )
-    })
+    const alreadyEntered = (existingResults || []).some((result: ResultRow) =>
+      sameMatch(player1, player2, result.player1, result.player2)
+    )
 
     if (alreadyEntered) {
       alert("This result has already been entered.")
@@ -309,8 +275,6 @@ export default function ResultsPage() {
       course,
       player1,
       player2,
-      player1_id: player1Id,
-      player2_id: player2Id,
       result_type: "league_result",
       player1_score: score1 ? Number(score1) : null,
       player2_score: score2 ? Number(score2) : null,
