@@ -21,7 +21,7 @@ function CallbackHandler() {
         await supabase.auth.exchangeCodeForSession(code);
       }
 
-      router.replace("/join");
+      router.replace("/admin/command-center");
     }
 
     handleLogin();
