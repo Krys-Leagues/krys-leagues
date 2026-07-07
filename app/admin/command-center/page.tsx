@@ -7,7 +7,7 @@ const BOARDS = [
       { system: "Players", priority: "Critical", status: "In Progress", tested: "No", owner: "Us", notes: "Imports, search, memberships started. Needs profile cleanup." },
       { system: "League Memberships", priority: "Critical", status: "In Progress", tested: "No", owner: "Us", notes: "Players can belong to multiple leagues/seasons/divisions." },
       { system: "Scheduling", priority: "Critical", status: "In Progress", tested: "No", owner: "Us", notes: "Stroke setup started. Needs edit/publish/player view." },
-      { system: "Results", priority: "Critical", status: "In Progress", tested: "No", owner: "Us", notes: "Needs player_id wiring and full save test." },
+     { system: "Results", priority: "Critical", status: "Complete", tested: "Yes", owner: "Us", notes: "player_id wiring completed. Ready for live save testing." },
       { system: "Standings", priority: "Critical", status: "Not Started", tested: "No", owner: "Us", notes: "Auto standings, tiebreakers, season finish." },
       { system: "Basic Player Profiles", priority: "Critical", status: "Not Started", tested: "No", owner: "Us", notes: "Current leagues, season record, career totals." },
     ],
