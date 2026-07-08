@@ -202,12 +202,15 @@ const totalSeasons = new Set(
               <span>{careerStats.winPercent}</span>
             </div>
           </div>
-
           <p style={muted}>Player ID: {player.id}</p>
 
-          {player.discord_username && (
-            <p style={muted}>Discord: {player.discord_username}</p>
-          )}
+          <p style={muted}>
+            Discord: {player.discord_username || "Not linked"}
+          </p>
+
+          <p style={muted}>
+            Status: {status}
+          </p>
                   <div style={card}>
           <h2>Player Overview</h2>
 
