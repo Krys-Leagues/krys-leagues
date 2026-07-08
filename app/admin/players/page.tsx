@@ -186,6 +186,28 @@ export default function PlayersAdminPage() {
 
     setSavingLeague(true)
 
+    const { data: existingMemberships, error: checkError } = await supabase
+      .from("player_league_memberships")
+      .select("id")
+      .eq("player_id", leaguePlayer.id)
+      .eq("league_type", league)
+      .eq("season_number", CURRENT_SEASON)
+      .eq("division", division)
+
+    if (checkError) {
+      setSavingLeague(false)
+      alert(checkError.message)
+      return
+    }
+
+    if (existingMemberships && existingMemberships.length > 0) {
+      setSavingLeague(false)
+      alert(
+        `${leaguePlayer.screen_name} is already registered for ${division} in Season ${CURRENT_SEASON}.`
+      )
+      return
+    }
+
     const { error } = await supabase
       .from("player_league_memberships")
       .insert([
@@ -229,6 +251,28 @@ export default function PlayersAdminPage() {
     }
 
     setSavingTournament(true)
+
+    const { data: existingEntries, error: checkError } = await supabase
+      .from("player_tournament_entries")
+      .select("id")
+      .eq("player_id", tourneyPlayer.id)
+      .eq("tournament_type", tournamentType)
+      .eq("bracket", tournamentBracket)
+      .eq("status", "registered")
+
+    if (checkError) {
+      setSavingTournament(false)
+      alert(checkError.message)
+      return
+    }
+
+    if (existingEntries && existingEntries.length > 0) {
+      setSavingTournament(false)
+      alert(
+        `${tourneyPlayer.screen_name} is already registered for ${tournamentType} - ${tournamentBracket}.`
+      )
+      return
+    }
 
     const { error } = await supabase
       .from("player_tournament_entries")
