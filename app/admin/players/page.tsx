@@ -504,7 +504,22 @@ export default function PlayersAdminPage() {
 
             return (
               <tr key={p.id}>
-                <td style={playerTd}>{p.screen_name}</td>
+         <td style={playerTd}>
+  <button
+    onClick={() => router.push(`/admin/players/${p.id}`)}
+    style={{
+      background: "transparent",
+      border: "none",
+      color: "white",
+      fontSize: 18,
+      fontWeight: 800,
+      cursor: "pointer",
+      padding: 0,
+    }}
+  >
+    {p.screen_name}
+  </button>
+</td>
 
                 <td style={td}>
                   <span
