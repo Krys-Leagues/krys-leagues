@@ -208,6 +208,31 @@ const totalSeasons = new Set(
           {player.discord_username && (
             <p style={muted}>Discord: {player.discord_username}</p>
           )}
+                  <div style={card}>
+          <h2>Player Overview</h2>
+
+          <div style={quickStats}>
+            <div style={statBox}>
+              <strong>Memberships</strong>
+              <span>{memberships.length}</span>
+            </div>
+
+            <div style={statBox}>
+              <strong>Total Seasons</strong>
+              <span>{totalSeasons}</span>
+            </div>
+
+            <div style={statBox}>
+              <strong>Current League</strong>
+              <span>{currentMembership?.league_type || "-"}</span>
+            </div>
+
+            <div style={statBox}>
+              <strong>Current Division</strong>
+              <span>{currentMembership?.division || "-"}</span>
+            </div>
+          </div>
+        </div>
         </div>
 
         <div style={card}>
