@@ -175,8 +175,20 @@ export default function StrokeResultsPage() {
       alert(error.message)
       return
     }
-
     alert("Result saved ✔")
+
+    await fetch("/api/recalculate-standings", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        league_type: LEAGUE_TYPE,
+        division,
+        season_number: seasonNumber,
+      }),
+    })
+
     await loadScheduledMatches()
   }
 
