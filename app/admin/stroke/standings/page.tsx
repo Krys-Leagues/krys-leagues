@@ -61,6 +61,13 @@ export default function StrokeStandingsPage() {
   }
 
   async function loadStandings() {
+    const seasonNumber = Number(season)
+
+    if (!seasonNumber) {
+      alert("Invalid season")
+      return
+    }
+
     setLoading(true)
 
     const { data, error } = await supabase
@@ -68,7 +75,7 @@ export default function StrokeStandingsPage() {
       .select("player1, player2, player1_id, player2_id, player1_score, player2_score, winner, is_draw")
       .eq("league_type", "stroke")
       .eq("division", division)
-      .eq("season_number", Number(season))
+      .eq("season_number", seasonNumber)
 
     setLoading(false)
 
@@ -80,6 +87,8 @@ export default function StrokeStandingsPage() {
     const table = new Map<string, Standing>()
 
     ;((data || []) as ResultRow[]).forEach((row) => {
+      if (row.player1_score === null || row.player2_score === null) return
+
       ensurePlayer(table, row.player1, row.player1_id)
       ensurePlayer(table, row.player2, row.player2_id)
 
@@ -89,19 +98,25 @@ export default function StrokeStandingsPage() {
       p1.played += 1
       p2.played += 1
 
-      p1.strokes += Number(row.player1_score || 0)
-      p2.strokes += Number(row.player2_score || 0)
+      p1.strokes += Number(row.player1_score)
+      p2.strokes += Number(row.player2_score)
 
-      if (row.is_draw) {
+      if (row.is_draw || row.player1_score === row.player2_score) {
         p1.draws += 1
         p2.draws += 1
         p1.points += 1
         p2.points += 1
-      } else if (row.winner === row.player1) {
+        return
+      }
+
+      if (row.winner === row.player1 || row.player1_score < row.player2_score) {
         p1.wins += 1
         p2.losses += 1
         p1.points += 3
-      } else if (row.winner === row.player2) {
+        return
+      }
+
+      if (row.winner === row.player2 || row.player2_score < row.player1_score) {
         p2.wins += 1
         p1.losses += 1
         p2.points += 3
@@ -117,12 +132,12 @@ export default function StrokeStandingsPage() {
       )
     })
 
-    const ranked = sorted.map((row, index) => ({
-      ...row,
-      rank: index + 1,
-    }))
-
-    setStandings(ranked)
+    setStandings(
+      sorted.map((row, index) => ({
+        ...row,
+        rank: index + 1,
+      }))
+    )
   }
 
   async function saveStandings() {
@@ -133,24 +148,29 @@ export default function StrokeStandingsPage() {
       return
     }
 
-    const rows = standings
-      .filter((row) => row.player_id)
-      .map((row) => ({
-        player_id: row.player_id,
-        league_type: "stroke",
-        season_number: seasonNumber,
-        division,
-        points: row.points,
-        wins: row.wins,
-        losses: row.losses,
-        ties: row.draws,
-        strokes: row.strokes,
-        rank: row.rank,
-        updated_at: new Date().toISOString(),
-      }))
+    const missingIds = standings.filter((row) => !row.player_id)
+
+    if (missingIds.length > 0) {
+      alert("Some standings are missing player IDs. Fix player wiring before saving.")
+      return
+    }
+
+    const rows = standings.map((row) => ({
+      player_id: row.player_id,
+      league_type: "stroke",
+      season_number: seasonNumber,
+      division,
+      points: row.points,
+      wins: row.wins,
+      losses: row.losses,
+      ties: row.draws,
+      strokes: row.strokes,
+      rank: row.rank,
+      updated_at: new Date().toISOString(),
+    }))
 
     if (rows.length === 0) {
-      alert("No standings with player IDs to save")
+      alert("No standings to save")
       return
     }
 
@@ -159,7 +179,7 @@ export default function StrokeStandingsPage() {
     const { error } = await supabase
       .from("season_standings")
       .upsert(rows, {
-        onConflict: "player_id,league_type,season_number",
+        onConflict: "player_id,league_type,season_number,division",
       })
 
     setSaving(false)
