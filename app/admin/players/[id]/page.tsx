@@ -177,21 +177,25 @@ const totalSeasons = new Set(
               <span>{status}</span>
             </div>
 
-            <div style={statBox}>
-              <strong>Leagues</strong>
-              <span>{memberships.length}</span>
-            </div>
+                     <div style={statBox}>
+            <strong>Leagues</strong>
+            <span>{memberships.length}</span>
+          </div>
 
-            <div style={statBox}>
-              <strong>Trophies</strong>
-              <span>{trophies.length}</span>
-            </div>
+          <div style={statBox}>
+            <strong>Seasons</strong>
+            <span>{totalSeasons}</span>
+          </div>
 
-            <div style={statBox}>
-              <strong>Matches</strong>
-              <span>{careerStats.matchesPlayed}</span>
-            </div>
+          <div style={statBox}>
+            <strong>Trophies</strong>
+            <span>{trophies.length}</span>
+          </div>
 
+          <div style={statBox}>
+            <strong>Matches</strong>
+            <span>{careerStats.matchesPlayed}</span>
+          </div>
             <div style={statBox}>
               <strong>Wins</strong>
               <span>{careerStats.wins}</span>
