@@ -8,7 +8,7 @@ const BOARDS = [
       { system: "League Memberships", priority: "Critical", status: "In Progress", tested: "Partial", owner: "Us", notes: "Players can belong to multiple leagues/seasons/divisions. Duplicate protection complete. Indexes complete." },
       { system: "Scheduling", priority: "Critical", status: "In Progress", tested: "Partial", owner: "Us", notes: "Stroke setup started. Schedule indexes complete. Needs edit/publish/player view." },
       { system: "Results", priority: "Critical", status: "Complete", tested: "Yes", owner: "Us", notes: "player_id wiring completed. Unique result protection and lookup indexes complete." },
-      { system: "Standings", priority: "Critical", status: "In Progress", tested: "Partial", owner: "Us", notes: "season_standings table, unique protection, and indexes complete. Standings engine next." },
+      { system: "Standings", priority: "Critical", status: "In Progress", tested: "Partial", owner: "Us", notes: "Auto recalculation API complete. Results page now triggers standings updates. Viewer cleanup later." },
       { system: "Seasons", priority: "Critical", status: "Foundation Complete", tested: "Partial", owner: "Us", notes: "seasons table complete with dates, lock flag, unique season protection, and lookup indexes." },
       { system: "Basic Player Profiles", priority: "Critical", status: "Not Started", tested: "No", owner: "Us", notes: "Current leagues, season record, career totals." },
     ],
@@ -63,7 +63,7 @@ export default function CommandCenterPage() {
 
           <div style={missionCard}>
             <h2 style={cardTitle}>Current Box</h2>
-            <p style={mission}>Foundation Audit complete → Standings engine next</p>
+            <p style={mission}>Auto standings recalculation complete → Player profiles next</p>
           </div>
         </section>
 
