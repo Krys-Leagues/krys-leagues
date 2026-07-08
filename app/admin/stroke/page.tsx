@@ -17,9 +17,9 @@ export default function StrokeAdminPage() {
           <span>Enter or review Stroke Play results.</span>
         </Link>
 
-        <Link href="/admin/stroke/active-games" style={card}>
-          <strong>Active Games</strong>
-          <span>Track player progress and submissions.</span>
+               <Link href="/admin/stroke/standings" style={card}>
+          <strong>Standings</strong>
+          <span>View and save live Stroke Play standings.</span>
         </Link>
 
         <Link href="/admin/players" style={card}>
