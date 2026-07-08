@@ -8,6 +8,8 @@ type Player = {
   id: string
   screen_name: string
   discord_username: string | null
+  status: string | null
+  active: boolean | null
 }
 
 type Trophy = {
@@ -80,6 +82,10 @@ export default function PlayerProfilePage() {
               Discord: {player.discord_username}
             </p>
           )}
+
+          <p style={{ color: "#aaa" }}>
+            Status: {player.status || (player.active === false ? "inactive" : "active")}
+          </p>
         </div>
 
         {/* TROPHIES */}
