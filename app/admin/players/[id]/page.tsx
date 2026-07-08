@@ -74,16 +74,20 @@ export default function PlayerProfilePage() {
         </div>
 
         {/* PLAYER INFO */}
-        <div style={card}>
-          <h1 style={{ fontSize: 36 }}>{player.screen_name}</h1>
+                <div style={card}>
+          <h1 style={{ fontSize: 36, marginBottom: 8 }}>{player.screen_name}</h1>
+
+          <p style={{ color: "#aaa", marginBottom: 6 }}>
+            Player ID: {player.id}
+          </p>
 
           {player.discord_username && (
-            <p style={{ color: "#aaa" }}>
+            <p style={{ color: "#aaa", marginBottom: 6 }}>
               Discord: {player.discord_username}
             </p>
           )}
 
-          <p style={{ color: "#aaa" }}>
+          <p style={{ color: "#aaa", marginBottom: 0 }}>
             Status: {player.status || (player.active === false ? "inactive" : "active")}
           </p>
         </div>
@@ -139,7 +143,7 @@ const page: React.CSSProperties = {
 
 const container: React.CSSProperties = {
   width: "100%",
-  maxWidth: 1100,
+  maxWidth: 1200,
   padding: 30,
 }
 
