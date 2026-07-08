@@ -426,6 +426,22 @@ export default function PlayersAdminPage() {
 
   return (
     <main style={page}>
+      <div style={{ marginBottom: 20 }}>
+        <button
+          onClick={() => router.push("/admin")}
+          style={{
+            background: "#333",
+            border: "none",
+            padding: "10px 16px",
+            borderRadius: 8,
+            color: "white",
+            cursor: "pointer",
+          }}
+        >
+          ← Back to Admin
+        </button>
+      </div>
+
       <div style={topBar}>
         <div>
           <h1 style={title}>Global Players</h1>
