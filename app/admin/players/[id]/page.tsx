@@ -148,7 +148,13 @@ export default function PlayerProfilePage() {
   }
 
   const status = player.status || (player.active === false ? "inactive" : "active")
+const currentMembership = memberships[0]
 
+const totalSeasons = new Set(
+  memberships
+    .map((m) => m.season_number)
+    .filter((s) => s !== null)
+).size
   return (
     <main style={page}>
       <div style={container}>
@@ -234,7 +240,31 @@ export default function PlayerProfilePage() {
             </div>
           </div>
         </div>
+        <div style={card}>
+          <h2>Career Summary</h2>
 
+          <div style={quickStats}>
+            <div style={statBox}>
+              <strong>Total Seasons</strong>
+              <span>{totalSeasons}</span>
+            </div>
+
+            <div style={statBox}>
+              <strong>Current League</strong>
+              <span>{currentMembership?.league_type || "-"}</span>
+            </div>
+
+            <div style={statBox}>
+              <strong>Current Division</strong>
+              <span>{currentMembership?.division || "-"}</span>
+            </div>
+
+            <div style={statBox}>
+              <strong>Status</strong>
+              <span>{status}</span>
+            </div>
+          </div>
+        </div>
         <div style={card}>
           <h2>League Memberships ({memberships.length})</h2>
 
