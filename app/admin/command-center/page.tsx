@@ -5,10 +5,10 @@ const BOARDS = [
     title: "1.0 Foundation",
     items: [
       { system: "Players", priority: "Critical", status: "In Progress", tested: "No", owner: "Us", notes: "Imports, search, memberships started. Needs profile cleanup." },
-      { system: "League Memberships", priority: "Critical", status: "In Progress", tested: "No", owner: "Us", notes: "Players can belong to multiple leagues/seasons/divisions." },
+      { system: "League Memberships", priority: "Critical", status: "In Progress", tested: "Partial", owner: "Us", notes: "Players can belong to multiple leagues/seasons/divisions. Duplicate protection complete." },
       { system: "Scheduling", priority: "Critical", status: "In Progress", tested: "No", owner: "Us", notes: "Stroke setup started. Needs edit/publish/player view." },
-     { system: "Results", priority: "Critical", status: "Complete", tested: "Yes", owner: "Us", notes: "player_id wiring completed. Ready for live save testing." },
-      { system: "Standings", priority: "Critical", status: "Not Started", tested: "No", owner: "Us", notes: "Auto standings, tiebreakers, season finish." },
+      { system: "Results", priority: "Critical", status: "Complete", tested: "Yes", owner: "Us", notes: "player_id wiring completed. Ready for live save testing." },
+      { system: "Standings", priority: "Critical", status: "In Progress", tested: "Partial", owner: "Us", notes: "Database foundation complete. Standings engine next." },
       { system: "Basic Player Profiles", priority: "Critical", status: "Not Started", tested: "No", owner: "Us", notes: "Current leagues, season record, career totals." },
     ],
   },
@@ -16,7 +16,7 @@ const BOARDS = [
     title: "1.1 Growth",
     items: [
       { system: "KrysBot", priority: "High", status: "Planned", tested: "No", owner: "Later", notes: "Replace webhooks. Posting, roles, threads, cleanup." },
-      { system: "Tournament System", priority: "High", status: "Planned", tested: "No", owner: "Later", notes: "Custom brackets, rules, scoring, past tournament pages." },
+      { system: "Tournament System", priority: "High", status: "Planned", tested: "Partial", owner: "Later", notes: "Duplicate entry protection complete. Brackets, rules, scoring, past tournament pages later." },
       { system: "Leaderboards", priority: "High", status: "Planned", tested: "No", owner: "Later", notes: "Stroke, race, solo, map, KWT, pro, bank shot later." },
       { system: "Team Profiles", priority: "High", status: "Planned", tested: "No", owner: "Later", notes: "Team history, team trophies, overlapping players allowed." },
       { system: "Trophy Cases", priority: "High", status: "Planned", tested: "No", owner: "Later", notes: "Player and team visual trophy galleries." },
