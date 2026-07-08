@@ -30,6 +30,22 @@ type Trophy = {
   image_url: string | null
 }
 
+type ResultRow = {
+  id: string
+  player1_id: string | null
+  player2_id: string | null
+  winner: string | null
+  is_draw: boolean | null
+}
+
+type CareerStats = {
+  matchesPlayed: number
+  wins: number
+  losses: number
+  draws: number
+  winPercent: string
+}
+
 export default function PlayerProfilePage() {
   const params = useParams()
   const router = useRouter()
@@ -38,6 +54,13 @@ export default function PlayerProfilePage() {
   const [player, setPlayer] = useState<Player | null>(null)
   const [memberships, setMemberships] = useState<Membership[]>([])
   const [trophies, setTrophies] = useState<Trophy[]>([])
+  const [careerStats, setCareerStats] = useState<CareerStats>({
+    matchesPlayed: 0,
+    wins: 0,
+    losses: 0,
+    draws: 0,
+    winPercent: "0%",
+  })
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -72,10 +95,38 @@ export default function PlayerProfilePage() {
       .order("created_at", { ascending: false })
 
     setTrophies(trophyData || [])
+
+    const { data: resultData } = await supabase
+      .from("results")
+      .select("id, player1_id, player2_id, winner, is_draw")
+      .or(`player1_id.eq.${playerId},player2_id.eq.${playerId}`)
+
+    const results = (resultData || []) as ResultRow[]
+
+    const matchesPlayed = results.length
+    const draws = results.filter((result) => result.is_draw).length
+
+    const wins = results.filter((result) => {
+      if (!playerData?.screen_name) return false
+      return result.winner === playerData.screen_name
+    }).length
+
+    const losses = matchesPlayed - wins - draws
+
+    const winPercent =
+      matchesPlayed > 0 ? `${Math.round((wins / matchesPlayed) * 100)}%` : "0%"
+
+    setCareerStats({
+      matchesPlayed,
+      wins,
+      losses,
+      draws,
+      winPercent,
+    })
+
     setLoading(false)
   }
-
-  if (loading) {
+    if (loading) {
     return <p style={{ color: "white", padding: 20 }}>Loading player...</p>
   }
 
@@ -129,6 +180,21 @@ export default function PlayerProfilePage() {
               <strong>Trophies</strong>
               <span>{trophies.length}</span>
             </div>
+
+            <div style={statBox}>
+              <strong>Matches</strong>
+              <span>{careerStats.matchesPlayed}</span>
+            </div>
+
+            <div style={statBox}>
+              <strong>Wins</strong>
+              <span>{careerStats.wins}</span>
+            </div>
+
+            <div style={statBox}>
+              <strong>Win %</strong>
+              <span>{careerStats.winPercent}</span>
+            </div>
           </div>
 
           <p style={muted}>Player ID: {player.id}</p>
@@ -136,6 +202,37 @@ export default function PlayerProfilePage() {
           {player.discord_username && (
             <p style={muted}>Discord: {player.discord_username}</p>
           )}
+        </div>
+
+        <div style={card}>
+          <h2>Career Stats</h2>
+
+          <div style={quickStats}>
+            <div style={statBox}>
+              <strong>Matches Played</strong>
+              <span>{careerStats.matchesPlayed}</span>
+            </div>
+
+            <div style={statBox}>
+              <strong>Wins</strong>
+              <span>{careerStats.wins}</span>
+            </div>
+
+            <div style={statBox}>
+              <strong>Losses</strong>
+              <span>{careerStats.losses}</span>
+            </div>
+
+            <div style={statBox}>
+              <strong>Draws</strong>
+              <span>{careerStats.draws}</span>
+            </div>
+
+            <div style={statBox}>
+              <strong>Win %</strong>
+              <span>{careerStats.winPercent}</span>
+            </div>
+          </div>
         </div>
 
         <div style={card}>
@@ -158,8 +255,7 @@ export default function PlayerProfilePage() {
 
         <div style={card}>
           <h2>🏆 Trophies ({trophies.length})</h2>
-
-          {trophies.length === 0 ? (
+                    {trophies.length === 0 ? (
             <p style={emptyText}>No trophies yet.</p>
           ) : (
             <div style={grid}>
