@@ -17,6 +17,21 @@ type ResultRow = {
   is_draw: boolean | null
 }
 
+type SeasonStandingRow = {
+  player_id: string
+  points: number
+  wins: number
+  losses: number
+  ties: number
+  strokes: number
+  rank: number
+}
+
+type PlayerRow = {
+  id: string
+  screen_name: string
+}
+
 type Standing = {
   player: string
   player_id: string | null
@@ -42,7 +57,71 @@ export default function StrokeStandingsPage() {
     loadStandings()
   }, [division, season])
 
-  function ensurePlayer(map: Map<string, Standing>, player: string, playerId: string | null) {
+  async function loadStandings() {
+    const seasonNumber = Number(season)
+
+    if (!seasonNumber) {
+      alert("Invalid season")
+      return
+    }
+
+    setLoading(true)
+
+    const { data, error } = await supabase
+      .from("season_standings")
+      .select("player_id, points, wins, losses, ties, strokes, rank")
+      .eq("league_type", "stroke")
+      .eq("division", division)
+      .eq("season_number", seasonNumber)
+      .order("rank", { ascending: true })
+
+    if (error) {
+      setLoading(false)
+      alert(error.message)
+      return
+    }
+
+    const savedRows = (data || []) as SeasonStandingRow[]
+    const playerIds = savedRows.map((row) => row.player_id).filter(Boolean)
+
+    let playerMap = new Map<string, string>()
+
+    if (playerIds.length > 0) {
+      const { data: playerData, error: playerError } = await supabase
+        .from("players")
+        .select("id, screen_name")
+        .in("id", playerIds)
+
+      if (playerError) {
+        setLoading(false)
+        alert(playerError.message)
+        return
+      }
+
+      playerMap = new Map(
+        ((playerData || []) as PlayerRow[]).map((player) => [
+          player.id,
+          player.screen_name,
+        ])
+      )
+    }
+
+    const rows = savedRows.map((row) => ({
+      player: playerMap.get(row.player_id) || "Unknown Player",
+      player_id: row.player_id,
+      played: Number(row.wins || 0) + Number(row.losses || 0) + Number(row.ties || 0),
+      wins: Number(row.wins || 0),
+      draws: Number(row.ties || 0),
+      losses: Number(row.losses || 0),
+      points: Number(row.points || 0),
+      strokes: Number(row.strokes || 0),
+      rank: Number(row.rank || 0),
+    }))
+
+    setStandings(rows)
+    setLoading(false)
+  }
+    function ensurePlayer(map: Map<string, Standing>, player: string, playerId: string | null) {
     const key = playerId || player
 
     if (!map.has(key)) {
@@ -60,7 +139,7 @@ export default function StrokeStandingsPage() {
     }
   }
 
-  async function loadStandings() {
+  async function recalculateAndSaveStandings() {
     const seasonNumber = Number(season)
 
     if (!seasonNumber) {
@@ -68,7 +147,7 @@ export default function StrokeStandingsPage() {
       return
     }
 
-    setLoading(true)
+    setSaving(true)
 
     const { data, error } = await supabase
       .from("results")
@@ -77,9 +156,8 @@ export default function StrokeStandingsPage() {
       .eq("division", division)
       .eq("season_number", seasonNumber)
 
-    setLoading(false)
-
     if (error) {
+      setSaving(false)
       alert(error.message)
       return
     }
@@ -132,30 +210,20 @@ export default function StrokeStandingsPage() {
       )
     })
 
-    setStandings(
-      sorted.map((row, index) => ({
-        ...row,
-        rank: index + 1,
-      }))
-    )
-  }
+    const ranked = sorted.map((row, index) => ({
+      ...row,
+      rank: index + 1,
+    }))
 
-  async function saveStandings() {
-    const seasonNumber = Number(season)
-
-    if (!seasonNumber) {
-      alert("Invalid season")
-      return
-    }
-
-    const missingIds = standings.filter((row) => !row.player_id)
+    const missingIds = ranked.filter((row) => !row.player_id)
 
     if (missingIds.length > 0) {
+      setSaving(false)
       alert("Some standings are missing player IDs. Fix player wiring before saving.")
       return
     }
 
-    const rows = standings.map((row) => ({
+    const rows = ranked.map((row) => ({
       player_id: row.player_id,
       league_type: "stroke",
       season_number: seasonNumber,
@@ -170,29 +238,29 @@ export default function StrokeStandingsPage() {
     }))
 
     if (rows.length === 0) {
-      alert("No standings to save")
+      setSaving(false)
+      alert("No completed results found to calculate standings.")
       return
     }
 
-    setSaving(true)
-
-    const { error } = await supabase
+    const { error: saveError } = await supabase
       .from("season_standings")
       .upsert(rows, {
         onConflict: "player_id,league_type,season_number,division",
       })
 
-    setSaving(false)
-
-    if (error) {
-      alert(error.message)
+    if (saveError) {
+      setSaving(false)
+      alert(saveError.message)
       return
     }
 
-    alert("Stroke standings saved ✔")
-  }
+    setStandings(ranked)
+    setSaving(false)
 
-  return (
+    alert("Stroke standings recalculated and saved ✔")
+  }
+    return (
     <main style={page}>
       <div style={container}>
         <div style={topBar}>
@@ -200,12 +268,16 @@ export default function StrokeStandingsPage() {
             ← Back to Stroke
           </button>
 
-          <button onClick={saveStandings} disabled={saving || standings.length === 0} style={saveButton}>
-            {saving ? "Saving..." : "Save Standings"}
+          <button onClick={recalculateAndSaveStandings} disabled={saving} style={saveButton}>
+            {saving ? "Recalculating..." : "Recalculate + Save"}
           </button>
         </div>
 
         <h1 style={title}>Stroke Standings</h1>
+
+        <p style={subtitle}>
+          This page reads saved standings from season_standings. Use Recalculate + Save after results are entered.
+        </p>
 
         <div style={controls}>
           <select value={division} onChange={(e) => setDivision(e.target.value)} style={input}>
@@ -248,6 +320,14 @@ export default function StrokeStandingsPage() {
                 <td style={td}>{row.strokes}</td>
               </tr>
             ))}
+
+            {standings.length === 0 && (
+              <tr>
+                <td style={td} colSpan={8}>
+                  No saved standings found for this division and season.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
@@ -277,6 +357,12 @@ const topBar: React.CSSProperties = {
 const title: React.CSSProperties = {
   fontSize: 38,
   marginTop: 24,
+  marginBottom: 8,
+}
+
+const subtitle: React.CSSProperties = {
+  color: "#aaa",
+  marginBottom: 20,
 }
 
 const controls: React.CSSProperties = {
