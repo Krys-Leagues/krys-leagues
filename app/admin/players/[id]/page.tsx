@@ -12,6 +12,13 @@ type Player = {
   active: boolean | null
 }
 
+type Membership = {
+  id: string
+  league_type: string | null
+  season_number: number | null
+  division: string | null
+}
+
 type Trophy = {
   id: string
   trophy_title: string | null
@@ -24,10 +31,12 @@ type Trophy = {
 }
 
 export default function PlayerProfilePage() {
-  const { id } = useParams()
+  const params = useParams()
   const router = useRouter()
+  const playerId = Array.isArray(params.id) ? params.id[0] : params.id
 
   const [player, setPlayer] = useState<Player | null>(null)
+  const [memberships, setMemberships] = useState<Membership[]>([])
   const [trophies, setTrophies] = useState<Trophy[]>([])
 
   useEffect(() => {
@@ -35,20 +44,28 @@ export default function PlayerProfilePage() {
   }, [])
 
   async function loadData() {
-    // load player
+    if (!playerId) return
+
     const { data: playerData } = await supabase
       .from("players")
-      .select("*")
-      .eq("id", id)
+      .select("id, screen_name, discord_username, status, active")
+      .eq("id", playerId)
       .single()
 
     setPlayer(playerData)
 
-    // load trophies
+    const { data: membershipData } = await supabase
+      .from("player_league_memberships")
+      .select("id, league_type, season_number, division")
+      .eq("player_id", playerId)
+      .order("season_number", { ascending: false })
+
+    setMemberships(membershipData || [])
+
     const { data: trophyData } = await supabase
       .from("player_trophies")
       .select("*")
-      .eq("player_id", id)
+      .eq("player_id", playerId)
       .order("created_at", { ascending: false })
 
     setTrophies(trophyData || [])
@@ -58,11 +75,10 @@ export default function PlayerProfilePage() {
     return <p style={{ color: "white", padding: 20 }}>Loading player...</p>
   }
 
-  return (
+  const status = player.status || (player.active === false ? "inactive" : "active")
+    return (
     <main style={page}>
       <div style={container}>
-
-        {/* NAV */}
         <div style={topBar}>
           <button onClick={() => router.push("/admin/players")} style={backButton}>
             ← Players
@@ -73,31 +89,56 @@ export default function PlayerProfilePage() {
           </button>
         </div>
 
-        {/* PLAYER INFO */}
-                <div style={card}>
-          <h1 style={{ fontSize: 36, marginBottom: 8 }}>{player.screen_name}</h1>
+        <div style={card}>
+          <h1 style={playerName}>{player.screen_name}</h1>
 
-          <p style={{ color: "#aaa", marginBottom: 6 }}>
-            Player ID: {player.id}
-          </p>
+          <div style={quickStats}>
+            <div style={statBox}>
+              <strong>Status</strong>
+              <span>{status}</span>
+            </div>
+
+            <div style={statBox}>
+              <strong>Leagues</strong>
+              <span>{memberships.length}</span>
+            </div>
+
+            <div style={statBox}>
+              <strong>Trophies</strong>
+              <span>{trophies.length}</span>
+            </div>
+          </div>
+
+          <p style={muted}>Player ID: {player.id}</p>
 
           {player.discord_username && (
-            <p style={{ color: "#aaa", marginBottom: 6 }}>
-              Discord: {player.discord_username}
-            </p>
+            <p style={muted}>Discord: {player.discord_username}</p>
           )}
-
-          <p style={{ color: "#aaa", marginBottom: 0 }}>
-            Status: {player.status || (player.active === false ? "inactive" : "active")}
-          </p>
         </div>
 
-        {/* TROPHIES */}
+        <div style={card}>
+          <h2>League Memberships ({memberships.length})</h2>
+
+          {memberships.length === 0 ? (
+            <p style={emptyText}>No league memberships yet.</p>
+          ) : (
+            <div style={grid}>
+              {memberships.map((membership) => (
+                <div key={membership.id} style={miniCard}>
+                  <h3>{membership.league_type || "League"}</h3>
+                  <p>{membership.division || "No division"}</p>
+                  <p style={muted}>Season {membership.season_number || "?"}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         <div style={card}>
           <h2>🏆 Trophies ({trophies.length})</h2>
 
           {trophies.length === 0 ? (
-            <p style={{ color: "#888" }}>No trophies yet.</p>
+            <p style={emptyText}>No trophies yet.</p>
           ) : (
             <div style={grid}>
               {trophies.map((t) => (
@@ -107,7 +148,7 @@ export default function PlayerProfilePage() {
                   <p>{t.event_name}</p>
                   <p>{t.division}</p>
 
-                  <p style={{ color: "#aaa" }}>
+                  <p style={muted}>
                     {[t.season, t.week].filter(Boolean).join(" / ")}
                   </p>
 
@@ -130,9 +171,6 @@ export default function PlayerProfilePage() {
     </main>
   )
 }
-
-/* styles */
-
 const page: React.CSSProperties = {
   minHeight: "100vh",
   background: "black",
@@ -180,10 +218,48 @@ const card: React.CSSProperties = {
   marginBottom: 20,
 }
 
+const playerName: React.CSSProperties = {
+  fontSize: 36,
+  marginBottom: 14,
+}
+
+const quickStats: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+  gap: 12,
+  marginBottom: 16,
+}
+
+const statBox: React.CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+  gap: 6,
+  background: "#111",
+  border: "1px solid #333",
+  borderRadius: 12,
+  padding: 14,
+}
+
+const muted: React.CSSProperties = {
+  color: "#aaa",
+  margin: "6px 0",
+}
+
+const emptyText: React.CSSProperties = {
+  color: "#888",
+}
+
 const grid: React.CSSProperties = {
   display: "grid",
   gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
   gap: 16,
+}
+
+const miniCard: React.CSSProperties = {
+  background: "#111",
+  border: "1px solid #444",
+  borderRadius: 12,
+  padding: 14,
 }
 
 const trophyCard: React.CSSProperties = {
