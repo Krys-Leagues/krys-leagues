@@ -38,6 +38,7 @@ export default function PlayerProfilePage() {
   const [player, setPlayer] = useState<Player | null>(null)
   const [memberships, setMemberships] = useState<Membership[]>([])
   const [trophies, setTrophies] = useState<Trophy[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     loadData()
@@ -45,6 +46,8 @@ export default function PlayerProfilePage() {
 
   async function loadData() {
     if (!playerId) return
+
+    setLoading(true)
 
     const { data: playerData } = await supabase
       .from("players")
@@ -69,14 +72,33 @@ export default function PlayerProfilePage() {
       .order("created_at", { ascending: false })
 
     setTrophies(trophyData || [])
+    setLoading(false)
   }
 
-  if (!player) {
+  if (loading) {
     return <p style={{ color: "white", padding: 20 }}>Loading player...</p>
   }
 
-  const status = player.status || (player.active === false ? "inactive" : "active")
+  if (!player) {
     return (
+      <main style={page}>
+        <div style={container}>
+          <button onClick={() => router.push("/admin/players")} style={backButton}>
+            ← Players
+          </button>
+
+          <div style={card}>
+            <h1>Player not found</h1>
+            <p style={muted}>This player profile could not be loaded.</p>
+          </div>
+        </div>
+      </main>
+    )
+  }
+
+  const status = player.status || (player.active === false ? "inactive" : "active")
+
+  return (
     <main style={page}>
       <div style={container}>
         <div style={topBar}>
@@ -145,8 +167,8 @@ export default function PlayerProfilePage() {
                 <div key={t.id} style={trophyCard}>
                   <h3>{t.trophy_title || t.placement || "Trophy"}</h3>
 
-                  <p>{t.event_name}</p>
-                  <p>{t.division}</p>
+                  <p>{t.event_name || "Event not listed"}</p>
+                  <p>{t.division || "Division not listed"}</p>
 
                   <p style={muted}>
                     {[t.season, t.week].filter(Boolean).join(" / ")}
@@ -155,6 +177,7 @@ export default function PlayerProfilePage() {
                   {t.image_url && (
                     <img
                       src={t.image_url}
+                      alt={t.trophy_title || "Player trophy"}
                       style={{
                         width: "100%",
                         borderRadius: 10,
@@ -171,6 +194,7 @@ export default function PlayerProfilePage() {
     </main>
   )
 }
+
 const page: React.CSSProperties = {
   minHeight: "100vh",
   background: "black",
