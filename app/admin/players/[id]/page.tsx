@@ -242,36 +242,7 @@ const totalSeasons = new Set(
         </div>
         </div>
 
-        <div style={card}>
-          <h2>Career Stats</h2>
-
-          <div style={quickStats}>
-            <div style={statBox}>
-              <strong>Matches Played</strong>
-              <span>{careerStats.matchesPlayed}</span>
-            </div>
-
-            <div style={statBox}>
-              <strong>Wins</strong>
-              <span>{careerStats.wins}</span>
-            </div>
-
-            <div style={statBox}>
-              <strong>Losses</strong>
-              <span>{careerStats.losses}</span>
-            </div>
-
-            <div style={statBox}>
-              <strong>Draws</strong>
-              <span>{careerStats.draws}</span>
-            </div>
-
-            <div style={statBox}>
-              <strong>Win %</strong>
-              <span>{careerStats.winPercent}</span>
-            </div>
-          </div>
-        </div>
+       
         <div style={card}>
           <h2>Career Summary</h2>
 
