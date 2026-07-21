@@ -174,7 +174,9 @@ export default function HomePage() {
             <Link href="/players" style={button}>
               Player Profiles
             </Link>
-
+<Link href="/kwt" style={button}>
+  KWT
+</Link>
             <Link href="/records" style={button}>
               League Records
             </Link>
