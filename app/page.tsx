@@ -18,22 +18,30 @@ export default function HomePage() {
           </p>
 
           <div style={buttonGrid}>
-            <Link href="/join" style={primaryButton}>
-              Join Leagues
-            </Link>
+  <Link href="/join" style={primaryButton}>
+    Join Leagues
+  </Link>
 
-            <Link href="/schedule" style={button}>
-              View Schedule
-            </Link>
+  <Link href="/matches" style={button}>
+    My Matches
+  </Link>
 
-            <Link href="/admin/stroke/standings" style={button}>
-              View Standings
-            </Link>
+  <Link href="/admin/stroke/standings" style={button}>
+    Standings
+  </Link>
 
-            <Link href="/register" style={button}>
-              Player Registration
-            </Link>
-          </div>
+  <Link href="/players" style={button}>
+    Player Profiles
+  </Link>
+
+  <Link href="/records" style={button}>
+    League Records
+  </Link>
+
+  <Link href="/champions" style={button}>
+    Hall of Champions
+  </Link>
+</div>
         </section>
 
         <section style={infoCard}>
