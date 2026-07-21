@@ -22,17 +22,17 @@ export default function HomePage() {
     Join Leagues
   </Link>
 
-  <Link href="/matches" style={button}>
-    My Matches
-  </Link>
+  <Link href="/dashboard" style={button}>
+  Player Dashboard
+</Link>
 
-  <Link href="/admin/stroke/standings" style={button}>
-    Standings
-  </Link>
+<Link href="/matches" style={button}>
+  League Matches
+</Link>
 
-  <Link href="/players" style={button}>
-    Player Profiles
-  </Link>
+<Link href="/players" style={button}>
+  Player Profiles
+</Link>
 
   <Link href="/records" style={button}>
     League Records
