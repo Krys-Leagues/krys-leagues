@@ -1,3 +1,4 @@
+
 "use client"
 
 import Link from "next/link"
@@ -183,6 +184,10 @@ export default function HomePage() {
 
             <Link href="/monthlies" style={button}>
               Monthlies
+            </Link>
+
+            <Link href="/tournaments" style={button}>
+              Bracket Tournaments
             </Link>
 
             <Link href="/records" style={button}>
