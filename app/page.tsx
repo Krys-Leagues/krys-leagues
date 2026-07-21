@@ -1,6 +1,143 @@
+"use client"
+
 import Link from "next/link"
+import { useEffect, useMemo, useState } from "react"
+import { supabase } from "@/lib/supabase"
+
+type Player = {
+  id: string
+  status: string | null
+  active: boolean | null
+}
+
+type ScheduledMatch = {
+  id: string
+  league_type: string | null
+  division: string | null
+  season_number: number | null
+  player1_id: string | null
+  player2_id: string | null
+}
+
+type Result = {
+  id: string
+  league_type: string | null
+  division: string | null
+  season_number: number | null
+  player1_id: string | null
+  player2_id: string | null
+}
+
+const CURRENT_SEASON = 59
 
 export default function HomePage() {
+  const [players, setPlayers] = useState<Player[]>([])
+  const [schedule, setSchedule] = useState<ScheduledMatch[]>([])
+  const [results, setResults] = useState<Result[]>([])
+  const [loadingStats, setLoadingStats] = useState(true)
+
+  useEffect(() => {
+    loadStats()
+  }, [])
+
+  async function loadStats() {
+    setLoadingStats(true)
+
+    const [playersResponse, scheduleResponse, resultsResponse] =
+      await Promise.all([
+        supabase.from("players").select("id, status, active"),
+
+        supabase
+          .from("schedule")
+          .select(
+            "id, league_type, division, season_number, player1_id, player2_id"
+          ),
+
+        supabase
+          .from("results")
+          .select(
+            "id, league_type, division, season_number, player1_id, player2_id"
+          ),
+      ])
+
+    setPlayers(playersResponse.data || [])
+    setSchedule(scheduleResponse.data || [])
+    setResults(resultsResponse.data || [])
+    setLoadingStats(false)
+  }
+
+  function normalizeLeague(value: string | null) {
+    const text = (value || "").toLowerCase()
+
+    if (text.includes("stroke")) return "Stroke Play"
+    if (text.includes("match")) return "Match Play"
+    if (text.includes("double")) return "Doubles"
+    if (text.includes("pyp")) return "PYP"
+    if (text.includes("pro")) return "Pro"
+    if (text.includes("amateur")) return "Amateur"
+
+    return ""
+  }
+
+  function samePlayers(
+    firstPlayer1: string | null,
+    firstPlayer2: string | null,
+    secondPlayer1: string | null,
+    secondPlayer2: string | null
+  ) {
+    return (
+      (firstPlayer1 === secondPlayer1 && firstPlayer2 === secondPlayer2) ||
+      (firstPlayer1 === secondPlayer2 && firstPlayer2 === secondPlayer1)
+    )
+  }
+
+  const stats = useMemo(() => {
+    const activePlayers = players.filter((player) => {
+      if (player.active === false) return false
+      if ((player.status || "").toLowerCase() === "inactive") return false
+      return true
+    }).length
+
+    const seasonSchedule = schedule.filter(
+      (match) => Number(match.season_number) === CURRENT_SEASON
+    )
+
+    const seasonResults = results.filter(
+      (result) => Number(result.season_number) === CURRENT_SEASON
+    )
+
+    const activeLeagueNames = new Set(
+      seasonSchedule
+        .map((match) => normalizeLeague(match.league_type || match.division))
+        .filter(Boolean)
+    )
+
+    const matchesRemaining = seasonSchedule.filter((match) => {
+      const completed = seasonResults.some(
+        (result) =>
+          result.division === match.division &&
+          samePlayers(
+            result.player1_id,
+            result.player2_id,
+            match.player1_id,
+            match.player2_id
+          )
+      )
+
+      return !completed
+    }).length
+
+    return {
+      activePlayers,
+      activeLeagues: activeLeagueNames.size,
+      matchesRemaining,
+      matchesCompleted: seasonResults.length,
+    }
+  }, [players, schedule, results])
+
+  const displayValue = (value: number) =>
+    loadingStats ? "Loading..." : value.toString()
+
   return (
     <main style={page}>
       <div style={container}>
@@ -18,57 +155,69 @@ export default function HomePage() {
           </p>
 
           <div style={buttonGrid}>
-  <Link href="/join" style={primaryButton}>
-    Join Leagues
-  </Link>
+            <Link href="/join" style={primaryButton}>
+              Join Leagues
+            </Link>
 
-  <Link href="/dashboard" style={button}>
-  Player Dashboard
-</Link>
+            <Link href="/dashboard" style={button}>
+              Player Dashboard
+            </Link>
 
-<Link href="/matches" style={button}>
-  League Matches
-</Link>
+            <Link href="/matches" style={button}>
+              League Matches
+            </Link>
 
-<Link href="/players" style={button}>
-  Player Profiles
-</Link>
+            <Link href="/admin/stroke/standings" style={button}>
+              Standings
+            </Link>
 
-  <Link href="/records" style={button}>
-    League Records
-  </Link>
+            <Link href="/players" style={button}>
+              Player Profiles
+            </Link>
 
-  <Link href="/champions" style={button}>
-    Hall of Champions
-  </Link>
-</div>
+            <Link href="/records" style={button}>
+              League Records
+            </Link>
+
+            <Link href="/champions" style={button}>
+              Hall of Champions
+            </Link>
+          </div>
         </section>
 
- <section style={infoCard}>
-  <h2 style={sectionTitle}>Season 59</h2>
+        <section style={infoCard}>
+          <h2 style={sectionTitle}>Season {CURRENT_SEASON}</h2>
 
-  <div style={statsGrid}>
-    <div style={statCard}>
-      <strong>👥 Active Players</strong>
-      <span>Loading...</span>
-    </div>
+          <div style={statsGrid}>
+            <div style={statCard}>
+              <strong>👥 Active Players</strong>
+              <span style={statNumber}>
+                {displayValue(stats.activePlayers)}
+              </span>
+            </div>
 
-    <div style={statCard}>
-      <strong>🏆 Active Leagues</strong>
-      <span>Loading...</span>
-    </div>
+            <div style={statCard}>
+              <strong>🏆 Active Leagues</strong>
+              <span style={statNumber}>
+                {displayValue(stats.activeLeagues)}
+              </span>
+            </div>
 
-    <div style={statCard}>
-      <strong>🎯 Matches Remaining</strong>
-      <span>Loading...</span>
-    </div>
+            <div style={statCard}>
+              <strong>🎯 Matches Remaining</strong>
+              <span style={statNumber}>
+                {displayValue(stats.matchesRemaining)}
+              </span>
+            </div>
 
-    <div style={statCard}>
-      <strong>✅ Matches Completed</strong>
-      <span>Loading...</span>
-    </div>
-  </div>
-</section>
+            <div style={statCard}>
+              <strong>✅ Matches Completed</strong>
+              <span style={statNumber}>
+                {displayValue(stats.matchesCompleted)}
+              </span>
+            </div>
+          </div>
+        </section>
 
         <Link href="/admin" style={adminButton}>
           Admin Login
@@ -166,21 +315,6 @@ const sectionTitle: React.CSSProperties = {
   fontSize: 28,
 }
 
-const infoText: React.CSSProperties = {
-  marginBottom: 0,
-  color: "#cbd5e1",
-  fontSize: 17,
-  lineHeight: 1.6,
-}
-
-const adminButton: React.CSSProperties = {
-  display: "block",
-  width: "fit-content",
-  margin: "20px auto 0",
-  color: "#94a3b8",
-  textDecoration: "none",
-  fontWeight: 700,
-}
 const statsGrid: React.CSSProperties = {
   display: "grid",
   gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
@@ -198,4 +332,18 @@ const statCard: React.CSSProperties = {
   flexDirection: "column",
   gap: 10,
   fontSize: 18,
+}
+
+const statNumber: React.CSSProperties = {
+  fontSize: 30,
+  fontWeight: 900,
+}
+
+const adminButton: React.CSSProperties = {
+  display: "block",
+  width: "fit-content",
+  margin: "20px auto 0",
+  color: "#94a3b8",
+  textDecoration: "none",
+  fontWeight: 700,
 }
