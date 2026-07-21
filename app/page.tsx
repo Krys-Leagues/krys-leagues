@@ -163,9 +163,9 @@ export default function HomePage() {
               Player Dashboard
             </Link>
 
-            <Link href="/matches" style={button}>
-              League Matches
-            </Link>
+           <Link href="/league-play" style={button}>
+  League Play
+</Link>
 
             <Link href="/admin/stroke/standings" style={button}>
               Standings
@@ -226,7 +226,6 @@ export default function HomePage() {
     </main>
   )
 }
-
 const page: React.CSSProperties = {
   minHeight: "100vh",
   background:
