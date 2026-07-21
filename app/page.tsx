@@ -5,7 +5,11 @@ export default function HomePage() {
     <main style={page}>
       <div style={container}>
         <section style={hero}>
-          <div style={logoBox}>KL</div>
+          <img
+            src="/league-media/BIG LOGO TRANSPARENT.png"
+            alt="Krys Leagues"
+            style={logo}
+          />
 
           <h1 style={title}>Krys Leagues</h1>
 
@@ -73,19 +77,12 @@ const hero: React.CSSProperties = {
   boxShadow: "0 20px 60px rgba(0, 0, 0, 0.45)",
 }
 
-const logoBox: React.CSSProperties = {
-  width: 110,
-  height: 110,
-  margin: "0 auto 22px",
-  borderRadius: "50%",
-  background: "#16a34a",
-  border: "5px solid white",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  fontSize: 42,
-  fontWeight: 900,
-  boxShadow: "0 0 35px rgba(34, 197, 94, 0.45)",
+const logo: React.CSSProperties = {
+  width: "min(220px, 70vw)",
+  height: "auto",
+  display: "block",
+  margin: "0 auto 24px",
+  objectFit: "contain",
 }
 
 const title: React.CSSProperties = {
