@@ -73,8 +73,9 @@ export default function HomePage() {
     if (text.includes("match")) return "Match Play"
     if (text.includes("double")) return "Doubles"
     if (text.includes("pyp")) return "PYP"
-    if (text.includes("pro")) return "Pro"
-    if (text.includes("amateur")) return "Amateur"
+    if (text.includes("pro")) return "Amateur to Pro"
+    if (text.includes("amateur")) return "Amateur to Pro"
+    if (text.includes("skin")) return "Skins"
 
     return ""
   }
@@ -151,7 +152,8 @@ export default function HomePage() {
           <h1 style={title}>Krys Leagues</h1>
 
           <p style={subtitle}>
-            Walkabout Mini Golf leagues, schedules, standings, and player history.
+            Walkabout Mini Golf leagues, tournaments, standings, and player
+            history.
           </p>
 
           <div style={buttonGrid}>
@@ -163,9 +165,9 @@ export default function HomePage() {
               Player Dashboard
             </Link>
 
-           <Link href="/league-play" style={button}>
-  League Play
-</Link>
+            <Link href="/league-play" style={button}>
+              League Play
+            </Link>
 
             <Link href="/admin/stroke/standings" style={button}>
               Standings
@@ -174,9 +176,15 @@ export default function HomePage() {
             <Link href="/players" style={button}>
               Player Profiles
             </Link>
-<Link href="/kwt" style={button}>
-  KWT
-</Link>
+
+            <Link href="/kwt" style={button}>
+              KWT
+            </Link>
+
+            <Link href="/monthlies" style={button}>
+              Monthlies
+            </Link>
+
             <Link href="/records" style={button}>
               League Records
             </Link>
@@ -228,6 +236,7 @@ export default function HomePage() {
     </main>
   )
 }
+
 const page: React.CSSProperties = {
   minHeight: "100vh",
   background:
