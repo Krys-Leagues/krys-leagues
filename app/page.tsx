@@ -44,14 +44,31 @@ export default function HomePage() {
 </div>
         </section>
 
-        <section style={infoCard}>
-          <h2 style={sectionTitle}>Welcome to Krys Leagues</h2>
+ <section style={infoCard}>
+  <h2 style={sectionTitle}>Season 59</h2>
 
-          <p style={infoText}>
-            Join a league, follow upcoming matches, view standings, and track
-            player achievements across Krys Leagues.
-          </p>
-        </section>
+  <div style={statsGrid}>
+    <div style={statCard}>
+      <strong>👥 Active Players</strong>
+      <span>Loading...</span>
+    </div>
+
+    <div style={statCard}>
+      <strong>🏆 Active Leagues</strong>
+      <span>Loading...</span>
+    </div>
+
+    <div style={statCard}>
+      <strong>🎯 Matches Remaining</strong>
+      <span>Loading...</span>
+    </div>
+
+    <div style={statCard}>
+      <strong>✅ Matches Completed</strong>
+      <span>Loading...</span>
+    </div>
+  </div>
+</section>
 
         <Link href="/admin" style={adminButton}>
           Admin Login
@@ -163,4 +180,22 @@ const adminButton: React.CSSProperties = {
   color: "#94a3b8",
   textDecoration: "none",
   fontWeight: 700,
+}
+const statsGrid: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+  gap: 16,
+  marginTop: 20,
+}
+
+const statCard: React.CSSProperties = {
+  background: "#020617",
+  border: "1px solid #334155",
+  borderRadius: 14,
+  padding: 18,
+  textAlign: "center",
+  display: "flex",
+  flexDirection: "column",
+  gap: 10,
+  fontSize: 18,
 }
