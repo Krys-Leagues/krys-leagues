@@ -28,10 +28,10 @@ export default function TournamentsPage() {
   <p>No tournaments currently in progress.</p>
 </section>
 
-<section style={card}>
+<Link href="/champions" style={linkCard}>
   <h2>🏆 Past Tournament Winners</h2>
-  <p>Coming Soon</p>
-</section>
+  <p>View bracket tournament winners in the Hall of Champions.</p>
+</Link>
 
 <section style={card}>
   <h2>⭐ Invitational Qualification</h2>
@@ -107,4 +107,10 @@ const card: React.CSSProperties = {
   border: "1px solid #334155",
   borderRadius: 16,
   padding: 24,
+}
+const linkCard: React.CSSProperties = {
+  ...card,
+  display: "block",
+  color: "white",
+  textDecoration: "none",
 }
