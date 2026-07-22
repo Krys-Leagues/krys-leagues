@@ -26,10 +26,10 @@ export default function StrokePage() {
             </p>
           </Link>
 
-          <section style={card}>
-            <h2>📊 Public Standings</h2>
-            <p>Coming next.</p>
-          </section>
+         <Link href="/standings" style={card}>
+  <h2>📊 Public Standings</h2>
+  <p>View current Stroke Play standings by division and season.</p>
+</Link>
 
           <Link href="/records" style={card}>
             <h2>🏆 League Records</h2>
