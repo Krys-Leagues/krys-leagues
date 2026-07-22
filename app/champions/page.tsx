@@ -27,10 +27,31 @@ export default function ChampionsPage() {
             <p>Coming Soon</p>
           </section>
 
-          <section style={card}>
-            <h2>👑 Champion of Champions</h2>
-            <p>Cup winners will be displayed here.</p>
-          </section>
+         <section style={card}>
+  <h2>👑 Champion of Champions</h2>
+
+  <video
+    controls
+    autoPlay
+    muted
+    loop
+    playsInline
+    style={{
+      width: "100%",
+      maxWidth: 500,
+      borderRadius: 16,
+      marginTop: 16,
+      marginBottom: 20,
+    }}
+  >
+    <source
+      src="/league-media/trophies/champion-of-champions.mov"
+      type="video/quicktime"
+    />
+  </video>
+
+  <p>Champion of Champions winners will appear here.</p>
+</section>
 
           <section style={card}>
             <h2>🏆 Krys Cup</h2>
