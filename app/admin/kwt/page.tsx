@@ -4,7 +4,10 @@ export default function KWTAdminPage() {
   return (
     <main style={page}>
       <h1 style={title}>KWT League Admin</h1>
-      <p style={subtitle}>Manage KWT seasons, scoring, imports, and active games.</p>
+
+      <p style={subtitle}>
+        Manage KWT seasons, scoring, imports, standings, and active games.
+      </p>
 
       <div style={grid}>
         <Link href="/admin/kwt/setup" style={card}>
@@ -15,6 +18,11 @@ export default function KWTAdminPage() {
         <Link href="/admin/kwt-import" style={card}>
           <strong>Score Current Season</strong>
           <span>Upload KWT CSV files and import weekly results.</span>
+        </Link>
+
+        <Link href="/kwt-standings" style={card}>
+          <strong>Public Standings</strong>
+          <span>View current KWT standings.</span>
         </Link>
 
         <Link href="/admin/kwt/active-games" style={card}>
