@@ -1,3 +1,4 @@
+import Link from "next/link"
 export default function KWTPage() {
   return (
     <main
@@ -22,27 +23,26 @@ export default function KWTPage() {
           gap: 20,
           marginTop: 30,
         }}
-      >
-        <div style={card}>
-          <h2>Current Tournament</h2>
-          <p>Coming Soon</p>
-        </div>
+      ><div style={card}>
+  <h2>🏆 Current Tournament</h2>
+  <p>Current KWT tournament details will appear here.</p>
+</div>
 
-        <div style={card}>
-          <h2>Upcoming Events</h2>
-          <p>Coming Soon</p>
-        </div>
+<div style={card}>
+  <h2>📅 Upcoming Events</h2>
+  <p>Upcoming KWT dates and registration information will appear here.</p>
+</div>
 
-        <div style={card}>
-          <h2>Past Champions</h2>
-          <p>Coming Soon</p>
-        </div>
+<Link href="/champions" style={linkCard}>
+  <h2>👑 Past Champions</h2>
+  <p>View KWT champions in the Hall of Champions.</p>
+</Link>
 
-        <div style={card}>
-          <h2>Records</h2>
-          <p>Coming Soon</p>
+<Link href="/records" style={linkCard}>
+  <h2>🎯 Records</h2>
+  <p>View KWT records and player achievements.</p>
+</Link>
         </div>
-      </div>
     </main>
   )
 }
@@ -52,4 +52,10 @@ const card: React.CSSProperties = {
   border: "1px solid #334155",
   borderRadius: 16,
   padding: 24,
+}
+const linkCard: React.CSSProperties = {
+  ...card,
+  display: "block",
+  color: "white",
+  textDecoration: "none",
 }
