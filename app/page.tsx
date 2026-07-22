@@ -185,8 +185,11 @@ export default function HomePage() {
             <Link href="/monthlies" style={button}>
               Monthlies
             </Link>
+<Link href="/tournaments" style={button}>
+  Bracket Tournaments
+</Link>
 
-           <Link href="/leaderboards" style={button}>
+<Link href="/leaderboards" style={button}>
   Overall Leaderboards
 </Link>
 
