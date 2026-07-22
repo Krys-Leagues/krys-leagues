@@ -17,25 +17,25 @@ export default function MonthliesPage() {
         </section>
 
         <div style={grid}>
-          <section style={card}>
-            <h2>Current Monthly</h2>
-            <p>Coming Soon</p>
-          </section>
+      <section style={card}>
+  <h2>📅 Current Monthly</h2>
+  <p>Current event details and registration information will appear here.</p>
+</section>
 
-          <section style={card}>
-            <h2>Upcoming</h2>
-            <p>Coming Soon</p>
-          </section>
+<section style={card}>
+  <h2>⏭️ Upcoming Monthlies</h2>
+  <p>Future monthly events and dates will appear here.</p>
+</section>
 
-          <section style={card}>
-            <h2>Results</h2>
-            <p>Coming Soon</p>
-          </section>
+<Link href="/matches" style={linkCard}>
+  <h2>✅ Results</h2>
+  <p>View completed matches and scores.</p>
+</Link>
 
-          <section style={card}>
-            <h2>Past Winners</h2>
-            <p>Coming Soon</p>
-          </section>
+<Link href="/champions" style={linkCard}>
+  <h2>🏆 Past Winners</h2>
+  <p>View past winners in the Hall of Champions.</p>
+</Link>
         </div>
       </div>
     </main>
@@ -98,4 +98,11 @@ const card: React.CSSProperties = {
   border: "1px solid #334155",
   borderRadius: 16,
   padding: 24,
+}
+
+const linkCard: React.CSSProperties = {
+  ...card,
+  display: "block",
+  color: "white",
+  textDecoration: "none",
 }
