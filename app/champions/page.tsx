@@ -27,30 +27,33 @@ export default function ChampionsPage() {
             <p>Coming Soon</p>
           </section>
 
-         <section style={card}>
+   <section style={card}>
   <h2>👑 Champion of Champions</h2>
 
-  <video
-    controls
-    autoPlay
-    muted
-    loop
-    playsInline
-    style={{
-      width: "100%",
-      maxWidth: 500,
-      borderRadius: 16,
-      marginTop: 16,
-      marginBottom: 20,
-    }}
-  >
+ <video
+  controls
+  loop
+  playsInline
+  preload="auto"
+  style={{
+    width: "100%",
+    maxWidth: 500,
+    borderRadius: 16,
+    marginTop: 16,
+    marginBottom: 20,
+  }}
+>
    <source
   src="/league-media/trophies/champion-of-champions.mp4"
   type="video/mp4"
 />
   </video>
 
-  <p>Champion of Champions winners will appear here.</p>
+ <p>
+  <strong>🏆 2026 Champion of Champions</strong>
+  <br />
+  BLUTES87
+</p>
 </section>
 
           <section style={card}>
