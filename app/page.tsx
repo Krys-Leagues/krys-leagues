@@ -186,13 +186,17 @@ export default function HomePage() {
               Monthlies
             </Link>
 
-            <Link href="/tournaments" style={button}>
-              Bracket Tournaments
-            </Link>
+           <Link href="/leaderboards" style={button}>
+  Overall Leaderboards
+</Link>
 
-            <Link href="/records" style={button}>
-              League Records
-            </Link>
+<Link href="/invitationals" style={button}>
+  Invitationals
+</Link>
+
+<Link href="/records" style={button}>
+  League Records
+</Link>
 
             <Link href="/champions" style={button}>
               Hall of Champions
