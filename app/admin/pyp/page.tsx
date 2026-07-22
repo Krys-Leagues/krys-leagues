@@ -4,7 +4,10 @@ export default function PYPAdminPage() {
   return (
     <main style={page}>
       <h1 style={title}>PYP Admin</h1>
-      <p style={subtitle}>Manage Pick Your Poison seasons, scoring, and active games.</p>
+
+      <p style={subtitle}>
+        Manage Pick Your Poison seasons, scoring, standings, and active games.
+      </p>
 
       <div style={grid}>
         <Link href="/admin/pyp/setup" style={card}>
@@ -15,6 +18,11 @@ export default function PYPAdminPage() {
         <Link href="/admin/pyp/results" style={card}>
           <strong>Score Current Season</strong>
           <span>Enter or review PYP results.</span>
+        </Link>
+
+        <Link href="/pyp-standings" style={card}>
+          <strong>Public Standings</strong>
+          <span>View current PYP standings.</span>
         </Link>
 
         <Link href="/admin/pyp/active-games" style={card}>
