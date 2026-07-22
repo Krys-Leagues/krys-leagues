@@ -210,27 +210,23 @@ export default function PlayerDashboardPage() {
                 </div>
               )}
             </section>
+<section style={actionGrid}>
+  <Link href="/matches" style={actionButton}>
+    View Matches
+  </Link>
 
-            <section style={actionGrid}>
-              <Link href="/matches" style={actionButton}>
-                View Matches
-              </Link>
+  <Link href="/players" style={actionButton}>
+    Player Profiles
+  </Link>
 
-              <Link
-                href={`/admin/players/${selectedPlayer.id}`}
-                style={actionButton}
-              >
-                View Full Profile
-              </Link>
+  <Link href="/standings" style={actionButton}>
+    View Standings
+  </Link>
 
-              <Link href="/admin/stroke/standings" style={actionButton}>
-                View Standings
-              </Link>
-
-              <Link href="/records" style={actionButton}>
-                View Records
-              </Link>
-            </section>
+  <Link href="/records" style={actionButton}>
+    View Records
+  </Link>
+</section>
           </>
         )}
       </div>
