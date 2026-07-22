@@ -1,3 +1,5 @@
+import Link from "next/link"
+
 export default function LeaguePlayPage() {
   return (
     <main
@@ -10,6 +12,19 @@ export default function LeaguePlayPage() {
         padding: "40px",
       }}
     >
+      <Link
+        href="/"
+        style={{
+          display: "inline-block",
+          marginBottom: 24,
+          color: "white",
+          textDecoration: "none",
+          fontWeight: 700,
+        }}
+      >
+        ← Krys Leagues
+      </Link>
+
       <h1 style={{ fontSize: 42 }}>🏌️ League Play</h1>
 
       <p style={{ color: "#cbd5e1", fontSize: 18 }}>
@@ -24,27 +39,41 @@ export default function LeaguePlayPage() {
           marginTop: 30,
         }}
       >
-        {[
-          "Stroke Play",
-          "Match Play",
-          "Doubles",
-          "Amateur → Pro",
-        ].map((league) => (
-          <div
-            key={league}
-            style={{
-              background: "#0f172a",
-              border: "1px solid #334155",
-              borderRadius: 16,
-              padding: 24,
-            }}
-          >
-            <h2>{league}</h2>
+        <Link href="/stroke" style={card}>
+          <h2>🏌️ Stroke Play</h2>
+          <p>Schedules • Standings • Results • Records</p>
+        </Link>
 
-            <p>Schedules • Standings • Results • Records</p>
-          </div>
-        ))}
+        <Link href="/match-play" style={card}>
+          <h2>⚔️ Match Play</h2>
+          <p>Schedules • Standings • Results • Records</p>
+        </Link>
+
+        <Link href="/doubles" style={card}>
+          <h2>👥 Doubles</h2>
+          <p>Schedules • Standings • Results • Records</p>
+        </Link>
+
+        <Link href="/amateur-pro" style={card}>
+          <h2>⭐ Amateur → Pro</h2>
+          <p>Schedules • Standings • Results • Records</p>
+        </Link>
+
+        <Link href="/skins" style={card}>
+          <h2>💰 Skins</h2>
+          <p>League • Standings • Results</p>
+        </Link>
       </div>
     </main>
   )
+}
+
+const card: React.CSSProperties = {
+  background: "#0f172a",
+  border: "1px solid #334155",
+  borderRadius: 16,
+  padding: 24,
+  color: "white",
+  textDecoration: "none",
+  display: "block",
 }
