@@ -44,10 +44,10 @@ export default function ChampionsPage() {
       marginBottom: 20,
     }}
   >
-    <source
-      src="/league-media/trophies/champion-of-champions.mov"
-      type="video/quicktime"
-    />
+   <source
+  src="/league-media/trophies/champion-of-champions.mp4"
+  type="video/mp4"
+/>
   </video>
 
   <p>Champion of Champions winners will appear here.</p>
