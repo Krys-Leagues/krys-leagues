@@ -17,10 +17,10 @@ export default function SkinsPage() {
         </section>
 
         <div style={grid}>
-          <section style={card}>
-            <h2>📊 Skins Leaderboard</h2>
-            <p>Current Skins standings are coming next.</p>
-          </section>
+         <Link href="/skins-standings" style={card}>
+  <h2>📊 Skins Leaderboard</h2>
+  <p>View current Skins standings and player totals.</p>
+</Link>
 
           <section style={card}>
             <h2>✅ Results</h2>
