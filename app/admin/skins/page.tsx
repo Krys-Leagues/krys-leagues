@@ -4,7 +4,10 @@ export default function SkinsAdminPage() {
   return (
     <main style={page}>
       <h1 style={title}>Skins Admin</h1>
-      <p style={subtitle}>Manage Skins seasons, scoring, and active games.</p>
+
+      <p style={subtitle}>
+        Manage Skins seasons, scoring, standings, and active games.
+      </p>
 
       <div style={grid}>
         <Link href="/admin/skins/setup" style={card}>
@@ -15,6 +18,11 @@ export default function SkinsAdminPage() {
         <Link href="/admin/skins/results" style={card}>
           <strong>Score Current Season</strong>
           <span>Enter or review Skins results.</span>
+        </Link>
+
+        <Link href="/skins-standings" style={card}>
+          <strong>Public Leaderboard</strong>
+          <span>View the public Skins leaderboard.</span>
         </Link>
 
         <Link href="/admin/skins/active-games" style={card}>
