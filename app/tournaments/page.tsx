@@ -18,25 +18,33 @@ export default function TournamentsPage() {
         </section>
 
         <div style={grid}>
-          <section style={card}>
-            <h2>Open Registration</h2>
-            <p>Coming Soon</p>
-          </section>
+      <section style={card}>
+  <h2>📝 Open Registration</h2>
+  <p>No tournaments currently accepting registrations.</p>
+</section>
 
-          <section style={card}>
-            <h2>Current Tournaments</h2>
-            <p>Coming Soon</p>
-          </section>
+<section style={card}>
+  <h2>🎯 Current Brackets</h2>
+  <p>No tournaments currently in progress.</p>
+</section>
 
-          <section style={card}>
-            <h2>Completed Tournaments</h2>
-            <p>Coming Soon</p>
-          </section>
+<section style={card}>
+  <h2>🏆 Past Tournament Winners</h2>
+  <p>Coming Soon</p>
+</section>
 
-          <section style={card}>
-            <h2>Past Champions</h2>
-            <p>Coming Soon</p>
-          </section>
+<section style={card}>
+  <h2>⭐ Invitational Qualification</h2>
+
+  <p><strong>👑 Champion of Champions</strong><br />
+  Win any Bracket Tournament.</p>
+
+  <p><strong>🏆 Krys Cup</strong><br />
+  Reach Round 3 or later but do not win the Final.</p>
+
+  <p><strong>🌶️ Spicy Cup</strong><br />
+  Reach Round 2 or earlier.</p>
+</section>
         </div>
       </div>
     </main>
