@@ -37,10 +37,10 @@ export default function InvitationalsPage() {
             </p>
           </section>
 
-          <section style={card}>
-            <h2>Past Winners</h2>
-            <p>Coming Soon</p>
-          </section>
+         <Link href="/champions" style={linkCard}>
+  <h2>🏆 Past Winners</h2>
+  <p>View Invitational winners in the Hall of Champions.</p>
+</Link>
         </div>
       </div>
     </main>
@@ -103,4 +103,10 @@ const card: React.CSSProperties = {
   border: "1px solid #334155",
   borderRadius: 16,
   padding: 24,
+}
+const linkCard: React.CSSProperties = {
+  ...card,
+  display: "block",
+  color: "white",
+  textDecoration: "none",
 }
