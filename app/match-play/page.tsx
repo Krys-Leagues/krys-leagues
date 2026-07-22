@@ -26,10 +26,10 @@ export default function MatchPlayPage() {
             </p>
           </Link>
 
-          <section style={card}>
-            <h2>📊 Public Standings</h2>
-            <p>Coming next.</p>
-          </section>
+          <Link href="/match-standings" style={card}>
+  <h2>📊 Public Standings</h2>
+  <p>View current Match Play standings by division and season.</p>
+</Link>
 
           <Link href="/records" style={card}>
             <h2>🏆 League Records</h2>
