@@ -32,7 +32,6 @@ export default function ChampionsPage() {
 
  <video
   controls
-  loop
   playsInline
   preload="auto"
   style={{
