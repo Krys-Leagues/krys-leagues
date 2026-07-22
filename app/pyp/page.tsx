@@ -22,11 +22,10 @@ export default function PYPPage() {
             <p>View schedules, scores, and completed PYP matches.</p>
           </Link>
 
-          <section style={card}>
-            <h2>📊 Public Standings</h2>
-            <p>Coming next.</p>
-          </section>
-
+         <Link href="/pyp-standings" style={card}>
+  <h2>📊 Public Standings</h2>
+  <p>View live PYP standings by division and season.</p>
+</Link>
           <Link href="/players" style={card}>
             <h2>👤 Player Profiles</h2>
             <p>View player history and progression.</p>
