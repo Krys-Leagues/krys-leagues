@@ -23,36 +23,60 @@ type ImportSummary = {
 }
 
 const COURSE_CODE_MAP: Record<string, string> = {
-  ZZE: "Zanzibar", ZZH: "Zanzibar",
-  QVE: "Quixote Valley", QVH: "Quixote Valley",
-  LBE: "Laser Lair", LBH: "Laser Lair",
-  ILE: "Ice Lair", ILH: "Ice Lair",
-  ATE: "Atlantis", ATH: "Atlantis",
-  CBE: "Cherry Blossom", CBH: "Cherry Blossom",
-  GBE: "Gardens of Babylon", GBH: "Gardens of Babylon",
-  HWE: "Hollywood", HWH: "Hollywood",
-  FFE: "Forgotten Fairyland", FFH: "Forgotten Fairyland",
-  RCE: "Raptor Cliff", RCH: "Raptor Cliff",
-  MWE: "Meow Wolf", MWH: "Meow Wolf",
-  VNE: "Venice", VNH: "Venice",
-  MYE: "Myst", MYH: "Myst",
-  JCE: "Journey to the Center", JCH: "Journey to the Center",
-
-  SWE: "Sweetopia", SWH: "Sweetopia",
-  OGE: "Mount Olympus", OGH: "Mount Olympus",
-  EDE: "El Dorado", EDH: "El Dorado",
-  "8BE": "8-Bit Lair", "8BH": "8-Bit Lair",
-  WGE: "Widow's Walkabout", WGH: "Widow's Walkabout",
-
-  // 🔥 NEW FIXES
-  ELE: "El Dorado", ELH: "El Dorado",
-  WOE: "Around the World", WOH: "Around the World",
-  AWE: "Around the World 80 Days", AWH: "Around the World 80 Days",
-  MOE: "Mars Garden", MOH: "Mars Garden",
-  TSE: "Tethys Station", TSH: "Tethys Station",
-  WWE: "Widow's Walkabout", WWH: "Widow's Walkabout",
-  "20E": "20,000 Leagues", "20H": "20,000 Leagues",
-  SLE: "Shangri-La", SLH: "Shangri-La",
+  ZZE: "Zanzibar",
+  ZZH: "Zanzibar",
+  QVE: "Quixote Valley",
+  QVH: "Quixote Valley",
+  LBE: "Laser Lair",
+  LBH: "Laser Lair",
+  ILE: "Ice Lair",
+  ILH: "Ice Lair",
+  ATE: "Atlantis",
+  ATH: "Atlantis",
+  CBE: "Cherry Blossom",
+  CBH: "Cherry Blossom",
+  GBE: "Gardens of Babylon",
+  GBH: "Gardens of Babylon",
+  HWE: "Hollywood",
+  HWH: "Hollywood",
+  FFE: "Forgotten Fairyland",
+  FFH: "Forgotten Fairyland",
+  RCE: "Raptor Cliff",
+  RCH: "Raptor Cliff",
+  MWE: "Meow Wolf",
+  MWH: "Meow Wolf",
+  VNE: "Venice",
+  VNH: "Venice",
+  MYE: "Myst",
+  MYH: "Myst",
+  JCE: "Journey to the Center",
+  JCH: "Journey to the Center",
+  SWE: "Sweetopia",
+  SWH: "Sweetopia",
+  OGE: "Mount Olympus",
+  OGH: "Mount Olympus",
+  EDE: "El Dorado",
+  EDH: "El Dorado",
+  "8BE": "8-Bit Lair",
+  "8BH": "8-Bit Lair",
+  WGE: "Widow's Walkabout",
+  WGH: "Widow's Walkabout",
+  ELE: "El Dorado",
+  ELH: "El Dorado",
+  WOE: "Around the World",
+  WOH: "Around the World",
+  AWE: "Around the World 80 Days",
+  AWH: "Around the World 80 Days",
+  MOE: "Mars Garden",
+  MOH: "Mars Garden",
+  TSE: "Tethys Station",
+  TSH: "Tethys Station",
+  WWE: "Widow's Walkabout",
+  WWH: "Widow's Walkabout",
+  "20E": "20,000 Leagues",
+  "20H": "20,000 Leagues",
+  SLE: "Shangri-La",
+  SLH: "Shangri-La",
 }
 
 export default function KWTImportPage() {
@@ -64,8 +88,9 @@ export default function KWTImportPage() {
     const results: ImportSummary[] = []
 
     for (const file of Array.from(files)) {
-      const res = await importFile(file)
-      results.push(res)
+      const result = await importFile(file)
+
+      results.push(result)
       setSummaries([...results])
     }
   }
@@ -83,18 +108,29 @@ export default function KWTImportPage() {
       duplicatesSkipped: 0,
     }
 
+    if (season === null || week === null) {
+      return {
+        ...base,
+        error:
+          "The filename must include the KWT season and week, such as kwt59w1.csv.",
+      }
+    }
+
     const text = await file.text()
 
     const parsed = Papa.parse<CsvRow>(text, {
       header: true,
       skipEmptyLines: true,
-      transformHeader: (h) => h.trim(),
+      transformHeader: (header) => header.trim(),
     })
 
-    const rows = parsed.data.filter((r) => getVal(r, ["Player"]))
+    const rows = parsed.data.filter((row) =>
+      cleanName(getVal(row, ["Player"]))
+    )
 
     const missing = findMissing(rows)
-    if (missing.length) {
+
+    if (missing.length > 0) {
       return {
         ...base,
         rowsFound: rows.length,
@@ -102,119 +138,206 @@ export default function KWTImportPage() {
       }
     }
 
-    const rounds = rows.flatMap((r, i) => buildRounds(r, season!, week!, i))
-    const careers = rows.map((r, i) => buildCareer(r, season!, week!, i))
-
-    // 🔥 remove duplicates BEFORE upsert (critical fix)
-    const uniqueRounds = Array.from(
-      new Map(rounds.map(r => [r.source_key, r])).values()
+    const rounds = rows.flatMap((row, index) =>
+      buildRounds(row, season, week, index)
     )
 
-    const { error: roundErr } = await supabase
+    const careers = rows.map((row, index) =>
+      buildCareer(row, season, week, index)
+    )
+
+    const uniqueRounds = Array.from(
+      new Map(rounds.map((round) => [round.source_key, round])).values()
+    )
+
+    const uniqueCareers = Array.from(
+      new Map(careers.map((event) => [event.source_key, event])).values()
+    )
+
+    const { error: roundError } = await supabase
       .from("handicap_rounds")
-      .upsert(uniqueRounds, { onConflict: "source_key" })
+      .upsert(uniqueRounds, {
+        onConflict: "source_key",
+      })
 
-    if (roundErr) return { ...base, error: roundErr.message }
+    if (roundError) {
+      return {
+        ...base,
+        rowsFound: rows.length,
+        error: roundError.message,
+      }
+    }
 
-    const { error: careerErr } = await supabase
+    const { error: careerError } = await supabase
       .from("player_career_events")
-      .upsert(careers, { onConflict: "source_key" })
+      .upsert(uniqueCareers, {
+        onConflict: "source_key",
+      })
 
-    if (careerErr) return { ...base, error: careerErr.message }
+    if (careerError) {
+      return {
+        ...base,
+        rowsFound: rows.length,
+        roundsInserted: uniqueRounds.length,
+        error: careerError.message,
+      }
+    }
 
     return {
       ...base,
       rowsFound: rows.length,
       roundsInserted: uniqueRounds.length,
-      careerEventsInserted: careers.length,
-      duplicatesSkipped: rounds.length - uniqueRounds.length,
+      careerEventsInserted: uniqueCareers.length,
+      duplicatesSkipped:
+        rounds.length -
+        uniqueRounds.length +
+        (careers.length - uniqueCareers.length),
     }
   }
 
   return (
-    <main style={{ padding: 24, color: "white" }}>
+    <main
+      style={{
+        minHeight: "100vh",
+        padding: 24,
+        background: "black",
+        color: "white",
+      }}
+    >
       <h1>KWT CSV Import</h1>
-      <input type="file" multiple onChange={(e) => handleFiles(e.target.files)} />
 
-      {summaries.map((s) => (
-        <div key={s.fileName} style={{ marginTop: 10 }}>
-          <strong>{s.fileName}</strong>
-          <div>Season: {s.season}</div>
-          <div>Week: {s.week}</div>
-          <div>Rows: {s.rowsFound}</div>
-          <div>Inserted: {s.roundsInserted}</div>
-          <div>Career: {s.careerEventsInserted}</div>
-          <div>Duplicates skipped: {s.duplicatesSkipped}</div>
-          {s.error && <div style={{ color: "red" }}>{s.error}</div>}
-          {!s.error && <div style={{ color: "lime" }}>Done</div>}
+      <input
+        type="file"
+        multiple
+        accept=".csv,text/csv"
+        onChange={(event) => handleFiles(event.target.files)}
+      />
+
+      {summaries.map((summary) => (
+        <div
+          key={summary.fileName}
+          style={{
+            marginTop: 16,
+            padding: 16,
+            background: "#111",
+            border: "1px solid #333",
+            borderRadius: 10,
+          }}
+        >
+          <strong>{summary.fileName}</strong>
+          <div>Season: {summary.season ?? "Not found"}</div>
+          <div>Week: {summary.week ?? "Not found"}</div>
+          <div>Rows: {summary.rowsFound}</div>
+          <div>Rounds inserted: {summary.roundsInserted}</div>
+          <div>Career events: {summary.careerEventsInserted}</div>
+          <div>Duplicates skipped: {summary.duplicatesSkipped}</div>
+
+          {summary.error ? (
+            <div style={{ color: "#ef4444" }}>{summary.error}</div>
+          ) : (
+            <div style={{ color: "#22c55e" }}>Done</div>
+          )}
         </div>
       ))}
     </main>
   )
 }
 
-function buildRounds(r: CsvRow, s: number, w: number, i: number) {
-  const name = clean(getVal(r, ["Player"]))
-  const eCode = clean(getVal(r, ["Easy Code", "EasyCode"]))
-  const hCode = clean(getVal(r, ["Hard Code", "HardCode"]))
+function buildRounds(
+  row: CsvRow,
+  season: number,
+  week: number,
+  index: number
+) {
+  const playerName = cleanName(getVal(row, ["Player"]))
+  const easyCode = cleanCode(getVal(row, ["Easy Code", "EasyCode"]))
+  const hardCode = cleanCode(getVal(row, ["Hard Code", "HardCode"]))
 
-  const e = COURSE_CODE_MAP[eCode]
-  const h = COURSE_CODE_MAP[hCode]
+  const easyCourse = COURSE_CODE_MAP[easyCode]
+  const hardCourse = COURSE_CODE_MAP[hardCode]
 
   return [
     {
-      source_key: `S${s}W${w}-${i}-${name}-${eCode}-E`,
-      player_name: name,
-      course_key: `${e}_easy`,
+      source_key: `S${season}W${week}-${index}-${playerName}-${easyCode}-E`,
+      player_name: playerName,
+      course_key: `${easyCourse}_easy`,
       difficulty: "easy",
-      score: toInt(getVal(r, ["Easy"]))
+      score: toInt(getVal(row, ["Easy"])),
     },
     {
-      source_key: `S${s}W${w}-${i}-${name}-${hCode}-H`,
-      player_name: name,
-      course_key: `${h}_hard`,
+      source_key: `S${season}W${week}-${index}-${playerName}-${hardCode}-H`,
+      player_name: playerName,
+      course_key: `${hardCourse}_hard`,
       difficulty: "hard",
-      score: toInt(getVal(r, ["Hard"]))
-    }
+      score: toInt(getVal(row, ["Hard"])),
+    },
   ]
 }
 
-function buildCareer(r: CsvRow, s: number, w: number, i: number) {
+function buildCareer(
+  row: CsvRow,
+  season: number,
+  week: number,
+  index: number
+) {
+  const playerName = cleanName(getVal(row, ["Player"]))
+
   return {
-    source_key: `S${s}W${w}-${i}-${r.Player}-career`,
-    player_name: clean(r.Player),
-    total_score: toInt(getVal(r, ["Total Score", "Total"]))
+    source_key: `S${season}W${week}-${index}-${playerName}-career`,
+    player_name: playerName,
+    total_score: toInt(getVal(row, ["Total Score", "Total"])),
   }
 }
 
 function findMissing(rows: CsvRow[]) {
-  const set = new Set<string>()
-  rows.forEach(r => {
-    const e = clean(getVal(r, ["Easy Code", "EasyCode"]))
-    const h = clean(getVal(r, ["Hard Code", "HardCode"]))
-    if (!COURSE_CODE_MAP[e]) set.add(e)
-    if (!COURSE_CODE_MAP[h]) set.add(h)
+  const missingCodes = new Set<string>()
+
+  rows.forEach((row) => {
+    const easyCode = cleanCode(getVal(row, ["Easy Code", "EasyCode"]))
+    const hardCode = cleanCode(getVal(row, ["Hard Code", "HardCode"]))
+
+    if (easyCode && !COURSE_CODE_MAP[easyCode]) {
+      missingCodes.add(easyCode)
+    }
+
+    if (hardCode && !COURSE_CODE_MAP[hardCode]) {
+      missingCodes.add(hardCode)
+    }
   })
-  return [...set].filter(Boolean)
+
+  return [...missingCodes]
 }
 
-function parseSeasonWeek(name: string) {
-  const m = name.toLowerCase().match(/kwt(\d+)w(\d+)/)
-  return { season: m ? +m[1] : null, week: m ? +m[2] : null }
+function parseSeasonWeek(fileName: string) {
+  const match = fileName.toLowerCase().match(/kwt(\d+)w(\d+)/)
+
+  return {
+    season: match ? Number(match[1]) : null,
+    week: match ? Number(match[2]) : null,
+  }
 }
 
 function getVal(row: CsvRow, keys: string[]) {
-  for (const k of keys) {
-    if (row[k]) return row[k]
+  for (const key of keys) {
+    if (row[key] !== undefined && row[key] !== "") {
+      return row[key]
+    }
   }
+
   return ""
 }
 
-function clean(v: any) {
-  return String(v ?? "").trim().toUpperCase()
+function cleanName(value: unknown) {
+  return String(value ?? "").trim()
 }
 
-function toInt(v: any) {
-  const n = Number(clean(v))
-  return Number.isFinite(n) ? n : null
+function cleanCode(value: unknown) {
+  return String(value ?? "").trim().toUpperCase()
+}
+
+function toInt(value: unknown) {
+  const cleanedValue = String(value ?? "").trim()
+  const number = Number(cleanedValue)
+
+  return Number.isFinite(number) ? number : null
 }
