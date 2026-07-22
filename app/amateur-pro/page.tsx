@@ -26,10 +26,10 @@ export default function AmateurProPage() {
             </p>
           </Link>
 
-          <section style={card}>
-            <h2>📊 Public Standings</h2>
-            <p>Coming next.</p>
-          </section>
+         <Link href="/amateur-pro-standings" style={card}>
+  <h2>📊 Public Standings</h2>
+  <p>View live Amateur → Pro standings by division and season.</p>
+</Link>
 
           <Link href="/players" style={card}>
             <h2>👤 Player Progression</h2>
