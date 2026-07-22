@@ -25,11 +25,10 @@ export default function DoublesPage() {
               and completed matches.
             </p>
           </Link>
-
-          <section style={card}>
-            <h2>📊 Public Standings</h2>
-            <p>Coming next.</p>
-          </section>
+<Link href="/doubles-standings" style={card}>
+  <h2>📊 Public Standings</h2>
+  <p>View live Doubles standings by division and season.</p>
+</Link>
 
           <Link href="/players" style={card}>
             <h2>👥 Teams & Players</h2>
