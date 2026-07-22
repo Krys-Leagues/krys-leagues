@@ -4,33 +4,196 @@ const BOARDS = [
   {
     title: "1.0 Foundation",
     items: [
-      { system: "Players", priority: "Critical", status: "In Progress", tested: "Partial", owner: "Us", notes: "Imports, search, memberships started. Players indexes complete. Needs profile cleanup." },
-      { system: "League Memberships", priority: "Critical", status: "In Progress", tested: "Partial", owner: "Us", notes: "Players can belong to multiple leagues/seasons/divisions. Duplicate protection complete. Indexes complete." },
-      { system: "Scheduling", priority: "Critical", status: "In Progress", tested: "Partial", owner: "Us", notes: "Stroke setup started. Schedule indexes complete. Needs edit/publish/player view." },
-      { system: "Results", priority: "Critical", status: "Complete", tested: "Yes", owner: "Us", notes: "player_id wiring completed. Unique result protection and lookup indexes complete." },
-    { system: "Standings", priority: "Critical", status: "Complete", tested: "Yes", owner: "Us", notes: "season_standings viewer complete. Manual recalculation and save flow complete." },
-      { system: "Seasons", priority: "Critical", status: "Foundation Complete", tested: "Partial", owner: "Us", notes: "seasons table complete with dates, lock flag, unique season protection, and lookup indexes." },
-      { system: "Basic Player Profiles", priority: "Critical", status: "Not Started", tested: "No", owner: "Us", notes: "Current leagues, season record, career totals." },
+      {
+        system: "Players",
+        priority: "Critical",
+        status: "In Progress",
+        tested: "Partial",
+        owner: "Us",
+        notes:
+          "Imports, search, memberships, merge tools, public dashboard, and admin player management are started. Full public profiles still need career data.",
+      },
+      {
+        system: "League Memberships",
+        priority: "Critical",
+        status: "In Progress",
+        tested: "Partial",
+        owner: "Us",
+        notes:
+          "Players can belong to multiple leagues, seasons, and divisions. Duplicate protection and indexes are complete.",
+      },
+      {
+        system: "Scheduling",
+        priority: "Critical",
+        status: "In Progress",
+        tested: "Partial",
+        owner: "Us",
+        notes:
+          "Schedule management, public match viewing, Discord posting, and match generation exist. Editing and publishing workflow still needs polish.",
+      },
+      {
+        system: "Results",
+        priority: "Critical",
+        status: "Complete",
+        tested: "Yes",
+        owner: "Us",
+        notes:
+          "Player ID wiring, result protection, result entry, and lookup indexes are complete.",
+      },
+      {
+        system: "Standings",
+        priority: "Critical",
+        status: "Complete",
+        tested: "Yes",
+        owner: "Us",
+        notes:
+          "Saved standings, recalculation, and public pages for Stroke, Match Play, Doubles, PYP, and Amateur to Pro are complete.",
+      },
+      {
+        system: "Seasons",
+        priority: "Critical",
+        status: "Foundation Complete",
+        tested: "Partial",
+        owner: "Us",
+        notes:
+          "Seasons table includes dates, lock flag, unique season protection, and lookup indexes.",
+      },
+      {
+        system: "Basic Player Profiles",
+        priority: "Critical",
+        status: "In Progress",
+        tested: "Partial",
+        owner: "Us",
+        notes:
+          "Public player landing page and dashboard exist. Full career totals, league history, trophies, and achievements remain.",
+      },
+      {
+        system: "Handicaps",
+        priority: "High",
+        status: "Foundation Started",
+        tested: "No",
+        owner: "Us",
+        notes:
+          "Admin landing page created. Handicap calculations, adjustments, and history still need to be built.",
+      },
+      {
+        system: "Career Statistics",
+        priority: "High",
+        status: "Foundation Started",
+        tested: "No",
+        owner: "Us",
+        notes:
+          "Admin landing page created. Career totals, trophy history, and cross-league history still need data wiring.",
+      },
     ],
   },
   {
     title: "1.1 Growth",
     items: [
-      { system: "KrysBot", priority: "High", status: "Planned", tested: "No", owner: "Later", notes: "Replace webhooks. Posting, roles, threads, cleanup." },
-      { system: "Tournament System", priority: "High", status: "Planned", tested: "Partial", owner: "Later", notes: "Duplicate entry protection complete. Brackets, rules, scoring, past tournament pages later." },
-      { system: "Leaderboards", priority: "High", status: "Planned", tested: "No", owner: "Later", notes: "Stroke, race, solo, map, KWT, pro, bank shot later." },
-      { system: "Team Profiles", priority: "High", status: "Planned", tested: "No", owner: "Later", notes: "Team history, team trophies, overlapping players allowed." },
-      { system: "Trophy Cases", priority: "High", status: "Planned", tested: "No", owner: "Later", notes: "Player and team visual trophy galleries." },
+      {
+        system: "KrysBot",
+        priority: "High",
+        status: "Planned",
+        tested: "No",
+        owner: "Later",
+        notes:
+          "Replace webhooks with full posting, roles, threads, scheduling, and cleanup automation.",
+      },
+      {
+        system: "Tournament System",
+        priority: "High",
+        status: "In Progress",
+        tested: "Partial",
+        owner: "Us",
+        notes:
+          "Tournament pages, registration, qualification rules, and admin foundations exist. Live brackets and historical data remain.",
+      },
+      {
+        system: "Leaderboards",
+        priority: "High",
+        status: "Planned",
+        tested: "No",
+        owner: "Later",
+        notes:
+          "Overall, Stroke, race, solo, map, KWT, Pro, and bank-shot leaderboards remain.",
+      },
+      {
+        system: "Team Profiles",
+        priority: "High",
+        status: "Planned",
+        tested: "No",
+        owner: "Later",
+        notes:
+          "Team history, team trophies, and overlapping-player support remain.",
+      },
+      {
+        system: "Trophy Cases",
+        priority: "High",
+        status: "In Progress",
+        tested: "Partial",
+        owner: "Us",
+        notes:
+          "Hall of Champions exists with the first Champion of Champions trophy and 2026 winner BLUTES87. Other trophies and winners remain.",
+      },
+      {
+        system: "Records",
+        priority: "High",
+        status: "Foundation Started",
+        tested: "Partial",
+        owner: "Us",
+        notes:
+          "Public records landing page and combined-course admin records exist. Career and season record data remain.",
+      },
     ],
   },
   {
     title: "2.0 Ecosystem",
     items: [
-      { system: "Play Zones", priority: "High", status: "Planned", tested: "No", owner: "Later", notes: "Preferred playing windows, not just time zones." },
-      { system: "Multilingual Support", priority: "High", status: "Planned", tested: "No", owner: "Later", notes: "Player language preferences and translated scheduling." },
-      { system: "Streaming Overlays", priority: "Medium", status: "Planned", tested: "No", owner: "Later", notes: "Custom OBS/browser overlays and scoreboard tools." },
-      { system: "Community Hub", priority: "Medium", status: "Future", tested: "No", owner: "Later", notes: "Podcast, polls, articles, server links, videos." },
-      { system: "Stream Deck Automation", priority: "Medium", status: "Future", tested: "No", owner: "Later", notes: "Reusable profiles and faster stream setup." },
+      {
+        system: "Play Zones",
+        priority: "High",
+        status: "Planned",
+        tested: "No",
+        owner: "Later",
+        notes:
+          "Preferred playing windows rather than only time-zone storage.",
+      },
+      {
+        system: "Multilingual Support",
+        priority: "High",
+        status: "Planned",
+        tested: "No",
+        owner: "Later",
+        notes:
+          "Player language preferences and translated scheduling.",
+      },
+      {
+        system: "Streaming Overlays",
+        priority: "Medium",
+        status: "Planned",
+        tested: "No",
+        owner: "Later",
+        notes:
+          "Custom OBS and browser overlays with scoreboard tools.",
+      },
+      {
+        system: "Community Hub",
+        priority: "Medium",
+        status: "Future",
+        tested: "No",
+        owner: "Later",
+        notes:
+          "Podcast, polls, articles, server links, and videos.",
+      },
+      {
+        system: "Stream Deck Automation",
+        priority: "Medium",
+        status: "Future",
+        tested: "No",
+        owner: "Later",
+        notes:
+          "Reusable profiles and faster stream setup.",
+      },
     ],
   },
 ]
@@ -38,37 +201,50 @@ const BOARDS = [
 const QUICK_LINKS = [
   { label: "Admin Home", href: "/admin" },
   { label: "Players", href: "/admin/players" },
+  { label: "Handicaps", href: "/admin/handicaps" },
+  { label: "Career Stats", href: "/admin/career" },
   { label: "Stroke Setup", href: "/admin/stroke/setup" },
   { label: "Stroke Results", href: "/admin/stroke/results" },
   { label: "Stroke Standings", href: "/admin/stroke/standings" },
+  { label: "Combined Records", href: "/admin/records/combined" },
 ]
 
 export default function CommandCenterPage() {
   return (
     <main style={page}>
       <div style={container}>
-        <Link href="/admin" style={backButton}>← Back to Admin</Link>
+        <Link href="/admin" style={backButton}>
+          ← Back to Admin
+        </Link>
 
         <section style={hero}>
           <p style={eyebrow}>Krys Central</p>
           <h1 style={title}>Command Center</h1>
-          <p style={subtitle}>League Operating System · Version 1.0 Foundation</p>
+          <p style={subtitle}>
+            League Operating System · Version 1.0 Foundation
+          </p>
         </section>
 
         <section style={gridTop}>
           <div style={missionCard}>
             <h2 style={cardTitle}>Current Mission</h2>
-            <p style={mission}>Build a league that can run entirely from Krys Central.</p>
+            <p style={mission}>
+              Build a league that can run entirely from Krys Central.
+            </p>
           </div>
 
           <div style={missionCard}>
             <h2 style={cardTitle}>Current Box</h2>
-          <p style={mission}>Stroke standings rewrite complete → Player profiles in progress</p>
+            <p style={mission}>
+              Public league foundations complete → Admin systems and player
+              history in progress
+            </p>
           </div>
         </section>
 
         <section style={panel}>
           <h2 style={sectionTitle}>Quick Links</h2>
+
           <div style={linkGrid}>
             {QUICK_LINKS.map((link) => (
               <Link key={link.href} href={link.href} style={quickLink}>
