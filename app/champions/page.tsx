@@ -66,8 +66,7 @@ export default function ChampionsPage() {
     setTrophies(trophiesResponse.data || [])
     setLoading(false)
   }
-
-  const championEntries = useMemo<ChampionEntry[]>(() => {
+    const championEntries = useMemo<ChampionEntry[]>(() => {
     const playerNames = new Map(
       players.map((player) => [player.id, player.screen_name])
     )
@@ -147,8 +146,7 @@ export default function ChampionsPage() {
             Leagues.
           </p>
         </section>
-
-        {loading ? (
+                {loading ? (
           <div style={messageCard}>
             Loading Hall of Champions...
           </div>
@@ -157,40 +155,75 @@ export default function ChampionsPage() {
         ) : (
           <>
             <section style={featuredCard}>
-              <div style={featuredContent}>
-                <div>
-                  <p style={eyebrow}>ULTIMATE HONOUR</p>
+              <div style={cupGrid}>
+                <div style={cupCard}>
+                 <h2 style={featuredTitle}>
+  🏆 Champion of Champions
+  <br />
+  2026
+</h2>
 
-                  <h2 style={featuredTitle}>
-                    👑 Champion of Champions
-                  </h2>
-
-                  {championOfChampionsEntries.length > 0 ? (
-                    <ChampionList
-                      entries={championOfChampionsEntries}
-                    />
-                  ) : (
-                    <div style={featuredWinner}>
-                      <strong style={winnerName}>BLUTES87</strong>
-
-                      <span style={muted}>
-                        2026 Champion of Champions
-                      </span>
-                    </div>
-                  )}
+<video
+  controls
+  playsInline
+  preload="metadata"
+  style={cupVideo}
+  onEnded={(e) => {
+    e.currentTarget.currentTime = 0
+  }}
+>
+  <source
+    src="/league-media/trophies/champion-of-champions.mp4"
+    type="video/mp4"
+  />
+</video>
                 </div>
 
-                <video
-                  controls
-                  playsInline
-                  preload="metadata"
-                  style={featuredVideo}
-                >
-                  <source
-                    src="/league-media/trophies/champion-of-champions.mp4"
-                    type="video/mp4"
-                  />
-                </video>
+                <div style={cupCard}>
+                  <h2 style={featuredTitle}>
+  🏆 Krys Cup Winner
+  <br />
+  2026
+</h2>
+
+                  <video
+                    controls
+                    playsInline
+                    preload="metadata"
+                    style={cupVideo}
+                    onEnded={(e) => {
+  e.currentTarget.currentTime = 0
+}}
+                  >
+                    <source
+                      src="/league-media/trophies/krys cup winner 2026.mp4"
+                      type="video/mp4"
+                    />
+                  </video>
+                </div>
+
+                <div style={cupCard}>
+                  <h2 style={featuredTitle}>
+  🌶️ Spicy Cup Winner
+  <br />
+  2026
+</h2>
+
+                  <video
+  controls
+  playsInline
+  preload="metadata"
+  style={cupVideo}
+  onEnded={(e) => {
+    e.currentTarget.currentTime = 0
+  }}
+                 >
+                    <source
+                      src="/league-media/trophies/Spicy cup winner 2026.mp4"
+                      type="video/mp4"
+                    />
+                  </video>
+                </div>
               </div>
             </section>
 
@@ -219,8 +252,7 @@ export default function ChampionsPage() {
                 entries={spicyCupEntries}
               />
             </div>
-
-            {championEntries.length > 0 && (
+                        {championEntries.length > 0 && (
               <section style={allChampionsCard}>
                 <h2 style={sectionTitle}>
                   🏛️ Complete Trophy Archive
@@ -319,7 +351,6 @@ function ChampionList({
     </div>
   )
 }
-
 function searchableText(entry: ChampionEntry) {
   return [
     entry.trophy_title,
@@ -341,7 +372,7 @@ const page: React.CSSProperties = {
 
 const container: React.CSSProperties = {
   width: "100%",
-  maxWidth: 1150,
+  maxWidth: 1600,
   margin: "0 auto",
 }
 
@@ -373,7 +404,9 @@ const hero: React.CSSProperties = {
 
 const title: React.CSSProperties = {
   margin: 0,
-  fontSize: "clamp(36px, 8vw, 48px)",
+  fontSize: "clamp(42px, 9vw, 56px)",
+  fontWeight: 800,
+  color: "#FFD700",
 }
 
 const subtitle: React.CSSProperties = {
@@ -385,48 +418,33 @@ const subtitle: React.CSSProperties = {
 const featuredCard: React.CSSProperties = {
   padding: 24,
   marginBottom: 20,
-  background:
-    "linear-gradient(135deg, rgba(120, 53, 15, 0.95), rgba(15, 23, 42, 0.96))",
-  border: "1px solid #f59e0b",
+  background: "#0b1220",
+  border: "1px solid #d4af37",
   borderRadius: 20,
 }
 
-const featuredContent: React.CSSProperties = {
+const cupGrid: React.CSSProperties = {
   display: "grid",
-  gridTemplateColumns:
-    "repeat(auto-fit, minmax(280px, 1fr))",
-  alignItems: "center",
-  gap: 24,
+  gridTemplateColumns: "repeat(3, minmax(320px, 1fr))",
+  gap: 20,
 }
 
-const eyebrow: React.CSSProperties = {
-  color: "#fde68a",
-  fontSize: 13,
-  fontWeight: 900,
-  letterSpacing: 2,
+const cupCard: React.CSSProperties = {
+  background: "#0b1220",
+  border: "2px solid #d4af37",
+  borderRadius: 18,
+  padding: 18,
+  textAlign: "center",
+}
+
+const cupVideo: React.CSSProperties = {
+  width: "100%",
+  borderRadius: 12,
 }
 
 const featuredTitle: React.CSSProperties = {
   marginTop: 0,
-  fontSize: 30,
-}
-
-const featuredWinner: React.CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  gap: 7,
-}
-
-const winnerName: React.CSSProperties = {
-  fontSize: 34,
-}
-
-const featuredVideo: React.CSSProperties = {
-  width: "100%",
-  maxWidth: 520,
-  justifySelf: "center",
-  borderRadius: 16,
-  background: "#000000",
+  fontSize: 26,
 }
 
 const grid: React.CSSProperties = {
@@ -474,62 +492,54 @@ const championRow: React.CSSProperties = {
   border: "1px solid #334155",
   borderRadius: 12,
 }
-
 const trophyImage: React.CSSProperties = {
-  width: 78,
-  height: 78,
+  width: 90,
+  height: 90,
   objectFit: "cover",
-  borderRadius: 10,
-  flexShrink: 0,
+  borderRadius: 12,
+  border: "1px solid #475569",
 }
 
 const championInformation: React.CSSProperties = {
   display: "flex",
   flexDirection: "column",
-  gap: 5,
-  minWidth: 0,
+  gap: 6,
 }
 
 const championName: React.CSSProperties = {
-  color: "#fde68a",
-  textDecoration: "none",
+  color: "#38bdf8",
   fontSize: 20,
-  fontWeight: 900,
-  overflowWrap: "anywhere",
+  fontWeight: 800,
+  textDecoration: "none",
 }
 
 const trophyName: React.CSSProperties = {
-  color: "white",
-}
-
-const metadata: React.CSSProperties = {
-  color: "#94a3b8",
-  fontSize: 14,
+  fontSize: 18,
 }
 
 const muted: React.CSSProperties = {
-  color: "#cbd5e1",
+  color: "#94a3b8",
+}
+
+const metadata: React.CSSProperties = {
+  color: "#64748b",
+  fontSize: 14,
+}
+
+const messageCard: React.CSSProperties = {
+  padding: 20,
+  background: "#111827",
+  borderRadius: 12,
+  border: "1px solid #334155",
+}
+
+const errorCard: React.CSSProperties = {
+  padding: 20,
+  background: "#450a0a",
+  borderRadius: 12,
+  border: "1px solid #ef4444",
 }
 
 const emptyText: React.CSSProperties = {
   color: "#94a3b8",
-  padding: 14,
-  background: "#020617",
-  border: "1px solid #334155",
-  borderRadius: 12,
-}
-
-const messageCard: React.CSSProperties = {
-  padding: 24,
-  background: "#0f172a",
-  border: "1px solid #334155",
-  borderRadius: 16,
-  textAlign: "center",
-  color: "#cbd5e1",
-}
-
-const errorCard: React.CSSProperties = {
-  ...messageCard,
-  border: "1px solid #991b1b",
-  color: "#fecaca",
 }
