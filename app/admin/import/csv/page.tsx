@@ -1,6 +1,11 @@
 "use client"
 
 import Link from "next/link"
+import UploadArea from "./components/UploadArea"
+import ImportSummary from "./components/ImportSummary"
+import ImportTypeSelector from "./components/ImportTypeSelector"
+import ColumnDetection from "./components/ColumnDetection"
+import CsvPreview from "./components/CsvPreview"
 import {
   ChangeEvent,
   DragEvent,
@@ -895,16 +900,24 @@ export default function CsvImportPage() {
               </div>
             </section>
 
-            <section className="mt-8 rounded-2xl border border-yellow-800 bg-yellow-950/40 p-6">
-              <h2 className="text-xl font-bold text-yellow-200">
-                Preview mode only
-              </h2>
+            <section className="mt-8 rounded-2xl border border-blue-800 bg-blue-950/40 p-6">
+  <h2 className="text-xl font-bold text-blue-200">
+    Ready for Import
+  </h2>
 
-              <p className="mt-2 text-yellow-100/80">
-                This page has not created an import batch,
-                changed a player, or saved any CSV records.
-              </p>
-            </section>
+  <p className="mt-2 text-blue-100/80">
+    The next step will connect this page to the Import Engine.
+    When you click Import, the website will:
+  </p>
+
+  <ul className="mt-4 space-y-2 text-blue-100">
+    <li>📦 Create an import batch</li>
+    <li>💾 Save every CSV row</li>
+    <li>👤 Match players</li>
+    <li>✅ Validate the data</li>
+    <li>📊 Show the import results before anything is permanently imported</li>
+  </ul>
+</section>
           </>
         )}
       </div>
