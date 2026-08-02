@@ -1,15 +1,178 @@
-"use client";
+"use client"
 
-import Link from "next/link";
-import { ChangeEvent, DragEvent, useMemo, useState } from "react";
+import Link from "next/link"
+import {
+  ChangeEvent,
+  DragEvent,
+  useMemo,
+  useState,
+} from "react"
 
-type CsvRow = Record<string, string>;
+type CsvRow = Record<string, string>
 
 type DetectedColumn = {
-  purpose: string;
-  column: string | null;
-  confidence: number;
-};
+  purpose: string
+  column: string | null
+  confidence: number
+}
+
+type ImportType =
+  | "stroke"
+  | "match"
+  | "pyp"
+  | "doubles"
+  | "monthly"
+  | "kwt"
+  | "tournament"
+  | "course_records"
+  | "other"
+
+type ImportTypeOption = {
+  value: ImportType
+  label: string
+  description: string
+  icon: string
+  expectedColumns: string[]
+}
+
+const IMPORT_TYPES: ImportTypeOption[] = [
+  {
+    value: "stroke",
+    label: "Stroke League",
+    description:
+      "Season stroke scores, divisions, points, courses, and placements.",
+    icon: "⛳",
+    expectedColumns: [
+      "Player",
+      "Division",
+      "Season",
+      "Week or Game",
+      "Course",
+      "Strokes",
+      "Points",
+    ],
+  },
+  {
+    value: "match",
+    label: "Match Play",
+    description:
+      "Match results, holes won, points, opponents, and divisions.",
+    icon: "🏌️",
+    expectedColumns: [
+      "Player",
+      "Opponent",
+      "Division",
+      "Season",
+      "Result",
+      "Holes Won",
+      "Points",
+    ],
+  },
+  {
+    value: "pyp",
+    label: "Pick Your Poison",
+    description:
+      "PYP match results, divisions, selected courses, and points.",
+    icon: "🌶️",
+    expectedColumns: [
+      "Player",
+      "Opponent",
+      "Division",
+      "Season",
+      "Course",
+      "Result",
+      "Points",
+    ],
+  },
+  {
+    value: "doubles",
+    label: "Doubles",
+    description:
+      "Teams, players, divisions, scores, results, and season points.",
+    icon: "👥",
+    expectedColumns: [
+      "Team",
+      "Player 1",
+      "Player 2",
+      "Division",
+      "Season",
+      "Score or Result",
+      "Points",
+    ],
+  },
+  {
+    value: "monthly",
+    label: "Monthly Ladder",
+    description:
+      "Monthly divisions, rankings, points, promotions, and relegations.",
+    icon: "🪜",
+    expectedColumns: [
+      "Player",
+      "Month",
+      "Division",
+      "Points",
+      "Rank",
+      "Promotion Status",
+    ],
+  },
+  {
+    value: "kwt",
+    label: "KWT",
+    description:
+      "Krys Weekend Tourney easy, hard, combined, and division results.",
+    icon: "🏆",
+    expectedColumns: [
+      "Player",
+      "Season",
+      "Week",
+      "Division",
+      "Easy Course",
+      "Easy Score",
+      "Hard Course",
+      "Hard Score",
+      "Combined",
+      "Placement",
+    ],
+  },
+  {
+    value: "tournament",
+    label: "Tournament",
+    description:
+      "Bracket entries, rounds, opponents, results, and placements.",
+    icon: "🥇",
+    expectedColumns: [
+      "Player",
+      "Tournament",
+      "Round",
+      "Opponent",
+      "Result",
+      "Placement",
+    ],
+  },
+  {
+    value: "course_records",
+    label: "Course Records",
+    description:
+      "Individual course scores, combined records, dates, and record holders.",
+    icon: "📊",
+    expectedColumns: [
+      "Player",
+      "Course",
+      "Difficulty",
+      "Score",
+      "Date",
+      "Record Type",
+    ],
+  },
+  {
+    value: "other",
+    label: "Other",
+    description:
+      "Use manual column mapping for a file that does not match another type.",
+    icon: "📁",
+    expectedColumns: [],
+  },
+]
 
 const COLUMN_PATTERNS = {
   player: [
@@ -22,17 +185,35 @@ const COLUMN_PATTERNS = {
     "walkabout_name",
     "username",
   ],
+  opponent: [
+    "opponent",
+    "versus",
+    "vs",
+  ],
+  team: [
+    "team",
+    "team name",
+    "team_name",
+  ],
   division: [
     "division",
     "div",
     "tier",
     "group",
     "flight",
+    "bracket",
   ],
   season: [
     "season",
     "season number",
     "season_number",
+  ],
+  week: [
+    "week",
+    "week number",
+    "week_number",
+    "game",
+    "round number",
   ],
   score: [
     "score",
@@ -41,6 +222,28 @@ const COLUMN_PATTERNS = {
     "strokes",
     "stroke total",
     "stroke_total",
+    "combined",
+  ],
+  easy_score: [
+    "easy score",
+    "easy_score",
+    "easy",
+  ],
+  hard_score: [
+    "hard score",
+    "hard_score",
+    "hard",
+  ],
+  holes_won: [
+    "holes won",
+    "holes_won",
+    "hw",
+  ],
+  result: [
+    "result",
+    "winner",
+    "win loss",
+    "outcome",
   ],
   points: [
     "points",
@@ -68,41 +271,52 @@ const COLUMN_PATTERNS = {
     "match date",
     "match_date",
   ],
-};
+  month: [
+    "month",
+    "ladder month",
+    "ladder_month",
+  ],
+  round: [
+    "round",
+    "tournament round",
+    "tournament_round",
+  ],
+}
 
 function normalizeHeader(value: string) {
   return value
     .trim()
     .toLowerCase()
     .replace(/[_-]+/g, " ")
-    .replace(/\s+/g, " ");
+    .replace(/\s+/g, " ")
 }
 
 function parseCsv(text: string): string[][] {
-  const rows: string[][] = [];
-  let currentRow: string[] = [];
-  let currentValue = "";
-  let insideQuotes = false;
+  const rows: string[][] = []
+
+  let currentRow: string[] = []
+  let currentValue = ""
+  let insideQuotes = false
 
   for (let index = 0; index < text.length; index += 1) {
-    const character = text[index];
-    const nextCharacter = text[index + 1];
+    const character = text[index]
+    const nextCharacter = text[index + 1]
 
     if (character === '"') {
       if (insideQuotes && nextCharacter === '"') {
-        currentValue += '"';
-        index += 1;
+        currentValue += '"'
+        index += 1
       } else {
-        insideQuotes = !insideQuotes;
+        insideQuotes = !insideQuotes
       }
 
-      continue;
+      continue
     }
 
     if (character === "," && !insideQuotes) {
-      currentRow.push(currentValue.trim());
-      currentValue = "";
-      continue;
+      currentRow.push(currentValue.trim())
+      currentValue = ""
+      continue
     }
 
     if (
@@ -110,58 +324,58 @@ function parseCsv(text: string): string[][] {
       !insideQuotes
     ) {
       if (character === "\r" && nextCharacter === "\n") {
-        index += 1;
+        index += 1
       }
 
-      currentRow.push(currentValue.trim());
+      currentRow.push(currentValue.trim())
 
       const hasContent = currentRow.some(
         (value) => value.trim() !== ""
-      );
+      )
 
       if (hasContent) {
-        rows.push(currentRow);
+        rows.push(currentRow)
       }
 
-      currentRow = [];
-      currentValue = "";
-      continue;
+      currentRow = []
+      currentValue = ""
+      continue
     }
 
-    currentValue += character;
+    currentValue += character
   }
 
-  currentRow.push(currentValue.trim());
+  currentRow.push(currentValue.trim())
 
   if (currentRow.some((value) => value.trim() !== "")) {
-    rows.push(currentRow);
+    rows.push(currentRow)
   }
 
-  return rows;
+  return rows
 }
 
 function findDetectedColumn(
   headers: string[],
   patterns: string[]
 ): {
-  column: string | null;
-  confidence: number;
+  column: string | null
+  confidence: number
 } {
   const normalizedHeaders = headers.map((header) => ({
     original: header,
     normalized: normalizeHeader(header),
-  }));
+  }))
 
   for (const pattern of patterns) {
     const exactMatch = normalizedHeaders.find(
       (header) => header.normalized === pattern
-    );
+    )
 
     if (exactMatch) {
       return {
         column: exactMatch.original,
         confidence: 100,
-      };
+      }
     }
   }
 
@@ -170,20 +384,20 @@ function findDetectedColumn(
       (header) =>
         header.normalized.includes(pattern) ||
         pattern.includes(header.normalized)
-    );
+    )
 
     if (partialMatch) {
       return {
         column: partialMatch.original,
         confidence: 80,
-      };
+      }
     }
   }
 
   return {
     column: null,
     confidence: 0,
-  };
+  }
 }
 
 function createRows(
@@ -191,26 +405,32 @@ function createRows(
   values: string[][]
 ): CsvRow[] {
   return values.map((row) => {
-    const result: CsvRow = {};
+    const result: CsvRow = {}
 
     headers.forEach((header, index) => {
-      result[header] = row[index] ?? "";
-    });
+      result[header] = row[index] ?? ""
+    })
 
-    return result;
-  });
+    return result
+  })
 }
 
 export default function CsvImportPage() {
-  const [fileName, setFileName] = useState("");
-  const [headers, setHeaders] = useState<string[]>([]);
-  const [rows, setRows] = useState<CsvRow[]>([]);
-  const [error, setError] = useState("");
-  const [isDragging, setIsDragging] = useState(false);
+  const [fileName, setFileName] = useState("")
+  const [headers, setHeaders] = useState<string[]>([])
+  const [rows, setRows] = useState<CsvRow[]>([])
+  const [error, setError] = useState("")
+  const [isDragging, setIsDragging] = useState(false)
+
+  const [selectedImportType, setSelectedImportType] =
+    useState<ImportType | null>(null)
+
+  const [analysisConfirmed, setAnalysisConfirmed] =
+    useState(false)
 
   const detectedColumns = useMemo<DetectedColumn[]>(() => {
     if (headers.length === 0) {
-      return [];
+      return []
     }
 
     return Object.entries(COLUMN_PATTERNS).map(
@@ -218,92 +438,124 @@ export default function CsvImportPage() {
         const result = findDetectedColumn(
           headers,
           patterns
-        );
+        )
 
         return {
           purpose,
           column: result.column,
           confidence: result.confidence,
-        };
+        }
       }
-    );
-  }, [headers]);
+    )
+  }, [headers])
+
+  const selectedImportDetails = useMemo(() => {
+    if (!selectedImportType) {
+      return null
+    }
+
+    return (
+      IMPORT_TYPES.find(
+        (option) => option.value === selectedImportType
+      ) ?? null
+    )
+  }, [selectedImportType])
 
   async function analyzeFile(file: File) {
-    setError("");
-    setFileName("");
-    setHeaders([]);
-    setRows([]);
+    setError("")
+    setFileName("")
+    setHeaders([])
+    setRows([])
+    setSelectedImportType(null)
+    setAnalysisConfirmed(false)
 
     if (!file.name.toLowerCase().endsWith(".csv")) {
-      setError("Please select a CSV file.");
-      return;
+      setError("Please select a CSV file.")
+      return
     }
 
     try {
-      const text = await file.text();
-      const parsedRows = parseCsv(text);
+      const text = await file.text()
+      const parsedRows = parseCsv(text)
 
       if (parsedRows.length < 2) {
         setError(
           "The CSV must contain a header row and at least one data row."
-        );
-        return;
+        )
+        return
       }
 
       const parsedHeaders = parsedRows[0].map(
         (header, index) =>
           header.trim() || `Column ${index + 1}`
-      );
+      )
 
       const dataRows = createRows(
         parsedHeaders,
         parsedRows.slice(1)
-      );
+      )
 
-      setFileName(file.name);
-      setHeaders(parsedHeaders);
-      setRows(dataRows);
+      setFileName(file.name)
+      setHeaders(parsedHeaders)
+      setRows(dataRows)
     } catch (fileError) {
-      console.error(fileError);
+      console.error(fileError)
 
       setError(
         "The CSV could not be read. No data was imported."
-      );
+      )
     }
   }
 
   function handleFileChange(
     event: ChangeEvent<HTMLInputElement>
   ) {
-    const file = event.target.files?.[0];
+    const file = event.target.files?.[0]
 
     if (file) {
-      void analyzeFile(file);
+      void analyzeFile(file)
     }
 
-    event.target.value = "";
+    event.target.value = ""
   }
 
   function handleDrop(event: DragEvent<HTMLDivElement>) {
-    event.preventDefault();
-    setIsDragging(false);
+    event.preventDefault()
+    setIsDragging(false)
 
-    const file = event.dataTransfer.files?.[0];
+    const file = event.dataTransfer.files?.[0]
 
     if (file) {
-      void analyzeFile(file);
+      void analyzeFile(file)
     }
   }
 
   function clearFile() {
-    setFileName("");
-    setHeaders([]);
-    setRows([]);
-    setError("");
+    setFileName("")
+    setHeaders([])
+    setRows([])
+    setError("")
+    setSelectedImportType(null)
+    setAnalysisConfirmed(false)
   }
 
-  const previewRows = rows.slice(0, 10);
+  function confirmImportType() {
+    if (!selectedImportType) {
+      setError(
+        "Choose the type of data contained in this CSV."
+      )
+      return
+    }
+
+    setError("")
+    setAnalysisConfirmed(true)
+  }
+
+  function changeImportType() {
+    setAnalysisConfirmed(false)
+  }
+
+  const previewRows = rows.slice(0, 10)
 
   return (
     <main className="min-h-screen bg-zinc-950 text-white">
@@ -319,9 +571,9 @@ export default function CsvImportPage() {
             </h1>
 
             <p className="mt-3 max-w-3xl text-zinc-400">
-              Upload a CSV to inspect its columns and data.
-              Nothing will be saved to Supabase during this
-              step.
+              Upload a CSV, review its structure, and identify
+              the type of Krys League data it contains. Nothing
+              is saved during this step.
             </p>
           </div>
 
@@ -336,8 +588,8 @@ export default function CsvImportPage() {
         <section className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6 shadow-xl">
           <div
             onDragOver={(event) => {
-              event.preventDefault();
-              setIsDragging(true);
+              event.preventDefault()
+              setIsDragging(true)
             }}
             onDragLeave={() => setIsDragging(false)}
             onDrop={handleDrop}
@@ -359,6 +611,7 @@ export default function CsvImportPage() {
 
             <label className="mt-6 inline-flex cursor-pointer rounded-lg bg-indigo-600 px-6 py-3 font-semibold transition hover:bg-indigo-500">
               Choose CSV
+
               <input
                 type="file"
                 accept=".csv,text/csv"
@@ -409,6 +662,137 @@ export default function CsvImportPage() {
               </div>
             </section>
 
+            <section className="mt-8 rounded-2xl border border-indigo-800 bg-indigo-950/30 p-6">
+              <div className="mb-6">
+                <p className="text-sm font-bold uppercase tracking-widest text-indigo-300">
+                  Step 1
+                </p>
+
+                <h2 className="mt-2 text-3xl font-bold">
+                  What type of data is this?
+                </h2>
+
+                <p className="mt-2 text-zinc-300">
+                  Choose the type that best describes the
+                  uploaded file. This controls the column mapping
+                  and validation rules used in the next step.
+                </p>
+              </div>
+
+              {!analysisConfirmed ? (
+                <>
+                  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    {IMPORT_TYPES.map((option) => {
+                      const isSelected =
+                        selectedImportType === option.value
+
+                      return (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() =>
+                            setSelectedImportType(option.value)
+                          }
+                          className={`rounded-xl border p-5 text-left transition ${
+                            isSelected
+                              ? "border-indigo-400 bg-indigo-900/60 ring-2 ring-indigo-400"
+                              : "border-zinc-700 bg-zinc-950 hover:border-zinc-500"
+                          }`}
+                        >
+                          <div className="flex items-start gap-4">
+                            <span className="text-3xl">
+                              {option.icon}
+                            </span>
+
+                            <div>
+                              <h3 className="text-xl font-bold">
+                                {option.label}
+                              </h3>
+
+                              <p className="mt-2 text-sm leading-6 text-zinc-400">
+                                {option.description}
+                              </p>
+                            </div>
+                          </div>
+
+                          {option.expectedColumns.length > 0 && (
+                            <div className="mt-4 border-t border-zinc-800 pt-4">
+                              <p className="text-xs font-bold uppercase tracking-wide text-zinc-500">
+                                Typical columns
+                              </p>
+
+                              <p className="mt-2 text-sm text-zinc-400">
+                                {option.expectedColumns.join(", ")}
+                              </p>
+                            </div>
+                          )}
+                        </button>
+                      )
+                    })}
+                  </div>
+
+                  <div className="mt-6 flex flex-wrap gap-3">
+                    <button
+                      type="button"
+                      onClick={confirmImportType}
+                      disabled={!selectedImportType}
+                      className="rounded-lg bg-green-600 px-6 py-3 font-bold transition hover:bg-green-500 disabled:cursor-not-allowed disabled:bg-zinc-700 disabled:text-zinc-400"
+                    >
+                      Confirm Data Type
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={clearFile}
+                      className="rounded-lg border border-red-800 px-5 py-3 font-semibold text-red-300 transition hover:bg-red-950"
+                    >
+                      Clear File
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="rounded-xl border border-green-700 bg-green-950/50 p-6">
+                  <div className="flex flex-wrap items-start justify-between gap-4">
+                    <div>
+                      <p className="text-sm font-bold uppercase tracking-wide text-green-300">
+                        Selected data type
+                      </p>
+
+                      <h3 className="mt-2 text-2xl font-bold">
+                        {selectedImportDetails?.icon}{" "}
+                        {selectedImportDetails?.label}
+                      </h3>
+
+                      <p className="mt-2 text-green-100/80">
+                        {selectedImportDetails?.description}
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={changeImportType}
+                      className="rounded-lg border border-green-700 px-4 py-2 font-semibold text-green-200 transition hover:bg-green-900"
+                    >
+                      Change Type
+                    </button>
+                  </div>
+
+                  <div className="mt-6 rounded-lg bg-black/30 p-4">
+                    <p className="font-semibold text-green-200">
+                      Next step
+                    </p>
+
+                    <p className="mt-1 text-sm text-zinc-300">
+                      We will map this file&apos;s columns to the
+                      required {selectedImportDetails?.label} fields,
+                      then match imported names to existing player
+                      profiles.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </section>
+
             <section className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
               <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
                 <div>
@@ -421,14 +805,6 @@ export default function CsvImportPage() {
                     the mappings before importing.
                   </p>
                 </div>
-
-                <button
-                  type="button"
-                  onClick={clearFile}
-                  className="rounded-lg border border-red-800 px-4 py-2 font-semibold text-red-300 transition hover:bg-red-950"
-                >
-                  Clear File
-                </button>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -438,7 +814,7 @@ export default function CsvImportPage() {
                     className="rounded-xl border border-zinc-800 bg-zinc-950 p-4"
                   >
                     <p className="capitalize text-zinc-400">
-                      {item.purpose}
+                      {item.purpose.replaceAll("_", " ")}
                     </p>
 
                     {item.column ? (
@@ -525,15 +901,13 @@ export default function CsvImportPage() {
               </h2>
 
               <p className="mt-2 text-yellow-100/80">
-                This page has not added an import batch, changed
-                a player, or saved any CSV records. The next step
-                will let you confirm which column contains the
-                player names.
+                This page has not created an import batch,
+                changed a player, or saved any CSV records.
               </p>
             </section>
           </>
         )}
       </div>
     </main>
-  );
+  )
 }
