@@ -15,6 +15,7 @@ const LEAGUES = [
 const GLOBAL_TOOLS = [
   { name: "Command Center", href: "/admin/command-center", description: "Krys Central project board and roadmap" },
   { name: "Players", href: "/admin/players", description: "Global player list, statuses, merge tools" },
+  { name: "Player Identity", href: "/admin/player-identity", description: "Aliases, Discord identities, historical names, and player matching" },
   { name: "Combined Course Records", href: "/admin/records/combined", description: "Easy + Hard all-time bragging rights" },
   { name: "Handicaps", href: "/admin/handicaps", description: "Player handicap tracking" },
   { name: "Career Stats", href: "/admin/career", description: "Career results across leagues" },
