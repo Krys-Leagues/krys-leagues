@@ -80,7 +80,37 @@ export default function StrokeSetup() {
       alert("Invalid season")
       return
     }
+const { data: existingSeason, error: existingError } = await supabase
+  .from("seasons")
+  .select("id")
+  .eq("league_type", "stroke")
+  .eq("division", division)
+  .eq("season_number", seasonNumber)
+  .maybeSingle()
 
+if (existingError) {
+  alert(existingError.message)
+  return
+}
+
+if (existingSeason) {
+  alert("This season already exists")
+  return
+}
+
+const { error: seasonError } = await supabase
+  .from("seasons")
+  .insert({
+    league_type: "stroke",
+    division,
+    season_number: seasonNumber,
+    due_date: due,
+  })
+
+if (seasonError) {
+  alert(seasonError.message)
+  return
+}
     setLoading(true)
 
     const base = {
