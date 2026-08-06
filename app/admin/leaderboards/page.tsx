@@ -1,29 +1,29 @@
 import Link from "next/link"
 
-export default function MatchAdminPage() {
+export default function LeaderboardsAdminPage() {
   return (
     <main style={page}>
-      <h1 style={title}>Match Play Admin</h1>
+      <h1 style={title}>All-Time Leaderboards</h1>
 
       <p style={subtitle}>
-        Manage Match Play scheduling, scoring, standings, and players.
+        Manage historical rankings across every league.
       </p>
 
       <div style={grid}>
-        <Link href="/admin/match/schedule" style={card}>
-          <strong>Setup Season</strong>
-          <span>Create and manage Match Play seasons.</span>
-        </Link>
+        <section style={card}>
+          <strong>Overall Leaderboards</strong>
+          <span>Coming Soon</span>
+        </section>
 
-        <Link href="/admin/match/results" style={card}>
-          <strong>Score Season</strong>
-          <span>Enter Match Play scores and results.</span>
-        </Link>
+        <section style={card}>
+          <strong>League Leaderboards</strong>
+          <span>Coming Soon</span>
+        </section>
 
-        <Link href="/match-standings" style={card}>
-          <strong>Standings</strong>
-          <span>View current Match Play standings.</span>
-        </Link>
+        <section style={card}>
+          <strong>Player Rankings</strong>
+          <span>Coming Soon</span>
+        </section>
 
         <Link href="/admin/players" style={card}>
           <strong>Players</strong>

@@ -1,28 +1,28 @@
 import Link from "next/link"
 
-export default function MatchAdminPage() {
+export default function DoublesAdminPage() {
   return (
     <main style={page}>
-      <h1 style={title}>Match Play Admin</h1>
+      <h1 style={title}>Doubles Admin</h1>
 
       <p style={subtitle}>
-        Manage Match Play scheduling, scoring, standings, and players.
+        Manage Doubles league seasons, scoring, standings and teams.
       </p>
 
       <div style={grid}>
-        <Link href="/admin/match/schedule" style={card}>
+        <Link href="/admin/doubles/schedule" style={card}>
           <strong>Setup Season</strong>
-          <span>Create and manage Match Play seasons.</span>
+          <span>Create and manage Doubles seasons.</span>
         </Link>
 
-        <Link href="/admin/match/results" style={card}>
+        <Link href="/admin/doubles/results" style={card}>
           <strong>Score Season</strong>
-          <span>Enter Match Play scores and results.</span>
+          <span>Enter Doubles match results.</span>
         </Link>
 
-        <Link href="/match-standings" style={card}>
+        <Link href="/doubles-standings" style={card}>
           <strong>Standings</strong>
-          <span>View current Match Play standings.</span>
+          <span>View current Doubles standings.</span>
         </Link>
 
         <Link href="/admin/players" style={card}>
