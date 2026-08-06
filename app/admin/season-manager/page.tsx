@@ -388,7 +388,7 @@ function startEdit(season: Season) {
       {season.is_locked ? "Unlock" : "Lock"}
     </button>
 <button
-  onClick={() => {}}
+onClick={() => startEdit(season)}
   style={{
     padding: "6px 12px",
     background: "#f59e0b",
