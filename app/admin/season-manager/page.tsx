@@ -35,6 +35,9 @@ export default function SeasonManagerPage() {
   const [loading, setLoading] = useState(false)
   const [loadingSeasons, setLoadingSeasons] = useState(true)
   const [message, setMessage] = useState("")
+const [editingSeason, setEditingSeason] = useState<Season | null>(null)
+const [editSeasonNumber, setEditSeasonNumber] = useState("")
+const [editDueDate, setEditDueDate] = useState("")
 
   useEffect(() => {
     loadSeasons()
@@ -209,6 +212,12 @@ async function toggleLock(season: Season) {
       season.is_locked ? "unlocked" : "locked"
     }.`
   )
+}
+
+function startEdit(season: Season) {
+  setEditingSeason(season)
+  setEditSeasonNumber(String(season.season_number))
+  setEditDueDate(season.due_date ?? "")
 }
 
   function getLeagueLabel(value: string) {
