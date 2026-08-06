@@ -378,6 +378,19 @@ async function toggleLock(season: Season) {
     >
       {season.is_locked ? "Unlock" : "Lock"}
     </button>
+<button
+  onClick={() => {}}
+  style={{
+    padding: "6px 12px",
+    background: "#f59e0b",
+    color: "black",
+    border: "none",
+    borderRadius: 6,
+    cursor: "pointer",
+  }}
+>
+  Edit
+</button>
 
     {season.is_active && (
       <span style={{ color: "#22c55e", fontWeight: 700 }}>
