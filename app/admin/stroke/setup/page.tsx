@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
+import { logActivity } from "@/lib/activityLog"
 
 type Player = {
   id: string
@@ -178,7 +179,18 @@ export default function StrokeSetup() {
       alert(insertError.message)
       return
     }
-
+await logActivity({
+  userType: "admin",
+  action: "Created Stroke Schedule",
+  leagueType: "stroke",
+  division,
+  page: "/admin/stroke/setup",
+  details: {
+    season,
+    courses: [c1, c2, c3],
+    players: [p1, p2, p3, p4],
+  },
+})
     alert("Stroke schedule created ✔")
   }
 
