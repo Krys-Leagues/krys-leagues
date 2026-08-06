@@ -307,7 +307,46 @@ function startEdit(season: Season) {
 
           {message && <p style={messageStyle}>{message}</p>}
         </section>
+{editingSeason && (
+  <section style={panel}>
+    <h2 style={sectionTitle}>Edit Season</h2>
 
+    <div style={formGrid}>
+      <div>
+        <label style={label}>Season Number</label>
+        <input
+          type="number"
+          value={editSeasonNumber}
+          onChange={(e) => setEditSeasonNumber(e.target.value)}
+          style={input}
+        />
+      </div>
+
+      <div>
+        <label style={label}>Due Date</label>
+        <input
+          type="date"
+          value={editDueDate}
+          onChange={(e) => setEditDueDate(e.target.value)}
+          style={input}
+        />
+      </div>
+    </div>
+
+    <div style={{ display: "flex", gap: 12, marginTop: 20 }}>
+      <button style={createButton}>
+        Save Changes
+      </button>
+
+      <button
+        onClick={() => setEditingSeason(null)}
+        style={secondaryButton}
+      >
+        Cancel
+      </button>
+    </div>
+  </section>
+)}
         <section style={panel}>
           <h2 style={sectionTitle}>Existing Seasons</h2>
 
