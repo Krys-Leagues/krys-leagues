@@ -13,6 +13,7 @@ type Season = {
   start_date: string | null
   end_date: string | null
   is_locked: boolean
+  is_active: boolean
   created_at: string
 }
 
@@ -45,7 +46,7 @@ export default function SeasonManagerPage() {
     const { data, error } = await supabase
       .from("seasons")
       .select(
-        "id, league_type, season_number, due_date, start_date, end_date, is_locked, created_at"
+        "id, league_type, season_number, due_date, start_date, end_date, is_locked, is_active, created_at"
       )
       .order("created_at", { ascending: false })
 
@@ -109,10 +110,11 @@ export default function SeasonManagerPage() {
         season_number: number,
         due_date: dueDate,
         is_locked: false,
+        is_active: false,
       })
       .select(
-        "id, league_type, season_number, due_date, start_date, end_date, is_locked, created_at"
-      )
+  "id, league_type, season_number, due_date, start_date, end_date, is_locked, is_active, created_at"
+)
       .single()
 
     if (insertError) {
@@ -156,6 +158,58 @@ export default function SeasonManagerPage() {
     await loadSeasons()
     setLoading(false)
   }
+async function makeActive(season: Season) {
+  setMessage("")
+
+  const { error: clearError } = await supabase
+    .from("seasons")
+    .update({ is_active: false })
+    .eq("league_type", season.league_type)
+
+  if (clearError) {
+    setMessage(clearError.message)
+    return
+  }
+
+  const { error } = await supabase
+    .from("seasons")
+    .update({ is_active: true })
+    .eq("id", season.id)
+
+  if (error) {
+    setMessage(error.message)
+    return
+  }
+
+  await loadSeasons()
+
+  setMessage(
+    `${getLeagueLabel(season.league_type)} Season ${season.season_number} is now active.`
+  )
+}
+async function toggleLock(season: Season) {
+  setMessage("")
+
+  const { error } = await supabase
+    .from("seasons")
+    .update({
+      is_locked: !season.is_locked,
+    })
+    .eq("id", season.id)
+
+  if (error) {
+    setMessage(error.message)
+    return
+  }
+
+  await loadSeasons()
+
+  setMessage(
+    `${getLeagueLabel(season.league_type)} Season ${season.season_number} ${
+      season.is_locked ? "unlocked" : "locked"
+    }.`
+  )
+}
 
   function getLeagueLabel(value: string) {
     return LEAGUES.find((league) => league.value === value)?.label || value
@@ -255,16 +309,18 @@ export default function SeasonManagerPage() {
           ) : (
             <div style={{ overflowX: "auto" }}>
               <table style={table}>
-                <thead>
-                  <tr>
-                    <th style={th}>League</th>
-                    <th style={th}>Season</th>
-                    <th style={th}>Due Date</th>
-                    <th style={th}>Status</th>
-                    <th style={th}>Created</th>
-                  </tr>
-                </thead>
-
+               <thead>
+  <tr>
+    <th style={th}>League</th>
+    <th style={th}>Season</th>
+    <th style={th}>Due Date</th>
+    <th style={th}>Start</th>
+    <th style={th}>End</th>
+    <th style={th}>Status</th>
+    <th style={th}>Created</th>
+    <th style={th}>Actions</th>
+  </tr>
+</thead>
                 <tbody>
                   {seasons.map((season) => (
                     <tr key={season.id}>
@@ -275,14 +331,61 @@ export default function SeasonManagerPage() {
                       <td style={td}>Season {season.season_number}</td>
 
                       <td style={td}>{season.due_date || "Not set"}</td>
+<td style={td}>
+  {season.start_date || "-"}
+</td>
 
-                      <td style={td}>
-                        {season.is_locked ? "Locked" : "Open"}
-                      </td>
+<td style={td}>
+  {season.end_date || "-"}
+</td>
 
-                      <td style={td}>
-                        {new Date(season.created_at).toLocaleDateString()}
-                      </td>
+<td style={td}>
+  {season.is_locked ? "🔒 Locked" : "🟢 Open"}
+</td>
+
+<td style={td}>
+  {new Date(season.created_at).toLocaleDateString()}
+</td>
+
+<td style={td}>
+  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+    {!season.is_active && (
+      <button
+        onClick={() => makeActive(season)}
+        style={{
+          padding: "6px 12px",
+          background: "#2563eb",
+          color: "white",
+          border: "none",
+          borderRadius: 6,
+          cursor: "pointer",
+        }}
+      >
+        Make Active
+      </button>
+    )}
+
+    <button
+      onClick={() => toggleLock(season)}
+      style={{
+        padding: "6px 12px",
+        background: season.is_locked ? "#16a34a" : "#dc2626",
+        color: "white",
+        border: "none",
+        borderRadius: 6,
+        cursor: "pointer",
+      }}
+    >
+      {season.is_locked ? "Unlock" : "Lock"}
+    </button>
+
+    {season.is_active && (
+      <span style={{ color: "#22c55e", fontWeight: 700 }}>
+        ✅ Active
+      </span>
+    )}
+  </div>
+</td>
                     </tr>
                   ))}
                 </tbody>
