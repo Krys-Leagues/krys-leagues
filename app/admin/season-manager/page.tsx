@@ -1,54 +1,295 @@
 "use client"
 
 import Link from "next/link"
+import { useEffect, useState } from "react"
+import { supabase } from "@/lib/supabase"
+import { logActivity } from "@/lib/activityLog"
+
+type Season = {
+  id: string
+  league_type: string
+  season_number: number
+  due_date: string | null
+  start_date: string | null
+  end_date: string | null
+  is_locked: boolean
+  created_at: string
+}
+
+const LEAGUES = [
+  { value: "stroke", label: "Stroke Play" },
+  { value: "match", label: "Match Play" },
+  { value: "pyp", label: "Pick Your Poison" },
+  { value: "doubles", label: "Doubles" },
+  { value: "pro", label: "Pro League" },
+  { value: "solo", label: "Solo League" },
+]
 
 export default function SeasonManagerPage() {
+  const [leagueType, setLeagueType] = useState("stroke")
+  const [seasonNumber, setSeasonNumber] = useState("")
+  const [dueDate, setDueDate] = useState("")
+
+  const [seasons, setSeasons] = useState<Season[]>([])
+  const [loading, setLoading] = useState(false)
+  const [loadingSeasons, setLoadingSeasons] = useState(true)
+  const [message, setMessage] = useState("")
+
+  useEffect(() => {
+    loadSeasons()
+  }, [])
+
+  async function loadSeasons() {
+    setLoadingSeasons(true)
+
+    const { data, error } = await supabase
+      .from("seasons")
+      .select(
+        "id, league_type, season_number, due_date, start_date, end_date, is_locked, created_at"
+      )
+      .order("created_at", { ascending: false })
+
+    if (error) {
+      setMessage(`Could not load seasons: ${error.message}`)
+      setLoadingSeasons(false)
+      return
+    }
+
+    setSeasons((data || []) as Season[])
+    setLoadingSeasons(false)
+  }
+
+  async function createSeason() {
+    setMessage("")
+
+    const number = Number(seasonNumber)
+
+    if (!leagueType) {
+      setMessage("Choose a league.")
+      return
+    }
+
+    if (!Number.isInteger(number) || number <= 0) {
+      setMessage("Enter a valid season number.")
+      return
+    }
+
+    if (!dueDate) {
+      setMessage("Choose a due date.")
+      return
+    }
+
+    setLoading(true)
+
+    const { data: existingSeason, error: existingError } = await supabase
+      .from("seasons")
+      .select("id")
+      .eq("league_type", leagueType)
+      .eq("season_number", number)
+      .maybeSingle()
+
+    if (existingError) {
+      setMessage(`Could not check the season: ${existingError.message}`)
+      setLoading(false)
+      return
+    }
+
+    if (existingSeason) {
+      setMessage(
+        `${getLeagueLabel(leagueType)} Season ${number} already exists.`
+      )
+      setLoading(false)
+      return
+    }
+
+    const { data: newSeason, error: insertError } = await supabase
+      .from("seasons")
+      .insert({
+        league_type: leagueType,
+        season_number: number,
+        due_date: dueDate,
+        is_locked: false,
+      })
+      .select(
+        "id, league_type, season_number, due_date, start_date, end_date, is_locked, created_at"
+      )
+      .single()
+
+    if (insertError) {
+      await logActivity({
+        userType: "admin",
+        action: "Create Season Failed",
+        status: "error",
+        leagueType,
+        page: "/admin/season-manager",
+        details: {
+          seasonNumber: number,
+          dueDate,
+          error: insertError.message,
+        },
+      })
+
+      setMessage(`Season was not created: ${insertError.message}`)
+      setLoading(false)
+      return
+    }
+
+    await logActivity({
+      userType: "admin",
+      action: "Created Season",
+      status: "success",
+      leagueType,
+      page: "/admin/season-manager",
+      details: {
+        seasonId: newSeason.id,
+        seasonNumber: number,
+        dueDate,
+      },
+    })
+
+    setSeasonNumber("")
+    setDueDate("")
+    setMessage(
+      `${getLeagueLabel(leagueType)} Season ${number} was created successfully.`
+    )
+
+    await loadSeasons()
+    setLoading(false)
+  }
+
+  function getLeagueLabel(value: string) {
+    return LEAGUES.find((league) => league.value === value)?.label || value
+  }
+
   return (
     <main style={page}>
-      <h1 style={title}>Season Manager</h1>
+      <div style={container}>
+        <div style={topBar}>
+          <Link href="/admin" style={backButton}>
+            ← Admin Home
+          </Link>
 
-      <p style={subtitle}>
-        Create, activate, archive, and manage league seasons.
-      </p>
+          <Link href="/admin/command-center" style={secondaryButton}>
+            Command Center
+          </Link>
+        </div>
 
-      <div style={grid}>
-        <section style={card}>
-          <strong>Create New Season</strong>
-          <span>
-            Create the next season for any league.
-          </span>
+        <h1 style={title}>Season Manager</h1>
+
+        <p style={subtitle}>
+          Create and manage the official season record for each league.
+        </p>
+
+        <section style={panel}>
+          <h2 style={sectionTitle}>Create New Season</h2>
+
+          <div style={formGrid}>
+            <div>
+              <label style={label}>League</label>
+
+              <select
+                value={leagueType}
+                onChange={(event) => setLeagueType(event.target.value)}
+                style={input}
+                disabled={loading}
+              >
+                {LEAGUES.map((league) => (
+                  <option key={league.value} value={league.value}>
+                    {league.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label style={label}>Season Number</label>
+
+              <input
+                type="number"
+                min="1"
+                step="1"
+                value={seasonNumber}
+                onChange={(event) => setSeasonNumber(event.target.value)}
+                placeholder="Example: 60"
+                style={input}
+                disabled={loading}
+              />
+            </div>
+
+            <div>
+              <label style={label}>Season Due Date</label>
+
+              <input
+                type="date"
+                value={dueDate}
+                onChange={(event) => setDueDate(event.target.value)}
+                style={input}
+                disabled={loading}
+              />
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={createSeason}
+            disabled={loading}
+            style={{
+              ...createButton,
+              opacity: loading ? 0.6 : 1,
+              cursor: loading ? "not-allowed" : "pointer",
+            }}
+          >
+            {loading ? "Creating Season..." : "Create Season"}
+          </button>
+
+          {message && <p style={messageStyle}>{message}</p>}
         </section>
 
-        <section style={card}>
-          <strong>Active Seasons</strong>
-          <span>
-            Select which season is currently active.
-          </span>
+        <section style={panel}>
+          <h2 style={sectionTitle}>Existing Seasons</h2>
+
+          {loadingSeasons ? (
+            <p style={muted}>Loading seasons...</p>
+          ) : seasons.length === 0 ? (
+            <p style={muted}>No seasons have been created yet.</p>
+          ) : (
+            <div style={{ overflowX: "auto" }}>
+              <table style={table}>
+                <thead>
+                  <tr>
+                    <th style={th}>League</th>
+                    <th style={th}>Season</th>
+                    <th style={th}>Due Date</th>
+                    <th style={th}>Status</th>
+                    <th style={th}>Created</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {seasons.map((season) => (
+                    <tr key={season.id}>
+                      <td style={td}>
+                        {getLeagueLabel(season.league_type)}
+                      </td>
+
+                      <td style={td}>Season {season.season_number}</td>
+
+                      <td style={td}>{season.due_date || "Not set"}</td>
+
+                      <td style={td}>
+                        {season.is_locked ? "Locked" : "Open"}
+                      </td>
+
+                      <td style={td}>
+                        {new Date(season.created_at).toLocaleDateString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </section>
-
-        <section style={card}>
-          <strong>Archive Seasons</strong>
-          <span>
-            Lock completed seasons and preserve historical standings.
-          </span>
-        </section>
-
-        <section style={card}>
-          <strong>Clone League Structure</strong>
-          <span>
-            Copy divisions and settings into a new season.
-          </span>
-        </section>
-
-        <Link href="/admin/players" style={card}>
-          <strong>Players</strong>
-          <span>Open the global player manager.</span>
-        </Link>
-
-        <Link href="/admin" style={card}>
-          <strong>Back to Admin Home</strong>
-          <span>Return to the main admin dashboard.</span>
-        </Link>
       </div>
     </main>
   )
@@ -61,30 +302,129 @@ const page: React.CSSProperties = {
   color: "white",
 }
 
+const container: React.CSSProperties = {
+  width: "100%",
+  maxWidth: 1150,
+  margin: "0 auto",
+}
+
+const topBar: React.CSSProperties = {
+  display: "flex",
+  gap: 12,
+  flexWrap: "wrap",
+  marginBottom: 22,
+}
+
+const backButton: React.CSSProperties = {
+  display: "inline-block",
+  padding: "10px 14px",
+  borderRadius: 9,
+  background: "#2563eb",
+  color: "white",
+  textDecoration: "none",
+  fontWeight: 700,
+}
+
+const secondaryButton: React.CSSProperties = {
+  display: "inline-block",
+  padding: "10px 14px",
+  borderRadius: 9,
+  border: "1px solid #555",
+  background: "#181818",
+  color: "white",
+  textDecoration: "none",
+  fontWeight: 700,
+}
+
 const title: React.CSSProperties = {
-  fontSize: 34,
+  fontSize: 38,
   marginBottom: 8,
 }
 
 const subtitle: React.CSSProperties = {
   color: "#cfcfcf",
-  marginBottom: 28,
+  marginBottom: 26,
+  fontSize: 17,
 }
 
-const grid: React.CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))",
-  gap: 14,
-}
-
-const card: React.CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  gap: 8,
-  padding: 18,
-  borderRadius: 14,
+const panel: React.CSSProperties = {
+  padding: 22,
+  marginBottom: 20,
+  borderRadius: 15,
   border: "1px solid #333",
   background: "#111",
+}
+
+const sectionTitle: React.CSSProperties = {
+  marginTop: 0,
+  marginBottom: 20,
+}
+
+const formGrid: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+  gap: 16,
+}
+
+const label: React.CSSProperties = {
+  display: "block",
+  marginBottom: 7,
+  color: "#ddd",
+  fontWeight: 700,
+}
+
+const input: React.CSSProperties = {
+  boxSizing: "border-box",
+  width: "100%",
+  padding: 12,
+  borderRadius: 9,
+  border: "1px solid #555",
+  background: "#050505",
   color: "white",
-  textDecoration: "none",
+  fontSize: 16,
+}
+
+const createButton: React.CSSProperties = {
+  width: "100%",
+  marginTop: 20,
+  padding: 14,
+  border: "none",
+  borderRadius: 10,
+  background: "#16a34a",
+  color: "white",
+  fontSize: 17,
+  fontWeight: 800,
+}
+
+const messageStyle: React.CSSProperties = {
+  marginTop: 18,
+  padding: 12,
+  borderRadius: 9,
+  border: "1px solid #444",
+  background: "#080808",
+  color: "#facc15",
+  fontWeight: 700,
+}
+
+const muted: React.CSSProperties = {
+  color: "#aaa",
+}
+
+const table: React.CSSProperties = {
+  width: "100%",
+  minWidth: 700,
+  borderCollapse: "collapse",
+}
+
+const th: React.CSSProperties = {
+  padding: 11,
+  textAlign: "left",
+  borderBottom: "1px solid #555",
+  color: "#ddd",
+}
+
+const td: React.CSSProperties = {
+  padding: 11,
+  borderBottom: "1px solid #333",
+  color: "#eee",
 }
