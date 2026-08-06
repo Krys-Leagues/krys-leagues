@@ -1,6 +1,7 @@
 import { createImportBatch } from "./createImportBatch"
 import { saveImportRows } from "./saveImportRows"
 import { loadPlayers } from "./loadPlayers"
+import { loadPlayerAliases } from "./loadPlayerAliases"
 import { matchPlayers } from "./matchPlayers"
 import { validateImport } from "./validateImport"
 
@@ -41,6 +42,7 @@ export async function runImport({
 
   // STEP 3 - Load existing players
   const players = await loadPlayers()
+  const aliases = await loadPlayerAliases()
 
   // STEP 4 - Match imported player names
   const importedNames = rows.map((row) =>
@@ -48,9 +50,10 @@ export async function runImport({
   )
 
   const matches = matchPlayers(
-    importedNames,
-    players
-  )
+  importedNames,
+  players,
+  aliases
+)
 
   // STEP 5 - Validate the import
   const validation = validateImport(matches)

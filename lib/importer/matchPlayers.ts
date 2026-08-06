@@ -1,4 +1,9 @@
-import { PlayerRecord } from "./loadPlayers"
+import type { PlayerRecord } from "./loadPlayers"
+import type {
+  IdentityPlayer,
+  PlayerIdentityAlias,
+} from "@/lib/identity"
+import { resolveIdentity } from "@/lib/identity"
 
 export type PlayerMatch = {
   importedName: string
@@ -8,50 +13,51 @@ export type PlayerMatch = {
   status: "exact" | "close" | "new"
 }
 
-function normalize(value: string) {
-  return value
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, "")
-}
-
 export function matchPlayers(
   importedNames: string[],
-  players: PlayerRecord[]
+  players: PlayerRecord[],
+  aliases: PlayerIdentityAlias[] = []
 ): PlayerMatch[] {
+  const identityPlayers: IdentityPlayer[] =
+    players.map((player) => ({
+      id: player.id,
+      screenName: player.screen_name,
+      discordName: player.discord_name,
+      discordId: player.discord_id,
+      active: player.active,
+    }))
 
   return importedNames.map((name) => {
+    const result = resolveIdentity({
+      importedName: name,
+      players: identityPlayers,
+      aliases,
+      options: {
+        minimumSuggestionConfidence: 60,
+        maximumCandidates: 5,
+      },
+    })
 
-    const normalized = normalize(name)
-
-    const exact = players.find(
-      (player) =>
-        normalize(player.screen_name) === normalized
-    )
-
-    if (exact) {
+    if (
+      result.status === "exact" ||
+      result.status === "normalized" ||
+      result.status === "alias"
+    ) {
       return {
         importedName: name,
-        playerId: exact.id,
-        matchedName: exact.screen_name,
-        confidence: 100,
+        playerId: result.playerId,
+        matchedName: result.screenName,
+        confidence: result.confidence,
         status: "exact",
       }
     }
 
-    const close = players.find(
-      (player) =>
-        normalize(player.screen_name).includes(normalized) ||
-        normalized.includes(
-          normalize(player.screen_name)
-        )
-    )
-
-    if (close) {
+    if (result.status === "suggested") {
       return {
         importedName: name,
-        playerId: close.id,
-        matchedName: close.screen_name,
-        confidence: 85,
+        playerId: result.playerId,
+        matchedName: result.screenName,
+        confidence: result.confidence,
         status: "close",
       }
     }
@@ -63,7 +69,5 @@ export function matchPlayers(
       confidence: 0,
       status: "new",
     }
-
   })
-
 }

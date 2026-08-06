@@ -15,15 +15,21 @@ function CallbackHandler() {
 
   useEffect(() => {
     async function handleLogin() {
-      const code = searchParams.get("code");
+  const code = searchParams.get("code");
+  const next = searchParams.get("next");
+  const type = searchParams.get("type");
 
-      if (code) {
-        await supabase.auth.exchangeCodeForSession(code);
-      }
+  if (code) {
+    await supabase.auth.exchangeCodeForSession(code);
+  }
 
-      router.replace("/admin/command-center");
-    }
+  if (type === "player" && next) {
+    router.replace(next);
+    return;
+  }
 
+  router.replace("/admin");
+}
     handleLogin();
   }, [router, searchParams]);
 
