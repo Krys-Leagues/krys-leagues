@@ -220,6 +220,27 @@ function startEdit(season: Season) {
   setEditDueDate(season.due_date ?? "")
 }
 
+async function saveEdit() {
+  if (!editingSeason) return
+
+  const { error } = await supabase
+    .from("seasons")
+    .update({
+      season_number: Number(editSeasonNumber),
+      due_date: editDueDate,
+    })
+    .eq("id", editingSeason.id)
+
+  if (error) {
+    setMessage(error.message)
+    return
+  }
+
+  setEditingSeason(null)
+  await loadSeasons()
+  setMessage("Season updated successfully.")
+}
+
   function getLeagueLabel(value: string) {
     return LEAGUES.find((league) => league.value === value)?.label || value
   }
@@ -334,9 +355,12 @@ function startEdit(season: Season) {
     </div>
 
     <div style={{ display: "flex", gap: 12, marginTop: 20 }}>
-      <button style={createButton}>
-        Save Changes
-      </button>
+      <button
+  onClick={saveEdit}
+  style={createButton}
+>
+  Save Changes
+</button>
 
       <button
         onClick={() => setEditingSeason(null)}
