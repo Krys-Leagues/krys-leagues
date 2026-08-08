@@ -1091,7 +1091,7 @@ begin
     null,
     null
   )
-  on conflict (season_id) do nothing;
+  on conflict on constraint stroke_schedule_state_pkey do nothing;
 
   get diagnostics v_state_inserted_count = row_count;
 

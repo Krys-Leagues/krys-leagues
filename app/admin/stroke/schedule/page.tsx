@@ -45,6 +45,25 @@ type ReviewResultRow = {
   review_performed: boolean
 }
 
+type PostScheduleResponse = {
+  success?: boolean
+  error?: string
+  posted_revision?: number
+  succeeded_divisions?: number[]
+  failed_divisions?: Array<{ division_number: number; error: string }>
+}
+
+const divisionThemes: Record<
+  number,
+  { background: string; border: string; accent: string }
+> = {
+  1: { background: "rgba(124, 45, 18, 0.18)", border: "#9a3412", accent: "#fb923c" },
+  2: { background: "rgba(30, 64, 175, 0.16)", border: "#1d4ed8", accent: "#60a5fa" },
+  3: { background: "rgba(20, 83, 45, 0.18)", border: "#15803d", accent: "#4ade80" },
+  4: { background: "rgba(113, 63, 18, 0.18)", border: "#a16207", accent: "#facc15" },
+  5: { background: "rgba(88, 28, 135, 0.18)", border: "#7e22ce", accent: "#c084fc" },
+}
+
 export default function StrokeScheduleReviewPage() {
   const router = useRouter()
   const [season, setSeason] = useState<SeasonRow | null>(null)
@@ -55,8 +74,11 @@ export default function StrokeScheduleReviewPage() {
   const [fixtures, setFixtures] = useState<FixtureRow[]>([])
   const [loading, setLoading] = useState(true)
   const [reviewing, setReviewing] = useState(false)
+  const [posting, setPosting] = useState(false)
   const [error, setError] = useState("")
   const [message, setMessage] = useState("")
+  const [postMessage, setPostMessage] = useState("")
+  const [postError, setPostError] = useState("")
 
   useEffect(() => {
     void loadSchedule()
@@ -207,6 +229,68 @@ export default function StrokeScheduleReviewPage() {
     setReviewing(false)
   }
 
+  async function postScheduleToDiscord() {
+    if (!season || !roster || !scheduleState) return
+
+    const canPost =
+      roster.status === "approved" &&
+      scheduleState.generated_revision > 0 &&
+      scheduleState.generated_revision === scheduleState.change_revision &&
+      scheduleState.reviewed_revision === scheduleState.change_revision &&
+      scheduleState.posted_revision !== scheduleState.change_revision
+
+    if (!canPost) return
+
+    setPosting(true)
+    setPostMessage("")
+    setPostError("")
+
+    try {
+      const { data, error: sessionError } = await supabase.auth.getSession()
+      const session = data.session
+
+      if (sessionError || !session) {
+        setPostError("An authenticated administrator session is required.")
+        return
+      }
+
+      const response = await fetch("/api/admin/stroke/post-schedule", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ season_id: season.id }),
+      })
+      const result = (await response.json().catch(() => ({}))) as PostScheduleResponse
+
+      if (!response.ok || !result.success) {
+        const succeeded = result.succeeded_divisions?.length
+          ? ` Posted successfully: ${result.succeeded_divisions
+              .map((divisionNumber) => `D${divisionNumber}`)
+              .join(", ")}.`
+          : ""
+        const failed = result.failed_divisions?.length
+          ? ` Failed: ${result.failed_divisions
+              .map((item) => `D${item.division_number} (${item.error})`)
+              .join(", ")}.`
+          : ""
+
+        setPostError(
+          `${result.error || "Schedule posting failed."}${succeeded}${failed}`
+        )
+        return
+      }
+
+      await loadSchedule()
+      setPostMessage("The current reviewed schedule was posted to Discord.")
+    } catch {
+      setPostError("The Discord posting request could not be completed.")
+    } finally {
+      setPosting(false)
+    }
+  }
+
   const divisionNumbers = useMemo(() => {
     if (!roster) return []
     return Array.from({ length: roster.division_count }, (_, index) => index + 1)
@@ -234,6 +318,14 @@ export default function StrokeScheduleReviewPage() {
       scheduleState.generated_revision > 0 &&
       scheduleState.generated_revision === scheduleState.change_revision &&
       scheduleState.reviewed_revision < scheduleState.generated_revision
+  )
+  const scheduleIsPosted = Boolean(
+    scheduleState &&
+      scheduleIsReviewed &&
+      scheduleState.posted_revision === scheduleState.change_revision
+  )
+  const canPost = Boolean(
+    roster?.status === "approved" && scheduleIsReviewed && !scheduleIsPosted
   )
   const scheduleStatus = !scheduleState || scheduleState.generated_revision === 0
     ? "Not Generated"
@@ -320,10 +412,30 @@ export default function StrokeScheduleReviewPage() {
                 const divisionFixtures = fixtures.filter(
                   (fixture) => fixture.division_number === divisionNumber
                 )
+                const divisionTheme = divisionThemes[divisionNumber]
 
                 return (
-                  <div key={divisionNumber} style={divisionSection}>
-                    <h3>Stroke D{divisionNumber}</h3>
+                  <div
+                    key={divisionNumber}
+                    style={
+                      divisionTheme
+                        ? {
+                            ...divisionSection,
+                            background: divisionTheme.background,
+                            borderColor: divisionTheme.border,
+                          }
+                        : divisionSection
+                    }
+                  >
+                    <h3
+                      style={
+                        divisionTheme
+                          ? { ...divisionHeading, color: divisionTheme.accent }
+                          : divisionHeading
+                      }
+                    >
+                      Stroke D{divisionNumber}
+                    </h3>
 
                     {divisionFixtures.length === 0 ? (
                       <p style={mutedText}>No real-player fixtures.</p>
@@ -369,6 +481,10 @@ export default function StrokeScheduleReviewPage() {
                 <p style={successText}>Reviewed</p>
               )}
 
+              {scheduleIsPosted && (
+                <p style={successText}>Posted to Discord</p>
+              )}
+
               {!scheduleState || scheduleState.generated_revision === 0 ? (
                 <p style={mutedText}>Generate the schedule before reviewing it.</p>
               ) : null}
@@ -394,9 +510,38 @@ export default function StrokeScheduleReviewPage() {
                 </button>
               )}
 
+              {canPost && (
+                <button
+                  type="button"
+                  onClick={postScheduleToDiscord}
+                  disabled={posting}
+                  style={{
+                    ...postButton,
+                    opacity: posting ? 0.6 : 1,
+                    cursor: posting ? "not-allowed" : "pointer",
+                  }}
+                >
+                  {posting
+                    ? "Posting Schedule to Discord..."
+                    : "Post Schedule to Discord"}
+                </button>
+              )}
+
               {message && (
                 <p role="status" style={successText}>
                   {message}
+                </p>
+              )}
+
+              {postMessage && (
+                <p role="status" style={successText}>
+                  {postMessage}
+                </p>
+              )}
+
+              {postError && (
+                <p role="alert" style={errorText}>
+                  {postError}
                 </p>
               )}
             </section>
@@ -464,8 +609,15 @@ const mutedText: React.CSSProperties = {
 
 const divisionSection: React.CSSProperties = {
   marginTop: 24,
-  paddingTop: 16,
-  borderTop: "1px solid #333",
+  padding: 18,
+  border: "1px solid #333",
+  borderRadius: 12,
+  background: "#0b0b0b",
+}
+
+const divisionHeading: React.CSSProperties = {
+  margin: 0,
+  color: "#ddd",
 }
 
 const gameSection: React.CSSProperties = {
@@ -490,6 +642,11 @@ const reviewButton: React.CSSProperties = {
   color: "white",
   fontWeight: 700,
   cursor: "pointer",
+}
+
+const postButton: React.CSSProperties = {
+  ...reviewButton,
+  background: "#5865f2",
 }
 
 const errorText: React.CSSProperties = {

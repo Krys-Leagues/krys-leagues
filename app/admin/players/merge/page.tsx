@@ -11,10 +11,19 @@ type Player = {
   active: boolean | null
 }
 
+type MergeResult = {
+  kept_player_id: string
+  kept_player_name: string
+  removed_player_id: string
+  removed_player_name: string
+  affected_stroke_season_ids: string[]
+  affected_stroke_season_numbers: number[]
+  affected_season_count: number
+}
+
 export default function MergePlayersPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-
   const removeFromUrl = searchParams.get("remove") || ""
 
   const [players, setPlayers] = useState<Player[]>([])
@@ -22,138 +31,81 @@ export default function MergePlayersPage() {
   const [keepPlayerId, setKeepPlayerId] = useState("")
   const [loading, setLoading] = useState(false)
   const [merging, setMerging] = useState(false)
+  const [mergeError, setMergeError] = useState("")
+  const [mergeResult, setMergeResult] = useState<MergeResult | null>(null)
 
   useEffect(() => {
-    loadPlayers()
+    void loadPlayers()
   }, [])
 
   async function loadPlayers() {
     setLoading(true)
-
     const { data, error } = await supabase
       .from("players")
       .select("id, screen_name, status, active")
       .order("screen_name", { ascending: true })
-
     setLoading(false)
 
     if (error) {
-      alert(error.message)
+      setMergeError(error.message)
       return
     }
 
     setPlayers(data || [])
   }
 
-  const removePlayer = useMemo(() => {
-    return players.find((p) => p.id === removePlayerId) || null
-  }, [players, removePlayerId])
+  const removePlayer = useMemo(
+    () => players.find((player) => player.id === removePlayerId) || null,
+    [players, removePlayerId]
+  )
+  const keepPlayer = useMemo(
+    () => players.find((player) => player.id === keepPlayerId) || null,
+    [players, keepPlayerId]
+  )
 
-  const keepPlayer = useMemo(() => {
-    return players.find((p) => p.id === keepPlayerId) || null
-  }, [players, keepPlayerId])
-
-  const keepOptions = players.filter((p) => p.id !== removePlayerId)
-  const removeOptions = players.filter((p) => p.id !== keepPlayerId)
-
-  async function updateTableIds(
-    table: string,
-    column: string,
-    removeId: string,
-    keepId: string
-  ) {
-    const { error } = await supabase
-      .from(table)
-      .update({ [column]: keepId })
-      .eq(column, removeId)
-
-    if (error) {
-      throw new Error(`${table}.${column}: ${error.message}`)
-    }
-  }
-
-  async function updateNameText(
-    table: string,
-    column: string,
-    oldName: string,
-    newName: string
-  ) {
-    const { error } = await supabase
-      .from(table)
-      .update({ [column]: newName })
-      .ilike(column, oldName)
-
-    if (error) {
-      throw new Error(`${table}.${column}: ${error.message}`)
-    }
-  }
+  const keepOptions = players.filter((player) => player.id !== removePlayerId)
+  const removeOptions = players.filter((player) => player.id !== keepPlayerId)
 
   async function mergePlayers() {
     if (!removePlayer || !keepPlayer) {
-      alert("Choose both players")
+      setMergeError("Choose both players")
       return
     }
 
     if (removePlayer.id === keepPlayer.id) {
-      alert("Remove player and keep player cannot be the same")
+      setMergeError("The player to keep and the player to remove must be different")
       return
     }
 
-    const ok = confirm(
-      `Merge ${removePlayer.screen_name} into ${keepPlayer.screen_name}?\n\nThis will move records to ${keepPlayer.screen_name} and delete ${removePlayer.screen_name}.`
+    const confirmed = window.confirm(
+      `KEEP PLAYER: ${keepPlayer.screen_name}\nMERGE / REMOVE PLAYER: ${removePlayer.screen_name}\n\nThis protected merge is permanent. Continue?`
     )
-
-    if (!ok) return
+    if (!confirmed) return
 
     setMerging(true)
+    setMergeError("")
+    setMergeResult(null)
 
     try {
-      const removeId = removePlayer.id
-      const keepId = keepPlayer.id
-      const oldName = removePlayer.screen_name
-      const newName = keepPlayer.screen_name
+      const { data, error } = await supabase.rpc("merge_site_player_identity", {
+        p_keep_player_id: keepPlayer.id,
+        p_merge_player_id: removePlayer.id,
+      })
 
-      await updateTableIds("player_trophies", "player_id", removeId, keepId)
-      await updateTableIds("player_league_memberships", "player_id", removeId, keepId)
+      if (error) throw new Error(error.message)
 
-      await updateTableIds("schedule", "player1_id", removeId, keepId)
-      await updateTableIds("schedule", "player2_id", removeId, keepId)
+      const saved = Array.isArray(data) ? data[0] : data
+      if (!saved) throw new Error("The merge completed without returning confirmation")
 
-      await updateTableIds("results", "player1_id", removeId, keepId)
-      await updateTableIds("results", "player2_id", removeId, keepId)
-
-      await updateTableIds("matches", "player1_id", removeId, keepId)
-      await updateTableIds("matches", "player2_id", removeId, keepId)
-
-      await updateTableIds("player_tournament_entries", "player_id", removeId, keepId)
-
-      await updateNameText("schedule", "player1", oldName, newName)
-      await updateNameText("schedule", "player2", oldName, newName)
-
-      await updateNameText("results", "player1", oldName, newName)
-      await updateNameText("results", "player2", oldName, newName)
-      await updateNameText("results", "winner", oldName, newName)
-
-      await updateNameText("player_trophies", "player_name", oldName, newName)
-      await updateNameText("player_tournament_entries", "player_name", oldName, newName)
-
-      const { error: deleteError } = await supabase
-        .from("players")
-        .delete()
-        .eq("id", removeId)
-
-      if (deleteError) {
-        throw new Error(`delete players: ${deleteError.message}`)
-      }
-
-      alert(`Merged ${oldName} into ${newName} ✔`)
-
-      router.push("/admin/players")
-    } catch (err: any) {
-      alert(err.message || "Merge failed")
+      setMergeResult(saved as MergeResult)
+      setRemovePlayerId("")
+      setKeepPlayerId("")
+      await loadPlayers()
+    } catch (error: unknown) {
+      setMergeError(error instanceof Error ? error.message : "Merge failed")
+    } finally {
+      setMerging(false)
     }
-
-    setMerging(false)
   }
 
   return (
@@ -163,7 +115,6 @@ export default function MergePlayersPage() {
           <button onClick={() => router.push("/admin/players")} style={backButtonPrimary}>
             ← Players
           </button>
-
           <button onClick={() => router.push("/admin")} style={backButtonSecondary}>
             ← Admin
           </button>
@@ -171,32 +122,29 @@ export default function MergePlayersPage() {
 
         <div style={card}>
           <h1 style={title}>Merge Players</h1>
-
           <p style={subtitle}>
             Move duplicate player history into the correct player, then remove the duplicate.
           </p>
 
           <div style={mergeGrid}>
             <div style={mergeBox}>
-              <h2 style={boxTitle}>Remove Duplicate</h2>
-
+              <h2 style={boxTitle}>MERGE / REMOVE PLAYER</h2>
               <select
                 value={removePlayerId}
-                onChange={(e) => setRemovePlayerId(e.target.value)}
+                onChange={(event) => setRemovePlayerId(event.target.value)}
                 style={input}
               >
                 <option value="">Select player to remove</option>
-                {removeOptions.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.screen_name}
+                {removeOptions.map((player) => (
+                  <option key={player.id} value={player.id}>
+                    {player.screen_name}
                   </option>
                 ))}
               </select>
-
               {removePlayer && (
                 <div style={previewBox}>
                   <div style={previewName}>{removePlayer.screen_name}</div>
-                  <div style={previewText}>This player will be removed after records move.</div>
+                  <div style={previewText}>This duplicate will be removed after all records move.</div>
                 </div>
               )}
             </div>
@@ -204,37 +152,59 @@ export default function MergePlayersPage() {
             <div style={arrowBox}>→</div>
 
             <div style={mergeBox}>
-              <h2 style={boxTitle}>Keep Main Player</h2>
-
+              <h2 style={boxTitle}>KEEP PLAYER</h2>
               <select
                 value={keepPlayerId}
-                onChange={(e) => setKeepPlayerId(e.target.value)}
+                onChange={(event) => setKeepPlayerId(event.target.value)}
                 style={input}
               >
                 <option value="">Select player to keep</option>
-                {keepOptions.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.screen_name}
+                {keepOptions.map((player) => (
+                  <option key={player.id} value={player.id}>
+                    {player.screen_name}
                   </option>
                 ))}
               </select>
-
               {keepPlayer && (
                 <div style={previewBox}>
                   <div style={previewName}>{keepPlayer.screen_name}</div>
-                  <div style={previewText}>This player will receive the records.</div>
+                  <div style={previewText}>This player and screen name remain authoritative.</div>
                 </div>
               )}
             </div>
           </div>
 
           <div style={warningBox}>
-            <strong>Safety:</strong> This moves linked records first, including trophies,
-            memberships, schedule, results, matches, and tournament entries.
+            <strong>Safety:</strong> The protected merge checks known identity conflicts before
+            making one atomic change. Approved Final Scorecard history is never rewritten.
           </div>
 
-          <button onClick={mergePlayers} disabled={merging || loading} style={mergeSubmitButton}>
-            {merging ? "Merging..." : "Merge Players"}
+          {mergeError && <div style={errorBox}>{mergeError}</div>}
+
+          {mergeResult && (
+            <div style={successBox}>
+              <strong>Player merge completed.</strong>
+              <div style={resultLine}>Kept player: {mergeResult.kept_player_name}</div>
+              <div style={resultLine}>Removed duplicate: {mergeResult.removed_player_name}</div>
+              <div style={resultLine}>
+                Affected Stroke seasons: {mergeResult.affected_stroke_season_numbers.length > 0
+                  ? mergeResult.affected_stroke_season_numbers.join(", ")
+                  : "None"}
+              </div>
+              {mergeResult.affected_season_count > 0 && (
+                <div style={reviewWarning}>
+                  Regenerate and review each affected Stroke schedule before posting it to Discord.
+                </div>
+              )}
+            </div>
+          )}
+
+          <button
+            onClick={mergePlayers}
+            disabled={merging || loading || !removePlayer || !keepPlayer}
+            style={mergeSubmitButton}
+          >
+            {merging ? "Merging..." : "Confirm Protected Merge"}
           </button>
         </div>
       </div>
@@ -250,130 +220,58 @@ const page: React.CSSProperties = {
   justifyContent: "center",
 }
 
-const container: React.CSSProperties = {
-  width: "100%",
-  maxWidth: 1100,
-  padding: 30,
-}
-
-const topBar: React.CSSProperties = {
-  display: "flex",
-  gap: 10,
-  marginBottom: 20,
-}
-
+const container: React.CSSProperties = { width: "100%", maxWidth: 1100, padding: 30 }
+const topBar: React.CSSProperties = { display: "flex", gap: 10, marginBottom: 20 }
 const backButtonPrimary: React.CSSProperties = {
-  padding: "10px 16px",
-  background: "#2563eb",
-  border: "none",
-  borderRadius: 8,
-  color: "white",
-  fontWeight: 700,
-  cursor: "pointer",
+  padding: "10px 16px", background: "#2563eb", border: "none", borderRadius: 8,
+  color: "white", fontWeight: 700, cursor: "pointer",
 }
-
 const backButtonSecondary: React.CSSProperties = {
-  padding: "10px 16px",
-  background: "#222",
-  border: "1px solid #555",
-  borderRadius: 8,
-  color: "white",
-  cursor: "pointer",
+  padding: "10px 16px", background: "#222", border: "1px solid #555", borderRadius: 8,
+  color: "white", cursor: "pointer",
 }
-
 const card: React.CSSProperties = {
-  background: "#050505",
-  border: "1px solid #333",
-  borderRadius: 18,
-  padding: 28,
+  background: "#050505", border: "1px solid #333", borderRadius: 18, padding: 28,
   boxShadow: "0 0 30px rgba(255,255,255,0.08)",
 }
-
-const title: React.CSSProperties = {
-  fontSize: 38,
-  margin: 0,
-}
-
-const subtitle: React.CSSProperties = {
-  marginTop: 8,
-  color: "#aaa",
-  fontSize: 16,
-}
-
+const title: React.CSSProperties = { fontSize: 38, margin: 0 }
+const subtitle: React.CSSProperties = { marginTop: 8, color: "#aaa", fontSize: 16 }
 const mergeGrid: React.CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "1fr auto 1fr",
-  gap: 18,
-  marginTop: 28,
+  display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: 18, marginTop: 28,
   alignItems: "stretch",
 }
-
 const mergeBox: React.CSSProperties = {
-  background: "#111",
-  border: "1px solid #444",
-  borderRadius: 14,
-  padding: 18,
+  background: "#111", border: "1px solid #444", borderRadius: 14, padding: 18,
 }
-
-const boxTitle: React.CSSProperties = {
-  marginTop: 0,
-  fontSize: 24,
-}
-
+const boxTitle: React.CSSProperties = { marginTop: 0, fontSize: 20 }
 const input: React.CSSProperties = {
-  width: "100%",
-  padding: 12,
-  background: "#050505",
-  border: "1px solid #555",
-  color: "white",
-  borderRadius: 8,
+  width: "100%", padding: 12, background: "#050505", border: "1px solid #555",
+  color: "white", borderRadius: 8,
 }
-
 const arrowBox: React.CSSProperties = {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  fontSize: 42,
-  fontWeight: 900,
-  color: "#aaa",
+  display: "flex", alignItems: "center", justifyContent: "center", fontSize: 42,
+  fontWeight: 900, color: "#aaa",
 }
-
 const previewBox: React.CSSProperties = {
-  marginTop: 16,
-  padding: 14,
-  background: "#050505",
-  border: "1px solid #333",
-  borderRadius: 10,
+  marginTop: 16, padding: 14, background: "#050505", border: "1px solid #333", borderRadius: 10,
 }
-
-const previewName: React.CSSProperties = {
-  fontSize: 24,
-  fontWeight: 900,
-}
-
-const previewText: React.CSSProperties = {
-  marginTop: 6,
-  color: "#aaa",
-}
-
+const previewName: React.CSSProperties = { fontSize: 24, fontWeight: 900 }
+const previewText: React.CSSProperties = { marginTop: 6, color: "#aaa" }
 const warningBox: React.CSSProperties = {
-  marginTop: 24,
-  padding: 14,
-  background: "#1f2937",
-  border: "1px solid #374151",
-  borderRadius: 10,
-  color: "#ddd",
+  marginTop: 24, padding: 14, background: "#1f2937", border: "1px solid #374151",
+  borderRadius: 10, color: "#ddd",
 }
-
+const errorBox: React.CSSProperties = {
+  marginTop: 18, padding: 14, background: "#2a0b0b", border: "1px solid #ef4444",
+  borderRadius: 10, color: "#fecaca",
+}
+const successBox: React.CSSProperties = {
+  marginTop: 18, padding: 16, background: "#082f1c", border: "1px solid #22c55e",
+  borderRadius: 10, color: "#dcfce7",
+}
+const resultLine: React.CSSProperties = { marginTop: 8 }
+const reviewWarning: React.CSSProperties = { marginTop: 12, color: "#fde68a", fontWeight: 700 }
 const mergeSubmitButton: React.CSSProperties = {
-  marginTop: 24,
-  width: "100%",
-  padding: 16,
-  background: "#f59e0b",
-  border: "none",
-  borderRadius: 12,
-  color: "black",
-  fontSize: 20,
-  fontWeight: 900,
-  cursor: "pointer",
+  marginTop: 24, width: "100%", padding: 16, background: "#f59e0b", border: "none",
+  borderRadius: 12, color: "black", fontSize: 20, fontWeight: 900, cursor: "pointer",
 }

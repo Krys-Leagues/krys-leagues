@@ -11,6 +11,20 @@ type Player = {
   active: boolean | null
 }
 
+type LeagueMembership = {
+  player_id: string | null
+  league_type: string
+  season_number: number
+  division: string
+}
+
+type TournamentEntry = {
+  player_id: string | null
+  tournament_type: string
+  bracket: string | null
+  status: string | null
+}
+
 type LeagueKey = "stroke" | "pyp" | "skins" | "kwt"
 
 const CURRENT_SEASON = 59
@@ -63,6 +77,8 @@ export default function PlayersAdminPage() {
   const router = useRouter()
 
   const [players, setPlayers] = useState<Player[]>([])
+  const [leagueMemberships, setLeagueMemberships] = useState<LeagueMembership[]>([])
+  const [tournamentEntries, setTournamentEntries] = useState<TournamentEntry[]>([])
   const [loading, setLoading] = useState(false)
   const [importing, setImporting] = useState(false)
   const [search, setSearch] = useState("")
@@ -105,19 +121,76 @@ export default function PlayersAdminPage() {
   async function loadPlayers() {
     setLoading(true)
 
-    const { data, error } = await supabase
-      .from("players")
-      .select("id, screen_name, status, active")
-      .order("screen_name", { ascending: true })
+    const [playersResult, membershipsResult, tournamentsResult] = await Promise.all([
+      supabase
+        .from("players")
+        .select("id, screen_name, status, active")
+        .order("screen_name", { ascending: true }),
+      supabase
+        .from("player_league_memberships")
+        .select("player_id, league_type, season_number, division")
+        .order("season_number", { ascending: false }),
+      supabase
+        .from("player_tournament_entries")
+        .select("player_id, tournament_type, bracket, status")
+        .order("created_at", { ascending: false }),
+    ])
 
     setLoading(false)
 
-    if (error) {
-      alert(error.message)
+    const loadError = playersResult.error || membershipsResult.error || tournamentsResult.error
+    if (loadError) {
+      alert(loadError.message)
       return
     }
 
-    setPlayers(data || [])
+    setPlayers(playersResult.data || [])
+    setLeagueMemberships(membershipsResult.data || [])
+    setTournamentEntries(tournamentsResult.data || [])
+  }
+
+  function formatLeagueName(leagueType: string) {
+    const labels: Record<string, string> = {
+      stroke: "Stroke",
+      doubles: "Doubles",
+      match: "Match",
+      pyp: "PYP",
+      skins: "Skins",
+      kwt: "KWT",
+    }
+
+    return labels[leagueType.toLowerCase()] || leagueType
+  }
+
+  function compactDivision(divisionName: string) {
+    const divisionMatch = divisionName.match(/\bD\d+\b/i)
+    return divisionMatch ? divisionMatch[0].toUpperCase() : divisionName
+  }
+
+  function playerMembershipLabels(playerId: string) {
+    const leagueLabels = leagueMemberships
+      .filter((membership) => membership.player_id === playerId)
+      .map((membership) =>
+        `${formatLeagueName(membership.league_type)} S${membership.season_number} ${compactDivision(membership.division)}`
+      )
+
+    const tournamentLabels = tournamentEntries
+      .filter((entry) => entry.player_id === playerId)
+      .map((entry) => {
+        const bracket = entry.bracket && entry.bracket !== "Open" ? ` ${entry.bracket}` : " Tournament"
+        const status = entry.status && entry.status !== "registered" ? ` (${entry.status})` : ""
+        return `${entry.tournament_type}${bracket}${status}`
+      })
+
+    return [...new Set([...leagueLabels, ...tournamentLabels])]
+  }
+
+  function handlePlayerAction(action: string, player: Player) {
+    if (action === "profile") router.push(`/admin/players/${player.id}`)
+    if (action === "league") openLeagueModal(player)
+    if (action === "tournament") openTournamentModal(player)
+    if (action === "status") openStatusModal(player)
+    if (action === "merge") router.push(`/admin/players/merge?remove=${player.id}`)
   }
 
   async function createPlayer() {
@@ -498,28 +571,29 @@ export default function PlayersAdminPage() {
       </div>
 
       <table style={table}>
+        <thead>
+          <tr>
+            <th style={tableHeading}>Player</th>
+            <th style={tableHeading}>Status</th>
+            <th style={tableHeading}>Currently In</th>
+            <th style={actionsHeading}>Actions</th>
+          </tr>
+        </thead>
         <tbody>
           {filteredPlayers.map((p) => {
             const currentStatus = getPlayerStatus(p)
+            const membershipLabels = playerMembershipLabels(p.id)
 
             return (
               <tr key={p.id}>
-         <td style={playerTd}>
-  <button
-    onClick={() => router.push(`/admin/players/${p.id}`)}
-    style={{
-      background: "transparent",
-      border: "none",
-      color: "white",
-      fontSize: 18,
-      fontWeight: 800,
-      cursor: "pointer",
-      padding: 0,
-    }}
-  >
-    {p.screen_name}
-  </button>
-</td>
+                <td style={playerTd}>
+                  <button
+                    onClick={() => router.push(`/admin/players/${p.id}`)}
+                    style={playerNameButton}
+                  >
+                    {p.screen_name}
+                  </button>
+                </td>
 
                 <td style={td}>
                   <span
@@ -532,45 +606,32 @@ export default function PlayersAdminPage() {
                   </span>
                 </td>
 
-                <td style={td}>
-                  <div style={actionRow}>
-                    <button
-                      onClick={() => router.push(`/admin/players/${p.id}`)}
-                      style={profileButton}
-                    >
-                      Profile
-                    </button>
-
-                    <button
-                      onClick={() => openLeagueModal(p)}
-                      style={leagueButton}
-                    >
-                      League
-                    </button>
-
-                    <button
-                      onClick={() => openTournamentModal(p)}
-                      style={tournamentButton}
-                    >
-                      Tournament
-                    </button>
-
-                    <button
-                      onClick={() => openStatusModal(p)}
-                      style={statusButton}
-                    >
-                      Status
-                    </button>
-
-                    <button
-                      onClick={() =>
-                        router.push(`/admin/players/merge?remove=${p.id}`)
-                      }
-                      style={mergeButton}
-                    >
-                      Merge
-                    </button>
+                <td style={membershipTd}>
+                  <div style={membershipList}>
+                    {membershipLabels.length > 0 ? membershipLabels.map((label) => (
+                      <span key={label} style={membershipBadge}>{label}</span>
+                    )) : <span style={emptyMembership}>—</span>}
                   </div>
+                </td>
+
+                <td style={actionsTd}>
+                  <select
+                    aria-label={`Actions for ${p.screen_name}`}
+                    value=""
+                    onChange={(event) => handlePlayerAction(event.target.value, p)}
+                    style={actionsSelect}
+                  >
+                    <option value="" disabled>Actions ▾</option>
+                    <optgroup label="Player actions">
+                      <option value="profile">Profile</option>
+                      <option value="league">League</option>
+                      <option value="tournament">Tournament</option>
+                      <option value="status">Status</option>
+                    </optgroup>
+                    <optgroup label="Identity — use carefully">
+                      <option value="merge">Merge</option>
+                    </optgroup>
+                  </select>
                 </td>
               </tr>
             )
@@ -816,58 +877,78 @@ const playerTd: React.CSSProperties = {
   ...td,
   fontWeight: 800,
   fontSize: 18,
+  width: "24%",
 }
 
-const actionRow: React.CSSProperties = {
-  display: "flex",
-  gap: 8,
-  flexWrap: "wrap",
-}
-
-const profileButton: React.CSSProperties = {
-  background: "#16a34a",
-  border: "none",
-  padding: "7px 12px",
-  borderRadius: 6,
-  color: "white",
-  cursor: "pointer",
-}
-
-const leagueButton: React.CSSProperties = {
-  background: "#2563eb",
-  border: "none",
-  padding: "7px 12px",
-  borderRadius: 6,
-  color: "white",
-  cursor: "pointer",
-}
-
-const tournamentButton: React.CSSProperties = {
-  background: "#9333ea",
-  border: "none",
-  padding: "7px 12px",
-  borderRadius: 6,
-  color: "white",
-  cursor: "pointer",
-}
-
-const mergeButton: React.CSSProperties = {
-  background: "#f59e0b",
-  border: "none",
-  padding: "7px 12px",
-  borderRadius: 6,
-  color: "black",
+const tableHeading: React.CSSProperties = {
+  padding: "0 8px 8px",
+  color: "#a1a1aa",
+  fontSize: 12,
   fontWeight: 700,
-  cursor: "pointer",
+  textAlign: "left",
+  textTransform: "uppercase",
+  letterSpacing: "0.04em",
 }
 
-const statusButton: React.CSSProperties = {
-  background: "#52525b",
+const actionsHeading: React.CSSProperties = {
+  ...tableHeading,
+  textAlign: "right",
+}
+
+const playerNameButton: React.CSSProperties = {
+  background: "transparent",
   border: "none",
-  padding: "7px 12px",
-  borderRadius: 6,
   color: "white",
   cursor: "pointer",
+  fontSize: 18,
+  fontWeight: 800,
+  padding: 0,
+  textAlign: "left",
+}
+
+const membershipTd: React.CSSProperties = {
+  ...td,
+  width: "52%",
+}
+
+const membershipList: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  flexWrap: "wrap",
+  gap: 6,
+}
+
+const membershipBadge: React.CSSProperties = {
+  display: "inline-flex",
+  padding: "3px 8px",
+  borderRadius: 999,
+  border: "1px solid #3f3f46",
+  background: "#18181b",
+  color: "#d4d4d8",
+  fontSize: 12,
+  lineHeight: 1.3,
+  whiteSpace: "nowrap",
+}
+
+const emptyMembership: React.CSSProperties = {
+  color: "#71717a",
+}
+
+const actionsTd: React.CSSProperties = {
+  ...td,
+  width: 110,
+  textAlign: "right",
+}
+
+const actionsSelect: React.CSSProperties = {
+  width: 104,
+  padding: "6px 8px",
+  borderRadius: 7,
+  border: "1px solid #52525b",
+  background: "#18181b",
+  color: "white",
+  cursor: "pointer",
+  fontSize: 13,
 }
 
 const filterRow: React.CSSProperties = {

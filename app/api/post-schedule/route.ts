@@ -34,7 +34,7 @@ function getWebhookForDivision(division: string) {
     "Doubles D6": process.env.DISCORD_WEBHOOK_DOUBLES_D6,
 
     // Pick Your Poison
-    "PYP D1": process.env.DISCORD_WEBHOOK_PYP_D1 || "https://discord.com/api/webhooks/1498372170664120321/KQ8DZPEAHcy-tNQgRVsFX1QtCkzBdg4cXpE-8_R9tQ9pFIGKTCk0rOgmOD5oudPVeLZU",
+    "PYP D1": process.env.DISCORD_WEBHOOK_PYP_D1,
     "PYP D2": process.env.DISCORD_WEBHOOK_PYP_D2,
     "PYP D3": process.env.DISCORD_WEBHOOK_PYP_D3,
     "PYP D4": process.env.DISCORD_WEBHOOK_PYP_D4,
