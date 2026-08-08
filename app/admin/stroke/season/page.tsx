@@ -14,7 +14,6 @@ export default function StrokeSeasonPage() {
   const [seasonNumber, setSeasonNumber] = useState("")
   const [divisionCount, setDivisionCount] = useState("5")
   const [startDate, setStartDate] = useState("")
-  const [dueDate, setDueDate] = useState("")
   const [endDate, setEndDate] = useState("")
   const [game1Course, setGame1Course] = useState("")
   const [game2Course, setGame2Course] = useState("")
@@ -33,7 +32,6 @@ export default function StrokeSeasonPage() {
     }
 
     if (!startDate) return "Choose a start date."
-    if (!dueDate) return "Choose a due date."
     if (!endDate) return "Choose an end date."
 
     if (endDate < startDate) {
@@ -67,7 +65,7 @@ export default function StrokeSeasonPage() {
         p_season_number: number,
         p_division_count: count,
         p_start_date: startDate,
-        p_due_date: dueDate,
+        p_due_date: endDate,
         p_end_date: endDate,
         p_game1_course: game1Course.trim(),
         p_game2_course: game2Course.trim(),
@@ -88,7 +86,7 @@ export default function StrokeSeasonPage() {
           seasonNumber: number,
           divisionCount: count,
           startDate,
-          dueDate,
+          dueDate: endDate,
           endDate,
           game1Course,
           game2Course,
@@ -120,7 +118,7 @@ export default function StrokeSeasonPage() {
         seasonNumber: number,
         divisionCount: count,
         startDate,
-        dueDate,
+        dueDate: endDate,
         endDate,
         game1Course,
         game2Course,
@@ -133,7 +131,6 @@ export default function StrokeSeasonPage() {
     setSeasonNumber("")
     setDivisionCount("5")
     setStartDate("")
-    setDueDate("")
     setEndDate("")
     setGame1Course("")
     setGame2Course("")
@@ -210,16 +207,6 @@ export default function StrokeSeasonPage() {
                 type="date"
                 value={startDate}
                 onChange={(event) => setStartDate(event.target.value)}
-                style={input}
-                disabled={saving}
-              />
-            </Field>
-
-            <Field label="Due Date">
-              <input
-                type="date"
-                value={dueDate}
-                onChange={(event) => setDueDate(event.target.value)}
                 style={input}
                 disabled={saving}
               />
