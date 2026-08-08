@@ -84,6 +84,7 @@ export default function StrokeSetup() {
   const [savingCourses, setSavingCourses] = useState(false)
   const [courseMessage, setCourseMessage] = useState("")
   const [courseSaveError, setCourseSaveError] = useState(false)
+  const [editingCourseOverrides, setEditingCourseOverrides] = useState(false)
   const [scheduleState, setScheduleState] = useState<ScheduleStateRow | null>(
     null
   )
@@ -389,6 +390,7 @@ export default function StrokeSetup() {
     setRosterSaveError(false)
     setCourseMessage("")
     setCourseSaveError(false)
+    setEditingCourseOverrides(false)
     setLoadingSetup(false)
   }
 
@@ -607,6 +609,10 @@ export default function StrokeSetup() {
           ? "Current — Needs Review"
           : "Not Generated"
 
+  const hasDivisionCourseOverrides = Boolean(
+    game1Override || game2Override || game3Override
+  )
+
   return (
     <main style={page}>
       <div style={container}>
@@ -739,68 +745,107 @@ export default function StrokeSetup() {
             {[
               {
                 game: 1,
-                defaultCourse: game1Default,
-                overrideCourse: game1Override,
                 effectiveCourse: c1,
-                setOverrideCourse: setGame1Override,
               },
               {
                 game: 2,
-                defaultCourse: game2Default,
-                overrideCourse: game2Override,
                 effectiveCourse: c2,
-                setOverrideCourse: setGame2Override,
               },
               {
                 game: 3,
-                defaultCourse: game3Default,
-                overrideCourse: game3Override,
                 effectiveCourse: c3,
-                setOverrideCourse: setGame3Override,
               },
             ].map((course) => (
-              <div key={course.game}>
-                <label style={fieldLabel}>
-                  Game {course.game} Division Override
-                </label>
-                <input
-                  value={course.overrideCourse}
-                  onChange={(event) =>
-                    course.setOverrideCourse(event.target.value)
-                  }
-                  placeholder="Use season default"
-                  disabled={rosterStatus === "locked"}
-                  style={input}
-                />
-                <p style={courseHelpText}>
-                  Season default: {course.defaultCourse || "Not set"}
-                  <br />
-                  Effective course: {course.effectiveCourse || "Not set"}
+              <div key={course.game} style={courseDisplayCard}>
+                <p style={courseGameLabel}>Game {course.game}</p>
+                <p style={courseName}>
+                  {course.effectiveCourse || "Not set"}
                 </p>
               </div>
             ))}
           </div>
 
-          <p style={helperText}>
-            Leave an override blank to use the season default for that game.
-          </p>
+          {hasDivisionCourseOverrides && (
+            <p style={overrideNotice}>
+              Division-specific course overrides are active.
+            </p>
+          )}
 
           <button
             type="button"
-            onClick={saveCourseOverrides}
-            disabled={savingCourses || rosterStatus === "locked"}
-            style={{
-              ...courseButton,
-              opacity:
-                savingCourses || rosterStatus === "locked" ? 0.6 : 1,
-              cursor:
-                savingCourses || rosterStatus === "locked"
-                  ? "not-allowed"
-                  : "pointer",
-            }}
+            onClick={() => setEditingCourseOverrides((current) => !current)}
+            style={courseButton}
           >
-            {savingCourses ? "Saving Courses..." : "Save Division Courses"}
+            {editingCourseOverrides
+              ? "Close Course Overrides"
+              : "Override Division Courses"}
           </button>
+
+          {editingCourseOverrides && (
+            <div style={courseOverrideEditor}>
+              <div style={grid}>
+                {[
+                  {
+                    game: 1,
+                    defaultCourse: game1Default,
+                    overrideCourse: game1Override,
+                    setOverrideCourse: setGame1Override,
+                  },
+                  {
+                    game: 2,
+                    defaultCourse: game2Default,
+                    overrideCourse: game2Override,
+                    setOverrideCourse: setGame2Override,
+                  },
+                  {
+                    game: 3,
+                    defaultCourse: game3Default,
+                    overrideCourse: game3Override,
+                    setOverrideCourse: setGame3Override,
+                  },
+                ].map((course) => (
+                  <div key={course.game}>
+                    <label style={fieldLabel}>
+                      Game {course.game} Override
+                    </label>
+                    <input
+                      value={course.overrideCourse}
+                      onChange={(event) =>
+                        course.setOverrideCourse(event.target.value)
+                      }
+                      placeholder="Use season default"
+                      disabled={rosterStatus === "locked"}
+                      style={input}
+                    />
+                    <p style={courseHelpText}>
+                      Season default: {course.defaultCourse || "Not set"}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              <p style={helperText}>
+                Leave an override blank to use the season default for that game.
+              </p>
+
+              <button
+                type="button"
+                onClick={saveCourseOverrides}
+                disabled={savingCourses || rosterStatus === "locked"}
+                style={{
+                  ...courseButton,
+                  opacity:
+                    savingCourses || rosterStatus === "locked" ? 0.6 : 1,
+                  cursor:
+                    savingCourses || rosterStatus === "locked"
+                      ? "not-allowed"
+                      : "pointer",
+                }}
+              >
+                {savingCourses ? "Saving Courses..." : "Save Division Courses"}
+              </button>
+            </div>
+          )}
 
           {courseMessage && (
             <p
@@ -1031,6 +1076,39 @@ const fieldLabel: React.CSSProperties = {
   display: "block",
   marginBottom: 8,
   fontWeight: 700,
+}
+
+const courseDisplayCard: React.CSSProperties = {
+  padding: 16,
+  border: "1px solid #444",
+  borderRadius: 10,
+  background: "#080808",
+}
+
+const courseGameLabel: React.CSSProperties = {
+  margin: 0,
+  color: "#aaa",
+  fontSize: 14,
+  fontWeight: 700,
+}
+
+const courseName: React.CSSProperties = {
+  margin: "8px 0 0",
+  color: "white",
+  fontSize: 18,
+  fontWeight: 700,
+}
+
+const overrideNotice: React.CSSProperties = {
+  margin: "14px 0 0",
+  color: "#facc15",
+  fontWeight: 700,
+}
+
+const courseOverrideEditor: React.CSSProperties = {
+  marginTop: 18,
+  paddingTop: 18,
+  borderTop: "1px solid #444",
 }
 
 const courseHelpText: React.CSSProperties = {
