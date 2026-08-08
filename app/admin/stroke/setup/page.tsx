@@ -74,6 +74,17 @@ type GeneratedScheduleRow = {
   regeneration_performed: boolean
 }
 
+const divisionThemes: Record<
+  number,
+  { background: string; border: string; accent: string }
+> = {
+  1: { background: "rgba(124, 45, 18, 0.18)", border: "#9a3412", accent: "#fb923c" },
+  2: { background: "rgba(30, 64, 175, 0.16)", border: "#1d4ed8", accent: "#60a5fa" },
+  3: { background: "rgba(20, 83, 45, 0.18)", border: "#15803d", accent: "#4ade80" },
+  4: { background: "rgba(113, 63, 18, 0.18)", border: "#a16207", accent: "#facc15" },
+  5: { background: "rgba(88, 28, 135, 0.18)", border: "#7e22ce", accent: "#c084fc" },
+}
+
 export default function StrokeSetup() {
   const router = useRouter()
 
@@ -612,6 +623,7 @@ export default function StrokeSetup() {
   const hasDivisionCourseOverrides = Boolean(
     game1Override || game2Override || game3Override
   )
+  const divisionTheme = divisionThemes[divisionNumber]
 
   return (
     <main style={page}>
@@ -644,6 +656,33 @@ export default function StrokeSetup() {
 
         {!loadingSetup && !setupError && (
           <>
+        <div
+          style={
+            divisionTheme
+              ? {
+                  ...activeDivisionCard,
+                  background: divisionTheme.background,
+                  borderColor: divisionTheme.border,
+                }
+              : activeDivisionCard
+          }
+        >
+        <div style={activeDivisionHeader}>
+          <span
+            style={
+              divisionTheme
+                ? {
+                    ...divisionBadge,
+                    color: divisionTheme.accent,
+                    borderColor: divisionTheme.border,
+                  }
+                : divisionBadge
+            }
+          >
+            Stroke D{divisionNumber}
+          </span>
+        </div>
+
         <section style={section}>
           <h2>Season</h2>
 
@@ -739,7 +778,19 @@ export default function StrokeSetup() {
         </section>
 
         <section style={section}>
-          <h2>Courses</h2>
+          <div style={courseHeader}>
+            <h2 style={courseHeading}>Courses</h2>
+
+            <button
+              type="button"
+              onClick={() => setEditingCourseOverrides((current) => !current)}
+              style={overrideCoursesButton}
+            >
+              {editingCourseOverrides
+                ? "Close Overrides"
+                : "Override Season Courses"}
+            </button>
+          </div>
 
           <div style={grid}>
             {[
@@ -770,16 +821,6 @@ export default function StrokeSetup() {
               Division-specific course overrides are active.
             </p>
           )}
-
-          <button
-            type="button"
-            onClick={() => setEditingCourseOverrides((current) => !current)}
-            style={courseButton}
-          >
-            {editingCourseOverrides
-              ? "Close Course Overrides"
-              : "Override Division Courses"}
-          </button>
 
           {editingCourseOverrides && (
             <div style={courseOverrideEditor}>
@@ -985,6 +1026,7 @@ export default function StrokeSetup() {
             )}
           </section>
         )}
+        </div>
           </>
         )}
       </div>
@@ -1035,6 +1077,30 @@ const section: React.CSSProperties = {
   marginTop: 30,
 }
 
+const activeDivisionCard: React.CSSProperties = {
+  marginTop: 22,
+  padding: 22,
+  border: "1px solid #333",
+  borderRadius: 14,
+  background: "#080808",
+}
+
+const activeDivisionHeader: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+}
+
+const divisionBadge: React.CSSProperties = {
+  display: "inline-flex",
+  padding: "7px 11px",
+  border: "1px solid #555",
+  borderRadius: 999,
+  color: "#ddd",
+  background: "rgba(0, 0, 0, 0.35)",
+  fontSize: 15,
+  fontWeight: 800,
+}
+
 const row: React.CSSProperties = {
   display: "grid",
   gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
@@ -1076,6 +1142,31 @@ const fieldLabel: React.CSSProperties = {
   display: "block",
   marginBottom: 8,
   fontWeight: 700,
+}
+
+const courseHeader: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  flexWrap: "wrap",
+  gap: 12,
+  marginBottom: 16,
+}
+
+const courseHeading: React.CSSProperties = {
+  margin: 0,
+}
+
+const overrideCoursesButton: React.CSSProperties = {
+  width: "auto",
+  padding: "7px 11px",
+  border: "1px solid #666",
+  borderRadius: 8,
+  background: "transparent",
+  color: "#ddd",
+  fontSize: 13,
+  fontWeight: 600,
+  cursor: "pointer",
 }
 
 const courseDisplayCard: React.CSSProperties = {
