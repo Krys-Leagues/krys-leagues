@@ -28,6 +28,10 @@ declare
 begin
   v_user_id := auth.uid();
 
+  if not public.is_current_user_site_admin() then
+    raise exception 'Administrator authorization is required' using errcode = '42501';
+  end if;
+
   if v_user_id is null then
     raise exception
       'Authentication is required to save a Stroke result'

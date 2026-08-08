@@ -1,38 +1,51 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { usePathname } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 
+type AdminAccess = "loading" | "signed_out" | "denied" | "authorized"
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname()
-
-  const [loading, setLoading] = useState(true)
-  const [user, setUser] = useState<any>(null)
-
-  const [passwordAuthed, setPasswordAuthed] = useState(false)
-  const [password, setPassword] = useState("")
+  const router = useRouter()
+  const [access, setAccess] = useState<AdminAccess>("loading")
 
   useEffect(() => {
-    checkSession()
+    void checkAdminAccess()
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(() => {
-      checkSession()
+      void checkAdminAccess()
     })
 
     return () => subscription.unsubscribe()
   }, [])
 
-  async function checkSession() {
-    setLoading(true)
+  async function checkAdminAccess() {
+    setAccess("loading")
 
-    const { data } = await supabase.auth.getSession()
-    const sessionUser = data.session?.user || null
+    const { data, error } = await supabase.auth.getSession()
+    const session = data.session
 
-    setUser(sessionUser)
-    setLoading(false)
+    if (error || !session) {
+      setAccess("signed_out")
+      return
+    }
+
+    try {
+      const response = await fetch("/api/auth/admin-authorization", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        cache: "no-store",
+      })
+
+      setAccess(response.ok ? "authorized" : "denied")
+    } catch {
+      setAccess("denied")
+    }
   }
 
   async function loginWithDiscord() {
@@ -40,66 +53,101 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       provider: "discord",
       options: {
         scopes: "identify email",
-redirectTo: `${window.location.origin}/admin`,
+        redirectTo: `${window.location.origin}/auth/callback?type=admin`,
       },
     })
   }
 
-  function emergencyPasswordLogin() {
-    if (password === process.env.NEXT_PUBLIC_ADMIN_PASSWORD) {
-      setPasswordAuthed(true)
-    } else {
-      alert("Wrong password")
-    }
-  }
-
   async function logout() {
-    setPasswordAuthed(false)
-    setPassword("")
     await supabase.auth.signOut()
-    setUser(null)
+    setAccess("signed_out")
   }
 
-  if (loading) {
+  if (access === "loading") {
+    return <AdminMessage>Checking administrator access...</AdminMessage>
+  }
+
+  if (access === "signed_out") {
     return (
-      <main style={{ background: "black", color: "white", minHeight: "100vh", padding: 40 }}>
-        Loading...
-      </main>
+      <AdminMessage>
+        <h1>Admin Login</h1>
+        <button onClick={loginWithDiscord} style={primaryButton}>
+          Sign in as an admin
+        </button>
+      </AdminMessage>
     )
   }
 
-  // 🔒 SIMPLE AUTH (no role restrictions anymore)
-  if (!user && !passwordAuthed) {
+  if (access === "denied") {
     return (
-      <main style={{ background: "black", color: "white", minHeight: "100vh", padding: 40 }}>
-        <h1>Admin Login</h1>
-
-        <button onClick={loginWithDiscord} style={{ padding: 12, background: "#5865F2", color: "white" }}>
-          Login with Discord
-        </button>
-
-        <hr style={{ margin: 20 }} />
-
-        <input
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-
-        <button onClick={emergencyPasswordLogin}>Enter</button>
-      </main>
+      <AdminMessage>
+        <h1>Admin Access Denied</h1>
+        <p>This Discord account is not authorized for administration.</p>
+        <div style={buttonRow}>
+          <button onClick={() => router.replace("/dashboard")} style={primaryButton}>
+            Go to Player Dashboard
+          </button>
+          <button onClick={logout} style={secondaryButton}>
+            Sign Out
+          </button>
+        </div>
+      </AdminMessage>
     )
   }
 
   return (
-    <main style={{ background: "black", color: "white", minHeight: "100vh" }}>
-      <div style={{ padding: 16, display: "flex" }}>
-        <button onClick={logout} style={{ marginLeft: "auto" }}>
+    <main style={adminShell}>
+      <div style={logoutRow}>
+        <button onClick={logout} style={secondaryButton}>
           Logout
         </button>
       </div>
-
       {children}
     </main>
   )
+}
+
+function AdminMessage({ children }: { children: React.ReactNode }) {
+  return <main style={messagePage}>{children}</main>
+}
+
+const messagePage: React.CSSProperties = {
+  minHeight: "100vh",
+  padding: 40,
+  background: "black",
+  color: "white",
+}
+
+const adminShell: React.CSSProperties = {
+  minHeight: "100vh",
+  background: "black",
+  color: "white",
+}
+
+const logoutRow: React.CSSProperties = {
+  display: "flex",
+  padding: 16,
+}
+
+const buttonRow: React.CSSProperties = {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: 12,
+  marginTop: 20,
+}
+
+const primaryButton: React.CSSProperties = {
+  padding: 12,
+  border: "none",
+  borderRadius: 8,
+  background: "#5865F2",
+  color: "white",
+  cursor: "pointer",
+  fontWeight: 700,
+}
+
+const secondaryButton: React.CSSProperties = {
+  ...primaryButton,
+  marginLeft: "auto",
+  background: "#333",
 }

@@ -84,6 +84,10 @@ declare
   v_row public.stroke_final_scorecard_player_decisions%rowtype;
 begin
   v_user_id := auth.uid();
+
+  if not public.is_current_user_site_admin() then
+    raise exception 'Administrator authorization is required' using errcode = '42501';
+  end if;
   if v_user_id is null then
     raise exception 'Authentication is required to set a Stroke return decision' using errcode = '42501';
   end if;

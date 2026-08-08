@@ -35,6 +35,10 @@ declare
   v_player record;
   v_slot integer;
 begin
+  if not public.is_current_user_site_admin() then
+    raise exception 'Administrator authorization is required' using errcode = '42501';
+  end if;
+
   if v_user_id is null then
     raise exception 'Authentication is required to generate a Stroke next-season proposal' using errcode = '42501';
   end if;

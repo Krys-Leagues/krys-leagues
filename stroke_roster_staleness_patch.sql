@@ -47,6 +47,10 @@ declare
   v_roster_state_before jsonb;
   v_roster_state_after jsonb;
 begin
+  if not public.is_current_user_site_admin() then
+    raise exception 'Administrator authorization is required' using errcode = '42501';
+  end if;
+
   if auth.uid() is null then
     raise exception
       'Authentication is required to edit a Stroke roster'
