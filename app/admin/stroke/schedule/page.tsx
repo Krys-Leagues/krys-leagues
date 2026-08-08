@@ -1,287 +1,518 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
+import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 
-export default function StrokeSetup() {
-  const [season, setSeason] = useState("")
-  const [division, setDivision] = useState("Stroke D1")
+type SeasonRow = {
+  id: string
+  league_type: string
+  season_number: number
+  due_date: string | null
+}
 
-  const [player1, setPlayer1] = useState("")
-  const [player2, setPlayer2] = useState("")
-  const [player3, setPlayer3] = useState("")
-  const [player4, setPlayer4] = useState("")
+type RosterRow = {
+  id: string
+  division_count: number
+  status: "draft" | "approved" | "locked"
+}
 
-  const [playerOptions, setPlayerOptions] = useState<string[]>([])
+type ScheduleStateRow = {
+  change_revision: number
+  generated_revision: number
+  reviewed_revision: number
+  posted_revision: number
+}
 
-  const [course1, setCourse1] = useState("")
-  const [course2, setCourse2] = useState("")
-  const [course3, setCourse3] = useState("")
-  const [dueDate, setDueDate] = useState("")
+type FixtureRow = {
+  id: string
+  division_number: number
+  division: string | null
+  game_number: number
+  game: string | null
+  course: string | null
+  player1: string | null
+  player2: string | null
+  player1_name: string | null
+  player2_name: string | null
+  player1_id: string
+  player2_id: string
+  status: string | null
+  due_date: string | null
+}
 
-  const [loading, setLoading] = useState(false)
-  const [playersLoading, setPlayersLoading] = useState(false)
+type ReviewResultRow = {
+  review_performed: boolean
+}
+
+export default function StrokeScheduleReviewPage() {
+  const router = useRouter()
+  const [season, setSeason] = useState<SeasonRow | null>(null)
+  const [roster, setRoster] = useState<RosterRow | null>(null)
+  const [scheduleState, setScheduleState] = useState<ScheduleStateRow | null>(
+    null
+  )
+  const [fixtures, setFixtures] = useState<FixtureRow[]>([])
+  const [loading, setLoading] = useState(true)
+  const [reviewing, setReviewing] = useState(false)
+  const [error, setError] = useState("")
+  const [message, setMessage] = useState("")
 
   useEffect(() => {
-    loadPlayerOptions()
+    void loadSchedule()
   }, [])
 
-  async function loadPlayerOptions() {
-    setPlayersLoading(true)
-
-    const { data, error } = await supabase
-      .from("schedule")
-      .select("player1, player2")
-      .eq("league_type", "stroke")
-
-    setPlayersLoading(false)
-
-    if (error) {
-      console.error("Player load error:", error)
-      alert("Player list could not load. You can still type names manually.")
-      return
-    }
-
-    const names: string[] = []
-
-    data?.forEach((row: any) => {
-      if (row.player1 && !names.includes(row.player1)) {
-        names.push(row.player1)
-      }
-
-      if (row.player2 && !names.includes(row.player2)) {
-        names.push(row.player2)
-      }
-    })
-
-    setPlayerOptions(names.sort())
-  }
-
-  async function sendDiscordSchedule(seasonNumber: number) {
-    const fixtures = [
-      { round: "Game 1", player1, player2, course: course1, dueDate },
-      { round: "Game 1", player1: player3, player2: player4, course: course1, dueDate },
-
-      { round: "Game 2", player1: player4, player2: player1, course: course2, dueDate },
-      { round: "Game 2", player1: player2, player2: player3, course: course2, dueDate },
-
-      { round: "Game 3", player1, player2: player3, course: course3, dueDate },
-      { round: "Game 3", player1: player2, player2: player4, course: course3, dueDate },
-    ]
-
-    await fetch("/api/discord", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        leagueType: "Stroke",
-        division,
-        season: seasonNumber,
-        dueDate,
-        fixtures,
-        message:
-          "Stroke season schedule is set. Please complete all games before the due date.",
-      }),
-    })
-  }
-
-  async function handleCreateStrokeSchedule() {
-    const seasonNumber = Number(season)
-
-    if (
-      !seasonNumber ||
-      !player1 ||
-      !player2 ||
-      !player3 ||
-      !player4 ||
-      !course1 ||
-      !course2 ||
-      !course3 ||
-      !dueDate
-    ) {
-      alert("Please fill all fields correctly")
-      return
-    }
-
+  async function loadSchedule() {
     setLoading(true)
+    setError("")
 
-    const base = {
-      league_type: "stroke",
-      division,
-      season_number: seasonNumber,
-      due_date: dueDate,
-      status: "scheduled",
-    }
+    const params = new URLSearchParams(window.location.search)
+    const requestedSeasonId = params.get("seasonId")?.trim() || ""
 
-    const rows = [
-      {
-        ...base,
-        game: "1",
-        course: course1.trim(),
-        player1: player1.trim(),
-        player2: player2.trim(),
-      },
-      {
-        ...base,
-        game: "1",
-        course: course1.trim(),
-        player1: player3.trim(),
-        player2: player4.trim(),
-      },
-      {
-        ...base,
-        game: "2",
-        course: course2.trim(),
-        player1: player4.trim(),
-        player2: player1.trim(),
-      },
-      {
-        ...base,
-        game: "2",
-        course: course2.trim(),
-        player1: player2.trim(),
-        player2: player3.trim(),
-      },
-      {
-        ...base,
-        game: "3",
-        course: course3.trim(),
-        player1: player1.trim(),
-        player2: player3.trim(),
-      },
-      {
-        ...base,
-        game: "3",
-        course: course3.trim(),
-        player1: player2.trim(),
-        player2: player4.trim(),
-      },
-    ]
-
-    const { error } = await supabase.from("schedule").insert(rows)
-
-    if (error) {
+    if (!requestedSeasonId) {
+      setError("A seasonId is required to review a Stroke schedule.")
       setLoading(false)
-      console.error("Stroke insert error:", error)
-      alert("Insert failed: " + error.message)
       return
     }
 
-    await sendDiscordSchedule(seasonNumber)
+    const { data: seasonData, error: seasonError } = await supabase
+      .from("seasons")
+      .select("id, league_type, season_number, due_date")
+      .eq("id", requestedSeasonId)
+      .maybeSingle()
 
+    if (seasonError || !seasonData) {
+      setError(
+        `Could not load the season: ${
+          seasonError?.message || "Season not found."
+        }`
+      )
+      setLoading(false)
+      return
+    }
+
+    const selectedSeason = seasonData as SeasonRow
+
+    if (selectedSeason.league_type.trim().toLowerCase() !== "stroke") {
+      setError("The requested season is not a Stroke season.")
+      setLoading(false)
+      return
+    }
+
+    const { data: rosterData, error: rosterError } = await supabase
+      .from("stroke_roster_versions")
+      .select("id, division_count, status")
+      .eq("season_id", requestedSeasonId)
+      .in("status", ["draft", "approved", "locked"])
+
+    if (rosterError) {
+      setError(`Could not load the Stroke roster: ${rosterError.message}`)
+      setLoading(false)
+      return
+    }
+
+    const rosterVersions = (rosterData || []) as RosterRow[]
+    const selectedRoster =
+      rosterVersions.find((item) => item.status === "approved") ||
+      rosterVersions.find((item) => item.status === "locked") ||
+      rosterVersions.find((item) => item.status === "draft")
+
+    if (!selectedRoster) {
+      setError("No Stroke roster was found for this season.")
+      setLoading(false)
+      return
+    }
+
+    const [stateResponse, fixtureResponse] = await Promise.all([
+      supabase
+        .from("stroke_schedule_state")
+        .select(
+          "change_revision, generated_revision, reviewed_revision, posted_revision"
+        )
+        .eq("season_id", requestedSeasonId)
+        .maybeSingle(),
+      supabase
+        .from("schedule")
+        .select(
+          "id, division_number, division, game_number, game, course, player1, player2, player1_name, player2_name, player1_id, player2_id, status, due_date"
+        )
+        .eq("league_type", "stroke")
+        .eq("season_id", requestedSeasonId)
+        .order("division_number", { ascending: true })
+        .order("game_number", { ascending: true })
+        .order("id", { ascending: true }),
+    ])
+
+    if (stateResponse.error) {
+      setError(
+        `Could not load schedule workflow state: ${stateResponse.error.message}`
+      )
+      setLoading(false)
+      return
+    }
+
+    if (fixtureResponse.error) {
+      setError(`Could not load schedule fixtures: ${fixtureResponse.error.message}`)
+      setLoading(false)
+      return
+    }
+
+    setSeason(selectedSeason)
+    setRoster(selectedRoster)
+    setScheduleState(
+      (stateResponse.data as ScheduleStateRow | null) || null
+    )
+    setFixtures((fixtureResponse.data || []) as FixtureRow[])
     setLoading(false)
+  }
 
-    alert("Stroke schedule created + Discord posted ✔")
+  async function reviewSchedule() {
+    if (!season || !roster || !scheduleState) return
+
+    const canReview =
+      roster.status === "approved" &&
+      scheduleState.generated_revision > 0 &&
+      scheduleState.generated_revision === scheduleState.change_revision &&
+      scheduleState.reviewed_revision < scheduleState.generated_revision
+
+    if (!canReview) return
+
+    setReviewing(true)
+    setError("")
+    setMessage("")
+
+    const { data, error: reviewError } = await supabase
+      .rpc("review_stroke_schedule", {
+        p_season_id: season.id,
+      })
+      .single()
+
+    if (reviewError || !data) {
+      setError(
+        `Schedule review failed: ${
+          reviewError?.message || "No review result was returned."
+        }`
+      )
+      setReviewing(false)
+      return
+    }
+
+    const result = data as ReviewResultRow
+    await loadSchedule()
+    setMessage(
+      result.review_performed
+        ? "Stroke schedule reviewed and approved."
+        : "This Stroke schedule was already reviewed."
+    )
+    setReviewing(false)
+  }
+
+  const divisionNumbers = useMemo(() => {
+    if (!roster) return []
+    return Array.from({ length: roster.division_count }, (_, index) => index + 1)
+  }, [roster])
+
+  const scheduleIsCurrent = Boolean(
+    scheduleState &&
+      scheduleState.generated_revision > 0 &&
+      scheduleState.generated_revision === scheduleState.change_revision
+  )
+  const scheduleIsStale = Boolean(
+    scheduleState &&
+      scheduleState.generated_revision > 0 &&
+      scheduleState.generated_revision < scheduleState.change_revision
+  )
+  const scheduleIsReviewed = Boolean(
+    scheduleState &&
+      scheduleState.generated_revision > 0 &&
+      scheduleState.reviewed_revision === scheduleState.generated_revision &&
+      scheduleState.generated_revision === scheduleState.change_revision
+  )
+  const canReview = Boolean(
+    roster?.status === "approved" &&
+      scheduleState &&
+      scheduleState.generated_revision > 0 &&
+      scheduleState.generated_revision === scheduleState.change_revision &&
+      scheduleState.reviewed_revision < scheduleState.generated_revision
+  )
+  const scheduleStatus = !scheduleState || scheduleState.generated_revision === 0
+    ? "Not Generated"
+    : scheduleIsStale
+      ? "Stale — Regeneration Required"
+      : scheduleIsReviewed
+        ? "Reviewed"
+        : scheduleIsCurrent
+          ? "Current — Needs Review"
+          : "Not Generated"
+
+  function playerName(fixture: FixtureRow, playerNumber: 1 | 2) {
+    if (playerNumber === 1) {
+      return fixture.player1_name || fixture.player1 || fixture.player1_id
+    }
+
+    return fixture.player2_name || fixture.player2 || fixture.player2_id
   }
 
   return (
-    <main style={{ padding: 24, color: "white", background: "black", minHeight: "100vh" }}>
-      <h1>Stroke Setup</h1>
+    <main style={page}>
+      <div style={container}>
+        <div style={topBar}>
+          <button
+            type="button"
+            onClick={() =>
+              season && roster
+                ? router.push(
+                    `/admin/stroke/setup?seasonId=${encodeURIComponent(
+                      season.id
+                    )}&division=${roster.division_count}`
+                  )
+                : router.push("/admin/stroke")
+            }
+            style={primaryButton}
+          >
+            ← Stroke Setup
+          </button>
 
-      <datalist id="stroke-player-options">
-        {playerOptions.map((name) => (
-          <option key={name} value={name} />
-        ))}
-      </datalist>
+          <button
+            type="button"
+            onClick={() => router.push("/admin/stroke")}
+            style={secondaryButton}
+          >
+            ← Stroke Hub
+          </button>
+        </div>
 
-      <div style={{ marginTop: 16 }}>
-        <label>Season</label><br />
-        <input value={season} onChange={(e) => setSeason(e.target.value)} />
-      </div>
+        <h1>Review Stroke Schedule</h1>
 
-      <div style={{ marginTop: 16 }}>
-        <label>Division</label><br />
-        <select value={division} onChange={(e) => setDivision(e.target.value)}>
-          <option>Stroke D1</option>
-          <option>Stroke D2</option>
-          <option>Stroke D3</option>
-          <option>Stroke D4</option>
-          <option>Stroke D5</option>
-        </select>
-      </div>
+        {loading && <p style={mutedText}>Loading managed schedule...</p>}
 
-      <div style={{ marginTop: 24 }}>
-        <h3>Players</h3>
-
-        <button onClick={loadPlayerOptions} disabled={playersLoading}>
-          {playersLoading ? "Loading Players..." : "Refresh Player List"}
-        </button>
-
-        {playerOptions.length === 0 && (
-          <p style={{ color: "orange" }}>
-            No saved player list found yet. Type names manually this time.
+        {error && (
+          <p role="alert" style={errorText}>
+            {error}
           </p>
         )}
 
-        <div style={{ marginTop: 12 }}>
-          <label>Player 1</label><br />
-          <input
-            list="stroke-player-options"
-            value={player1}
-            onChange={(e) => setPlayer1(e.target.value)}
-          />
-        </div>
+        {!loading && season && roster && (
+          <>
+            <section style={panel}>
+              <h2>Season {season.season_number}</h2>
+              <p style={statusLine}>
+                Roster: {roster.status.charAt(0).toUpperCase() + roster.status.slice(1)}
+              </p>
+              <p style={statusLine}>Schedule: {scheduleStatus}</p>
+              {scheduleState && (
+                <p style={mutedText}>
+                  Revision {scheduleState.change_revision}; generated {scheduleState.generated_revision}; reviewed {scheduleState.reviewed_revision}.
+                </p>
+              )}
+            </section>
 
-        <div style={{ marginTop: 12 }}>
-          <label>Player 2</label><br />
-          <input
-            list="stroke-player-options"
-            value={player2}
-            onChange={(e) => setPlayer2(e.target.value)}
-          />
-        </div>
+            <section style={panel}>
+              <h2>Generated Fixtures</h2>
 
-        <div style={{ marginTop: 12 }}>
-          <label>Player 3</label><br />
-          <input
-            list="stroke-player-options"
-            value={player3}
-            onChange={(e) => setPlayer3(e.target.value)}
-          />
-        </div>
+              {fixtures.length === 0 && (
+                <p style={mutedText}>
+                  No real-player fixtures were generated. This is valid when divisions contain fewer than two real players.
+                </p>
+              )}
 
-        <div style={{ marginTop: 12 }}>
-          <label>Player 4</label><br />
-          <input
-            list="stroke-player-options"
-            value={player4}
-            onChange={(e) => setPlayer4(e.target.value)}
-          />
-        </div>
-      </div>
+              {divisionNumbers.map((divisionNumber) => {
+                const divisionFixtures = fixtures.filter(
+                  (fixture) => fixture.division_number === divisionNumber
+                )
 
-      <div style={{ marginTop: 24 }}>
-        <h3>Courses</h3>
+                return (
+                  <div key={divisionNumber} style={divisionSection}>
+                    <h3>Stroke D{divisionNumber}</h3>
 
-        <label>Game 1 Course</label><br />
-        <input value={course1} onChange={(e) => setCourse1(e.target.value)} />
+                    {divisionFixtures.length === 0 ? (
+                      <p style={mutedText}>No real-player fixtures.</p>
+                    ) : (
+                      [1, 2, 3].map((gameNumber) => {
+                        const gameFixtures = divisionFixtures.filter(
+                          (fixture) => fixture.game_number === gameNumber
+                        )
 
-        <br /><br />
+                        if (gameFixtures.length === 0) return null
 
-        <label>Game 2 Course</label><br />
-        <input value={course2} onChange={(e) => setCourse2(e.target.value)} />
+                        return (
+                          <div key={gameNumber} style={gameSection}>
+                            <h4>Game {gameNumber}</h4>
+                            {gameFixtures.map((fixture) => (
+                              <div key={fixture.id} style={fixtureRow}>
+                                <span>
+                                  {playerName(fixture, 1)} vs {playerName(fixture, 2)}
+                                </span>
+                                <span>{fixture.course || "Course not set"}</span>
+                                <span>{fixture.status || "assigned"}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )
+                      })
+                    )}
+                  </div>
+                )
+              })}
+            </section>
 
-        <br /><br />
+            <section style={panel}>
+              <h2>Schedule Review</h2>
 
-        <label>Game 3 Course</label><br />
-        <input value={course3} onChange={(e) => setCourse3(e.target.value)} />
-      </div>
+              {scheduleIsStale && (
+                <p style={warningText}>
+                  Schedule is stale — return to Stroke Setup and regenerate it before review.
+                </p>
+              )}
 
-      <div style={{ marginTop: 16 }}>
-        <label>Due Date</label><br />
-        <input
-          type="date"
-          value={dueDate}
-          onChange={(e) => setDueDate(e.target.value)}
-        />
-      </div>
+              {scheduleIsReviewed && (
+                <p style={successText}>Reviewed</p>
+              )}
 
-      <div style={{ marginTop: 24 }}>
-        <button onClick={handleCreateStrokeSchedule} disabled={loading}>
-          {loading ? "Creating + Posting..." : "Create Stroke Schedule"}
-        </button>
+              {!scheduleState || scheduleState.generated_revision === 0 ? (
+                <p style={mutedText}>Generate the schedule before reviewing it.</p>
+              ) : null}
+
+              {roster.status === "locked" && (
+                <p style={mutedText}>
+                  This historical roster is locked. Review actions are unavailable.
+                </p>
+              )}
+
+              {canReview && (
+                <button
+                  type="button"
+                  onClick={reviewSchedule}
+                  disabled={reviewing}
+                  style={{
+                    ...reviewButton,
+                    opacity: reviewing ? 0.6 : 1,
+                    cursor: reviewing ? "not-allowed" : "pointer",
+                  }}
+                >
+                  {reviewing ? "Reviewing Schedule..." : "Review Schedule"}
+                </button>
+              )}
+
+              {message && (
+                <p role="status" style={successText}>
+                  {message}
+                </p>
+              )}
+            </section>
+          </>
+        )}
       </div>
     </main>
   )
+}
+
+const page: React.CSSProperties = {
+  minHeight: "100vh",
+  background: "black",
+  color: "white",
+  display: "flex",
+  justifyContent: "center",
+}
+
+const container: React.CSSProperties = {
+  width: "100%",
+  maxWidth: 1100,
+  padding: 30,
+}
+
+const topBar: React.CSSProperties = {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: 10,
+  marginBottom: 20,
+}
+
+const primaryButton: React.CSSProperties = {
+  padding: "10px 16px",
+  background: "#2563eb",
+  border: "none",
+  borderRadius: 8,
+  color: "white",
+  fontWeight: 700,
+  cursor: "pointer",
+}
+
+const secondaryButton: React.CSSProperties = {
+  ...primaryButton,
+  background: "#222",
+  border: "1px solid #555",
+}
+
+const panel: React.CSSProperties = {
+  marginTop: 24,
+  padding: 20,
+  background: "#111",
+  border: "1px solid #444",
+  borderRadius: 10,
+}
+
+const statusLine: React.CSSProperties = {
+  margin: "8px 0",
+  fontWeight: 700,
+}
+
+const mutedText: React.CSSProperties = {
+  color: "#aaa",
+  lineHeight: 1.5,
+}
+
+const divisionSection: React.CSSProperties = {
+  marginTop: 24,
+  paddingTop: 16,
+  borderTop: "1px solid #333",
+}
+
+const gameSection: React.CSSProperties = {
+  marginTop: 16,
+}
+
+const fixtureRow: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "minmax(240px, 2fr) minmax(160px, 1fr) 100px",
+  gap: 12,
+  padding: "10px 0",
+  borderBottom: "1px solid #222",
+}
+
+const reviewButton: React.CSSProperties = {
+  marginTop: 16,
+  width: "100%",
+  padding: 14,
+  background: "#16a34a",
+  border: "none",
+  borderRadius: 10,
+  color: "white",
+  fontWeight: 700,
+  cursor: "pointer",
+}
+
+const errorText: React.CSSProperties = {
+  marginTop: 20,
+  padding: 12,
+  color: "#fca5a5",
+  background: "#1f0a0a",
+  border: "1px solid #7f1d1d",
+  borderRadius: 8,
+}
+
+const warningText: React.CSSProperties = {
+  ...errorText,
+  color: "#fde68a",
+  background: "#2a1f05",
+  border: "1px solid #92400e",
+}
+
+const successText: React.CSSProperties = {
+  marginTop: 16,
+  padding: 12,
+  color: "#bbf7d0",
+  background: "#052e16",
+  border: "1px solid #166534",
+  borderRadius: 8,
 }

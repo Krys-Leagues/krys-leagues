@@ -46,6 +46,20 @@ type CareerStats = {
   winPercent: number
 }
 
+type StrokeSeasonHistory = {
+  season_number: number
+  season_id: string
+  player_screen_name: string
+  division_number: number
+  division_rank: number
+  completed_game_count: number
+  wins: number
+  losses: number
+  ties: number
+  points: number
+  strokes: number
+}
+
 export default function PublicPlayerProfilePage() {
   const params = useParams()
   const playerId = Array.isArray(params.id) ? params.id[0] : params.id
@@ -54,6 +68,8 @@ export default function PublicPlayerProfilePage() {
   const [memberships, setMemberships] = useState<Membership[]>([])
   const [trophies, setTrophies] = useState<Trophy[]>([])
   const [results, setResults] = useState<Result[]>([])
+  const [strokeHistory, setStrokeHistory] = useState<StrokeSeasonHistory[]>([])
+  const [strokeHistoryError, setStrokeHistoryError] = useState("")
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState("")
 
@@ -70,12 +86,14 @@ export default function PublicPlayerProfilePage() {
 
     setLoading(true)
     setMessage("")
+    setStrokeHistoryError("")
 
     const [
       playerResponse,
       membershipsResponse,
       trophiesResponse,
       resultsResponse,
+      strokeHistoryResponse,
     ] = await Promise.all([
       supabase
         .from("players")
@@ -100,6 +118,10 @@ export default function PublicPlayerProfilePage() {
         .from("results")
         .select("id, player1_id, player2_id, winner, is_draw")
         .or(`player1_id.eq.${playerId},player2_id.eq.${playerId}`),
+
+      supabase.rpc("get_public_stroke_player_history", {
+        p_player_id: playerId,
+      }),
     ])
 
     if (playerResponse.error) {
@@ -118,6 +140,14 @@ export default function PublicPlayerProfilePage() {
     setMemberships(membershipsResponse.data || [])
     setTrophies(trophiesResponse.data || [])
     setResults(resultsResponse.data || [])
+    setStrokeHistory(
+      (strokeHistoryResponse.data || []) as StrokeSeasonHistory[]
+    )
+    if (strokeHistoryResponse.error) {
+      setStrokeHistoryError(
+        `Stroke season history could not be loaded: ${strokeHistoryResponse.error.message}`
+      )
+    }
     setLoading(false)
   }
 
@@ -271,6 +301,52 @@ export default function PublicPlayerProfilePage() {
                   </span>
                 </div>
               ))}
+            </div>
+          )}
+        </section>
+
+        <section style={card}>
+          <h2 style={sectionTitle}>Stroke Season History</h2>
+
+          {strokeHistoryError ? (
+            <p style={historyError}>{strokeHistoryError}</p>
+          ) : strokeHistory.length === 0 ? (
+            <p style={muted}>
+              No approved Stroke season history is available yet.
+            </p>
+          ) : (
+            <div style={tableWrap}>
+              <table style={table}>
+                <thead>
+                  <tr>
+                    <th style={th}>Season</th>
+                    <th style={th}>Division</th>
+                    <th style={th}>Final Rank</th>
+                    <th style={th}>Points</th>
+                    <th style={th}>Wins</th>
+                    <th style={th}>Losses</th>
+                    <th style={th}>Ties</th>
+                    <th style={th}>Strokes</th>
+                    <th style={th}>Completed Games</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {strokeHistory.map((history) => (
+                    <tr key={history.season_id}>
+                      <td style={td}>{history.season_number}</td>
+                      <td style={td}>Stroke D{history.division_number}</td>
+                      <td style={td}>{history.division_rank}</td>
+                      <td style={td}>{history.points}</td>
+                      <td style={td}>{history.wins}</td>
+                      <td style={td}>{history.losses}</td>
+                      <td style={td}>{history.ties}</td>
+                      <td style={td}>{history.strokes}</td>
+                      <td style={td}>{history.completed_game_count}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </section>
@@ -473,6 +549,33 @@ const trophyImage: React.CSSProperties = {
 
 const muted: React.CSSProperties = {
   color: "#94a3b8",
+}
+
+const historyError: React.CSSProperties = {
+  color: "#fecaca",
+}
+
+const tableWrap: React.CSSProperties = {
+  overflowX: "auto",
+}
+
+const table: React.CSSProperties = {
+  width: "100%",
+  minWidth: 850,
+  borderCollapse: "collapse",
+}
+
+const th: React.CSSProperties = {
+  padding: 12,
+  textAlign: "left",
+  borderBottom: "1px solid #475569",
+  whiteSpace: "nowrap",
+}
+
+const td: React.CSSProperties = {
+  padding: 12,
+  borderBottom: "1px solid #334155",
+  whiteSpace: "nowrap",
 }
 
 const linkGrid: React.CSSProperties = {

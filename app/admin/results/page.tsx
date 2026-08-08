@@ -216,6 +216,11 @@ export default function ResultsPage() {
   }
 
   async function handleSubmit() {
+    if (leagueType === "stroke") {
+      alert("Use the dedicated managed Stroke Results page to enter Stroke results.")
+      return
+    }
+
     const seasonNumber = Number(season)
 
     if (!seasonNumber || !player1 || !player2 || !player1Id || !player2Id) {
@@ -452,7 +457,7 @@ export default function ResultsPage() {
       <div style={{ marginTop: 24 }}>
         <button
           onClick={handleSubmit}
-          disabled={loading}
+          disabled={loading || leagueType === "stroke"}
           style={{
             background: "#1e90ff",
             border: "none",
@@ -462,9 +467,20 @@ export default function ResultsPage() {
             cursor: "pointer",
           }}
         >
-          {loading ? "Saving..." : "Submit Result"}
+          {loading
+            ? "Saving..."
+            : leagueType === "stroke"
+              ? "Use Managed Stroke Results"
+              : "Submit Result"}
         </button>
       </div>
+
+      {leagueType === "stroke" && (
+        <p style={{ color: "orange" }}>
+          Stroke results must be entered on the dedicated managed Stroke Results page at
+          {" "}<a href="/admin/stroke/results" style={{ color: "#60a5fa" }}>/admin/stroke/results</a>.
+        </p>
+      )}
     </main>
   )
 }

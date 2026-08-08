@@ -7,7 +7,7 @@ export default function StrokeAdminPage() {
       <p style={subtitle}>Manage Stroke Play seasons, scoring, and active games.</p>
 
       <div style={grid}>
-        <Link href="/admin/stroke/setup" style={card}>
+        <Link href="/admin/stroke/season" style={card}>
           <strong>Setup New Season</strong>
           <span>Create or prepare a new Stroke Play season.</span>
         </Link>

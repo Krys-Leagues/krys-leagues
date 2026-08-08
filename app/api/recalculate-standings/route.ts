@@ -50,6 +50,19 @@ export async function POST(req: Request) {
     const division = body.division
     const seasonNumber = Number(body.season_number)
 
+    if (
+      typeof leagueType === "string" &&
+      leagueType.trim().toLowerCase() === "stroke"
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Managed Stroke standings must be rebuilt through rebuild_stroke_standings.",
+        },
+        { status: 400 }
+      )
+    }
+
     if (!leagueType || !division || !seasonNumber) {
       return NextResponse.json(
         { success: false, error: "Missing league_type, division, or season_number" },
