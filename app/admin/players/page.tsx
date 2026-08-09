@@ -575,8 +575,8 @@ export default function PlayersAdminPage() {
           <tr>
             <th style={tableHeading}>Player</th>
             <th style={tableHeading}>Status</th>
-            <th style={tableHeading}>Currently In</th>
             <th style={actionsHeading}>Actions</th>
+            <th style={tableHeading}>Currently In</th>
           </tr>
         </thead>
         <tbody>
@@ -606,14 +606,6 @@ export default function PlayersAdminPage() {
                   </span>
                 </td>
 
-                <td style={membershipTd}>
-                  <div style={membershipList}>
-                    {membershipLabels.length > 0 ? membershipLabels.map((label) => (
-                      <span key={label} style={membershipBadge}>{label}</span>
-                    )) : <span style={emptyMembership}>—</span>}
-                  </div>
-                </td>
-
                 <td style={actionsTd}>
                   <select
                     aria-label={`Actions for ${p.screen_name}`}
@@ -632,6 +624,14 @@ export default function PlayersAdminPage() {
                       <option value="merge">Merge</option>
                     </optgroup>
                   </select>
+                </td>
+
+                <td style={membershipTd}>
+                  <div style={membershipList}>
+                    {membershipLabels.length > 0 ? membershipLabels.map((label) => (
+                      <span key={label} style={membershipBadge}>{label}</span>
+                    )) : <span style={emptyMembership}>—</span>}
+                  </div>
                 </td>
               </tr>
             )
