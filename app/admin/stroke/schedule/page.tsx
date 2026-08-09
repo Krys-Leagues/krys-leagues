@@ -72,10 +72,21 @@ type CourseOverrideRow = {
   game3_course_override: string | null
 }
 
+type ResultRow = {
+  schedule_id: string
+  player1_score: number | null
+  player2_score: number | null
+}
+
+type ScheduleImageFixture = {
+  text: string
+  completed: boolean
+}
+
 type ScheduleImageGame = {
   gameNumber: number
   course: string
-  fixtures: string[]
+  fixtures: ScheduleImageFixture[]
   byeLine: string | null
 }
 
@@ -169,12 +180,37 @@ function renderScheduleImage(data: ScheduleImageData) {
   context.fillStyle = background
   context.fillRect(0, 0, width, height)
 
-  context.globalAlpha = 0.1
+  const headerBottom = 248
+  context.save()
+  roundedRect(context, 22, 22, width - 44, height - 44, 28)
+  context.clip()
+  context.globalAlpha = 0.11
   context.fillStyle = data.accent
-  context.beginPath()
-  context.arc(930, 90, 250, 0, Math.PI * 2)
-  context.fill()
+  context.fillRect(22, 22, width - 44, headerBottom - 22)
   context.globalAlpha = 1
+  const headerShade = context.createLinearGradient(22, 22, width - 22, headerBottom)
+  headerShade.addColorStop(0, "rgba(3, 6, 11, 0.18)")
+  headerShade.addColorStop(0.55, "rgba(8, 12, 18, 0.48)")
+  headerShade.addColorStop(1, "rgba(3, 6, 11, 0.24)")
+  context.fillStyle = headerShade
+  context.fillRect(22, 22, width - 44, headerBottom - 22)
+  context.restore()
+
+  context.save()
+  context.strokeStyle = data.accent
+  context.lineCap = "round"
+  context.lineWidth = 6
+  context.beginPath()
+  context.moveTo(50, 25)
+  context.lineTo(width - 50, 25)
+  context.stroke()
+  context.globalAlpha = 0.42
+  context.lineWidth = 2
+  context.beginPath()
+  context.moveTo(52, headerBottom)
+  context.lineTo(width - 52, headerBottom)
+  context.stroke()
+  context.restore()
 
   context.strokeStyle = data.accent
   context.lineWidth = 5
@@ -222,12 +258,27 @@ function renderScheduleImage(data: ScheduleImageData) {
     context.textAlign = "left"
 
     let lineY = top + 104
-    const lines = game.fixtures.length ? game.fixtures : ["No real-player fixture"]
-    lines.forEach((line) => {
+    const lines = game.fixtures.length
+      ? game.fixtures
+      : [{ text: "No real-player fixture", completed: false }]
+    lines.forEach((fixtureLine) => {
       context.fillStyle = game.fixtures.length ? "#e2e8f0" : "#94a3b8"
-      const lineSize = fitText(context, line, 880, 28, 18, 600)
+      const lineSize = fitText(context, fixtureLine.text, 880, 28, 18, 600)
       context.font = `600 ${lineSize}px ${canvasFont}`
-      context.fillText(line, 84, lineY)
+
+      if (fixtureLine.completed) {
+        context.save()
+        context.globalAlpha = 0.78
+        context.strokeStyle = data.accent
+        context.lineWidth = 4
+        context.beginPath()
+        context.moveTo(76, lineY - Math.max(7, lineSize * 0.3))
+        context.lineTo(1004, lineY - Math.max(7, lineSize * 0.3))
+        context.stroke()
+        context.restore()
+      }
+
+      context.fillText(fixtureLine.text, 84, lineY)
       lineY += 56
     })
 
@@ -256,6 +307,9 @@ export default function StrokeScheduleReviewPage() {
     null
   )
   const [fixtures, setFixtures] = useState<FixtureRow[]>([])
+  const [resultsBySchedule, setResultsBySchedule] = useState<Map<string, ResultRow>>(
+    new Map()
+  )
   const [rosterSlots, setRosterSlots] = useState<RosterSlotRow[]>([])
   const [courseOverrides, setCourseOverrides] = useState<CourseOverrideRow[]>([])
   const [loading, setLoading] = useState(true)
@@ -394,12 +448,35 @@ export default function StrokeScheduleReviewPage() {
       return
     }
 
+    const loadedFixtures = (fixtureResponse.data || []) as FixtureRow[]
+    const fixtureIds = loadedFixtures.map((fixture) => fixture.id)
+    let resultRows: ResultRow[] = []
+
+    if (fixtureIds.length > 0) {
+      const { data: resultData, error: resultError } = await supabase
+        .from("results")
+        .select("schedule_id, player1_score, player2_score")
+        .eq("league_type", "stroke")
+        .in("schedule_id", fixtureIds)
+
+      if (resultError) {
+        setError(`Could not load completed fixture scores: ${resultError.message}`)
+        setLoading(false)
+        return
+      }
+
+      resultRows = (resultData || []) as ResultRow[]
+    }
+
     setSeason(selectedSeason)
     setRoster(selectedRoster)
     setScheduleState(
       (stateResponse.data as ScheduleStateRow | null) || null
     )
-    setFixtures((fixtureResponse.data || []) as FixtureRow[])
+    setFixtures(loadedFixtures)
+    setResultsBySchedule(
+      new Map(resultRows.map((result) => [result.schedule_id, result]))
+    )
     setRosterSlots((slotResponse.data || []) as RosterSlotRow[])
     setCourseOverrides((overrideResponse.data || []) as CourseOverrideRow[])
     setLoading(false)
@@ -528,6 +605,27 @@ export default function StrokeScheduleReviewPage() {
     return fixture.player2_name || fixture.player2 || "Player name unavailable"
   }
 
+  function completedResult(fixture: FixtureRow) {
+    const result = resultsBySchedule.get(fixture.id)
+    return result &&
+      result.player1_score !== null &&
+      result.player2_score !== null
+      ? result
+      : null
+  }
+
+  function fixtureDisplay(fixture: FixtureRow) {
+    const result = completedResult(fixture)
+    if (!result) {
+      return `${playerName(fixture, 1)}  vs  ${playerName(fixture, 2)}`
+    }
+
+    return `${playerName(fixture, 1)}  ${result.player1_score}  vs  ${playerName(
+      fixture,
+      2
+    )}  ${result.player2_score}`
+  }
+
   function scheduleImageData(divisionNumber: number): ScheduleImageData {
     if (!season) throw new Error("Season details are not available.")
 
@@ -556,9 +654,10 @@ export default function StrokeScheduleReviewPage() {
         overrides[gameNumber - 1]?.trim() ||
         defaults[gameNumber - 1]?.trim() ||
         "Course not set"
-      const fixtureLines = gameFixtures.map(
-        (fixture) => `${playerName(fixture, 1)}  vs  ${playerName(fixture, 2)}`
-      )
+      const fixtureLines = gameFixtures.map((fixture) => ({
+        text: fixtureDisplay(fixture),
+        completed: Boolean(completedResult(fixture)),
+      }))
       let byeLine: string | null = null
 
       if (divisionSlots.length === 3) {
@@ -752,15 +851,28 @@ export default function StrokeScheduleReviewPage() {
                         return (
                           <div key={gameNumber} style={gameSection}>
                             <h4>Game {gameNumber}</h4>
-                            {gameFixtures.map((fixture) => (
-                              <div key={fixture.id} style={fixtureRow}>
-                                <span>
-                                  {playerName(fixture, 1)} vs {playerName(fixture, 2)}
-                                </span>
-                                <span>{fixture.course || "Course not set"}</span>
-                                <span>{fixture.status || "assigned"}</span>
-                              </div>
-                            ))}
+                            {gameFixtures.map((fixture) => {
+                              const result = completedResult(fixture)
+                              return (
+                                <div key={fixture.id} style={fixtureRow}>
+                                  {result && (
+                                    <span
+                                      aria-hidden="true"
+                                      style={{
+                                        ...completedFixtureLine,
+                                        background: divisionTheme?.accent || "#94a3b8",
+                                      }}
+                                    />
+                                  )}
+                                  <span style={fixtureContent}>
+                                    {fixtureDisplay(fixture)}
+                                  </span>
+                                  <span style={fixtureContent}>
+                                    {fixture.course || "Course not set"}
+                                  </span>
+                                </div>
+                              )
+                            })}
                           </div>
                         )
                       })
@@ -1019,11 +1131,30 @@ const gameSection: React.CSSProperties = {
 }
 
 const fixtureRow: React.CSSProperties = {
+  position: "relative",
   display: "grid",
-  gridTemplateColumns: "minmax(240px, 2fr) minmax(160px, 1fr) 100px",
+  gridTemplateColumns: "minmax(240px, 2fr) minmax(160px, 1fr)",
   gap: 12,
   padding: "10px 0",
   borderBottom: "1px solid #222",
+}
+
+const fixtureContent: React.CSSProperties = {
+  position: "relative",
+  zIndex: 1,
+}
+
+const completedFixtureLine: React.CSSProperties = {
+  position: "absolute",
+  zIndex: 0,
+  left: 0,
+  right: 0,
+  top: "50%",
+  height: 3,
+  borderRadius: 999,
+  opacity: 0.72,
+  transform: "translateY(-50%)",
+  pointerEvents: "none",
 }
 
 const reviewButton: React.CSSProperties = {
