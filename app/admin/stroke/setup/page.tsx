@@ -118,6 +118,12 @@ export default function StrokeSetup() {
     null,
     null,
   ])
+  const [loadedSlotPlayerIds, setLoadedSlotPlayerIds] = useState<(string | null)[]>([
+    null,
+    null,
+    null,
+    null,
+  ])
 
   const [season, setSeason] = useState("")
   const [divisionCount, setDivisionCount] = useState("")
@@ -135,6 +141,7 @@ export default function StrokeSetup() {
   const [game1Override, setGame1Override] = useState("")
   const [game2Override, setGame2Override] = useState("")
   const [game3Override, setGame3Override] = useState("")
+  const [loadedCourseOverrides, setLoadedCourseOverrides] = useState(["", "", ""])
   const [due, setDue] = useState("")
 
   const divisions = useMemo(() => {
@@ -153,6 +160,25 @@ export default function StrokeSetup() {
   useEffect(() => {
     void loadSetupData()
   }, [])
+
+  const rosterHasUnsavedChanges = slotPlayerIds.some(
+    (playerId, index) => playerId !== loadedSlotPlayerIds[index]
+  )
+  const coursesHaveUnsavedChanges = [game1Override, game2Override, game3Override].some(
+    (course, index) => course !== loadedCourseOverrides[index]
+  )
+  const hasUnsavedChanges = rosterHasUnsavedChanges || coursesHaveUnsavedChanges
+
+  useEffect(() => {
+    function warnBeforeUnload(event: BeforeUnloadEvent) {
+      if (!hasUnsavedChanges) return
+      event.preventDefault()
+      event.returnValue = ""
+    }
+
+    window.addEventListener("beforeunload", warnBeforeUnload)
+    return () => window.removeEventListener("beforeunload", warnBeforeUnload)
+  }, [hasUnsavedChanges])
 
   useEffect(() => {
     if (divisions.length === 0) return
@@ -393,16 +419,47 @@ export default function StrokeSetup() {
     setGame1Override(overrideGame1)
     setGame2Override(overrideGame2)
     setGame3Override(overrideGame3)
+    setLoadedCourseOverrides([overrideGame1, overrideGame2, overrideGame3])
     setC1(overrideGame1 || defaultGame1)
     setC2(overrideGame2 || defaultGame2)
     setC3(overrideGame3 || defaultGame3)
     setSlotPlayerIds(slots.map((slot) => slot.player_id))
+    setLoadedSlotPlayerIds(slots.map((slot) => slot.player_id))
     setRosterMessage("")
     setRosterSaveError(false)
     setCourseMessage("")
     setCourseSaveError(false)
     setEditingCourseOverrides(false)
     setLoadingSetup(false)
+  }
+
+  function confirmNavigation(ignoreRosterChanges = false) {
+    const changesWouldBeDiscarded =
+      (!ignoreRosterChanges && rosterHasUnsavedChanges) || coursesHaveUnsavedChanges
+    return (
+      !changesWouldBeDiscarded ||
+      window.confirm(
+        "You have unsaved roster or course changes. Leave this division without saving them?"
+      )
+    )
+  }
+
+  function navigateToDivision(nextDivision: number, ignoreRosterChanges = false) {
+    if (!seasonId || nextDivision < 1 || nextDivision > Number(divisionCount)) return false
+    if (!confirmNavigation(ignoreRosterChanges)) return false
+
+    const params = new URLSearchParams({
+      seasonId,
+      division: String(nextDivision),
+    })
+    router.push(`/admin/stroke/setup?${params.toString()}`)
+    void loadSetupData(seasonId, nextDivision)
+    return true
+  }
+
+  function navigateAway(path: string) {
+    if (!confirmNavigation()) return
+    router.push(path)
   }
 
   async function saveDivisionRoster() {
@@ -452,23 +509,23 @@ export default function StrokeSetup() {
     }
 
     setSlotPlayerIds(savedSlots.map((slot) => slot.player_id))
+    setLoadedSlotPlayerIds(savedSlots.map((slot) => slot.player_id))
 
     const count = Number(divisionCount)
-    const hasNextDivision =
-      rosterStatus === "draft" && divisionNumber < count
+    const hasNextDivision = divisionNumber < count
 
     if (hasNextDivision) {
       const nextDivision = divisionNumber + 1
-      const params = new URLSearchParams({
-        seasonId,
-        division: String(nextDivision),
-      })
-
-      router.push(`/admin/stroke/setup?${params.toString()}`)
-      await loadSetupData(seasonId, nextDivision)
-      setRosterMessage(
-        `Stroke D${divisionNumber} roster saved. Stroke D${nextDivision} is ready.`
-      )
+      const savedDivision = divisionNumber
+      if (navigateToDivision(nextDivision, true)) {
+        setRosterMessage(
+          `Stroke D${savedDivision} roster saved. Stroke D${nextDivision} is ready.`
+        )
+      } else {
+        setRosterMessage(
+          `Stroke D${savedDivision} roster saved. Unsaved course changes remain on this division.`
+        )
+      }
     } else if (rosterStatus === "draft") {
       setRosterMessage(
         `Stroke D${divisionNumber} roster saved. This is the final division.`
@@ -519,6 +576,11 @@ export default function StrokeSetup() {
     setGame1Override(savedCourses.game1_course_override || "")
     setGame2Override(savedCourses.game2_course_override || "")
     setGame3Override(savedCourses.game3_course_override || "")
+    setLoadedCourseOverrides([
+      savedCourses.game1_course_override || "",
+      savedCourses.game2_course_override || "",
+      savedCourses.game3_course_override || "",
+    ])
     setC1(savedCourses.game1_effective_course || "")
     setC2(savedCourses.game2_effective_course || "")
     setC3(savedCourses.game3_effective_course || "")
@@ -630,14 +692,14 @@ export default function StrokeSetup() {
       <div style={container}>
         <div style={topBar}>
           <button
-            onClick={() => router.push("/admin/stroke")}
+            onClick={() => navigateAway("/admin/stroke")}
             style={backButtonPrimary}
           >
             ← Stroke Hub
           </button>
 
           <button
-            onClick={() => router.push("/admin")}
+            onClick={() => navigateAway("/admin")}
             style={backButtonSecondary}
           >
             ← Admin
@@ -681,6 +743,48 @@ export default function StrokeSetup() {
           >
             Stroke D{divisionNumber}
           </span>
+          <div style={divisionNavigation}>
+            {divisionNumber > 1 && (
+              <button
+                type="button"
+                onClick={() => navigateToDivision(divisionNumber - 1)}
+                style={backButtonSecondary}
+              >
+                ← Stroke D{divisionNumber - 1}
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() =>
+                navigateAway(
+                  `/admin/stroke/season/edit?seasonId=${encodeURIComponent(seasonId)}`
+                )
+              }
+              style={backButtonSecondary}
+            >
+              Back to Season
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                navigateAway(
+                  `/admin/stroke/schedule?seasonId=${encodeURIComponent(seasonId)}`
+                )
+              }
+              style={backButtonPrimary}
+            >
+              View Schedule
+            </button>
+            {divisionNumber < Number(divisionCount) && (
+              <button
+                type="button"
+                onClick={() => navigateToDivision(divisionNumber + 1)}
+                style={backButtonSecondary}
+              >
+                Stroke D{divisionNumber + 1} →
+              </button>
+            )}
+          </div>
         </div>
 
         <section style={section}>
@@ -713,13 +817,7 @@ export default function StrokeSetup() {
 
                 if (nextDivision < 1) return
 
-                const params = new URLSearchParams({
-                  seasonId,
-                  division: String(nextDivision),
-                })
-
-                router.push(`/admin/stroke/setup?${params.toString()}`)
-                void loadSetupData(seasonId, nextDivision)
+                navigateToDivision(nextDivision)
               }}
               style={input}
             >
@@ -996,7 +1094,7 @@ export default function StrokeSetup() {
                   <button
                     type="button"
                     onClick={() =>
-                      router.push(
+                      navigateAway(
                         `/admin/stroke/schedule?seasonId=${encodeURIComponent(
                           seasonId
                         )}`
@@ -1088,6 +1186,17 @@ const activeDivisionCard: React.CSSProperties = {
 const activeDivisionHeader: React.CSSProperties = {
   display: "flex",
   alignItems: "center",
+  justifyContent: "space-between",
+  flexWrap: "wrap",
+  gap: 12,
+}
+
+const divisionNavigation: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "flex-end",
+  flexWrap: "wrap",
+  gap: 8,
 }
 
 const divisionBadge: React.CSSProperties = {

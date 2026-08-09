@@ -50,6 +50,14 @@ type ReviewResultRow = {
   review_performed: boolean
 }
 
+type GeneratedScheduleRow = {
+  fixture_count: number
+  completed_fixture_count: number
+  inserted_count: number
+  updated_count: number
+  deleted_count: number
+}
+
 type RosterSlotRow = {
   division_number: number
   slot_number: number
@@ -251,6 +259,7 @@ export default function StrokeScheduleReviewPage() {
   const [rosterSlots, setRosterSlots] = useState<RosterSlotRow[]>([])
   const [courseOverrides, setCourseOverrides] = useState<CourseOverrideRow[]>([])
   const [loading, setLoading] = useState(true)
+  const [generating, setGenerating] = useState(false)
   const [reviewing, setReviewing] = useState(false)
   const [error, setError] = useState("")
   const [message, setMessage] = useState("")
@@ -435,6 +444,37 @@ export default function StrokeScheduleReviewPage() {
         : "This Stroke schedule was already reviewed."
     )
     setReviewing(false)
+  }
+
+  async function generateSchedule() {
+    if (!season || roster?.status !== "approved" || generating) return
+
+    setGenerating(true)
+    setError("")
+    setMessage("")
+
+    const { data, error: generationError } = await supabase
+      .rpc("generate_stroke_schedule", {
+        p_season_id: season.id,
+      })
+      .single()
+
+    if (generationError || !data) {
+      setError(
+        `Schedule generation failed: ${
+          generationError?.message || "No generation result was returned."
+        }`
+      )
+      setGenerating(false)
+      return
+    }
+
+    const result = data as GeneratedScheduleRow
+    await loadSchedule()
+    setMessage(
+      `Schedule generated: ${result.fixture_count} fixtures (${result.inserted_count} inserted, ${result.updated_count} updated, ${result.deleted_count} deleted, ${result.completed_fixture_count} completed preserved).`
+    )
+    setGenerating(false)
   }
 
   const divisionNumbers = useMemo(() => {
@@ -756,6 +796,29 @@ export default function StrokeScheduleReviewPage() {
                   This historical roster is locked. Review actions are unavailable.
                 </p>
               )}
+
+              {roster.status === "approved" &&
+                (!scheduleState ||
+                  scheduleState.generated_revision === 0 ||
+                  scheduleIsStale) && (
+                  <button
+                    type="button"
+                    onClick={() => void generateSchedule()}
+                    disabled={generating}
+                    style={{
+                      ...reviewButton,
+                      background: "#2563eb",
+                      opacity: generating ? 0.6 : 1,
+                      cursor: generating ? "not-allowed" : "pointer",
+                    }}
+                  >
+                    {generating
+                      ? "Generating Schedule..."
+                      : scheduleIsStale
+                        ? "Regenerate Schedule"
+                        : "Generate Schedule"}
+                  </button>
+                )}
 
               {canReview && (
                 <button

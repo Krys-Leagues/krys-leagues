@@ -121,9 +121,16 @@ export default function EditCurrentStrokeSeasonPage() {
         return
       }
 
+      const requestedSeasonId = new URLSearchParams(window.location.search)
+        .get("seasonId")
+        ?.trim()
+      const requestedSeason = loadedSeasons.find(
+        (season) => season.id === requestedSeasonId
+      )
+
       setSeasons(loadedSeasons)
       setRosterVersions((rosterData || []) as RosterVersionRow[])
-      setSelectedSeasonId(loadedSeasons[0].id)
+      setSelectedSeasonId(requestedSeason?.id || loadedSeasons[0].id)
       setLoading(false)
     }
 
