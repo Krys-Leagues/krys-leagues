@@ -1,33 +1,102 @@
+"use client"
+
 import Link from "next/link"
+import { useEffect, useState } from "react"
+import { supabase } from "@/lib/supabase"
+
+type MatchSeason = {
+  id: string
+  season_number: number
+  is_active: boolean
+}
+
+type MatchRoster = {
+  season_id: string
+  status: "draft" | "approved" | "locked"
+}
 
 export default function MatchAdminPage() {
+  const [managedSeason, setManagedSeason] = useState<MatchSeason | null>(null)
+  const [scheduleLinkError, setScheduleLinkError] = useState("")
+
+  useEffect(() => {
+    async function loadCurrentManagedSeason() {
+      const { data: seasonData, error: seasonError } = await supabase
+        .from("seasons")
+        .select("id, season_number, is_active")
+        .eq("league_type", "match")
+        .is("division", null)
+        .order("is_active", { ascending: false })
+        .order("season_number", { ascending: false })
+
+      if (seasonError) {
+        setScheduleLinkError(`Could not load the current Match season: ${seasonError.message}`)
+        return
+      }
+
+      const seasons = (seasonData || []) as MatchSeason[]
+      if (seasons.length === 0) return
+
+      const { data: rosterData, error: rosterError } = await supabase
+        .from("match_roster_versions")
+        .select("season_id, status")
+        .in("season_id", seasons.map((season) => season.id))
+        .in("status", ["draft", "approved"])
+
+      if (rosterError) {
+        setScheduleLinkError(`Could not load the current Match roster: ${rosterError.message}`)
+        return
+      }
+
+      const managedSeasonIds = new Set(
+        ((rosterData || []) as MatchRoster[]).map((roster) => roster.season_id)
+      )
+      setManagedSeason(
+        seasons.find((season) => managedSeasonIds.has(season.id)) || null
+      )
+    }
+
+    void loadCurrentManagedSeason()
+  }, [])
+
   return (
     <main style={page}>
       <h1 style={title}>Match Play Admin</h1>
-
-      <p style={subtitle}>
-        Manage Match Play scheduling, scoring, standings, and players.
-      </p>
+      <p style={subtitle}>Manage Match Play seasons, scoring, and active games.</p>
 
       <div style={grid}>
-        <Link href="/admin/match/schedule" style={card}>
-          <strong>Setup Season</strong>
-          <span>Create and manage Match Play seasons.</span>
+        <Link href="/admin/match/season" style={card}>
+          <strong>Setup New Season</strong>
+          <span>Create or prepare a new Match Play season.</span>
         </Link>
 
-        <Link href="/admin/match/results" style={card}>
-          <strong>Score Season</strong>
-          <span>Enter Match Play scores and results.</span>
+        <Link href="/admin/match/season/edit" style={card}>
+          <strong>Edit Current Season</strong>
+          <span>Edit the current managed Match season and its divisions.</span>
         </Link>
 
-        <Link href="/match-standings" style={card}>
-          <strong>Standings</strong>
-          <span>View current Match Play standings.</span>
-        </Link>
+        {managedSeason ? (
+          <Link
+            href={`/admin/match/schedule?seasonId=${encodeURIComponent(managedSeason.id)}`}
+            style={card}
+          >
+            <strong>Schedule &amp; Images</strong>
+            <span>
+              View the current schedule, review changes, and download division schedule images.
+            </span>
+          </Link>
+        ) : (
+          <div style={{ ...card, opacity: 0.65 }}>
+            <strong>Schedule &amp; Images</strong>
+            <span>
+              {scheduleLinkError || "No current managed Match season is available yet."}
+            </span>
+          </div>
+        )}
 
         <Link href="/admin/players" style={card}>
           <strong>Players</strong>
-          <span>Open the global player manager.</span>
+          <span>View global player list used across all leagues.</span>
         </Link>
 
         <Link href="/admin" style={card}>
