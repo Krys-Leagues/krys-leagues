@@ -9,6 +9,12 @@ type SeasonRow = {
   id: string
   season_number: number
   is_active: boolean
+  start_date: string | null
+  due_date: string | null
+  end_date: string | null
+  game1_course: string | null
+  game2_course: string | null
+  game3_course: string | null
 }
 
 type RosterVersionRow = {
@@ -16,6 +22,21 @@ type RosterVersionRow = {
   season_id: string
   division_count: number
   status: "draft" | "approved" | "locked"
+}
+
+type SavedSeasonDetails = {
+  season_id: string
+  season_number: number
+  division_count: number
+  roster_status: "draft" | "approved" | "locked"
+  start_date: string
+  due_date: string
+  end_date: string
+  game1_course: string
+  game2_course: string
+  game3_course: string
+  schedule_changes_detected: boolean
+  change_revision: number
 }
 
 const LEAGUE_TYPE = "stroke"
@@ -28,6 +49,13 @@ export default function EditCurrentStrokeSeasonPage() {
   const [selectedSeasonId, setSelectedSeasonId] = useState("")
   const [loading, setLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState("")
+  const [savingDetails, setSavingDetails] = useState(false)
+  const [detailsMessage, setDetailsMessage] = useState("")
+  const [startDate, setStartDate] = useState("")
+  const [endDate, setEndDate] = useState("")
+  const [game1Course, setGame1Course] = useState("")
+  const [game2Course, setGame2Course] = useState("")
+  const [game3Course, setGame3Course] = useState("")
 
   useEffect(() => {
     async function loadStrokeSeasons() {
@@ -36,7 +64,9 @@ export default function EditCurrentStrokeSeasonPage() {
 
       const { data: seasonData, error: seasonError } = await supabase
         .from("seasons")
-        .select("id, season_number, is_active")
+        .select(
+          "id, season_number, is_active, start_date, due_date, end_date, game1_course, game2_course, game3_course"
+        )
         .eq("league_type", LEAGUE_TYPE)
         .is("division", null)
         .order("is_active", { ascending: false })
@@ -89,6 +119,17 @@ export default function EditCurrentStrokeSeasonPage() {
     [seasons, selectedSeasonId]
   )
 
+  useEffect(() => {
+    if (!selectedSeason) return
+
+    setStartDate(selectedSeason.start_date || "")
+    setEndDate(selectedSeason.end_date || selectedSeason.due_date || "")
+    setGame1Course(selectedSeason.game1_course || "")
+    setGame2Course(selectedSeason.game2_course || "")
+    setGame3Course(selectedSeason.game3_course || "")
+    setDetailsMessage("")
+  }, [selectedSeason])
+
   const selectedRoster = useMemo(() => {
     const versions = rosterVersions.filter(
       (roster) => roster.season_id === selectedSeasonId
@@ -122,6 +163,93 @@ export default function EditCurrentStrokeSeasonPage() {
     router.push(`/admin/stroke/setup?${params.toString()}`)
   }
 
+  function resetSeasonDetails() {
+    if (!selectedSeason) return
+
+    setStartDate(selectedSeason.start_date || "")
+    setEndDate(selectedSeason.end_date || selectedSeason.due_date || "")
+    setGame1Course(selectedSeason.game1_course || "")
+    setGame2Course(selectedSeason.game2_course || "")
+    setGame3Course(selectedSeason.game3_course || "")
+    setDetailsMessage("")
+  }
+
+  async function saveSeasonDetails() {
+    if (!selectedSeason || !selectedRoster || selectedRoster.status === "locked") return
+
+    setDetailsMessage("")
+
+    if (!startDate) {
+      setDetailsMessage("Choose a start date.")
+      return
+    }
+
+    if (!endDate) {
+      setDetailsMessage("Choose an end date.")
+      return
+    }
+
+    if (endDate < startDate) {
+      setDetailsMessage("End date cannot be before the start date.")
+      return
+    }
+
+    if (!game1Course.trim() || !game2Course.trim() || !game3Course.trim()) {
+      setDetailsMessage("Game 1, Game 2, and Game 3 courses are required.")
+      return
+    }
+
+    setSavingDetails(true)
+
+    const { data, error } = await supabase
+      .rpc("update_stroke_season_details", {
+        p_season_id: selectedSeason.id,
+        p_start_date: startDate,
+        p_end_date: endDate,
+        p_game1_course: game1Course.trim(),
+        p_game2_course: game2Course.trim(),
+        p_game3_course: game3Course.trim(),
+      })
+      .single()
+
+    setSavingDetails(false)
+
+    if (error || !data) {
+      setDetailsMessage(
+        `Stroke season changes were not saved: ${error?.message || "No saved season data was returned."}`
+      )
+      return
+    }
+
+    const saved = data as SavedSeasonDetails
+
+    setSeasons((current) =>
+      current.map((season) =>
+        season.id === saved.season_id
+          ? {
+              ...season,
+              start_date: saved.start_date,
+              due_date: saved.due_date,
+              end_date: saved.end_date,
+              game1_course: saved.game1_course,
+              game2_course: saved.game2_course,
+              game3_course: saved.game3_course,
+            }
+          : season
+      )
+    )
+    setStartDate(saved.start_date)
+    setEndDate(saved.end_date)
+    setGame1Course(saved.game1_course)
+    setGame2Course(saved.game2_course)
+    setGame3Course(saved.game3_course)
+    setDetailsMessage(
+      saved.schedule_changes_detected
+        ? "Season changes saved. Schedule changes detected. Regenerate and review the schedule."
+        : "Season changes saved."
+    )
+  }
+
   const rosterIsLocked = selectedRoster?.status === "locked"
 
   return (
@@ -136,7 +264,11 @@ export default function EditCurrentStrokeSeasonPage() {
           </Link>
         </nav>
 
-        <h1 style={title}>Edit Current Stroke Season</h1>
+        <h1 style={title}>
+          {selectedSeason
+            ? `Edit Stroke Season ${selectedSeason.season_number}`
+            : "Edit Current Stroke Season"}
+        </h1>
         <p style={subtitle}>
           Select an existing season, then choose the division that needs editing.
         </p>
@@ -173,6 +305,108 @@ export default function EditCurrentStrokeSeasonPage() {
 
         {!loading && !errorMessage && selectedSeason && (
           <>
+            <section style={panel}>
+              <h2 style={sectionTitle}>EDIT SEASON DETAILS</h2>
+              <p style={sectionDescription}>
+                Update the season dates and default courses. Season identity and
+                roster size are managed separately and cannot be changed here.
+              </p>
+
+              <div style={detailsGrid}>
+                <EditField label="Season Number">
+                  <input
+                    value={selectedSeason.season_number}
+                    readOnly
+                    aria-readonly="true"
+                    style={readOnlyInput}
+                  />
+                </EditField>
+
+                <EditField label="Number of Divisions">
+                  <input
+                    value={selectedRoster?.division_count ?? "Unavailable"}
+                    readOnly
+                    aria-readonly="true"
+                    style={readOnlyInput}
+                  />
+                </EditField>
+
+                <EditField label="Start Date">
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(event) => setStartDate(event.target.value)}
+                    disabled={savingDetails || rosterIsLocked || !selectedRoster}
+                    style={input}
+                  />
+                </EditField>
+
+                <EditField label="End Date">
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={(event) => setEndDate(event.target.value)}
+                    disabled={savingDetails || rosterIsLocked || !selectedRoster}
+                    style={input}
+                  />
+                </EditField>
+
+                <EditField label="Game 1 Course">
+                  <input
+                    value={game1Course}
+                    onChange={(event) => setGame1Course(event.target.value)}
+                    disabled={savingDetails || rosterIsLocked || !selectedRoster}
+                    style={input}
+                  />
+                </EditField>
+
+                <EditField label="Game 2 Course">
+                  <input
+                    value={game2Course}
+                    onChange={(event) => setGame2Course(event.target.value)}
+                    disabled={savingDetails || rosterIsLocked || !selectedRoster}
+                    style={input}
+                  />
+                </EditField>
+
+                <EditField label="Game 3 Course">
+                  <input
+                    value={game3Course}
+                    onChange={(event) => setGame3Course(event.target.value)}
+                    disabled={savingDetails || rosterIsLocked || !selectedRoster}
+                    style={input}
+                  />
+                </EditField>
+              </div>
+
+              {rosterIsLocked && (
+                <p style={lockedText}>This historical season is locked and read-only.</p>
+              )}
+
+              <div style={detailsActions}>
+                <button
+                  type="button"
+                  onClick={saveSeasonDetails}
+                  disabled={savingDetails || rosterIsLocked || !selectedRoster}
+                  style={saveDetailsButton}
+                >
+                  {savingDetails ? "Saving Season Changes..." : "Save Season Changes"}
+                </button>
+                <button
+                  type="button"
+                  onClick={resetSeasonDetails}
+                  disabled={savingDetails}
+                  style={cancelButton}
+                >
+                  Cancel
+                </button>
+              </div>
+
+              {detailsMessage && (
+                <p role="status" style={detailsMessageStyle}>{detailsMessage}</p>
+              )}
+            </section>
+
             <section style={panel}>
               <h2 style={sectionTitle}>EDIT A DIVISION</h2>
               <p style={sectionDescription}>
@@ -211,20 +445,25 @@ export default function EditCurrentStrokeSeasonPage() {
               )}
             </section>
 
-            <section style={secondaryPanel}>
-              <h2 style={sectionTitle}>EDIT ENTIRE SEASON</h2>
-              <p style={sectionDescription}>
-                Use this only for season-wide details such as dates, default
-                courses, season number, or division count.
-              </p>
-              <Link href="/admin/stroke/season" style={seasonDetailsButton}>
-                Edit Season Details
-              </Link>
-            </section>
           </>
         )}
       </div>
     </main>
+  )
+}
+
+function EditField({
+  label,
+  children,
+}: {
+  label: string
+  children: React.ReactNode
+}) {
+  return (
+    <label style={fieldLabel}>
+      {label}
+      {children}
+    </label>
   )
 }
 
@@ -285,12 +524,6 @@ const panel: React.CSSProperties = {
   background: "#0b0b0b",
 }
 
-const secondaryPanel: React.CSSProperties = {
-  ...panel,
-  background: "#080808",
-  borderColor: "#2a2a2a",
-}
-
 const sectionTitle: React.CSSProperties = {
   margin: "0 0 12px",
   fontSize: 17,
@@ -308,6 +541,60 @@ const fieldLabel: React.CSSProperties = {
   flexDirection: "column",
   gap: 8,
   fontWeight: 700,
+}
+
+const detailsGrid: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+  gap: 16,
+}
+
+const input: React.CSSProperties = {
+  boxSizing: "border-box",
+  width: "100%",
+  padding: 12,
+  background: "#111",
+  border: "1px solid #555",
+  color: "white",
+  borderRadius: 8,
+}
+
+const readOnlyInput: React.CSSProperties = {
+  ...input,
+  background: "#080808",
+  color: "#a1a1aa",
+}
+
+const detailsActions: React.CSSProperties = {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: 10,
+  marginTop: 18,
+}
+
+const saveDetailsButton: React.CSSProperties = {
+  padding: "10px 16px",
+  background: "#16a34a",
+  border: "none",
+  borderRadius: 8,
+  color: "white",
+  fontWeight: 700,
+  cursor: "pointer",
+}
+
+const cancelButton: React.CSSProperties = {
+  ...saveDetailsButton,
+  background: "#27272a",
+  border: "1px solid #52525b",
+}
+
+const detailsMessageStyle: React.CSSProperties = {
+  margin: "16px 0 0",
+  padding: 12,
+  border: "1px solid #444",
+  borderRadius: 8,
+  background: "#080808",
+  color: "#facc15",
 }
 
 const select: React.CSSProperties = {
@@ -354,17 +641,6 @@ const editButton: React.CSSProperties = {
 const viewButton: React.CSSProperties = {
   ...editButton,
   background: "#334155",
-}
-
-const seasonDetailsButton: React.CSSProperties = {
-  display: "inline-block",
-  padding: "9px 14px",
-  background: "#222",
-  color: "white",
-  border: "1px solid #555",
-  borderRadius: 7,
-  fontWeight: 700,
-  textDecoration: "none",
 }
 
 const mutedText: React.CSSProperties = {
