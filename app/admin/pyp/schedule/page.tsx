@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 
 type Fixture = { id: string; division_number: number; game_number: number; pyp_home_player_screen_name: string; pyp_away_player_screen_name: string }
+type PypResult = { schedule_id:string;course1_name:string;course1_home_hw:number;course1_away_hw:number;course2_name:string;course2_home_hw:number;course2_away_hw:number;home_total_hw:number;away_total_hw:number }
 type ScheduleState = { change_revision: number; generated_revision: number; reviewed_revision: number }
 type Season = { season_number: number; start_date: string | null; end_date: string | null; league_type: string | null }
 type Roster = { status: "draft" | "approved" | "locked"; division_count: number }
@@ -25,6 +26,7 @@ export default function PypSchedulePage() {
   const [roster, setRoster] = useState<Roster | null>(null)
   const [scheduleState, setScheduleState] = useState<ScheduleState | null>(null)
   const [fixtures, setFixtures] = useState<Fixture[]>([])
+  const [results, setResults] = useState<PypResult[]>([])
   const [division, setDivision] = useState(1)
   const [message, setMessage] = useState("")
   const [busy, setBusy] = useState(false)
@@ -33,13 +35,14 @@ export default function PypSchedulePage() {
 
   const load = useCallback(async (id: string) => {
     setLoading(true)
-    const [{ data: seasonData, error: seasonError }, { data: rosterData, error: rosterError }, { data: stateData, error: stateError }, { data: fixtureData, error: fixtureError }] = await Promise.all([
+    const [{ data: seasonData, error: seasonError }, { data: rosterData, error: rosterError }, { data: stateData, error: stateError }, { data: fixtureData, error: fixtureError }, {data:resultData,error:resultError}] = await Promise.all([
       supabase.from("seasons").select("season_number, start_date, end_date, league_type").eq("id", id).maybeSingle(),
       supabase.from("pyp_roster_versions").select("status, division_count").eq("season_id", id).in("status", ["draft", "approved", "locked"]).order("created_at", { ascending: false }).limit(1).maybeSingle(),
       supabase.from("pyp_schedule_state").select("change_revision, generated_revision, reviewed_revision").eq("season_id", id).maybeSingle(),
       supabase.from("schedule").select("id, division_number, game_number, pyp_home_player_screen_name, pyp_away_player_screen_name").eq("league_type", "pyp").eq("season_id", id).not("pyp_roster_version_id", "is", null).order("division_number").order("game_number"),
+      supabase.from("pyp_managed_results").select("schedule_id,course1_name,course1_home_hw,course1_away_hw,course2_name,course2_home_hw,course2_away_hw,home_total_hw,away_total_hw").eq("season_id",id),
     ])
-    const error = seasonError || rosterError || stateError || fixtureError
+    const error = seasonError || rosterError || stateError || fixtureError || resultError
     if (error || !seasonData || seasonData.league_type !== "pyp" || !rosterData) {
       setMessage(error?.message || "Managed PYP season was not found.")
       setLoading(false)
@@ -49,6 +52,7 @@ export default function PypSchedulePage() {
     setRoster(rosterData as Roster)
     setScheduleState(stateData as ScheduleState | null)
     setFixtures((fixtureData || []) as Fixture[])
+    setResults((resultData || []) as PypResult[])
     setLoading(false)
   }, [])
 
@@ -79,6 +83,7 @@ export default function PypSchedulePage() {
   const reviewed = Boolean(current && scheduleState && scheduleState.reviewed_revision === scheduleState.generated_revision)
   const workflowLabel = !generated ? "Not Generated" : !current ? "Stale — Regeneration Required" : !reviewed ? "Current — Needs Review" : "Reviewed"
   const shown = useMemo(() => fixtures.filter((fixture) => fixture.division_number === division), [division, fixtures])
+  const resultMap=useMemo(()=>new Map(results.map(result=>[result.schedule_id,result])),[results])
   const theme = themes[division] || neutralTheme
 
   function createImageUrl() {
@@ -131,6 +136,8 @@ export default function PypSchedulePage() {
         context.fillStyle = "#ddd"
         context.fillText(awayText, matchupX, y)
         y += 60
+        const result=resultMap.get(fixture.id)
+        if(result){const resultText=`C1 ${result.course1_name} ${result.course1_home_hw}-${result.course1_away_hw} · C2 ${result.course2_name} ${result.course2_home_hw}-${result.course2_away_hw} · TOTAL ${result.home_total_hw}-${result.away_total_hw}`;let resultSize=18;context.font=`${resultSize}px Arial, sans-serif`;while(resultSize>12&&context.measureText(resultText).width>canvas.width-160){resultSize-=1;context.font=`${resultSize}px Arial, sans-serif`}context.fillStyle="#aaa";context.fillText(resultText,80,y-22);y+=30}
       }
       y += 35
     }
@@ -159,7 +166,7 @@ export default function PypSchedulePage() {
       <div style={container}>
         <div style={topBar}>
           <button type="button" onClick={() => router.push(`/admin/pyp/setup?seasonId=${encodeURIComponent(seasonId)}&division=1`)} style={secondaryButton} disabled={!seasonId}>← PYP Setup</button>
-          <button type="button" onClick={() => router.push("/admin/pyp")} style={secondaryButton}>← PYP Hub</button>
+          <button type="button" onClick={() => router.push("/admin/pyp")} style={secondaryButton}>← PYP Hub</button><button type="button" onClick={()=>router.push(`/admin/pyp/results?seasonId=${encodeURIComponent(seasonId)}`)} disabled={!seasonId} style={secondaryButton}>Results Admin</button><button type="button" onClick={()=>router.push(`/admin/pyp/standings?seasonId=${encodeURIComponent(seasonId)}`)} disabled={!seasonId} style={secondaryButton}>Scorecard / Standings</button>
         </div>
         <h1 style={title}>PYP Schedule &amp; Images</h1>
         <p style={subtitle}>{season ? `Managed PYP Season ${season.season_number}` : "Review a managed PYP schedule."}</p>
@@ -178,7 +185,7 @@ export default function PypSchedulePage() {
 
             <section style={{ ...divisionCard, borderColor: theme.border, background: theme.background }}>
               <div style={divisionHeader}><h2 style={{ margin: 0, color: theme.accent }}>PYP D{division}</h2><span style={statusPill}>{shown.length} fixtures</span></div>
-              {[1, 2, 3].map((round) => <div key={round} style={roundCard}><h3>Round {round}</h3>{shown.filter((fixture) => fixture.game_number === round).length === 0 ? <p style={helper}>No real-player fixture.</p> : shown.filter((fixture) => fixture.game_number === round).map((fixture) => <div key={fixture.id} style={fixtureRow}><strong style={{ color: theme.accent }}>HOME · {fixture.pyp_home_player_screen_name}</strong><span style={versus}>vs</span><span>AWAY · {fixture.pyp_away_player_screen_name}</span></div>)}</div>)}
+              {[1, 2, 3].map((round) => <div key={round} style={roundCard}><h3>Round {round}</h3>{shown.filter((fixture) => fixture.game_number === round).length === 0 ? <p style={helper}>No real-player fixture.</p> : shown.filter((fixture) => fixture.game_number === round).map((fixture) => {const result=resultMap.get(fixture.id);return <div key={fixture.id} style={fixtureBlock}><div style={fixtureRow}><strong style={{ color: theme.accent }}>HOME · {fixture.pyp_home_player_screen_name}</strong><span style={versus}>vs</span><span>AWAY · {fixture.pyp_away_player_screen_name}</span></div>{result&&<div style={resultLine}><span>Course 1 · {result.course1_name}: {result.course1_home_hw}-{result.course1_away_hw}</span><span>Course 2 · {result.course2_name}: {result.course2_home_hw}-{result.course2_away_hw}</span><strong>Combined: {result.home_total_hw}-{result.away_total_hw}</strong></div>}</div>})}</div>)}
               <div style={rules}><strong>PYP course rules</strong><span>Home player is the person in color.</span><span>Course 1: Home chooses; Away hits first.</span><span>Course 2: Away chooses; Home hits first.</span><span>Players may choose Easy or Hard.</span></div>
             </section>
 
@@ -214,6 +221,7 @@ const divisionHeader: React.CSSProperties = { display: "flex", alignItems: "cent
 const statusPill: React.CSSProperties = { padding: "6px 10px", borderRadius: 999, border: "1px solid #555", background: "rgba(0,0,0,.35)", color: "#ddd" }
 const roundCard: React.CSSProperties = { marginTop: 18, padding: 16, borderRadius: 10, border: "1px solid rgba(255,255,255,.12)", background: "rgba(0,0,0,.28)" }
 const fixtureRow: React.CSSProperties = { display: "flex", alignItems: "center", flexWrap: "wrap", gap: "6px 12px", width: "fit-content", maxWidth: "100%", padding: "10px 0", borderTop: "1px solid rgba(255,255,255,.08)" }
+const fixtureBlock:React.CSSProperties={paddingBottom:6};const resultLine:React.CSSProperties={display:"flex",flexWrap:"wrap",gap:"5px 14px",padding:"0 0 9px",color:"#bbb",fontSize:14}
 const versus: React.CSSProperties = { color: "#888", fontWeight: 800 }
 const rules: React.CSSProperties = { display: "flex", flexDirection: "column", gap: 7, marginTop: 22, color: "#ddd" }
 const imagePanel: React.CSSProperties = { marginTop: 22, padding: 22, borderRadius: 14, border: "1px solid #333", background: "#0d0d0d" }

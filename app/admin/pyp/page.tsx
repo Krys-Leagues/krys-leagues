@@ -66,20 +66,19 @@ export default function PypAdminPage() {
         </Link>
 
         {managedSeason ? (
-          <Link
-            href={`/admin/pyp/schedule?seasonId=${encodeURIComponent(managedSeason.id)}`}
-            style={card}
-          >
-            <strong>Schedule &amp; Images</strong>
-            <span>
-              View the current schedule, review changes, and download division schedule images.
-            </span>
-          </Link>
+          <>
+            <Link href={`/admin/pyp/results?seasonId=${encodeURIComponent(managedSeason.id)}`} style={card}>
+              <strong>Results Admin</strong><span>Enter, correct, or delete managed PYP results.</span>
+            </Link>
+            <Link href={`/admin/pyp/schedule?seasonId=${encodeURIComponent(managedSeason.id)}`} style={card}>
+              <strong>Schedule &amp; Images</strong><span>View the current schedule, review changes, and download division schedule images.</span>
+            </Link>
+            <Link href={`/admin/pyp/standings?seasonId=${encodeURIComponent(managedSeason.id)}`} style={card}>
+              <strong>Scorecard / Standings</strong><span>Review standings and finalize the season scorecard.</span>
+            </Link>
+          </>
         ) : (
-          <div style={{ ...card, opacity: 0.65 }}>
-            <strong>Schedule &amp; Images</strong>
-            <span>{loadError || "No current managed PYP season is available yet."}</span>
-          </div>
+          <><div style={{ ...card, opacity: 0.65 }}><strong>Results Admin</strong><span>{loadError || "No current managed PYP season is available yet."}</span></div><div style={{ ...card, opacity: 0.65 }}><strong>Schedule &amp; Images</strong><span>{loadError || "No current managed PYP season is available yet."}</span></div><div style={{ ...card, opacity: 0.65 }}><strong>Scorecard / Standings</strong><span>{loadError || "No current managed PYP season is available yet."}</span></div></>
         )}
 
         <Link href="/admin/players" style={card}>

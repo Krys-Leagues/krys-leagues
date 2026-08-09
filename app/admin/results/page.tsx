@@ -221,6 +221,11 @@ export default function ResultsPage() {
       return
     }
 
+    if (leagueType === "pyp") {
+      alert("Use the dedicated managed PYP Results page to enter PYP results.")
+      return
+    }
+
     const seasonNumber = Number(season)
 
     if (!seasonNumber || !player1 || !player2 || !player1Id || !player2Id) {
