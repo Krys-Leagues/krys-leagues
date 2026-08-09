@@ -1,11 +1,22 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import { logActivity } from "@/lib/activityLog"
 
 const LEAGUE_TYPE = "match"
+const MATCH_SEASON_DRAFT_KEY = "match-season-create-draft"
+
+type MatchSeasonDraft = {
+  seasonNumber: string
+  divisionCount: string
+  startDate: string
+  endDate: string
+  game1Course: string
+  game2Course: string
+  game3Course: string
+}
 
 export default function MatchSeasonPage() {
   const router = useRouter()
@@ -18,6 +29,42 @@ export default function MatchSeasonPage() {
   const [game1Course, setGame1Course] = useState("")
   const [game2Course, setGame2Course] = useState("")
   const [game3Course, setGame3Course] = useState("")
+  const draftReady = useRef(false)
+
+  useEffect(() => {
+    try {
+      const savedDraft = window.sessionStorage.getItem(MATCH_SEASON_DRAFT_KEY)
+      if (savedDraft) {
+        const draft = JSON.parse(savedDraft) as Partial<MatchSeasonDraft>
+        setSeasonNumber(typeof draft.seasonNumber === "string" ? draft.seasonNumber : "")
+        setDivisionCount(typeof draft.divisionCount === "string" ? draft.divisionCount : "5")
+        setStartDate(typeof draft.startDate === "string" ? draft.startDate : "")
+        setEndDate(typeof draft.endDate === "string" ? draft.endDate : "")
+        setGame1Course(typeof draft.game1Course === "string" ? draft.game1Course : "")
+        setGame2Course(typeof draft.game2Course === "string" ? draft.game2Course : "")
+        setGame3Course(typeof draft.game3Course === "string" ? draft.game3Course : "")
+      }
+    } catch {
+      window.sessionStorage.removeItem(MATCH_SEASON_DRAFT_KEY)
+    }
+
+    draftReady.current = true
+  }, [])
+
+  useEffect(() => {
+    if (!draftReady.current) return
+
+    const draft: MatchSeasonDraft = {
+      seasonNumber,
+      divisionCount,
+      startDate,
+      endDate,
+      game1Course,
+      game2Course,
+      game3Course,
+    }
+    window.sessionStorage.setItem(MATCH_SEASON_DRAFT_KEY, JSON.stringify(draft))
+  }, [divisionCount, endDate, game1Course, game2Course, game3Course, seasonNumber, startDate])
 
   function validateSeasonForm() {
     const number = Number(seasonNumber)
@@ -128,6 +175,7 @@ export default function MatchSeasonPage() {
       },
     })
 
+    window.sessionStorage.removeItem(MATCH_SEASON_DRAFT_KEY)
     setSeasonNumber("")
     setDivisionCount("5")
     setStartDate("")
