@@ -46,6 +46,8 @@ type FixtureRow = {
   due_date: string | null
 }
 
+type ResultRow = { schedule_id: string; player1_hw: number | null; player2_hw: number | null }
+
 type ReviewResultRow = {
   review_performed: boolean
 }
@@ -281,6 +283,7 @@ export default function MatchScheduleReviewPage() {
     null
   )
   const [fixtures, setFixtures] = useState<FixtureRow[]>([])
+  const [resultsBySchedule, setResultsBySchedule] = useState<Map<string, ResultRow>>(new Map())
   const [rosterSlots, setRosterSlots] = useState<RosterSlotRow[]>([])
   const [courseOverrides, setCourseOverrides] = useState<CourseOverrideRow[]>([])
   const [loading, setLoading] = useState(true)
@@ -421,12 +424,28 @@ export default function MatchScheduleReviewPage() {
     }
 
     const loadedFixtures = (fixtureResponse.data || []) as FixtureRow[]
+    const fixtureIds = loadedFixtures.map((fixture) => fixture.id)
+    let loadedResults: ResultRow[] = []
+    if (fixtureIds.length > 0) {
+      const { data: resultData, error: resultError } = await supabase
+        .from("results")
+        .select("schedule_id, player1_hw, player2_hw")
+        .eq("league_type", "match")
+        .in("schedule_id", fixtureIds)
+      if (resultError) {
+        setError(`Could not load Match fixture results: ${resultError.message}`)
+        setLoading(false)
+        return
+      }
+      loadedResults = (resultData || []) as ResultRow[]
+    }
     setSeason(selectedSeason)
     setRoster(selectedRoster)
     setScheduleState(
       (stateResponse.data as ScheduleStateRow | null) || null
     )
     setFixtures(loadedFixtures)
+    setResultsBySchedule(new Map(loadedResults.map((result) => [result.schedule_id, result])))
     setRosterSlots((slotResponse.data || []) as RosterSlotRow[])
     setCourseOverrides((overrideResponse.data || []) as CourseOverrideRow[])
     setLoading(false)
@@ -556,7 +575,11 @@ export default function MatchScheduleReviewPage() {
   }
 
   function fixtureDisplay(fixture: FixtureRow) {
-    return `${playerName(fixture, 1)}  vs  ${playerName(fixture, 2)}`
+    const result = resultsBySchedule.get(fixture.id)
+    const completed = result?.player1_hw !== null && result?.player1_hw !== undefined && result.player2_hw !== null
+    return completed
+      ? `${playerName(fixture, 1)}  ${result.player1_hw} HW  vs  ${result.player2_hw} HW  ${playerName(fixture, 2)}`
+      : `${playerName(fixture, 1)}  vs  ${playerName(fixture, 2)}`
   }
 
   function scheduleImageData(divisionNumber: number): ScheduleImageData {
@@ -703,6 +726,16 @@ export default function MatchScheduleReviewPage() {
           >
             ← Match Hub
           </button>
+          {season && (
+            <>
+              <button type="button" onClick={() => router.push(`/admin/match/results?seasonId=${encodeURIComponent(season.id)}`)} style={secondaryButton}>
+                Results Admin
+              </button>
+              <button type="button" onClick={() => router.push(`/admin/match/standings?seasonId=${encodeURIComponent(season.id)}`)} style={secondaryButton}>
+                Standings / Final Scorecard
+              </button>
+            </>
+          )}
         </div>
 
         <h1>Review Match Schedule</h1>

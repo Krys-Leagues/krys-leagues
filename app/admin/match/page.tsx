@@ -94,6 +94,19 @@ export default function MatchAdminPage() {
           </div>
         )}
 
+        {managedSeason && (
+          <>
+            <Link href={`/admin/match/results?seasonId=${encodeURIComponent(managedSeason.id)}`} style={card}>
+              <strong>Score Current Season</strong>
+              <span>Enter, correct, or delete managed Match results.</span>
+            </Link>
+            <Link href={`/admin/match/standings?seasonId=${encodeURIComponent(managedSeason.id)}`} style={card}>
+              <strong>Standings / Final Scorecard</strong>
+              <span>Review standings and finalize the season scorecard.</span>
+            </Link>
+          </>
+        )}
+
         <Link href="/admin/players" style={card}>
           <strong>Players</strong>
           <span>View global player list used across all leagues.</span>
