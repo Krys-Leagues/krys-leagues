@@ -342,6 +342,22 @@ export default function StrokeStandingsPage() {
       <div style={container}>
         <div style={topBar}>
           <button onClick={() => router.push("/admin/stroke")} style={backButton}>← Back to Stroke</button>
+          {seasonId && (
+            <>
+              <button
+                onClick={() => router.push(`/admin/stroke/results?seasonId=${encodeURIComponent(seasonId)}`)}
+                style={backButton}
+              >
+                Results Admin
+              </button>
+              <button
+                onClick={() => router.push(`/admin/stroke/schedule?seasonId=${encodeURIComponent(seasonId)}`)}
+                style={backButton}
+              >
+                Schedule &amp; Images
+              </button>
+            </>
+          )}
         </div>
         <h1 style={title}>Stroke Standings</h1>
         <p style={subtitle}>Authoritative managed Stroke standings and Final Scorecard.</p>

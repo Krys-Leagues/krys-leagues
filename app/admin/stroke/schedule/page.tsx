@@ -750,6 +750,32 @@ export default function StrokeScheduleReviewPage() {
           >
             ← Stroke Hub
           </button>
+          {season && (
+            <>
+              <button
+                type="button"
+                onClick={() =>
+                  router.push(
+                    `/admin/stroke/results?seasonId=${encodeURIComponent(season.id)}`
+                  )
+                }
+                style={secondaryButton}
+              >
+                Results Admin
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  router.push(
+                    `/admin/stroke/standings?seasonId=${encodeURIComponent(season.id)}`
+                  )
+                }
+                style={secondaryButton}
+              >
+                Scorecard / Standings
+              </button>
+            </>
+          )}
         </div>
 
         <h1>Review Stroke Schedule</h1>
