@@ -13,9 +13,11 @@ create table if not exists public.pyp_managed_results (
   home_player_screen_name text not null check (btrim(home_player_screen_name) <> ''),
   away_player_screen_name text not null check (btrim(away_player_screen_name) <> ''),
   course1_name text not null check (btrim(course1_name) <> ''),
+  course1_difficulty text null check (course1_difficulty in ('Easy', 'Hard')),
   course1_home_hw integer not null check (course1_home_hw >= 0),
   course1_away_hw integer not null check (course1_away_hw >= 0),
   course2_name text not null check (btrim(course2_name) <> ''),
+  course2_difficulty text null check (course2_difficulty in ('Easy', 'Hard')),
   course2_home_hw integer not null check (course2_home_hw >= 0),
   course2_away_hw integer not null check (course2_away_hw >= 0),
   home_total_hw integer generated always as (course1_home_hw + course2_home_hw) stored,
@@ -31,6 +33,21 @@ create table if not exists public.pyp_managed_results (
     or (away_total_hw > home_total_hw and not is_draw and winner_player_id = away_player_id)
   )
 );
+
+-- Existing Batch 2 installations may already contain test results. Keep the
+-- new fields nullable so those rows are not silently rewritten; correcting a
+-- result through save_pyp_result supplies and validates both difficulties.
+alter table public.pyp_managed_results
+  add column if not exists course1_difficulty text null,
+  add column if not exists course2_difficulty text null;
+
+alter table public.pyp_managed_results
+  drop constraint if exists pyp_managed_results_course1_difficulty_check,
+  add constraint pyp_managed_results_course1_difficulty_check
+    check (course1_difficulty is null or course1_difficulty in ('Easy', 'Hard')),
+  drop constraint if exists pyp_managed_results_course2_difficulty_check,
+  add constraint pyp_managed_results_course2_difficulty_check
+    check (course2_difficulty is null or course2_difficulty in ('Easy', 'Hard'));
 
 create index if not exists pyp_managed_results_season_division_idx
   on public.pyp_managed_results(season_id, division_number, game_number);

@@ -20,7 +20,7 @@ begin
   if v_card.status<>'draft' then raise exception 'Only a draft PYP Final Scorecard can be approved';end if;
   if v_card.source_change_revision<>v_state.change_revision then raise exception 'Final Scorecard is stale. Regenerate it before approval.';end if;
   select count(*)::integer into v_incomplete from public.schedule f where lower(btrim(f.league_type))='pyp' and f.season_id=v_card.season_id and f.pyp_roster_version_id=v_roster.id
-    and not exists(select 1 from public.pyp_managed_results r where r.schedule_id=f.id and nullif(btrim(r.course1_name),'') is not null and nullif(btrim(r.course2_name),'') is not null);
+    and not exists(select 1 from public.pyp_managed_results r where r.schedule_id=f.id and nullif(btrim(r.course1_name),'') is not null and r.course1_difficulty in ('Easy','Hard') and nullif(btrim(r.course2_name),'') is not null and r.course2_difficulty in ('Easy','Hard'));
   if v_incomplete>0 then raise exception 'Final Scorecard cannot be approved: % managed fixture(s) are incomplete',v_incomplete;end if;
   if exists(select 1 from public.pyp_managed_results r where r.season_id=v_card.season_id and r.roster_version_id=v_roster.id and r.updated_at>v_card.updated_at) then raise exception 'Final Scorecard is stale. Regenerate it before approval.';end if;
   select count(*)::integer into v_roster_players from public.pyp_division_roster_slots s where s.roster_version_id=v_roster.id and s.player_id is not null;

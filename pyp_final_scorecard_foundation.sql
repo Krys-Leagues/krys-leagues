@@ -48,9 +48,11 @@ create table if not exists public.pyp_final_scorecard_fixture_details (
   game_number integer not null check (game_number between 1 and 3),
   player_role text not null check (player_role in ('home','away')),
   course1_name text not null,
+  course1_difficulty text null check (course1_difficulty in ('Easy', 'Hard')),
   course1_player_hw integer not null check (course1_player_hw >= 0),
   course1_opponent_hw integer not null check (course1_opponent_hw >= 0),
   course2_name text not null,
+  course2_difficulty text null check (course2_difficulty in ('Easy', 'Hard')),
   course2_player_hw integer not null check (course2_player_hw >= 0),
   course2_opponent_hw integer not null check (course2_opponent_hw >= 0),
   player_total_hw integer not null check (player_total_hw >= 0),
@@ -60,6 +62,18 @@ create table if not exists public.pyp_final_scorecard_fixture_details (
   constraint pyp_scorecard_fixture_parent_fkey foreign key(scorecard_id,season_id) references public.pyp_final_scorecards(id,season_id) on delete restrict,
   constraint pyp_scorecard_fixture_player_game_key unique(scorecard_id,player_id,game_number)
 );
+
+alter table public.pyp_final_scorecard_fixture_details
+  add column if not exists course1_difficulty text null,
+  add column if not exists course2_difficulty text null;
+
+alter table public.pyp_final_scorecard_fixture_details
+  drop constraint if exists pyp_final_scorecard_fixture_details_course1_difficulty_check,
+  add constraint pyp_final_scorecard_fixture_details_course1_difficulty_check
+    check (course1_difficulty is null or course1_difficulty in ('Easy', 'Hard')),
+  drop constraint if exists pyp_final_scorecard_fixture_details_course2_difficulty_check,
+  add constraint pyp_final_scorecard_fixture_details_course2_difficulty_check
+    check (course2_difficulty is null or course2_difficulty in ('Easy', 'Hard'));
 
 create or replace function public.protect_approved_pyp_final_scorecard()
 returns trigger language plpgsql security definer set search_path to '' as $function$

@@ -27,11 +27,11 @@ begin
   from public.pyp_division_roster_slots slot join public.season_standings standing on standing.player_id=slot.player_id and standing.league_type='pyp' and standing.season_number=v_season.season_number
   where slot.roster_version_id=v_roster.id and slot.player_id is not null;
   insert into public.pyp_final_scorecard_fixture_details(scorecard_id,season_id,player_id,opponent_player_id,opponent_screen_name,division_number,game_number,player_role,
-    course1_name,course1_player_hw,course1_opponent_hw,course2_name,course2_player_hw,course2_opponent_hw,player_total_hw,opponent_total_hw,outcome)
-  select v_card.id,p_season_id,r.home_player_id,r.away_player_id,r.away_player_screen_name,r.division_number,r.game_number,'home',r.course1_name,r.course1_home_hw,r.course1_away_hw,r.course2_name,r.course2_home_hw,r.course2_away_hw,r.home_total_hw,r.away_total_hw,
+    course1_name,course1_difficulty,course1_player_hw,course1_opponent_hw,course2_name,course2_difficulty,course2_player_hw,course2_opponent_hw,player_total_hw,opponent_total_hw,outcome)
+  select v_card.id,p_season_id,r.home_player_id,r.away_player_id,r.away_player_screen_name,r.division_number,r.game_number,'home',r.course1_name,r.course1_difficulty,r.course1_home_hw,r.course1_away_hw,r.course2_name,r.course2_difficulty,r.course2_home_hw,r.course2_away_hw,r.home_total_hw,r.away_total_hw,
     case when r.home_total_hw>r.away_total_hw then 'W' when r.is_draw then 'D' else 'L' end from public.pyp_managed_results r where r.season_id=p_season_id and r.roster_version_id=v_roster.id
   union all
-  select v_card.id,p_season_id,r.away_player_id,r.home_player_id,r.home_player_screen_name,r.division_number,r.game_number,'away',r.course1_name,r.course1_away_hw,r.course1_home_hw,r.course2_name,r.course2_away_hw,r.course2_home_hw,r.away_total_hw,r.home_total_hw,
+  select v_card.id,p_season_id,r.away_player_id,r.home_player_id,r.home_player_screen_name,r.division_number,r.game_number,'away',r.course1_name,r.course1_difficulty,r.course1_away_hw,r.course1_home_hw,r.course2_name,r.course2_difficulty,r.course2_away_hw,r.course2_home_hw,r.away_total_hw,r.home_total_hw,
     case when r.away_total_hw>r.home_total_hw then 'W' when r.is_draw then 'D' else 'L' end from public.pyp_managed_results r where r.season_id=p_season_id and r.roster_version_id=v_roster.id;
   update public.pyp_final_scorecards c set source_change_revision=v_state.change_revision,updated_at=now() where c.id=v_card.id returning c.* into v_card;
   select count(*)::integer into v_players from public.pyp_final_scorecard_entries e where e.scorecard_id=v_card.id;
