@@ -1,90 +1,13 @@
-import Link from "next/link"
-
-export default function PYPSetupPage() {
-  return (
-    <main style={page}>
-      <h1 style={title}>PYP Season Setup</h1>
-
-      <p style={subtitle}>
-        Prepare players, divisions, courses, and scheduling for a new Pick Your
-        Poison season.
-      </p>
-
-      <div style={grid}>
-        <section style={card}>
-          <strong>Season Information</strong>
-          <span>
-            Season number, dates, and locking controls will be managed here.
-          </span>
-        </section>
-
-        <section style={card}>
-          <strong>Division Setup</strong>
-          <span>
-            Prepare PYP D1 through PYP D5 and assign participating players.
-          </span>
-        </section>
-
-        <section style={card}>
-          <strong>Course Picks</strong>
-          <span>
-            Home and away course selections and match scheduling will be added
-            here.
-          </span>
-        </section>
-
-        <Link href="/admin/players" style={card}>
-          <strong>Players</strong>
-          <span>Open the global player manager.</span>
-        </Link>
-
-        <Link href="/admin/pyp/results" style={card}>
-          <strong>PYP Results</strong>
-          <span>Enter or review results for the current season.</span>
-        </Link>
-
-        <Link href="/admin/pyp" style={card}>
-          <strong>Back to PYP Admin</strong>
-          <span>Return to the PYP admin hub.</span>
-        </Link>
-      </div>
-    </main>
-  )
-}
-
-const page: React.CSSProperties = {
-  minHeight: "100vh",
-  padding: 24,
-  background: "black",
-  color: "white",
-}
-
-const title: React.CSSProperties = {
-  fontSize: 34,
-  marginBottom: 8,
-}
-
-const subtitle: React.CSSProperties = {
-  color: "#cfcfcf",
-  marginBottom: 28,
-  maxWidth: 760,
-  lineHeight: 1.5,
-}
-
-const grid: React.CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))",
-  gap: 14,
-}
-
-const card: React.CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  gap: 8,
-  padding: 18,
-  borderRadius: 14,
-  border: "1px solid #333",
-  background: "#111",
-  color: "white",
-  textDecoration: "none",
-}
+"use client"
+import {useEffect,useState} from "react";import {useRouter} from "next/navigation";import {supabase} from "@/lib/supabase";
+type Slot={slot_number:number;player_id:string|null;player_screen_name:string|null};type Player={id:string;screen_name:string};
+const themes:Record<number,[string,string,string]>={1:["#fb923c","#9a3412","rgba(124,45,18,.18)"],2:["#4ade80","#15803d","rgba(20,83,45,.18)"],3:["#60a5fa","#1d4ed8","rgba(30,64,175,.16)"],4:["#facc15","#a16207","rgba(113,63,18,.18)"],5:["#c084fc","#7e22ce","rgba(88,28,135,.18)"]};
+export default function PYPSetup(){const router=useRouter();const [seasonId,setSeasonId]=useState("");const [division,setDivision]=useState(1);const [rosterId,setRosterId]=useState("");const [count,setCount]=useState(1);const [status,setStatus]=useState("");const [slots,setSlots]=useState<(string|null)[]>([null,null,null,null]);const [players,setPlayers]=useState<Player[]>([]);const [msg,setMsg]=useState("");const [busy,setBusy]=useState(false);
+// The URL-scoped managed roster context is intentionally loaded once.
+// eslint-disable-next-line react-hooks/immutability
+useEffect(()=>{void load()},[]);async function load(){const q=new URLSearchParams(location.search),sid=q.get("seasonId")||"",d=Number(q.get("division"));if(!sid||!Number.isInteger(d)||d<1){setMsg("A valid seasonId and division are required.");return}setSeasonId(sid);setDivision(d);const {data:s}=await supabase.from("seasons").select("league_type").eq("id",sid).maybeSingle();if(!s||s.league_type!=="pyp"){setMsg("Managed PYP season not found.");return}const {data:r,error}=await supabase.from("pyp_roster_versions").select("id,division_count,status").eq("season_id",sid).in("status",["draft","approved","locked"]).order("created_at",{ascending:false}).limit(1).maybeSingle();if(error||!r){setMsg(error?.message||"PYP roster not found.");return}if(d>r.division_count){setMsg("Division is outside this roster.");return}const [{data:sl},{data:p}]=await Promise.all([supabase.from("pyp_division_roster_slots").select("slot_number,player_id,player_screen_name").eq("roster_version_id",r.id).eq("division_number",d).order("slot_number"),supabase.from("players").select("id,screen_name").eq("active",true).order("screen_name")]);if(sl?.length!==4){setMsg("Exactly four persistent roster slots were not found.");return}setRosterId(r.id);setCount(r.division_count);setStatus(r.status);setSlots((sl as Slot[]).map(x=>x.player_id));setPlayers((p||[]) as Player[])}
+function goDivision(next:number){window.location.assign(`/admin/pyp/setup?seasonId=${seasonId}&division=${next}`)}
+async function save(){setBusy(true);setMsg("");const {error}=await supabase.rpc("set_pyp_division_roster_slots",{p_roster_version_id:rosterId,p_division_number:division,p_slot1_player_id:slots[0],p_slot2_player_id:slots[1],p_slot3_player_id:slots[2],p_slot4_player_id:slots[3]});setBusy(false);if(error){setMsg(error.message);return}setMsg("Division roster saved.");if(division<count)goDivision(division+1)}
+async function approve(){setBusy(true);const {error}=await supabase.rpc("approve_pyp_roster_version",{p_roster_version_id:rosterId,p_approval_note:null});setBusy(false);if(error)setMsg(error.message);else{setStatus("approved");setMsg("PYP roster approved. Schedule generation is now available.")}}
+const t=themes[division]||["#ddd","#444","#0b0b0b"];return <main style={page}><div style={{...panel,borderColor:t[1],background:t[2]}}><nav style={nav}><button onClick={()=>router.push("/admin/pyp")}>PYP Hub</button><button onClick={()=>router.push(`/admin/pyp/schedule?seasonId=${seasonId}`)}>Schedule &amp; Images</button></nav><h1 style={{color:t[0]}}>PYP D{division} Roster</h1><p>Status: {status}</p>{slots.map((id,i)=><label key={i} style={field}>Slot {i+1}<select value={id||""} disabled={status==="locked"} onChange={e=>setSlots(x=>x.map((v,j)=>j===i?(e.target.value||null):v))}><option value="">EMPTY</option>{players.map(p=><option key={p.id} value={p.id}>{p.screen_name}</option>)}</select></label>)}<div style={nav}><button disabled={busy||status==="locked"} onClick={save}>{busy?"Saving...":"Save Division Roster"}</button>{status==="draft"&&<button disabled={busy} onClick={approve}>Approve Roster</button>}</div><div style={nav}>{division>1&&<button onClick={()=>goDivision(division-1)}>← PYP D{division-1}</button>}<button onClick={()=>router.push("/admin/pyp/season")}>Back to Season</button>{division<count&&<button onClick={()=>goDivision(division+1)}>PYP D{division+1} →</button>}</div>{msg&&<p>{msg}</p>}</div></main>}
+const page:React.CSSProperties={minHeight:"100vh",background:"black",color:"white",padding:24};const panel:React.CSSProperties={maxWidth:900,margin:"auto",padding:22,border:"1px solid",borderRadius:16};const nav:React.CSSProperties={display:"flex",gap:10,flexWrap:"wrap",margin:"16px 0"};const field:React.CSSProperties={display:"grid",gridTemplateColumns:"100px minmax(220px,1fr)",gap:10,margin:"12px 0"}

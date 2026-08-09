@@ -1,117 +1,13 @@
-"use client"
-
-import { useEffect, useState } from "react"
-import { supabase } from "@/lib/supabase"
-
-const LEAGUE_TYPE = "pyp"
-const DIVISIONS = ["PYP D1", "PYP D2", "PYP D3", "PYP D4", "PYP D5"]
-
-export default function PYPSchedulePage() {
-  const [division, setDivision] = useState("PYP D1")
-  const [season, setSeason] = useState("")
-  const [dueDate, setDueDate] = useState("")
-
-  const [players, setPlayers] = useState<string[]>([])
-
-  const [p1, setP1] = useState("")
-  const [p2, setP2] = useState("")
-  const [p3, setP3] = useState("")
-  const [p4, setP4] = useState("")
-
-  const [course1, setCourse1] = useState("")
-  const [course2, setCourse2] = useState("")
-  const [course3, setCourse3] = useState("")
-
-  const [loading, setLoading] = useState(false)
-
-  useEffect(() => {
-    loadPlayers()
-  }, [division])
-
-  async function loadPlayers() {
-    const { data, error } = await supabase
-      .from("players")
-      .select("screen_name")
-      .eq("division", division)
-      .order("screen_name", { ascending: true })
-
-    if (error) {
-      console.error(error)
-      setPlayers([])
-      return
-    }
-
-    setPlayers(data?.map((p: any) => p.screen_name) || [])
-  }
-
-  async function handleGenerateSeason() {
-    const seasonNumber = Number(season)
-
-    if (!seasonNumber || !dueDate) {
-      alert("Enter season and due date")
-      return
-    }
-
-    if (!p1 || !p2 || !p3 || !p4) {
-      alert("Select all 4 players")
-      return
-    }
-
-    if (!course1 || !course2 || !course3) {
-      alert("Enter all courses")
-      return
-    }
-
-    setLoading(true)
-
-    await supabase.from("seasons").insert({
-      league_type: LEAGUE_TYPE,
-      division,
-      season_number: seasonNumber,
-      due_date: dueDate,
-    })
-
-    const matches = [
-      { game: "1", player1: p1, player2: p2, course: course1 },
-      { game: "1", player1: p3, player2: p4, course: course1 },
-      { game: "2", player1: p1, player2: p3, course: course2 },
-      { game: "2", player1: p2, player2: p4, course: course2 },
-      { game: "3", player1: p1, player2: p4, course: course3 },
-      { game: "3", player1: p2, player2: p3, course: course3 },
-    ]
-
-    await supabase.from("schedule").insert(
-      matches.map((m) => ({
-        league_type: LEAGUE_TYPE,
-        division,
-        season_number: seasonNumber,
-        ...m,
-      }))
-    )
-
-    setLoading(false)
-    alert("PYP season created ✔")
-  }
-
-  return (
-    <main style={{ padding: 24, background: "black", color: "white", minHeight: "100vh" }}>
-      <h1>PYP Season Builder</h1>
-
-      <input placeholder="Season" value={season} onChange={(e) => setSeason(e.target.value)} /><br /><br />
-      <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} /><br /><br />
-
-      <input placeholder="P1" value={p1} onChange={(e) => setP1(e.target.value)} /><br />
-      <input placeholder="P2" value={p2} onChange={(e) => setP2(e.target.value)} /><br />
-      <input placeholder="P3" value={p3} onChange={(e) => setP3(e.target.value)} /><br />
-      <input placeholder="P4" value={p4} onChange={(e) => setP4(e.target.value)} /><br /><br />
-
-      <input placeholder="Course 1" value={course1} onChange={(e) => setCourse1(e.target.value)} /><br />
-      <input placeholder="Course 2" value={course2} onChange={(e) => setCourse2(e.target.value)} /><br />
-      <input placeholder="Course 3" value={course3} onChange={(e) => setCourse3(e.target.value)} /><br /><br />
-
-      <button onClick={handleGenerateSeason} disabled={loading}>
-        {loading ? "Creating..." : "Create Season"}
-      </button>
-    </main>
-  )
-}
+﻿"use client"
+import {useEffect,useMemo,useState} from "react";import {useRouter} from "next/navigation";import {supabase} from "@/lib/supabase";
+type Fixture={id:string;division_number:number;game_number:number;pyp_home_player_screen_name:string;pyp_away_player_screen_name:string};type State={change_revision:number;generated_revision:number;reviewed_revision:number};type Season={season_number:number;start_date:string|null;end_date:string|null};
+const colors:Record<number,string>={1:"#fb923c",2:"#4ade80",3:"#60a5fa",4:"#facc15",5:"#c084fc"};
+export default function PYPSchedule(){const router=useRouter();const [sid,setSid]=useState("");const [season,setSeason]=useState<Season|null>(null);const [status,setStatus]=useState("");const [state,setState]=useState<State|null>(null);const [fixtures,setFixtures]=useState<Fixture[]>([]);const [division,setDivision]=useState(1);const [count,setCount]=useState(1);const [msg,setMsg]=useState("");const [busy,setBusy]=useState(false);
+// The URL-scoped managed schedule context is intentionally loaded once.
+// eslint-disable-next-line react-hooks/set-state-in-effect, react-hooks/exhaustive-deps
+useEffect(()=>{const id=new URLSearchParams(location.search).get("seasonId")||"";setSid(id);if(id)void load(id);else setMsg("A seasonId is required.")},[]);async function load(id=sid){const [{data:s},{data:r},{data:st},{data:f}]=await Promise.all([supabase.from("seasons").select("season_number,start_date,end_date,league_type").eq("id",id).maybeSingle(),supabase.from("pyp_roster_versions").select("status,division_count").eq("season_id",id).in("status",["draft","approved","locked"]).order("created_at",{ascending:false}).limit(1).maybeSingle(),supabase.from("pyp_schedule_state").select("change_revision,generated_revision,reviewed_revision").eq("season_id",id).maybeSingle(),supabase.from("schedule").select("id,division_number,game_number,pyp_home_player_screen_name,pyp_away_player_screen_name").eq("league_type","pyp").eq("season_id",id).not("pyp_roster_version_id","is",null).order("division_number").order("game_number")]);if(!s||s.league_type!=="pyp"||!r){setMsg("Managed PYP season was not found.");return}setSeason(s);setStatus(r.status);setCount(r.division_count);setState(st);setFixtures((f||[]) as Fixture[])}
+async function rpc(name:string){setBusy(true);setMsg("");const {error}=await supabase.rpc(name,{p_season_id:sid});setBusy(false);if(error){setMsg(error.message);return}setMsg(name.includes("review")?"PYP schedule reviewed.":"PYP schedule generated.");await load()}
+const current=!!state&&state.generated_revision>0&&state.generated_revision===state.change_revision,reviewed=current&&state!.reviewed_revision===state!.generated_revision;const shown=useMemo(()=>fixtures.filter(f=>f.division_number===division),[fixtures,division]);
+function download(){if(!season)return;const c=document.createElement("canvas");c.width=1080;c.height=1350;const x=c.getContext("2d");if(!x)return;const accent=colors[division]||"#aaa";x.fillStyle="#080b12";x.fillRect(0,0,c.width,c.height);x.fillStyle=accent;x.fillRect(0,0,c.width,12);x.fillStyle="#fff";x.font="bold 46px sans-serif";x.fillText(`KRYS LEAGUES Â· PYP Â· SEASON ${season.season_number}`,60,90);x.fillStyle=accent;x.font="bold 56px sans-serif";x.fillText(`DIVISION ${division}`,60,165);let y=250;for(let round=1;round<=3;round++){x.fillStyle="#fff";x.font="bold 34px sans-serif";x.fillText(`ROUND ${round}`,60,y);y+=55;for(const f of shown.filter(v=>v.game_number===round)){x.fillStyle=accent;x.font="bold 31px sans-serif";x.fillText(`HOME  ${f.pyp_home_player_screen_name}`,80,y);x.fillStyle="#ddd";x.fillText(`AWAY  ${f.pyp_away_player_screen_name}`,570,y);y+=60}y+=35}x.fillStyle="#ddd";x.font="26px sans-serif";["Home player is the person in color.","Course 1: Home picks the course; Away hits first.","Course 2: Away picks the course; Home hits first.","Players may pick Easy or Hard."].forEach(t=>{x.fillText(t,60,y);y+=42});const a=document.createElement("a");a.download=`PYP-S${season.season_number}-D${division}.png`;a.href=c.toDataURL("image/png");a.click()}
+return <main style={page}><div style={box}><nav style={nav}><button onClick={()=>router.push("/admin/pyp")}>â† PYP Hub</button><button onClick={()=>router.push(`/admin/pyp/setup?seasonId=${sid}&division=1`)}>â† PYP Setup</button></nav><h1>PYP Schedule &amp; Images</h1><p>Roster: {status} Â· {state?reviewed?"Reviewed":current?"Current â€” Needs Review":"Stale / Not Generated":"Not Generated"}</p><div style={nav}><button disabled={busy||status!=="approved"} onClick={()=>rpc("generate_pyp_schedule")}>Generate / Regenerate Schedule</button><button disabled={busy||!current} onClick={()=>rpc("review_pyp_schedule")}>Review Schedule</button></div><div style={nav}>{Array.from({length:count},(_,i)=>i+1).map(d=><button key={d} onClick={()=>setDivision(d)}>D{d}</button>)}</div><section style={{...card,borderColor:colors[division]||"#555"}}><h2 style={{color:colors[division]||"#ddd"}}>PYP D{division}</h2>{[1,2,3].map(r=><div key={r}><h3>Round {r}</h3>{shown.filter(f=>f.game_number===r).map(f=><p key={f.id}><b style={{color:colors[division]||"#ddd"}}>HOME {f.pyp_home_player_screen_name}</b> vs <span>AWAY {f.pyp_away_player_screen_name}</span></p>)}</div>)}<hr/><p>Home player is the person in color.</p><p>Course 1: Home player picks the course; Away player hits first.</p><p>Course 2: Away player picks the course; Home player hits first.</p><p>Player can pick Easy or Hard.</p></section><button onClick={download}>Download PYP D{division} Image</button>{msg&&<p>{msg}</p>}</div></main>}
+const page:React.CSSProperties={minHeight:"100vh",background:"black",color:"white",padding:24};const box:React.CSSProperties={maxWidth:1050,margin:"auto"};const nav:React.CSSProperties={display:"flex",gap:10,flexWrap:"wrap",margin:"16px 0"};const card:React.CSSProperties={background:"#10131a",border:"2px solid",borderRadius:16,padding:22,margin:"18px 0"}
