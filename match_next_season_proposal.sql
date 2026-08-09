@@ -34,6 +34,8 @@ declare
   v_target integer;
   v_player record;
   v_slot integer;
+  v_promotion_count integer;
+  v_promotion_index integer;
 begin
   if not public.is_current_user_site_admin() then
     raise exception 'Administrator authorization is required' using errcode = '42501';
@@ -324,13 +326,22 @@ begin
       where roster_slot.roster_version_id = v_roster.id and roster_slot.division_number = v_division and roster_slot.slot_number = v_slot;
     end loop;
 
+    select count(*)::integer into v_promotion_count
+    from pg_temp.match_transition_work
+    where target_division = v_division and source_division > target_division;
+    v_promotion_index := 0;
+
     for v_player in select * from pg_temp.match_transition_work
       where target_division = v_division and source_division > target_division
       order by source_rank
     loop
-      select max(roster_slot.slot_number) into v_slot from public.match_division_roster_slots as roster_slot
-      where roster_slot.roster_version_id = v_roster.id and roster_slot.division_number = v_division and roster_slot.player_id is null;
-      if v_slot is null then raise exception 'Target division % exceeds four players', v_division; end if;
+      v_promotion_index := v_promotion_index + 1;
+      v_slot := 4 - v_promotion_count + v_promotion_index;
+      if exists (
+        select 1 from public.match_division_roster_slots as roster_slot
+        where roster_slot.roster_version_id = v_roster.id and roster_slot.division_number = v_division
+          and roster_slot.slot_number = v_slot and roster_slot.player_id is not null
+      ) then raise exception 'Target division % cannot preserve promotion slot order', v_division; end if;
       update public.match_division_roster_slots as roster_slot set player_id = v_player.player_id,
         player_screen_name = v_player.player_screen_name, slot_status = 'active'
       where roster_slot.roster_version_id = v_roster.id and roster_slot.division_number = v_division and roster_slot.slot_number = v_slot;
