@@ -70,20 +70,30 @@ export default function StrokeTransitionPage() {
     const loadedEntries = (entryResponse.data || []) as Entry[]
     const candidateSeasons = (seasonResponse.data || []) as Season[]
     let loadedSeasons: Season[] = []
+    let loadedTargetDivisionCount: number | null = null
     if (candidateSeasons.length > 0) {
       const { data: rosterData, error: rosterError } = await supabase
         .from("stroke_roster_versions")
-        .select("season_id")
+        .select("season_id, division_count")
         .in("season_id", candidateSeasons.map((season) => season.id))
         .in("status", ["draft", "approved"])
       if (rosterError) { setError(rosterError.message); setLoading(false); return }
       const managedIds = new Set((rosterData || []).map((roster) => roster.season_id as string))
       loadedSeasons = candidateSeasons.filter((season) => managedIds.has(season.id))
+      if (loadedSeasons.length > 1) {
+        setError("Multiple eligible managed Stroke target seasons were found. Resolve the ambiguity before continuing.")
+        setLoading(false)
+        return
+      }
+      if (loadedSeasons.length === 1) {
+        const targetRoster = (rosterData || []).find((roster) => roster.season_id === loadedSeasons[0].id)
+        if (targetRoster?.division_count) loadedTargetDivisionCount = Number(targetRoster.division_count)
+      }
     }
     setEntries(loadedEntries)
     setDecisions(new Map(((decisionResponse.data || []) as Decision[]).map((item) => [item.player_id, item.decision])))
     setTargetSeasons(loadedSeasons); setTargetSeasonId(loadedSeasons[0]?.id || "")
-    setDivisionCount(String(Math.max(1, ...loadedEntries.map((entry) => entry.division_number))))
+    setDivisionCount(String(loadedTargetDivisionCount || Math.max(1, ...loadedEntries.map((entry) => entry.division_number))))
     setPlayers((playerResponse.data || []) as Player[]); setLoading(false)
   }
 
@@ -189,6 +199,7 @@ export default function StrokeTransitionPage() {
 
     <section style={panel}><h2>Create Next Stroke Season</h2>
       <p>The normal path is to create and select the next managed Stroke season here.</p>
+      {targetSeasonId && <p style={successText}>Managed Stroke Season {targetSeasons.find((season) => season.id === targetSeasonId)?.season_number} is selected automatically.</p>}
       <div style={formRow}>
         <label style={fieldLabel}>Season Number<input value={sourceSeasonNumber === null ? "" : String(sourceSeasonNumber + 1)} readOnly style={input} /></label>
         <label style={fieldLabel}>Number of Divisions<input type="number" min="1" max="20" value={divisionCount} onChange={(event) => setDivisionCount(event.target.value)} style={input} /></label>
@@ -198,14 +209,10 @@ export default function StrokeTransitionPage() {
         <label style={fieldLabel}>Game 2 Course<input value={game2Course} onChange={(event) => setGame2Course(event.target.value)} style={input} /></label>
         <label style={fieldLabel}>Game 3 Course<input value={game3Course} onChange={(event) => setGame3Course(event.target.value)} style={input} /></label>
       </div>
-      <button onClick={() => void createNextSeason()} disabled={creatingSeason} style={primaryButton}>{creatingSeason ? "Creating Next Stroke Season..." : "Create Next Stroke Season"}</button>
+      <button onClick={() => void createNextSeason()} disabled={creatingSeason || Boolean(targetSeasonId)} style={primaryButton}>{creatingSeason ? "Creating Next Stroke Season..." : targetSeasonId ? "Next Stroke Season Ready" : "Create Next Stroke Season"}</button>
     </section>
 
-    <section style={panel}><h2>Target Season and New Players</h2>
-      <p>Select the season created above, or use an existing eligible managed Stroke season.</p>
-      <div style={formRow}><select value={targetSeasonId} onChange={(event) => setTargetSeasonId(event.target.value)} style={input}>
-        <option value="">Select target season</option>{targetSeasons.map((item) => <option key={item.id} value={item.id}>Season {item.season_number}</option>)}
-      </select><input type="number" min="1" max="20" value={divisionCount} onChange={(event) => setDivisionCount(event.target.value)} style={input} /></div>
+    <section style={panel}><h2>New Players</h2>
       <div style={formRow}><select value={newPlayerId} onChange={(event) => setNewPlayerId(event.target.value)} style={input}>
         <option value="">Select new player</option>{availableNewPlayers.map((player) => <option key={player.id} value={player.id}>{player.screen_name}</option>)}
       </select><button onClick={addNewPlayer} style={primaryButton}>Add Player</button></div>
