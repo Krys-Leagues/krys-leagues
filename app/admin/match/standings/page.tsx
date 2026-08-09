@@ -164,18 +164,6 @@ export default function MatchStandingsPage() {
 
   async function loadStandings(activeSeason: SeasonRow, activeDivision: number, requestId: number) {
     setLoading(true)
-    if (selectedRoster?.status === "approved") {
-      const { error: rebuildError } = await supabase.rpc("rebuild_match_standings", {
-        p_season_id: activeSeason.id,
-        p_division_number: activeDivision,
-      })
-      if (requestId !== loadVersion.current) return
-      if (rebuildError) {
-        setScorecardError(`Could not rebuild managed Match standings: ${rebuildError.message}`)
-        setLoading(false)
-        return
-      }
-    }
     const { data, error } = await supabase
       .from("season_standings")
       .select("player_id, points, wins, losses, ties, strokes, rank")
