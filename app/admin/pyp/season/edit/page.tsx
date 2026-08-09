@@ -1,8 +1,158 @@
 "use client"
-import {useEffect,useState} from "react";import {useRouter} from "next/navigation";import {supabase} from "@/lib/supabase";
-type Item={id:string;season_number:number;division_count:number;status:string};
-export default function PYPEditSeason(){const router=useRouter();const [items,setItems]=useState<Item[]>([]);const [id,setId]=useState("");const [count,setCount]=useState("");const [msg,setMsg]=useState("");const [busy,setBusy]=useState(false);
-useEffect(()=>{void load()},[]);async function load(){const {data:s,error}=await supabase.from("seasons").select("id,season_number").eq("league_type","pyp").is("division",null).order("season_number",{ascending:false});if(error){setMsg(error.message);return}if(!s?.length)return;const {data:r}=await supabase.from("pyp_roster_versions").select("season_id,division_count,status").in("season_id",s.map(x=>x.id)).in("status",["draft","approved","locked"]);const map=new Map((r||[]).map(x=>[x.season_id,x]));const next=s.flatMap(x=>{const v=map.get(x.id);return v?[{id:x.id,season_number:x.season_number,division_count:v.division_count,status:v.status}]:[]});setItems(next);if(next[0]){setId(next[0].id);setCount(String(next[0].division_count))}}
-function choose(v:string){setId(v);const x=items.find(i=>i.id===v);if(x)setCount(String(x.division_count))}async function save(){const n=Number(count);if(!id||!Number.isInteger(n)||n<1){setMsg("Choose a season and enter a positive division count.");return}setBusy(true);const {error}=await supabase.rpc("resize_pyp_season_divisions",{p_season_id:id,p_new_division_count:n});setBusy(false);if(error){setMsg(error.message);return}setMsg("PYP division count saved.");await load()}
-const current=items.find(i=>i.id===id);return <main style={page}><div style={box}><button onClick={()=>router.push("/admin/pyp")}>← PYP Hub</button><h1>Edit Current PYP Season</h1><select value={id} onChange={e=>choose(e.target.value)}>{items.map(i=><option key={i.id} value={i.id}>Season {i.season_number} — {i.status}</option>)}</select><label style={{display:"block",margin:"18px 0"}}>Number of Divisions <input type="number" min="1" value={count} disabled={current?.status==="locked"} onChange={e=>setCount(e.target.value)}/></label><button disabled={busy||current?.status==="locked"} onClick={save}>{busy?"Saving...":"Save Division Count"}</button>{id&&<button onClick={()=>router.push(`/admin/pyp/setup?seasonId=${id}&division=1`)}>Open Division Setup</button>}{msg&&<p>{msg}</p>}</div></main>}
-const page:React.CSSProperties={minHeight:"100vh",background:"black",color:"white",padding:24};const box:React.CSSProperties={maxWidth:850,margin:"auto",background:"#111",border:"1px solid #333",borderRadius:16,padding:24}
+
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+import { supabase } from "@/lib/supabase"
+
+type ManagedSeason = { id: string; season_number: number; division_count: number; status: string }
+
+export default function PypEditSeasonPage() {
+  const router = useRouter()
+  const [seasons, setSeasons] = useState<ManagedSeason[]>([])
+  const [seasonId, setSeasonId] = useState("")
+  const [divisionCount, setDivisionCount] = useState("")
+  const [message, setMessage] = useState("")
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => { void loadSeasons() }, [])
+
+  async function loadSeasons(preferredId?: string) {
+    setLoading(true)
+    const { data: seasonData, error: seasonError } = await supabase
+      .from("seasons")
+      .select("id, season_number")
+      .eq("league_type", "pyp")
+      .is("division", null)
+      .order("season_number", { ascending: false })
+
+    if (seasonError) {
+      setMessage(`Could not load PYP seasons: ${seasonError.message}`)
+      setLoading(false)
+      return
+    }
+
+    const source = seasonData || []
+    if (source.length === 0) {
+      setSeasons([])
+      setLoading(false)
+      return
+    }
+
+    const { data: rosterData, error: rosterError } = await supabase
+      .from("pyp_roster_versions")
+      .select("season_id, division_count, status")
+      .in("season_id", source.map((season) => season.id))
+      .in("status", ["draft", "approved", "locked"])
+      .order("created_at", { ascending: false })
+
+    if (rosterError) {
+      setMessage(`Could not load PYP rosters: ${rosterError.message}`)
+      setLoading(false)
+      return
+    }
+
+    const rosterBySeason = new Map<string, { division_count: number; status: string }>()
+    for (const roster of rosterData || []) {
+      if (!rosterBySeason.has(roster.season_id)) rosterBySeason.set(roster.season_id, roster)
+    }
+    const managed = source.flatMap((season) => {
+      const roster = rosterBySeason.get(season.id)
+      return roster ? [{ ...season, division_count: roster.division_count, status: roster.status }] : []
+    }) as ManagedSeason[]
+    const selected = managed.find((season) => season.id === preferredId) || managed[0]
+    setSeasons(managed)
+    setSeasonId(selected?.id || "")
+    setDivisionCount(selected ? String(selected.division_count) : "")
+    setLoading(false)
+  }
+
+  function selectSeason(id: string) {
+    setSeasonId(id)
+    const selected = seasons.find((season) => season.id === id)
+    setDivisionCount(selected ? String(selected.division_count) : "")
+    setMessage("")
+  }
+
+  async function save() {
+    const count = Number(divisionCount)
+    if (!seasonId || !Number.isInteger(count) || count < 1) {
+      setMessage("Choose a season and enter a positive division count.")
+      return
+    }
+    setSaving(true)
+    setMessage("")
+    const { error } = await supabase.rpc("resize_pyp_season_divisions", {
+      p_season_id: seasonId,
+      p_new_division_count: count,
+    })
+    setSaving(false)
+    if (error) {
+      setMessage(error.message)
+      return
+    }
+    setMessage("PYP season changes saved.")
+    await loadSeasons(seasonId)
+  }
+
+  const current = seasons.find((season) => season.id === seasonId)
+  const locked = current?.status === "locked"
+
+  return (
+    <main style={page}>
+      <div style={container}>
+        <div style={topBar}>
+          <button type="button" onClick={() => router.push("/admin/pyp")} style={secondaryButton}>← PYP Hub</button>
+          <button type="button" onClick={() => router.push("/admin/pyp/season")} style={secondaryButton}>PYP Season</button>
+        </div>
+        <h1 style={title}>Edit Current PYP Season</h1>
+        <p style={subtitle}>Manage the current PYP season and continue division roster setup.</p>
+
+        <section style={panel}>
+          {loading ? <p>Loading managed PYP seasons...</p> : seasons.length === 0 ? (
+            <p style={messageStyle}>No managed PYP season is available. Create one from PYP Season first.</p>
+          ) : (
+            <>
+              <div style={formGrid}>
+                <Field label="Managed Season">
+                  <select value={seasonId} onChange={(event) => selectSeason(event.target.value)} style={input} disabled={saving}>
+                    {seasons.map((season) => <option key={season.id} value={season.id}>Season {season.season_number} — {season.status}</option>)}
+                  </select>
+                </Field>
+                <Field label="Number of Divisions">
+                  <input type="number" min="1" step="1" value={divisionCount} onChange={(event) => setDivisionCount(event.target.value)} style={input} disabled={saving || locked} />
+                </Field>
+              </div>
+              <p style={helper}>PYP matchup courses are selected by the players and are not season-level settings.</p>
+              {locked && <p style={lockedMessage}>This historical roster is locked and cannot be resized.</p>}
+              <div style={actions}>
+                <button type="button" onClick={save} disabled={saving || locked} style={primaryButton}>{saving ? "Saving..." : "Save Season Changes"}</button>
+                <button type="button" onClick={() => router.push(`/admin/pyp/setup?seasonId=${encodeURIComponent(seasonId)}&division=1`)} disabled={!seasonId} style={secondaryButton}>Open Division Setup</button>
+                <button type="button" onClick={() => router.push(`/admin/pyp/schedule?seasonId=${encodeURIComponent(seasonId)}`)} disabled={!seasonId} style={secondaryButton}>View Schedule</button>
+              </div>
+            </>
+          )}
+          {message && <p style={messageStyle}>{message}</p>}
+        </section>
+      </div>
+    </main>
+  )
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) { return <label style={field}><span style={labelStyle}>{label}</span>{children}</label> }
+const page: React.CSSProperties = { minHeight: "100vh", padding: 24, background: "black", color: "white" }
+const container: React.CSSProperties = { maxWidth: 980, margin: "0 auto" }
+const topBar: React.CSSProperties = { display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 24 }
+const title: React.CSSProperties = { fontSize: 34, marginBottom: 8 }
+const subtitle: React.CSSProperties = { color: "#bbb", marginBottom: 28 }
+const panel: React.CSSProperties = { padding: 24, borderRadius: 14, border: "1px solid #333", background: "#0d0d0d" }
+const formGrid: React.CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16 }
+const field: React.CSSProperties = { display: "flex", flexDirection: "column", gap: 8 }
+const labelStyle: React.CSSProperties = { color: "#ddd", fontWeight: 700 }
+const input: React.CSSProperties = { boxSizing: "border-box", width: "100%", padding: 12, borderRadius: 8, border: "1px solid #444", background: "#111", color: "white" }
+const helper: React.CSSProperties = { color: "#aaa", marginTop: 18 }
+const actions: React.CSSProperties = { display: "flex", flexWrap: "wrap", gap: 10, marginTop: 22 }
+const primaryButton: React.CSSProperties = { padding: "12px 18px", borderRadius: 8, border: "1px solid #167a45", background: "#126b3c", color: "white", fontWeight: 800, cursor: "pointer" }
+const secondaryButton: React.CSSProperties = { padding: "10px 14px", borderRadius: 8, border: "1px solid #555", background: "#171717", color: "white", cursor: "pointer" }
+const messageStyle: React.CSSProperties = { marginTop: 16, padding: 12, borderRadius: 8, border: "1px solid #444", background: "#171717" }
+const lockedMessage: React.CSSProperties = { ...messageStyle, borderColor: "#7c5b17", color: "#facc15" }
