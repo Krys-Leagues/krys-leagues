@@ -288,27 +288,53 @@ begin
   from generate_series(1, p_target_division_count) as division(division_number)
   cross join generate_series(1, 4) as slot(slot_number);
 
-  for v_player in
-    select work.player_id, work.player_screen_name, work.target_division,
-      work.movement_reason, work.source_rank, 0 as selection_order
-    from pg_temp.stroke_transition_work as work
-    union all
-    select new_player.player_id, new_player.player_screen_name,
-      new_player.target_division, 'New Player', 1000000, new_player.selection_order
-    from pg_temp.stroke_transition_new_players as new_player
-    order by target_division, source_rank, selection_order
-  loop
-    select min(roster_slot.slot_number) into v_slot
-    from public.stroke_division_roster_slots as roster_slot
-    where roster_slot.roster_version_id = v_roster.id
-      and roster_slot.division_number = v_player.target_division
-      and roster_slot.player_id is null;
-    if v_slot is null then raise exception 'Target division % exceeds four players', v_player.target_division; end if;
-    update public.stroke_division_roster_slots as roster_slot set player_id = v_player.player_id,
-      player_screen_name = v_player.player_screen_name, slot_status = 'active'
-    where roster_slot.roster_version_id = v_roster.id
-      and roster_slot.division_number = v_player.target_division
-      and roster_slot.slot_number = v_slot;
+  for v_division in 1..p_target_division_count loop
+    for v_player in select * from pg_temp.stroke_transition_work
+      where target_division = v_division and source_division < target_division
+      order by source_rank
+    loop
+      select min(roster_slot.slot_number) into v_slot from public.stroke_division_roster_slots as roster_slot
+      where roster_slot.roster_version_id = v_roster.id and roster_slot.division_number = v_division and roster_slot.player_id is null;
+      if v_slot is null then raise exception 'Target division % exceeds four players', v_division; end if;
+      update public.stroke_division_roster_slots as roster_slot set player_id = v_player.player_id,
+        player_screen_name = v_player.player_screen_name, slot_status = 'active'
+      where roster_slot.roster_version_id = v_roster.id and roster_slot.division_number = v_division and roster_slot.slot_number = v_slot;
+    end loop;
+
+    for v_player in select * from pg_temp.stroke_transition_work
+      where target_division = v_division and source_division = target_division
+      order by source_rank
+    loop
+      select min(roster_slot.slot_number) into v_slot from public.stroke_division_roster_slots as roster_slot
+      where roster_slot.roster_version_id = v_roster.id and roster_slot.division_number = v_division and roster_slot.player_id is null;
+      if v_slot is null then raise exception 'Target division % exceeds four players', v_division; end if;
+      update public.stroke_division_roster_slots as roster_slot set player_id = v_player.player_id,
+        player_screen_name = v_player.player_screen_name, slot_status = 'active'
+      where roster_slot.roster_version_id = v_roster.id and roster_slot.division_number = v_division and roster_slot.slot_number = v_slot;
+    end loop;
+
+    for v_player in select * from pg_temp.stroke_transition_new_players
+      where target_division = v_division order by selection_order
+    loop
+      select min(roster_slot.slot_number) into v_slot from public.stroke_division_roster_slots as roster_slot
+      where roster_slot.roster_version_id = v_roster.id and roster_slot.division_number = v_division and roster_slot.player_id is null;
+      if v_slot is null then raise exception 'Target division % exceeds four players', v_division; end if;
+      update public.stroke_division_roster_slots as roster_slot set player_id = v_player.player_id,
+        player_screen_name = v_player.player_screen_name, slot_status = 'active'
+      where roster_slot.roster_version_id = v_roster.id and roster_slot.division_number = v_division and roster_slot.slot_number = v_slot;
+    end loop;
+
+    for v_player in select * from pg_temp.stroke_transition_work
+      where target_division = v_division and source_division > target_division
+      order by source_rank
+    loop
+      select max(roster_slot.slot_number) into v_slot from public.stroke_division_roster_slots as roster_slot
+      where roster_slot.roster_version_id = v_roster.id and roster_slot.division_number = v_division and roster_slot.player_id is null;
+      if v_slot is null then raise exception 'Target division % exceeds four players', v_division; end if;
+      update public.stroke_division_roster_slots as roster_slot set player_id = v_player.player_id,
+        player_screen_name = v_player.player_screen_name, slot_status = 'active'
+      where roster_slot.roster_version_id = v_roster.id and roster_slot.division_number = v_division and roster_slot.slot_number = v_slot;
+    end loop;
   end loop;
 
   return query

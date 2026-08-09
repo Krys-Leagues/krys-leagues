@@ -15,6 +15,19 @@ type TransitionDraft = { divisionCount: string; startDate: string; endDate: stri
 const transitionDraftKey = (sourceSeasonId: string) => `match-transition-season-draft:${sourceSeasonId}`
 const transitionPlayersKey = (sourceSeasonId: string) => `match-transition-new-players:${sourceSeasonId}`
 
+function withVisibleMovementLabels(slots: ProposalSlot[], entries: Entry[]) {
+  const sourceDivisionByPlayer = new Map(entries.map((entry) => [entry.player_id, entry.division_number]))
+  return slots.map((slot) => {
+    if (!slot.player_id) return { ...slot, movement_reason: null }
+    const sourceDivision = sourceDivisionByPlayer.get(slot.player_id)
+    const movementReason = sourceDivision === undefined ? "New"
+      : slot.division_number < sourceDivision ? "Promoted"
+      : slot.division_number > sourceDivision ? "Relegated"
+      : "Stayed"
+    return { ...slot, movement_reason: movementReason }
+  })
+}
+
 const divisionThemes: Record<number, { background: string; border: string; accent: string }> = {
   1: { background: "rgba(124, 45, 18, 0.18)", border: "#9a3412", accent: "#fb923c" },
   2: { background: "rgba(20, 83, 45, 0.18)", border: "#15803d", accent: "#4ade80" },
@@ -96,10 +109,11 @@ export default function MatchTransitionPage() {
     const candidateSeasons = (seasonResponse.data || []) as Season[]
     let loadedSeasons: Season[] = []
     let loadedTargetDivisionCount: number | null = null
+    let loadedProposal: ProposalSlot[] = []
     if (candidateSeasons.length > 0) {
       const { data: rosterData, error: rosterError } = await supabase
         .from("match_roster_versions")
-        .select("season_id, division_count")
+        .select("id, season_id, division_count, source_final_scorecard_id")
         .in("season_id", candidateSeasons.map((season) => season.id))
         .in("status", ["draft", "approved"])
       if (rosterError) { setError(rosterError.message); setLoading(false); return }
@@ -113,6 +127,18 @@ export default function MatchTransitionPage() {
       if (loadedSeasons.length === 1) {
         const targetRoster = (rosterData || []).find((roster) => roster.season_id === loadedSeasons[0].id)
         if (targetRoster?.division_count) loadedTargetDivisionCount = Number(targetRoster.division_count)
+        if (targetRoster?.source_final_scorecard_id === requestedId) {
+          const { data: slotData, error: slotError } = await supabase
+            .from("match_division_roster_slots")
+            .select("division_number, slot_number, player_id, player_screen_name")
+            .eq("roster_version_id", targetRoster.id)
+            .order("division_number").order("slot_number")
+          if (slotError) { setError(slotError.message); setLoading(false); return }
+          loadedProposal = withVisibleMovementLabels(((slotData || []) as Omit<ProposalSlot, "roster_version_id" | "target_season_id" | "target_division_count" | "movement_reason">[]).map((slot) => ({
+            ...slot, roster_version_id: targetRoster.id, target_season_id: loadedSeasons[0].id,
+            target_division_count: Number(targetRoster.division_count), movement_reason: null,
+          })), loadedEntries)
+        }
       }
     }
     setEntries(loadedEntries)
@@ -153,6 +179,7 @@ export default function MatchTransitionPage() {
       window.sessionStorage.removeItem(transitionPlayersKey(scorecard.season_id))
     }
     setPlayers(loadedPlayers)
+    setProposal(loadedProposal)
     transitionStorageReady.current = true
     setLoading(false)
   }
@@ -234,7 +261,7 @@ export default function MatchTransitionPage() {
       p_target_division_count: parsedCount, p_new_player_ids: newPlayerIds,
     })
     if (generateError) { setError(generateError.message); setGenerating(false); return }
-    setProposal((data || []) as ProposalSlot[]); setMessage("Draft next-season roster generated. It is not official until separately approved.")
+    setProposal(withVisibleMovementLabels((data || []) as ProposalSlot[], entries)); setMessage("Draft next-season roster generated. It is not official until separately approved.")
     setGenerating(false)
   }
 
