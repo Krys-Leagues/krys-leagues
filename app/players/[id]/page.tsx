@@ -60,6 +60,20 @@ type StrokeSeasonHistory = {
   strokes: number
 }
 
+type MatchSeasonHistory = {
+  season_number: number
+  season_id: string
+  player_screen_name: string
+  division_number: number
+  division_rank: number
+  completed_game_count: number
+  wins: number
+  losses: number
+  ties: number
+  points: number
+  holes_won: number
+}
+
 export default function PublicPlayerProfilePage() {
   const params = useParams()
   const playerId = Array.isArray(params.id) ? params.id[0] : params.id
@@ -70,11 +84,16 @@ export default function PublicPlayerProfilePage() {
   const [results, setResults] = useState<Result[]>([])
   const [strokeHistory, setStrokeHistory] = useState<StrokeSeasonHistory[]>([])
   const [strokeHistoryError, setStrokeHistoryError] = useState("")
+  const [matchHistory, setMatchHistory] = useState<MatchSeasonHistory[]>([])
+  const [matchHistoryError, setMatchHistoryError] = useState("")
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState("")
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/immutability
     loadProfile()
+    // Profile data is reloaded only when the UUID route parameter changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playerId])
 
   async function loadProfile() {
@@ -87,6 +106,7 @@ export default function PublicPlayerProfilePage() {
     setLoading(true)
     setMessage("")
     setStrokeHistoryError("")
+    setMatchHistoryError("")
 
     const [
       playerResponse,
@@ -94,6 +114,7 @@ export default function PublicPlayerProfilePage() {
       trophiesResponse,
       resultsResponse,
       strokeHistoryResponse,
+      matchHistoryResponse,
     ] = await Promise.all([
       supabase
         .from("players")
@@ -122,6 +143,9 @@ export default function PublicPlayerProfilePage() {
       supabase.rpc("get_public_stroke_player_history", {
         p_player_id: playerId,
       }),
+      supabase.rpc("get_public_match_player_history", {
+        p_player_id: playerId,
+      }),
     ])
 
     if (playerResponse.error) {
@@ -147,6 +171,10 @@ export default function PublicPlayerProfilePage() {
       setStrokeHistoryError(
         `Stroke season history could not be loaded: ${strokeHistoryResponse.error.message}`
       )
+    }
+    setMatchHistory((matchHistoryResponse.data || []) as MatchSeasonHistory[])
+    if (matchHistoryResponse.error) {
+      setMatchHistoryError(`Match season history could not be loaded: ${matchHistoryResponse.error.message}`)
     }
     setLoading(false)
   }
@@ -342,6 +370,40 @@ export default function PublicPlayerProfilePage() {
                       <td style={td}>{history.losses}</td>
                       <td style={td}>{history.ties}</td>
                       <td style={td}>{history.strokes}</td>
+                      <td style={td}>{history.completed_game_count}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+
+        <section style={card}>
+          <h2 style={sectionTitle}>Match Season History</h2>
+
+          {matchHistoryError ? (
+            <p style={historyError}>{matchHistoryError}</p>
+          ) : matchHistory.length === 0 ? (
+            <p style={muted}>No approved Match season history is available yet.</p>
+          ) : (
+            <div style={tableWrap}>
+              <table style={table}>
+                <thead>
+                  <tr>
+                    <th style={th}>Season</th><th style={th}>Division</th><th style={th}>Final Rank</th>
+                    <th style={th}>Played</th><th style={th}>Wins</th><th style={th}>Draws</th>
+                    <th style={th}>Losses</th><th style={th}>Points</th><th style={th}>HW</th>
+                    <th style={th}>Completed Games</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {matchHistory.map((history) => (
+                    <tr key={history.season_id}>
+                      <td style={td}>{history.season_number}</td><td style={td}>Match D{history.division_number}</td>
+                      <td style={td}>{history.division_rank}</td><td style={td}>{history.completed_game_count}</td>
+                      <td style={td}>{history.wins}</td><td style={td}>{history.ties}</td><td style={td}>{history.losses}</td>
+                      <td style={td}>{history.points}</td><td style={td}>{history.holes_won}</td>
                       <td style={td}>{history.completed_game_count}</td>
                     </tr>
                   ))}

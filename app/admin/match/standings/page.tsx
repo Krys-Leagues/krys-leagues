@@ -458,9 +458,9 @@ export default function MatchStandingsPage() {
                     <div style={tableWrap}>
                       <table style={table}>
                         <thead><tr>
-                          <th style={th}>Rank</th><th style={th}>Player</th><th style={th}>P</th><th style={th}>Points</th>
+                          <th style={th}>Rank</th><th style={th}>Player</th><th style={th}>Played</th><th style={th}>Points</th>
                           <th style={th}>Wins</th><th style={th}>Losses</th><th style={th}>Ties</th>
-                          <th style={th}>HW</th><th style={th}>Game 1</th><th style={th}>Game 2</th><th style={th}>Game 3</th>
+                          <th style={th}>Holes Won</th><th style={th}>Completed Games</th>
                         </tr></thead>
                         <tbody>
                           {divisionEntries.map((entry) => (
@@ -471,9 +471,7 @@ export default function MatchStandingsPage() {
                               <td style={metricCell}>{entry.points}</td>
                               <td style={td}>{entry.wins}</td><td style={td}>{entry.losses}</td><td style={td}>{entry.ties}</td>
                               <td style={metricCell}>{entry.holes_won}</td>
-                              <td style={td}>{entry.game1_outcome ? `${entry.game1_course || "Game 1"}: ${entry.game1_outcome} · ${entry.game1_hw} HW` : "—"}</td>
-                              <td style={td}>{entry.game2_outcome ? `${entry.game2_course || "Game 2"}: ${entry.game2_outcome} · ${entry.game2_hw} HW` : "—"}</td>
-                              <td style={td}>{entry.game3_outcome ? `${entry.game3_course || "Game 3"}: ${entry.game3_outcome} · ${entry.game3_hw} HW` : "—"}</td>
+                              <td style={td}>{entry.completed_game_count}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -483,6 +481,15 @@ export default function MatchStandingsPage() {
                 )
               })}
             </>
+          )}
+
+          {scorecard?.status === "approved" && (
+            <button
+              onClick={() => router.push(`/admin/match/transition?scorecardId=${encodeURIComponent(scorecard.id)}`)}
+              style={generateButton}
+            >
+              Build Next-Season Proposed Roster
+            </button>
           )}
 
           {selectedSeason && scorecard?.status !== "approved" && (
