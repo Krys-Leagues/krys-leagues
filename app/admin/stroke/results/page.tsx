@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase"
 type SeasonRow = {
   id: string
   season_number: number
+  is_active: boolean
 }
 
 type ScheduleMatch = {
@@ -27,8 +28,12 @@ type ScheduleMatch = {
 
 type ResultRow = {
   schedule_id: string
-  player1_score: number
-  player2_score: number
+  player1_score: number | null
+  player2_score: number | null
+}
+
+type DeletedResultRow = {
+  result_deleted: boolean
 }
 
 export default function StrokeResultsPage() {
@@ -43,6 +48,7 @@ export default function StrokeResultsPage() {
   const [score2, setScore2] = useState("")
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState("")
   const [message, setMessage] = useState("")
 
@@ -60,8 +66,10 @@ export default function StrokeResultsPage() {
 
     const { data, error: seasonError } = await supabase
       .from("seasons")
-      .select("id, season_number")
+      .select("id, season_number, is_active")
       .eq("league_type", "stroke")
+      .is("division", null)
+      .order("is_active", { ascending: false })
       .order("season_number", { ascending: false })
 
     if (seasonError) {
@@ -70,9 +78,39 @@ export default function StrokeResultsPage() {
       return
     }
 
-    const loadedSeasons = (data || []) as SeasonRow[]
+    const candidateSeasons = (data || []) as SeasonRow[]
+    let loadedSeasons: SeasonRow[] = []
+
+    if (candidateSeasons.length > 0) {
+      const { data: rosterData, error: rosterError } = await supabase
+        .from("stroke_roster_versions")
+        .select("season_id")
+        .in("season_id", candidateSeasons.map((item) => item.id))
+        .eq("status", "approved")
+
+      if (rosterError) {
+        setError(`Could not load managed Stroke seasons: ${rosterError.message}`)
+        setLoading(false)
+        return
+      }
+
+      const managedSeasonIds = new Set(
+        (rosterData || []).map((roster) => roster.season_id as string)
+      )
+      loadedSeasons = candidateSeasons.filter((item) => managedSeasonIds.has(item.id))
+    }
+
+    const requestedSeasonId = new URLSearchParams(window.location.search)
+      .get("seasonId")
+      ?.trim()
     setSeasons(loadedSeasons)
-    setSeasonId((current) => current || loadedSeasons[0]?.id || "")
+    setSeasonId((current) => {
+      if (loadedSeasons.some((item) => item.id === current)) return current
+      if (loadedSeasons.some((item) => item.id === requestedSeasonId)) {
+        return requestedSeasonId || ""
+      }
+      return loadedSeasons[0]?.id || ""
+    })
     setLoading(false)
   }
 
@@ -141,14 +179,27 @@ export default function StrokeResultsPage() {
     setScore2("")
   }
 
+  function hasCompletedResult(scheduleId: string) {
+    const result = resultsBySchedule.get(scheduleId)
+    return Boolean(
+      result &&
+        result.player1_score !== null &&
+        result.player2_score !== null
+    )
+  }
+
   function handlePickMatch(scheduleId: string) {
     setSelectedScheduleId(scheduleId)
     setError("")
     setMessage("")
 
     const existingResult = resultsBySchedule.get(scheduleId)
-    setScore1(existingResult ? String(existingResult.player1_score) : "")
-    setScore2(existingResult ? String(existingResult.player2_score) : "")
+    const hasStoredScores =
+      existingResult?.player1_score !== null &&
+      existingResult?.player1_score !== undefined &&
+      existingResult.player2_score !== null
+    setScore1(hasStoredScores ? String(existingResult.player1_score) : "")
+    setScore2(hasStoredScores ? String(existingResult.player2_score) : "")
   }
 
   function parseScore(value: string, label: string) {
@@ -223,7 +274,39 @@ export default function StrokeResultsPage() {
     }
   }
 
-  const selectedSeason = seasons.find((season) => season.id === seasonId) || null
+  async function handleDeleteResult() {
+    if (!selectedMatch || !correctingResult || deleting) return
+    if (
+      !window.confirm(
+        `Delete the submitted result for ${player1Name} vs ${player2Name}? The fixture will become unplayed.`
+      )
+    ) return
+
+    setDeleting(true)
+    setError("")
+    setMessage("")
+
+    const { data, error: deleteError } = await supabase
+      .rpc("delete_stroke_result", {
+        p_schedule_id: selectedMatch.id,
+      })
+      .single()
+
+    if (deleteError) {
+      setError(`Result deletion failed: ${deleteError.message}`)
+      setDeleting(false)
+      return
+    }
+
+    await loadFixtures(selectedMatch.season_id)
+    setMessage(
+      (data as DeletedResultRow | null)?.result_deleted
+        ? "Submitted result deleted. The fixture is unplayed and standings were rebuilt."
+        : "No submitted result remained for this fixture."
+    )
+    setDeleting(false)
+  }
+
   const divisions = useMemo(
     () => Array.from(new Set(scheduledMatches.map((fixture) => fixture.division_number))).sort((a, b) => a - b),
     [scheduledMatches]
@@ -235,7 +318,14 @@ export default function StrokeResultsPage() {
   const selectedMatch = scheduledMatches.find((fixture) => fixture.id === selectedScheduleId) || null
   const player1Name = selectedMatch?.player1_name || selectedMatch?.player1 || "Player 1"
   const player2Name = selectedMatch?.player2_name || selectedMatch?.player2 || "Player 2"
-  const correctingResult = Boolean(selectedMatch && resultsBySchedule.has(selectedMatch.id))
+  const selectedResult = selectedMatch
+    ? resultsBySchedule.get(selectedMatch.id)
+    : undefined
+  const correctingResult = Boolean(
+    selectedResult &&
+      selectedResult.player1_score !== null &&
+      selectedResult.player2_score !== null
+  )
 
   return (
     <main style={page}>
@@ -247,6 +337,22 @@ export default function StrokeResultsPage() {
           <button onClick={() => router.push("/admin")} style={backButtonSecondary}>
             ← Admin
           </button>
+          {seasonId && (
+            <>
+              <button
+                onClick={() => router.push(`/admin/stroke/schedule?seasonId=${encodeURIComponent(seasonId)}`)}
+                style={backButtonSecondary}
+              >
+                View Schedule &amp; Images
+              </button>
+              <button
+                onClick={() => router.push(`/admin/stroke/standings?seasonId=${encodeURIComponent(seasonId)}`)}
+                style={backButtonSecondary}
+              >
+                View Scorecard / Standings
+              </button>
+            </>
+          )}
         </div>
 
         <div style={card}>
@@ -281,7 +387,7 @@ export default function StrokeResultsPage() {
             <select value={selectedScheduleId} onChange={(event) => handlePickMatch(event.target.value)} style={wideInput}>
               <option value="">Select match</option>
               {visibleMatches.map((match) => {
-                const completed = resultsBySchedule.has(match.id)
+                const completed = hasCompletedResult(match.id)
                 return (
                   <option key={match.id} value={match.id}>
                     {match.player1_name || match.player1} vs {match.player2_name || match.player2}{completed ? " — Result entered" : ""}
@@ -304,21 +410,39 @@ export default function StrokeResultsPage() {
 
           <section style={section}>
             <h2 style={sectionTitle}>Scores</h2>
+            {correctingResult && (
+              <p style={existingResultNotice}>
+                Existing submitted result — edit the stored scores below or delete the result.
+              </p>
+            )}
             <div style={grid}>
               <div>
                 <label style={label}>{player1Name} Score</label>
-                <input value={score1} onChange={(event) => setScore1(event.target.value)} placeholder="-28" inputMode="numeric" style={input} />
+                <input value={score1} onChange={(event) => setScore1(event.target.value)} inputMode="numeric" style={input} />
               </div>
               <div>
                 <label style={label}>{player2Name} Score</label>
-                <input value={score2} onChange={(event) => setScore2(event.target.value)} placeholder="-25" inputMode="numeric" style={input} />
+                <input value={score2} onChange={(event) => setScore2(event.target.value)} inputMode="numeric" style={input} />
               </div>
             </div>
           </section>
 
           <button onClick={handleSubmit} disabled={saving || loading || !selectedMatch} style={submitButton}>
-            {saving ? "Saving..." : correctingResult ? "Save Score Correction" : "Submit Result"}
+            {saving ? "Saving..." : correctingResult ? "Update Submitted Score" : "Submit Result"}
           </button>
+
+          {correctingResult && (
+            <div style={destructiveArea}>
+              <button
+                type="button"
+                onClick={() => void handleDeleteResult()}
+                disabled={saving || deleting}
+                style={deleteButton}
+              >
+                {deleting ? "Deleting Result..." : "Delete Result"}
+              </button>
+            </div>
+          )}
 
           {loading && <p style={infoText}>Loading managed Stroke fixtures...</p>}
           {error && <p role="alert" style={errorText}>{error}</p>}
@@ -351,3 +475,6 @@ const submitButton: React.CSSProperties = { marginTop: 30, padding: 16, width: "
 const infoText: React.CSSProperties = { marginTop: 16, color: "#bbb" }
 const errorText: React.CSSProperties = { marginTop: 16, color: "#fca5a5", whiteSpace: "pre-wrap" }
 const successText: React.CSSProperties = { marginTop: 16, color: "#86efac", whiteSpace: "pre-wrap" }
+const existingResultNotice: React.CSSProperties = { padding: 12, color: "#fde68a", background: "#2a1f05", border: "1px solid #92400e", borderRadius: 8 }
+const destructiveArea: React.CSSProperties = { marginTop: 24, paddingTop: 18, borderTop: "1px solid #7f1d1d" }
+const deleteButton: React.CSSProperties = { padding: "11px 16px", background: "transparent", color: "#fca5a5", border: "1px solid #b91c1c", borderRadius: 9, fontWeight: 800, cursor: "pointer" }

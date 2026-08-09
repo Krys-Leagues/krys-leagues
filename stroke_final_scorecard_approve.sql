@@ -212,6 +212,7 @@ begin
           order by
             total.wins * 3 + total.ties desc,
             total.wins desc,
+            (total.completed_game_count > 0) desc,
             total.strokes asc,
             total.player_screen_name asc
         )::integer as division_rank,

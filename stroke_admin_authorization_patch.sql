@@ -2646,6 +2646,7 @@ begin
         coalesce(sum(contribution.wins), 0)::integer as wins,
         coalesce(sum(contribution.losses), 0)::integer as losses,
         coalesce(sum(contribution.ties), 0)::integer as ties,
+        count(contribution.player_id)::integer as completed_game_count,
         coalesce(sum(contribution.strokes), 0)::integer as strokes
       from roster_players as roster_player
       left join contributions as contribution
@@ -2663,6 +2664,7 @@ begin
         order by
           total.wins * 3 + total.ties desc,
           total.wins desc,
+          (total.completed_game_count > 0) desc,
           total.strokes asc,
           total.player_screen_name asc
       )::integer as rank
@@ -3007,6 +3009,7 @@ begin
         order by
           total.wins * 3 + total.ties desc,
           total.wins desc,
+          (total.completed_game_count > 0) desc,
           total.strokes asc,
           total.player_screen_name asc
       )::integer as division_rank
@@ -3298,6 +3301,7 @@ begin
           order by
             total.wins * 3 + total.ties desc,
             total.wins desc,
+            (total.completed_game_count > 0) desc,
             total.strokes asc,
             total.player_screen_name asc
         )::integer as division_rank,

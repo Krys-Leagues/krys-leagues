@@ -78,15 +78,10 @@ type ResultRow = {
   player2_score: number | null
 }
 
-type ScheduleImageFixture = {
-  text: string
-  completed: boolean
-}
-
 type ScheduleImageGame = {
   gameNumber: number
   course: string
-  fixtures: ScheduleImageFixture[]
+  fixtures: string[]
   byeLine: string | null
 }
 
@@ -258,27 +253,12 @@ function renderScheduleImage(data: ScheduleImageData) {
     context.textAlign = "left"
 
     let lineY = top + 104
-    const lines = game.fixtures.length
-      ? game.fixtures
-      : [{ text: "No real-player fixture", completed: false }]
+    const lines = game.fixtures.length ? game.fixtures : ["No real-player fixture"]
     lines.forEach((fixtureLine) => {
       context.fillStyle = game.fixtures.length ? "#e2e8f0" : "#94a3b8"
-      const lineSize = fitText(context, fixtureLine.text, 880, 28, 18, 600)
+      const lineSize = fitText(context, fixtureLine, 880, 28, 18, 600)
       context.font = `600 ${lineSize}px ${canvasFont}`
-
-      if (fixtureLine.completed) {
-        context.save()
-        context.globalAlpha = 0.78
-        context.strokeStyle = data.accent
-        context.lineWidth = 4
-        context.beginPath()
-        context.moveTo(76, lineY - Math.max(7, lineSize * 0.3))
-        context.lineTo(1004, lineY - Math.max(7, lineSize * 0.3))
-        context.stroke()
-        context.restore()
-      }
-
-      context.fillText(fixtureLine.text, 84, lineY)
+      context.fillText(fixtureLine, 84, lineY)
       lineY += 56
     })
 
@@ -654,10 +634,7 @@ export default function StrokeScheduleReviewPage() {
         overrides[gameNumber - 1]?.trim() ||
         defaults[gameNumber - 1]?.trim() ||
         "Course not set"
-      const fixtureLines = gameFixtures.map((fixture) => ({
-        text: fixtureDisplay(fixture),
-        completed: Boolean(completedResult(fixture)),
-      }))
+      const fixtureLines = gameFixtures.map((fixture) => fixtureDisplay(fixture))
       let byeLine: string | null = null
 
       if (divisionSlots.length === 3) {
@@ -855,19 +832,19 @@ export default function StrokeScheduleReviewPage() {
                               const result = completedResult(fixture)
                               return (
                                 <div key={fixture.id} style={fixtureRow}>
-                                  {result && (
-                                    <span
-                                      aria-hidden="true"
-                                      style={{
-                                        ...completedFixtureLine,
-                                        background: divisionTheme?.accent || "#94a3b8",
-                                      }}
-                                    />
-                                  )}
-                                  <span style={fixtureContent}>
+                                  <span style={fixtureMatchup}>
+                                    {result && (
+                                      <span
+                                        aria-hidden="true"
+                                        style={{
+                                          ...completedFixtureLine,
+                                          background: divisionTheme?.accent || "#94a3b8",
+                                        }}
+                                      />
+                                    )}
                                     {fixtureDisplay(fixture)}
                                   </span>
-                                  <span style={fixtureContent}>
+                                  <span>
                                     {fixture.course || "Course not set"}
                                   </span>
                                 </div>
@@ -1043,14 +1020,25 @@ export default function StrokeScheduleReviewPage() {
               alt={`Reviewed Stroke D${previewDivision} schedule`}
               style={previewImage}
             />
-            <button
-              type="button"
-              onClick={() => void downloadScheduleImage(previewDivision)}
-              disabled={renderingDivision !== null}
-              style={imageDownloadButton}
-            >
-              Download Stroke D{previewDivision} Image
-            </button>
+            <div style={previewFooter}>
+              <button
+                type="button"
+                onClick={() => void downloadScheduleImage(previewDivision)}
+                disabled={renderingDivision !== null}
+                style={imageDownloadButton}
+              >
+                Download Stroke D{previewDivision} Image
+              </button>
+              {previewDivision < divisionNumbers.length && (
+                <button
+                  type="button"
+                  onClick={() => previewScheduleImage(previewDivision + 1)}
+                  style={imageSecondaryButton}
+                >
+                  Next Division →
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -1139,21 +1127,20 @@ const fixtureRow: React.CSSProperties = {
   borderBottom: "1px solid #222",
 }
 
-const fixtureContent: React.CSSProperties = {
+const fixtureMatchup: React.CSSProperties = {
   position: "relative",
-  zIndex: 1,
+  display: "block",
+  paddingTop: 8,
 }
 
 const completedFixtureLine: React.CSSProperties = {
   position: "absolute",
-  zIndex: 0,
   left: 0,
   right: 0,
-  top: "50%",
+  top: 0,
   height: 3,
   borderRadius: 999,
   opacity: 0.72,
-  transform: "translateY(-50%)",
   pointerEvents: "none",
 }
 
@@ -1279,4 +1266,12 @@ const previewImage: React.CSSProperties = {
   marginBottom: 14,
   borderRadius: 10,
   border: "1px solid #333",
+}
+
+const previewFooter: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  flexWrap: "wrap",
+  gap: 10,
 }
