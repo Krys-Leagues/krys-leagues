@@ -39,6 +39,19 @@ type SavedSeasonDetails = {
   change_revision: number
 }
 
+type ResizedRoster = {
+  season_id: string
+  roster_version_id: string
+  roster_status: "draft" | "approved" | "locked"
+  previous_division_count: number
+  division_count: number
+  added_division_count: number
+  removed_division_count: number
+  deleted_fixture_count: number
+  schedule_changes_detected: boolean
+  change_revision: number | null
+}
+
 const LEAGUE_TYPE = "stroke"
 
 export default function EditCurrentStrokeSeasonPage() {
@@ -58,6 +71,7 @@ export default function EditCurrentStrokeSeasonPage() {
   const [game1Course, setGame1Course] = useState("")
   const [game2Course, setGame2Course] = useState("")
   const [game3Course, setGame3Course] = useState("")
+  const [divisionCountInput, setDivisionCountInput] = useState("")
 
   useEffect(() => {
     async function loadStrokeSeasons() {
@@ -144,6 +158,12 @@ export default function EditCurrentStrokeSeasonPage() {
     )
   }, [rosterVersions, selectedSeasonId])
 
+  useEffect(() => {
+    setDivisionCountInput(
+      selectedRoster ? String(selectedRoster.division_count) : ""
+    )
+  }, [selectedRoster])
+
   const divisions = useMemo(() => {
     if (!selectedRoster) return []
 
@@ -172,6 +192,9 @@ export default function EditCurrentStrokeSeasonPage() {
     setGame1Course(selectedSeason.game1_course || "")
     setGame2Course(selectedSeason.game2_course || "")
     setGame3Course(selectedSeason.game3_course || "")
+    setDivisionCountInput(
+      selectedRoster ? String(selectedRoster.division_count) : ""
+    )
     setDetailsMessage("")
     setDetailsMessageType(null)
     setScheduleStaleMessage(false)
@@ -188,6 +211,14 @@ export default function EditCurrentStrokeSeasonPage() {
     setDetailsMessage("")
     setDetailsMessageType(null)
     setScheduleStaleMessage(false)
+
+    const requestedDivisionCount = Number(divisionCountInput)
+
+    if (!Number.isInteger(requestedDivisionCount) || requestedDivisionCount < 1) {
+      setDetailsMessage("Number of Divisions must be a whole number of at least 1.")
+      setDetailsMessageType("error")
+      return
+    }
 
     if (!startDate) {
       setDetailsMessage("Choose a start date.")
@@ -214,8 +245,39 @@ export default function EditCurrentStrokeSeasonPage() {
     }
 
     setSavingDetails(true)
+    let resizeCompleted = false
+    let resizeMadeScheduleStale = false
 
     try {
+      if (requestedDivisionCount !== selectedRoster.division_count) {
+        const { data: resizeData, error: resizeError } = await supabase
+          .rpc("resize_stroke_season_divisions", {
+            p_season_id: selectedSeason.id,
+            p_new_division_count: requestedDivisionCount,
+          })
+          .single()
+
+        if (resizeError || !resizeData) {
+          throw new Error(
+            resizeError?.message || "No resized roster data was returned."
+          )
+        }
+
+        const resized = resizeData as ResizedRoster
+        resizeCompleted = true
+        resizeMadeScheduleStale = resized.schedule_changes_detected
+
+        setRosterVersions((current) =>
+          current.map((roster) =>
+            roster.id === resized.roster_version_id
+              ? { ...roster, division_count: resized.division_count }
+              : roster
+          )
+        )
+        setDivisionCountInput(String(resized.division_count))
+        setScheduleStaleMessage(resizeMadeScheduleStale)
+      }
+
       const { data, error } = await supabase
         .rpc("update_stroke_season_details", {
           p_season_id: selectedSeason.id,
@@ -255,10 +317,16 @@ export default function EditCurrentStrokeSeasonPage() {
       setGame3Course(saved.game3_course)
       setDetailsMessage("Season changes saved.")
       setDetailsMessageType("success")
-      setScheduleStaleMessage(saved.schedule_changes_detected)
+      setScheduleStaleMessage(
+        resizeMadeScheduleStale || saved.schedule_changes_detected
+      )
     } catch (error: unknown) {
       setDetailsMessage(
-        `Stroke season changes were not saved: ${
+        `${
+          resizeCompleted
+            ? `Division count was resized to ${requestedDivisionCount}, but season details were not saved: `
+            : "Stroke season changes were not saved: "
+        }${
           error instanceof Error ? error.message : "The request could not be completed."
         }`
       )
@@ -331,8 +399,8 @@ export default function EditCurrentStrokeSeasonPage() {
             <section style={panel}>
               <h2 style={sectionTitle}>EDIT SEASON DETAILS</h2>
               <p style={sectionDescription}>
-                Update the season dates and default courses. Season identity and
-                roster size are managed separately and cannot be changed here.
+                Update the season dates, default courses, and managed division
+                count. Season identity remains fixed.
               </p>
 
               <div style={detailsGrid}>
@@ -347,10 +415,13 @@ export default function EditCurrentStrokeSeasonPage() {
 
                 <EditField label="Number of Divisions">
                   <input
-                    value={selectedRoster?.division_count ?? "Unavailable"}
-                    readOnly
-                    aria-readonly="true"
-                    style={readOnlyInput}
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={divisionCountInput}
+                    onChange={(event) => setDivisionCountInput(event.target.value)}
+                    disabled={savingDetails || rosterIsLocked || !selectedRoster}
+                    style={input}
                   />
                 </EditField>
 
