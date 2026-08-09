@@ -828,28 +828,12 @@ export default function StrokeScheduleReviewPage() {
                         return (
                           <div key={gameNumber} style={gameSection}>
                             <h4>Game {gameNumber}</h4>
-                            {gameFixtures.map((fixture) => {
-                              const result = completedResult(fixture)
-                              return (
-                                <div key={fixture.id} style={fixtureRow}>
-                                  <span style={fixtureMatchup}>
-                                    {result && (
-                                      <span
-                                        aria-hidden="true"
-                                        style={{
-                                          ...completedFixtureLine,
-                                          background: divisionTheme?.accent || "#94a3b8",
-                                        }}
-                                      />
-                                    )}
-                                    {fixtureDisplay(fixture)}
-                                  </span>
-                                  <span>
-                                    {fixture.course || "Course not set"}
-                                  </span>
-                                </div>
-                              )
-                            })}
+                            {gameFixtures.map((fixture) => (
+                              <div key={fixture.id} style={fixtureRow}>
+                                <span style={fixtureMatchup}>{fixtureDisplay(fixture)}</span>
+                                <span>{fixture.course || "Course not set"}</span>
+                              </div>
+                            ))}
                           </div>
                         )
                       })
@@ -1029,10 +1013,13 @@ export default function StrokeScheduleReviewPage() {
               >
                 Download Stroke D{previewDivision} Image
               </button>
-              {previewDivision < divisionNumbers.length && (
+              {divisionNumbers.indexOf(previewDivision) < divisionNumbers.length - 1 && (
                 <button
                   type="button"
-                  onClick={() => previewScheduleImage(previewDivision + 1)}
+                  onClick={() => {
+                    const currentIndex = divisionNumbers.indexOf(previewDivision)
+                    previewScheduleImage(divisionNumbers[currentIndex + 1])
+                  }}
                   style={imageSecondaryButton}
                 >
                   Next Division →
@@ -1128,20 +1115,7 @@ const fixtureRow: React.CSSProperties = {
 }
 
 const fixtureMatchup: React.CSSProperties = {
-  position: "relative",
   display: "block",
-  paddingTop: 8,
-}
-
-const completedFixtureLine: React.CSSProperties = {
-  position: "absolute",
-  left: 0,
-  right: 0,
-  top: 0,
-  height: 3,
-  borderRadius: 999,
-  opacity: 0.72,
-  pointerEvents: "none",
 }
 
 const reviewButton: React.CSSProperties = {

@@ -143,6 +143,9 @@ export default function StrokeStandingsPage() {
     })
     return Array.from(grouped.entries()).sort(([left], [right]) => left - right)
   }, [entries])
+  const displayedDueDate = selectedSeason
+    ? formatDate(selectedSeason.end_date || selectedSeason.due_date)
+    : "Not set"
 
   useEffect(() => {
     if (!selectedSeason || !selectedRoster) return
@@ -391,7 +394,7 @@ export default function StrokeStandingsPage() {
             {selectedSeason && (
               <div style={dueDateCard}>
                 <span style={dueLabel}>SEASON DUE DATE</span>
-                <strong style={dueValue}>{formatDate(selectedSeason.end_date || selectedSeason.due_date)}</strong>
+                <strong style={dueValue}>{displayedDueDate}</strong>
               </div>
             )}
           </div>
@@ -419,7 +422,10 @@ export default function StrokeStandingsPage() {
                       borderColor: theme?.border || "#444",
                     }}
                   >
-                    <h3 style={{ ...divisionTitle, color: theme?.accent || "#ddd" }}>Stroke D{division}</h3>
+                    <div style={divisionCardHeader}>
+                      <h3 style={{ ...divisionTitle, color: theme?.accent || "#ddd" }}>Stroke D{division}</h3>
+                      <strong style={divisionDueDate}>Due {displayedDueDate}</strong>
+                    </div>
                     <div style={tableWrap}>
                       <table style={table}>
                         <thead><tr>
@@ -431,7 +437,7 @@ export default function StrokeStandingsPage() {
                           {divisionEntries.map((entry) => (
                             <tr key={entry.id}>
                               <td style={td}>#{entry.division_rank}</td>
-                              <td style={{ ...td, ...playerRankStyles[entry.division_rank] }}>{entry.player_screen_name}</td>
+                              <td style={playerNameCell}>{entry.player_screen_name}</td>
                               <td style={metricCell}>{entry.points}</td>
                               <td style={td}>{entry.wins}</td><td style={td}>{entry.losses}</td><td style={td}>{entry.ties}</td>
                               <td style={metricCell}>{entry.strokes}</td><td style={td}>{entry.completed_game_count}</td>
@@ -498,12 +504,10 @@ const dueLabel: React.CSSProperties = { color: "#94a3b8", fontSize: 12, fontWeig
 const dueValue: React.CSSProperties = { color: "#f8fafc", fontSize: 18 }
 const summary: React.CSSProperties = { display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap", padding: 14, background: "#111", border: "1px solid #444", borderRadius: 10 }
 const divisionCard: React.CSSProperties = { marginTop: 20, padding: 18, border: "1px solid #444", borderRadius: 14 }
+const divisionCardHeader: React.CSSProperties = { display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12, flexWrap: "wrap" }
 const divisionTitle: React.CSSProperties = { margin: 0, fontSize: 24 }
-const playerRankStyles: Record<number, React.CSSProperties> = {
-  1: { fontSize: 19, fontWeight: 900, color: "#fff" },
-  2: { fontSize: 17, fontWeight: 800, color: "#e2e8f0" },
-  3: { fontWeight: 700, color: "#cbd5e1" },
-}
+const divisionDueDate: React.CSSProperties = { color: "#f8fafc", fontSize: 15, fontWeight: 700 }
+const playerNameCell: React.CSSProperties = { ...td, fontSize: 16, fontWeight: 700, color: "#f8fafc" }
 const actions: React.CSSProperties = { display: "flex", gap: 12, flexWrap: "wrap", marginTop: 20 }
 const generateButton: React.CSSProperties = { ...button, marginTop: 20, background: "#2563eb" }
 const approveButton: React.CSSProperties = { ...button, background: "#16a34a" }
