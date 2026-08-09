@@ -105,11 +105,31 @@ export default function PypSchedulePage() {
       context.fillText(`ROUND ${round}`, 60, y)
       y += 55
       for (const fixture of shown.filter((item) => item.game_number === round)) {
+        const homeText = `HOME · ${fixture.pyp_home_player_screen_name}`
+        const awayText = `AWAY · ${fixture.pyp_away_player_screen_name}`
+        const versusText = "vs"
+        let fontSize = 31
+        context.font = `bold ${fontSize}px Arial, sans-serif`
+        while (
+          fontSize > 21 &&
+          context.measureText(homeText).width +
+            context.measureText(versusText).width +
+            context.measureText(awayText).width +
+            48 >
+            canvas.width - 160
+        ) {
+          fontSize -= 1
+          context.font = `bold ${fontSize}px Arial, sans-serif`
+        }
+        let matchupX = 80
         context.fillStyle = theme.accent
-        context.font = "bold 31px Arial, sans-serif"
-        context.fillText(`HOME  ${fixture.pyp_home_player_screen_name}`, 80, y)
+        context.fillText(homeText, matchupX, y)
+        matchupX += context.measureText(homeText).width + 24
+        context.fillStyle = "#888"
+        context.fillText(versusText, matchupX, y)
+        matchupX += context.measureText(versusText).width + 24
         context.fillStyle = "#ddd"
-        context.fillText(`AWAY  ${fixture.pyp_away_player_screen_name}`, 570, y)
+        context.fillText(awayText, matchupX, y)
         y += 60
       }
       y += 35
@@ -193,7 +213,7 @@ const divisionCard: React.CSSProperties = { border: "2px solid", borderRadius: 1
 const divisionHeader: React.CSSProperties = { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }
 const statusPill: React.CSSProperties = { padding: "6px 10px", borderRadius: 999, border: "1px solid #555", background: "rgba(0,0,0,.35)", color: "#ddd" }
 const roundCard: React.CSSProperties = { marginTop: 18, padding: 16, borderRadius: 10, border: "1px solid rgba(255,255,255,.12)", background: "rgba(0,0,0,.28)" }
-const fixtureRow: React.CSSProperties = { display: "grid", gridTemplateColumns: "1fr auto 1fr", alignItems: "center", gap: 14, padding: "10px 0", borderTop: "1px solid rgba(255,255,255,.08)" }
+const fixtureRow: React.CSSProperties = { display: "flex", alignItems: "center", flexWrap: "wrap", gap: "6px 12px", width: "fit-content", maxWidth: "100%", padding: "10px 0", borderTop: "1px solid rgba(255,255,255,.08)" }
 const versus: React.CSSProperties = { color: "#888", fontWeight: 800 }
 const rules: React.CSSProperties = { display: "flex", flexDirection: "column", gap: 7, marginTop: 22, color: "#ddd" }
 const imagePanel: React.CSSProperties = { marginTop: 22, padding: 22, borderRadius: 14, border: "1px solid #333", background: "#0d0d0d" }
