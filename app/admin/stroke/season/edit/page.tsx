@@ -51,6 +51,8 @@ export default function EditCurrentStrokeSeasonPage() {
   const [errorMessage, setErrorMessage] = useState("")
   const [savingDetails, setSavingDetails] = useState(false)
   const [detailsMessage, setDetailsMessage] = useState("")
+  const [detailsMessageType, setDetailsMessageType] = useState<"success" | "error" | null>(null)
+  const [scheduleStaleMessage, setScheduleStaleMessage] = useState(false)
   const [startDate, setStartDate] = useState("")
   const [endDate, setEndDate] = useState("")
   const [game1Course, setGame1Course] = useState("")
@@ -127,7 +129,6 @@ export default function EditCurrentStrokeSeasonPage() {
     setGame1Course(selectedSeason.game1_course || "")
     setGame2Course(selectedSeason.game2_course || "")
     setGame3Course(selectedSeason.game3_course || "")
-    setDetailsMessage("")
   }, [selectedSeason])
 
   const selectedRoster = useMemo(() => {
@@ -172,82 +173,99 @@ export default function EditCurrentStrokeSeasonPage() {
     setGame2Course(selectedSeason.game2_course || "")
     setGame3Course(selectedSeason.game3_course || "")
     setDetailsMessage("")
+    setDetailsMessageType(null)
+    setScheduleStaleMessage(false)
   }
 
   async function saveSeasonDetails() {
-    if (!selectedSeason || !selectedRoster || selectedRoster.status === "locked") return
+    if (
+      savingDetails ||
+      !selectedSeason ||
+      !selectedRoster ||
+      selectedRoster.status === "locked"
+    ) return
 
     setDetailsMessage("")
+    setDetailsMessageType(null)
+    setScheduleStaleMessage(false)
 
     if (!startDate) {
       setDetailsMessage("Choose a start date.")
+      setDetailsMessageType("error")
       return
     }
 
     if (!endDate) {
       setDetailsMessage("Choose an end date.")
+      setDetailsMessageType("error")
       return
     }
 
     if (endDate < startDate) {
       setDetailsMessage("End date cannot be before the start date.")
+      setDetailsMessageType("error")
       return
     }
 
     if (!game1Course.trim() || !game2Course.trim() || !game3Course.trim()) {
       setDetailsMessage("Game 1, Game 2, and Game 3 courses are required.")
+      setDetailsMessageType("error")
       return
     }
 
     setSavingDetails(true)
 
-    const { data, error } = await supabase
-      .rpc("update_stroke_season_details", {
-        p_season_id: selectedSeason.id,
-        p_start_date: startDate,
-        p_end_date: endDate,
-        p_game1_course: game1Course.trim(),
-        p_game2_course: game2Course.trim(),
-        p_game3_course: game3Course.trim(),
-      })
-      .single()
+    try {
+      const { data, error } = await supabase
+        .rpc("update_stroke_season_details", {
+          p_season_id: selectedSeason.id,
+          p_start_date: startDate,
+          p_end_date: endDate,
+          p_game1_course: game1Course.trim(),
+          p_game2_course: game2Course.trim(),
+          p_game3_course: game3Course.trim(),
+        })
+        .single()
 
-    setSavingDetails(false)
+      if (error || !data) {
+        throw new Error(error?.message || "No saved season data was returned.")
+      }
 
-    if (error || !data) {
+      const saved = data as SavedSeasonDetails
+
+      setSeasons((current) =>
+        current.map((season) =>
+          season.id === saved.season_id
+            ? {
+                ...season,
+                start_date: saved.start_date,
+                due_date: saved.due_date,
+                end_date: saved.end_date,
+                game1_course: saved.game1_course,
+                game2_course: saved.game2_course,
+                game3_course: saved.game3_course,
+              }
+            : season
+        )
+      )
+      setStartDate(saved.start_date)
+      setEndDate(saved.end_date)
+      setGame1Course(saved.game1_course)
+      setGame2Course(saved.game2_course)
+      setGame3Course(saved.game3_course)
+      setDetailsMessage("Season changes saved.")
+      setDetailsMessageType("success")
+      setScheduleStaleMessage(saved.schedule_changes_detected)
+    } catch (error: unknown) {
       setDetailsMessage(
-        `Stroke season changes were not saved: ${error?.message || "No saved season data was returned."}`
+        `Stroke season changes were not saved: ${
+          error instanceof Error ? error.message : "The request could not be completed."
+        }`
       )
-      return
+      setDetailsMessageType("error")
+    } finally {
+      setSavingDetails(false)
     }
-
-    const saved = data as SavedSeasonDetails
-
-    setSeasons((current) =>
-      current.map((season) =>
-        season.id === saved.season_id
-          ? {
-              ...season,
-              start_date: saved.start_date,
-              due_date: saved.due_date,
-              end_date: saved.end_date,
-              game1_course: saved.game1_course,
-              game2_course: saved.game2_course,
-              game3_course: saved.game3_course,
-            }
-          : season
-      )
-    )
-    setStartDate(saved.start_date)
-    setEndDate(saved.end_date)
-    setGame1Course(saved.game1_course)
-    setGame2Course(saved.game2_course)
-    setGame3Course(saved.game3_course)
-    setDetailsMessage(
-      saved.schedule_changes_detected
-        ? "Season changes saved. Schedule changes detected. Regenerate and review the schedule."
-        : "Season changes saved."
-    )
   }
 
   const rosterIsLocked = selectedRoster?.status === "locked"
@@ -289,7 +307,12 @@ export default function EditCurrentStrokeSeasonPage() {
               Stroke Season
               <select
                 value={selectedSeasonId}
-                onChange={(event) => setSelectedSeasonId(event.target.value)}
+                onChange={(event) => {
+                  setDetailsMessage("")
+                  setDetailsMessageType(null)
+                  setScheduleStaleMessage(false)
+                  setSelectedSeasonId(event.target.value)
+                }}
                 style={select}
               >
                 {seasons.map((season) => (
@@ -390,7 +413,7 @@ export default function EditCurrentStrokeSeasonPage() {
                   disabled={savingDetails || rosterIsLocked || !selectedRoster}
                   style={saveDetailsButton}
                 >
-                  {savingDetails ? "Saving Season Changes..." : "Save Season Changes"}
+                  {savingDetails ? "Saving..." : "Save Season Changes"}
                 </button>
                 <button
                   type="button"
@@ -403,7 +426,22 @@ export default function EditCurrentStrokeSeasonPage() {
               </div>
 
               {detailsMessage && (
-                <p role="status" style={detailsMessageStyle}>{detailsMessage}</p>
+                <p
+                  role={detailsMessageType === "error" ? "alert" : "status"}
+                  style={
+                    detailsMessageType === "error"
+                      ? detailsErrorStyle
+                      : detailsSuccessStyle
+                  }
+                >
+                  {detailsMessage}
+                </p>
+              )}
+
+              {scheduleStaleMessage && (
+                <p role="status" style={scheduleStaleStyle}>
+                  Schedule changes detected. Regenerate and review the schedule.
+                </p>
               )}
             </section>
 
@@ -588,13 +626,29 @@ const cancelButton: React.CSSProperties = {
   border: "1px solid #52525b",
 }
 
-const detailsMessageStyle: React.CSSProperties = {
+const detailsSuccessStyle: React.CSSProperties = {
   margin: "16px 0 0",
   padding: 12,
-  border: "1px solid #444",
+  border: "1px solid #22c55e",
   borderRadius: 8,
-  background: "#080808",
-  color: "#facc15",
+  background: "#052e16",
+  color: "#bbf7d0",
+  fontWeight: 700,
+}
+
+const detailsErrorStyle: React.CSSProperties = {
+  ...detailsSuccessStyle,
+  borderColor: "#ef4444",
+  background: "#2a0b0b",
+  color: "#fecaca",
+}
+
+const scheduleStaleStyle: React.CSSProperties = {
+  ...detailsSuccessStyle,
+  marginTop: 10,
+  borderColor: "#f59e0b",
+  background: "#2b1d05",
+  color: "#fde68a",
 }
 
 const select: React.CSSProperties = {
