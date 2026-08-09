@@ -313,7 +313,7 @@ begin
 
   return query
   select v_roster.id, p_target_season_id, p_target_division_count,
-    slot.division_number, slot.slot_number, slot.player_id, slot.player_screen_name,
+    slot.division_number, slot.slot_number::integer, slot.player_id, slot.player_screen_name,
     coalesce(work.movement_reason, case when new_player.player_id is not null then 'New Player' end)
   from public.stroke_division_roster_slots as slot
   left join pg_temp.stroke_transition_work as work on work.player_id = slot.player_id

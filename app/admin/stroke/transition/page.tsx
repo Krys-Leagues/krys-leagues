@@ -1,15 +1,19 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import { logActivity } from "@/lib/activityLog"
 
 type Entry = { player_id: string; player_screen_name: string; division_number: number; division_rank: number; completed_game_count: number }
 type Decision = { player_id: string; decision: "returning" | "not_returning" }
-type Season = { id: string; season_number: number }
+type Season = { id: string; season_number: number; start_date: string | null; end_date: string | null; game1_course: string | null; game2_course: string | null; game3_course: string | null }
 type Player = { id: string; screen_name: string }
 type ProposalSlot = { roster_version_id: string; target_season_id: string; target_division_count: number; division_number: number; slot_number: number; player_id: string | null; player_screen_name: string | null; movement_reason: string | null }
+type TransitionDraft = { divisionCount: string; startDate: string; endDate: string; game1Course: string; game2Course: string; game3Course: string }
+
+const transitionDraftKey = (sourceSeasonId: string) => `stroke-transition-season-draft:${sourceSeasonId}`
+const transitionPlayersKey = (sourceSeasonId: string) => `stroke-transition-new-players:${sourceSeasonId}`
 
 export default function StrokeTransitionPage() {
   const router = useRouter()
@@ -36,10 +40,22 @@ export default function StrokeTransitionPage() {
   const [creatingSeason, setCreatingSeason] = useState(false)
   const [error, setError] = useState("")
   const [message, setMessage] = useState("")
+  const transitionStorageReady = useRef(false)
 
   // The initial approved-scorecard context is intentionally loaded once.
   // eslint-disable-next-line react-hooks/immutability
   useEffect(() => { void loadTransition() }, [])
+
+  useEffect(() => {
+    if (!transitionStorageReady.current || !sourceSeasonId || targetSeasonId) return
+    const draft: TransitionDraft = { divisionCount, startDate, endDate, game1Course, game2Course, game3Course }
+    window.sessionStorage.setItem(transitionDraftKey(sourceSeasonId), JSON.stringify(draft))
+  }, [divisionCount, endDate, game1Course, game2Course, game3Course, sourceSeasonId, startDate, targetSeasonId])
+
+  useEffect(() => {
+    if (!transitionStorageReady.current || !sourceSeasonId) return
+    window.sessionStorage.setItem(transitionPlayersKey(sourceSeasonId), JSON.stringify(newPlayerIds))
+  }, [newPlayerIds, sourceSeasonId])
 
   async function loadTransition() {
     const requestedId = new URLSearchParams(window.location.search).get("scorecardId")?.trim() || ""
@@ -61,13 +77,14 @@ export default function StrokeTransitionPage() {
         .select("player_id, player_screen_name, division_number, division_rank, completed_game_count")
         .eq("scorecard_id", requestedId).order("division_number").order("division_rank"),
       supabase.from("stroke_final_scorecard_player_decisions").select("player_id, decision").eq("final_scorecard_id", requestedId),
-      supabase.from("seasons").select("id, season_number").eq("league_type", "stroke")
+      supabase.from("seasons").select("id, season_number, start_date, end_date, game1_course, game2_course, game3_course").eq("league_type", "stroke")
         .is("division", null).eq("season_number", sourceSeason.season_number + 1),
       supabase.from("players").select("id, screen_name").eq("active", true).order("screen_name"),
     ])
     const loadError = entryResponse.error || decisionResponse.error || seasonResponse.error || playerResponse.error
     if (loadError) { setError(loadError.message); setLoading(false); return }
     const loadedEntries = (entryResponse.data || []) as Entry[]
+    const loadedPlayers = (playerResponse.data || []) as Player[]
     const candidateSeasons = (seasonResponse.data || []) as Season[]
     let loadedSeasons: Season[] = []
     let loadedTargetDivisionCount: number | null = null
@@ -93,8 +110,43 @@ export default function StrokeTransitionPage() {
     setEntries(loadedEntries)
     setDecisions(new Map(((decisionResponse.data || []) as Decision[]).map((item) => [item.player_id, item.decision])))
     setTargetSeasons(loadedSeasons); setTargetSeasonId(loadedSeasons[0]?.id || "")
-    setDivisionCount(String(loadedTargetDivisionCount || Math.max(1, ...loadedEntries.map((entry) => entry.division_number))))
-    setPlayers((playerResponse.data || []) as Player[]); setLoading(false)
+    const sourceDivisionCount = String(Math.max(1, ...loadedEntries.map((entry) => entry.division_number)))
+    if (loadedSeasons.length === 1) {
+      const targetSeason = loadedSeasons[0]
+      setDivisionCount(String(loadedTargetDivisionCount || sourceDivisionCount))
+      setStartDate(targetSeason.start_date || "")
+      setEndDate(targetSeason.end_date || "")
+      setGame1Course(targetSeason.game1_course || "")
+      setGame2Course(targetSeason.game2_course || "")
+      setGame3Course(targetSeason.game3_course || "")
+      window.sessionStorage.removeItem(transitionDraftKey(scorecard.season_id))
+    } else {
+      let savedDraft: Partial<TransitionDraft> = {}
+      try {
+        savedDraft = JSON.parse(window.sessionStorage.getItem(transitionDraftKey(scorecard.season_id)) || "{}") as Partial<TransitionDraft>
+      } catch {
+        window.sessionStorage.removeItem(transitionDraftKey(scorecard.season_id))
+      }
+      setDivisionCount(typeof savedDraft.divisionCount === "string" ? savedDraft.divisionCount : sourceDivisionCount)
+      setStartDate(typeof savedDraft.startDate === "string" ? savedDraft.startDate : "")
+      setEndDate(typeof savedDraft.endDate === "string" ? savedDraft.endDate : "")
+      setGame1Course(typeof savedDraft.game1Course === "string" ? savedDraft.game1Course : "")
+      setGame2Course(typeof savedDraft.game2Course === "string" ? savedDraft.game2Course : "")
+      setGame3Course(typeof savedDraft.game3Course === "string" ? savedDraft.game3Course : "")
+    }
+    const entryIds = new Set(loadedEntries.map((entry) => entry.player_id))
+    const validPlayerIds = new Set(loadedPlayers.map((player) => player.id))
+    try {
+      const savedPlayerIds = JSON.parse(window.sessionStorage.getItem(transitionPlayersKey(scorecard.season_id)) || "[]")
+      if (Array.isArray(savedPlayerIds)) {
+        setNewPlayerIds(Array.from(new Set(savedPlayerIds.filter((id): id is string => typeof id === "string" && validPlayerIds.has(id) && !entryIds.has(id)))))
+      }
+    } catch {
+      window.sessionStorage.removeItem(transitionPlayersKey(scorecard.season_id))
+    }
+    setPlayers(loadedPlayers)
+    transitionStorageReady.current = true
+    setLoading(false)
   }
 
   async function setDecision(playerId: string, decision: Decision["decision"]) {
@@ -150,10 +202,14 @@ export default function StrokeTransitionPage() {
     }
 
     const created = data as { season_id: string; season_number: number; division_count: number }
-    const createdSeason = { id: created.season_id, season_number: created.season_number }
+    const createdSeason: Season = {
+      id: created.season_id, season_number: created.season_number, start_date: startDate,
+      end_date: endDate, game1_course: game1Course.trim(), game2_course: game2Course.trim(), game3_course: game3Course.trim(),
+    }
     setTargetSeasons((current) => [...current.filter((season) => season.id !== createdSeason.id), createdSeason])
     setTargetSeasonId(created.season_id)
     setDivisionCount(String(created.division_count))
+    window.sessionStorage.removeItem(transitionDraftKey(sourceSeasonId))
     await logActivity({ userType: "admin", action: "Created Stroke Season From Transition", status: "success", leagueType: "stroke", page: "/admin/stroke/transition", details: { sourceSeasonId, targetSeasonId: created.season_id, seasonNumber: created.season_number, divisionCount: created.division_count } })
     setMessage(`Stroke Season ${created.season_number} created and selected as the target season. Return decisions and new-player order were preserved.`)
     setCreatingSeason(false)
@@ -202,12 +258,12 @@ export default function StrokeTransitionPage() {
       {targetSeasonId && <p style={successText}>Managed Stroke Season {targetSeasons.find((season) => season.id === targetSeasonId)?.season_number} is selected automatically.</p>}
       <div style={formRow}>
         <label style={fieldLabel}>Season Number<input value={sourceSeasonNumber === null ? "" : String(sourceSeasonNumber + 1)} readOnly style={input} /></label>
-        <label style={fieldLabel}>Number of Divisions<input type="number" min="1" max="20" value={divisionCount} onChange={(event) => setDivisionCount(event.target.value)} style={input} /></label>
-        <label style={fieldLabel}>Start Date<input type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} style={input} /></label>
-        <label style={fieldLabel}>End Date<input type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} style={input} /></label>
-        <label style={fieldLabel}>Game 1 Course<input value={game1Course} onChange={(event) => setGame1Course(event.target.value)} style={input} /></label>
-        <label style={fieldLabel}>Game 2 Course<input value={game2Course} onChange={(event) => setGame2Course(event.target.value)} style={input} /></label>
-        <label style={fieldLabel}>Game 3 Course<input value={game3Course} onChange={(event) => setGame3Course(event.target.value)} style={input} /></label>
+        <label style={fieldLabel}>Number of Divisions<input type="number" min="1" max="20" value={divisionCount} disabled={Boolean(targetSeasonId)} onChange={(event) => setDivisionCount(event.target.value)} style={input} /></label>
+        <label style={fieldLabel}>Start Date<input type="date" value={startDate} disabled={Boolean(targetSeasonId)} onChange={(event) => setStartDate(event.target.value)} style={input} /></label>
+        <label style={fieldLabel}>End Date<input type="date" value={endDate} disabled={Boolean(targetSeasonId)} onChange={(event) => setEndDate(event.target.value)} style={input} /></label>
+        <label style={fieldLabel}>Game 1 Course<input value={game1Course} disabled={Boolean(targetSeasonId)} onChange={(event) => setGame1Course(event.target.value)} style={input} /></label>
+        <label style={fieldLabel}>Game 2 Course<input value={game2Course} disabled={Boolean(targetSeasonId)} onChange={(event) => setGame2Course(event.target.value)} style={input} /></label>
+        <label style={fieldLabel}>Game 3 Course<input value={game3Course} disabled={Boolean(targetSeasonId)} onChange={(event) => setGame3Course(event.target.value)} style={input} /></label>
       </div>
       <button onClick={() => void createNextSeason()} disabled={creatingSeason || Boolean(targetSeasonId)} style={primaryButton}>{creatingSeason ? "Creating Next Stroke Season..." : targetSeasonId ? "Next Stroke Season Ready" : "Create Next Stroke Season"}</button>
     </section>
