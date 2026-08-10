@@ -98,7 +98,7 @@ export default function MajorsAdminPage() {
     <main style={page}>
       <div style={topRow}>
         <div><Link href="/admin" style={backLink}>← Admin</Link><h1 style={title}>Four Majors</h1><p style={muted}>Configure four reusable event records, signup, participants, and streams.</p></div>
-        <Link href="/majors" style={publicLink}>View public Majors</Link>
+        <div style={headerLinks}><Link href="/admin/majors/scoring" style={scoringLink}>Live scoring</Link><Link href="/majors" style={publicLink}>View public Majors</Link></div>
       </div>
       {message && <p style={notice}>{message}</p>}
       {loading ? <p>Loading…</p> : (
@@ -160,6 +160,8 @@ const backLink: React.CSSProperties = { color: "#94a3b8", textDecoration: "none"
 const title: React.CSSProperties = { margin: "10px 0 4px", fontSize: 38 }
 const muted: React.CSSProperties = { color: "#a1a1aa", lineHeight: 1.5 }
 const publicLink: React.CSSProperties = { padding: "11px 15px", borderRadius: 9, background: "#1d4ed8", color: "white", textDecoration: "none", fontWeight: 800 }
+const scoringLink: React.CSSProperties = { ...publicLink, background: "#16a34a" }
+const headerLinks: React.CSSProperties = { display: "flex", gap: 10, flexWrap: "wrap" }
 const notice: React.CSSProperties = { padding: 12, borderRadius: 10, background: "#292524", color: "#fde68a" }
 const eventTabs: React.CSSProperties = { display: "grid", gridTemplateColumns: "repeat(4,minmax(150px,1fr))", gap: 10, margin: "24px 0" }
 const tab: React.CSSProperties = { display: "flex", flexDirection: "column", gap: 4, padding: 14, borderRadius: 12, border: "1px solid #3f3f46", background: "#18181b", color: "white", textAlign: "left", cursor: "pointer" }
