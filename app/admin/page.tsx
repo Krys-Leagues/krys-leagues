@@ -14,6 +14,7 @@ const LEAGUES = [
   { name: "Spicy", href: "/admin/spicy", description: "Spicy tournament tracking" },
   { name: "Krys Tourney", href: "/admin/krys-tourney", description: "Tournament setup and tracking" },
   { name: "Champion of Champions", href: "/admin/champion-of-champions", description: "Champion event tracking" },
+  { name: "Four Majors", href: "/admin/majors", description: "Major event signup, entrants, public details and streaming" },
 ]
 
 const GLOBAL_TOOLS = [
