@@ -48,6 +48,11 @@ type CareerStats = {
   winPercent: string
 }
 
+type CanonicalIdentity = {
+  canonical_screen_name: string
+  aliases: string[] | null
+}
+
 export default function PlayerProfilePage() {
   const params = useParams()
   const router = useRouter()
@@ -56,6 +61,8 @@ export default function PlayerProfilePage() {
   const [player, setPlayer] = useState<Player | null>(null)
   const [memberships, setMemberships] = useState<Membership[]>([])
   const [trophies, setTrophies] = useState<Trophy[]>([])
+  const [formerNames, setFormerNames] = useState<string[]>([])
+  const [formerNamesError, setFormerNamesError] = useState("")
   const [careerStats, setCareerStats] = useState<CareerStats>({
     matchesPlayed: 0,
     wins: 0,
@@ -76,6 +83,7 @@ export default function PlayerProfilePage() {
     if (!playerId) return
 
     setLoading(true)
+    setFormerNamesError("")
 
     const { data: playerData } = await supabase
       .from("players")
@@ -84,6 +92,32 @@ export default function PlayerProfilePage() {
       .single()
 
     setPlayer(playerData)
+
+    const { data: identityData, error: identityError } = await supabase.rpc(
+      "get_public_player_canonical_identity",
+      { p_player_id: playerId }
+    )
+
+    if (identityError) {
+      setFormerNames([])
+      setFormerNamesError(`Could not load former names: ${identityError.message}`)
+    } else {
+      const identity = (
+        Array.isArray(identityData) ? identityData[0] : identityData
+      ) as CanonicalIdentity | null
+      const currentCanonicalName =
+        identity?.canonical_screen_name || playerData?.screen_name || ""
+
+      setFormerNames(
+        Array.from(
+          new Set(
+            (identity?.aliases || []).filter(
+              (alias) => alias !== currentCanonicalName
+            )
+          )
+        )
+      )
+    }
 
     const { data: membershipData } = await supabase
       .from("player_league_memberships")
@@ -247,6 +281,21 @@ const totalSeasons = new Set(
         </div>
         </div>
 
+        <div style={card}>
+          <h2>Former Names / Aliases</h2>
+          {formerNamesError ? (
+            <p style={aliasErrorText}>{formerNamesError}</p>
+          ) : formerNames.length === 0 ? (
+            <p style={emptyText}>No former names recorded.</p>
+          ) : (
+            <ul style={aliasList}>
+              {formerNames.map((alias) => (
+                <li key={alias}>{alias}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+
                          <div style={card}>
           <h2>League Memberships ({memberships.length})</h2>
           {memberships.length === 0 ? (
@@ -378,6 +427,17 @@ const muted: React.CSSProperties = {
 
 const emptyText: React.CSSProperties = {
   color: "#888",
+}
+
+const aliasErrorText: React.CSSProperties = {
+  color: "#fca5a5",
+}
+
+const aliasList: React.CSSProperties = {
+  margin: "12px 0 0",
+  paddingLeft: 22,
+  display: "grid",
+  gap: 8,
 }
 
 const grid: React.CSSProperties = {
