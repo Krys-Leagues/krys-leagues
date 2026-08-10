@@ -18,6 +18,14 @@ export default function TournamentsPage() {
         </section>
 
         <div style={grid}>
+          <Link href="/majors" style={linkCard}>
+            <h2>Four Majors</h2>
+            <p>
+              View Major event details, registration, participants, and official
+              streams.
+            </p>
+          </Link>
+
       <section style={card}>
   <h2>📝 Open Registration</h2>
   <p>No tournaments currently accepting registrations.</p>
