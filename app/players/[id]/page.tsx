@@ -74,6 +74,29 @@ type MatchSeasonHistory = {
   holes_won: number
 }
 
+type PypSeasonHistory = MatchSeasonHistory
+
+type PypFixtureHistory = {
+  season_number: number
+  season_id: string
+  division_number: number
+  game_number: number
+  player_screen_name: string
+  opponent_screen_name: string
+  player_role: "home" | "away"
+  course1_name: string
+  course1_difficulty: string | null
+  course1_player_hw: number
+  course1_opponent_hw: number
+  course2_name: string
+  course2_difficulty: string | null
+  course2_player_hw: number
+  course2_opponent_hw: number
+  player_total_hw: number
+  opponent_total_hw: number
+  outcome: "W" | "L" | "D"
+}
+
 export default function PublicPlayerProfilePage() {
   const params = useParams()
   const playerId = Array.isArray(params.id) ? params.id[0] : params.id
@@ -86,6 +109,9 @@ export default function PublicPlayerProfilePage() {
   const [strokeHistoryError, setStrokeHistoryError] = useState("")
   const [matchHistory, setMatchHistory] = useState<MatchSeasonHistory[]>([])
   const [matchHistoryError, setMatchHistoryError] = useState("")
+  const [pypHistory, setPypHistory] = useState<PypSeasonHistory[]>([])
+  const [pypFixtureHistory, setPypFixtureHistory] = useState<PypFixtureHistory[]>([])
+  const [pypHistoryError, setPypHistoryError] = useState("")
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState("")
 
@@ -107,6 +133,7 @@ export default function PublicPlayerProfilePage() {
     setMessage("")
     setStrokeHistoryError("")
     setMatchHistoryError("")
+    setPypHistoryError("")
 
     const [
       playerResponse,
@@ -115,6 +142,8 @@ export default function PublicPlayerProfilePage() {
       resultsResponse,
       strokeHistoryResponse,
       matchHistoryResponse,
+      pypHistoryResponse,
+      pypFixtureHistoryResponse,
     ] = await Promise.all([
       supabase
         .from("players")
@@ -146,6 +175,12 @@ export default function PublicPlayerProfilePage() {
       supabase.rpc("get_public_match_player_history", {
         p_player_id: playerId,
       }),
+      supabase.rpc("get_public_pyp_player_history", {
+        p_player_id: playerId,
+      }),
+      supabase.rpc("get_public_pyp_player_fixture_history", {
+        p_player_id: playerId,
+      }),
     ])
 
     if (playerResponse.error) {
@@ -175,6 +210,14 @@ export default function PublicPlayerProfilePage() {
     setMatchHistory((matchHistoryResponse.data || []) as MatchSeasonHistory[])
     if (matchHistoryResponse.error) {
       setMatchHistoryError(`Match season history could not be loaded: ${matchHistoryResponse.error.message}`)
+    }
+    setPypHistory((pypHistoryResponse.data || []) as PypSeasonHistory[])
+    if (pypHistoryResponse.error) {
+      setPypHistoryError(`PYP season history could not be loaded: ${pypHistoryResponse.error.message}`)
+    }
+    setPypFixtureHistory((pypFixtureHistoryResponse.data || []) as PypFixtureHistory[])
+    if (pypFixtureHistoryResponse.error && !pypHistoryResponse.error) {
+      setPypHistoryError(`PYP fixture history could not be loaded: ${pypFixtureHistoryResponse.error.message}`)
     }
     setLoading(false)
   }
@@ -414,6 +457,48 @@ export default function PublicPlayerProfilePage() {
         </section>
 
         <section style={card}>
+          <h2 style={sectionTitle}>PYP Season History</h2>
+
+          {pypHistoryError ? (
+            <p style={historyError}>{pypHistoryError}</p>
+          ) : pypHistory.length === 0 ? (
+            <p style={muted}>No approved PYP season history is available yet.</p>
+          ) : (
+            <div style={tableWrap}>
+              <table style={table}>
+                <thead>
+                  <tr>
+                    <th style={th}>Season</th><th style={th}>Division</th><th style={th}>Final Rank</th>
+                    <th style={th}>Played</th><th style={th}>Wins</th><th style={th}>Draws</th>
+                    <th style={th}>Losses</th><th style={th}>Points</th><th style={th}>Holes Won</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pypHistory.map((history) => (
+                    <tr key={history.season_id}>
+                      <td style={td}>{history.season_number}</td><td style={td}>PYP D{history.division_number}</td>
+                      <td style={td}>{history.division_rank}</td><td style={td}>{history.completed_game_count}</td>
+                      <td style={td}>{history.wins}</td><td style={td}>{history.ties}</td><td style={td}>{history.losses}</td>
+                      <td style={td}>{history.points}</td><td style={td}>{history.holes_won}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {pypHistory.map((history) => {
+                const fixtures = pypFixtureHistory.filter((fixture) => fixture.season_id === history.season_id)
+                if (fixtures.length === 0) return null
+                return <details key={`fixtures-${history.season_id}`} style={historyDetails}>
+                  <summary>Season {history.season_number} fixture details</summary>
+                  {fixtures.map((fixture) => <p key={`${fixture.season_id}-${fixture.game_number}`} style={muted}>
+                    Round {fixture.game_number} · {fixture.player_role.toUpperCase()} vs {fixture.opponent_screen_name} · {fixture.course1_name}{fixture.course1_difficulty ? ` (${fixture.course1_difficulty})` : ""}: {fixture.player_screen_name} {fixture.course1_player_hw} – {fixture.opponent_screen_name} {fixture.course1_opponent_hw} · {fixture.course2_name}{fixture.course2_difficulty ? ` (${fixture.course2_difficulty})` : ""}: {fixture.player_screen_name} {fixture.course2_player_hw} – {fixture.opponent_screen_name} {fixture.course2_opponent_hw} · Combined {fixture.player_total_hw}–{fixture.opponent_total_hw} · {fixture.outcome}
+                  </p>)}
+                </details>
+              })}
+            </div>
+          )}
+        </section>
+
+        <section style={card}>
           <h2 style={sectionTitle}>
             🏆 Trophy Case
           </h2>
@@ -615,6 +700,13 @@ const muted: React.CSSProperties = {
 
 const historyError: React.CSSProperties = {
   color: "#fecaca",
+}
+
+const historyDetails: React.CSSProperties = {
+  margin: "14px 12px",
+  padding: 12,
+  border: "1px solid #334155",
+  borderRadius: 10,
 }
 
 const tableWrap: React.CSSProperties = {

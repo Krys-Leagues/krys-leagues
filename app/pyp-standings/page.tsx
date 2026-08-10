@@ -1,318 +1,105 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { supabase } from "@/lib/supabase"
 
-const DIVISIONS = [
-  "PYP D1",
-  "PYP D2",
-  "PYP D3",
-  "PYP D4",
-  "PYP D5",
-]
-
-type StandingRow = {
+type ApprovedSeason = { season_id: string; season_number: number; division_count: number }
+type ScorecardEntry = {
+  season_id: string
+  season_number: number
+  division_number: number
+  division_rank: number
   player_id: string
-  points: number | null
-  wins: number | null
-  losses: number | null
-  ties: number | null
-  rank: number | null
-}
-
-type PlayerRow = {
-  id: string
-  screen_name: string
-}
-
-type Standing = {
-  playerId: string
-  player: string
-  played: number
+  player_screen_name: string
+  completed_game_count: number
   wins: number
-  draws: number
   losses: number
+  ties: number
   points: number
-  rank: number
+  holes_won: number
 }
 
-export default function PYPStandingsPage() {
-  const [division, setDivision] = useState("PYP D1")
-  const [season, setSeason] = useState("59")
-  const [standings, setStandings] = useState<Standing[]>([])
+export default function PypStandingsPage() {
+  const [seasons, setSeasons] = useState<ApprovedSeason[]>([])
+  const [seasonId, setSeasonId] = useState("")
+  const [division, setDivision] = useState(1)
+  const [entries, setEntries] = useState<ScorecardEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState("")
 
   useEffect(() => {
-    loadStandings()
-  }, [division, season])
-
-  async function loadStandings() {
-    const seasonNumber = Number(season)
-
-    if (!seasonNumber) {
-      setStandings([])
-      setMessage("Enter a valid season number.")
-      return
+    async function loadSeasons() {
+      const { data, error } = await supabase.rpc("list_public_pyp_final_scorecard_seasons")
+      if (error) { setMessage(error.message); setLoading(false); return }
+      const approved = (data || []) as ApprovedSeason[]
+      setSeasons(approved)
+      setSeasonId(approved[0]?.season_id || "")
+      if (approved.length === 0) { setMessage("No approved managed PYP seasons are available yet."); setLoading(false) }
     }
+    void loadSeasons()
+  }, [])
 
-    setLoading(true)
-    setMessage("")
-
-    const { data, error } = await supabase
-      .from("season_standings")
-      .select("player_id, points, wins, losses, ties, rank")
-      .eq("league_type", "pyp")
-      .eq("division", division)
-      .eq("season_number", seasonNumber)
-      .order("rank", { ascending: true })
-
-    if (error) {
-      setStandings([])
-      setMessage(error.message)
+  useEffect(() => {
+    if (!seasonId) return
+    async function loadScorecard() {
+      setLoading(true); setMessage("")
+      const { data, error } = await supabase.rpc("get_public_pyp_final_scorecard", { p_season_id: seasonId })
+      if (error) { setEntries([]); setMessage(error.message); setLoading(false); return }
+      setEntries((data || []) as ScorecardEntry[])
       setLoading(false)
-      return
     }
+    void loadScorecard()
+  }, [seasonId])
 
-    const savedRows = (data || []) as StandingRow[]
-    const playerIds = savedRows.map((row) => row.player_id).filter(Boolean)
+  const selectedSeason = seasons.find((season) => season.season_id === seasonId)
+  const divisions = Array.from({ length: selectedSeason?.division_count || 0 }, (_, index) => index + 1)
+  const shown = useMemo(() => entries.filter((entry) => entry.division_number === division), [division, entries])
 
-    let playerMap = new Map<string, string>()
-
-    if (playerIds.length > 0) {
-      const { data: playerData, error: playerError } = await supabase
-        .from("players")
-        .select("id, screen_name")
-        .in("id", playerIds)
-
-      if (playerError) {
-        setStandings([])
-        setMessage(playerError.message)
-        setLoading(false)
-        return
-      }
-
-      playerMap = new Map(
-        ((playerData || []) as PlayerRow[]).map((player) => [
-          player.id,
-          player.screen_name,
-        ])
-      )
-    }
-
-    const rows = savedRows.map((row) => {
-      const wins = Number(row.wins || 0)
-      const draws = Number(row.ties || 0)
-      const losses = Number(row.losses || 0)
-
-      return {
-        playerId: row.player_id,
-        player: playerMap.get(row.player_id) || "Unknown Player",
-        played: wins + draws + losses,
-        wins,
-        draws,
-        losses,
-        points: Number(row.points || 0),
-        rank: Number(row.rank || 0),
-      }
-    })
-
-    setStandings(rows)
-
-    if (rows.length === 0) {
-      setMessage("No saved standings found for this division and season.")
-    }
-
-    setLoading(false)
+  function changeSeason(id: string) {
+    setSeasonId(id)
+    setDivision(1)
   }
 
-  return (
-    <main style={page}>
-      <div style={container}>
-        <Link href="/pyp" style={backButton}>
-          ← PYP
-        </Link>
-
-        <section style={hero}>
-          <h1 style={title}>🚀 PYP Standings</h1>
-
-          <p style={subtitle}>
-            View current saved standings for each PYP division.
-          </p>
-
-          <div style={controls}>
-            <div>
-              <label style={label}>Division</label>
-
-              <select
-                value={division}
-                onChange={(event) => setDivision(event.target.value)}
-                style={input}
-              >
-                {DIVISIONS.map((divisionName) => (
-                  <option key={divisionName} value={divisionName}>
-                    {divisionName}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label style={label}>Season</label>
-
-              <input
-                value={season}
-                onChange={(event) => setSeason(event.target.value)}
-                style={input}
-              />
-            </div>
-          </div>
-        </section>
-
-        {loading ? (
-          <div style={messageCard}>Loading standings...</div>
-        ) : standings.length === 0 ? (
-          <div style={messageCard}>{message}</div>
-        ) : (
-          <div style={tableWrap}>
-            <table style={table}>
-              <thead>
-                <tr>
-                  <th style={th}>Rank</th>
-                  <th style={th}>Player</th>
-                  <th style={th}>Played</th>
-                  <th style={th}>Wins</th>
-                  <th style={th}>Draws</th>
-                  <th style={th}>Losses</th>
-                  <th style={th}>Points</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {standings.map((row) => (
-                  <tr key={row.playerId}>
-                    <td style={td}>{row.rank}</td>
-                    <td style={playerCell}>{row.player}</td>
-                    <td style={td}>{row.played}</td>
-                    <td style={td}>{row.wins}</td>
-                    <td style={td}>{row.draws}</td>
-                    <td style={td}>{row.losses}</td>
-                    <td style={playerCell}>{row.points}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+  return <main style={page}><div style={container}>
+    <Link href="/pyp" style={backButton}>← PYP</Link>
+    <section style={hero}>
+      <h1 style={title}>PYP Standings</h1>
+      <p style={subtitle}>Approved managed PYP Final Scorecard history.</p>
+      <div style={controls}>
+        <label style={label}>Season<select value={seasonId} onChange={(event) => changeSeason(event.target.value)} style={input}>
+          {seasons.map((season) => <option key={season.season_id} value={season.season_id}>Season {season.season_number}</option>)}
+        </select></label>
+        <label style={label}>Division<select value={division} onChange={(event) => setDivision(Number(event.target.value))} style={input}>
+          {divisions.map((number) => <option key={number} value={number}>PYP D{number}</option>)}
+        </select></label>
       </div>
-    </main>
-  )
+    </section>
+    {loading ? <div style={messageCard}>Loading approved standings...</div>
+      : shown.length === 0 ? <div style={messageCard}>{message || "No approved players are recorded for this division."}</div>
+      : <div style={tableWrap}><table style={table}><thead><tr>
+        <th style={th}>Rank</th><th style={th}>Player</th><th style={th}>Played</th><th style={th}>Wins</th>
+        <th style={th}>Draws</th><th style={th}>Losses</th><th style={th}>Points</th><th style={th}>Holes Won</th>
+      </tr></thead><tbody>{shown.map((entry) => <tr key={entry.player_id}>
+        <td style={td}>{entry.division_rank}</td><td style={playerCell}>{entry.player_screen_name}</td>
+        <td style={td}>{entry.completed_game_count}</td><td style={td}>{entry.wins}</td><td style={td}>{entry.ties}</td>
+        <td style={td}>{entry.losses}</td><td style={playerCell}>{entry.points}</td><td style={td}>{entry.holes_won}</td>
+      </tr>)}</tbody></table></div>}
+  </div></main>
 }
 
-const page: React.CSSProperties = {
-  minHeight: "100vh",
-  background:
-    "radial-gradient(circle at top, #172554 0%, #020617 48%, #000000 100%)",
-  color: "white",
-  padding: "30px 18px",
-}
-
-const container: React.CSSProperties = {
-  width: "100%",
-  maxWidth: 1100,
-  margin: "0 auto",
-}
-
-const backButton: React.CSSProperties = {
-  display: "inline-block",
-  marginBottom: 18,
-  padding: "10px 16px",
-  background: "#1e293b",
-  border: "1px solid #475569",
-  borderRadius: 10,
-  color: "white",
-  textDecoration: "none",
-  fontWeight: 700,
-}
-
-const hero: React.CSSProperties = {
-  padding: 26,
-  background: "rgba(2, 6, 23, 0.9)",
-  border: "1px solid #334155",
-  borderRadius: 20,
-  marginBottom: 20,
-}
-
-const title: React.CSSProperties = {
-  margin: 0,
-  fontSize: 42,
-}
-
-const subtitle: React.CSSProperties = {
-  color: "#cbd5e1",
-  fontSize: 18,
-  lineHeight: 1.5,
-}
-
-const controls: React.CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-  gap: 14,
-  marginTop: 20,
-}
-
-const label: React.CSSProperties = {
-  display: "block",
-  marginBottom: 8,
-  fontWeight: 700,
-}
-
-const input: React.CSSProperties = {
-  width: "100%",
-  padding: 12,
-  background: "#0f172a",
-  color: "white",
-  border: "1px solid #475569",
-  borderRadius: 10,
-  fontSize: 17,
-}
-
-const messageCard: React.CSSProperties = {
-  padding: 24,
-  background: "#0f172a",
-  border: "1px solid #334155",
-  borderRadius: 16,
-  textAlign: "center",
-  color: "#cbd5e1",
-}
-
-const tableWrap: React.CSSProperties = {
-  overflowX: "auto",
-  background: "#0f172a",
-  border: "1px solid #334155",
-  borderRadius: 16,
-  padding: 12,
-}
-
-const table: React.CSSProperties = {
-  width: "100%",
-  borderCollapse: "collapse",
-  minWidth: 680,
-}
-
-const th: React.CSSProperties = {
-  textAlign: "left",
-  padding: 12,
-  borderBottom: "1px solid #475569",
-}
-
-const td: React.CSSProperties = {
-  padding: 12,
-  borderBottom: "1px solid #334155",
-}
-
-const playerCell: React.CSSProperties = {
-  ...td,
-  fontWeight: 800,
-}
+const page: React.CSSProperties = { minHeight: "100vh", background: "radial-gradient(circle at top, #172554 0%, #020617 48%, #000 100%)", color: "white", padding: "30px 18px" }
+const container: React.CSSProperties = { width: "100%", maxWidth: 1100, margin: "0 auto" }
+const backButton: React.CSSProperties = { display: "inline-block", marginBottom: 18, padding: "10px 16px", background: "#1e293b", border: "1px solid #475569", borderRadius: 10, color: "white", textDecoration: "none", fontWeight: 700 }
+const hero: React.CSSProperties = { padding: 26, background: "rgba(2,6,23,.9)", border: "1px solid #334155", borderRadius: 20, marginBottom: 20 }
+const title: React.CSSProperties = { margin: 0, fontSize: 42 }
+const subtitle: React.CSSProperties = { color: "#cbd5e1", fontSize: 18, lineHeight: 1.5 }
+const controls: React.CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 16 }
+const label: React.CSSProperties = { display: "flex", flexDirection: "column", gap: 8, fontWeight: 700 }
+const input: React.CSSProperties = { padding: 12, borderRadius: 10, border: "1px solid #475569", background: "#0f172a", color: "white" }
+const messageCard: React.CSSProperties = { padding: 20, borderRadius: 14, border: "1px solid #334155", background: "#0f172a" }
+const tableWrap: React.CSSProperties = { overflowX: "auto", border: "1px solid #334155", borderRadius: 14 }
+const table: React.CSSProperties = { width: "100%", borderCollapse: "collapse", background: "#0f172a" }
+const th: React.CSSProperties = { padding: 13, textAlign: "left", borderBottom: "1px solid #334155", color: "#cbd5e1" }
+const td: React.CSSProperties = { padding: 13, borderBottom: "1px solid #1e293b" }
+const playerCell: React.CSSProperties = { ...td, fontWeight: 800 }
