@@ -41,6 +41,7 @@ export default function ProSchedulePage() {
     const { data, error } = await supabase
       .from("players")
       .select("screen_name")
+      .eq("active", true)
       .eq("division", division)
       .order("screen_name", { ascending: true })
 

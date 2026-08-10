@@ -23,9 +23,14 @@ export default function PlayerIdentityPage() {
           <span>Merge duplicate player profiles.</span>
         </Link>
 
+        <Link href="/admin/player-identity/duplicates" style={card}>
+          <strong>Duplicate Review Queue</strong>
+          <span>Review grouped possible matches, preview impact, merge subsets, or mark false positives.</span>
+        </Link>
+
         <div style={card}>
           <strong>Aliases</strong>
-          <span>Coming Soon</span>
+          <span>Aliases are preserved automatically by confirmed identity merges.</span>
         </div>
 
         <div style={card}>

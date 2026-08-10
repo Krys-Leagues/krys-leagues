@@ -9,14 +9,10 @@ const supabase = createClient(
 type AliasDatabaseRow = {
   id: string
   player_id: string
-  alias_name: string
-  normalized_alias: string | null
+  alias: string
+  normalized_alias: string
   source: string | null
-  first_seen_league: string | null
-  first_seen_season: number | null
-  last_seen_league: string | null
-  last_seen_season: number | null
-  active: boolean | null
+  verified: boolean
 }
 
 export async function loadPlayerAliases(): Promise<
@@ -27,16 +23,12 @@ export async function loadPlayerAliases(): Promise<
     .select(`
       id,
       player_id,
-      alias_name,
+      alias,
       normalized_alias,
       source,
-      first_seen_league,
-      first_seen_season,
-      last_seen_league,
-      last_seen_season,
-      active
+      verified
     `)
-    .order("alias_name")
+    .order("alias")
 
   if (error) {
     throw error
@@ -46,9 +38,8 @@ export async function loadPlayerAliases(): Promise<
     (row) => ({
       id: row.id,
       playerId: row.player_id,
-      aliasName: row.alias_name,
-      normalizedAlias:
-        row.normalized_alias ?? "",
+      aliasName: row.alias,
+      normalizedAlias: row.normalized_alias,
       source:
         row.source === "manual" ||
         row.source === "import" ||
@@ -57,15 +48,11 @@ export async function loadPlayerAliases(): Promise<
         row.source === "historical_alias"
           ? row.source
           : "unknown",
-      firstSeenLeague:
-        row.first_seen_league,
-      firstSeenSeason:
-        row.first_seen_season,
-      lastSeenLeague:
-        row.last_seen_league,
-      lastSeenSeason:
-        row.last_seen_season,
-      active: row.active !== false,
+      firstSeenLeague: null,
+      firstSeenSeason: null,
+      lastSeenLeague: null,
+      lastSeenSeason: null,
+      active: true,
     })
   )
 }

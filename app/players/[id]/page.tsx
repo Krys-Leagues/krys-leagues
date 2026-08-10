@@ -32,6 +32,8 @@ type Trophy = {
 
 type Result = {
   id: string
+  player1: string | null
+  player2: string | null
   player1_id: string | null
   player2_id: string | null
   winner: string | null
@@ -76,6 +78,14 @@ type MatchSeasonHistory = {
 
 type PypSeasonHistory = MatchSeasonHistory
 
+type CanonicalIdentity = {
+  canonical_player_id: string
+  canonical_screen_name: string
+  identity_player_ids: string[]
+  aliases: string[]
+  discord_linked: boolean
+}
+
 type PypFixtureHistory = {
   season_number: number
   season_id: string
@@ -114,6 +124,8 @@ export default function PublicPlayerProfilePage() {
   const [pypHistoryError, setPypHistoryError] = useState("")
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState("")
+  const [aliases, setAliases] = useState<string[]>([])
+  const [identityPlayerIds, setIdentityPlayerIds] = useState<string[]>([])
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/immutability
@@ -135,6 +147,30 @@ export default function PublicPlayerProfilePage() {
     setMatchHistoryError("")
     setPypHistoryError("")
 
+    const { data: identityData, error: identityError } = await supabase.rpc(
+      "get_public_player_canonical_identity",
+      { p_player_id: playerId }
+    )
+    if (identityError) {
+      setMessage(identityError.message)
+      setLoading(false)
+      return
+    }
+    const identity = (Array.isArray(identityData) ? identityData[0] : identityData) as CanonicalIdentity | null
+    if (!identity) {
+      setMessage("Player not found.")
+      setLoading(false)
+      return
+    }
+    const canonicalId = identity.canonical_player_id
+    const identityIds = identity.identity_player_ids.length > 0
+      ? identity.identity_player_ids
+      : [canonicalId]
+    const resultIdentityFilter = identityIds.flatMap((id) => [
+      `player1_id.eq.${id}`,
+      `player2_id.eq.${id}`,
+    ]).join(",")
+
     const [
       playerResponse,
       membershipsResponse,
@@ -148,13 +184,13 @@ export default function PublicPlayerProfilePage() {
       supabase
         .from("players")
         .select("id, screen_name, status, active")
-        .eq("id", playerId)
+        .eq("id", canonicalId)
         .maybeSingle(),
 
       supabase
         .from("player_league_memberships")
         .select("id, league_type, division, season_number")
-        .eq("player_id", playerId)
+        .in("player_id", identityIds)
         .order("season_number", { ascending: false }),
 
       supabase
@@ -162,12 +198,12 @@ export default function PublicPlayerProfilePage() {
         .select(
           "id, trophy_title, placement, event_name, division, season, week, image_url"
         )
-        .eq("player_id", playerId),
+        .in("player_id", identityIds),
 
       supabase
         .from("results")
-        .select("id, player1_id, player2_id, winner, is_draw")
-        .or(`player1_id.eq.${playerId},player2_id.eq.${playerId}`),
+        .select("id, player1, player2, player1_id, player2_id, winner, is_draw")
+        .or(resultIdentityFilter),
 
       supabase.rpc("get_public_stroke_player_history", {
         p_player_id: playerId,
@@ -196,6 +232,8 @@ export default function PublicPlayerProfilePage() {
     }
 
     setPlayer(playerResponse.data)
+    setAliases(identity.aliases || [])
+    setIdentityPlayerIds(identityIds)
     setMemberships(membershipsResponse.data || [])
     setTrophies(trophiesResponse.data || [])
     setResults(resultsResponse.data || [])
@@ -235,8 +273,10 @@ export default function PublicPlayerProfilePage() {
 
     const matches = results.length
     const draws = results.filter((result) => result.is_draw).length
-    const wins = results.filter(
-      (result) => result.winner === player.screen_name
+    const playerIds = new Set(identityPlayerIds)
+    const wins = results.filter((result) =>
+      (result.player1_id && playerIds.has(result.player1_id) && result.winner === result.player1)
+      || (result.player2_id && playerIds.has(result.player2_id) && result.winner === result.player2)
     ).length
     const losses = Math.max(matches - wins - draws, 0)
     const winPercent =
@@ -249,7 +289,7 @@ export default function PublicPlayerProfilePage() {
       losses,
       winPercent,
     }
-  }, [player, results])
+  }, [player, results, identityPlayerIds])
 
   const totalSeasons = useMemo(() => {
     return new Set(
@@ -304,6 +344,10 @@ export default function PublicPlayerProfilePage() {
 
         <section style={hero}>
           <h1 style={title}>{player.screen_name}</h1>
+
+          {aliases.length > 0 && (
+            <p style={aliasLine}>Aliases / former names: {aliases.join(", ")}</p>
+          )}
 
           <p style={subtitle}>
             Career history, league progression, statistics, trophies, and
@@ -696,6 +740,12 @@ const trophyImage: React.CSSProperties = {
 
 const muted: React.CSSProperties = {
   color: "#94a3b8",
+}
+
+const aliasLine: React.CSSProperties = {
+  color: "#cbd5e1",
+  margin: "8px 0 0",
+  fontSize: 14,
 }
 
 const historyError: React.CSSProperties = {

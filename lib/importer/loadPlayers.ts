@@ -23,6 +23,7 @@ export async function loadPlayers(): Promise<PlayerRecord[]> {
       discord_id,
       active
     `)
+    .eq("active", true)
     .order("screen_name")
 
   if (error) {

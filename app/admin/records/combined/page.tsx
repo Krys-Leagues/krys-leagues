@@ -73,6 +73,7 @@ export default function CombinedRecordsPage() {
     const { data: playerData } = await supabase
       .from("players")
       .select("id, screen_name")
+      .eq("active", true)
       .order("screen_name", { ascending: true })
 
     const { data: recordData } = await supabase

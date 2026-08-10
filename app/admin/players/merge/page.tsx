@@ -43,6 +43,7 @@ export default function MergePlayersPage() {
     const { data, error } = await supabase
       .from("players")
       .select("id, screen_name, status, active")
+      .eq("active", true)
       .order("screen_name", { ascending: true })
     setLoading(false)
 
@@ -123,7 +124,7 @@ export default function MergePlayersPage() {
         <div style={card}>
           <h1 style={title}>Merge Players</h1>
           <p style={subtitle}>
-            Move duplicate player history into the correct player, then remove the duplicate.
+            Resolve a duplicate into the canonical player while retaining its historical UUID.
           </p>
 
           <div style={mergeGrid}>
@@ -144,7 +145,7 @@ export default function MergePlayersPage() {
               {removePlayer && (
                 <div style={previewBox}>
                   <div style={previewName}>{removePlayer.screen_name}</div>
-                  <div style={previewText}>This duplicate will be removed after all records move.</div>
+                  <div style={previewText}>This duplicate will be retired from future selection and linked to the canonical player.</div>
                 </div>
               )}
             </div>
@@ -185,7 +186,7 @@ export default function MergePlayersPage() {
             <div style={successBox}>
               <strong>Player merge completed.</strong>
               <div style={resultLine}>Kept player: {mergeResult.kept_player_name}</div>
-              <div style={resultLine}>Removed duplicate: {mergeResult.removed_player_name}</div>
+              <div style={resultLine}>Retired duplicate: {mergeResult.removed_player_name}</div>
               <div style={resultLine}>
                 Affected Stroke seasons: {mergeResult.affected_stroke_season_numbers.length > 0
                   ? mergeResult.affected_stroke_season_numbers.join(", ")

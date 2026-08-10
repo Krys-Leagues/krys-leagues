@@ -1,3 +1,5 @@
+begin;
+
 create or replace function public.get_public_pyp_player_history(
   p_player_id uuid
 )
@@ -43,7 +45,8 @@ begin
     and scorecard.season_id = entry.season_id
   join public.seasons as season
     on season.id = scorecard.season_id
-  where entry.player_id = p_player_id
+  where public.resolve_canonical_player_id(entry.player_id)
+      = public.resolve_canonical_player_id(p_player_id)
     and scorecard.status = 'approved'
     and lower(btrim(season.league_type)) is not distinct from 'pyp'
   order by season.season_number desc;
@@ -212,7 +215,8 @@ begin
     and entry.player_id = detail.player_id
   join public.seasons as season
     on season.id = scorecard.season_id
-  where detail.player_id = p_player_id
+  where public.resolve_canonical_player_id(detail.player_id)
+      = public.resolve_canonical_player_id(p_player_id)
     and scorecard.status = 'approved'
     and lower(btrim(season.league_type)) is not distinct from 'pyp'
   order by season.season_number desc, detail.game_number;
@@ -224,3 +228,5 @@ revoke all on function public.get_public_pyp_player_fixture_history(uuid) from a
 revoke all on function public.get_public_pyp_player_fixture_history(uuid) from authenticated;
 grant execute on function public.get_public_pyp_player_fixture_history(uuid) to anon;
 grant execute on function public.get_public_pyp_player_fixture_history(uuid) to authenticated;
+
+commit;

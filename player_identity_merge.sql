@@ -1,3 +1,475 @@
+begin;
+
+create or replace function public.preview_site_player_identity_merge(
+  p_keep_player_id uuid,
+  p_merge_player_ids uuid[]
+)
+returns table(
+  keep_player_id uuid,
+  keep_screen_name text,
+  keep_discord_linked boolean,
+  merging_players jsonb,
+  aliases_to_create text[],
+  results_count bigint,
+  schedule_count bigint,
+  league_membership_count bigint,
+  tournament_entry_count bigint,
+  roster_reference_count bigint,
+  transition_reference_count bigint,
+  trophy_count bigint,
+  approved_history_count bigint
+)
+language plpgsql
+stable
+security definer
+set search_path to ''
+as $function$
+declare
+  v_merge_ids uuid[];
+begin
+  if not public.is_current_user_site_admin() then
+    raise exception 'Administrator authorization is required';
+  end if;
+
+  if p_keep_player_id is null then
+    raise exception 'The canonical player to keep is required';
+  end if;
+
+  select array_agg(distinct value order by value)
+  into v_merge_ids
+  from unnest(p_merge_player_ids) as value
+  where value is not null and value <> p_keep_player_id;
+
+  if coalesce(cardinality(v_merge_ids), 0) < 1 then
+    raise exception 'Select at least one different player to merge';
+  end if;
+
+  if not exists (select 1 from public.players as player where player.id = p_keep_player_id) then
+    raise exception 'The canonical player to keep does not exist';
+  end if;
+
+  if (select count(*) from public.players as player where player.id = any(v_merge_ids)) <> cardinality(v_merge_ids) then
+    raise exception 'One or more selected players to merge do not exist';
+  end if;
+
+  return query
+  select
+    keep_player.id,
+    keep_player.screen_name,
+    nullif(btrim(keep_player.discord_id), '') is not null,
+    (select jsonb_agg(jsonb_build_object(
+       'id', merging_player.id,
+       'screen_name', merging_player.screen_name,
+       'discord_linked', nullif(btrim(merging_player.discord_id), '') is not null
+     ) order by merging_player.screen_name, merging_player.id)
+     from public.players as merging_player where merging_player.id = any(v_merge_ids)),
+    (select coalesce(array_agg(distinct merging_player.screen_name order by merging_player.screen_name), array[]::text[])
+     from public.players as merging_player
+     where merging_player.id = any(v_merge_ids)
+       and merging_player.screen_name is distinct from keep_player.screen_name),
+    ((select count(*) from public.results as result
+      where result.player1_id = any(v_merge_ids) or result.player2_id = any(v_merge_ids))
+     + (select count(*) from public.pyp_managed_results as result
+        where result.home_player_id = any(v_merge_ids) or result.away_player_id = any(v_merge_ids))),
+    (select count(*) from public.schedule as fixture
+     where fixture.player1_id = any(v_merge_ids) or fixture.player2_id = any(v_merge_ids)
+        or fixture.pyp_home_player_id = any(v_merge_ids) or fixture.pyp_away_player_id = any(v_merge_ids)),
+    (select count(*) from public.player_league_memberships as membership where membership.player_id = any(v_merge_ids)),
+    (select count(*) from public.player_tournament_entries as entry where entry.player_id = any(v_merge_ids)),
+    (
+      (select count(*) from public.stroke_division_roster_slots as slot where slot.player_id = any(v_merge_ids))
+      + (select count(*) from public.match_division_roster_slots as slot where slot.player_id = any(v_merge_ids))
+      + (select count(*) from public.pyp_division_roster_slots as slot where slot.player_id = any(v_merge_ids))
+    ),
+    (
+      (select count(*) from public.stroke_final_scorecard_player_decisions as decision where decision.player_id = any(v_merge_ids))
+      + (select count(*) from public.match_final_scorecard_player_decisions as decision where decision.player_id = any(v_merge_ids))
+      + (select count(*) from public.pyp_final_scorecard_player_decisions as decision where decision.player_id = any(v_merge_ids))
+    ),
+    (select count(*) from public.player_trophies as trophy where trophy.player_id = any(v_merge_ids)),
+    (
+      (select count(*) from public.stroke_final_scorecard_entries as entry
+       join public.stroke_final_scorecards as card on card.id = entry.scorecard_id
+       where entry.player_id = any(v_merge_ids) and card.status = 'approved')
+      + (select count(*) from public.match_final_scorecard_entries as entry
+         join public.match_final_scorecards as card on card.id = entry.scorecard_id
+         where entry.player_id = any(v_merge_ids) and card.status = 'approved')
+      + (select count(*) from public.pyp_final_scorecard_entries as entry
+         join public.pyp_final_scorecards as card on card.id = entry.scorecard_id
+         where entry.player_id = any(v_merge_ids) and card.status = 'approved')
+    )
+  from public.players as keep_player
+  where keep_player.id = p_keep_player_id;
+end;
+$function$;
+
+revoke all on function public.preview_site_player_identity_merge(uuid, uuid[]) from public;
+revoke all on function public.preview_site_player_identity_merge(uuid, uuid[]) from anon;
+revoke all on function public.preview_site_player_identity_merge(uuid, uuid[]) from authenticated;
+grant execute on function public.preview_site_player_identity_merge(uuid, uuid[]) to authenticated;
+
+create or replace function public.merge_site_player_identities(
+  p_keep_player_id uuid,
+  p_merge_player_ids uuid[]
+)
+returns table(
+  canonical_player_id uuid,
+  canonical_screen_name text,
+  merged_player_ids uuid[],
+  aliases_created text[]
+)
+language plpgsql
+security definer
+set search_path to ''
+as $function$
+declare
+  v_merge_ids uuid[];
+  v_keep_name text;
+  v_keep_discord_id text;
+  v_keep_discord_name text;
+  v_keep_discord_username text;
+  v_final_discord_id text;
+  v_final_discord_name text;
+  v_distinct_discord_ids text[];
+  v_aliases text[] := array[]::text[];
+  v_alias_row record;
+  v_inserted_alias_id uuid;
+begin
+  if not public.is_current_user_site_admin() then
+    raise exception 'Administrator authorization is required';
+  end if;
+
+  if p_keep_player_id is null then
+    raise exception 'The canonical player to keep is required';
+  end if;
+
+  select array_agg(distinct value order by value)
+  into v_merge_ids
+  from unnest(p_merge_player_ids) as value
+  where value is not null and value <> p_keep_player_id;
+
+  if coalesce(cardinality(v_merge_ids), 0) < 1 then
+    raise exception 'Select at least one different player to merge';
+  end if;
+
+  perform pg_catalog.pg_advisory_xact_lock(
+    pg_catalog.hashtextextended('site-player-identity-merge', 0)
+  );
+  perform pg_catalog.pg_advisory_xact_lock(
+    pg_catalog.hashtextextended('site-player-discord-identity', 0)
+  );
+
+  perform 1
+  from public.players as player
+  where player.id = p_keep_player_id or player.id = any(v_merge_ids)
+  order by player.id
+  for update;
+
+  if (select count(*) from public.players as player
+      where player.id = p_keep_player_id or player.id = any(v_merge_ids))
+     <> cardinality(v_merge_ids) + 1 then
+    raise exception 'One or more selected players do not exist';
+  end if;
+
+  perform 1
+  from public.major_events as event
+  where exists (
+    select 1
+    from public.major_entries as entry
+    where entry.major_event_id = event.id
+      and (entry.player_id = p_keep_player_id
+           or entry.player_id = any(v_merge_ids))
+  )
+  order by event.id
+  for update;
+
+  perform 1
+  from public.major_scoring_sessions as session
+  where exists (
+    select 1
+    from public.major_scoring_participants as participant
+    where participant.session_id = session.id
+      and (participant.player_id = p_keep_player_id
+           or participant.player_id = any(v_merge_ids))
+  )
+  order by session.id
+  for update;
+
+  perform 1
+  from public.major_entries as entry
+  where entry.player_id = p_keep_player_id
+     or entry.player_id = any(v_merge_ids)
+  order by entry.id
+  for update;
+
+  perform 1
+  from public.major_scoring_participants as participant
+  where participant.player_id = p_keep_player_id
+     or participant.player_id = any(v_merge_ids)
+  order by participant.id
+  for update;
+
+  if exists (
+    select entry.major_event_id
+    from public.major_entries as entry
+    where entry.player_id = p_keep_player_id
+       or entry.player_id = any(v_merge_ids)
+    group by entry.major_event_id
+    having count(distinct entry.player_id) > 1
+  ) then
+    raise exception 'Two selected identities have entries in the same Major event; review those entries before merging';
+  end if;
+
+  if exists (
+    select participant.session_id
+    from public.major_scoring_participants as participant
+    where participant.player_id = p_keep_player_id
+       or participant.player_id = any(v_merge_ids)
+    group by participant.session_id
+    having count(distinct participant.player_id) > 1
+  ) then
+    raise exception 'Two selected identities participate in the same Major scoring session; review that session before merging';
+  end if;
+
+  if exists (
+    select 1 from public.player_identity_links as link
+    where link.historical_player_id = p_keep_player_id
+  ) then
+    raise exception 'The selected KEEP player is already merged into another canonical player';
+  end if;
+
+  if exists (
+    select 1 from public.player_identity_links as link
+    where link.historical_player_id = any(v_merge_ids)
+  ) then
+    raise exception 'One or more selected MERGE players are already retired identities';
+  end if;
+
+  if exists (
+    select entry.scorecard_id
+    from public.stroke_final_scorecard_entries as entry
+    join public.stroke_final_scorecards as card on card.id = entry.scorecard_id
+    where card.status = 'approved'
+      and (entry.player_id = p_keep_player_id or entry.player_id = any(v_merge_ids))
+    group by entry.scorecard_id
+    having count(distinct entry.player_id) > 1
+  ) or exists (
+    select entry.scorecard_id
+    from public.match_final_scorecard_entries as entry
+    join public.match_final_scorecards as card on card.id = entry.scorecard_id
+    where card.status = 'approved'
+      and (entry.player_id = p_keep_player_id or entry.player_id = any(v_merge_ids))
+    group by entry.scorecard_id
+    having count(distinct entry.player_id) > 1
+  ) or exists (
+    select entry.scorecard_id
+    from public.pyp_final_scorecard_entries as entry
+    join public.pyp_final_scorecards as card on card.id = entry.scorecard_id
+    where card.status = 'approved'
+      and (entry.player_id = p_keep_player_id or entry.player_id = any(v_merge_ids))
+    group by entry.scorecard_id
+    having count(distinct entry.player_id) > 1
+  ) then
+    raise exception 'Two selected identities appear in the same approved Final Scorecard; resolve that historical conflict before merging';
+  end if;
+
+  if exists (
+    select 1 from public.stroke_division_roster_slots as slot
+    join public.stroke_roster_versions as roster on roster.id = slot.roster_version_id
+    where slot.player_id = any(v_merge_ids) and roster.status in ('draft', 'approved')
+  ) or exists (
+    select 1 from public.match_division_roster_slots as slot
+    join public.match_roster_versions as roster on roster.id = slot.roster_version_id
+    where slot.player_id = any(v_merge_ids) and roster.status in ('draft', 'approved')
+  ) or exists (
+    select 1 from public.pyp_division_roster_slots as slot
+    join public.pyp_roster_versions as roster on roster.id = slot.roster_version_id
+    where slot.player_id = any(v_merge_ids) and roster.status in ('draft', 'approved')
+  ) then
+    raise exception 'A selected duplicate is still assigned to a current draft/approved managed roster; replace it with the KEEP player through the protected roster workflow first';
+  end if;
+
+  select player.screen_name,
+         nullif(btrim(player.discord_id), ''),
+         nullif(btrim(player.discord_name), ''),
+         nullif(btrim(player.discord_username), '')
+  into v_keep_name, v_keep_discord_id, v_keep_discord_name, v_keep_discord_username
+  from public.players as player
+  where player.id = p_keep_player_id;
+
+  select array_agg(distinct discord_id order by discord_id)
+  into v_distinct_discord_ids
+  from (
+    select nullif(btrim(player.discord_id), '') as discord_id
+    from public.players as player
+    where player.id = p_keep_player_id or player.id = any(v_merge_ids)
+    union
+    select nullif(btrim(member.discord_id), '')
+    from public.discord_members as member
+    where member.player_id = p_keep_player_id or member.player_id = any(v_merge_ids)
+  ) as identity
+  where discord_id is not null;
+
+  if coalesce(cardinality(v_distinct_discord_ids), 0) > 1 then
+    raise exception 'The selected players have conflicting Discord identities and cannot be merged';
+  end if;
+
+  v_final_discord_id := coalesce(v_keep_discord_id, v_distinct_discord_ids[1]);
+
+  select coalesce(
+    v_keep_discord_name,
+    v_keep_discord_username,
+    max(nullif(btrim(player.discord_name), '')),
+    max(nullif(btrim(player.discord_username), ''))
+  )
+  into v_final_discord_name
+  from public.players as player
+  where player.id = any(v_merge_ids);
+
+  if v_final_discord_id is not null and exists (
+    select 1 from public.players as other_player
+    where other_player.id <> p_keep_player_id
+      and not (other_player.id = any(v_merge_ids))
+      and nullif(btrim(other_player.discord_id), '') = v_final_discord_id
+  ) then
+    raise exception 'The preserved Discord identity belongs to another player outside this merge';
+  end if;
+
+  select coalesce(array_agg(distinct player.screen_name order by player.screen_name), array[]::text[])
+  into v_aliases
+  from public.players as player
+  where player.id = any(v_merge_ids)
+    and player.screen_name is distinct from v_keep_name;
+
+  delete from public.player_identity_not_matches as rejection
+  where (rejection.player1_id = p_keep_player_id or rejection.player1_id = any(v_merge_ids))
+    and (rejection.player2_id = p_keep_player_id or rejection.player2_id = any(v_merge_ids));
+
+  for v_alias_row in
+    select alias_row.id,
+           alias_row.alias,
+           alias_row.verified
+    from public.player_aliases as alias_row
+    where alias_row.player_id = any(v_merge_ids)
+    order by alias_row.id
+    for update
+  loop
+    if exists (
+      select 1
+      from public.player_aliases as existing_alias
+      where existing_alias.player_id = p_keep_player_id
+        and existing_alias.alias = v_alias_row.alias
+    ) then
+      update public.player_aliases as existing_alias
+      set verified = existing_alias.verified or v_alias_row.verified
+      where existing_alias.player_id = p_keep_player_id
+        and existing_alias.alias = v_alias_row.alias;
+
+      delete from public.player_aliases as alias_row
+      where alias_row.id = v_alias_row.id;
+    else
+      update public.player_aliases as alias_row
+      set player_id = p_keep_player_id
+      where alias_row.id = v_alias_row.id;
+    end if;
+  end loop;
+
+  for v_alias_row in
+    select player.screen_name as alias,
+           public.normalize_player_identity_name(player.screen_name) as normalized_alias
+    from public.players as player
+    where player.id = any(v_merge_ids)
+      and player.screen_name is distinct from v_keep_name
+    order by player.id
+  loop
+    if exists (
+      select 1
+      from public.player_aliases as existing_alias
+      where existing_alias.player_id = p_keep_player_id
+        and existing_alias.alias = v_alias_row.alias
+    ) then
+      update public.player_aliases as existing_alias
+      set verified = true
+      where existing_alias.player_id = p_keep_player_id
+        and existing_alias.alias = v_alias_row.alias;
+    else
+      v_inserted_alias_id := null;
+
+      insert into public.player_aliases(
+        player_id, alias, normalized_alias, source, verified
+      )
+      values (
+        p_keep_player_id,
+        v_alias_row.alias,
+        v_alias_row.normalized_alias,
+        'historical_alias',
+        true
+      )
+      on conflict do nothing
+      returning id into v_inserted_alias_id;
+
+      if v_inserted_alias_id is null and not exists (
+        select 1
+        from public.player_aliases as existing_alias
+        where existing_alias.player_id = p_keep_player_id
+          and existing_alias.alias = v_alias_row.alias
+      ) then
+        raise exception 'Could not preserve retiring player alias % because it conflicts with an existing alias constraint', v_alias_row.alias;
+      end if;
+    end if;
+  end loop;
+
+  insert into public.player_identity_links(
+    historical_player_id, canonical_player_id, merged_at, merged_by
+  )
+  select merge_id, p_keep_player_id, now(), auth.uid()
+  from unnest(v_merge_ids) as merge_id;
+
+  update public.player_identity_links as link
+  set canonical_player_id = p_keep_player_id,
+      merged_at = now(),
+      merged_by = auth.uid()
+  where link.canonical_player_id = any(v_merge_ids);
+
+  update public.discord_members as member
+  set player_id = p_keep_player_id
+  where member.player_id = any(v_merge_ids);
+
+  update public.major_entries as entry
+  set player_id = p_keep_player_id
+  from public.major_events as event
+  where event.id = entry.major_event_id
+    and entry.player_id = any(v_merge_ids)
+    and event.status not in ('complete', 'cancelled');
+
+  update public.major_scoring_participants as participant
+  set player_id = p_keep_player_id
+  from public.major_scoring_sessions as session
+  where session.id = participant.session_id
+    and participant.player_id = any(v_merge_ids)
+    and session.is_active;
+
+  update public.players as player
+  set discord_id = null,
+      discord_name = null,
+      active = false,
+      status = 'archived'
+  where player.id = any(v_merge_ids);
+
+  update public.players as player
+  set discord_id = v_final_discord_id,
+      discord_name = v_final_discord_name
+  where player.id = p_keep_player_id;
+
+  return query select p_keep_player_id, v_keep_name, v_merge_ids, v_aliases;
+end;
+$function$;
+
+revoke all on function public.merge_site_player_identities(uuid, uuid[]) from public;
+revoke all on function public.merge_site_player_identities(uuid, uuid[]) from anon;
+revoke all on function public.merge_site_player_identities(uuid, uuid[]) from authenticated;
+grant execute on function public.merge_site_player_identities(uuid, uuid[]) to authenticated;
+
 create or replace function public.merge_site_player_identity(
   p_keep_player_id uuid,
   p_merge_player_id uuid
@@ -18,398 +490,21 @@ as $function$
 declare
   v_keep_name text;
   v_merge_name text;
-  v_keep_discord_id text;
-  v_keep_discord_name text;
-  v_keep_discord_username text;
-  v_merge_discord_id text;
-  v_merge_discord_name text;
-  v_merge_discord_username text;
-  v_final_discord_id text;
-  v_final_discord_name text;
-  v_affected_season_ids uuid[] := array[]::uuid[];
-  v_affected_season_numbers integer[] := array[]::integer[];
-  v_affected_season_count integer := 0;
 begin
   if not public.is_current_user_site_admin() then
     raise exception 'Administrator authorization is required';
   end if;
 
-  perform pg_catalog.pg_advisory_xact_lock(
-    pg_catalog.hashtextextended('site-player-discord-identity', 0)
-  );
+  select player.screen_name into v_keep_name
+  from public.players as player where player.id = p_keep_player_id;
+  select player.screen_name into v_merge_name
+  from public.players as player where player.id = p_merge_player_id;
 
-  if p_keep_player_id is null or p_merge_player_id is null then
-    raise exception 'Both the player to keep and the player to merge are required';
-  end if;
+  perform public.merge_site_player_identities(p_keep_player_id, array[p_merge_player_id]);
 
-  if p_keep_player_id = p_merge_player_id then
-    raise exception 'The player to keep and the player to merge must be different';
-  end if;
-
-  perform 1
-  from public.players as player
-  where player.id in (p_keep_player_id, p_merge_player_id)
-  order by player.id
-  for update;
-
-  select player.screen_name, nullif(btrim(player.discord_id), ''),
-    nullif(btrim(player.discord_name), ''), nullif(btrim(player.discord_username), '')
-  into v_keep_name, v_keep_discord_id, v_keep_discord_name, v_keep_discord_username
-  from public.players as player
-  where player.id = p_keep_player_id;
-
-  if not found then
-    raise exception 'The player selected to keep does not exist';
-  end if;
-
-  select player.screen_name, nullif(btrim(player.discord_id), ''),
-    nullif(btrim(player.discord_name), ''), nullif(btrim(player.discord_username), '')
-  into v_merge_name, v_merge_discord_id, v_merge_discord_name, v_merge_discord_username
-  from public.players as player
-  where player.id = p_merge_player_id;
-
-  if not found then
-    raise exception 'The player selected to merge does not exist';
-  end if;
-
-  if v_keep_discord_id is not null
-     and v_merge_discord_id is not null
-     and v_keep_discord_id <> v_merge_discord_id then
-    raise exception 'The two players have conflicting Discord identities and cannot be merged';
-  end if;
-
-  v_final_discord_id := coalesce(v_keep_discord_id, v_merge_discord_id);
-  v_final_discord_name := case
-    when v_keep_discord_id is not null then
-      coalesce(v_keep_discord_name, v_keep_discord_username,
-        case when v_merge_discord_id = v_keep_discord_id then coalesce(v_merge_discord_name, v_merge_discord_username) end)
-    when v_merge_discord_id is not null then
-      coalesce(v_merge_discord_name, v_merge_discord_username, v_keep_discord_name, v_keep_discord_username)
-    else
-      coalesce(v_keep_discord_name, v_keep_discord_username, v_merge_discord_name, v_merge_discord_username)
-  end;
-
-  if (
-    select count(distinct nullif(btrim(member.discord_id), ''))
-    from public.discord_members as member
-    where member.player_id in (p_keep_player_id, p_merge_player_id)
-      and nullif(btrim(member.discord_id), '') is not null
-  ) > 1 then
-    raise exception 'The two players are linked to conflicting Discord member identities and cannot be merged';
-  end if;
-
-  if exists (
-    select 1
-    from public.discord_members as member
-    where member.player_id in (p_keep_player_id, p_merge_player_id)
-      and nullif(btrim(member.discord_id), '') is not null
-      and nullif(btrim(member.discord_id), '') is distinct from v_final_discord_id
-  ) then
-    raise exception 'A linked Discord member conflicts with the canonical player Discord identity';
-  end if;
-
-  if v_final_discord_id is not null and exists (
-    select 1
-    from public.players as other_player
-    where other_player.id not in (p_keep_player_id, p_merge_player_id)
-      and nullif(btrim(other_player.discord_id), '') = v_final_discord_id
-  ) then
-    raise exception 'The preserved Discord identity belongs to another canonical player';
-  end if;
-
-  if exists (
-    select 1
-    from public.stroke_final_scorecard_entries as entry
-    join public.stroke_final_scorecards as scorecard
-      on scorecard.id = entry.scorecard_id
-     and scorecard.season_id = entry.season_id
-    where entry.player_id = p_merge_player_id
-      and scorecard.status = 'approved'
-  ) then
-    raise exception 'The duplicate player appears in an approved Stroke Final Scorecard and cannot be merged';
-  end if;
-
-  if exists (
-    select 1
-    from public.stroke_division_roster_slots as merging_slot
-    join public.stroke_division_roster_slots as kept_slot
-      on kept_slot.roster_version_id = merging_slot.roster_version_id
-     and kept_slot.player_id = p_keep_player_id
-    where merging_slot.player_id = p_merge_player_id
-  ) then
-    raise exception 'Both players occupy slots in the same Stroke roster version';
-  end if;
-
-  if exists (
-    select 1
-    from public.schedule as merging_fixture
-    where (merging_fixture.player1_id = p_merge_player_id and merging_fixture.player2_id = p_keep_player_id)
-       or (merging_fixture.player2_id = p_merge_player_id and merging_fixture.player1_id = p_keep_player_id)
-  ) then
-    raise exception 'Merging these players would create a self-match in schedule';
-  end if;
-
-  if exists (
-    select 1
-    from public.schedule as merging_fixture
-    join public.schedule as other_fixture
-      on other_fixture.id <> merging_fixture.id
-     and other_fixture.season_id = merging_fixture.season_id
-     and other_fixture.division_number = merging_fixture.division_number
-     and least(other_fixture.player1_id, other_fixture.player2_id) = least(
-       case when merging_fixture.player1_id = p_merge_player_id then p_keep_player_id else merging_fixture.player1_id end,
-       case when merging_fixture.player2_id = p_merge_player_id then p_keep_player_id else merging_fixture.player2_id end
-     )
-     and greatest(other_fixture.player1_id, other_fixture.player2_id) = greatest(
-       case when merging_fixture.player1_id = p_merge_player_id then p_keep_player_id else merging_fixture.player1_id end,
-       case when merging_fixture.player2_id = p_merge_player_id then p_keep_player_id else merging_fixture.player2_id end
-     )
-     and lower(btrim(other_fixture.league_type)) = 'stroke'
-     and other_fixture.season_id is not null
-     and other_fixture.roster_version_id is not null
-     and other_fixture.division_number is not null
-     and other_fixture.game_number is not null
-     and other_fixture.player1_id is not null
-     and other_fixture.player2_id is not null
-    where (merging_fixture.player1_id = p_merge_player_id or merging_fixture.player2_id = p_merge_player_id)
-      and lower(btrim(merging_fixture.league_type)) = 'stroke'
-      and merging_fixture.season_id is not null
-      and merging_fixture.roster_version_id is not null
-      and merging_fixture.division_number is not null
-      and merging_fixture.game_number is not null
-  ) then
-    raise exception 'Merging these players would duplicate a managed Stroke schedule pairing';
-  end if;
-
-  if exists (
-    select 1
-    from public.results as merging_result
-    where (merging_result.player1_id = p_merge_player_id and merging_result.player2_id = p_keep_player_id)
-       or (merging_result.player2_id = p_merge_player_id and merging_result.player1_id = p_keep_player_id)
-  ) then
-    raise exception 'Merging these players would create a self-result';
-  end if;
-
-  if exists (
-    select 1
-    from public.matches as merging_match
-    where (merging_match.player1_id = p_merge_player_id and merging_match.player2_id = p_keep_player_id)
-       or (merging_match.player2_id = p_merge_player_id and merging_match.player1_id = p_keep_player_id)
-  ) then
-    raise exception 'Merging these players would create a self-match in matches';
-  end if;
-
-  if exists (
-    select 1
-    from public.results as merging_result
-    join public.results as other_result
-      on other_result.id <> merging_result.id
-     and other_result.league_type = merging_result.league_type
-     and other_result.season_number = merging_result.season_number
-     and other_result.division = merging_result.division
-     and other_result.game = merging_result.game
-     and other_result.player1_id = case when merging_result.player1_id = p_merge_player_id then p_keep_player_id else merging_result.player1_id end
-     and other_result.player2_id = case when merging_result.player2_id = p_merge_player_id then p_keep_player_id else merging_result.player2_id end
-    where merging_result.player1_id = p_merge_player_id
-       or merging_result.player2_id = p_merge_player_id
-  ) then
-    raise exception 'Merging these players would duplicate a result';
-  end if;
-
-  if exists (
-    select 1
-    from public.season_standings as merging_standing
-    join public.season_standings as kept_standing
-      on kept_standing.player_id = p_keep_player_id
-     and kept_standing.league_type = merging_standing.league_type
-     and kept_standing.season_number = merging_standing.season_number
-    where merging_standing.player_id = p_merge_player_id
-  ) then
-    raise exception 'Both players have standings for the same league and season';
-  end if;
-
-  if exists (
-    select 1
-    from public.stroke_final_scorecard_entries as merging_entry
-    join public.stroke_final_scorecard_entries as kept_entry
-      on kept_entry.scorecard_id = merging_entry.scorecard_id
-     and kept_entry.player_id = p_keep_player_id
-    where merging_entry.player_id = p_merge_player_id
-  ) then
-    raise exception 'Both players appear in the same Stroke Final Scorecard';
-  end if;
-
-  if exists (
-    select 1
-    from public.stroke_final_scorecard_player_decisions as merging_decision
-    join public.stroke_final_scorecard_player_decisions as kept_decision
-      on kept_decision.final_scorecard_id = merging_decision.final_scorecard_id
-     and kept_decision.player_id = p_keep_player_id
-    where merging_decision.player_id = p_merge_player_id
-  ) then
-    raise exception 'Both players have a transition decision for the same Stroke Final Scorecard';
-  end if;
-
-  if exists (
-    select 1
-    from public.player_league_memberships as merging_membership
-    join public.player_league_memberships as kept_membership
-      on kept_membership.player_id = p_keep_player_id
-     and kept_membership.league_type = merging_membership.league_type
-     and kept_membership.season_number = merging_membership.season_number
-     and kept_membership.division = merging_membership.division
-    where merging_membership.player_id = p_merge_player_id
-  ) then
-    raise exception 'Both players have the same league membership';
-  end if;
-
-  if exists (
-    select 1
-    from public.player_tournament_entries as merging_entry
-    join public.player_tournament_entries as kept_entry
-      on kept_entry.player_id = p_keep_player_id
-     and kept_entry.tournament_type = merging_entry.tournament_type
-     and kept_entry.bracket = merging_entry.bracket
-     and kept_entry.status = merging_entry.status
-    where merging_entry.player_id = p_merge_player_id
-  ) then
-    raise exception 'Both players have the same tournament entry';
-  end if;
-
-  select
-    coalesce(array_agg(affected.season_id order by affected.season_number, affected.season_id), array[]::uuid[]),
-    coalesce(array_agg(affected.season_number order by affected.season_number, affected.season_id), array[]::integer[]),
-    count(*)::integer
-  into v_affected_season_ids, v_affected_season_numbers, v_affected_season_count
-  from (
-    select distinct season.id as season_id, season.season_number
-    from public.stroke_roster_versions as roster
-    join public.seasons as season
-      on season.id = roster.season_id
-    where roster.status = 'approved'
-      and lower(btrim(season.league_type)) = 'stroke'
-      and (
-        exists (
-          select 1
-          from public.stroke_division_roster_slots as slot
-          where slot.roster_version_id = roster.id
-            and slot.player_id = p_merge_player_id
-        )
-        or exists (
-          select 1
-          from public.schedule as fixture
-          where fixture.roster_version_id = roster.id
-            and fixture.season_id = season.id
-            and lower(btrim(fixture.league_type)) = 'stroke'
-            and (fixture.player1_id = p_merge_player_id or fixture.player2_id = p_merge_player_id)
-        )
-      )
-  ) as affected;
-
-  if v_affected_season_count > 0 then
-    perform 1
-    from public.stroke_schedule_state as state
-    where state.season_id = any(v_affected_season_ids)
-    order by state.season_id
-    for update;
-
-    if (select count(*) from public.stroke_schedule_state as state where state.season_id = any(v_affected_season_ids)) <> v_affected_season_count then
-      raise exception 'An affected approved Stroke season has no schedule workflow state';
-    end if;
-  end if;
-
-  update public.stroke_division_roster_slots as slot
-  set player_id = p_keep_player_id,
-      player_screen_name = v_keep_name
-  where slot.player_id = p_merge_player_id;
-
-  update public.schedule as fixture
-  set player1_id = case when fixture.player1_id = p_merge_player_id then p_keep_player_id else fixture.player1_id end,
-      player2_id = case when fixture.player2_id = p_merge_player_id then p_keep_player_id else fixture.player2_id end,
-      player1 = case when fixture.player1_id = p_merge_player_id then v_keep_name else fixture.player1 end,
-      player2 = case when fixture.player2_id = p_merge_player_id then v_keep_name else fixture.player2 end,
-      player1_name = case when fixture.player1_id = p_merge_player_id then v_keep_name else fixture.player1_name end,
-      player2_name = case when fixture.player2_id = p_merge_player_id then v_keep_name else fixture.player2_name end
-  where fixture.player1_id = p_merge_player_id
-     or fixture.player2_id = p_merge_player_id;
-
-  update public.results as result
-  set player1_id = case when result.player1_id = p_merge_player_id then p_keep_player_id else result.player1_id end,
-      player2_id = case when result.player2_id = p_merge_player_id then p_keep_player_id else result.player2_id end,
-      player1 = case when result.player1_id = p_merge_player_id then v_keep_name else result.player1 end,
-      player2 = case when result.player2_id = p_merge_player_id then v_keep_name else result.player2 end,
-      winner = case when result.winner = v_merge_name then v_keep_name else result.winner end
-  where result.player1_id = p_merge_player_id
-     or result.player2_id = p_merge_player_id;
-
-  update public.season_standings as standing
-  set player_id = p_keep_player_id
-  where standing.player_id = p_merge_player_id;
-
-  update public.stroke_final_scorecard_entries as entry
-  set player_id = p_keep_player_id,
-      player_screen_name = v_keep_name
-  where entry.player_id = p_merge_player_id;
-
-  update public.stroke_final_scorecard_player_decisions as decision
-  set player_id = p_keep_player_id
-  where decision.player_id = p_merge_player_id;
-
-  update public.player_league_memberships as membership
-  set player_id = p_keep_player_id
-  where membership.player_id = p_merge_player_id;
-
-  update public.matches as match_row
-  set player1_id = case when match_row.player1_id = p_merge_player_id then p_keep_player_id else match_row.player1_id end,
-      player2_id = case when match_row.player2_id = p_merge_player_id then p_keep_player_id else match_row.player2_id end
-  where match_row.player1_id = p_merge_player_id
-     or match_row.player2_id = p_merge_player_id;
-
-  update public.player_tournament_entries as entry
-  set player_id = p_keep_player_id,
-      player_name = v_keep_name
-  where entry.player_id = p_merge_player_id;
-
-  update public.player_aliases as alias_row
-  set player_id = p_keep_player_id
-  where alias_row.player_id = p_merge_player_id;
-
-  update public.discord_members as member
-  set player_id = p_keep_player_id
-  where member.player_id = p_merge_player_id;
-
-  update public.players as player
-  set discord_id = null,
-      discord_name = null
-  where player.id = p_merge_player_id;
-
-  update public.players as player
-  set discord_id = v_final_discord_id,
-      discord_name = v_final_discord_name
-  where player.id = p_keep_player_id;
-
-  if v_affected_season_count > 0 then
-    update public.stroke_schedule_state as state
-    set change_revision = state.change_revision + 1
-    where state.season_id = any(v_affected_season_ids);
-  end if;
-
-  delete from public.players as player
-  where player.id = p_merge_player_id;
-
-  if not found then
-    raise exception 'The duplicate player could not be removed';
-  end if;
-
-  return query
-  select
-    p_keep_player_id,
-    v_keep_name,
-    p_merge_player_id,
-    v_merge_name,
-    v_affected_season_ids,
-    v_affected_season_numbers,
-    v_affected_season_count;
+  return query select
+    p_keep_player_id, v_keep_name, p_merge_player_id, v_merge_name,
+    array[]::uuid[], array[]::integer[], 0;
 end;
 $function$;
 
@@ -417,3 +512,5 @@ revoke all on function public.merge_site_player_identity(uuid, uuid) from public
 revoke all on function public.merge_site_player_identity(uuid, uuid) from anon;
 revoke all on function public.merge_site_player_identity(uuid, uuid) from authenticated;
 grant execute on function public.merge_site_player_identity(uuid, uuid) to authenticated;
+
+commit;

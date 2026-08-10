@@ -25,6 +25,11 @@ type TournamentEntry = {
   status: string | null
 }
 
+type IdentityLink = {
+  historical_player_id: string
+  canonical_player_id: string
+}
+
 type LeagueKey = "stroke" | "pyp" | "skins" | "kwt"
 
 const CURRENT_SEASON = 59
@@ -71,6 +76,7 @@ const STATUS_COLORS: Record<string, string> = {
   inactive: "#6b7280",
   archived: "#dc2626",
   memorial: "#9333ea",
+  merged: "#7c3aed",
 }
 
 export default function PlayersAdminPage() {
@@ -79,6 +85,7 @@ export default function PlayersAdminPage() {
   const [players, setPlayers] = useState<Player[]>([])
   const [leagueMemberships, setLeagueMemberships] = useState<LeagueMembership[]>([])
   const [tournamentEntries, setTournamentEntries] = useState<TournamentEntry[]>([])
+  const [identityLinks, setIdentityLinks] = useState<IdentityLink[]>([])
   const [loading, setLoading] = useState(false)
   const [importing, setImporting] = useState(false)
   const [search, setSearch] = useState("")
@@ -121,7 +128,7 @@ export default function PlayersAdminPage() {
   async function loadPlayers() {
     setLoading(true)
 
-    const [playersResult, membershipsResult, tournamentsResult] = await Promise.all([
+    const [playersResult, membershipsResult, tournamentsResult, identityLinksResult] = await Promise.all([
       supabase
         .from("players")
         .select("id, screen_name, status, active")
@@ -134,11 +141,14 @@ export default function PlayersAdminPage() {
         .from("player_tournament_entries")
         .select("player_id, tournament_type, bracket, status")
         .order("created_at", { ascending: false }),
+      supabase
+        .from("player_identity_links")
+        .select("historical_player_id, canonical_player_id"),
     ])
 
     setLoading(false)
 
-    const loadError = playersResult.error || membershipsResult.error || tournamentsResult.error
+    const loadError = playersResult.error || membershipsResult.error || tournamentsResult.error || identityLinksResult.error
     if (loadError) {
       alert(loadError.message)
       return
@@ -147,6 +157,7 @@ export default function PlayersAdminPage() {
     setPlayers(playersResult.data || [])
     setLeagueMemberships(membershipsResult.data || [])
     setTournamentEntries(tournamentsResult.data || [])
+    setIdentityLinks(identityLinksResult.data || [])
   }
 
   function formatLeagueName(leagueType: string) {
@@ -186,6 +197,10 @@ export default function PlayersAdminPage() {
   }
 
   function handlePlayerAction(action: string, player: Player) {
+    if (identityLinks.some((link) => link.historical_player_id === player.id) && action !== "profile") {
+      alert("This is a retired merged identity. Open its profile to view the canonical player.")
+      return
+    }
     if (action === "profile") router.push(`/admin/players/${player.id}`)
     if (action === "league") openLeagueModal(player)
     if (action === "tournament") openTournamentModal(player)
@@ -423,7 +438,7 @@ export default function PlayersAdminPage() {
 
       const uniqueImportMap = new Map<string, string>()
 
-      function addName(value: any) {
+      function addName(value: unknown) {
         const clean = String(value || "").trim()
         if (!clean) return
 
@@ -434,16 +449,16 @@ export default function PlayersAdminPage() {
         }
       }
 
-      scheduleData?.forEach((row: any) => {
+      scheduleData?.forEach((row) => {
         addName(row.player1)
         addName(row.player2)
       })
 
-      handicapData?.forEach((row: any) => {
+      handicapData?.forEach((row) => {
         addName(row.player_name)
       })
 
-      careerData?.forEach((row: any) => {
+      careerData?.forEach((row) => {
         addName(row.player_name)
       })
 
@@ -454,7 +469,7 @@ export default function PlayersAdminPage() {
         .select("screen_name")
 
       const existingSet = new Set(
-        (existing || []).map((p: any) => normalizeName(p.screen_name))
+        (existing || []).map((p) => normalizeName(p.screen_name))
       )
 
       const newPlayers = allNames
@@ -581,7 +596,8 @@ export default function PlayersAdminPage() {
         </thead>
         <tbody>
           {filteredPlayers.map((p) => {
-            const currentStatus = getPlayerStatus(p)
+            const identityLink = identityLinks.find((link) => link.historical_player_id === p.id)
+            const currentStatus = identityLink ? "merged" : getPlayerStatus(p)
             const membershipLabels = playerMembershipLabels(p.id)
 
             return (
@@ -628,6 +644,7 @@ export default function PlayersAdminPage() {
 
                 <td style={membershipTd}>
                   <div style={membershipList}>
+                    {identityLink && <span style={membershipBadge}>Merged → {players.find((player) => player.id === identityLink.canonical_player_id)?.screen_name || identityLink.canonical_player_id}</span>}
                     {membershipLabels.length > 0 ? membershipLabels.map((label) => (
                       <span key={label} style={membershipBadge}>{label}</span>
                     )) : <span style={emptyMembership}>—</span>}

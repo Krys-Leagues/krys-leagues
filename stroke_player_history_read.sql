@@ -1,3 +1,5 @@
+begin;
+
 create or replace function public.get_public_stroke_player_history(
   p_player_id uuid
 )
@@ -43,7 +45,8 @@ begin
     and scorecard.season_id = entry.season_id
   join public.seasons as season
     on season.id = scorecard.season_id
-  where entry.player_id = p_player_id
+  where public.resolve_canonical_player_id(entry.player_id)
+      = public.resolve_canonical_player_id(p_player_id)
     and scorecard.status = 'approved'
     and lower(btrim(season.league_type)) is not distinct from 'stroke'
   order by season.season_number desc;
@@ -64,3 +67,5 @@ to anon;
 
 grant execute on function public.get_public_stroke_player_history(uuid)
 to authenticated;
+
+commit;

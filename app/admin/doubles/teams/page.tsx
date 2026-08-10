@@ -48,6 +48,7 @@ export default function DoublesTeamsPage() {
     const { data, error } = await supabase
       .from("players")
       .select("*")
+      .eq("active", true)
       .order("id", { ascending: true })
 
     if (error) {

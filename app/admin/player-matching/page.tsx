@@ -254,6 +254,7 @@ export default function PlayerMatchingPage() {
       supabase
         .from("players")
         .select("id, screen_name, discord_id")
+        .eq("active", true)
         .is("discord_id", null)
         .order("screen_name"),
 
