@@ -11,6 +11,7 @@ type DeletionPreview = {
   schedule_count: number
   result_count: number
   standings_count: number
+  membership_count?: number
   transition_count: number
   final_scorecard_count: number
   other_season_row_count: number
@@ -23,11 +24,13 @@ export function ManagedSeasonDangerZone({
   seasonNumber,
   leagueName,
   returnPath,
+  historical = false,
 }: {
   seasonId: string
   seasonNumber: number
   leagueName: string
   returnPath: string
+  historical?: boolean
 }) {
   const router = useRouter()
   const [step, setStep] = useState<0 | 1 | 2>(0)
@@ -40,7 +43,7 @@ export function ManagedSeasonDangerZone({
     setLoading(true)
     setError("")
     const { data, error: previewError } = await supabase
-      .rpc("preview_managed_season_deletion", { p_season_id: seasonId })
+      .rpc(historical ? "preview_historical_season_deletion" : "preview_managed_season_deletion", { p_season_id: seasonId })
       .single()
     setLoading(false)
     if (previewError || !data) {
@@ -55,7 +58,7 @@ export function ManagedSeasonDangerZone({
     if (loading || !preview?.deletion_allowed) return
     setLoading(true)
     setError("")
-    const { error: deleteError } = await supabase.rpc("delete_managed_season", {
+    const { error: deleteError } = await supabase.rpc(historical ? "delete_historical_season" : "delete_managed_season", {
       p_season_id: seasonId,
     })
     setLoading(false)
@@ -71,12 +74,12 @@ export function ManagedSeasonDangerZone({
     <section style={dangerZone}>
       <h2 style={dangerTitle}>DANGER ZONE</h2>
       <p style={dangerText}>
-        Permanently delete this season and its managed divisions, rosters, schedules,
-        results, standings, transitions, and season-specific data. Player identities are
-        not deleted.
+        {historical
+          ? "Permanently delete this historical season and its owned league data. Player identities are not deleted. Historical ownership must be unambiguous."
+          : "Permanently delete this season and its managed divisions, rosters, schedules, results, standings, transitions, and season-specific data. Player identities are not deleted."}
       </p>
       <button type="button" onClick={beginDelete} disabled={loading} style={deleteButton}>
-        {loading && step === 0 ? "Loading impact..." : "DELETE SEASON"}
+        {loading && step === 0 ? "Loading impact..." : historical ? "DELETE HISTORICAL SEASON" : "DELETE SEASON"}
       </button>
       {error && <p role="alert" style={errorStyle}>{error}</p>}
 
@@ -85,8 +88,11 @@ export function ManagedSeasonDangerZone({
           <div style={modal}>
             {step === 1 ? (
               <>
-                <h2 id="delete-season-title" style={modalTitle}>Delete Season {seasonNumber}?</h2>
-                <p style={modalText}>{leagueName} managed data owned by this season:</p>
+                <h2 id="delete-season-title" style={modalTitle}>
+                  {historical ? `Delete historical ${leagueName} Season ${seasonNumber}?` : `Delete Season ${seasonNumber}?`}
+                </h2>
+                <p style={modalText}>{leagueName} data owned by this exact season UUID:</p>
+                {historical && <p style={historicalWarning}>This season contains locked/completed historical data.</p>}
                 <div style={countGrid}>
                   <span>Divisions: {preview.division_count}</span>
                   <span>Roster versions: {preview.roster_version_count}</span>
@@ -94,6 +100,7 @@ export function ManagedSeasonDangerZone({
                   <span>Schedules: {preview.schedule_count}</span>
                   <span>Results: {preview.result_count}</span>
                   <span>Standings: {preview.standings_count}</span>
+                  {historical && <span>Memberships: {preview.membership_count ?? 0}</span>}
                   <span>Transitions: {preview.transition_count}</span>
                   <span>Final Scorecards/snapshots: {preview.final_scorecard_count}</span>
                   <span>Other season rows: {preview.other_season_row_count}</span>
@@ -109,9 +116,13 @@ export function ManagedSeasonDangerZone({
             ) : (
               <>
                 <h2 id="delete-season-title" style={modalTitle}>
-                  Permanently delete Season {seasonNumber}? This cannot be undone.
+                  {historical ? `PERMANENTLY DELETE HISTORICAL ${leagueName.toUpperCase()} SEASON ${seasonNumber}?` : `Permanently delete Season ${seasonNumber}? This cannot be undone.`}
                 </h2>
-                <p style={modalText}>Make sure you have a backup/export if you may need this season later.</p>
+                <p style={modalText}>
+                  {historical
+                    ? "This permanently removes this season’s roster, schedules, results, standings, transitions, Final Scorecards/snapshots, and other season-owned data. This cannot be undone. Make sure you have a backup/export if you may need it later."
+                    : "Make sure you have a backup/export if you may need this season later."}
+                </p>
                 <div style={modalActions}>
                   <button type="button" onClick={() => setStep(0)} disabled={loading} style={cancelButton}>Cancel</button>
                   <button type="button" onClick={permanentlyDelete} disabled={loading} style={deleteButton}>
@@ -132,6 +143,7 @@ const dangerTitle: React.CSSProperties = { margin: "0 0 10px", color: "#fca5a5",
 const dangerText: React.CSSProperties = { color: "#d1d5db", lineHeight: 1.6, maxWidth: 760 }
 const deleteButton: React.CSSProperties = { padding: "11px 16px", borderRadius: 8, border: "1px solid #ef4444", background: "#991b1b", color: "white", fontWeight: 800, cursor: "pointer" }
 const errorStyle: React.CSSProperties = { marginTop: 14, padding: 12, borderRadius: 8, border: "1px solid #ef4444", background: "#2a0d0d", color: "#fecaca" }
+const historicalWarning: React.CSSProperties = { marginTop: 14, padding: 12, borderRadius: 8, border: "1px solid #f59e0b", background: "#2a1907", color: "#fde68a", fontWeight: 700 }
 const overlay: React.CSSProperties = { position: "fixed", inset: 0, zIndex: 1000, display: "grid", placeItems: "center", padding: 20, background: "rgba(0,0,0,.78)" }
 const modal: React.CSSProperties = { width: "min(620px, 100%)", maxHeight: "90vh", overflowY: "auto", padding: 24, borderRadius: 14, border: "1px solid #7f1d1d", background: "#111", color: "white", boxShadow: "0 24px 80px rgba(0,0,0,.6)" }
 const modalTitle: React.CSSProperties = { margin: "0 0 12px", fontSize: 24 }

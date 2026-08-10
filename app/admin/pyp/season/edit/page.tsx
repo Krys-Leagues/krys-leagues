@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import { ManagedSeasonDangerZone } from "@/components/admin/ManagedSeasonDangerZone"
 
-type ManagedSeason = { id: string; season_number: number; start_date: string | null; end_date: string | null; division_count: number; status: string }
+type ManagedSeason = { id: string; season_number: number; is_active: boolean; is_locked: boolean; start_date: string | null; end_date: string | null; division_count: number | null; status: string | null }
 type SavedSeasonDetails = { season_id: string; start_date: string; end_date: string; schedule_changes_detected: boolean }
 type ResizedRoster = { schedule_changes_detected: boolean }
 
@@ -29,8 +29,8 @@ export default function PypEditSeasonPage() {
     setLoading(true)
     const { data: seasonData, error: seasonError } = await supabase
       .from("seasons")
-      .select("id, season_number, start_date, end_date")
-      .eq("league_type", "pyp")
+      .select("id, season_number, is_active, is_locked, start_date, end_date")
+      .ilike("league_type", "pyp")
       .is("division", null)
       .order("season_number", { ascending: false })
 
@@ -64,13 +64,14 @@ export default function PypEditSeasonPage() {
     for (const roster of rosterData || []) {
       if (!rosterBySeason.has(roster.season_id)) rosterBySeason.set(roster.season_id, roster)
     }
-    const managed = source.flatMap((season) => {
+    const managed = source.map((season) => {
       const roster = rosterBySeason.get(season.id)
-      return roster ? [{ ...season, division_count: roster.division_count, status: roster.status }] : []
+      return { ...season, division_count: roster?.division_count ?? null, status: roster?.status ?? null }
     }) as ManagedSeason[]
+    const current = managed.filter((season) => !season.is_locked && season.status !== "locked" && season.status !== null)
     const selected = preferredId
       ? managed.find((season) => season.id === preferredId)
-      : managed[0]
+      : current[0] || managed[0]
 
     if (!selected) {
       setSeasonId("")
@@ -83,7 +84,7 @@ export default function PypEditSeasonPage() {
     }
     setSeasons(managed)
     setSeasonId(selected?.id || "")
-    setDivisionCount(selected ? String(selected.division_count) : "")
+    setDivisionCount(selected?.division_count ? String(selected.division_count) : "")
     setStartDate(selected?.start_date || "")
     setEndDate(selected?.end_date || "")
     setLoading(false)
@@ -92,7 +93,7 @@ export default function PypEditSeasonPage() {
   function selectSeason(id: string) {
     setSeasonId(id)
     const selected = seasons.find((season) => season.id === id)
-    setDivisionCount(selected ? String(selected.division_count) : "")
+    setDivisionCount(selected?.division_count ? String(selected.division_count) : "")
     setStartDate(selected?.start_date || "")
     setEndDate(selected?.end_date || "")
     setMessage("")
@@ -117,7 +118,7 @@ export default function PypEditSeasonPage() {
     try {
       const currentSeason = seasons.find((season) => season.id === seasonId)
       let scheduleChangesDetected = false
-      if (currentSeason && count !== currentSeason.division_count) {
+      if (currentSeason?.division_count && count !== currentSeason.division_count) {
         const { data, error } = await supabase.rpc("resize_pyp_season_divisions", {
           p_season_id: seasonId,
           p_new_division_count: count,
@@ -144,7 +145,10 @@ export default function PypEditSeasonPage() {
   }
 
   const current = seasons.find((season) => season.id === seasonId)
-  const locked = current?.status === "locked"
+  const currentSeasons = seasons.filter((season) => !season.is_locked && season.status !== "locked" && season.status !== null)
+  const pastSeasons = seasons.filter((season) => !currentSeasons.some((candidate) => candidate.id === season.id))
+  const historical = Boolean(current && pastSeasons.some((season) => season.id === current.id))
+  const locked = historical
 
   return (
     <main style={page}>
@@ -153,8 +157,8 @@ export default function PypEditSeasonPage() {
           <button type="button" onClick={() => router.push("/admin/pyp")} style={secondaryButton}>← PYP Hub</button>
           <button type="button" onClick={() => router.push("/admin/pyp/season")} style={secondaryButton}>PYP Season</button>
         </div>
-        <h1 style={title}>Edit Current PYP Season</h1>
-        <p style={subtitle}>Manage the current PYP season and continue division roster setup.</p>
+        <h1 style={title}>{current ? `Edit PYP Season ${current.season_number}` : "Edit PYP Season"}</h1>
+        <p style={subtitle}>Choose a current managed season or an authoritative historical season.</p>
 
         <section style={panel}>
           {loading ? <p>Loading managed PYP seasons...</p> : seasons.length === 0 ? (
@@ -162,9 +166,16 @@ export default function PypEditSeasonPage() {
           ) : (
             <>
               <div style={formGrid}>
-                <Field label="Managed Season">
-                  <select value={seasonId} onChange={(event) => selectSeason(event.target.value)} style={input} disabled={saving}>
-                    {seasons.map((season) => <option key={season.id} value={season.id}>Season {season.season_number} — {season.status}</option>)}
+                <Field label="CURRENT MANAGED SEASONS">
+                  <select value={currentSeasons.some((season) => season.id === seasonId) ? seasonId : ""} onChange={(event) => selectSeason(event.target.value)} style={input} disabled={saving}>
+                    <option value="" disabled>Select a current season</option>
+                    {currentSeasons.map((season) => <option key={season.id} value={season.id}>Season {season.season_number} — {season.status}</option>)}
+                  </select>
+                </Field>
+                <Field label="PAST SEASONS">
+                  <select value={pastSeasons.some((season) => season.id === seasonId) ? seasonId : ""} onChange={(event) => selectSeason(event.target.value)} style={input} disabled={saving}>
+                    <option value="" disabled>Select a past season</option>
+                    {pastSeasons.map((season) => <option key={season.id} value={season.id}>Season {season.season_number} — {season.status || "legacy UUID"}</option>)}
                   </select>
                 </Field>
                 <Field label="Number of Divisions">
@@ -177,12 +188,13 @@ export default function PypEditSeasonPage() {
                   <input type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} style={input} disabled={saving || locked} />
                 </Field>
               </div>
+              <p style={helper}>Legacy number-only or division-row history is not selectable because it has no single authoritative season UUID.</p>
               <p style={helper}>PYP matchup courses are selected by the players and are not season-level settings.</p>
               {locked && <p style={lockedMessage}>This historical roster is locked and cannot be resized.</p>}
               <div style={actions}>
                 <button type="button" onClick={save} disabled={saving || locked} style={primaryButton}>{saving ? "Saving..." : "Save Season Changes"}</button>
-                <button type="button" onClick={() => router.push(`/admin/pyp/setup?seasonId=${encodeURIComponent(seasonId)}&division=1`)} disabled={!seasonId} style={secondaryButton}>Open Division Setup</button>
-                <button type="button" onClick={() => router.push(`/admin/pyp/schedule?seasonId=${encodeURIComponent(seasonId)}`)} disabled={!seasonId} style={secondaryButton}>View Schedule</button>
+                <button type="button" onClick={() => router.push(`/admin/pyp/setup?seasonId=${encodeURIComponent(seasonId)}&division=1`)} disabled={!seasonId || !current?.status} style={secondaryButton}>Open Division Setup</button>
+                <button type="button" onClick={() => router.push(`/admin/pyp/schedule?seasonId=${encodeURIComponent(seasonId)}`)} disabled={!seasonId || !current?.status} style={secondaryButton}>View Schedule</button>
               </div>
             </>
           )}
@@ -194,6 +206,7 @@ export default function PypEditSeasonPage() {
             seasonNumber={current.season_number}
             leagueName="PYP"
             returnPath="/admin/pyp/season"
+            historical={historical}
           />
         )}
       </div>
