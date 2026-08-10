@@ -16,6 +16,8 @@ language plpgsql security definer set search_path to '' as $function$
 declare
   v_user_id uuid:=auth.uid();
   v_fixture public.schedule%rowtype;
+  v_roster public.pyp_roster_versions%rowtype;
+  v_season public.seasons%rowtype;
   v_public_result public.results%rowtype;
   v_result public.pyp_managed_results%rowtype;
   v_winner uuid;
@@ -30,18 +32,49 @@ begin
   if p_course1_home_hw is null or p_course1_away_hw is null or p_course2_home_hw is null or p_course2_away_hw is null then raise exception 'All four PYP HW values are required'; end if;
   if least(p_course1_home_hw,p_course1_away_hw,p_course2_home_hw,p_course2_away_hw)<0 then raise exception 'PYP HW values cannot be negative'; end if;
 
-  select fixture.* into v_fixture from public.schedule fixture where fixture.id=p_schedule_id for update;
+  -- Resolve the fixture first without taking a row lock so the established
+  -- managed lock order can begin with the roster version.
+  select fixture.* into v_fixture from public.schedule fixture where fixture.id=p_schedule_id;
   if not found then raise exception 'Schedule fixture % was not found',p_schedule_id; end if;
   if lower(btrim(v_fixture.league_type)) is distinct from 'pyp' or v_fixture.season_id is null or v_fixture.pyp_roster_version_id is null
     or v_fixture.division_number is null or v_fixture.division_number<=0 or v_fixture.game_number not between 1 and 3
     or v_fixture.pyp_home_player_id is null or v_fixture.pyp_away_player_id is null
     or v_fixture.pyp_home_player_id<>v_fixture.player1_id or v_fixture.pyp_away_player_id<>v_fixture.player2_id
   then raise exception 'Schedule fixture % is not a valid managed PYP fixture',p_schedule_id; end if;
-  if exists(select 1 from public.pyp_roster_versions r where r.id=v_fixture.pyp_roster_version_id and r.season_id=v_fixture.season_id and r.status='locked')
-    or exists(select 1 from public.pyp_final_scorecards c where c.season_id=v_fixture.season_id and c.status='approved')
-  then raise exception 'Results cannot be changed after PYP Final Scorecard approval' using errcode='42501'; end if;
+  -- Serialize against Final Scorecard approval by locking the source roster
+  -- before the parent season, schedule state, and fixture.
+  select roster.* into v_roster
+  from public.pyp_roster_versions roster
+  where roster.id=v_fixture.pyp_roster_version_id
+    and roster.season_id=v_fixture.season_id
+  for update;
+  if not found then raise exception 'The managed PYP fixture has no valid source roster'; end if;
+  if v_roster.status<>'approved' then
+    if v_roster.status='locked' then raise exception 'Results cannot be changed after PYP Final Scorecard approval' using errcode='42501'; end if;
+    raise exception 'PYP results can be changed only for an approved current roster' using errcode='42501';
+  end if;
+
+  select season.* into v_season
+  from public.seasons season
+  where season.id=v_fixture.season_id
+  for share;
+  if not found or lower(btrim(v_season.league_type)) is distinct from 'pyp' then raise exception 'The managed fixture does not belong to a PYP season'; end if;
+
   perform 1 from public.pyp_schedule_state s where s.season_id=v_fixture.season_id and s.change_revision=s.generated_revision and s.generated_revision=s.reviewed_revision and s.generated_revision>0 for update;
   if not found then raise exception 'PYP results can be saved only after the current schedule has been generated and reviewed'; end if;
+
+  -- Re-lock and revalidate the authoritative fixture after acquiring the
+  -- lifecycle locks. Approval cannot pass the roster lock while this save is
+  -- active, and a save arriving afterward observes the locked roster above.
+  select fixture.* into v_fixture from public.schedule fixture where fixture.id=p_schedule_id for update;
+  if not found then raise exception 'Schedule fixture % was not found',p_schedule_id; end if;
+  if lower(btrim(v_fixture.league_type)) is distinct from 'pyp' or v_fixture.season_id<>v_season.id or v_fixture.pyp_roster_version_id<>v_roster.id
+    or v_fixture.division_number is null or v_fixture.division_number<=0 or v_fixture.game_number not between 1 and 3
+    or v_fixture.pyp_home_player_id is null or v_fixture.pyp_away_player_id is null
+    or v_fixture.pyp_home_player_id<>v_fixture.player1_id or v_fixture.pyp_away_player_id<>v_fixture.player2_id
+  then raise exception 'Schedule fixture % is not a valid managed PYP fixture',p_schedule_id; end if;
+  if exists(select 1 from public.pyp_final_scorecards c where c.season_id=v_fixture.season_id and c.status='approved')
+  then raise exception 'Results cannot be changed after PYP Final Scorecard approval' using errcode='42501'; end if;
 
   if p_course1_home_hw+p_course2_home_hw>p_course1_away_hw+p_course2_away_hw then v_winner:=v_fixture.pyp_home_player_id;v_draw:=false;
   elsif p_course1_away_hw+p_course2_away_hw>p_course1_home_hw+p_course2_home_hw then v_winner:=v_fixture.pyp_away_player_id;v_draw:=false;

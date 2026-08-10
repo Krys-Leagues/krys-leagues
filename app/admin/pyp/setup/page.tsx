@@ -36,12 +36,14 @@ export default function PypSetupPage() {
   const dirty = slotPlayerIds.some((playerId, index) => playerId !== loadedSlotPlayerIds[index])
   const theme = themes[division] || neutralTheme
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (seasonIdOverride?: string, divisionOverride?: number) => {
     setLoading(true)
     setMessage("")
+    setSlotPlayerIds([null, null, null, null])
+    setLoadedSlotPlayerIds([null, null, null, null])
     const params = new URLSearchParams(window.location.search)
-    const selectedSeasonId = params.get("seasonId") || ""
-    const requestedDivision = Number(params.get("division"))
+    const selectedSeasonId = seasonIdOverride || params.get("seasonId") || ""
+    const requestedDivision = divisionOverride ?? Number(params.get("division"))
     if (!selectedSeasonId || !Number.isInteger(requestedDivision) || requestedDivision < 1) {
       setMessage("A valid seasonId and division are required.")
       setLoading(false)
@@ -120,9 +122,20 @@ export default function PypSetupPage() {
     setLoading(false)
   }, [])
 
-  // The URL-scoped managed roster context is intentionally loaded once.
+  // Load the URL-scoped context initially and whenever browser history changes.
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { void load() }, [load])
+  useEffect(() => {
+    function reloadFromBrowserNavigation() {
+      if (dirty && !window.confirm("You have unsaved roster changes. Leave without saving them?")) {
+        window.history.go(1)
+        return
+      }
+      void load()
+    }
+    window.addEventListener("popstate", reloadFromBrowserNavigation)
+    return () => window.removeEventListener("popstate", reloadFromBrowserNavigation)
+  }, [dirty, load])
   useEffect(() => {
     function warn(event: BeforeUnloadEvent) { if (dirty) event.preventDefault() }
     window.addEventListener("beforeunload", warn)
@@ -135,7 +148,10 @@ export default function PypSetupPage() {
   }
 
   function goDivision(next: number) {
-    navigate(`/admin/pyp/setup?seasonId=${encodeURIComponent(seasonId)}&division=${next}`)
+    if (loading || next < 1 || next > divisionCount || next === division) return
+    if (dirty && !window.confirm("You have unsaved roster changes. Leave without saving them?")) return
+    router.push(`/admin/pyp/setup?seasonId=${encodeURIComponent(seasonId)}&division=${next}`)
+    void load(seasonId, next)
   }
 
   async function saveRoster() {
@@ -159,7 +175,11 @@ export default function PypSetupPage() {
     setSlotPlayerIds(authoritative)
     setLoadedSlotPlayerIds(authoritative)
     setMessage("Division roster saved.")
-    if (division < divisionCount) router.push(`/admin/pyp/setup?seasonId=${encodeURIComponent(seasonId)}&division=${division + 1}`)
+    if (division < divisionCount) {
+      const nextDivision = division + 1
+      router.push(`/admin/pyp/setup?seasonId=${encodeURIComponent(seasonId)}&division=${nextDivision}`)
+      await load(seasonId, nextDivision)
+    }
   }
 
   async function approveRoster() {
@@ -185,7 +205,7 @@ export default function PypSetupPage() {
       <div style={container}>
         <div style={topBar}>
           <button type="button" onClick={() => navigate("/admin/pyp")} style={secondaryButton}>← PYP Hub</button>
-          <button type="button" onClick={() => navigate("/admin/pyp/season/edit")} style={secondaryButton}>Back to Season</button>
+          <button type="button" onClick={() => navigate(`/admin/pyp/season/edit?seasonId=${encodeURIComponent(seasonId)}`)} style={secondaryButton}>Back to Season</button>
           <button type="button" onClick={() => navigate(`/admin/pyp/schedule?seasonId=${encodeURIComponent(seasonId)}`)} style={secondaryButton} disabled={!seasonId}>View Schedule</button>
         </div>
         <h1 style={title}>PYP Setup</h1>
@@ -219,7 +239,7 @@ export default function PypSetupPage() {
 
             <div style={bottomNavigation}>
               <div>{division > 1 && <button type="button" onClick={() => goDivision(division - 1)} style={secondaryButton}>← PYP D{division - 1}</button>}</div>
-              <div style={actions}><button type="button" onClick={() => navigate("/admin/pyp/season/edit")} style={secondaryButton}>Back to Season</button><button type="button" onClick={() => navigate(`/admin/pyp/schedule?seasonId=${encodeURIComponent(seasonId)}`)} style={secondaryButton}>View Schedule</button></div>
+              <div style={actions}><button type="button" onClick={() => navigate(`/admin/pyp/season/edit?seasonId=${encodeURIComponent(seasonId)}`)} style={secondaryButton}>Back to Season</button><button type="button" onClick={() => navigate(`/admin/pyp/schedule?seasonId=${encodeURIComponent(seasonId)}`)} style={secondaryButton}>View Schedule</button></div>
               <div>{division < divisionCount && <button type="button" onClick={() => goDivision(division + 1)} style={secondaryButton}>PYP D{division + 1} →</button>}</div>
             </div>
           </section>

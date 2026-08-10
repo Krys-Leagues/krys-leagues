@@ -125,7 +125,15 @@ export default function PypResultsPage() {
     setBusy(false)
     if (error) { setMessage(error.message); return }
     setMessage("PYP result deleted and standings rebuilt.")
-    selectFixture(fixture.id)
+    setResults((current) => current.filter((result) => result.schedule_id !== fixture.id))
+    setCourse1("")
+    setCourse2("")
+    setDifficulty1("")
+    setDifficulty2("")
+    setC1Home("")
+    setC1Away("")
+    setC2Home("")
+    setC2Away("")
     await load(seasonId)
   }
 

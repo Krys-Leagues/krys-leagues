@@ -94,7 +94,7 @@ begin
     raise exception 'The requested season was not found';
   end if;
 
-  if lower(btrim(v_season.league_type)) <> 'pyp' then
+  if lower(btrim(v_season.league_type)) is distinct from 'pyp' then
     raise exception 'The requested season is not a PYP season';
   end if;
 

@@ -4,24 +4,31 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 
-type ManagedSeason = { id: string; season_number: number; division_count: number; status: string }
+type ManagedSeason = { id: string; season_number: number; start_date: string | null; end_date: string | null; division_count: number; status: string }
+type SavedSeasonDetails = { season_id: string; start_date: string; end_date: string; schedule_changes_detected: boolean }
+type ResizedRoster = { schedule_changes_detected: boolean }
 
 export default function PypEditSeasonPage() {
   const router = useRouter()
   const [seasons, setSeasons] = useState<ManagedSeason[]>([])
   const [seasonId, setSeasonId] = useState("")
   const [divisionCount, setDivisionCount] = useState("")
+  const [startDate, setStartDate] = useState("")
+  const [endDate, setEndDate] = useState("")
   const [message, setMessage] = useState("")
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
-  useEffect(() => { void loadSeasons() }, [])
+  useEffect(() => {
+    const preferredId = new URLSearchParams(window.location.search).get("seasonId") || undefined
+    void loadSeasons(preferredId)
+  }, [])
 
   async function loadSeasons(preferredId?: string) {
     setLoading(true)
     const { data: seasonData, error: seasonError } = await supabase
       .from("seasons")
-      .select("id, season_number")
+      .select("id, season_number, start_date, end_date")
       .eq("league_type", "pyp")
       .is("division", null)
       .order("season_number", { ascending: false })
@@ -60,10 +67,24 @@ export default function PypEditSeasonPage() {
       const roster = rosterBySeason.get(season.id)
       return roster ? [{ ...season, division_count: roster.division_count, status: roster.status }] : []
     }) as ManagedSeason[]
-    const selected = managed.find((season) => season.id === preferredId) || managed[0]
+    const selected = preferredId
+      ? managed.find((season) => season.id === preferredId)
+      : managed[0]
+
+    if (!selected) {
+      setSeasonId("")
+      setDivisionCount("")
+      setStartDate("")
+      setEndDate("")
+      setMessage("The requested managed PYP season was not found.")
+      setLoading(false)
+      return
+    }
     setSeasons(managed)
     setSeasonId(selected?.id || "")
     setDivisionCount(selected ? String(selected.division_count) : "")
+    setStartDate(selected?.start_date || "")
+    setEndDate(selected?.end_date || "")
     setLoading(false)
   }
 
@@ -71,6 +92,8 @@ export default function PypEditSeasonPage() {
     setSeasonId(id)
     const selected = seasons.find((season) => season.id === id)
     setDivisionCount(selected ? String(selected.division_count) : "")
+    setStartDate(selected?.start_date || "")
+    setEndDate(selected?.end_date || "")
     setMessage("")
   }
 
@@ -80,19 +103,43 @@ export default function PypEditSeasonPage() {
       setMessage("Choose a season and enter a positive division count.")
       return
     }
-    setSaving(true)
-    setMessage("")
-    const { error } = await supabase.rpc("resize_pyp_season_divisions", {
-      p_season_id: seasonId,
-      p_new_division_count: count,
-    })
-    setSaving(false)
-    if (error) {
-      setMessage(error.message)
+    if (!startDate || !endDate) {
+      setMessage("Start date and end date are required.")
       return
     }
-    setMessage("PYP season changes saved.")
-    await loadSeasons(seasonId)
+    if (endDate < startDate) {
+      setMessage("End date cannot be before the start date.")
+      return
+    }
+    setSaving(true)
+    setMessage("")
+    try {
+      const currentSeason = seasons.find((season) => season.id === seasonId)
+      let scheduleChangesDetected = false
+      if (currentSeason && count !== currentSeason.division_count) {
+        const { data, error } = await supabase.rpc("resize_pyp_season_divisions", {
+          p_season_id: seasonId,
+          p_new_division_count: count,
+        }).single()
+        if (error || !data) throw new Error(error?.message || "No resized PYP roster was returned.")
+        scheduleChangesDetected = Boolean((data as ResizedRoster).schedule_changes_detected)
+      }
+
+      const { data, error } = await supabase.rpc("update_pyp_season_details", {
+        p_season_id: seasonId,
+        p_start_date: startDate,
+        p_end_date: endDate,
+      }).single()
+      if (error || !data) throw new Error(error?.message || "No saved PYP season details were returned.")
+      const saved = data as SavedSeasonDetails
+      scheduleChangesDetected = scheduleChangesDetected || saved.schedule_changes_detected
+      setMessage(scheduleChangesDetected ? "PYP season changes saved. Regenerate and review the schedule." : "PYP season changes saved.")
+      await loadSeasons(seasonId)
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Could not save PYP season changes.")
+    } finally {
+      setSaving(false)
+    }
   }
 
   const current = seasons.find((season) => season.id === seasonId)
@@ -121,6 +168,12 @@ export default function PypEditSeasonPage() {
                 </Field>
                 <Field label="Number of Divisions">
                   <input type="number" min="1" step="1" value={divisionCount} onChange={(event) => setDivisionCount(event.target.value)} style={input} disabled={saving || locked} />
+                </Field>
+                <Field label="Start Date">
+                  <input type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} style={input} disabled={saving || locked} />
+                </Field>
+                <Field label="End Date">
+                  <input type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} style={input} disabled={saving || locked} />
                 </Field>
               </div>
               <p style={helper}>PYP matchup courses are selected by the players and are not season-level settings.</p>
