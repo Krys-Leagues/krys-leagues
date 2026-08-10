@@ -68,7 +68,7 @@ export default function MajorScoringAdminPage() {
   const loadFoundation = useCallback(async () => {
     const [eventResponse, playerResponse, sessionResponse] = await Promise.all([
       supabase.from("major_events").select("*").order("slug"),
-      supabase.from("players").select("id, screen_name, active, status").order("screen_name"),
+      supabase.from("players").select("id, screen_name, active, status").eq("active", true).order("screen_name"),
       supabase.from("major_scoring_sessions").select("*").order("updated_at", { ascending: false }),
     ])
     const loadedEvents = (eventResponse.data as MajorEvent[] | null) || []
