@@ -41,18 +41,20 @@ export default function StrokeAdminPage() {
         .from("stroke_roster_versions")
         .select("season_id, status")
         .in("season_id", seasons.map((season) => season.id))
-        .in("status", ["draft", "approved"])
+        .in("status", ["draft", "approved", "locked"])
 
       if (rosterError) {
         setScheduleLinkError(`Could not load the current Stroke roster: ${rosterError.message}`)
         return
       }
 
-      const managedSeasonIds = new Set(
-        ((rosterData || []) as StrokeRoster[]).map((roster) => roster.season_id)
-      )
+      const rosters = (rosterData || []) as StrokeRoster[]
+      const managedSeasonIds = new Set(rosters.map((roster) => roster.season_id))
+      const currentSeasonIds = new Set(rosters.filter((roster) => roster.status !== "locked").map((roster) => roster.season_id))
+      const requestedSeasonId = new URLSearchParams(window.location.search).get("seasonId")
+      const requestedSeason = seasons.find((season) => season.id === requestedSeasonId && managedSeasonIds.has(season.id))
       setManagedSeason(
-        seasons.find((season) => managedSeasonIds.has(season.id)) || null
+        requestedSeason || seasons.find((season) => currentSeasonIds.has(season.id)) || null
       )
     }
 
@@ -99,10 +101,14 @@ export default function StrokeAdminPage() {
           <span>View and save live Stroke Play standings.</span>
         </Link>
 
-        <Link href="/admin/players" style={card}>
-          <strong>Players</strong>
-          <span>View global player list used across all leagues.</span>
-        </Link>
+        {managedSeason ? (
+          <Link href={`/admin/stroke/players?seasonId=${encodeURIComponent(managedSeason.id)}`} style={card}>
+            <strong>Players</strong>
+            <span>View players in this Stroke season.</span>
+          </Link>
+        ) : (
+          <div style={{ ...card, opacity: 0.65 }}><strong>Players</strong><span>{scheduleLinkError || "No current managed Stroke season is available yet."}</span></div>
+        )}
 
         <Link href="/admin" style={card}>
           <strong>Back to Admin Home</strong>
