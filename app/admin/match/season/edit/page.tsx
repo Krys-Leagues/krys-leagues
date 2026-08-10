@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
+import { ManagedSeasonDangerZone } from "@/components/admin/ManagedSeasonDangerZone"
 
 type SeasonRow = {
   id: string
@@ -561,6 +562,13 @@ export default function EditCurrentMatchSeasonPage() {
                 </>
               )}
             </section>
+
+            <ManagedSeasonDangerZone
+              seasonId={selectedSeason.id}
+              seasonNumber={selectedSeason.season_number}
+              leagueName="Match"
+              returnPath="/admin/match/season"
+            />
 
           </>
         )}

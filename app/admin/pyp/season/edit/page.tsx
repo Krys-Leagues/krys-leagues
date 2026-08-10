@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
+import { ManagedSeasonDangerZone } from "@/components/admin/ManagedSeasonDangerZone"
 
 type ManagedSeason = { id: string; season_number: number; start_date: string | null; end_date: string | null; division_count: number; status: string }
 type SavedSeasonDetails = { season_id: string; start_date: string; end_date: string; schedule_changes_detected: boolean }
@@ -187,6 +188,14 @@ export default function PypEditSeasonPage() {
           )}
           {message && <p style={messageStyle}>{message}</p>}
         </section>
+        {current && (
+          <ManagedSeasonDangerZone
+            seasonId={current.id}
+            seasonNumber={current.season_number}
+            leagueName="PYP"
+            returnPath="/admin/pyp/season"
+          />
+        )}
       </div>
     </main>
   )
