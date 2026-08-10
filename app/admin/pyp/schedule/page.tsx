@@ -137,15 +137,15 @@ export default function PypSchedulePage() {
         context.fillText(awayText, matchupX, y)
         y += 60
         const result=resultMap.get(fixture.id)
-        if(result){const resultText=`${fixture.pyp_home_player_screen_name} ${result.home_total_hw} - ${fixture.pyp_away_player_screen_name} ${result.away_total_hw}`;let resultSize=18;context.font=`${resultSize}px Arial, sans-serif`;while(resultSize>12&&context.measureText(resultText).width>canvas.width-160){resultSize-=1;context.font=`${resultSize}px Arial, sans-serif`}context.fillStyle="#aaa";context.fillText(resultText,80,y-22);y+=30}
+        if(result){const resultText=`${fixture.pyp_home_player_screen_name} ${result.home_total_hw} - ${fixture.pyp_away_player_screen_name} ${result.away_total_hw}`;let resultSize=28;context.font=`${resultSize}px Arial, sans-serif`;while(resultSize>18&&context.measureText(resultText).width>canvas.width-160){resultSize-=1;context.font=`${resultSize}px Arial, sans-serif`}context.fillStyle="#aaa";context.fillText(resultText,80,y-20);y+=36}
       }
       y += 35
     }
     context.fillStyle = "#ddd"
-    context.font = "26px Arial, sans-serif"
+    context.font = "32px Arial, sans-serif"
     for (const rule of ["Home player is the person in color.", "Course 1: Home picks; Away hits first.", "Course 2: Away picks; Home hits first.", "Players may choose Easy or Hard."]) {
       context.fillText(rule, 60, y)
-      y += 42
+      y += 52
     }
     return canvas.toDataURL("image/png")
   }
