@@ -7,6 +7,8 @@ import { supabase } from "@/lib/supabase"
 type Player = {
   id: string
   screen_name: string
+  discord_id: string | null
+  discord_name: string | null
   discord_username: string | null
   status: string | null
   active: boolean | null
@@ -64,7 +66,10 @@ export default function PlayerProfilePage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/immutability
     loadData()
+    // Player data is reloaded only when this UUID page mounts.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   async function loadData() {
@@ -74,7 +79,7 @@ export default function PlayerProfilePage() {
 
     const { data: playerData } = await supabase
       .from("players")
-      .select("id, screen_name, discord_username, status, active")
+      .select("id, screen_name, discord_id, discord_name, discord_username, status, active")
       .eq("id", playerId)
       .single()
 
@@ -209,7 +214,7 @@ const totalSeasons = new Set(
           <p style={muted}>Player ID: {player.id}</p>
 
           <p style={muted}>
-            Discord: {player.discord_username || "Not linked"}
+            Discord: {player.discord_id ? player.discord_name || player.discord_username || "Linked" : "Not linked"}
           </p>
 
           <p style={muted}>

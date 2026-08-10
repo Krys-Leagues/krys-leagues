@@ -18,6 +18,14 @@ as $function$
 declare
   v_keep_name text;
   v_merge_name text;
+  v_keep_discord_id text;
+  v_keep_discord_name text;
+  v_keep_discord_username text;
+  v_merge_discord_id text;
+  v_merge_discord_name text;
+  v_merge_discord_username text;
+  v_final_discord_id text;
+  v_final_discord_name text;
   v_affected_season_ids uuid[] := array[]::uuid[];
   v_affected_season_numbers integer[] := array[]::integer[];
   v_affected_season_count integer := 0;
@@ -25,6 +33,10 @@ begin
   if not public.is_current_user_site_admin() then
     raise exception 'Administrator authorization is required';
   end if;
+
+  perform pg_catalog.pg_advisory_xact_lock(
+    pg_catalog.hashtextextended('site-player-discord-identity', 0)
+  );
 
   if p_keep_player_id is null or p_merge_player_id is null then
     raise exception 'Both the player to keep and the player to merge are required';
@@ -40,8 +52,9 @@ begin
   order by player.id
   for update;
 
-  select player.screen_name
-  into v_keep_name
+  select player.screen_name, nullif(btrim(player.discord_id), ''),
+    nullif(btrim(player.discord_name), ''), nullif(btrim(player.discord_username), '')
+  into v_keep_name, v_keep_discord_id, v_keep_discord_name, v_keep_discord_username
   from public.players as player
   where player.id = p_keep_player_id;
 
@@ -49,13 +62,59 @@ begin
     raise exception 'The player selected to keep does not exist';
   end if;
 
-  select player.screen_name
-  into v_merge_name
+  select player.screen_name, nullif(btrim(player.discord_id), ''),
+    nullif(btrim(player.discord_name), ''), nullif(btrim(player.discord_username), '')
+  into v_merge_name, v_merge_discord_id, v_merge_discord_name, v_merge_discord_username
   from public.players as player
   where player.id = p_merge_player_id;
 
   if not found then
     raise exception 'The player selected to merge does not exist';
+  end if;
+
+  if v_keep_discord_id is not null
+     and v_merge_discord_id is not null
+     and v_keep_discord_id <> v_merge_discord_id then
+    raise exception 'The two players have conflicting Discord identities and cannot be merged';
+  end if;
+
+  v_final_discord_id := coalesce(v_keep_discord_id, v_merge_discord_id);
+  v_final_discord_name := case
+    when v_keep_discord_id is not null then
+      coalesce(v_keep_discord_name, v_keep_discord_username,
+        case when v_merge_discord_id = v_keep_discord_id then coalesce(v_merge_discord_name, v_merge_discord_username) end)
+    when v_merge_discord_id is not null then
+      coalesce(v_merge_discord_name, v_merge_discord_username, v_keep_discord_name, v_keep_discord_username)
+    else
+      coalesce(v_keep_discord_name, v_keep_discord_username, v_merge_discord_name, v_merge_discord_username)
+  end;
+
+  if (
+    select count(distinct nullif(btrim(member.discord_id), ''))
+    from public.discord_members as member
+    where member.player_id in (p_keep_player_id, p_merge_player_id)
+      and nullif(btrim(member.discord_id), '') is not null
+  ) > 1 then
+    raise exception 'The two players are linked to conflicting Discord member identities and cannot be merged';
+  end if;
+
+  if exists (
+    select 1
+    from public.discord_members as member
+    where member.player_id in (p_keep_player_id, p_merge_player_id)
+      and nullif(btrim(member.discord_id), '') is not null
+      and nullif(btrim(member.discord_id), '') is distinct from v_final_discord_id
+  ) then
+    raise exception 'A linked Discord member conflicts with the canonical player Discord identity';
+  end if;
+
+  if v_final_discord_id is not null and exists (
+    select 1
+    from public.players as other_player
+    where other_player.id not in (p_keep_player_id, p_merge_player_id)
+      and nullif(btrim(other_player.discord_id), '') = v_final_discord_id
+  ) then
+    raise exception 'The preserved Discord identity belongs to another canonical player';
   end if;
 
   if exists (
@@ -318,6 +377,16 @@ begin
   update public.discord_members as member
   set player_id = p_keep_player_id
   where member.player_id = p_merge_player_id;
+
+  update public.players as player
+  set discord_id = null,
+      discord_name = null
+  where player.id = p_merge_player_id;
+
+  update public.players as player
+  set discord_id = v_final_discord_id,
+      discord_name = v_final_discord_name
+  where player.id = p_keep_player_id;
 
   if v_affected_season_count > 0 then
     update public.stroke_schedule_state as state

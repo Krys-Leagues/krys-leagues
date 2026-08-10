@@ -1,6 +1,5 @@
 "use client"
 
-import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { supabase } from "@/lib/supabase"
 
@@ -61,6 +60,7 @@ export default function PlayerTracker() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchPlayers()
   }, [])
 
@@ -237,6 +237,9 @@ export default function PlayerTracker() {
       <p>
         Cup/bracket tracker only. League divisions and Welcome divisions stay inside each league system.
       </p>
+      <p style={{ padding: 12, border: "1px solid #a16207", background: "#291d08", color: "#fde68a" }}>
+        Discord values on this legacy tournament tracker are reference-only and do not edit global player identity. Use Player Matching to link Discord to a verified canonical player UUID.
+      </p>
 
       <h2>Add Player</h2>
 
@@ -245,20 +248,6 @@ export default function PlayerTracker() {
         <input
           value={form.screen_name}
           onChange={(e) => setForm({ ...form, screen_name: e.target.value })}
-        />
-
-        <label>Discord Username</label>
-        <input
-          value={form.discord_username}
-          onChange={(e) =>
-            setForm({ ...form, discord_username: e.target.value })
-          }
-        />
-
-        <label>Discord ID / Number optional</label>
-        <input
-          value={form.discord_id}
-          onChange={(e) => setForm({ ...form, discord_id: e.target.value })}
         />
 
         <label>Player Status</label>
@@ -395,10 +384,10 @@ export default function PlayerTracker() {
         <table style={{ borderCollapse: "collapse", width: "100%" }}>
           <thead>
             <tr>
-              <th style={{ padding: 8, borderBottom: "1px solid #444" }}>Profile</th>
+              <th style={{ padding: 8, borderBottom: "1px solid #444" }}>Record</th>
               <th style={{ padding: 8, borderBottom: "1px solid #444" }}>Player</th>
-              <th style={{ padding: 8, borderBottom: "1px solid #444" }}>Discord</th>
-              <th style={{ padding: 8, borderBottom: "1px solid #444" }}>Discord ID</th>
+              <th style={{ padding: 8, borderBottom: "1px solid #444" }}>Legacy Discord Name</th>
+              <th style={{ padding: 8, borderBottom: "1px solid #444" }}>Legacy Discord ID</th>
               <th style={{ padding: 8, borderBottom: "1px solid #444" }}>Status</th>
               <th style={{ padding: 8, borderBottom: "1px solid #444" }}>Cup Tier</th>
               <th style={{ padding: 8, borderBottom: "1px solid #444" }}>Best Round</th>
@@ -412,27 +401,17 @@ export default function PlayerTracker() {
             {filteredPlayers.map((p) => (
               <tr key={p.id}>
                 <td style={{ padding: 6 }}>
-                  <Link href={`/admin/players/${p.id}`}>Profile</Link>
+                  Tracker only
                 </td>
 
                 <td style={{ padding: 6 }}>{p.screen_name}</td>
 
                 <td style={{ padding: 6 }}>
-                  <input
-                    value={p.discord_username || ""}
-                    onChange={(e) =>
-                      updatePlayer(p.id, "discord_username", e.target.value)
-                    }
-                  />
+                  {p.discord_username || "—"}
                 </td>
 
                 <td style={{ padding: 6 }}>
-                  <input
-                    value={p.discord_id || ""}
-                    onChange={(e) =>
-                      updatePlayer(p.id, "discord_id", e.target.value || null)
-                    }
-                  />
+                  {p.discord_id ? "Stored in tracker" : "—"}
                 </td>
 
                 <td style={{ padding: 6 }}>

@@ -395,43 +395,15 @@ export default function PlayerMatchingPage() {
 
     setSaving(true)
 
-    const { error: playerError } = await supabase
-      .from("players")
-      .update({
-        discord_id: selectedMember.discord_id,
-        discord_name:
-          selectedMember.discord_name,
-      })
-      .eq("id", currentPlayer.id)
-      .is("discord_id", null)
+    const { error: linkError } = await supabase.rpc("set_site_player_discord_identity", {
+      p_player_id: currentPlayer.id,
+      p_discord_id: selectedMember.discord_id,
+      p_discord_name: selectedMember.discord_name,
+    })
 
-    if (playerError) {
+    if (linkError) {
       setSaving(false)
-      alert(playerError.message)
-      return
-    }
-
-    const { error: memberError } = await supabase
-      .from("discord_members")
-      .update({
-        player_id: currentPlayer.id,
-        walkabout_name:
-          currentPlayer.screen_name,
-      })
-      .eq("id", selectedMember.id)
-      .is("player_id", null)
-
-    if (memberError) {
-      await supabase
-        .from("players")
-        .update({
-          discord_id: null,
-          discord_name: null,
-        })
-        .eq("id", currentPlayer.id)
-
-      setSaving(false)
-      alert(memberError.message)
+      alert(linkError.message)
       return
     }
 
