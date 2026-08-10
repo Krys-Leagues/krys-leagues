@@ -137,7 +137,7 @@ export default function PypSchedulePage() {
         context.fillText(awayText, matchupX, y)
         y += 60
         const result=resultMap.get(fixture.id)
-        if(result){const course1Difficulty=result.course1_difficulty?` ${result.course1_difficulty}`:"";const course2Difficulty=result.course2_difficulty?` ${result.course2_difficulty}`:"";const resultText=`C1 ${result.course1_name}${course1Difficulty}: ${fixture.pyp_home_player_screen_name} ${result.course1_home_hw}, ${fixture.pyp_away_player_screen_name} ${result.course1_away_hw} · C2 ${result.course2_name}${course2Difficulty}: ${fixture.pyp_away_player_screen_name} ${result.course2_away_hw}, ${fixture.pyp_home_player_screen_name} ${result.course2_home_hw} · TOTAL ${fixture.pyp_home_player_screen_name} ${result.home_total_hw}, ${fixture.pyp_away_player_screen_name} ${result.away_total_hw}`;let resultSize=18;context.font=`${resultSize}px Arial, sans-serif`;while(resultSize>12&&context.measureText(resultText).width>canvas.width-160){resultSize-=1;context.font=`${resultSize}px Arial, sans-serif`}context.fillStyle="#aaa";context.fillText(resultText,80,y-22);y+=30}
+        if(result){const resultText=`${fixture.pyp_home_player_screen_name} ${result.home_total_hw} - ${fixture.pyp_away_player_screen_name} ${result.away_total_hw}`;let resultSize=18;context.font=`${resultSize}px Arial, sans-serif`;while(resultSize>12&&context.measureText(resultText).width>canvas.width-160){resultSize-=1;context.font=`${resultSize}px Arial, sans-serif`}context.fillStyle="#aaa";context.fillText(resultText,80,y-22);y+=30}
       }
       y += 35
     }
