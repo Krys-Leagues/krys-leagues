@@ -391,6 +391,55 @@ actual_alias_columns as (
   where column_row.table_schema = 'public'
     and column_row.table_name = 'player_aliases'
 ),
+alias_exact_duplicates as (
+  select alias_row.player_id, alias_row.alias, count(*) as duplicate_count
+  from public.player_aliases as alias_row
+  group by alias_row.player_id, alias_row.alias
+  having count(*) > 1
+),
+alias_index_keys as (
+  select
+    index_definition.indexrelid,
+    index_row.relname::text as index_name,
+    index_definition.indisunique,
+    array_agg(pg_get_indexdef(index_definition.indexrelid, key_position.position, true)
+              order by key_position.position)::text[] as key_columns,
+    pg_get_indexdef(index_definition.indexrelid)::text as definition
+  from pg_index as index_definition
+  join pg_class as table_row
+    on table_row.oid = index_definition.indrelid
+  join pg_namespace as namespace_row
+    on namespace_row.oid = table_row.relnamespace
+  join pg_class as index_row
+    on index_row.oid = index_definition.indexrelid
+  cross join lateral generate_series(1, index_definition.indnkeyatts) as key_position(position)
+  where namespace_row.nspname = 'public'
+    and table_row.relname = 'player_aliases'
+  group by index_definition.indexrelid, index_row.relname, index_definition.indisunique
+),
+incompatible_alias_indexes as (
+  select alias_index.*
+  from alias_index_keys as alias_index
+  where alias_index.indisunique
+    and 'normalized_alias' = any(alias_index.key_columns)
+),
+has_exact_alias_ownership_index as (
+  select exists (
+    select 1
+    from alias_index_keys as alias_index
+    where alias_index.indisunique
+      and cardinality(alias_index.key_columns) = 2
+      and alias_index.key_columns @> array['player_id', 'alias']::text[]
+  ) as present
+),
+has_normalized_alias_lookup_index as (
+  select exists (
+    select 1
+    from alias_index_keys as alias_index
+    where not alias_index.indisunique
+      and 'normalized_alias' = any(alias_index.key_columns)
+  ) as present
+),
 check_rows(check_name, status, object_name, details) as (
   select
     'Unexpected foreign keys to public.players',
@@ -445,6 +494,31 @@ check_rows(check_name, status, object_name, details) as (
                 else ''
               end
       else 'All columns required by canonical identity, Discord synchronization, and managed roster triggers exist.'
+    end
+  union all
+  select
+    'Player alias constraint compatibility',
+    case
+      when exists (select 1 from alias_exact_duplicates) then 'BLOCK'
+      when exists (select 1 from incompatible_alias_indexes) then 'BLOCK'
+      when not (select present from has_exact_alias_ownership_index) then 'BLOCK'
+      when not (select present from has_normalized_alias_lookup_index) then 'BLOCK'
+      else 'PASS'
+    end,
+    'public.player_aliases',
+    case
+      when exists (select 1 from alias_exact_duplicates)
+        then (select string_agg(player_id::text || ' alias=' || alias || ' count=' || duplicate_count,
+                                '; ' order by player_id, alias)
+              from alias_exact_duplicates)
+      when exists (select 1 from incompatible_alias_indexes)
+        then (select string_agg(index_name || ': ' || definition, '; ' order by index_name)
+              from incompatible_alias_indexes)
+      when not (select present from has_exact_alias_ownership_index)
+        then 'Missing UNIQUE exact-alias ownership index on (player_id, alias).'
+      when not (select present from has_normalized_alias_lookup_index)
+        then 'Missing non-unique normalized_alias lookup index.'
+      else 'normalized_alias is indexed but not unique, and exact alias text is unique only within one player UUID.'
     end
   union all
   select

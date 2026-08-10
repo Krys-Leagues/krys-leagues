@@ -83,15 +83,24 @@ export function resolveIdentity({
     }
   }
 
-  const exactAlias = aliases.find(
-    (alias) =>
-      alias.active &&
-      alias.normalizedAlias === normalizedName
+  const exactAliasPlayerIds = Array.from(
+    new Set(
+      aliases
+        .filter(
+          (alias) =>
+            alias.active &&
+            alias.normalizedAlias === normalizedName
+        )
+        .map((alias) => alias.playerId)
+        .filter((playerId) =>
+          players.some((player) => player.id === playerId)
+        )
+    )
   )
 
-  if (exactAlias) {
+  if (exactAliasPlayerIds.length === 1) {
     const player = players.find(
-      (item) => item.id === exactAlias.playerId
+      (item) => item.id === exactAliasPlayerIds[0]
     )
 
     if (player) {
