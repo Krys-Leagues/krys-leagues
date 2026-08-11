@@ -98,7 +98,7 @@ export default function MajorsAdminPage() {
     <main style={page}>
       <div style={topRow}>
         <div><Link href="/admin" style={backLink}>← Admin</Link><h1 style={title}>Four Majors</h1><p style={muted}>Configure four reusable event records, signup, participants, and streams.</p></div>
-        <div style={headerLinks}><Link href="/admin/majors/scoring" style={scoringLink}>Live scoring</Link><Link href="/majors" style={publicLink}>View public Majors</Link></div>
+        <div style={headerLinks}><Link href="/admin/majors/scheduling" style={scoringLink}>Signup schedule</Link><Link href="/admin/majors/scoring" style={scoringLink}>Live scoring</Link><Link href="/majors" style={publicLink}>View public Majors</Link></div>
       </div>
       {message && <p style={notice}>{message}</p>}
       {loading ? <p>Loading…</p> : (

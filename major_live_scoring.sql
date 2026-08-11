@@ -80,14 +80,20 @@ grant select on table public.major_scoring_sessions to authenticated;
 grant select on table public.major_scoring_participants to authenticated;
 grant select on table public.major_hole_scores to authenticated;
 
+drop policy if exists "Site admins can read Major scoring sessions"
+on public.major_scoring_sessions;
 create policy "Site admins can read Major scoring sessions"
 on public.major_scoring_sessions for select to authenticated
 using (public.is_current_user_site_admin());
 
+drop policy if exists "Site admins can read Major scoring participants"
+on public.major_scoring_participants;
 create policy "Site admins can read Major scoring participants"
 on public.major_scoring_participants for select to authenticated
 using (public.is_current_user_site_admin());
 
+drop policy if exists "Site admins can read Major hole scores"
+on public.major_hole_scores;
 create policy "Site admins can read Major hole scores"
 on public.major_hole_scores for select to authenticated
 using (public.is_current_user_site_admin());
@@ -151,6 +157,9 @@ begin
 end;
 $function$;
 
+revoke all on function public.create_major_scoring_session(uuid,text,uuid[])
+from public, anon, authenticated;
+
 create or replace function public.save_major_scorecard_theme(
   p_major_event_id uuid,
   p_background_url text,
@@ -174,6 +183,9 @@ begin
   if not found then raise exception 'Major event not found'; end if;
 end;
 $function$;
+
+revoke all on function public.save_major_scorecard_theme(uuid,text,text,text)
+from public, anon, authenticated;
 
 create or replace function public.update_major_scoring_session(
   p_session_id uuid,
@@ -200,6 +212,9 @@ begin
   if not found then raise exception 'Major scoring session not found'; end if;
 end;
 $function$;
+
+revoke all on function public.update_major_scoring_session(uuid,text,integer,boolean,boolean)
+from public, anon, authenticated;
 
 create or replace function public.save_major_hole_scores(
   p_session_id uuid,
@@ -242,6 +257,9 @@ begin
 end;
 $function$;
 
+revoke all on function public.save_major_hole_scores(uuid,integer,jsonb)
+from public, anon, authenticated;
+
 create or replace function public.clear_major_hole_score(
   p_session_id uuid,
   p_participant_id uuid,
@@ -262,6 +280,9 @@ begin
     and hole_number = p_hole_number;
 end;
 $function$;
+
+revoke all on function public.clear_major_hole_score(uuid,uuid,integer)
+from public, anon, authenticated;
 
 create or replace function public.get_public_major_scoreboard(p_session_id uuid)
 returns jsonb
@@ -315,12 +336,8 @@ as $function$
     and event.is_public;
 $function$;
 
-revoke all on function public.create_major_scoring_session(uuid,text,uuid[]) from public, anon, authenticated;
-revoke all on function public.save_major_scorecard_theme(uuid,text,text,text) from public, anon, authenticated;
-revoke all on function public.update_major_scoring_session(uuid,text,integer,boolean,boolean) from public, anon, authenticated;
-revoke all on function public.save_major_hole_scores(uuid,integer,jsonb) from public, anon, authenticated;
-revoke all on function public.clear_major_hole_score(uuid,uuid,integer) from public, anon, authenticated;
-revoke all on function public.get_public_major_scoreboard(uuid) from public, anon, authenticated;
+revoke all on function public.get_public_major_scoreboard(uuid)
+from public, anon, authenticated;
 
 grant execute on function public.create_major_scoring_session(uuid,text,uuid[]) to authenticated;
 grant execute on function public.save_major_scorecard_theme(uuid,text,text,text) to authenticated;
