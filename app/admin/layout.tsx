@@ -1,13 +1,14 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 
 type AdminAccess = "loading" | "signed_out" | "denied" | "authorized"
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
+  const pathname = usePathname()
   const [access, setAccess] = useState<AdminAccess>("loading")
 
   useEffect(() => {
@@ -15,15 +16,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(() => {
-      void checkAdminAccess()
+    } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "USER_UPDATED") {
+        void checkAdminAccess(false)
+      }
     })
 
     return () => subscription.unsubscribe()
-  }, [])
+  }, [pathname])
 
-  async function checkAdminAccess() {
-    setAccess("loading")
+  async function checkAdminAccess(showLoading = true) {
+    if (showLoading) setAccess("loading")
 
     const { data, error } = await supabase.auth.getSession()
     const session = data.session
@@ -42,7 +45,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         cache: "no-store",
       })
 
-      setAccess(response.ok ? "authorized" : "denied")
+      if (!response.ok) {
+        setAccess("denied")
+        return
+      }
+
+      const permissions = (await response.json()) as { siteAdmin?: boolean; soloAdmin?: boolean }
+      const routeAllowed = Boolean(
+        permissions.siteAdmin || (permissions.soloAdmin && pathname.startsWith("/admin/solo"))
+      )
+      setAccess(routeAllowed ? "authorized" : "denied")
     } catch {
       setAccess("denied")
     }
