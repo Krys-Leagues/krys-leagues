@@ -1,7 +1,7 @@
 "use client"
 /* eslint-disable react-hooks/set-state-in-effect */
 
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import { SOLO_DIVISIONS, SOLO_DIVISION_PRESENTATION, type SoloDivision } from "@/lib/solo"
@@ -34,17 +34,19 @@ export default function SoloSetupPage() {
   const [roster, setRoster] = useState<Roster | null>(null)
   const [players, setPlayers] = useState<Player[]>([])
   const [globalPlayers, setGlobalPlayers] = useState<Player[]>([])
+  const [newPlayerMatches, setNewPlayerMatches] = useState<Player[]>([])
   const [entries, setEntries] = useState<Entry[]>([])
   const [savedFingerprint, setSavedFingerprint] = useState("[]")
   const [message, setMessage] = useState("")
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
-  const [searching, setSearching] = useState(false)
-  const [playerSource, setPlayerSource] = useState<"existing" | "new" | null>(null)
+  const [searchingExisting, setSearchingExisting] = useState(false)
+  const [searchingNew, setSearchingNew] = useState(false)
   const [globalSearch, setGlobalSearch] = useState("")
   const [screenName, setScreenName] = useState("")
   const [discordId, setDiscordId] = useState("")
   const [newPlayerId, setNewPlayerId] = useState("")
+  const screenNameRef = useRef<HTMLInputElement>(null)
 
   const load = useCallback(async () => {
     const id = new URLSearchParams(window.location.search).get("seasonId") || ""
@@ -85,19 +87,18 @@ export default function SoloSetupPage() {
 
   useEffect(() => { void load() }, [load])
   useEffect(() => {
-    if (playerSource !== "existing") return
     const search = globalSearch.trim()
     if (!search) {
       setGlobalPlayers([])
-      setSearching(false)
+      setSearchingExisting(false)
       return
     }
 
     let cancelled = false
-    setSearching(true)
+    setSearchingExisting(true)
     void supabase.rpc("search_solo_existing_global_players", { p_season_id: seasonId, p_search: search }).then(({ data, error }) => {
       if (cancelled) return
-      setSearching(false)
+      setSearchingExisting(false)
       if (error) {
         setGlobalPlayers([])
         setMessage("Global Players could not be searched.")
@@ -107,7 +108,28 @@ export default function SoloSetupPage() {
     })
 
     return () => { cancelled = true }
-  }, [globalSearch, playerSource, seasonId])
+  }, [globalSearch, seasonId])
+  useEffect(() => {
+    const search = screenName.trim()
+    if (!search) {
+      setNewPlayerMatches([])
+      setSearchingNew(false)
+      return
+    }
+    let cancelled = false
+    setSearchingNew(true)
+    void supabase.rpc("search_solo_existing_global_players", { p_season_id: seasonId, p_search: search }).then(({ data, error }) => {
+      if (cancelled) return
+      setSearchingNew(false)
+      if (error) {
+        setNewPlayerMatches([])
+        setMessage("Global Players could not be checked for possible matches.")
+        return
+      }
+      setNewPlayerMatches((data || []) as Player[])
+    })
+    return () => { cancelled = true }
+  }, [screenName, seasonId])
   const dirty = roster?.status === "draft" && rosterFingerprint(entries) !== savedFingerprint
   useEffect(() => {
     function warn(event: BeforeUnloadEvent) {
@@ -132,20 +154,22 @@ export default function SoloSetupPage() {
     if (dirty && !window.confirm("You have unsaved Solo roster changes. Leave without saving?")) return
     router.push(href)
   }
-  function closePlayerSource() {
-    setPlayerSource(null)
-    setGlobalSearch("")
-    setGlobalPlayers([])
-    setSearching(false)
-  }
-  async function addExistingPlayer(player: Player) {
+  async function addExistingPlayer(player: Player, source: "existing" | "new" = "existing") {
     setBusy(true)
     const { data, error } = await supabase.rpc("add_existing_player_to_solo_pool", { p_season_id: seasonId, p_player_id: player.id }).single()
     setBusy(false)
     if (error || !data) return setMessage(friendlyError(error?.message || "", "Player could not be added to the Solo pool."))
     setPlayers((current) => [...current, data as Player].sort((a, b) => a.screen_name.localeCompare(b.screen_name)))
     setNewPlayerId(player.id)
-    closePlayerSource()
+    if (source === "existing") {
+      setGlobalSearch("")
+      setGlobalPlayers([])
+    } else {
+      setScreenName("")
+      setDiscordId("")
+      setNewPlayerMatches([])
+      requestAnimationFrame(() => screenNameRef.current?.focus())
+    }
     setMessage(`${player.screen_name} is now available in the Solo division selectors.`)
   }
   async function savePlayer() {
@@ -165,7 +189,8 @@ export default function SoloSetupPage() {
     setNewPlayerId(player.id)
     setScreenName("")
     setDiscordId("")
-    closePlayerSource()
+    setNewPlayerMatches([])
+    requestAnimationFrame(() => screenNameRef.current?.focus())
     setMessage(`${player.screen_name} was saved globally, added to this Solo season's pool, and is ready to assign.`)
   }
   async function saveDraft() {
@@ -192,9 +217,8 @@ export default function SoloSetupPage() {
     <div style={nav}><button style={button} onClick={() => navigate(`/admin/solo?seasonId=${encodeURIComponent(seasonId)}`)}>← Solo Hub</button><button style={button} onClick={() => navigate(`/admin/solo/weeks?seasonId=${encodeURIComponent(seasonId)}`)} disabled={!seasonId}>Weeks →</button></div>
     <h1>Solo Setup / Roster</h1><p style={muted}>{season ? `Season ${season.season_number}` : "Load the exact managed Solo season."}</p>
     {loading ? <p>Loading…</p> : roster && <><p>Roster status: <strong>{roster.status}</strong> · {entries.length} players {dirty && <strong style={{ color: "#facc15" }}>· Unsaved changes</strong>}</p>
-      {roster.status === "draft" && playerSource && <section style={addPanel}>{playerSource === "existing" ? <><h2>Add Existing Global Player</h2><div style={sourceRow}><input style={input} autoFocus placeholder="Type a screen name" value={globalSearch} onChange={(event) => setGlobalSearch(event.target.value)} /><button disabled={busy} style={button} onClick={closePlayerSource}>CANCEL</button></div>{searching && <p style={muted}>Searching…</p>}{globalSearch.trim() && !searching && globalPlayers.length === 0 && <p style={muted}>No matching Global Players outside this Solo pool.</p>}{globalPlayers.length > 0 && <div style={searchResults}>{globalPlayers.map((player) => <button key={player.id} disabled={busy} style={searchResult} onClick={() => addExistingPlayer(player)}>{player.screen_name}</button>)}</div>}</> : <><h2>Add New Player</h2><div style={addForm}><label style={field}>Screen Name<input style={input} value={screenName} onChange={(event) => setScreenName(event.target.value)} /></label><label style={field}>Discord ID<input style={input} inputMode="numeric" value={discordId} onChange={(event) => setDiscordId(event.target.value)} /></label><div style={actions}><button disabled={busy} style={primary} onClick={savePlayer}>SAVE PLAYER</button><button disabled={busy} style={button} onClick={closePlayerSource}>CANCEL</button></div></div></>}</section>}
       <div style={grid}>{SOLO_DIVISIONS.map((division) => { const presentation = SOLO_DIVISION_PRESENTATION[division]; return <section key={division} style={card}><h2 style={{ color: presentation.color }}><span role="img" aria-label={presentation.label}>{presentation.symbol}</span> {division}</h2>{entries.filter((entry) => entry.division === division).map((entry) => <div key={entry.player_id} style={row}><span>{entry.player_screen_name}</span>{roster.status === "draft" && <button style={small} onClick={() => remove(entry.player_id)}>Remove</button>}</div>)}{roster.status === "draft" && <select value="" style={selector} onChange={(event) => add(division, event.target.value)}><option value="">Solo signed-up players…</option>{players.filter((player) => !assigned.has(player.id)).map((player) => <option key={player.id} value={player.id}>{player.screen_name}{player.id === newPlayerId ? " · NEW" : ""}</option>)}</select>}</section> })}</div>
-      {roster.status === "draft" && <div style={bottomActions}><div style={actions}><button disabled={busy || !dirty} style={primary} onClick={saveDraft}>SAVE DRAFT</button><button disabled={busy || entries.length === 0 || dirty} style={button} onClick={approve}>APPROVE ROSTER</button></div><div style={playerActions}><button style={button} onClick={() => { setPlayerSource("existing"); setGlobalSearch(""); setGlobalPlayers([]) }}>Add Existing Global Player</button><button style={button} onClick={() => setPlayerSource("new")}>Add New Player to Solo Players</button></div></div>}
+      {roster.status === "draft" && <div style={bottomActions}><div style={actions}><button disabled={busy || !dirty} style={primary} onClick={saveDraft}>SAVE DRAFT</button><button disabled={busy || entries.length === 0 || dirty} style={button} onClick={approve}>APPROVE ROSTER</button></div><div style={playerTools}><section style={compactTool}><h3>Existing Global Player</h3><input style={input} placeholder="Type a screen name" value={globalSearch} onChange={(event) => setGlobalSearch(event.target.value)} />{searchingExisting && <p style={muted}>Searching…</p>}{globalSearch.trim() && !searchingExisting && globalPlayers.length === 0 && <p style={muted}>No eligible matches.</p>}{globalPlayers.length > 0 && <div style={searchResults}>{globalPlayers.map((player) => <button key={player.id} disabled={busy} style={searchResult} onClick={() => addExistingPlayer(player)}>{player.screen_name}</button>)}</div>}</section><section style={compactTool}><h3>New Player</h3><label style={field}>Screen Name<input ref={screenNameRef} style={input} value={screenName} onChange={(event) => setScreenName(event.target.value)} /></label>{searchingNew && <p style={muted}>Checking…</p>}{newPlayerMatches.length > 0 && <div style={searchResults}>{newPlayerMatches.map((player) => <div key={player.id} style={matchRow}><span>{player.screen_name}</span><button disabled={busy} style={small} onClick={() => addExistingPlayer(player, "new")}>USE EXISTING PLAYER</button></div>)}</div>}<label style={field}>Discord ID<input style={input} inputMode="numeric" value={discordId} onChange={(event) => setDiscordId(event.target.value)} /></label><button disabled={busy} style={primary} onClick={savePlayer}>SAVE PLAYER</button></section></div></div>}
     </>}
     {message && <p style={notice}>{message}</p>}
   </div></main>
@@ -214,11 +238,10 @@ const small: React.CSSProperties = { ...button, padding: "4px 7px" }
 const primary: React.CSSProperties = { ...button, background: "#126b3c", borderColor: "#167a45", fontWeight: 800 }
 const actions: React.CSSProperties = { display: "flex", gap: 10, flexWrap: "wrap", marginTop: 18 }
 const notice: React.CSSProperties = { padding: 12, border: "1px solid #555", borderRadius: 8, background: "#171717" }
-const addPanel: React.CSSProperties = { ...card, marginBottom: 16 }
-const addForm: React.CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 12, marginTop: 14 }
 const field: React.CSSProperties = { display: "flex", flexDirection: "column", gap: 7, fontWeight: 700 }
-const sourceRow: React.CSSProperties = { display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }
 const searchResults: React.CSSProperties = { display: "flex", flexDirection: "column", marginTop: 8, border: "1px solid #333", borderRadius: 8, overflow: "hidden" }
 const searchResult: React.CSSProperties = { padding: "10px 12px", border: 0, borderBottom: "1px solid #282828", background: "#111", color: "white", textAlign: "left", cursor: "pointer" }
-const bottomActions: React.CSSProperties = { display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 16, flexWrap: "wrap", marginTop: 20 }
-const playerActions: React.CSSProperties = { display: "flex", justifyContent: "flex-end", gap: 10, flexWrap: "wrap", marginLeft: "auto" }
+const bottomActions: React.CSSProperties = { display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, flexWrap: "wrap", marginTop: 20 }
+const playerTools: React.CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(230px,1fr))", gap: 12, width: "min(100%,560px)", marginLeft: "auto" }
+const compactTool: React.CSSProperties = { ...card, padding: 14 }
+const matchRow: React.CSSProperties = { ...row, background: "#111", padding: 9 }
