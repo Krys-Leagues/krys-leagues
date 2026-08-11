@@ -39,6 +39,7 @@ export default function SoloSetupPage() {
   const [message, setMessage] = useState("")
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
+  const [searching, setSearching] = useState(false)
   const [playerSource, setPlayerSource] = useState<"existing" | "new" | null>(null)
   const [globalSearch, setGlobalSearch] = useState("")
   const [screenName, setScreenName] = useState("")
@@ -83,6 +84,31 @@ export default function SoloSetupPage() {
   }, [])
 
   useEffect(() => { void load() }, [load])
+  useEffect(() => {
+    if (playerSource !== "existing") return
+    const search = globalSearch.trim()
+    if (!search) {
+      setGlobalPlayers([])
+      setSearching(false)
+      return
+    }
+
+    let cancelled = false
+    setSearching(true)
+    void supabase.from("players").select("id,screen_name").eq("active", true).ilike("screen_name", `%${search}%`).order("screen_name").limit(20).then(({ data, error }) => {
+      if (cancelled) return
+      setSearching(false)
+      if (error) {
+        setGlobalPlayers([])
+        setMessage("Global Players could not be searched.")
+        return
+      }
+      const poolIds = new Set(players.map((player) => player.id))
+      setGlobalPlayers(((data || []) as Player[]).filter((player) => !poolIds.has(player.id)))
+    })
+
+    return () => { cancelled = true }
+  }, [globalSearch, playerSource, players])
   const dirty = roster?.status === "draft" && rosterFingerprint(entries) !== savedFingerprint
   useEffect(() => {
     function warn(event: BeforeUnloadEvent) {
@@ -107,16 +133,11 @@ export default function SoloSetupPage() {
     if (dirty && !window.confirm("You have unsaved Solo roster changes. Leave without saving?")) return
     router.push(href)
   }
-  async function searchGlobalPlayers() {
-    const search = globalSearch.trim()
-    if (search.length < 2) return setMessage("Enter at least two characters to search Global Players.")
-    setBusy(true)
-    const { data, error } = await supabase.from("players").select("id,screen_name").eq("active", true).ilike("screen_name", `%${search}%`).order("screen_name").limit(30)
-    setBusy(false)
-    if (error) return setMessage("Global Players could not be searched.")
-    const poolIds = new Set(players.map((player) => player.id))
-    setGlobalPlayers(((data || []) as Player[]).filter((player) => !poolIds.has(player.id)))
-    setMessage(data?.length ? "Select a Global Player to add to this Solo season." : "No matching Global Players were found.")
+  function closePlayerSource() {
+    setPlayerSource(null)
+    setGlobalSearch("")
+    setGlobalPlayers([])
+    setSearching(false)
   }
   async function addExistingPlayer(player: Player) {
     setBusy(true)
@@ -124,9 +145,8 @@ export default function SoloSetupPage() {
     setBusy(false)
     if (error || !data) return setMessage(friendlyError(error?.message || "", "Player could not be added to the Solo pool."))
     setPlayers((current) => [...current, data as Player].sort((a, b) => a.screen_name.localeCompare(b.screen_name)))
-    setGlobalPlayers((current) => current.filter((candidate) => candidate.id !== player.id))
     setNewPlayerId(player.id)
-    setPlayerSource(null)
+    closePlayerSource()
     setMessage(`${player.screen_name} is now available in the Solo division selectors.`)
   }
   async function savePlayer() {
@@ -146,7 +166,7 @@ export default function SoloSetupPage() {
     setNewPlayerId(player.id)
     setScreenName("")
     setDiscordId("")
-    setPlayerSource(null)
+    closePlayerSource()
     setMessage(`${player.screen_name} was saved globally, added to this Solo season's pool, and is ready to assign.`)
   }
   async function saveDraft() {
@@ -173,9 +193,9 @@ export default function SoloSetupPage() {
     <div style={nav}><button style={button} onClick={() => navigate(`/admin/solo?seasonId=${encodeURIComponent(seasonId)}`)}>← Solo Hub</button><button style={button} onClick={() => navigate(`/admin/solo/weeks?seasonId=${encodeURIComponent(seasonId)}`)} disabled={!seasonId}>Weeks →</button></div>
     <h1>Solo Setup / Roster</h1><p style={muted}>{season ? `Season ${season.season_number}` : "Load the exact managed Solo season."}</p>
     {loading ? <p>Loading…</p> : roster && <><p>Roster status: <strong>{roster.status}</strong> · {entries.length} players {dirty && <strong style={{ color: "#facc15" }}>· Unsaved changes</strong>}</p>
-      {roster.status === "draft" && playerSource && <section style={addPanel}>{playerSource === "existing" ? <><h2>Add Existing Global Player</h2><div style={sourceRow}><input style={input} placeholder="Search screen name" value={globalSearch} onChange={(event) => setGlobalSearch(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") void searchGlobalPlayers() }} /><button disabled={busy} style={primary} onClick={searchGlobalPlayers}>SEARCH</button><button disabled={busy} style={button} onClick={() => setPlayerSource(null)}>CANCEL</button></div>{globalPlayers.map((player) => <div key={player.id} style={row}><span>{player.screen_name}</span><button disabled={busy} style={button} onClick={() => addExistingPlayer(player)}>Add to Solo pool</button></div>)}</> : <><h2>Add New Player</h2><div style={addForm}><label style={field}>Screen Name<input style={input} value={screenName} onChange={(event) => setScreenName(event.target.value)} /></label><label style={field}>Discord ID<input style={input} inputMode="numeric" value={discordId} onChange={(event) => setDiscordId(event.target.value)} /></label><div style={actions}><button disabled={busy} style={primary} onClick={savePlayer}>SAVE PLAYER</button><button disabled={busy} style={button} onClick={() => setPlayerSource(null)}>CANCEL</button></div></div></>}</section>}
-      <div style={grid}>{SOLO_DIVISIONS.map((division) => { const presentation = SOLO_DIVISION_PRESENTATION[division]; return <section key={division} style={card}><h2 style={{ color: presentation.color }}><span role="img" aria-label={presentation.label}>{presentation.symbol}</span> {division}</h2>{entries.filter((entry) => entry.division === division).map((entry) => <div key={entry.player_id} style={row}><span>{entry.player_screen_name}</span>{roster.status === "draft" && <button style={small} onClick={() => remove(entry.player_id)}>Remove</button>}</div>)}{roster.status === "draft" && <div style={selectorRow}><select value="" style={selector} onChange={(event) => add(division, event.target.value)}><option value="">Solo signed-up players…</option>{players.filter((player) => !assigned.has(player.id)).map((player) => <option key={player.id} value={player.id}>{player.screen_name}{player.id === newPlayerId ? " · NEW" : ""}</option>)}</select><button style={button} onClick={() => { setPlayerSource("existing"); setGlobalPlayers([]) }}>Add Existing Global Player</button><button style={button} onClick={() => setPlayerSource("new")}>Add New Player</button></div>}</section> })}</div>
-      {roster.status === "draft" && <div style={actions}><button disabled={busy || !dirty} style={primary} onClick={saveDraft}>SAVE DRAFT</button><button disabled={busy || entries.length === 0 || dirty} style={button} onClick={approve}>APPROVE ROSTER</button></div>}
+      {roster.status === "draft" && playerSource && <section style={addPanel}>{playerSource === "existing" ? <><h2>Add Existing Global Player</h2><div style={sourceRow}><input style={input} autoFocus placeholder="Type a screen name" value={globalSearch} onChange={(event) => setGlobalSearch(event.target.value)} /><button disabled={busy} style={button} onClick={closePlayerSource}>CANCEL</button></div>{searching && <p style={muted}>Searching…</p>}{globalSearch.trim() && !searching && globalPlayers.length === 0 && <p style={muted}>No matching Global Players outside this Solo pool.</p>}{globalPlayers.length > 0 && <div style={searchResults}>{globalPlayers.map((player) => <button key={player.id} disabled={busy} style={searchResult} onClick={() => addExistingPlayer(player)}>{player.screen_name}</button>)}</div>}</> : <><h2>Add New Player</h2><div style={addForm}><label style={field}>Screen Name<input style={input} value={screenName} onChange={(event) => setScreenName(event.target.value)} /></label><label style={field}>Discord ID<input style={input} inputMode="numeric" value={discordId} onChange={(event) => setDiscordId(event.target.value)} /></label><div style={actions}><button disabled={busy} style={primary} onClick={savePlayer}>SAVE PLAYER</button><button disabled={busy} style={button} onClick={closePlayerSource}>CANCEL</button></div></div></>}</section>}
+      <div style={grid}>{SOLO_DIVISIONS.map((division) => { const presentation = SOLO_DIVISION_PRESENTATION[division]; return <section key={division} style={card}><h2 style={{ color: presentation.color }}><span role="img" aria-label={presentation.label}>{presentation.symbol}</span> {division}</h2>{entries.filter((entry) => entry.division === division).map((entry) => <div key={entry.player_id} style={row}><span>{entry.player_screen_name}</span>{roster.status === "draft" && <button style={small} onClick={() => remove(entry.player_id)}>Remove</button>}</div>)}{roster.status === "draft" && <select value="" style={selector} onChange={(event) => add(division, event.target.value)}><option value="">Solo signed-up players…</option>{players.filter((player) => !assigned.has(player.id)).map((player) => <option key={player.id} value={player.id}>{player.screen_name}{player.id === newPlayerId ? " · NEW" : ""}</option>)}</select>}</section> })}</div>
+      {roster.status === "draft" && <div style={bottomActions}><div style={actions}><button disabled={busy || !dirty} style={primary} onClick={saveDraft}>SAVE DRAFT</button><button disabled={busy || entries.length === 0 || dirty} style={button} onClick={approve}>APPROVE ROSTER</button></div><div style={playerActions}><button style={button} onClick={() => { setPlayerSource("existing"); setGlobalSearch(""); setGlobalPlayers([]) }}>Add Existing Global Player</button><button style={button} onClick={() => setPlayerSource("new")}>Add New Player to Solo Players</button></div></div>}
     </>}
     {message && <p style={notice}>{message}</p>}
   </div></main>
@@ -189,7 +209,7 @@ const grid: React.CSSProperties = { display: "grid", gridTemplateColumns: "repea
 const card: React.CSSProperties = { padding: 16, border: "1px solid #333", borderRadius: 12, background: "#0d0d0d" }
 const row: React.CSSProperties = { display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, padding: "7px 0" }
 const input: React.CSSProperties = { padding: 10, border: "1px solid #444", borderRadius: 8, background: "#111", color: "white" }
-const selector: React.CSSProperties = { ...input, minWidth: 190, flex: "1 1 190px" }
+const selector: React.CSSProperties = { ...input, width: "100%", marginTop: 12 }
 const button: React.CSSProperties = { padding: "9px 12px", border: "1px solid #555", borderRadius: 8, background: "#171717", color: "white" }
 const small: React.CSSProperties = { ...button, padding: "4px 7px" }
 const primary: React.CSSProperties = { ...button, background: "#126b3c", borderColor: "#167a45", fontWeight: 800 }
@@ -198,5 +218,8 @@ const notice: React.CSSProperties = { padding: 12, border: "1px solid #555", bor
 const addPanel: React.CSSProperties = { ...card, marginBottom: 16 }
 const addForm: React.CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 12, marginTop: 14 }
 const field: React.CSSProperties = { display: "flex", flexDirection: "column", gap: 7, fontWeight: 700 }
-const selectorRow: React.CSSProperties = { display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginTop: 12 }
 const sourceRow: React.CSSProperties = { display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }
+const searchResults: React.CSSProperties = { display: "flex", flexDirection: "column", marginTop: 8, border: "1px solid #333", borderRadius: 8, overflow: "hidden" }
+const searchResult: React.CSSProperties = { padding: "10px 12px", border: 0, borderBottom: "1px solid #282828", background: "#111", color: "white", textAlign: "left", cursor: "pointer" }
+const bottomActions: React.CSSProperties = { display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 16, flexWrap: "wrap", marginTop: 20 }
+const playerActions: React.CSSProperties = { display: "flex", justifyContent: "flex-end", gap: 10, flexWrap: "wrap", marginLeft: "auto" }
