@@ -41,13 +41,28 @@ export async function GET(request: Request) {
     )
   }
 
+  const { data: soloAuthorized, error: soloAuthorizationError } = await supabase.rpc(
+    "is_current_user_solo_admin"
+  )
+
+  if (soloAuthorizationError) {
+    return Response.json(
+      { authorized: false, reason: "authorization_check_failed" },
+      { status: 503, headers: { "Cache-Control": "no-store" } }
+    )
+  }
+
+  const hasAdminAccess = Boolean(authorized || soloAuthorized)
+
   return Response.json(
     {
-      authorized,
-      reason: authorized ? null : "admin_access_denied",
+      authorized: hasAdminAccess,
+      siteAdmin: Boolean(authorized),
+      soloAdmin: Boolean(soloAuthorized),
+      reason: hasAdminAccess ? null : "admin_access_denied",
     },
     {
-      status: authorized ? 200 : 403,
+      status: hasAdminAccess ? 200 : 403,
       headers: { "Cache-Control": "no-store" },
     }
   )

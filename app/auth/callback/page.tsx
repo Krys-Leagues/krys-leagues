@@ -41,7 +41,8 @@ async function hasAdminAccess(accessToken: string) {
     cache: "no-store",
   })
 
-  return response.ok
+  if (!response.ok) return null
+  return response.json() as Promise<{ siteAdmin?: boolean; soloAdmin?: boolean }>
 }
 
 function CallbackHandler() {
@@ -69,8 +70,13 @@ function CallbackHandler() {
 
       if (type === "admin" || (isSafeInternalPath(next) && next.startsWith("/admin"))) {
         try {
-          if (await hasAdminAccess(session.access_token)) {
+          const permissions = await hasAdminAccess(session.access_token)
+          if (permissions?.siteAdmin) {
             router.replace("/admin/command-center")
+            return
+          }
+          if (permissions?.soloAdmin) {
+            router.replace("/admin/solo")
             return
           }
         } catch {
