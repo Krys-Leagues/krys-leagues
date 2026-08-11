@@ -80,10 +80,11 @@ export default function MajorDetailPage() {
   const signupState = signupStatus?.state || (event.signup_open ? "open" : "closed")
   const signupDisabled = signupState !== "open" && signupState !== "priority"
 
-  return <main className={`${styles.page} ${masters ? styles.masters : styles.defaultTheme}`}><div className={styles.atmosphere} /><div className={styles.container}>
+  return <main className={`${styles.page} ${masters ? styles.masters : styles.defaultTheme}`}><div className={styles.atmosphere}>{masters && <div className={styles.mastersScene} aria-hidden="true"><i className={styles.blossomTree} /><i className={styles.bench} /><i className={styles.putter} /><i className={styles.golfBall} /><i className={styles.golfBallTwo} /></div>}</div><div className={styles.container}>
     <Link href="/majors" className={styles.backLink}>← Four Majors</Link>
     <header className={styles.hero}>
       <div className={styles.brandRow}><Image src="/league-media/BIG LOGO TRANSPARENT.png" width={136} height={136} alt="Krys Leagues" className={styles.logo} priority /><div><p className={styles.eyebrow}>Krys Leagues · Majors Series</p><h1>{event.name}</h1><p className={styles.subtitle}>{masters ? "Mini-Golf Style · Cherry Blossom" : "Major Championship"}</p></div></div>
+      {masters && <div className={styles.mastersFeature} role="img" aria-label="Cherry Blossom course artwork from the Masters scorecard"><div className={styles.featureSheen} /></div>}
       <div className={styles.statusRow}><span className={styles.badge}>{event.status}</span><span className={`${styles.badge} ${styles[signupState]}`}>Signup {signupState}</span><span className={styles.capacity}>{signupStatus?.spots_claimed ?? entries.length} claimed {signupStatus?.capacity ? `of ${signupStatus.capacity}` : "· field capacity not set"}</span></div>
       <p className={styles.meta}>{event.year || "Year to be announced"} · {formatMajorDate(event.starts_at)}</p>
       {event.description && <p className={styles.description}>{event.description}</p>}
