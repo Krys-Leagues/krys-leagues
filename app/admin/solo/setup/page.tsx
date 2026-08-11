@@ -95,7 +95,7 @@ export default function SoloSetupPage() {
 
     let cancelled = false
     setSearching(true)
-    void supabase.from("players").select("id,screen_name").eq("active", true).ilike("screen_name", `%${search}%`).order("screen_name").limit(20).then(({ data, error }) => {
+    void supabase.rpc("search_solo_existing_global_players", { p_season_id: seasonId, p_search: search }).then(({ data, error }) => {
       if (cancelled) return
       setSearching(false)
       if (error) {
@@ -103,12 +103,11 @@ export default function SoloSetupPage() {
         setMessage("Global Players could not be searched.")
         return
       }
-      const poolIds = new Set(players.map((player) => player.id))
-      setGlobalPlayers(((data || []) as Player[]).filter((player) => !poolIds.has(player.id)))
+      setGlobalPlayers((data || []) as Player[])
     })
 
     return () => { cancelled = true }
-  }, [globalSearch, playerSource, players])
+  }, [globalSearch, playerSource, seasonId])
   const dirty = roster?.status === "draft" && rosterFingerprint(entries) !== savedFingerprint
   useEffect(() => {
     function warn(event: BeforeUnloadEvent) {
