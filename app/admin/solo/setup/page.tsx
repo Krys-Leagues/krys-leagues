@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase"
 import { SOLO_DIVISIONS, SOLO_DIVISION_PRESENTATION, type SoloDivision } from "@/lib/solo"
 
 type Player = { id: string; screen_name: string }
+type DiscordMatch = Player & { discord_id: string; already_in_pool: boolean }
 type PoolEntry = { player_id: string }
 type Entry = { player_id: string; player_screen_name: string; division: SoloDivision; display_order: number }
 type Roster = { id: string; status: "draft" | "approved" | "locked" }
@@ -38,6 +39,8 @@ export default function SoloSetupPage() {
   const [entries, setEntries] = useState<Entry[]>([])
   const [savedFingerprint, setSavedFingerprint] = useState("[]")
   const [message, setMessage] = useState("")
+  const [existingMessage, setExistingMessage] = useState("")
+  const [newPlayerMessage, setNewPlayerMessage] = useState("")
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
   const [searchingExisting, setSearchingExisting] = useState(false)
@@ -45,8 +48,10 @@ export default function SoloSetupPage() {
   const [globalSearch, setGlobalSearch] = useState("")
   const [screenName, setScreenName] = useState("")
   const [discordId, setDiscordId] = useState("")
+  const [discordMatch, setDiscordMatch] = useState<DiscordMatch | null>(null)
   const [newPlayerId, setNewPlayerId] = useState("")
   const screenNameRef = useRef<HTMLInputElement>(null)
+  const existingSearchRef = useRef<HTMLInputElement>(null)
 
   const load = useCallback(async () => {
     const id = new URLSearchParams(window.location.search).get("seasonId") || ""
@@ -101,9 +106,10 @@ export default function SoloSetupPage() {
       setSearchingExisting(false)
       if (error) {
         setGlobalPlayers([])
-        setMessage("Global Players could not be searched.")
+        setExistingMessage("Global Players could not be searched.")
         return
       }
+      setExistingMessage("")
       setGlobalPlayers((data || []) as Player[])
     })
 
@@ -123,13 +129,32 @@ export default function SoloSetupPage() {
       setSearchingNew(false)
       if (error) {
         setNewPlayerMatches([])
-        setMessage("Global Players could not be checked for possible matches.")
+        setNewPlayerMessage("Global Players could not be checked for possible matches.")
         return
       }
       setNewPlayerMatches((data || []) as Player[])
     })
     return () => { cancelled = true }
   }, [screenName, seasonId])
+  useEffect(() => {
+    const discord = discordId.trim()
+    if (!/^\d{17,20}$/.test(discord)) {
+      setDiscordMatch(null)
+      return
+    }
+    let cancelled = false
+    void supabase.rpc("find_solo_player_by_discord_id", { p_season_id: seasonId, p_discord_id: discord }).maybeSingle().then(({ data, error }) => {
+      if (cancelled) return
+      if (error) {
+        setDiscordMatch(null)
+        setNewPlayerMessage("Discord ID could not be checked.")
+        return
+      }
+      setDiscordMatch((data as DiscordMatch | null) || null)
+      if (data) setNewPlayerMessage("")
+    })
+    return () => { cancelled = true }
+  }, [discordId, seasonId])
   const dirty = roster?.status === "draft" && rosterFingerprint(entries) !== savedFingerprint
   useEffect(() => {
     function warn(event: BeforeUnloadEvent) {
@@ -154,44 +179,70 @@ export default function SoloSetupPage() {
     if (dirty && !window.confirm("You have unsaved Solo roster changes. Leave without saving?")) return
     router.push(href)
   }
-  async function addExistingPlayer(player: Player, source: "existing" | "new" = "existing") {
+  function clearNewPlayerEntry() {
+    setScreenName("")
+    setDiscordId("")
+    setNewPlayerMatches([])
+    setDiscordMatch(null)
+  }
+  async function addExistingPlayer(player: Player | DiscordMatch, source: "existing" | "new" = "existing") {
+    if ("already_in_pool" in player && player.already_in_pool) {
+      clearNewPlayerEntry()
+      setNewPlayerMessage("This player is already available in Solo signed-up players.")
+      requestAnimationFrame(() => screenNameRef.current?.focus())
+      return
+    }
     setBusy(true)
     const { data, error } = await supabase.rpc("add_existing_player_to_solo_pool", { p_season_id: seasonId, p_player_id: player.id }).single()
     setBusy(false)
-    if (error || !data) return setMessage(friendlyError(error?.message || "", "Player could not be added to the Solo pool."))
+    if (error || !data) {
+      const errorMessage = friendlyError(error?.message || "", "Player could not be added to the Solo pool.")
+      if (source === "existing") setExistingMessage(errorMessage)
+      else setNewPlayerMessage(errorMessage)
+      return
+    }
     setPlayers((current) => [...current, data as Player].sort((a, b) => a.screen_name.localeCompare(b.screen_name)))
     setNewPlayerId(player.id)
     if (source === "existing") {
       setGlobalSearch("")
       setGlobalPlayers([])
+      setExistingMessage(`${player.screen_name} added to Solo signed-up players.`)
+      requestAnimationFrame(() => existingSearchRef.current?.focus())
     } else {
-      setScreenName("")
-      setDiscordId("")
-      setNewPlayerMatches([])
+      clearNewPlayerEntry()
+      setNewPlayerMessage(`${player.screen_name} added to Solo signed-up players.`)
       requestAnimationFrame(() => screenNameRef.current?.focus())
     }
-    setMessage(`${player.screen_name} is now available in the Solo division selectors.`)
   }
   async function savePlayer() {
     const name = screenName.trim()
     const discord = discordId.trim()
-    if (!name) return setMessage("Enter the player's screen name.")
-    if (!/^\d{17,20}$/.test(discord)) return setMessage("Enter a valid numeric Discord ID.")
+    setNewPlayerMessage("")
+    if (!name) return setNewPlayerMessage("Enter the player's screen name.")
+    if (!/^\d{17,20}$/.test(discord)) return setNewPlayerMessage("Enter a valid numeric Discord ID.")
+    if (discordMatch) return setNewPlayerMessage("Existing player found. Use the canonical player shown below.")
     setBusy(true)
     const { data, error } = await supabase.rpc("create_solo_canonical_player", { p_season_id: seasonId, p_screen_name: name, p_discord_id: discord }).single()
     setBusy(false)
     if (error || !data) {
-      setMessage(friendlyError(error?.message || "", "Player could not be created."))
+      const normalizedError = (error?.message || "").toLowerCase()
+      if (normalizedError.includes("discord") && (normalizedError.includes("already") || normalizedError.includes("duplicate") || normalizedError.includes("unique"))) {
+        const { data: existing } = await supabase.rpc("find_solo_player_by_discord_id", { p_season_id: seasonId, p_discord_id: discord }).maybeSingle()
+        if (existing) {
+          setDiscordMatch(existing as DiscordMatch)
+          setNewPlayerMessage("Existing player found for this Discord ID.")
+          return
+        }
+      }
+      setNewPlayerMessage(friendlyError(error?.message || "", "Player could not be created."))
       return
     }
     const player = data as Player
     setPlayers((current) => [...current.filter((item) => item.id !== player.id), player].sort((a, b) => a.screen_name.localeCompare(b.screen_name)))
     setNewPlayerId(player.id)
-    setScreenName("")
-    setDiscordId("")
-    setNewPlayerMatches([])
+    clearNewPlayerEntry()
     requestAnimationFrame(() => screenNameRef.current?.focus())
-    setMessage(`${player.screen_name} was saved globally, added to this Solo season's pool, and is ready to assign.`)
+    setNewPlayerMessage(`${player.screen_name} created and added to Solo signed-up players.`)
   }
   async function saveDraft() {
     if (!roster) return
@@ -218,7 +269,27 @@ export default function SoloSetupPage() {
     <h1>Solo Setup / Roster</h1><p style={muted}>{season ? `Season ${season.season_number}` : "Load the exact managed Solo season."}</p>
     {loading ? <p>Loading…</p> : roster && <><p>Roster status: <strong>{roster.status}</strong> · {entries.length} players {dirty && <strong style={{ color: "#facc15" }}>· Unsaved changes</strong>}</p>
       <div style={grid}>{SOLO_DIVISIONS.map((division) => { const presentation = SOLO_DIVISION_PRESENTATION[division]; return <section key={division} style={card}><h2 style={{ color: presentation.color }}><span role="img" aria-label={presentation.label}>{presentation.symbol}</span> {division}</h2>{entries.filter((entry) => entry.division === division).map((entry) => <div key={entry.player_id} style={row}><span>{entry.player_screen_name}</span>{roster.status === "draft" && <button style={small} onClick={() => remove(entry.player_id)}>Remove</button>}</div>)}{roster.status === "draft" && <select value="" style={selector} onChange={(event) => add(division, event.target.value)}><option value="">Solo signed-up players…</option>{players.filter((player) => !assigned.has(player.id)).map((player) => <option key={player.id} value={player.id}>{player.screen_name}{player.id === newPlayerId ? " · NEW" : ""}</option>)}</select>}</section> })}</div>
-      {roster.status === "draft" && <div style={bottomActions}><div style={actions}><button disabled={busy || !dirty} style={primary} onClick={saveDraft}>SAVE DRAFT</button><button disabled={busy || entries.length === 0 || dirty} style={button} onClick={approve}>APPROVE ROSTER</button></div><div style={playerTools}><section style={compactTool}><h3>Existing Global Player</h3><input style={input} placeholder="Type a screen name" value={globalSearch} onChange={(event) => setGlobalSearch(event.target.value)} />{searchingExisting && <p style={muted}>Searching…</p>}{globalSearch.trim() && !searchingExisting && globalPlayers.length === 0 && <p style={muted}>No eligible matches.</p>}{globalPlayers.length > 0 && <div style={searchResults}>{globalPlayers.map((player) => <button key={player.id} disabled={busy} style={searchResult} onClick={() => addExistingPlayer(player)}>{player.screen_name}</button>)}</div>}</section><section style={compactTool}><h3>New Player</h3><label style={field}>Screen Name<input ref={screenNameRef} style={input} value={screenName} onChange={(event) => setScreenName(event.target.value)} /></label>{searchingNew && <p style={muted}>Checking…</p>}{newPlayerMatches.length > 0 && <div style={searchResults}>{newPlayerMatches.map((player) => <div key={player.id} style={matchRow}><span>{player.screen_name}</span><button disabled={busy} style={small} onClick={() => addExistingPlayer(player, "new")}>USE EXISTING PLAYER</button></div>)}</div>}<label style={field}>Discord ID<input style={input} inputMode="numeric" value={discordId} onChange={(event) => setDiscordId(event.target.value)} /></label><button disabled={busy} style={primary} onClick={savePlayer}>SAVE PLAYER</button></section></div></div>}
+      {roster.status === "draft" && <div style={bottomActions}>
+        <div style={actions}><button disabled={busy || !dirty} style={primary} onClick={saveDraft}>SAVE DRAFT</button><button disabled={busy || entries.length === 0 || dirty} style={button} onClick={approve}>APPROVE ROSTER</button></div>
+        <div style={playerTools}>
+          <section style={compactTool}><h3>Existing Global Player</h3>
+            <input ref={existingSearchRef} style={input} placeholder="Type a screen name" value={globalSearch} onChange={(event) => { setGlobalSearch(event.target.value); setExistingMessage("") }} />
+            {searchingExisting && <p style={muted}>Searching…</p>}
+            {globalSearch.trim() && !searchingExisting && globalPlayers.length === 0 && <p style={muted}>No eligible matches.</p>}
+            {globalPlayers.length > 0 && <div style={searchResults}>{globalPlayers.map((player) => <button key={player.id} disabled={busy} style={searchResult} onClick={() => addExistingPlayer(player)}>{player.screen_name}</button>)}</div>}
+            {existingMessage && <p style={localNotice}>{existingMessage}</p>}
+          </section>
+          <section style={compactTool}><h3>New Player</h3>
+            <label style={field}>Screen Name<input ref={screenNameRef} style={input} value={screenName} onChange={(event) => { setScreenName(event.target.value); setNewPlayerMessage("") }} /></label>
+            {searchingNew && <p style={muted}>Checking…</p>}
+            {newPlayerMatches.length > 0 && <div style={searchResults}>{newPlayerMatches.map((player) => <div key={player.id} style={matchRow}><span>{player.screen_name}</span><button disabled={busy} style={small} onClick={() => addExistingPlayer(player, "new")}>USE EXISTING PLAYER</button></div>)}</div>}
+            <label style={field}>Discord ID<input style={input} inputMode="numeric" value={discordId} onChange={(event) => { setDiscordId(event.target.value); setNewPlayerMessage("") }} /></label>
+            {discordMatch && <div style={identityMatch}><strong>EXISTING PLAYER FOUND</strong><span>Screen Name: {discordMatch.screen_name}</span><span>Discord ID: {discordMatch.discord_id}</span>{discordMatch.already_in_pool ? <span>This player is already available in Solo signed-up players.</span> : <button disabled={busy} style={small} onClick={() => addExistingPlayer(discordMatch, "new")}>USE EXISTING PLAYER</button>}</div>}
+            {newPlayerMessage && <p style={localNotice}>{newPlayerMessage}</p>}
+            <button disabled={busy} style={primary} onClick={savePlayer}>SAVE PLAYER</button>
+          </section>
+        </div>
+      </div>}
     </>}
     {message && <p style={notice}>{message}</p>}
   </div></main>
@@ -245,3 +316,5 @@ const bottomActions: React.CSSProperties = { display: "flex", justifyContent: "s
 const playerTools: React.CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(230px,1fr))", gap: 12, width: "min(100%,560px)", marginLeft: "auto" }
 const compactTool: React.CSSProperties = { ...card, padding: 14 }
 const matchRow: React.CSSProperties = { ...row, background: "#111", padding: 9 }
+const identityMatch: React.CSSProperties = { display: "flex", flexDirection: "column", gap: 7, padding: 10, margin: "10px 0", border: "1px solid #a16207", borderRadius: 8, background: "#211704" }
+const localNotice: React.CSSProperties = { padding: 9, margin: "10px 0", border: "1px solid #444", borderRadius: 8, background: "#171717" }
