@@ -17,8 +17,26 @@ export type MajorEvent = {
   scorecard_background_url: string | null
   scorecard_accent_color: string | null
   scorecard_text_color: string | null
+  signup_capacity: number | null
+  public_signup_opens_at: string | null
+  priority_signup_enabled: boolean
+  priority_signup_opens_at: string | null
+  priority_source_event_id: string | null
+  minimum_public_spots_at_open: number | null
+  public_capacity_adjusted_at: string | null
+  later_release_used_at: string | null
+  later_release_spots: number | null
   created_at: string
   updated_at: string
+}
+
+export type MajorSignupStatus = {
+  spots_claimed: number
+  capacity: number | null
+  signup_open: boolean
+  public_signup_opens_at: string | null
+  priority_signup_enabled: boolean
+  state: "open" | "priority" | "full" | "upcoming" | "closed"
 }
 
 export type MajorScoringSession = {
@@ -83,6 +101,40 @@ export type MajorEntry = {
   status: "registered" | "confirmed" | "waitlisted" | "withdrawn" | "declined"
   registered_at: string
   updated_at: string
+}
+
+export type MajorPlayDay = {
+  id: string
+  major_event_id: string
+  day_number: 1 | 2 | 3 | 4
+  label: string
+  play_date: string
+  choices_locked: boolean
+}
+
+export type MajorTimeSlot = {
+  id: string
+  play_day_id: string
+  starts_at: string
+  label: string | null
+  is_available: boolean
+}
+
+export type MajorDayChoice = {
+  id: string
+  entry_id: string
+  play_day_id: string
+  time_slot_id: string
+  assignment_location: string | null
+  starts_at?: string
+  slot_label?: string | null
+}
+
+export function formatMajorSlot(value: string) {
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: "full",
+    timeStyle: "short",
+  }).format(new Date(value))
 }
 
 export const MAJOR_EVENT_STATUSES: MajorEvent["status"][] = [
