@@ -168,8 +168,9 @@ set search_path to ''
 as $function$
 declare
   provider_id text;
-  matched_count integer;
-  matched_player public.players;
+  matched_count bigint;
+  matched_player_id uuid;
+  matched_player_screen_name text;
   saved public.major_entries;
 begin
   if auth.uid() is null then
@@ -183,32 +184,46 @@ begin
     raise exception 'Signup is not open for this Major';
   end if;
 
+  if coalesce(auth.jwt() -> 'app_metadata' ->> 'provider', '') <> 'discord'
+    and not (coalesce(auth.jwt() -> 'app_metadata' -> 'providers', '[]'::jsonb) ? 'discord')
+  then
+    raise exception 'Discord authentication is required' using errcode = '42501';
+  end if;
+
   provider_id := coalesce(
-    auth.jwt() -> 'user_metadata' ->> 'provider_id',
-    auth.jwt() -> 'user_metadata' ->> 'sub'
+    nullif(btrim(auth.jwt() -> 'user_metadata' ->> 'provider_id'), ''),
+    nullif(btrim(auth.jwt() -> 'user_metadata' ->> 'sub'), '')
   );
-  if nullif(btrim(provider_id), '') is null then
+  if provider_id is null then
     raise exception 'Discord identity could not be verified' using errcode = '42501';
   end if;
 
-  select count(*), (array_agg(player order by player.id))[1]
-  into matched_count, matched_player
+  select count(*)
+  into matched_count
   from public.players player
   where player.discord_id = provider_id;
 
   if matched_count = 0 then
     raise exception 'No Krys Leagues player is linked to this Discord account' using errcode = '42501';
   elsif matched_count > 1 then
-    raise exception 'This Discord account is linked to multiple players; an administrator must resolve it' using errcode = '23505';
+    raise exception 'This Discord account is linked to multiple players; an administrator must resolve it' using errcode = '21000';
   end if;
 
+  select player.id, player.screen_name
+  into strict matched_player_id, matched_player_screen_name
+  from public.players player
+  where player.discord_id = provider_id;
+
   insert into public.major_entries (major_event_id, player_id, player_screen_name_snapshot)
-  values (p_major_event_id, matched_player.id, matched_player.screen_name)
+  values (p_major_event_id, matched_player_id, matched_player_screen_name)
+  on conflict (major_event_id, player_id) do nothing
   returning * into saved;
-  return saved;
-exception
-  when unique_violation then
+
+  if saved.id is null then
     raise exception 'This player is already registered for this Major' using errcode = '23505';
+  end if;
+
+  return saved;
 end;
 $function$;
 
@@ -243,12 +258,17 @@ begin
   insert into public.major_entries (major_event_id, player_id, player_screen_name_snapshot)
   select p_major_event_id, player.id, player.screen_name
   from public.players player where player.id = p_player_id
+  on conflict (major_event_id, player_id) do nothing
   returning * into saved;
-  if saved.id is null then raise exception 'Player not found'; end if;
-  return saved;
-exception
-  when unique_violation then
+
+  if saved.id is null then
+    if not exists (select 1 from public.players player where player.id = p_player_id) then
+      raise exception 'Player not found';
+    end if;
     raise exception 'This player is already registered for this Major' using errcode = '23505';
+  end if;
+
+  return saved;
 end;
 $function$;
 

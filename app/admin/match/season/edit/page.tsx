@@ -5,11 +5,13 @@ import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
+import { ManagedSeasonDangerZone } from "@/components/admin/ManagedSeasonDangerZone"
 
 type SeasonRow = {
   id: string
   season_number: number
   is_active: boolean
+  is_locked: boolean
   start_date: string | null
   due_date: string | null
   end_date: string | null
@@ -82,9 +84,9 @@ export default function EditCurrentMatchSeasonPage() {
       const { data: seasonData, error: seasonError } = await supabase
         .from("seasons")
         .select(
-          "id, season_number, is_active, start_date, due_date, end_date, game1_course, game2_course, game3_course"
+          "id, season_number, is_active, is_locked, start_date, due_date, end_date, game1_course, game2_course, game3_course"
         )
-        .eq("league_type", LEAGUE_TYPE)
+        .ilike("league_type", LEAGUE_TYPE)
         .is("division", null)
         .order("is_active", { ascending: false })
         .order("season_number", { ascending: false })
@@ -129,9 +131,12 @@ export default function EditCurrentMatchSeasonPage() {
         (season) => season.id === requestedSeasonId
       )
 
+      const loadedRosters = (rosterData || []) as RosterVersionRow[]
+      const currentSeasonIds = new Set(loadedRosters.filter((roster) => roster.status !== "locked").map((roster) => roster.season_id))
+      const defaultSeason = loadedSeasons.find((season) => !season.is_locked && currentSeasonIds.has(season.id)) || loadedSeasons[0]
       setSeasons(loadedSeasons)
-      setRosterVersions((rosterData || []) as RosterVersionRow[])
-      setSelectedSeasonId(requestedSeason?.id || loadedSeasons[0].id)
+      setRosterVersions(loadedRosters)
+      setSelectedSeasonId(requestedSeason?.id || defaultSeason.id)
       setLoading(false)
     }
 
@@ -171,6 +176,12 @@ export default function EditCurrentMatchSeasonPage() {
       selectedRoster ? String(selectedRoster.division_count) : ""
     )
   }, [selectedRoster])
+
+  const currentSeasons = useMemo(() => seasons.filter((season) => {
+    const roster = rosterVersions.find((item) => item.season_id === season.id)
+    return !season.is_locked && Boolean(roster && roster.status !== "locked")
+  }), [seasons, rosterVersions])
+  const pastSeasons = useMemo(() => seasons.filter((season) => !currentSeasons.some((current) => current.id === season.id)), [seasons, currentSeasons])
 
   const divisions = useMemo(() => {
     if (!selectedRoster) return []
@@ -344,7 +355,8 @@ export default function EditCurrentMatchSeasonPage() {
     }
   }
 
-  const rosterIsLocked = selectedRoster?.status === "locked"
+  const rosterIsLocked = selectedSeason?.is_locked || selectedRoster?.status === "locked" || !selectedRoster
+  const selectedIsHistorical = Boolean(selectedSeason && pastSeasons.some((season) => season.id === selectedSeason.id))
 
   return (
     <main style={page}>
@@ -379,10 +391,12 @@ export default function EditCurrentMatchSeasonPage() {
           ) : seasons.length === 0 ? (
             <p style={mutedText}>No Match seasons were found.</p>
           ) : (
+            <>
+            <div style={detailsGrid}>
             <label style={fieldLabel}>
-              Match Season
+              CURRENT MANAGED SEASONS
               <select
-                value={selectedSeasonId}
+                value={currentSeasons.some((season) => season.id === selectedSeasonId) ? selectedSeasonId : ""}
                 onChange={(event) => {
                   setDetailsMessage("")
                   setDetailsMessageType(null)
@@ -391,14 +405,27 @@ export default function EditCurrentMatchSeasonPage() {
                 }}
                 style={select}
               >
-                {seasons.map((season) => (
+                <option value="" disabled>Select a current season</option>
+                {currentSeasons.map((season) => (
                   <option key={season.id} value={season.id}>
                     Season {season.season_number}
-                    {season.is_active ? " (Active)" : ""}
+                    {season.is_active ? " (Active)" : ""} — {rosterVersions.find((roster) => roster.season_id === season.id)?.status}
                   </option>
                 ))}
               </select>
             </label>
+            <label style={fieldLabel}>
+              PAST SEASONS
+              <select value={pastSeasons.some((season) => season.id === selectedSeasonId) ? selectedSeasonId : ""} onChange={(event) => setSelectedSeasonId(event.target.value)} style={select}>
+                <option value="" disabled>Select a past season</option>
+                {pastSeasons.map((season) => (
+                  <option key={season.id} value={season.id}>Season {season.season_number} — {rosterVersions.find((roster) => roster.season_id === season.id)?.status || "legacy UUID"}</option>
+                ))}
+              </select>
+            </label>
+            </div>
+            <p style={mutedText}>Legacy number-only or division-row history is not selectable because it has no single authoritative season UUID.</p>
+            </>
           )}
         </section>
 
@@ -407,8 +434,9 @@ export default function EditCurrentMatchSeasonPage() {
             <section style={panel}>
               <h2 style={sectionTitle}>EDIT SEASON DETAILS</h2>
               <p style={sectionDescription}>
-                Update the season dates, default courses, and managed division
-                count. Season identity remains fixed.
+                {selectedIsHistorical
+                  ? "Historical season details are loaded from the authoritative season UUID and remain read-only."
+                  : "Update the season dates, default courses, and managed division count. Season identity remains fixed."}
               </p>
 
               <div style={detailsGrid}>
@@ -561,6 +589,14 @@ export default function EditCurrentMatchSeasonPage() {
                 </>
               )}
             </section>
+
+            <ManagedSeasonDangerZone
+              seasonId={selectedSeason.id}
+              seasonNumber={selectedSeason.season_number}
+              leagueName="Match"
+              returnPath="/admin/match/season"
+              historical={selectedIsHistorical}
+            />
 
           </>
         )}

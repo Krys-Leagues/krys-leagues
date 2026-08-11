@@ -33,17 +33,19 @@ export default function PypAdminPage() {
         .from("pyp_roster_versions")
         .select("season_id, status")
         .in("season_id", seasons.map((season) => season.id))
-        .in("status", ["draft", "approved"])
+        .in("status", ["draft", "approved", "locked"])
 
       if (rosterError) {
         setLoadError(`Could not load the current PYP roster: ${rosterError.message}`)
         return
       }
 
-      const managedIds = new Set(
-        ((rosterData || []) as PypRoster[]).map((roster) => roster.season_id)
-      )
-      setManagedSeason(seasons.find((season) => managedIds.has(season.id)) || null)
+      const rosters = (rosterData || []) as PypRoster[]
+      const managedIds = new Set(rosters.map((roster) => roster.season_id))
+      const currentIds = new Set(rosters.filter((roster) => roster.status !== "locked").map((roster) => roster.season_id))
+      const requestedSeasonId = new URLSearchParams(window.location.search).get("seasonId")
+      const requestedSeason = seasons.find((season) => season.id === requestedSeasonId && managedIds.has(season.id))
+      setManagedSeason(requestedSeason || seasons.find((season) => currentIds.has(season.id)) || null)
     }
 
     void loadManagedSeason()
@@ -81,10 +83,13 @@ export default function PypAdminPage() {
           <><div style={{ ...card, opacity: 0.65 }}><strong>Results Admin</strong><span>{loadError || "No current managed PYP season is available yet."}</span></div><div style={{ ...card, opacity: 0.65 }}><strong>Schedule &amp; Images</strong><span>{loadError || "No current managed PYP season is available yet."}</span></div><div style={{ ...card, opacity: 0.65 }}><strong>Scorecard / Standings</strong><span>{loadError || "No current managed PYP season is available yet."}</span></div></>
         )}
 
-        <Link href="/admin/players" style={card}>
-          <strong>Players</strong>
-          <span>View the global player list used across all leagues.</span>
-        </Link>
+        {managedSeason ? (
+          <Link href={`/admin/pyp/players?seasonId=${encodeURIComponent(managedSeason.id)}`} style={card}>
+            <strong>Players</strong><span>View players in this PYP season.</span>
+          </Link>
+        ) : (
+          <div style={{ ...card, opacity: 0.65 }}><strong>Players</strong><span>{loadError || "No current managed PYP season is available yet."}</span></div>
+        )}
 
         <Link href="/admin" style={card}>
           <strong>Back to Admin Home</strong>
