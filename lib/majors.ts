@@ -165,10 +165,19 @@ export function isMastersScorecardTheme(event: {
   name: string
   scorecard_background_url: string | null
 }) {
+  const slug = event.slug.trim().toLowerCase()
+  const name = event.name.trim().toLowerCase()
+  const background = event.scorecard_background_url?.toLowerCase() || ""
+
   return (
-    event.scorecard_background_url === MASTERS_SCORECARD_THEME.backgroundUrl ||
-    event.slug.toLowerCase() === "masters" ||
-    event.name.trim().toLowerCase() === "masters"
+    background === MASTERS_SCORECARD_THEME.backgroundUrl ||
+    background.includes("/major-scorecards/masters/") ||
+    slug === "masters" ||
+    slug === "major-1" ||
+    name === "masters" ||
+    name === "major 1" ||
+    name.startsWith("masters ") ||
+    name.endsWith(" masters")
   )
 }
 
