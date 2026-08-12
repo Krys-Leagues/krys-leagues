@@ -10,6 +10,9 @@ import {
   previewFingerprint,
   sourceSha256,
 } from "../historicalMatchCommit.ts"
+import { historicalStandingIdentityRpcArgs, searchExistingPlayers } from "../historicalMatchIdentity.ts"
+import type { PlayerRecord } from "../loadPlayers.ts"
+import type { PlayerIdentityAlias } from "../../identity/types.ts"
 
 const SIDE_WIDTH = 19
 const RIGHT_START = 20
@@ -180,4 +183,41 @@ test("historical review UI uses only the dedicated commit RPC and requires confi
   assert.match(component, /onClick=\{\(\) => void commitHistoricalSeason\(\)\}/)
   assert.doesNotMatch(historicalFiles, /\b(runImport|createImportBatch|saveImportRows)\b/)
   assert.doesNotMatch(historicalFiles, /\.rpc\("(?:create_match_season_with_roster|generate_match_schedule|review_match_schedule|save_match_result|delete_match_result|rebuild_match_standings|generate_match_final_scorecard|approve_match_final_scorecard)"/)
+})
+
+test("existing-player search finds supported identity evidence but never selects automatically", () => {
+  const players: PlayerRecord[] = [{ id: "11111111-1111-1111-1111-111111111111", screen_name: "Warey84", discord_name: "Warey", discord_username: "warey_user", discord_id: "987654321", active: true }]
+  const aliases: PlayerIdentityAlias[] = [{ playerId: players[0].id, aliasName: "OLD WAREY", normalizedAlias: "old warey", source: "historical_alias", active: true }]
+  assert.equal(searchExistingPlayers(players, aliases, "Warey84")[0]?.id, players[0].id)
+  assert.equal(searchExistingPlayers(players, aliases, "OLD WAREY")[0]?.id, players[0].id)
+  assert.equal(searchExistingPlayers(players, aliases, "warey_user")[0]?.id, players[0].id)
+  assert.equal(searchExistingPlayers(players, aliases, "987654321")[0]?.id, players[0].id)
+  assert.deepEqual(searchExistingPlayers(players, aliases, ""), [])
+})
+
+test("committed identity RPC arguments link or clear one standing only", () => {
+  assert.deepEqual(historicalStandingIdentityRpcArgs("standing-id", "player-id", "Explicit selection"), {
+    p_historical_match_standing_id: "standing-id",
+    p_approved_player_id: "player-id",
+    p_resolution_note: "Explicit selection",
+  })
+  assert.equal(historicalStandingIdentityRpcArgs("standing-id", null, null).p_approved_player_id, null)
+})
+
+test("find/link workflow preserves frozen names and uses no player insert or managed Match mutation", async () => {
+  const preview = previewHistoricalMatchCsv(season55Matrix())
+  const target = preview.divisions[0].standings[0]
+  const key = historicalMatchStandingKey(target.divisionNumber, target.finalRank)
+  const playerId = "11111111-1111-1111-1111-111111111111"
+  const payload = buildHistoricalMatchCommitPayload(preview, { [key]: { canonicalPlayerId: playerId } }, "season55.csv", "a".repeat(64), await previewFingerprint(preview))
+  const body = payload.p_validated_preview as { divisions: Array<{ standings: Array<{ historicalDisplayName: string; canonicalPlayerId: string | null }> }> }
+  const linked = body.divisions.flatMap((division) => division.standings).find((standing) => standing.canonicalPlayerId === playerId)
+  assert.equal(linked?.historicalDisplayName, target.historicalDisplayName)
+
+  const files = ["app/admin/import/csv/components/ExistingPlayerPicker.tsx", "app/admin/import/csv/components/CommittedHistoricalMatchIdentities.tsx", "lib/importer/historicalMatchIdentity.ts"].map((file) => readFileSync(file, "utf8")).join("\n")
+  assert.match(files, /set_historical_match_standing_identity/)
+  assert.doesNotMatch(files, /\.from\("players"\)\.(?:insert|upsert)|create_match_|save_match_|delete_match_|rebuild_match_|generate_match_|approve_match_/)
+  assert.doesNotMatch(files, /match_specific_alias|historical_match_alias/)
+  assert.match(files, /historical_match_imports/)
+  assert.match(files, /canonical_player_id/)
 })

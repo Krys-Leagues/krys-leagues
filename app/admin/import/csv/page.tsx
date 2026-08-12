@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import HistoricalMatchPreview from "./components/HistoricalMatchPreview"
+import CommittedHistoricalMatchIdentities from "./components/CommittedHistoricalMatchIdentities"
 import { previewHistoricalMatchCsv } from "@/lib/importer/adapters/matchAdapter"
 import { loadPlayers } from "@/lib/importer/loadPlayers"
 import { loadPlayerAliases } from "@/lib/importer/loadPlayerAliases"
@@ -650,6 +651,8 @@ export default function CsvImportPage() {
             ← Import Center
           </Link>
         </div>
+
+        <CommittedHistoricalMatchIdentities />
 
         <section className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6 shadow-xl">
           <div

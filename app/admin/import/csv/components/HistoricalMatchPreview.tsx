@@ -12,6 +12,8 @@ import {
   type HistoricalMatchIdentityDecisions,
 } from "@/lib/importer/historicalMatchCommit"
 import { supabase } from "@/lib/supabase"
+import ExistingPlayerPicker from "./ExistingPlayerPicker"
+import CommittedHistoricalMatchIdentities from "./CommittedHistoricalMatchIdentities"
 
 type Props = {
   preview: Preview
@@ -52,6 +54,8 @@ export default function HistoricalMatchPreview({
   const [committing, setCommitting] = useState(false)
   const [commitError, setCommitError] = useState("")
   const [commitResult, setCommitResult] = useState<CommitResult | null>(null)
+  const [searchingStanding, setSearchingStanding] = useState<string | null>(null)
+  const [selectedPlayerNames, setSelectedPlayerNames] = useState<Record<string, string>>({})
   const blockers = useMemo(() => historicalMatchCommitBlockers(preview), [preview])
   const standings = preview.divisions.flatMap((division) => division.standings)
   const resolvedCount = Object.values(decisions).filter((decision) => decision.canonicalPlayerId).length
@@ -73,6 +77,11 @@ export default function HistoricalMatchPreview({
   function leaveUnresolved(divisionNumber: number, finalRank: number) {
     const key = historicalMatchStandingKey(divisionNumber, finalRank)
     setDecisions((current) => ({ ...current, [key]: { canonicalPlayerId: null } }))
+    setSelectedPlayerNames((current) => {
+      const next = { ...current }
+      delete next[key]
+      return next
+    })
   }
 
   async function commitHistoricalSeason() {
@@ -131,9 +140,14 @@ export default function HistoricalMatchPreview({
                 {identityLoading ? <div className="text-zinc-400">Checking read-only identity evidence…</div> : match?.playerId && match.status !== "new" ? <>
                   <div className="text-amber-200">Candidate: {match.matchedName}</div><div className="font-mono text-xs text-zinc-500">{match.playerId}</div>
                   <div className="text-xs text-zinc-400">Evidence: {match.evidence} · confidence {match.confidence}%</div>
-                  <div className="flex gap-2"><button type="button" onClick={() => approveCandidate(division.divisionNumber, standing.finalRank, match)} className="rounded bg-emerald-700 px-3 py-1 font-bold">Approve candidate</button><button type="button" onClick={() => leaveUnresolved(division.divisionNumber, standing.finalRank)} className="rounded border border-zinc-600 px-3 py-1">Leave unresolved</button></div>
-                </> : <><div className="text-zinc-400">No candidate · unresolved</div><button type="button" onClick={() => leaveUnresolved(division.divisionNumber, standing.finalRank)} className="rounded border border-zinc-600 px-3 py-1">Leave unresolved</button></>}
-                <div className={`text-xs font-bold ${decision?.canonicalPlayerId ? "text-emerald-300" : "text-zinc-400"}`}>Review status: {decision?.canonicalPlayerId ? "candidate approved" : "unresolved"}</div>
+                  <div className="flex flex-wrap gap-2"><button type="button" onClick={() => approveCandidate(division.divisionNumber, standing.finalRank, match)} className="rounded bg-emerald-700 px-3 py-1 font-bold">Approve candidate</button><button type="button" onClick={() => setSearchingStanding(key)} className="rounded bg-blue-700 px-3 py-1 font-bold">Find / Link Existing Player</button><button type="button" onClick={() => leaveUnresolved(division.divisionNumber, standing.finalRank)} className="rounded border border-zinc-600 px-3 py-1">Leave unresolved</button></div>
+                </> : <><div className="text-zinc-400">No candidate · unresolved</div><div className="flex flex-wrap gap-2"><button type="button" onClick={() => setSearchingStanding(key)} className="rounded bg-blue-700 px-3 py-1 font-bold">Find / Link Existing Player</button><button type="button" onClick={() => leaveUnresolved(division.divisionNumber, standing.finalRank)} className="rounded border border-zinc-600 px-3 py-1">Leave unresolved</button></div></>}
+                <div className={`text-xs font-bold ${decision?.canonicalPlayerId ? "text-emerald-300" : "text-zinc-400"}`}>Review status: {decision?.canonicalPlayerId ? `linked to ${selectedPlayerNames[key] || match?.matchedName || "selected player"}` : "unresolved"}</div>
+                {searchingStanding === key && <ExistingPlayerPicker historicalDisplayName={standing.historicalDisplayName} onCancel={() => setSearchingStanding(null)} onSelect={(player) => {
+                  setDecisions((current) => ({ ...current, [key]: { canonicalPlayerId: player.id, resolutionNote: "Explicitly selected through Find / Link Existing Player before commit." } }))
+                  setSelectedPlayerNames((current) => ({ ...current, [key]: player.screen_name }))
+                  setSearchingStanding(null)
+                }} />}
               </td>
             </tr>
           })}</tbody></table></div>
@@ -160,6 +174,7 @@ export default function HistoricalMatchPreview({
       </div>}
       {commitError && <div role="alert" className="rounded border border-red-700 bg-red-950/40 p-4 text-red-200">{commitError}</div>}
       {commitResult && <div role="status" className="rounded border border-emerald-600 bg-emerald-950/50 p-4 text-emerald-100"><h3 className="font-bold">{commitResult.idempotent ? "Historical season already committed — idempotent success" : "Historical season committed successfully"}</h3><div className="mt-2">Import UUID: <span className="font-mono">{commitResult.historical_match_import_id}</span></div><div>Season: {preview.seasonNumber} · Idempotent: {commitResult.idempotent ? "yes" : "no"}</div><div>Standings: {commitResult.standing_count} · Course appearances: {commitResult.course_appearance_count}</div><div>Resolved: {commitResult.resolved_identity_count} · Unresolved: {commitResult.unresolved_identity_count}</div></div>}
+      {commitResult && <CommittedHistoricalMatchIdentities initialImportId={commitResult.historical_match_import_id} />}
 
       {preview.ignoredRows.length > 0 && <details><summary className="cursor-pointer font-bold">Ignored structural/template rows ({preview.ignoredRows.length})</summary><div className="mt-2 space-y-2">{preview.ignoredRows.map((row, index) => <div key={`${row.sourceRow}-${index}`} className="rounded border border-zinc-700 bg-zinc-950 p-3">Division {row.divisionNumber}, CSV row {row.sourceRow}: {row.sourceName || "[blank name]"} — {row.reason}</div>)}</div></details>}
     </section>
