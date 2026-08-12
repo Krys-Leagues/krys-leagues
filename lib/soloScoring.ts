@@ -1,7 +1,7 @@
-export type SoloAttempt = { id:string;player_id:string;difficulty:"easy"|"hard";stroke_score:number;hn1_count:number;entered_at:string }
+export type SoloAttempt = { id:string;player_id:string;difficulty:"easy"|"hard";stroke_score:number|null;hn1_count:number;entered_at:string }
 
 export function bestAttempt(attempts:SoloAttempt[],playerId:string,difficulty:"easy"|"hard"){
-  return attempts.filter(a=>a.player_id===playerId&&a.difficulty===difficulty).sort((a,b)=>a.stroke_score-b.stroke_score||b.hn1_count-a.hn1_count||a.entered_at.localeCompare(b.entered_at)||a.id.localeCompare(b.id))[0]||null
+  return attempts.filter(a=>a.player_id===playerId&&a.difficulty===difficulty&&a.stroke_score!==null).sort((a,b)=>a.stroke_score!-b.stroke_score!||b.hn1_count-a.hn1_count||a.entered_at.localeCompare(b.entered_at)||a.id.localeCompare(b.id))[0]||null
 }
 
 export function mostHn1(attempts:SoloAttempt[],playerId:string,difficulty:"easy"|"hard"){
@@ -14,7 +14,7 @@ export function strokeRank(attempts:SoloAttempt[],playerIds:string[],playerId:st
   if(!selected)return null
   return 1+playerIds.reduce((better,otherId)=>{
     const other=bestAttempt(attempts,otherId,difficulty)
-    return better+(other&&(other.stroke_score<selected.stroke_score||(other.stroke_score===selected.stroke_score&&other.hn1_count>selected.hn1_count))?1:0)
+    return better+(other&&(other.stroke_score!<selected.stroke_score!||(other.stroke_score===selected.stroke_score&&other.hn1_count>selected.hn1_count))?1:0)
   },0)
 }
 
