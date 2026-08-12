@@ -4,6 +4,17 @@ import { Suspense, useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 
+const codeExchanges = new Map<string, ReturnType<typeof supabase.auth.exchangeCodeForSession>>()
+
+function exchangeCodeOnce(code: string) {
+  const existingExchange = codeExchanges.get(code)
+  if (existingExchange) return existingExchange
+
+  const exchange = supabase.auth.exchangeCodeForSession(code)
+  codeExchanges.set(code, exchange)
+  return exchange
+}
+
 function isSafeInternalPath(path: string | null): path is string {
   return Boolean(
     path &&
@@ -57,7 +68,7 @@ function CallbackHandler() {
       const type = searchParams.get("type")
 
       const sessionResponse = code
-        ? await supabase.auth.exchangeCodeForSession(code)
+        ? await exchangeCodeOnce(code)
         : await supabase.auth.getSession()
       const session = sessionResponse.data.session
 

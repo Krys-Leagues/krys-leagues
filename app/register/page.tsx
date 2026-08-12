@@ -2,13 +2,9 @@
 
 import Link from "next/link";
 import { Suspense, useEffect, useMemo, useState } from "react";
-import { createClient } from "@supabase/supabase-js";
+import type { User } from "@supabase/supabase-js";
 import { useSearchParams } from "next/navigation";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { supabase } from "@/lib/supabase";
 
 const LEAGUES: Record<string, { title: string; subtitle: string; image: string; ageNote: string }> = {
   match: { title: "Match League Registration", subtitle: "Head-to-head leagues are 18+.", image: "/league-media/match.png", ageNote: "18+ only" },
@@ -25,7 +21,7 @@ function RegisterContent() {
   const leagueKey = searchParams.get("league") || "";
   const league = useMemo(() => LEAGUES[leagueKey], [leagueKey]);
 
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [screenName, setScreenName] = useState("");
   const [notes, setNotes] = useState("");
   const [status, setStatus] = useState("");

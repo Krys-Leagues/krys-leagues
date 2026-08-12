@@ -2,12 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import type { User } from "@supabase/supabase-js";
+import { supabase } from "@/lib/supabase";
 
 const JOIN_OPTIONS = [
   {
@@ -69,7 +65,7 @@ const JOIN_OPTIONS = [
 ];
 
 export default function JoinPage() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
