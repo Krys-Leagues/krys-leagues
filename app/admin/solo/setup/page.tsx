@@ -270,6 +270,7 @@ export default function SoloSetupPage() {
   }
   async function saveDraft() {
     if (!roster) return
+    setMessage("")
     setBusy(true)
     const payload = entries.map(({ player_id, division, display_order }) => ({ player_id, division, display_order }))
     const { error } = await supabase.rpc("save_solo_roster", { p_roster_version_id: roster.id, p_entries: payload })
