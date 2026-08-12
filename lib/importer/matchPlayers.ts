@@ -11,6 +11,7 @@ export type PlayerMatch = {
   matchedName: string | null
   confidence: number
   status: "exact" | "close" | "new"
+  evidence: string
 }
 
 export function matchPlayers(
@@ -49,6 +50,7 @@ export function matchPlayers(
         matchedName: result.screenName,
         confidence: result.confidence,
         status: "exact",
+        evidence: result.matchedSource,
       }
     }
 
@@ -59,6 +61,7 @@ export function matchPlayers(
         matchedName: result.screenName,
         confidence: result.confidence,
         status: "close",
+        evidence: result.matchedSource,
       }
     }
 
@@ -68,6 +71,7 @@ export function matchPlayers(
       matchedName: null,
       confidence: 0,
       status: "new",
+      evidence: "none",
     }
   })
 }

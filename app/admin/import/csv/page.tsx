@@ -1,14 +1,17 @@
 "use client"
 
 import Link from "next/link"
-import UploadArea from "./components/UploadArea"
-import ImportSummary from "./components/ImportSummary"
-import ImportTypeSelector from "./components/ImportTypeSelector"
-import ColumnDetection from "./components/ColumnDetection"
-import CsvPreview from "./components/CsvPreview"
+import HistoricalMatchPreview from "./components/HistoricalMatchPreview"
+import CommittedHistoricalMatchIdentities from "./components/CommittedHistoricalMatchIdentities"
+import { previewHistoricalMatchCsv } from "@/lib/importer/adapters/matchAdapter"
+import { loadPlayers } from "@/lib/importer/loadPlayers"
+import { loadPlayerAliases } from "@/lib/importer/loadPlayerAliases"
+import { matchPlayers, type PlayerMatch } from "@/lib/importer/matchPlayers"
+import { previewFingerprint, sourceSha256 } from "@/lib/importer/historicalMatchCommit"
 import {
   ChangeEvent,
   DragEvent,
+  useEffect,
   useMemo,
   useState,
 } from "react"
@@ -424,6 +427,9 @@ export default function CsvImportPage() {
   const [fileName, setFileName] = useState("")
   const [headers, setHeaders] = useState<string[]>([])
   const [rows, setRows] = useState<CsvRow[]>([])
+  const [rawMatrix, setRawMatrix] = useState<string[][]>([])
+  const [sourceHash, setSourceHash] = useState("")
+  const [fingerprint, setFingerprint] = useState("")
   const [error, setError] = useState("")
   const [isDragging, setIsDragging] = useState(false)
 
@@ -432,6 +438,48 @@ export default function CsvImportPage() {
 
   const [analysisConfirmed, setAnalysisConfirmed] =
     useState(false)
+  const [identityCandidates, setIdentityCandidates] = useState<Map<string, PlayerMatch>>(new Map())
+  const [identityLoading, setIdentityLoading] = useState(false)
+
+  const historicalMatchPreview = useMemo(
+    () => selectedImportType === "match" && analysisConfirmed && rawMatrix.length > 0
+      ? previewHistoricalMatchCsv(rawMatrix)
+      : null,
+    [analysisConfirmed, rawMatrix, selectedImportType]
+  )
+
+  useEffect(() => {
+    if (!historicalMatchPreview) return
+    let cancelled = false
+    void previewFingerprint(historicalMatchPreview).then((value) => {
+      if (!cancelled) setFingerprint(value)
+    })
+    return () => { cancelled = true }
+  }, [historicalMatchPreview])
+
+  useEffect(() => {
+    if (!historicalMatchPreview) return
+
+    let cancelled = false
+    const names = historicalMatchPreview.divisions.flatMap((division) =>
+      division.standings.map((standing) => standing.historicalDisplayName)
+    )
+    Promise.all([loadPlayers(), loadPlayerAliases()])
+      .then(([players, aliases]) => {
+        if (cancelled) return
+        const matches = matchPlayers(names, players, aliases)
+        setIdentityCandidates(new Map(matches.map((match) => [match.importedName, match])))
+        setIdentityLoading(false)
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setIdentityCandidates(new Map())
+          setIdentityLoading(false)
+        }
+      })
+
+    return () => { cancelled = true }
+  }, [historicalMatchPreview])
 
   const detectedColumns = useMemo<DetectedColumn[]>(() => {
     if (headers.length === 0) {
@@ -471,8 +519,13 @@ export default function CsvImportPage() {
     setFileName("")
     setHeaders([])
     setRows([])
+    setRawMatrix([])
+    setSourceHash("")
+    setFingerprint("")
     setSelectedImportType(null)
     setAnalysisConfirmed(false)
+    setIdentityCandidates(new Map())
+    setIdentityLoading(false)
 
     if (!file.name.toLowerCase().endsWith(".csv")) {
       setError("Please select a CSV file.")
@@ -480,7 +533,8 @@ export default function CsvImportPage() {
     }
 
     try {
-      const text = await file.text()
+      const originalBytes = await file.arrayBuffer()
+      const text = new TextDecoder().decode(originalBytes)
       const parsedRows = parseCsv(text)
 
       if (parsedRows.length < 2) {
@@ -501,6 +555,8 @@ export default function CsvImportPage() {
       )
 
       setFileName(file.name)
+      setSourceHash(await sourceSha256(originalBytes))
+      setRawMatrix(parsedRows)
       setHeaders(parsedHeaders)
       setRows(dataRows)
     } catch (fileError) {
@@ -539,9 +595,14 @@ export default function CsvImportPage() {
     setFileName("")
     setHeaders([])
     setRows([])
+    setRawMatrix([])
+    setSourceHash("")
+    setFingerprint("")
     setError("")
     setSelectedImportType(null)
     setAnalysisConfirmed(false)
+    setIdentityCandidates(new Map())
+    setIdentityLoading(false)
   }
 
   function confirmImportType() {
@@ -553,6 +614,7 @@ export default function CsvImportPage() {
     }
 
     setError("")
+    if (selectedImportType === "match") setIdentityLoading(true)
     setAnalysisConfirmed(true)
   }
 
@@ -589,6 +651,8 @@ export default function CsvImportPage() {
             ← Import Center
           </Link>
         </div>
+
+        <CommittedHistoricalMatchIdentities />
 
         <section className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6 shadow-xl">
           <div
@@ -798,7 +862,19 @@ export default function CsvImportPage() {
               )}
             </section>
 
-            <section className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
+            {historicalMatchPreview && (
+              <HistoricalMatchPreview
+                key={`${sourceHash}:${fingerprint}`}
+                preview={historicalMatchPreview}
+                identityCandidates={identityCandidates}
+                identityLoading={identityLoading}
+                sourceFilename={fileName}
+                sourceSha256={sourceHash}
+                previewFingerprint={fingerprint}
+              />
+            )}
+
+            {!historicalMatchPreview && <section className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
               <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
                 <div>
                   <h2 className="text-2xl font-bold">
@@ -840,9 +916,9 @@ export default function CsvImportPage() {
                   </div>
                 ))}
               </div>
-            </section>
+            </section>}
 
-            <section className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
+            {!historicalMatchPreview && <section className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
               <h2 className="text-2xl font-bold">
                 CSV Preview
               </h2>
@@ -898,9 +974,9 @@ export default function CsvImportPage() {
                   </tbody>
                 </table>
               </div>
-            </section>
+            </section>}
 
-            <section className="mt-8 rounded-2xl border border-blue-800 bg-blue-950/40 p-6">
+            {!historicalMatchPreview && <section className="mt-8 rounded-2xl border border-blue-800 bg-blue-950/40 p-6">
   <h2 className="text-xl font-bold text-blue-200">
     Ready for Import
   </h2>
@@ -917,7 +993,7 @@ export default function CsvImportPage() {
     <li>✅ Validate the data</li>
     <li>📊 Show the import results before anything is permanently imported</li>
   </ul>
-</section>
+</section>}
           </>
         )}
       </div>
