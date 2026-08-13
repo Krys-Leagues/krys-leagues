@@ -61,6 +61,37 @@ function season55Matrix() {
   return matrix
 }
 
+function conventionMatrix(
+  name: string,
+  totals: [string, string, string, string, string, string],
+  courses: Array<[string, string, string, string]>
+) {
+  const matrix: string[][] = [["SEASON 54 * ENDS MAY 23rd"]]
+  const marker = Array(RIGHT_START + SIDE_WIDTH).fill("")
+  marker[0] = "Division 1"
+  marker[RIGHT_START] = "Division 1"
+  const titles = Array(RIGHT_START + SIDE_WIDTH).fill("")
+  for (const offset of [0, RIGHT_START]) {
+    titles[offset + 7] = "MARS GARDENS EASY"
+    titles[offset + 11] = "TIKI HARD"
+    titles[offset + 15] = "CHERRY BLOSSOM EASY"
+  }
+  const header = Array(RIGHT_START + SIDE_WIDTH).fill("")
+  headers.forEach((value, index) => { header[index] = value; header[RIGHT_START + index] = value })
+  const row = Array(RIGHT_START + SIDE_WIDTH).fill("")
+  const side = [name, ...totals, ...courses.flat()]
+  side.forEach((value, index) => { row[index] = value; row[RIGHT_START + index] = value })
+  matrix.push(marker, titles, header, row)
+  return matrix
+}
+
+function parsedConventionCourse(markers: [string, string, string], holesWon = "0") {
+  const preview = previewHistoricalMatchCsv(conventionMatrix("REAL PLAYER", ["1", "1", "0", "0", "3", holesWon], [
+    [...markers, holesWon], ["", "", "", "0"], ["", "", "", "0"],
+  ]))
+  return { preview, course: preview.divisions[0].standings[0].courses[0] }
+}
+
 test("collapses duplicated horizontal divisions and keeps right-side final order", () => {
   const preview = previewHistoricalMatchCsv(season55Matrix())
   assert.equal(preview.audit.seasonsFound, 1)
@@ -183,6 +214,69 @@ test("historical review UI uses only the dedicated commit RPC and requires confi
   assert.match(component, /onClick=\{\(\) => void commitHistoricalSeason\(\)\}/)
   assert.doesNotMatch(historicalFiles, /\b(runImport|createImportBatch|saveImportRows)\b/)
   assert.doesNotMatch(historicalFiles, /\.rpc\("(?:create_match_season_with_roster|generate_match_schedule|review_match_schedule|save_match_result|delete_match_result|rebuild_match_standings|generate_match_final_scorecard|approve_match_final_scorecard)"/)
+})
+
+test("zero, dash, and blank W/L/D markers are unplayed even when source HW is zero", () => {
+  for (const markers of [["0", "0", "0"], ["-", "–", "—"], ["", " ", ""]] as Array<[string, string, string]>) {
+    const { preview, course } = parsedConventionCourse(markers)
+    assert.deepEqual({ played: course.played, outcome: course.outcome, holesWon: course.holesWon }, { played: false, outcome: null, holesWon: null })
+    assert.equal(preview.audit.conflicts, 0)
+    assert.equal(course.courseName, "MARS GARDENS EASY")
+  }
+})
+
+test("one positive W/L/D marker is played and preserves legitimate HW zero", () => {
+  const cases: Array<[[string, string, string], "W" | "L" | "D"]> = [
+    [["1", "0", "0"], "W"],
+    [["0", "1", "0"], "L"],
+    [["0", "0", "1"], "D"],
+    [["1", "-", "—"], "W"],
+  ]
+  for (const [markers, outcome] of cases) {
+    const { preview, course } = parsedConventionCourse(markers)
+    assert.deepEqual({ played: course.played, outcome: course.outcome, holesWon: course.holesWon }, { played: true, outcome, holesWon: 0 })
+    assert.equal(preview.audit.conflicts, 0)
+  }
+})
+
+test("multiple positive W/L/D markers remain a genuine contradiction", () => {
+  const { preview, course } = parsedConventionCourse(["1", "1", "0"])
+  assert.equal(course.played, false)
+  assert.ok(preview.audit.conflicts > 0)
+  assert.ok(preview.divisions[0].standings[0].warnings.includes("Contradictory course outcome markers."))
+})
+
+test("zero-game and unambiguous dash-total real players remain valid standings", () => {
+  const zero = previewHistoricalMatchCsv(conventionMatrix("SPICY", ["0", "0", "0", "0", "0", "0"], [
+    ["0", "0", "0", "0"], ["-", "-", "-", "0"], ["", "", "", "0"],
+  ]))
+  assert.equal(zero.audit.realPlayerRows, 1)
+  assert.equal(zero.audit.conflicts, 0)
+  assert.deepEqual([zero.divisions[0].standings[0].played, zero.divisions[0].standings[0].points, zero.divisions[0].standings[0].holesWon], [0, 0, 0])
+
+  const dashes = previewHistoricalMatchCsv(conventionMatrix("DASH PLAYER", ["-", "-", "-", "-", "-", "-"], [
+    ["-", "-", "-", "0"], ["-", "-", "-", "0"], ["-", "-", "-", "0"],
+  ]))
+  assert.equal(dashes.audit.realPlayerRows, 1)
+  assert.equal(dashes.audit.conflicts, 0)
+  assert.equal(dashes.divisions[0].standings[0].played, 0)
+})
+
+test("exact BYE is ignored but similar legitimate names remain standings and identity inputs", () => {
+  const bye = previewHistoricalMatchCsv(conventionMatrix(" BYE ", ["0", "0", "0", "0", "0", "0"], [
+    ["0", "0", "0", "0"], ["0", "0", "0", "0"], ["0", "0", "0", "0"],
+  ]))
+  assert.equal(bye.audit.realPlayerRows, 0)
+  assert.equal(bye.audit.malformedRows, 0)
+  assert.equal(bye.audit.templateRowsIgnored, 1)
+  assert.equal(bye.ignoredRows[0].reason, "BYE / non-player slot")
+
+  const legitimate = previewHistoricalMatchCsv(conventionMatrix("BYE BYE BIRDIE", ["0", "0", "0", "0", "0", "0"], [
+    ["0", "0", "0", "0"], ["0", "0", "0", "0"], ["0", "0", "0", "0"],
+  ]))
+  const identityNames = legitimate.divisions.flatMap((division) => division.standings.map((standing) => standing.historicalDisplayName))
+  assert.deepEqual(identityNames, ["BYE BYE BIRDIE"])
+  assert.ok(!bye.divisions.flatMap((division) => division.standings).some((standing) => standing.historicalDisplayName === "BYE"))
 })
 
 test("existing-player search finds supported identity evidence but never selects automatically", () => {

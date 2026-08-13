@@ -69,6 +69,7 @@ type SideLayout = {
   nameColumn: number
   totals: [number, number, number, number, number, number]
   courseGroups: Array<[number, number, number, number]>
+  courseNames: string[]
 }
 
 const OUTCOME_HEADERS = ["W", "L", "D", "HW"]
@@ -86,6 +87,22 @@ function numberValue(value: string) {
   if (value.trim() === "") return null
   const parsed = Number(value)
   return Number.isFinite(parsed) ? parsed : null
+}
+
+function isDash(value: string) {
+  return /^[-–—]$/.test(value.trim())
+}
+
+function totalNumberValue(value: string) {
+  if (isDash(value)) return 0
+  return numberValue(value)
+}
+
+function isMeaningfulOutcomeMarker(value: string) {
+  const normalized = value.trim()
+  if (normalized === "" || isDash(normalized)) return false
+  const numeric = numberValue(normalized)
+  return numeric === null ? true : numeric > 0
 }
 
 function matchesAt(values: string[], start: number, expected: string[]) {
@@ -111,12 +128,20 @@ function findSideLayout(
       }
 
       if (courseGroups.length >= 3 && start > 0) {
+        const courseNames = courseGroups.slice(0, 3).map((group, index) => {
+          for (let titleRow = row - 1; titleRow >= Math.max(0, markerRow - 3); titleRow -= 1) {
+            const title = cell(matrix, titleRow, group[0])
+            if (title) return title
+          }
+          return HISTORICAL_MATCH_COURSES[index] ?? `Course ${index + 1}`
+        })
         return {
           markerColumn,
           headerRow: row,
           nameColumn: start - 1,
           totals: [start, start + 1, start + 2, start + 3, start + 4, start + 5],
           courseGroups: courseGroups.slice(0, 3),
+          courseNames,
         }
       }
     }
@@ -146,7 +171,11 @@ function nextDivisionRow(
 }
 
 function isTemplateName(name: string) {
-  return name === "" || /^\d+$/.test(name.trim())
+  return name === "" || /^\d+$/.test(name.trim()) || isByeName(name)
+}
+
+function isByeName(name: string) {
+  return upper(name) === "BYE"
 }
 
 function isStructuralHeaderName(name: string) {
@@ -166,11 +195,9 @@ function parseOutcome(
   columns: [number, number, number, number],
   warnings: string[]
 ): HistoricalMatchCourse {
-  const markers = columns.slice(0, 3).map((column) => {
-    const value = cell(matrix, row, column)
-    const numeric = numberValue(value)
-    return value !== "" && numeric !== 0
-  })
+  const markers = columns.slice(0, 3).map((column) =>
+    isMeaningfulOutcomeMarker(cell(matrix, row, column))
+  )
   const present = markers
     .map((value, index) => ({ value, index }))
     .filter(({ value }) => value)
@@ -205,7 +232,7 @@ function parseStanding(
   courses: string[]
 ) {
   const name = cell(matrix, row, layout.nameColumn)
-  const totals = layout.totals.map((column) => numberValue(cell(matrix, row, column)))
+  const totals = layout.totals.map((column) => totalNumberValue(cell(matrix, row, column)))
   if (isTemplateName(name) || totals.some((value) => value === null)) return null
 
   const warnings: string[] = []
@@ -249,6 +276,7 @@ export function previewHistoricalMatchCsv(matrix: string[][]): HistoricalMatchPr
   const warnings: string[] = []
   const ignoredRows: HistoricalMatchIgnoredRow[] = []
   const divisions: HistoricalMatchPreview["divisions"] = []
+  let detectedCourses: string[] = [...HISTORICAL_MATCH_COURSES]
   let collapsed = 0
   let conflicts = 0
   let malformedRows = 0
@@ -272,6 +300,7 @@ export function previewHistoricalMatchCsv(matrix: string[][]): HistoricalMatchPr
 
     const left = layouts[0]
     const right = layouts.at(-1)!
+    detectedCourses = right.courseNames
     const dataStart = Math.max(left.headerRow, right.headerRow) + 1
     const rightStandings: HistoricalMatchStanding[] = []
 
@@ -295,6 +324,17 @@ export function previewHistoricalMatchCsv(matrix: string[][]): HistoricalMatchPr
         continue
       }
 
+      if (isByeName(rightName)) {
+        ignoredRows.push({
+          divisionNumber,
+          sourceRow: row + 1,
+          sourceName: rightName,
+          classification: "template_placeholder",
+          reason: "BYE / non-player slot",
+        })
+        continue
+      }
+
       if (divisionNumber > 5) {
         const sourceName = rightName || leftName
         ignoredRows.push({
@@ -307,7 +347,7 @@ export function previewHistoricalMatchCsv(matrix: string[][]): HistoricalMatchPr
         continue
       }
 
-      const standing = parseStanding(matrix, row, right, divisionNumber, rightStandings.length + 1, [...HISTORICAL_MATCH_COURSES])
+      const standing = parseStanding(matrix, row, right, divisionNumber, rightStandings.length + 1, right.courseNames)
       if (standing) rightStandings.push(standing)
       else if (rightName !== "") {
         ignoredRows.push({ divisionNumber, sourceRow: row + 1, sourceName: rightName, classification: "malformed", reason: "Malformed player row" })
@@ -317,7 +357,7 @@ export function previewHistoricalMatchCsv(matrix: string[][]): HistoricalMatchPr
 
     const leftByName = new Map<string, HistoricalMatchStanding>()
     for (let row = dataStart; row < blockEnd; row += 1) {
-      const candidate = parseStanding(matrix, row, left, divisionNumber, 0, [...HISTORICAL_MATCH_COURSES])
+      const candidate = parseStanding(matrix, row, left, divisionNumber, 0, left.courseNames)
       if (candidate) leftByName.set(upper(candidate.historicalDisplayName), candidate)
     }
 
@@ -345,7 +385,7 @@ export function previewHistoricalMatchCsv(matrix: string[][]): HistoricalMatchPr
     seasonNumber: seasonMatch ? Number(seasonMatch[1]) : null,
     historicalLabel: labelCell,
     year: null,
-    courses: [...HISTORICAL_MATCH_COURSES],
+    courses: detectedCourses,
     divisions,
     ignoredRows,
     warnings,
