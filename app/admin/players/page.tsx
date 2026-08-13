@@ -7,6 +7,8 @@ import { supabase } from "@/lib/supabase"
 type Player = {
   id: string
   screen_name: string
+  discord_id: string | null
+  discord_name: string | null
   status: string | null
   active: boolean | null
 }
@@ -109,6 +111,13 @@ export default function PlayersAdminPage() {
   const [playerStatus, setPlayerStatus] = useState("active")
   const [savingStatus, setSavingStatus] = useState(false)
 
+  const [discordPlayer, setDiscordPlayer] = useState<Player | null>(null)
+  const [discordId, setDiscordId] = useState("")
+  const [discordName, setDiscordName] = useState("")
+  const [savingDiscord, setSavingDiscord] = useState(false)
+  const [discordError, setDiscordError] = useState("")
+  const [successMessage, setSuccessMessage] = useState("")
+
   useEffect(() => {
     loadPlayers()
   }, [])
@@ -131,7 +140,7 @@ export default function PlayersAdminPage() {
     const [playersResult, membershipsResult, tournamentsResult, identityLinksResult] = await Promise.all([
       supabase
         .from("players")
-        .select("id, screen_name, status, active")
+        .select("id, screen_name, discord_id, discord_name, status, active")
         .order("screen_name", { ascending: true }),
       supabase
         .from("player_league_memberships")
@@ -206,6 +215,44 @@ export default function PlayersAdminPage() {
     if (action === "tournament") openTournamentModal(player)
     if (action === "status") openStatusModal(player)
     if (action === "merge") router.push(`/admin/players/merge?remove=${player.id}`)
+  }
+
+  function openDiscordModal(player: Player) {
+    setDiscordPlayer(player)
+    setDiscordId("")
+    setDiscordName("")
+    setDiscordError("")
+    setSuccessMessage("")
+  }
+
+  async function saveDiscordIdentity() {
+    if (!discordPlayer) return
+    const trimmedDiscordId = discordId.trim()
+    if (!trimmedDiscordId) {
+      setDiscordError("Discord ID is required.")
+      return
+    }
+
+    setSavingDiscord(true)
+    setDiscordError("")
+    const { error: saveError } = await supabase.rpc("set_site_player_discord_identity", {
+      p_player_id: discordPlayer.id,
+      p_discord_id: trimmedDiscordId,
+      p_discord_name: discordName.trim() || null,
+    })
+    setSavingDiscord(false)
+
+    if (saveError) {
+      setDiscordError(saveError.message)
+      return
+    }
+
+    const savedPlayerName = discordPlayer.screen_name
+    setDiscordPlayer(null)
+    setDiscordId("")
+    setDiscordName("")
+    await loadPlayers()
+    setSuccessMessage(`Discord identity linked for ${savedPlayerName}.`)
   }
 
   async function createPlayer() {
@@ -561,6 +608,8 @@ export default function PlayersAdminPage() {
         </button>
       </div>
 
+      {successMessage && <p role="status" style={successNotice}>{successMessage}</p>}
+
       <div style={{ marginTop: 16 }}>
         <div style={filterRow}>
           {["active", "inactive", "archived", "memorial", "all"].map((status) => (
@@ -590,6 +639,7 @@ export default function PlayersAdminPage() {
           <tr>
             <th style={tableHeading}>Player</th>
             <th style={tableHeading}>Status</th>
+            <th style={tableHeading}>Discord</th>
             <th style={actionsHeading}>Actions</th>
             <th style={tableHeading}>Currently In</th>
           </tr>
@@ -620,6 +670,16 @@ export default function PlayersAdminPage() {
                   >
                     {currentStatus.toUpperCase()}
                   </span>
+                </td>
+
+                <td style={td}>
+                  {p.discord_id ? (
+                    <span style={discordLinkedBadge}>DISCORD LINKED</span>
+                  ) : (
+                    <button type="button" style={addDiscordButton} onClick={() => openDiscordModal(p)}>
+                      ADD DISCORD
+                    </button>
+                  )}
                 </td>
 
                 <td style={actionsTd}>
@@ -787,6 +847,46 @@ export default function PlayersAdminPage() {
           >
             {savingStatus ? "Saving..." : "Save Status"}
           </button>
+        </Modal>
+      )}
+
+
+      {discordPlayer && (
+        <Modal title="Add Discord" onClose={() => !savingDiscord && setDiscordPlayer(null)}>
+          <p style={modalPlayerName}>{discordPlayer.screen_name}</p>
+
+          <label style={label} htmlFor="discord-id">Discord ID</label>
+          <input
+            id="discord-id"
+            type="text"
+            inputMode="numeric"
+            autoComplete="off"
+            value={discordId}
+            onChange={(event) => setDiscordId(event.target.value)}
+            style={modalInput}
+            disabled={savingDiscord}
+            required
+          />
+
+          <label style={label} htmlFor="discord-name">Discord Name</label>
+          <input
+            id="discord-name"
+            type="text"
+            autoComplete="off"
+            value={discordName}
+            onChange={(event) => setDiscordName(event.target.value)}
+            style={modalInput}
+            disabled={savingDiscord}
+          />
+
+          {discordError && <p role="alert" style={modalError}>{discordError}</p>}
+
+          <div style={modalActions}>
+            <button type="button" style={cancelButton} disabled={savingDiscord} onClick={() => setDiscordPlayer(null)}>Cancel</button>
+            <button type="button" style={saveButton} disabled={savingDiscord || !discordId.trim()} onClick={saveDiscordIdentity}>
+              {savingDiscord ? "Saving..." : "Save Discord"}
+            </button>
+          </div>
         </Modal>
       )}
     </main>
@@ -991,6 +1091,26 @@ const statusBadge: React.CSSProperties = {
   fontWeight: 700,
 }
 
+const discordLinkedBadge: React.CSSProperties = {
+  ...statusBadge,
+  display: "inline-flex",
+  background: "#14532d",
+  color: "#bbf7d0",
+  whiteSpace: "nowrap",
+}
+
+const addDiscordButton: React.CSSProperties = {
+  padding: "6px 9px",
+  borderRadius: 7,
+  border: "1px solid #5865f2",
+  background: "transparent",
+  color: "#a5b4fc",
+  cursor: "pointer",
+  fontSize: 12,
+  fontWeight: 800,
+  whiteSpace: "nowrap",
+}
+
 const overlay: React.CSSProperties = {
   position: "fixed",
   inset: 0,
@@ -1066,4 +1186,33 @@ const saveButton: React.CSSProperties = {
   fontWeight: 700,
   cursor: "pointer",
   marginTop: 8,
+}
+
+const modalActions: React.CSSProperties = {
+  display: "flex",
+  justifyContent: "flex-end",
+  gap: 10,
+  marginTop: 8,
+}
+
+const cancelButton: React.CSSProperties = {
+  ...button,
+  background: "#27272a",
+}
+
+const modalError: React.CSSProperties = {
+  margin: 0,
+  padding: 10,
+  borderRadius: 8,
+  background: "#450a0a",
+  color: "#fecaca",
+}
+
+const successNotice: React.CSSProperties = {
+  marginTop: 16,
+  padding: 12,
+  borderRadius: 8,
+  border: "1px solid #166534",
+  background: "#052e16",
+  color: "#bbf7d0",
 }
