@@ -21,6 +21,7 @@ const GLOBAL_TOOLS = [
   { name: "Command Center", href: "/admin/command-center", description: "Krys Central project board and roadmap" },
   { name: "Players", href: "/admin/players", description: "Global player list, statuses, merge tools" },
   { name: "Player Identity", href: "/admin/player-identity", description: "Aliases, Discord identities, historical names and player matching" },
+  { name: "Historical Imports", href: "/admin/import/csv", description: "Import old Match, Stroke, PYP, and other league seasons." },
   { name: "Season Manager", href: "/admin/season-manager", description: "Create, activate, archive and manage seasons" },
   { name: "Player Tracker", href: "/admin/player-tracker", description: "Track player movement and history" },
   { name: "Records Center", href: "/admin/records", description: "League, course, race and historical records" },
