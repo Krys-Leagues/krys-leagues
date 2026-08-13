@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:match-preview": "node --experimental-strip-types --test lib/importer/adapters/matchAdapter.test.ts"
+    "test:match-preview": "node --experimental-strip-types --test lib/importer/adapters/matchAdapter.test.ts",
+    "test:stroke-history-preview": "node --experimental-strip-types --test lib/importer/adapters/historicalStrokeParser.test.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.104.1",
