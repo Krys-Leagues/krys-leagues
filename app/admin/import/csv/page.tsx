@@ -3,6 +3,7 @@
 import Link from "next/link"
 import HistoricalMatchPreview from "./components/HistoricalMatchPreview"
 import CommittedHistoricalMatchIdentities from "./components/CommittedHistoricalMatchIdentities"
+import ManualHistoricalMatchEntry from "./components/ManualHistoricalMatchEntry"
 import { previewHistoricalMatchCsv } from "@/lib/importer/adapters/matchAdapter"
 import { loadPlayers } from "@/lib/importer/loadPlayers"
 import { loadPlayerAliases } from "@/lib/importer/loadPlayerAliases"
@@ -425,6 +426,7 @@ function createRows(
 }
 
 export default function CsvImportPage() {
+  const [entryMode, setEntryMode] = useState<"csv" | "manual">("csv")
   const [fileName, setFileName] = useState("")
   const [headers, setHeaders] = useState<string[]>([])
   const [rows, setRows] = useState<CsvRow[]>([])
@@ -654,6 +656,13 @@ export default function CsvImportPage() {
         </div>
 
         <CommittedHistoricalMatchIdentities />
+
+        <section className="mb-6 grid gap-4 md:grid-cols-2">
+          <button type="button" onClick={() => setEntryMode("csv")} className={`rounded-xl border p-5 text-left ${entryMode === "csv" ? "border-indigo-400 bg-indigo-950/50" : "border-zinc-700 bg-zinc-900"}`}><strong className="text-xl">Upload CSV</strong><p className="mt-2 text-zinc-400">Analyze an existing historical league CSV.</p></button>
+          <button type="button" onClick={() => setEntryMode("manual")} className={`rounded-xl border p-5 text-left ${entryMode === "manual" ? "border-indigo-400 bg-indigo-950/50" : "border-zinc-700 bg-zinc-900"}`}><strong className="text-xl">Manual Historical Match Entry</strong><p className="mt-2 text-zinc-400">Enter historical Match standings with optional aggregate course results.</p></button>
+        </section>
+
+        {entryMode === "manual" ? <ManualHistoricalMatchEntry onChooseCsv={() => setEntryMode("csv")} /> : <>
 
         <section className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6 shadow-xl">
           <div
@@ -997,6 +1006,7 @@ export default function CsvImportPage() {
 </section>}
           </>
         )}
+        </>}
       </div>
     </main>
   )

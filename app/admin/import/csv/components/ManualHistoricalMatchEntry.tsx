@@ -1,0 +1,57 @@
+"use client"
+
+import { useEffect, useMemo, useRef, useState } from "react"
+import { loadPlayerAliases } from "@/lib/importer/loadPlayerAliases"
+import { loadPlayerIdentityLinks } from "@/lib/importer/loadPlayerIdentityLinks"
+import { loadPlayers } from "@/lib/importer/loadPlayers"
+import { matchPlayers, type PlayerMatch } from "@/lib/importer/matchPlayers"
+import { previewFingerprint } from "@/lib/importer/historicalMatchCommit"
+import { emptyManualStanding, manualHistoricalMatchPreview, manualHistoricalSourceSha, validateManualHistoricalMatch, type ManualHistoricalMatchDraft, type ManualMatchStanding } from "@/lib/importer/manualHistoricalMatch"
+import HistoricalMatchPreview from "./HistoricalMatchPreview"
+
+const input = "rounded border border-zinc-600 bg-zinc-950 px-2 py-1"
+const button = "rounded border border-zinc-600 px-3 py-2 font-semibold hover:bg-zinc-800"
+
+export default function ManualHistoricalMatchEntry({ onChooseCsv }: { onChooseCsv: () => void }) {
+  const nextId = useRef(2)
+  const [draft, setDraft] = useState<ManualHistoricalMatchDraft>({ seasonNumber: 0, historicalLabel: "", year: null, evidenceLevel: "standings_only", sourceReference: "", courses: [], divisions: [{ id: "division-1", divisionNumber: 1, standings: [emptyManualStanding("standing-1")] }] })
+  const [reviewing, setReviewing] = useState(false)
+  const [sourceHash, setSourceHash] = useState("")
+  const [fingerprint, setFingerprint] = useState("")
+  const [identityCandidates, setIdentityCandidates] = useState<Map<string, PlayerMatch>>(new Map())
+  const [identityLoading, setIdentityLoading] = useState(false)
+  const errors = useMemo(() => validateManualHistoricalMatch(draft), [draft])
+  const preview = useMemo(() => manualHistoricalMatchPreview(draft), [draft])
+  const id = (prefix: string) => `${prefix}-${nextId.current++}`
+  const updateStanding = (divisionId: string, standingId: string, patch: Partial<ManualMatchStanding>) => setDraft((current) => ({ ...current, divisions: current.divisions.map((division) => division.id === divisionId ? { ...division, standings: division.standings.map((standing) => standing.id === standingId ? { ...standing, ...patch } : standing) } : division) }))
+
+  useEffect(() => {
+    if (!reviewing) return
+    let cancelled = false
+    const names = preview.divisions.flatMap((division) => division.standings.map((standing) => standing.historicalDisplayName))
+    void Promise.all([manualHistoricalSourceSha(draft), previewFingerprint(preview), loadPlayers({ includeInactive: true }), loadPlayerAliases(), loadPlayerIdentityLinks()])
+      .then(([hash, print, players, aliases, links]) => { if (!cancelled) { setSourceHash(hash); setFingerprint(print); setIdentityCandidates(new Map(matchPlayers(names, players, aliases, links).map((match) => [match.importedName, match]))); setIdentityLoading(false) } })
+      .catch(() => { if (!cancelled) { setIdentityCandidates(new Map()); setIdentityLoading(false) } })
+    return () => { cancelled = true }
+  }, [draft, preview, reviewing])
+
+  if (reviewing) return <div><button type="button" className={button} onClick={() => setReviewing(false)}>← Edit manual entry</button><HistoricalMatchPreview preview={preview} identityCandidates={identityCandidates} identityLoading={identityLoading} sourceFilename={`manual-match-season-${draft.seasonNumber}`} sourceSha256={sourceHash} previewFingerprint={fingerprint} sourceReference={draft.sourceReference} /></div>
+
+  return <section className="space-y-6 rounded-2xl border border-indigo-800 bg-indigo-950/20 p-6">
+    <div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-sm font-bold uppercase tracking-widest text-indigo-300">Historical Match</p><h2 className="mt-2 text-3xl font-bold">Manual Historical Match Entry</h2><p className="mt-2 text-zinc-300">Enter frozen historical standings without inventing fixtures or creating players.</p></div><button type="button" className={button} onClick={onChooseCsv}>Upload CSV instead</button></div>
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <label>Season number<input aria-label="Season number" type="number" min="1" value={draft.seasonNumber || ""} onChange={(e) => setDraft({ ...draft, seasonNumber: Number(e.target.value) })} className={`${input} mt-1 w-full`} /></label>
+      <label>Historical season label<input value={draft.historicalLabel} onChange={(e) => setDraft({ ...draft, historicalLabel: e.target.value })} className={`${input} mt-1 w-full`} /></label>
+      <label>Year (optional)<input type="number" value={draft.year ?? ""} onChange={(e) => setDraft({ ...draft, year: e.target.value ? Number(e.target.value) : null })} className={`${input} mt-1 w-full`} /></label>
+      <label>Evidence level<select value={draft.evidenceLevel} onChange={(e) => setDraft({ ...draft, evidenceLevel: e.target.value as ManualHistoricalMatchDraft["evidenceLevel"] })} className={`${input} mt-1 w-full`}><option value="standings_only">Standings only</option><option value="aggregate_course">Aggregate course results</option></select></label>
+      <label className="md:col-span-2">Source reference / note (optional)<input value={draft.sourceReference} onChange={(e) => setDraft({ ...draft, sourceReference: e.target.value })} placeholder="Spreadsheet tab, paper sheet, photo reference, or note" className={`${input} mt-1 w-full`} /></label>
+    </div>
+    {draft.evidenceLevel === "aggregate_course" && <section className="rounded-xl border border-zinc-700 p-4"><div className="flex justify-between"><h3 className="text-xl font-bold">Courses</h3><button type="button" className={button} onClick={() => setDraft((current) => ({ ...current, courses: [...current.courses, { id: id("course"), name: "" }] }))}>Add course</button></div><div className="mt-3 space-y-2">{draft.courses.map((course, index) => <div key={course.id} className="flex gap-2"><span className="py-2">{index + 1}.</span><input aria-label={`Course ${index + 1} name`} value={course.name} onChange={(e) => setDraft((current) => ({ ...current, courses: current.courses.map((item) => item.id === course.id ? { ...item, name: e.target.value } : item) }))} className={`${input} flex-1`} /><button type="button" className={button} onClick={() => setDraft((current) => ({ ...current, courses: current.courses.filter((item) => item.id !== course.id) }))}>Remove</button></div>)}</div></section>}
+    {draft.divisions.map((division) => <section key={division.id} className="rounded-xl border border-zinc-700 bg-zinc-900 p-4"><div className="flex flex-wrap justify-between gap-2"><label className="text-xl font-bold">Division <input aria-label="Division number" type="number" min="1" value={division.divisionNumber} onChange={(e) => setDraft((current) => ({ ...current, divisions: current.divisions.map((item) => item.id === division.id ? { ...item, divisionNumber: Number(e.target.value) } : item) }))} className={`${input} w-20`} /></label><div className="flex gap-2"><button type="button" className={button} onClick={() => setDraft((current) => ({ ...current, divisions: current.divisions.map((item) => item.id === division.id ? { ...item, standings: [...item.standings, emptyManualStanding(id("standing"), item.standings.length + 1)] } : item) }))}>Add player</button><button type="button" className={button} onClick={() => setDraft((current) => ({ ...current, divisions: current.divisions.filter((item) => item.id !== division.id) }))}>Remove division</button></div></div>
+      <div className="mt-4 overflow-x-auto"><table className="min-w-full text-sm"><thead><tr><th>Rank</th><th>Exact historical name</th>{["P","W","L","D","PTS","HW"].map((name) => <th key={name}>{name}</th>)}{draft.courses.map((course) => <th key={course.id}>{course.name || "Course"}</th>)}<th /></tr></thead><tbody>{division.standings.map((standing) => <tr key={standing.id} className="align-top"><td><input aria-label="Rank" type="number" min="1" value={standing.finalRank} onChange={(e) => updateStanding(division.id, standing.id, { finalRank: Number(e.target.value) })} className={`${input} w-16`} /></td><td><input aria-label="Historical display name" value={standing.historicalDisplayName} onChange={(e) => updateStanding(division.id, standing.id, { historicalDisplayName: e.target.value })} className={`${input} min-w-48`} /></td>{(["played","wins","losses","draws","points","holesWon"] as const).map((field) => <td key={field}><input aria-label={field} type="number" min="0" value={standing[field]} onChange={(e) => updateStanding(division.id, standing.id, { [field]: Number(e.target.value) })} className={`${input} w-16`} /></td>)}{draft.evidenceLevel === "aggregate_course" && draft.courses.map((course) => { const appearance = standing.appearances[course.id] ?? { played: false, outcome: null, holesWon: null }; return <td key={course.id} className="min-w-40"><label><input type="checkbox" checked={appearance.played} onChange={(e) => updateStanding(division.id, standing.id, { appearances: { ...standing.appearances, [course.id]: e.target.checked ? { played: true, outcome: appearance.outcome ?? "W", holesWon: appearance.holesWon ?? 0 } : { played: false, outcome: null, holesWon: null } } })} /> Played</label>{appearance.played && <div className="mt-1 flex gap-1"><select aria-label="Outcome" value={appearance.outcome ?? "W"} onChange={(e) => updateStanding(division.id, standing.id, { appearances: { ...standing.appearances, [course.id]: { ...appearance, outcome: e.target.value as "W"|"L"|"D" } } })} className={input}><option>W</option><option>L</option><option>D</option></select><input aria-label="Course holes won" type="number" min="0" value={appearance.holesWon ?? 0} onChange={(e) => updateStanding(division.id, standing.id, { appearances: { ...standing.appearances, [course.id]: { ...appearance, holesWon: Number(e.target.value) } } })} className={`${input} w-16`} /></div>}</td> })}<td><button type="button" className={button} onClick={() => setDraft((current) => ({ ...current, divisions: current.divisions.map((item) => item.id === division.id ? { ...item, standings: item.standings.filter((row) => row.id !== standing.id) } : item) }))}>Remove</button></td></tr>)}</tbody></table></div>
+    </section>)}
+    <button type="button" className={button} onClick={() => setDraft((current) => ({ ...current, divisions: [...current.divisions, { id: id("division"), divisionNumber: current.divisions.length + 1, standings: [emptyManualStanding(id("standing"))] }] }))}>Add division</button>
+    {errors.length > 0 && <div role="alert" className="rounded border border-red-700 bg-red-950/40 p-4 text-red-200"><strong>Review is blocked</strong>{errors.map((error) => <div key={error}>{error}</div>)}</div>}
+    <button type="button" disabled={errors.length > 0} onClick={() => { setIdentityLoading(true); setReviewing(true) }} className="rounded bg-emerald-700 px-5 py-3 font-bold disabled:bg-zinc-700">Review Manual Historical Match Season</button>
+  </section>
+}

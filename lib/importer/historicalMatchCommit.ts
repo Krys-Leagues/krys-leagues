@@ -15,7 +15,7 @@ export type HistoricalMatchCommitPayload = {
   p_season_number: number
   p_historical_label: string
   p_historical_year: number | null
-  p_evidence_level: "aggregate_course"
+  p_evidence_level: "standings_only" | "aggregate_course"
   p_source_filename: string
   p_source_sha256: string
   p_preview_fingerprint: string
@@ -87,7 +87,7 @@ function canonicalHistoricalFacts(preview: HistoricalMatchPreview) {
     seasonNumber: preview.seasonNumber,
     historicalLabel: preview.historicalLabel,
     year: preview.year,
-    evidenceLevel: "aggregate_course",
+    evidenceLevel: preview.evidenceLevel,
     divisions: preview.divisions.map((division) => ({
       divisionNumber: division.divisionNumber,
       standings: division.standings.map((standing) => ({
@@ -159,7 +159,8 @@ export function buildHistoricalMatchCommitPayload(
   decisions: HistoricalMatchIdentityDecisions,
   sourceFilename: string,
   sourceHash: string,
-  fingerprint: string
+  fingerprint: string,
+  sourceReference = ""
 ): HistoricalMatchCommitPayload {
   if (preview.seasonNumber === null) throw new Error("Historical Match season number is required.")
   const facts = canonicalHistoricalFacts(preview)
@@ -192,11 +193,11 @@ export function buildHistoricalMatchCommitPayload(
     p_season_number: preview.seasonNumber,
     p_historical_label: preview.historicalLabel,
     p_historical_year: preview.year,
-    p_evidence_level: "aggregate_course",
+    p_evidence_level: preview.evidenceLevel,
     p_source_filename: sourceFilename,
     p_source_sha256: sourceHash,
     p_preview_fingerprint: fingerprint,
     p_parser_version: HISTORICAL_MATCH_PARSER_VERSION,
-    p_validated_preview: { ...facts, divisions },
+    p_validated_preview: { ...facts, entryMethod: sourceFilename.startsWith("manual-") ? "manual" : "csv", sourceReference: sourceReference || null, divisions },
   }
 }

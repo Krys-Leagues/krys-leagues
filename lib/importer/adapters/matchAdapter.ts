@@ -38,10 +38,11 @@ export type HistoricalMatchIgnoredRow = {
 }
 
 export type HistoricalMatchPreview = {
+  evidenceLevel: "standings_only" | "aggregate_course"
   layout: "duplicated_final_side" | "single_side" | "ambiguous"
   seasonNumber: number | null
   historicalLabel: string
-  year: null
+  year: number | null
   courses: string[]
   divisions: Array<{
     divisionNumber: number
@@ -402,6 +403,7 @@ export function previewHistoricalMatchCsv(matrix: string[][]): HistoricalMatchPr
   const allStandings = divisions.flatMap((division) => division.standings)
   const allCourses = allStandings.flatMap((standing) => standing.courses)
   return {
+    evidenceLevel: "aggregate_course",
     layout,
     seasonNumber: seasonMatch ? Number(seasonMatch[1]) : null,
     historicalLabel: labelCell,

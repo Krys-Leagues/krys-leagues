@@ -12,6 +12,7 @@ import {
   previewFingerprint,
   sourceSha256,
 } from "../historicalMatchCommit.ts"
+import { emptyManualStanding, manualHistoricalMatchPreview, manualHistoricalSourceSha, validateManualHistoricalMatch, type ManualHistoricalMatchDraft } from "../manualHistoricalMatch.ts"
 import { historicalStandingIdentityRpcArgs, searchExistingPlayers } from "../historicalMatchIdentity.ts"
 import type { PlayerRecord } from "../loadPlayers.ts"
 import type { PlayerIdentityAlias } from "../../identity/types.ts"
@@ -684,4 +685,58 @@ test("a remembered verified alias is authoritative evidence for the shared resol
   assert.equal(match.autoLinkEligible, true)
   assert.equal(match.playerId, player.id)
   assert.equal(match.autoLinkReason, "verified historical alias")
+})
+
+function manualDraft(evidenceLevel: "standings_only" | "aggregate_course" = "standings_only"): ManualHistoricalMatchDraft {
+  return { seasonNumber: 54, historicalLabel: "SEASON 54", year: null, evidenceLevel, sourceReference: "paper binder", courses: [], divisions: [{ id: "d1", divisionNumber: 1, standings: [{ ...emptyManualStanding("s1"), historicalDisplayName: "ZOE DARLIN" }] }] }
+}
+
+test("manual standings-only accepts a zero-game historical player", () => assert.deepEqual(validateManualHistoricalMatch(manualDraft()), []))
+test("manual validation requires season metadata", () => {
+  const draft = manualDraft(); draft.seasonNumber = 0; draft.historicalLabel = ""
+  assert.equal(validateManualHistoricalMatch(draft).length, 2)
+})
+test("manual validation enforces P equals W plus L plus D", () => {
+  const draft = manualDraft(); draft.divisions[0].standings[0].played = 2
+  assert.match(validateManualHistoricalMatch(draft).join(" "), /P must equal/)
+})
+test("manual validation enforces three points per win plus draws", () => {
+  const draft = manualDraft(); Object.assign(draft.divisions[0].standings[0], { played: 1, wins: 1, points: 2 })
+  assert.match(validateManualHistoricalMatch(draft).join(" "), /PTS must equal/)
+})
+test("manual aggregate mode requires courses", () => assert.match(validateManualHistoricalMatch(manualDraft("aggregate_course")).join(" "), /requires at least one course/))
+test("manual aggregate played HW zero remains valid", () => {
+  const draft = manualDraft("aggregate_course"); draft.courses = [{ id: "c1", name: "BLOKHAVEN EASY" }]
+  Object.assign(draft.divisions[0].standings[0], { played: 1, losses: 1, appearances: { c1: { played: true, outcome: "L", holesWon: 0 } } })
+  assert.deepEqual(validateManualHistoricalMatch(draft), [])
+  assert.equal(manualHistoricalMatchPreview(draft).divisions[0].standings[0].courses[0].played, true)
+})
+test("manual aggregate unplayed rows store null result fields", () => {
+  const draft = manualDraft("aggregate_course"); draft.courses = [{ id: "c1", name: "HOLLYWOOD EASY" }]
+  const course = manualHistoricalMatchPreview(draft).divisions[0].standings[0].courses[0]
+  assert.deepEqual([course.played, course.outcome, course.holesWon], [false, null, null])
+})
+test("manual aggregate cross-checks complete course totals", () => {
+  const draft = manualDraft("aggregate_course"); draft.courses = [{ id: "c1", name: "TIKI HARD" }]
+  draft.divisions[0].standings[0].appearances.c1 = { played: true, outcome: "W", holesWon: 2 }
+  assert.match(validateManualHistoricalMatch(draft).join(" "), /course results disagree/)
+})
+test("manual preview creates no fixtures", () => assert.equal(manualHistoricalMatchPreview(manualDraft()).audit.authoritativeFixtures, 0))
+test("manual source SHA is deterministic and includes source reference", async () => {
+  const draft = manualDraft(); const first = await manualHistoricalSourceSha(draft); const second = await manualHistoricalSourceSha(draft)
+  assert.equal(first, second); draft.sourceReference = "different note"; assert.notEqual(await manualHistoricalSourceSha(draft), first)
+})
+test("manual fingerprint ignores identity and source-note UI state", async () => {
+  const draft = manualDraft(); const first = await previewFingerprint(manualHistoricalMatchPreview(draft)); draft.sourceReference = "other"
+  assert.equal(await previewFingerprint(manualHistoricalMatchPreview(draft)), first)
+})
+test("manual commit payload preserves evidence and provenance", async () => {
+  const draft = manualDraft(); const preview = manualHistoricalMatchPreview(draft)
+  const payload = buildHistoricalMatchCommitPayload(preview, {}, "manual-match-season-54", await manualHistoricalSourceSha(draft), await previewFingerprint(preview), draft.sourceReference)
+  assert.equal(payload.p_evidence_level, "standings_only"); assert.equal(payload.p_validated_preview.entryMethod, "manual"); assert.equal(payload.p_validated_preview.sourceReference, "paper binder")
+})
+test("manual UI contains deliberate review, identity, and commit safeguards", () => {
+  const component = readFileSync("app/admin/import/csv/components/ManualHistoricalMatchEntry.tsx", "utf8")
+  assert.match(component, /Review Manual Historical Match Season/); assert.match(component, /HistoricalMatchPreview/)
+  assert.doesNotMatch(component, /\.from\(["']players["']\)\.(?:insert|upsert)/)
 })

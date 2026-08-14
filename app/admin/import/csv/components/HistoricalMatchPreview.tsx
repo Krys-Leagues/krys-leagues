@@ -30,6 +30,7 @@ type Props = {
   sourceFilename: string
   sourceSha256: string
   previewFingerprint: string
+  sourceReference?: string
 }
 
 type CommitResult = {
@@ -56,6 +57,7 @@ export default function HistoricalMatchPreview({
   sourceFilename,
   sourceSha256,
   previewFingerprint,
+  sourceReference = "",
 }: Props) {
   const [decisions, setDecisions] = useState<HistoricalMatchIdentityDecisions>({})
   const [confirming, setConfirming] = useState(false)
@@ -109,7 +111,7 @@ export default function HistoricalMatchPreview({
     setCommitError("")
     setCommitResult(null)
     setIdentityMemoryResult(null)
-    const payload = buildHistoricalMatchCommitPayload(preview, effectiveDecisions, sourceFilename, sourceSha256, previewFingerprint)
+    const payload = buildHistoricalMatchCommitPayload(preview, effectiveDecisions, sourceFilename, sourceSha256, previewFingerprint, sourceReference)
     const { data, error } = await supabase.rpc("commit_historical_match_preview", payload)
     setConfirming(false)
     if (error) {
@@ -172,7 +174,7 @@ export default function HistoricalMatchPreview({
         <h2 className="mt-2 text-3xl font-bold">Season {preview.seasonNumber ?? "not detected"}</h2>
         <p className="mt-2 text-zinc-300">{preview.historicalLabel || "Historical label not detected"}</p>
         <p className="text-zinc-300">Layout: {preview.layout === "single_side" ? "single-side historical Match" : preview.layout === "duplicated_final_side" ? "duplicated final-side historical Match" : "ambiguous — review required"}</p>
-        <p className="text-zinc-400">Year: unknown / not supplied · Evidence: aggregate course</p>
+        <p className="text-zinc-400">Year: {preview.year ?? "unknown / not supplied"} · Evidence: {preview.evidenceLevel === "standings_only" ? "standings only" : "aggregate course"}</p>
         <p className="mt-3 font-semibold text-emerald-200">No opponents or fixtures are inferred. Upload and identity review do not write to the database.</p>
       </div>
 
@@ -181,6 +183,7 @@ export default function HistoricalMatchPreview({
         <div className="mt-3 space-y-1 break-all font-mono text-xs text-zinc-400">
           <div>Filename: {sourceFilename}</div><div>Source SHA-256: {sourceSha256 || "calculating…"}</div>
           <div>Preview fingerprint: {previewFingerprint || "calculating…"}</div><div>Parser: {HISTORICAL_MATCH_PARSER_VERSION}</div>
+          {sourceReference && <div>Source reference: {sourceReference}</div>}
         </div>
       </details>
 
@@ -223,7 +226,7 @@ export default function HistoricalMatchPreview({
       <section className="rounded-xl border border-zinc-700 bg-zinc-950 p-4">
         <h3 className="text-xl font-bold">Final commit review</h3>
         <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          <div>Season: {preview.seasonNumber ?? "invalid"}</div><div>Label: {preview.historicalLabel}</div><div>Evidence: aggregate course</div>
+          <div>Season: {preview.seasonNumber ?? "invalid"}</div><div>Label: {preview.historicalLabel}</div><div>Evidence: {preview.evidenceLevel === "standings_only" ? "standings only" : "aggregate course"}</div>
           <div>Divisions: {preview.audit.populatedDivisions}</div><div>Standings: {preview.audit.realPlayerRows}</div><div>Course appearances: {courseCount}</div>
           <div>Played: {preview.audit.courseAppearancesPlayed}</div><div>Unplayed: {preview.audit.courseAppearancesUnplayed}</div><div>Auto-linked identities: {reviewSummary.autoLinked}</div>
           <div>Manually approved identities: {reviewSummary.manuallyApproved}</div><div>Unresolved identities: {reviewSummary.unresolved}</div><div>Needs review: {reviewSummary.needsReview}</div><div>Authoritative fixtures: {preview.audit.authoritativeFixtures}</div>
