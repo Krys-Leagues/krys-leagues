@@ -40,6 +40,7 @@ export async function loadPlayerAliases(): Promise<
       playerId: row.player_id,
       aliasName: row.alias,
       normalizedAlias: row.normalized_alias,
+      verified: row.verified,
       source:
         row.source === "manual" ||
         row.source === "import" ||

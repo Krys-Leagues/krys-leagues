@@ -258,6 +258,7 @@ expected_player_columns(table_name, column_name, treatment) as (
     ('handicap_index', 'player_id', 'derived handicap state; canonicalize identity family on read'),
     ('handicap_rounds', 'player_id', 'frozen handicap round history; canonicalize on read'),
     ('historical_league_results', 'player_id', 'frozen imported league history; canonicalize on read'),
+    ('historical_stroke_standings', 'player_id', 'frozen imported Stroke history; canonicalize on merge'),
     ('import_rows', 'matched_player_id', 'noncanonical import-review support reference'),
     ('import_rows', 'suggested_player_id', 'noncanonical import-review support reference'),
     ('kwt_raw_scores', 'player_id', 'noncanonical raw-import support reference'),

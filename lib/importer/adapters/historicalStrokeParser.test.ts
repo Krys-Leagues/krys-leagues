@@ -9,6 +9,8 @@ import {
   parseHistoricalStrokeCsvRows,
   parseHistoricalStrokeMatrix,
 } from "./historicalStrokeParser.ts"
+import { resolveIdentity } from "../../identity/resolveIdentity.ts"
+import type { PlayerIdentityAlias } from "../../identity/types.ts"
 
 const FIXTURE_URL = new URL("./fixtures/current-season-stroke-play-60.csv.base64", import.meta.url)
 const SOURCE_FILENAME = "CURRENT SEASON STROKE PLAY - 60.csv"
@@ -199,4 +201,47 @@ test("produces deterministic semantic output for the same source", async () => {
   const second = parseHistoricalStrokeCsv(csv, { filename: SOURCE_FILENAME, sourceSha256: SOURCE_SHA256 })
   assert.deepEqual(second, first)
   assert.equal(createHash("sha256").update(JSON.stringify(first)).digest("hex"), createHash("sha256").update(JSON.stringify(second)).digest("hex"))
+})
+
+test("future Historical Stroke imports reuse only verified global aliases", () => {
+  const player = {
+    id: "11111111-1111-1111-1111-111111111111",
+    screenName: "ZoeCurrent",
+    discordName: null,
+    discordId: null,
+    active: true,
+  }
+  const alias: PlayerIdentityAlias = {
+    playerId: player.id,
+    aliasName: "ZOEDARLIN",
+    normalizedAlias: "zoedarlin",
+    source: "historical_alias",
+    verified: true,
+    active: true,
+  }
+
+  const verified = resolveIdentity({ importedName: "ZOEDARLIN", players: [player], aliases: [alias] })
+  assert.equal(verified.status, "alias")
+  assert.equal(verified.playerId, player.id)
+  assert.equal(verified.matchedSource, "historical_alias")
+
+  const unverified = resolveIdentity({ importedName: "ZOEDARLIN", players: [player], aliases: [{ ...alias, verified: false }] })
+  assert.notEqual(unverified.status, "alias")
+})
+
+test("Historical Stroke SQL integrates global memory, merge survival, preview, and audit without rewriting history", async () => {
+  const sql = await readFile("historical_stroke_identity_integration.sql", "utf8")
+  const audit = await readFile("audit_player_identity_references.sql", "utf8")
+  const mergeFunction = sql.slice(
+    sql.indexOf("create or replace function public.canonicalize_historical_stroke_player_links"),
+    sql.indexOf("create or replace function public.preview_site_player_identity_merge")
+  )
+
+  assert.match(sql, /public\.remember_verified_player_alias\(\s*p_player_id uuid,\s*p_alias text/)
+  assert.match(sql, /perform public\.remember_verified_player_alias\(\s*v_canonical_id,\s*v_standing\.historical_display_name/)
+  assert.match(sql, /already belongs to a different canonical player identity/)
+  assert.match(sql, /after insert or update of canonical_player_id\s+on public\.player_identity_links/)
+  assert.match(sql, /approved_history_count[\s\S]*public\.historical_stroke_standings/)
+  assert.match(audit, /\('historical_stroke_standings', 'player_id', 'frozen imported Stroke history; canonicalize on merge'\)/)
+  assert.doesNotMatch(mergeFunction, /set\s+(?:historical_display_name|played|wins|draws|losses|points|strokes)\s*=/i)
 })
