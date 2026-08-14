@@ -743,6 +743,54 @@ test("manual aggregate cross-checks complete course totals", () => {
   draft.divisions[0].standings[0].appearances.c1 = { played: true, outcome: "W", holesWon: 2 }
   assert.match(validateManualHistoricalMatch(draft).join(" "), /course results disagree/)
 })
+function partialPlayDraft(playedCount: 0 | 1 | 2) {
+  const draft = manualDraft("aggregate_course")
+  draft.courses = [{ id: "c1", name: "COURSE ONE" }, { id: "c2", name: "COURSE TWO" }, { id: "c3", name: "COURSE THREE" }]
+  const standing = draft.divisions[0].standings[0]
+  standing.appearances = {
+    c1: playedCount >= 1 ? { played: true, outcome: "W", holesWon: 0 } : { played: false, outcome: null, holesWon: null },
+    c2: { played: false, outcome: null, holesWon: null },
+    c3: playedCount >= 2 ? { played: true, outcome: "L", holesWon: 3 } : { played: false, outcome: null, holesWon: null },
+  }
+  Object.assign(standing, playedCount === 2
+    ? { played: 2, wins: 1, losses: 1, draws: 0, points: 3, holesWon: 3 }
+    : playedCount === 1
+      ? { played: 1, wins: 1, losses: 0, draws: 0, points: 3, holesWon: 0 }
+      : { played: 0, wins: 0, losses: 0, draws: 0, points: 0, holesWon: 0 })
+  return draft
+}
+test("manual aggregate permits one unplayed course when P is two", () => assert.deepEqual(validateManualHistoricalMatch(partialPlayDraft(2)), []))
+test("manual aggregate permits two unplayed courses when P is one", () => assert.deepEqual(validateManualHistoricalMatch(partialPlayDraft(1)), []))
+test("manual aggregate permits all courses unplayed for a zero-game player", () => {
+  const draft = partialPlayDraft(0)
+  assert.deepEqual(validateManualHistoricalMatch(draft), [])
+  const preview = manualHistoricalMatchPreview(draft)
+  assert.equal(preview.audit.courseAppearancesPlayed, 0)
+  assert.equal(preview.audit.courseAppearancesUnplayed, 3)
+  assert.ok(preview.divisions[0].standings[0].courses.every((course) => !course.played && course.outcome === null && course.holesWon === null))
+})
+test("manual partial-play reconciliation counts outcomes and HW from played courses only", () => {
+  const draft = partialPlayDraft(2)
+  assert.deepEqual(validateManualHistoricalMatch(draft), [])
+  const courses = manualHistoricalMatchPreview(draft).divisions[0].standings[0].courses
+  assert.deepEqual(courses.map((course) => [course.played, course.outcome, course.holesWon]), [[true, "W", 0], [false, null, null], [true, "L", 3]])
+})
+test("manual players in one division may have different played counts", () => {
+  const draft = partialPlayDraft(2)
+  const second = partialPlayDraft(1).divisions[0].standings[0]
+  draft.divisions[0].standings.push({ ...second, id: "s2", finalRank: 2, historicalDisplayName: "PARTIAL PLAYER" })
+  assert.deepEqual(validateManualHistoricalMatch(draft), [])
+})
+test("manual mismatch between P and played course count remains blocked", () => {
+  const draft = partialPlayDraft(2)
+  Object.assign(draft.divisions[0].standings[0], { played: 1, wins: 1, losses: 0, points: 3 })
+  assert.match(validateManualHistoricalMatch(draft).join(" "), /course results disagree/)
+})
+test("manual unplayed rows reject stale outcome or HW values", () => {
+  const draft = partialPlayDraft(1)
+  draft.divisions[0].standings[0].appearances.c2 = { played: false, outcome: "L", holesWon: 0 }
+  assert.match(validateManualHistoricalMatch(draft).join(" "), /unplayed rows require a null outcome and null HW/)
+})
 test("manual preview creates no fixtures", () => assert.equal(manualHistoricalMatchPreview(manualDraft()).audit.authoritativeFixtures, 0))
 test("manual source SHA is deterministic and includes source reference", async () => {
   const draft = manualDraft(); const first = await manualHistoricalSourceSha(draft); const second = await manualHistoricalSourceSha(draft)
@@ -760,5 +808,6 @@ test("manual commit payload preserves evidence and provenance", async () => {
 test("manual UI contains deliberate review, identity, and commit safeguards", () => {
   const component = readFileSync("app/admin/import/csv/components/ManualHistoricalMatchEntry.tsx", "utf8")
   assert.match(component, /Review Manual Historical Match Season/); assert.match(component, /HistoricalMatchPreview/)
+  assert.match(component, /Did Not Play/); assert.match(component, /disabled={!appearance\.played}/)
   assert.doesNotMatch(component, /\.from\(["']players["']\)\.(?:insert|upsert)/)
 })

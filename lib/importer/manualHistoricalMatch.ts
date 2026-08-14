@@ -44,7 +44,13 @@ export function validateManualHistoricalMatch(draft: ManualHistoricalMatchDraft)
         let complete = true, w = 0, l = 0, d = 0, hw = 0
         for (const course of draft.courses) {
           const appearance = standing.appearances[course.id]
-          if (!appearance?.played) continue
+          if (!appearance?.played) {
+            if (appearance && (appearance.outcome !== null || appearance.holesWon !== null)) {
+              errors.push(`${label}, ${course.name || "unnamed course"}: unplayed rows require a null outcome and null HW.`)
+              complete = false
+            }
+            continue
+          }
           if (!appearance.outcome || appearance.holesWon === null || appearance.holesWon < 0) {
             errors.push(`${label}, ${course.name || "unnamed course"}: played rows require one outcome and HW of zero or greater.`)
             complete = false
