@@ -371,6 +371,28 @@ test("zero-game and unambiguous dash-total real players remain valid standings",
   assert.equal(dashes.divisions[0].standings[0].played, 0)
 })
 
+test("whitespace-only aggregate totals normalize to zero", () => {
+  for (const whitespace of [" ", "   "]) {
+    const preview = previewHistoricalMatchCsv(conventionMatrix("SKORPZZ", ["0", "0", whitespace, "0", "0", "0"], [
+      ["", "", "", ""], [" ", "   ", "", "0"], ["0", "0", "0", "0"],
+    ]))
+    const standing = preview.divisions[0].standings[0]
+    assert.deepEqual([standing.played, standing.wins, standing.losses, standing.draws, standing.points, standing.holesWon], [0, 0, 0, 0, 0, 0])
+    assert.ok(standing.courses.every((course) => !course.played && course.outcome === null && course.holesWon === null))
+    assert.deepEqual({ standings: preview.audit.realPlayerRows, conflicts: preview.audit.conflicts, malformed: preview.audit.malformedRows }, { standings: 1, conflicts: 0, malformed: 0 })
+  }
+})
+
+test("nonnumeric aggregate totals remain malformed", () => {
+  for (const garbage of ["abc", "?", "1x"]) {
+    const preview = previewHistoricalMatchCsv(conventionMatrix("BAD TOTAL", ["0", "0", garbage, "0", "0", "0"], [
+      ["", "", "", ""], ["", "", "", ""], ["", "", "", ""],
+    ]))
+    assert.equal(preview.audit.realPlayerRows, 0)
+    assert.equal(preview.audit.malformedRows, 1)
+  }
+})
+
 test("exact BYE is ignored but similar legitimate names remain standings and identity inputs", () => {
   const bye = previewHistoricalMatchCsv(conventionMatrix(" BYE ", ["0", "0", "0", "0", "0", "0"], [
     ["0", "0", "0", "0"], ["0", "0", "0", "0"], ["0", "0", "0", "0"],

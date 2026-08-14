@@ -96,7 +96,7 @@ function isDash(value: string) {
 }
 
 function totalNumberValue(value: string) {
-  if (isDash(value)) return 0
+  if (value.trim() === "" || isDash(value)) return 0
   return numberValue(value)
 }
 
