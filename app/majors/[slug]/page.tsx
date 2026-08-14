@@ -4,7 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { useParams } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
-import { formatMajorDate, formatMajorSlot, isMastersScorecardTheme, type MajorDayChoice, type MajorEntry, type MajorEvent, type MajorPlayDay, type MajorSignupStatus, type MajorTimeSlot } from "@/lib/majors"
+import { formatMajorDate, formatMajorSlot, isMajorDayLocked, isMastersScorecardTheme, type MajorDayChoice, type MajorEntry, type MajorEvent, type MajorPlayDay, type MajorSignupStatus, type MajorTimeSlot } from "@/lib/majors"
 import { supabase } from "@/lib/supabase"
 import styles from "./page.module.css"
 
@@ -74,42 +74,63 @@ export default function MajorDetailPage() {
   }
 
   if (loading) return <main className={styles.loading}>Loading Major…</main>
-  if (!event) return <main className={styles.loading}><Link href="/majors">← Four Majors</Link><p>{message}</p></main>
+  if (!event) return <main className={styles.loading}><Link href="/majors">← Four Majors</Link>{slug === "test" ? <><h1>TEST EVENT</h1><p>Authenticated trusted-tester access is required. TEST DATA — NOT OFFICIAL.</p><button onClick={signIn} className={styles.primaryButton}>Sign in with Discord</button></> : <p>{message}</p>}</main>
 
   const masters = isMastersScorecardTheme(event)
+  const testEvent = event.is_test_event
   const signupState = signupStatus?.state || (event.signup_open ? "open" : "closed")
   const signupDisabled = signupState !== "open" && signupState !== "priority"
+  const weekendStatus = schedule[0]?.weekend_competition_status || "pending"
+  const secondaryFieldName = event.secondary_trophy_display_name || "Secondary Trophy Field"
 
   return <main className={`${styles.page} ${masters ? styles.masters : styles.defaultTheme}`}><div className={styles.atmosphere}>{masters && <div className={styles.mastersScene} aria-hidden="true"><i className={styles.blossomTree} /><i className={styles.bench} /><i className={styles.putter} /><i className={styles.golfBall} /><i className={styles.golfBallTwo} /></div>}</div><div className={styles.container}>
     <Link href="/majors" className={styles.backLink}>← Four Majors</Link>
+    {testEvent && <div className={styles.testBanner}><strong>TEST EVENT</strong><span>TEST DATA — NOT OFFICIAL</span></div>}
     <header className={styles.hero}>
-      <div className={styles.brandRow}><Image src="/league-media/BIG LOGO TRANSPARENT.png" width={136} height={136} alt="Krys Leagues" className={styles.logo} priority /><div><p className={styles.eyebrow}>Krys Leagues · Majors Series</p><h1>{event.name}</h1><p className={styles.subtitle}>{masters ? "Mini-Golf Style · Cherry Blossom" : "Major Championship"}</p></div></div>
+      <div className={styles.brandRow}><Image src="/league-media/BIG LOGO TRANSPARENT.png" width={136} height={136} alt="Krys Leagues" className={styles.logo} priority /><div><p className={styles.eyebrow}>{testEvent ? "Krys Leagues · Controlled testing" : "Krys Leagues · Majors Series"}</p><h1>{testEvent ? "TEST SIGNUP" : event.name}</h1><p className={styles.subtitle}>{testEvent ? "Reusable Major workflow rehearsal" : masters ? "Mini-Golf Style · Cherry Blossom" : "Major Championship"}</p></div></div>
       {masters && <div className={styles.mastersFeature} role="img" aria-label="Cherry Blossom course artwork from the Masters scorecard"><div className={styles.featureSheen} /></div>}
-      <div className={styles.statusRow}><span className={styles.badge}>{event.status}</span><span className={`${styles.badge} ${styles[signupState]}`}>Signup {signupState}</span><span className={styles.capacity}>{signupStatus?.spots_claimed ?? entries.length} claimed {signupStatus?.capacity ? `of ${signupStatus.capacity}` : "· field capacity not set"}</span></div>
+      <div className={styles.statusRow}><span className={styles.badge}>{event.status}</span><span className={`${styles.badge} ${styles[signupState]}`}>Signup {signupState}</span><span className={styles.capacity}>{signupStatus?.capacity ? `${signupStatus.spots_claimed} / ${signupStatus.capacity} spots claimed` : `${entries.length} claimed · field capacity not set`}</span></div>
       <p className={styles.meta}>{event.year || "Year to be announced"} · {formatMajorDate(event.starts_at)}</p>
       {event.description && <p className={styles.description}>{event.description}</p>}
       {event.signup_open && <section className={styles.signupCard}>
         <h2>Choose all four play times</h2>
         <p className={styles.timezone}>◷ Times shown in your time zone: <strong>{Intl.DateTimeFormat().resolvedOptions().timeZone}</strong></p>
-        <p className={styles.cutNotice}>Rounds 1 and 2 determine the cut. Choose times for Days 3 and 4 now, but those later times only apply if you advance.</p>
+        {event.signup_instructions && <p className={styles.description}>{event.signup_instructions}</p>}
+        <p className={styles.cutNotice}>Choose one independent time for Thursday, Friday, Saturday, and Sunday. After Friday qualifying, players in both weekend fields continue Saturday and Sunday; every saved weekend time remains intact.</p>
+        {schedule.length > 0 && <p className={styles.assignment}>{event.weekend_status_published_at ? <>Weekend status: <strong>{weekendStatus === "main" ? "Masters Main Event" : weekendStatus === "secondary" ? secondaryFieldName : "Weekend field status pending"}</strong></> : <strong>Weekend field status pending</strong>}</p>}
         {signupState === "upcoming" && <p className={styles.notice}>Public signup opens {formatMajorDate(signupStatus?.public_signup_opens_at || null)}. Priority access is not active for this first Major.</p>}
         {signupState === "priority" && <p className={styles.notice}>Priority signup is open for eligible previous-Major players. Public signup opens {formatMajorDate(signupStatus?.public_signup_opens_at || null)}.</p>}
         {signupState === "full" && <p className={styles.notice}>The current field is full.</p>}
         {days.length !== 4 ? <p className={styles.notice}>Tournament staff is still configuring the four-day schedule.</p> : <div className={styles.days}>{days.map((day) => {
           const mine = schedule.find((choice) => choice.play_day_id === day.id)
           const daySlots = slots.filter((slot) => slot.play_day_id === day.id)
-          return <fieldset key={day.id} className={styles.dayCard} disabled={day.choices_locked || signupDisabled}>
+          const locked = mine?.is_locked ?? isMajorDayLocked(day)
+          return <fieldset key={day.id} className={styles.dayCard} disabled={locked || signupDisabled}>
             <legend><span>Day {day.day_number}</span>{day.label}</legend><p className={styles.dayDate}>{day.play_date}</p>
             {daySlots.length ? daySlots.map((slot) => <label key={slot.id} className={`${styles.slotLabel} ${choices[day.id] === slot.id ? styles.selected : ""}`}><input type="radio" name={day.id} checked={choices[day.id] === slot.id} onChange={() => setChoices((old) => ({ ...old, [day.id]: slot.id }))} /><span>{formatMajorSlot(slot.starts_at)}{slot.label ? <small>{slot.label}</small> : null}</span></label>) : <p className={styles.notice}>No times available yet.</p>}
-            {mine?.assignment_location ? <p className={styles.assignment}>Play at: {mine.assignment_location}</p> : <p className={styles.meta}>Location and instructions will be assigned by tournament staff.</p>}
-            {day.choices_locked && <p className={styles.locked}>◆ Selection locked</p>}
+            {mine?.group_label && <p className={styles.assignment}>{mine.group_label}{mine.assignment_location ? ` · ${mine.assignment_location}` : ""}{mine.group_instructions ? ` · ${mine.group_instructions}` : ""}</p>}
+            {!mine?.group_label && (mine?.assignment_location ? <p className={styles.assignment}>Play at: {mine.assignment_location}</p> : <p className={styles.meta}>Room and instructions will appear here after tournament staff publishes them.</p>)}
+            {day.selection_locks_at && <p className={styles.meta}>Day locks {formatMajorSlot(day.selection_locks_at)}</p>}
+            {locked && <p className={styles.locked}>◆ Selection locked</p>}
           </fieldset>
         })}</div>}
         {days.length === 4 && <button onClick={signup} disabled={saving || signupDisabled} className={styles.primaryButton}>{saving ? "Saving…" : schedule.length ? "Update my four times" : "Register and save my four times"}</button>}
       </section>}
       {message && <p className={styles.notice}>{message}</p>}
     </header>
+    {[event.scheduling_instructions,event.qualifier_information,event.cut_information,event.weekend_information,event.room_rules,event.stream_information].some(Boolean) && <section className={styles.contentCard}><h2>Tournament information</h2>
+      {event.scheduling_instructions && <InfoBlock title="Scheduling" body={event.scheduling_instructions} />}
+      {event.qualifier_information && <InfoBlock title="Qualifying" body={event.qualifier_information} />}
+      {event.cut_information && <InfoBlock title="Friday cut" body={event.cut_information} />}
+      {event.weekend_information && <InfoBlock title="Weekend fields" body={event.weekend_information} />}
+      {event.room_rules && <InfoBlock title="Room and play rules" body={event.room_rules} />}
+      {event.stream_information && <InfoBlock title="Stream information" body={event.stream_information} />}
+    </section>}
     {(event.stream_url || event.stream_scheduled_at) && <section className={styles.contentCard}><h2>Official broadcast</h2>{event.stream_is_live && <p className={styles.live}>● Live now</p>}<p className={styles.meta}>{event.stream_label || event.stream_platform || "Major broadcast"}</p>{event.stream_url && <a href={event.stream_url} target="_blank" rel="noreferrer" className={styles.streamLink}>Watch official stream ↗</a>}</section>}
-    <section className={styles.contentCard}><h2>Championship field <span>{entries.length}</span></h2>{entries.length === 0 ? <p className={styles.meta}>No public participants yet.</p> : <div className={styles.entrantGrid}>{entries.map((entry) => <div key={entry.id} className={styles.entrant}><strong>{entry.player_screen_name_snapshot}</strong><span>{entry.status}</span></div>)}</div>}</section>
+    <section className={styles.contentCard}><h2>{testEvent ? "TEST field" : "Championship field"} <span>{entries.length}</span></h2>{entries.length === 0 ? <p className={styles.meta}>No public participants yet.</p> : <div className={styles.entrantGrid}>{entries.map((entry) => <div key={entry.id} className={styles.entrant}><strong>{entry.player_screen_name_snapshot}</strong><span>{entry.status}</span></div>)}</div>}</section>
   </div></main>
+}
+
+function InfoBlock({ title, body }: { title: string; body: string }) {
+  return <div><h3>{title}</h3><p className={styles.description}>{body}</p></div>
 }
