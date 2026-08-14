@@ -6,6 +6,7 @@ import CommittedHistoricalMatchIdentities from "./components/CommittedHistorical
 import { previewHistoricalMatchCsv } from "@/lib/importer/adapters/matchAdapter"
 import { loadPlayers } from "@/lib/importer/loadPlayers"
 import { loadPlayerAliases } from "@/lib/importer/loadPlayerAliases"
+import { loadPlayerIdentityLinks } from "@/lib/importer/loadPlayerIdentityLinks"
 import { matchPlayers, type PlayerMatch } from "@/lib/importer/matchPlayers"
 import { previewFingerprint, sourceSha256 } from "@/lib/importer/historicalMatchCommit"
 import {
@@ -464,10 +465,10 @@ export default function CsvImportPage() {
     const names = historicalMatchPreview.divisions.flatMap((division) =>
       division.standings.map((standing) => standing.historicalDisplayName)
     )
-    Promise.all([loadPlayers(), loadPlayerAliases()])
-      .then(([players, aliases]) => {
+    Promise.all([loadPlayers({ includeInactive: true }), loadPlayerAliases(), loadPlayerIdentityLinks()])
+      .then(([players, aliases, identityLinks]) => {
         if (cancelled) return
-        const matches = matchPlayers(names, players, aliases)
+        const matches = matchPlayers(names, players, aliases, identityLinks)
         setIdentityCandidates(new Map(matches.map((match) => [match.importedName, match])))
         setIdentityLoading(false)
       })

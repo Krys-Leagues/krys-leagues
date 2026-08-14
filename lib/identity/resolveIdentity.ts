@@ -1,19 +1,32 @@
-import {
+import type {
   IdentityCandidate,
   IdentityMatchResult,
   IdentityPlayer,
   PlayerIdentityAlias,
   ResolveIdentityOptions,
-} from "./types"
+} from "./types.ts"
 
-import { normalizeIdentity } from "./normalizeIdentity"
-import { scoreIdentityMatch } from "./scoreIdentityMatch"
+import { normalizeIdentity } from "./normalizeIdentity.ts"
+import { scoreIdentityMatch } from "./scoreIdentityMatch.ts"
 
 type ResolveIdentityArgs = {
   importedName: string
   players: IdentityPlayer[]
   aliases: PlayerIdentityAlias[]
   options?: ResolveIdentityOptions
+}
+
+function canonicalPlayerId(player: IdentityPlayer) {
+  return player.canonicalPlayerId ?? player.id
+}
+
+function uniqueCanonicalPlayers(players: IdentityPlayer[], matches: IdentityPlayer[]) {
+  const canonicalIds = Array.from(new Set(matches.map(canonicalPlayerId)))
+  if (canonicalIds.length !== 1) return null
+  const canonicalId = canonicalIds[0]
+  return players.find((player) => player.id === canonicalId)
+    ?? matches.find((player) => canonicalPlayerId(player) === canonicalId)
+    ?? null
 }
 
 export function resolveIdentity({
@@ -41,45 +54,73 @@ export function resolveIdentity({
       confidence: 0,
       matchedSource: "unknown",
       candidates: [],
+      autoLinkEligible: false,
+      autoLinkReason: null,
     }
   }
 
-  const exactPlayer = players.find(
+  const exactScreenPlayers = players.filter(
     (player) =>
       normalizeIdentity(player.screenName) ===
       normalizedName
   )
+  const exactPlayer = uniqueCanonicalPlayers(players, exactScreenPlayers)
 
   if (exactPlayer) {
     return {
       importedName,
       normalizedName,
       status: "exact",
-      playerId: exactPlayer.id,
+      playerId: canonicalPlayerId(exactPlayer),
       screenName: exactPlayer.screenName,
       confidence: 100,
       matchedSource: "screen_name",
       candidates: [],
+      autoLinkEligible: true,
+      autoLinkReason: "exact unique screen_name",
     }
   }
 
-  const exactDiscordName = players.find(
+  const exactDiscordIdPlayers = players.filter(
+    (player) => player.discordId?.trim() && player.discordId.trim() === importedName.trim()
+  )
+  const exactDiscordIdPlayer = uniqueCanonicalPlayers(players, exactDiscordIdPlayers)
+
+  if (exactDiscordIdPlayer) {
+    return {
+      importedName,
+      normalizedName,
+      status: "exact",
+      playerId: canonicalPlayerId(exactDiscordIdPlayer),
+      screenName: exactDiscordIdPlayer.screenName,
+      confidence: 100,
+      matchedSource: "discord_id",
+      candidates: [],
+      autoLinkEligible: true,
+      autoLinkReason: "exact unique Discord ID",
+    }
+  }
+
+  const exactDiscordNames = players.filter(
     (player) =>
       player.discordName &&
       normalizeIdentity(player.discordName) ===
         normalizedName
   )
+  const exactDiscordName = uniqueCanonicalPlayers(players, exactDiscordNames)
 
   if (exactDiscordName) {
     return {
       importedName,
       normalizedName,
       status: "normalized",
-      playerId: exactDiscordName.id,
+      playerId: canonicalPlayerId(exactDiscordName),
       screenName: exactDiscordName.screenName,
       confidence: 100,
       matchedSource: "discord_name",
       candidates: [],
+      autoLinkEligible: false,
+      autoLinkReason: null,
     }
   }
 
@@ -89,9 +130,12 @@ export function resolveIdentity({
         .filter(
           (alias) =>
             alias.active &&
+            alias.verified === true &&
             alias.normalizedAlias === normalizedName
         )
-        .map((alias) => alias.playerId)
+        .map((alias) => players.find((player) => player.id === alias.playerId))
+        .filter((player): player is IdentityPlayer => Boolean(player))
+        .map(canonicalPlayerId)
         .filter((playerId) =>
           players.some((player) => player.id === playerId)
         )
@@ -108,11 +152,13 @@ export function resolveIdentity({
         importedName,
         normalizedName,
         status: "alias",
-        playerId: player.id,
+        playerId: canonicalPlayerId(player),
         screenName: player.screenName,
         confidence: 100,
         matchedSource: "historical_alias",
         candidates: [],
+        autoLinkEligible: true,
+        autoLinkReason: "exact unique verified historical alias",
       }
     }
   }
@@ -238,6 +284,8 @@ export function resolveIdentity({
       confidence: 0,
       matchedSource: "unknown",
       candidates: [],
+      autoLinkEligible: false,
+      autoLinkReason: null,
     }
   }
 
@@ -251,5 +299,7 @@ export function resolveIdentity({
     matchedSource:
       bestCandidate.matchedSource,
     candidates: rankedCandidates,
+    autoLinkEligible: false,
+    autoLinkReason: null,
   }
 }

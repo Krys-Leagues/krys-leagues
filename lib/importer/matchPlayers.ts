@@ -2,8 +2,9 @@ import type { PlayerRecord } from "./loadPlayers"
 import type {
   IdentityPlayer,
   PlayerIdentityAlias,
-} from "@/lib/identity"
-import { resolveIdentity } from "@/lib/identity"
+} from "../identity/types.ts"
+import { resolveIdentity } from "../identity/resolveIdentity.ts"
+import type { PlayerIdentityLink } from "./loadPlayerIdentityLinks"
 
 export type PlayerMatch = {
   importedName: string
@@ -12,16 +13,31 @@ export type PlayerMatch = {
   confidence: number
   status: "exact" | "close" | "new"
   evidence: string
+  autoLinkEligible: boolean
+  autoLinkReason: string | null
 }
 
 export function matchPlayers(
   importedNames: string[],
   players: PlayerRecord[],
-  aliases: PlayerIdentityAlias[] = []
+  aliases: PlayerIdentityAlias[] = [],
+  identityLinks: PlayerIdentityLink[] = []
 ): PlayerMatch[] {
+  const directCanonicalIds = new Map(identityLinks.map((link) => [link.historicalPlayerId, link.canonicalPlayerId]))
+  const canonicalIds = new Map<string, string>()
+  for (const link of identityLinks) {
+    const visited = new Set<string>()
+    let current = link.historicalPlayerId
+    while (directCanonicalIds.has(current) && !visited.has(current)) {
+      visited.add(current)
+      current = directCanonicalIds.get(current)!
+    }
+    canonicalIds.set(link.historicalPlayerId, current)
+  }
   const identityPlayers: IdentityPlayer[] =
     players.map((player) => ({
       id: player.id,
+      canonicalPlayerId: canonicalIds.get(player.id) ?? player.id,
       screenName: player.screen_name,
       discordName: player.discord_name,
       discordId: player.discord_id,
@@ -51,6 +67,8 @@ export function matchPlayers(
         confidence: result.confidence,
         status: "exact",
         evidence: result.matchedSource,
+        autoLinkEligible: result.autoLinkEligible,
+        autoLinkReason: result.autoLinkReason,
       }
     }
 
@@ -62,6 +80,8 @@ export function matchPlayers(
         confidence: result.confidence,
         status: "close",
         evidence: result.matchedSource,
+        autoLinkEligible: false,
+        autoLinkReason: null,
       }
     }
 
@@ -72,6 +92,8 @@ export function matchPlayers(
       confidence: 0,
       status: "new",
       evidence: "none",
+      autoLinkEligible: false,
+      autoLinkReason: null,
     }
   })
 }

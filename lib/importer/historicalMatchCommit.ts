@@ -1,10 +1,12 @@
 import type { HistoricalMatchPreview } from "./adapters/matchAdapter"
+import type { PlayerMatch } from "./matchPlayers"
 
 export const HISTORICAL_MATCH_PARSER_VERSION = "historical-match-v1"
 
 export type HistoricalMatchIdentityDecision = {
   canonicalPlayerId: string | null
   resolutionNote?: string
+  selectionSource?: "auto" | "manual" | "unresolved"
 }
 
 export type HistoricalMatchIdentityDecisions = Record<string, HistoricalMatchIdentityDecision>
@@ -23,6 +25,61 @@ export type HistoricalMatchCommitPayload = {
 
 export function historicalMatchStandingKey(divisionNumber: number, finalRank: number) {
   return `${divisionNumber}:${finalRank}`
+}
+
+export function historicalMatchAutoLinkDecision(match?: PlayerMatch) {
+  if (!match?.playerId || !match.autoLinkEligible || match.confidence !== 100 || !match.autoLinkReason) {
+    return null
+  }
+  return {
+    canonicalPlayerId: match.playerId,
+    resolutionNote: `Auto-linked from ${match.autoLinkReason}.`,
+    selectionSource: "auto" as const,
+  }
+}
+
+export function historicalMatchIdentityReviewSummary(
+  preview: HistoricalMatchPreview,
+  candidates: Map<string, PlayerMatch>,
+  decisions: HistoricalMatchIdentityDecisions
+) {
+  let autoLinked = 0
+  let manuallyApproved = 0
+  let unresolved = 0
+  let needsReview = 0
+
+  for (const division of preview.divisions) {
+    for (const standing of division.standings) {
+      const key = historicalMatchStandingKey(division.divisionNumber, standing.finalRank)
+      const explicitDecision = decisions[key]
+      if (explicitDecision) {
+        if (explicitDecision.canonicalPlayerId) manuallyApproved += 1
+        else unresolved += 1
+      } else if (historicalMatchAutoLinkDecision(candidates.get(standing.historicalDisplayName))) {
+        autoLinked += 1
+      } else {
+        needsReview += 1
+      }
+    }
+  }
+
+  return { autoLinked, manuallyApproved, unresolved, needsReview }
+}
+
+export function historicalMatchEffectiveIdentityDecisions(
+  preview: HistoricalMatchPreview,
+  candidates: Map<string, PlayerMatch>,
+  decisions: HistoricalMatchIdentityDecisions
+) {
+  const effective: HistoricalMatchIdentityDecisions = {}
+  for (const division of preview.divisions) {
+    for (const standing of division.standings) {
+      const key = historicalMatchStandingKey(division.divisionNumber, standing.finalRank)
+      const autoDecision = historicalMatchAutoLinkDecision(candidates.get(standing.historicalDisplayName))
+      if (autoDecision) effective[key] = autoDecision
+    }
+  }
+  return { ...effective, ...decisions }
 }
 
 function canonicalHistoricalFacts(preview: HistoricalMatchPreview) {

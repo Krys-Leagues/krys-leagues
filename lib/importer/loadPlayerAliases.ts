@@ -53,6 +53,7 @@ export async function loadPlayerAliases(): Promise<
       lastSeenLeague: null,
       lastSeenSeason: null,
       active: true,
+      verified: row.verified,
     })
   )
 }

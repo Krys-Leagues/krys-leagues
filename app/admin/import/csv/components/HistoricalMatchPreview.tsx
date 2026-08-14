@@ -6,7 +6,10 @@ import type { PlayerMatch } from "@/lib/importer/matchPlayers"
 import type { HistoricalMatchPreview as Preview } from "@/lib/importer/adapters/matchAdapter"
 import {
   buildHistoricalMatchCommitPayload,
+  historicalMatchAutoLinkDecision,
   historicalMatchCommitBlockers,
+  historicalMatchEffectiveIdentityDecisions,
+  historicalMatchIdentityReviewSummary,
   historicalMatchStandingKey,
   HISTORICAL_MATCH_PARSER_VERSION,
   type HistoricalMatchIdentityDecisions,
@@ -57,9 +60,14 @@ export default function HistoricalMatchPreview({
   const [searchingStanding, setSearchingStanding] = useState<string | null>(null)
   const [selectedPlayerNames, setSelectedPlayerNames] = useState<Record<string, string>>({})
   const blockers = useMemo(() => historicalMatchCommitBlockers(preview), [preview])
-  const standings = preview.divisions.flatMap((division) => division.standings)
-  const resolvedCount = Object.values(decisions).filter((decision) => decision.canonicalPlayerId).length
-  const unresolvedCount = standings.length - resolvedCount
+  const effectiveDecisions = useMemo(
+    () => historicalMatchEffectiveIdentityDecisions(preview, identityCandidates, decisions),
+    [decisions, identityCandidates, preview]
+  )
+  const reviewSummary = useMemo(
+    () => historicalMatchIdentityReviewSummary(preview, identityCandidates, decisions),
+    [decisions, identityCandidates, preview]
+  )
   const courseCount = preview.audit.courseAppearancesPlayed + preview.audit.courseAppearancesUnplayed
 
   function approveCandidate(divisionNumber: number, finalRank: number, match?: PlayerMatch) {
@@ -70,13 +78,14 @@ export default function HistoricalMatchPreview({
       [key]: {
         canonicalPlayerId: match.playerId,
         resolutionNote: `Explicitly approved ${match.evidence} candidate from Historical Match preview.`,
+        selectionSource: "manual",
       },
     }))
   }
 
   function leaveUnresolved(divisionNumber: number, finalRank: number) {
     const key = historicalMatchStandingKey(divisionNumber, finalRank)
-    setDecisions((current) => ({ ...current, [key]: { canonicalPlayerId: null } }))
+    setDecisions((current) => ({ ...current, [key]: { canonicalPlayerId: null, selectionSource: "unresolved" } }))
     setSelectedPlayerNames((current) => {
       const next = { ...current }
       delete next[key]
@@ -89,7 +98,7 @@ export default function HistoricalMatchPreview({
     setCommitting(true)
     setCommitError("")
     setCommitResult(null)
-    const payload = buildHistoricalMatchCommitPayload(preview, decisions, sourceFilename, sourceSha256, previewFingerprint)
+    const payload = buildHistoricalMatchCommitPayload(preview, effectiveDecisions, sourceFilename, sourceSha256, previewFingerprint)
     const { data, error } = await supabase.rpc("commit_historical_match_preview", payload)
     setCommitting(false)
     setConfirming(false)
@@ -131,20 +140,24 @@ export default function HistoricalMatchPreview({
           </tr></thead><tbody>{division.standings.map((standing) => {
             const key = historicalMatchStandingKey(division.divisionNumber, standing.finalRank)
             const match = identityCandidates.get(standing.historicalDisplayName)
-            const decision = decisions[key]
+            const autoDecision = historicalMatchAutoLinkDecision(match)
+            const explicitDecision = decisions[key]
+            const decision = effectiveDecisions[key]
+            const isAutoLinked = Boolean(autoDecision && !explicitDecision)
             return <tr key={key} className="border-b border-zinc-800 align-top">
               <td className="p-2"><strong>#{standing.finalRank} {standing.historicalDisplayName}</strong>{standing.warnings.map((warning) => <div key={warning} className="mt-1 text-xs text-red-300">{warning}</div>)}</td>
               <td className="whitespace-nowrap p-2">P {standing.played} · W {standing.wins} · L {standing.losses} · D {standing.draws} · PTS {standing.points} · HW {standing.holesWon}</td>
               {standing.courses.map((course) => <td key={course.courseName} className="p-2">{course.played ? <><div className="font-bold text-emerald-300">Played · {course.outcome}</div><div>HW {course.holesWon}</div></> : <div className="font-bold text-zinc-400">Unplayed</div>}</td>)}
               <td className="min-w-72 space-y-2 p-2">
                 {identityLoading ? <div className="text-zinc-400">Checking read-only identity evidence…</div> : match?.playerId && match.status !== "new" ? <>
-                  <div className="text-amber-200">Candidate: {match.matchedName}</div><div className="font-mono text-xs text-zinc-500">{match.playerId}</div>
+                  <div className={isAutoLinked ? "font-bold text-emerald-200" : "text-amber-200"}>{isAutoLinked ? "Auto-linked — exact unique match" : `Candidate: ${match.matchedName}`}</div>
+                  {isAutoLinked && <div className="text-zinc-200">Linked current player: {match.matchedName}</div>}<div className="font-mono text-xs text-zinc-500">{match.playerId}</div>
                   <div className="text-xs text-zinc-400">Evidence: {match.evidence} · confidence {match.confidence}%</div>
-                  <div className="flex flex-wrap gap-2"><button type="button" onClick={() => approveCandidate(division.divisionNumber, standing.finalRank, match)} className="rounded bg-emerald-700 px-3 py-1 font-bold">Approve candidate</button><button type="button" onClick={() => setSearchingStanding(key)} className="rounded bg-blue-700 px-3 py-1 font-bold">Find / Link Existing Player</button><button type="button" onClick={() => leaveUnresolved(division.divisionNumber, standing.finalRank)} className="rounded border border-zinc-600 px-3 py-1">Leave unresolved</button></div>
+                  <div className="flex flex-wrap gap-2">{!isAutoLinked && <button type="button" onClick={() => approveCandidate(division.divisionNumber, standing.finalRank, match)} className="rounded bg-emerald-700 px-3 py-1 font-bold">Approve candidate</button>}<button type="button" onClick={() => setSearchingStanding(key)} className="rounded bg-blue-700 px-3 py-1 font-bold">{isAutoLinked ? "Change linked player" : "Find / Link Existing Player"}</button><button type="button" onClick={() => leaveUnresolved(division.divisionNumber, standing.finalRank)} className="rounded border border-zinc-600 px-3 py-1">Leave unresolved</button></div>
                 </> : <><div className="text-zinc-400">No candidate · unresolved</div><div className="flex flex-wrap gap-2"><button type="button" onClick={() => setSearchingStanding(key)} className="rounded bg-blue-700 px-3 py-1 font-bold">Find / Link Existing Player</button><button type="button" onClick={() => leaveUnresolved(division.divisionNumber, standing.finalRank)} className="rounded border border-zinc-600 px-3 py-1">Leave unresolved</button></div></>}
-                <div className={`text-xs font-bold ${decision?.canonicalPlayerId ? "text-emerald-300" : "text-zinc-400"}`}>Review status: {decision?.canonicalPlayerId ? `linked to ${selectedPlayerNames[key] || match?.matchedName || "selected player"}` : "unresolved"}</div>
+                <div className={`text-xs font-bold ${decision?.canonicalPlayerId ? "text-emerald-300" : "text-zinc-400"}`}>Review status: {decision?.canonicalPlayerId ? `${isAutoLinked ? "auto-linked" : "manually linked"} to ${selectedPlayerNames[key] || match?.matchedName || "selected player"}` : explicitDecision ? "left unresolved" : "needs review"}</div>
                 {searchingStanding === key && <ExistingPlayerPicker historicalDisplayName={standing.historicalDisplayName} onCancel={() => setSearchingStanding(null)} onSelect={(player) => {
-                  setDecisions((current) => ({ ...current, [key]: { canonicalPlayerId: player.id, resolutionNote: "Explicitly selected through Find / Link Existing Player before commit." } }))
+                  setDecisions((current) => ({ ...current, [key]: { canonicalPlayerId: player.id, resolutionNote: "Explicitly selected through Find / Link Existing Player before commit.", selectionSource: "manual" } }))
                   setSelectedPlayerNames((current) => ({ ...current, [key]: player.screen_name }))
                   setSearchingStanding(null)
                 }} />}
@@ -159,8 +172,8 @@ export default function HistoricalMatchPreview({
         <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           <div>Season: {preview.seasonNumber ?? "invalid"}</div><div>Label: {preview.historicalLabel}</div><div>Evidence: aggregate course</div>
           <div>Divisions: {preview.audit.populatedDivisions}</div><div>Standings: {preview.audit.realPlayerRows}</div><div>Course appearances: {courseCount}</div>
-          <div>Played: {preview.audit.courseAppearancesPlayed}</div><div>Unplayed: {preview.audit.courseAppearancesUnplayed}</div><div>Resolved identities: {resolvedCount}</div>
-          <div>Unresolved identities: {unresolvedCount}</div><div>Authoritative fixtures: {preview.audit.authoritativeFixtures}</div>
+          <div>Played: {preview.audit.courseAppearancesPlayed}</div><div>Unplayed: {preview.audit.courseAppearancesUnplayed}</div><div>Auto-linked identities: {reviewSummary.autoLinked}</div>
+          <div>Manually approved identities: {reviewSummary.manuallyApproved}</div><div>Unresolved identities: {reviewSummary.unresolved}</div><div>Needs review: {reviewSummary.needsReview}</div><div>Authoritative fixtures: {preview.audit.authoritativeFixtures}</div>
         </div>
         {blockers.length > 0 && <div className="mt-4 rounded border border-red-700 bg-red-950/40 p-3 text-red-200"><strong>Commit blocked</strong>{blockers.map((blocker) => <div key={blocker}>{blocker}</div>)}</div>}
         {!sourceSha256 || !previewFingerprint ? <p className="mt-4 text-amber-200">Commit is unavailable until both deterministic hashes are ready.</p> : null}
@@ -169,7 +182,7 @@ export default function HistoricalMatchPreview({
       </section>
 
       {confirming && <div role="dialog" aria-modal="true" className="rounded-xl border-2 border-amber-500 bg-amber-950/50 p-5">
-        <h3 className="text-xl font-bold">Confirm Season {preview.seasonNumber} historical commit</h3><p className="mt-2">This freezes the validated historical source facts and your explicitly approved identity decisions. It creates no fixtures and does not modify managed Match.</p>
+        <h3 className="text-xl font-bold">Confirm Season {preview.seasonNumber} historical commit</h3><p className="mt-2">This freezes the validated historical source facts plus the shown automatic and manual identity selections. Unresolved identities remain allowed. It creates no fixtures and does not modify managed Match.</p>
         <div className="mt-4 flex gap-3"><button type="button" onClick={() => void commitHistoricalSeason()} disabled={committing} className="rounded bg-emerald-700 px-4 py-2 font-bold">{committing ? "Committing…" : "Confirm and commit"}</button><button type="button" onClick={() => setConfirming(false)} disabled={committing} className="rounded border border-zinc-500 px-4 py-2">Cancel</button></div>
       </div>}
       {commitError && <div role="alert" className="rounded border border-red-700 bg-red-950/40 p-4 text-red-200">{commitError}</div>}

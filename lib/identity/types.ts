@@ -1,6 +1,7 @@
 export type IdentitySource =
   | "screen_name"
   | "discord_name"
+  | "discord_id"
   | "historical_alias"
   | "manual"
   | "import"
@@ -15,6 +16,7 @@ export type IdentityMatchStatus =
 
 export type IdentityPlayer = {
   id: string
+  canonicalPlayerId?: string
   screenName: string
   discordName: string | null
   discordId: string | null
@@ -32,6 +34,7 @@ export type PlayerIdentityAlias = {
   lastSeenLeague?: string | null
   lastSeenSeason?: number | null
   active: boolean
+  verified?: boolean
 }
 
 export type IdentityCandidate = {
@@ -52,6 +55,8 @@ export type IdentityMatchResult = {
   confidence: number
   matchedSource: IdentitySource
   candidates: IdentityCandidate[]
+  autoLinkEligible: boolean
+  autoLinkReason: string | null
 }
 
 export type ResolveIdentityOptions = {

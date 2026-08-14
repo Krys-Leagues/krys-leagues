@@ -1,7 +1,7 @@
 import {
   normalizeIdentity,
   splitIdentityWords,
-} from "./normalizeIdentity"
+} from "./normalizeIdentity.ts"
 
 function levenshteinDistance(
   left: string,

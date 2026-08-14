@@ -6,6 +6,8 @@ import { previewHistoricalMatchCsv } from "./matchAdapter.ts"
 import {
   buildHistoricalMatchCommitPayload,
   historicalMatchCommitBlockers,
+  historicalMatchEffectiveIdentityDecisions,
+  historicalMatchIdentityReviewSummary,
   historicalMatchStandingKey,
   previewFingerprint,
   sourceSha256,
@@ -13,6 +15,8 @@ import {
 import { historicalStandingIdentityRpcArgs, searchExistingPlayers } from "../historicalMatchIdentity.ts"
 import type { PlayerRecord } from "../loadPlayers.ts"
 import type { PlayerIdentityAlias } from "../../identity/types.ts"
+import { matchPlayers } from "../matchPlayers.ts"
+import type { PlayerIdentityLink } from "../loadPlayerIdentityLinks.ts"
 
 const SIDE_WIDTH = 19
 const RIGHT_START = 20
@@ -314,4 +318,123 @@ test("find/link workflow preserves frozen names and uses no player insert or man
   assert.doesNotMatch(files, /match_specific_alias|historical_match_alias/)
   assert.match(files, /historical_match_imports/)
   assert.match(files, /canonical_player_id/)
+})
+
+function identityPlayer(id: string, screenName: string, options: Partial<PlayerRecord> = {}): PlayerRecord {
+  return {
+    id,
+    screen_name: screenName,
+    discord_name: null,
+    discord_username: null,
+    discord_id: null,
+    active: true,
+    ...options,
+  }
+}
+
+test("unique exact screen-name evidence auto-links one canonical identity", () => {
+  const player = identityPlayer("11111111-1111-1111-1111-111111111111", "SLAPPY")
+  const match = matchPlayers(["SLAPPY"], [player])[0]
+  assert.equal(match.autoLinkEligible, true)
+  assert.equal(match.autoLinkReason, "exact unique screen_name")
+  assert.equal(match.playerId, player.id)
+})
+
+test("exact normalized names resolving to multiple canonical identities do not auto-link", () => {
+  const players = [
+    identityPlayer("11111111-1111-1111-1111-111111111111", "SAME NAME"),
+    identityPlayer("22222222-2222-2222-2222-222222222222", "same_name"),
+  ]
+  const match = matchPlayers(["SAME-NAME"], players)[0]
+  assert.equal(match.confidence, 100)
+  assert.equal(match.autoLinkEligible, false)
+})
+
+test("duplicate player rows for the same canonical identity remain uniquely auto-linkable", () => {
+  const canonical = identityPlayer("11111111-1111-1111-1111-111111111111", "SLAPPY")
+  const historical = identityPlayer("22222222-2222-2222-2222-222222222222", "slappy")
+  const links: PlayerIdentityLink[] = [{ historicalPlayerId: historical.id, canonicalPlayerId: canonical.id }]
+  const match = matchPlayers(["SLAPPY"], [canonical, historical], [], links)[0]
+  assert.equal(match.autoLinkEligible, true)
+  assert.equal(match.playerId, canonical.id)
+})
+
+test("fuzzy candidates below 100 percent never auto-link", () => {
+  const player = identityPlayer("11111111-1111-1111-1111-111111111111", "KeiraRobert")
+  const match = matchPlayers(["KEIRROBERT"], [player])[0]
+  assert.ok(match.confidence <= 99)
+  assert.equal(match.autoLinkEligible, false)
+})
+
+test("displayed 100 percent Discord-name evidence is not safe auto-link evidence", () => {
+  const player = identityPlayer("11111111-1111-1111-1111-111111111111", "SPICY", { discord_name: "DawnSophia" })
+  const match = matchPlayers(["DawnSophia"], [player])[0]
+  assert.equal(match.confidence, 100)
+  assert.equal(match.evidence, "discord_name")
+  assert.equal(match.autoLinkEligible, false)
+})
+
+test("unique exact Discord ID auto-links", () => {
+  const player = identityPlayer("11111111-1111-1111-1111-111111111111", "SPICY", { discord_id: "987654321" })
+  const match = matchPlayers(["987654321"], [player])[0]
+  assert.equal(match.autoLinkEligible, true)
+  assert.equal(match.autoLinkReason, "exact unique Discord ID")
+})
+
+test("only unique verified exact aliases auto-link", () => {
+  const player = identityPlayer("11111111-1111-1111-1111-111111111111", "WAREY")
+  const verified: PlayerIdentityAlias = {
+    playerId: player.id,
+    aliasName: "OLD WAREY",
+    normalizedAlias: "oldwarey",
+    source: "historical_alias",
+    active: true,
+    verified: true,
+  }
+  assert.equal(matchPlayers(["OLD WAREY"], [player], [verified])[0].autoLinkEligible, true)
+  assert.equal(matchPlayers(["OLD WAREY"], [player], [{ ...verified, verified: false }])[0].autoLinkEligible, false)
+})
+
+test("auto-link decisions preserve frozen names, are overridable, and do not block unresolved rows", async () => {
+  const preview = previewHistoricalMatchCsv(season55Matrix())
+  const standing = preview.divisions[0].standings[0]
+  const key = historicalMatchStandingKey(standing.divisionNumber, standing.finalRank)
+  const player = identityPlayer("11111111-1111-1111-1111-111111111111", standing.historicalDisplayName)
+  const candidates = new Map([[standing.historicalDisplayName, matchPlayers([standing.historicalDisplayName], [player])[0]]])
+  const automatic = historicalMatchEffectiveIdentityDecisions(preview, candidates, {})
+  assert.equal(automatic[key].canonicalPlayerId, player.id)
+
+  const overridden = historicalMatchEffectiveIdentityDecisions(preview, candidates, {
+    [key]: { canonicalPlayerId: null, selectionSource: "unresolved" },
+  })
+  assert.equal(overridden[key].canonicalPlayerId, null)
+  const summary = historicalMatchIdentityReviewSummary(preview, candidates, {
+    [key]: { canonicalPlayerId: null, selectionSource: "unresolved" },
+  })
+  assert.equal(summary.unresolved, 1)
+  assert.ok(summary.needsReview > 0)
+  assert.deepEqual(historicalMatchCommitBlockers(preview), [])
+
+  const payload = buildHistoricalMatchCommitPayload(
+    preview,
+    automatic,
+    "season55.csv",
+    "a".repeat(64),
+    await previewFingerprint(preview)
+  )
+  const divisions = payload.p_validated_preview.divisions as Array<{ standings: Array<{ historicalDisplayName: string }> }>
+  assert.equal(divisions[0].standings[0].historicalDisplayName, standing.historicalDisplayName)
+})
+
+test("auto-link preview logic performs no database mutation or player creation", () => {
+  const files = [
+    "lib/identity/resolveIdentity.ts",
+    "lib/importer/matchPlayers.ts",
+    "lib/importer/historicalMatchCommit.ts",
+    "lib/importer/loadPlayerIdentityLinks.ts",
+    "app/admin/import/csv/components/HistoricalMatchPreview.tsx",
+  ].map((file) => readFileSync(file, "utf8")).join("\n")
+  assert.doesNotMatch(files, /\.from\("players"\)\.(?:insert|upsert|update|delete)/)
+  assert.doesNotMatch(files, /\.rpc\("set_historical_match_standing_identity"/)
+  assert.doesNotMatch(files, /\.rpc\("(?:create_match_|save_match_|delete_match_|rebuild_match_|generate_match_|approve_match_)/)
 })
