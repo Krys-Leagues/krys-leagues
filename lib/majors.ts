@@ -8,6 +8,8 @@ export type MajorEvent = {
   starts_at: string | null
   ends_at: string | null
   is_public: boolean
+  is_test_event: boolean
+  test_event_listed: boolean
   description: string | null
   stream_url: string | null
   stream_platform: string | null
@@ -18,6 +20,8 @@ export type MajorEvent = {
   scorecard_accent_color: string | null
   scorecard_text_color: string | null
   signup_capacity: number | null
+  signup_hard_capacity: number
+  initial_release_capacity: number
   public_signup_opens_at: string | null
   priority_signup_enabled: boolean
   priority_signup_opens_at: string | null
@@ -26,13 +30,32 @@ export type MajorEvent = {
   public_capacity_adjusted_at: string | null
   later_release_used_at: string | null
   later_release_spots: number | null
+  schedule_timezone: string
+  signup_instructions: string | null
+  scheduling_instructions: string | null
+  qualifier_information: string | null
+  cut_information: string | null
+  weekend_information: string | null
+  room_rules: string | null
+  stream_information: string | null
+  weekend_status_published_at: string | null
+  secondary_trophy_display_name: string | null
   created_at: string
   updated_at: string
+}
+
+export type MajorTestTester = {
+  major_event_id: string
+  player_id: string
+  screen_name: string
+  added_at: string
 }
 
 export type MajorSignupStatus = {
   spots_claimed: number
   capacity: number | null
+  hard_capacity: number
+  release_2_used: boolean
   signup_open: boolean
   public_signup_opens_at: string | null
   priority_signup_enabled: boolean
@@ -110,6 +133,7 @@ export type MajorPlayDay = {
   label: string
   play_date: string
   choices_locked: boolean
+  selection_locks_at: string | null
 }
 
 export type MajorTimeSlot = {
@@ -128,6 +152,64 @@ export type MajorDayChoice = {
   assignment_location: string | null
   starts_at?: string
   slot_label?: string | null
+  selection_locks_at?: string | null
+  is_locked?: boolean
+  weekend_competition_status?: MajorWeekendStatus["competition_status"]
+  group_label?: string | null
+  group_competition?: MajorScheduleGroup["competition"] | null
+  group_instructions?: string | null
+}
+
+export type MajorWeekendStatus = {
+  entry_id: string
+  major_event_id: string
+  competition_status: "pending" | "main" | "secondary"
+  decided_at: string | null
+  decided_by: string | null
+}
+
+export type MajorScheduleGroup = {
+  id: string
+  major_event_id: string
+  play_day_id: string
+  time_slot_id: string
+  group_label: string
+  competition: "qualifying" | "main" | "secondary"
+  location: string | null
+  instructions: string | null
+  admin_notes: string | null
+  is_finalized: boolean
+  is_published: boolean
+}
+
+export type MajorScheduleGroupMember = {
+  group_id: string
+  major_event_id: string
+  play_day_id: string
+  time_slot_id: string
+  entry_id: string
+}
+
+export type MajorFinalPlacement = {
+  id: string
+  major_event_id: string
+  entry_id: string
+  player_id: string
+  player_screen_name_snapshot: string
+  weekend_field: "main" | "secondary" | null
+  field_placement: number | null
+  is_tied: boolean
+  is_winner: boolean
+  result_status: "pending" | "completed" | "did_not_finish" | "withdrawn" | "disqualified"
+  is_finalized: boolean
+  finalized_at: string | null
+  finalized_by: string | null
+  created_at: string
+  updated_at: string
+}
+
+export function isMajorDayLocked(day: Pick<MajorPlayDay, "choices_locked" | "selection_locks_at">) {
+  return day.choices_locked || Boolean(day.selection_locks_at && Date.now() >= new Date(day.selection_locks_at).getTime())
 }
 
 export function formatMajorSlot(value: string) {

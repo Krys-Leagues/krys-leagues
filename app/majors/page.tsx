@@ -15,6 +15,7 @@ export default function MajorsPage() {
       const response = await supabase
         .from("major_events")
         .select("*")
+        .or("is_test_event.eq.false,test_event_listed.eq.true")
         .order("starts_at", { ascending: true, nullsFirst: false })
       setEvents((response.data as MajorEvent[] | null) || [])
       setError(response.error?.message || "")
@@ -46,6 +47,7 @@ export default function MajorsPage() {
                 {event.signup_open && <span style={signupBadge}>Signup open</span>}
               </div>
               <h2 style={cardTitle}>{event.name}</h2>
+              {event.is_test_event && <p style={testText}>TEST DATA — NOT OFFICIAL</p>}
               <p style={muted}>{event.year || "Year to be announced"}</p>
               <p style={muted}>{formatMajorDate(event.starts_at)}</p>
               {event.stream_is_live && <p style={liveText}>● Live now</p>}
@@ -74,4 +76,4 @@ const cardTitle: React.CSSProperties = { marginBottom: 4, fontSize: 26 }
 const muted: React.CSSProperties = { color: "#cbd5e1" }
 const liveText: React.CSSProperties = { color: "#f87171", fontWeight: 800 }
 const errorText: React.CSSProperties = { color: "#fca5a5" }
-
+const testText: React.CSSProperties = { color: "#fbbf24", fontWeight: 900, letterSpacing: ".08em" }

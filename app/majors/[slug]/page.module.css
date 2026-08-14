@@ -20,6 +20,20 @@
   background: radial-gradient(circle at 50% 0, #164e63 0, transparent 48%), linear-gradient(#020617, #000);
 }
 
+.testBanner {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 18px 0;
+  padding: 13px 16px;
+  border: 2px solid #f59e0b;
+  border-radius: 12px;
+  background: #451a03;
+  color: #fef3c7;
+  font-weight: 900;
+  letter-spacing: .08em;
+}
+
 .masters {
   --accent: #f07eac;
   --accent2: #17613d;
