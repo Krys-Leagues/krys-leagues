@@ -336,7 +336,7 @@ test("unique exact screen-name evidence auto-links one canonical identity", () =
   const player = identityPlayer("11111111-1111-1111-1111-111111111111", "SLAPPY")
   const match = matchPlayers(["SLAPPY"], [player])[0]
   assert.equal(match.autoLinkEligible, true)
-  assert.equal(match.autoLinkReason, "exact unique screen_name")
+  assert.equal(match.autoLinkReason, "exact current screen name")
   assert.equal(match.playerId, player.id)
 })
 
@@ -378,21 +378,83 @@ test("unique exact Discord ID auto-links", () => {
   const player = identityPlayer("11111111-1111-1111-1111-111111111111", "SPICY", { discord_id: "987654321" })
   const match = matchPlayers(["987654321"], [player])[0]
   assert.equal(match.autoLinkEligible, true)
-  assert.equal(match.autoLinkReason, "exact unique Discord ID")
+  assert.equal(match.autoLinkReason, "exact Discord ID")
 })
 
-test("only unique verified exact aliases auto-link", () => {
-  const player = identityPlayer("11111111-1111-1111-1111-111111111111", "WAREY")
+test("only unique verified exact aliases auto-link despite stored normalization differences", () => {
+  const player = identityPlayer("11111111-1111-1111-1111-111111111111", "Mully")
   const verified: PlayerIdentityAlias = {
     playerId: player.id,
-    aliasName: "OLD WAREY",
-    normalizedAlias: "oldwarey",
+    aliasName: "MULLIGAN",
+    normalizedAlias: "mulligan ",
     source: "historical_alias",
     active: true,
     verified: true,
   }
-  assert.equal(matchPlayers(["OLD WAREY"], [player], [verified])[0].autoLinkEligible, true)
-  assert.equal(matchPlayers(["OLD WAREY"], [player], [{ ...verified, verified: false }])[0].autoLinkEligible, false)
+  const match = matchPlayers(["MULLIGAN"], [player], [verified])[0]
+  assert.equal(match.autoLinkEligible, true)
+  assert.equal(match.playerId, player.id)
+  assert.equal(match.autoLinkReason, "verified historical alias")
+  assert.equal(matchPlayers(["MULLIGAN"], [player], [{ ...verified, verified: false }])[0].autoLinkEligible, false)
+})
+
+test("verified aliases on merged UUIDs resolve to the current canonical player", () => {
+  const canonical = identityPlayer("11111111-1111-1111-1111-111111111111", "GUYB22")
+  const old = identityPlayer("22222222-2222-2222-2222-222222222222", "OLD GUYB", { active: false })
+  const alias: PlayerIdentityAlias = {
+    playerId: old.id,
+    aliasName: "GUYB",
+    normalizedAlias: "guyb",
+    source: "historical_alias",
+    active: true,
+    verified: true,
+  }
+  const links: PlayerIdentityLink[] = [{ historicalPlayerId: old.id, canonicalPlayerId: canonical.id }]
+  const match = matchPlayers(["GUYB"], [canonical, old], [alias], links)[0]
+  assert.equal(match.autoLinkEligible, true)
+  assert.equal(match.playerId, canonical.id)
+  assert.equal(match.matchedName, canonical.screen_name)
+  assert.equal(match.autoLinkReason, "verified historical alias via canonical identity link")
+})
+
+test("multiple verified aliases are safe only when they resolve to one canonical UUID", () => {
+  const canonical = identityPlayer("11111111-1111-1111-1111-111111111111", "DawnSophia")
+  const oldOne = identityPlayer("22222222-2222-2222-2222-222222222222", "SPICY OLD", { active: false })
+  const oldTwo = identityPlayer("33333333-3333-3333-3333-333333333333", "DAWN OLD", { active: false })
+  const aliases: PlayerIdentityAlias[] = [oldOne, oldTwo].map((player) => ({
+    playerId: player.id,
+    aliasName: "DAWN_SOPHIA",
+    normalizedAlias: "dawn_sophia",
+    source: "historical_alias",
+    active: true,
+    verified: true,
+  }))
+  const sameCanonicalLinks: PlayerIdentityLink[] = [oldOne, oldTwo].map((player) => ({
+    historicalPlayerId: player.id,
+    canonicalPlayerId: canonical.id,
+  }))
+  assert.equal(matchPlayers(["DAWN_SOPHIA"], [canonical, oldOne, oldTwo], aliases, sameCanonicalLinks)[0].autoLinkEligible, true)
+
+  const otherCanonical = identityPlayer("44444444-4444-4444-4444-444444444444", "OTHER")
+  const ambiguousLinks = [sameCanonicalLinks[0], { historicalPlayerId: oldTwo.id, canonicalPlayerId: otherCanonical.id }]
+  assert.equal(matchPlayers(["DAWN_SOPHIA"], [canonical, otherCanonical, oldOne, oldTwo], aliases, ambiguousLinks)[0].autoLinkEligible, false)
+})
+
+test("verified alias evidence wins over weaker fuzzy and Discord-display candidates", () => {
+  const canonical = identityPlayer("11111111-1111-1111-1111-111111111111", "KeiraRobert")
+  const weaker = identityPlayer("22222222-2222-2222-2222-222222222222", "UNRELATED", { discord_name: "KEIRROBERT" })
+  const alias: PlayerIdentityAlias = {
+    playerId: canonical.id,
+    aliasName: "KEIRROBERT",
+    normalizedAlias: "keir robert",
+    source: "historical_alias",
+    active: true,
+    verified: true,
+  }
+  const match = matchPlayers(["KEIRROBERT"], [canonical, weaker], [alias])[0]
+  assert.equal(match.autoLinkEligible, true)
+  assert.equal(match.playerId, canonical.id)
+  assert.equal(match.evidence, "historical_alias")
 })
 
 test("auto-link decisions preserve frozen names, are overridable, and do not block unresolved rows", async () => {

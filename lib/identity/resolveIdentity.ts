@@ -64,40 +64,46 @@ export function resolveIdentity({
       normalizeIdentity(player.screenName) ===
       normalizedName
   )
-  const exactPlayer = uniqueCanonicalPlayers(players, exactScreenPlayers)
-
-  if (exactPlayer) {
-    return {
-      importedName,
-      normalizedName,
-      status: "exact",
-      playerId: canonicalPlayerId(exactPlayer),
-      screenName: exactPlayer.screenName,
-      confidence: 100,
-      matchedSource: "screen_name",
-      candidates: [],
-      autoLinkEligible: true,
-      autoLinkReason: "exact unique screen_name",
-    }
-  }
 
   const exactDiscordIdPlayers = players.filter(
     (player) => player.discordId?.trim() && player.discordId.trim() === importedName.trim()
   )
-  const exactDiscordIdPlayer = uniqueCanonicalPlayers(players, exactDiscordIdPlayers)
 
-  if (exactDiscordIdPlayer) {
+  const exactVerifiedAliases = aliases.filter(
+    (alias) =>
+      alias.active &&
+      alias.verified === true &&
+      normalizeIdentity(alias.normalizedAlias || alias.aliasName) === normalizedName
+  )
+  const exactAliasPlayers = exactVerifiedAliases
+    .map((alias) => players.find((player) => player.id === alias.playerId))
+    .filter((player): player is IdentityPlayer => Boolean(player))
+  const authoritativePlayer = uniqueCanonicalPlayers(
+    players,
+    [...exactScreenPlayers, ...exactDiscordIdPlayers, ...exactAliasPlayers]
+  )
+
+  if (authoritativePlayer) {
+    const canonicalId = canonicalPlayerId(authoritativePlayer)
+    const hasVerifiedAlias = exactAliasPlayers.some((player) => canonicalPlayerId(player) === canonicalId)
+    const hasExactDiscordId = exactDiscordIdPlayers.some((player) => canonicalPlayerId(player) === canonicalId)
+    const aliasUsesIdentityLink = exactVerifiedAliases.some((alias) => alias.playerId !== canonicalId)
+    const screenUsesIdentityLink = exactScreenPlayers.some((player) => player.id !== canonicalId)
+      && !exactScreenPlayers.some((player) => player.id === canonicalId)
     return {
       importedName,
       normalizedName,
-      status: "exact",
-      playerId: canonicalPlayerId(exactDiscordIdPlayer),
-      screenName: exactDiscordIdPlayer.screenName,
+      status: hasVerifiedAlias ? "alias" : "exact",
+      playerId: canonicalId,
+      screenName: authoritativePlayer.screenName,
       confidence: 100,
-      matchedSource: "discord_id",
+      matchedSource: hasVerifiedAlias ? "historical_alias" : hasExactDiscordId ? "discord_id" : "screen_name",
       candidates: [],
       autoLinkEligible: true,
-      autoLinkReason: "exact unique Discord ID",
+      autoLinkReason: hasVerifiedAlias
+        ? aliasUsesIdentityLink ? "verified historical alias via canonical identity link" : "verified historical alias"
+        : hasExactDiscordId ? "exact Discord ID"
+        : screenUsesIdentityLink ? "exact screen name via canonical identity link" : "exact current screen name",
     }
   }
 
@@ -121,45 +127,6 @@ export function resolveIdentity({
       candidates: [],
       autoLinkEligible: false,
       autoLinkReason: null,
-    }
-  }
-
-  const exactAliasPlayerIds = Array.from(
-    new Set(
-      aliases
-        .filter(
-          (alias) =>
-            alias.active &&
-            alias.verified === true &&
-            alias.normalizedAlias === normalizedName
-        )
-        .map((alias) => players.find((player) => player.id === alias.playerId))
-        .filter((player): player is IdentityPlayer => Boolean(player))
-        .map(canonicalPlayerId)
-        .filter((playerId) =>
-          players.some((player) => player.id === playerId)
-        )
-    )
-  )
-
-  if (exactAliasPlayerIds.length === 1) {
-    const player = players.find(
-      (item) => item.id === exactAliasPlayerIds[0]
-    )
-
-    if (player) {
-      return {
-        importedName,
-        normalizedName,
-        status: "alias",
-        playerId: canonicalPlayerId(player),
-        screenName: player.screenName,
-        confidence: 100,
-        matchedSource: "historical_alias",
-        candidates: [],
-        autoLinkEligible: true,
-        autoLinkReason: "exact unique verified historical alias",
-      }
     }
   }
 
