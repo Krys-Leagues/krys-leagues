@@ -13,6 +13,7 @@ import {
   sourceSha256,
 } from "../historicalMatchCommit.ts"
 import { emptyManualStanding, manualHistoricalMatchPreview, manualHistoricalSourceSha, validateManualHistoricalMatch, type ManualHistoricalMatchDraft } from "../manualHistoricalMatch.ts"
+import { calculateHistoricalMatchFixtures } from "../historicalMatchFixtures.ts"
 import { historicalStandingIdentityRpcArgs, searchExistingPlayers } from "../historicalMatchIdentity.ts"
 import type { PlayerRecord } from "../loadPlayers.ts"
 import type { PlayerIdentityAlias } from "../../identity/types.ts"
@@ -710,7 +711,7 @@ test("a remembered verified alias is authoritative evidence for the shared resol
 })
 
 function manualDraft(evidenceLevel: "standings_only" | "aggregate_course" = "standings_only"): ManualHistoricalMatchDraft {
-  return { seasonNumber: 54, historicalLabel: "SEASON 54", year: null, evidenceLevel, sourceReference: "paper binder", courses: [], divisions: [{ id: "d1", divisionNumber: 1, standings: [{ ...emptyManualStanding("s1"), historicalDisplayName: "ZOE DARLIN" }] }] }
+  return { seasonNumber: 54, historicalLabel: "SEASON 54", year: null, evidenceLevel, sourceReference: "paper binder", courses: [], divisions: [{ id: "d1", divisionNumber: 1, standings: [{ ...emptyManualStanding("s1"), historicalDisplayName: "ZOE DARLIN" }] }], fixtures: [] }
 }
 
 test("manual standings-only accepts a zero-game historical player", () => assert.deepEqual(validateManualHistoricalMatch(manualDraft()), []))
@@ -810,4 +811,77 @@ test("manual UI contains deliberate review, identity, and commit safeguards", ()
   assert.match(component, /Review Manual Historical Match Season/); assert.match(component, /HistoricalMatchPreview/)
   assert.match(component, /Did Not Play/); assert.match(component, /disabled={!appearance\.played}/)
   assert.doesNotMatch(component, /\.from\(["']players["']\)\.(?:insert|upsert)/)
+})
+
+function fixtureDraft(): ManualHistoricalMatchDraft {
+  const draft = manualDraft()
+  draft.evidenceLevel = "fixture_detailed"
+  draft.courses = [{ id: "c1", name: "COURSE ONE" }, { id: "c2", name: "COURSE TWO" }, { id: "c3", name: "COURSE THREE" }]
+  draft.divisions[0].standings = [
+    { ...emptyManualStanding("a", 1), historicalDisplayName: "MULLIGAN" },
+    { ...emptyManualStanding("b", 2), historicalDisplayName: "PLAYER B" },
+    { ...emptyManualStanding("c", 3), historicalDisplayName: "PLAYER C" },
+    { ...emptyManualStanding("d", 4), historicalDisplayName: "PLAYER D" },
+  ]
+  draft.fixtures = [
+    { id: "f1", divisionId: "d1", courseId: "c1", player1StandingId: "a", player2StandingId: "b", played: true, player1HolesWon: 8, player2HolesWon: 5 },
+    { id: "f2", divisionId: "d1", courseId: "c2", player1StandingId: "a", player2StandingId: "c", played: false, player1HolesWon: null, player2HolesWon: null },
+    { id: "f3", divisionId: "d1", courseId: "c3", player1StandingId: "a", player2StandingId: "d", played: true, player1HolesWon: 4, player2HolesWon: 4 },
+  ]
+  return draft
+}
+
+test("fixture calculator derives wins, losses, draws, points, and three-fixture totals", () => {
+  const draft = fixtureDraft(), result = calculateHistoricalMatchFixtures(draft.courses, draft.divisions, draft.fixtures)
+  assert.deepEqual(result.errors, [])
+  assert.deepEqual(result.totalsByStandingId.get("a"), { played: 2, wins: 1, losses: 0, draws: 1, points: 4, holesWon: 12 })
+  assert.deepEqual(result.totalsByStandingId.get("b"), { played: 1, wins: 0, losses: 1, draws: 0, points: 0, holesWon: 5 })
+  assert.equal(result.totalsByStandingId.get("d")?.points, 1)
+})
+test("played HW zero remains played and loses to three", () => {
+  const draft = fixtureDraft(); Object.assign(draft.fixtures[0], { player1HolesWon: 0, player2HolesWon: 3 })
+  const result = calculateHistoricalMatchFixtures(draft.courses, draft.divisions, [draft.fixtures[0]])
+  assert.deepEqual(result.appearancesByStandingId.get("a")?.map((course) => [course.played, course.outcome, course.holesWon]), [[true, "L", 0]])
+})
+test("unplayed detailed pairing preserves opponents but contributes no totals", () => {
+  const draft = fixtureDraft(), result = calculateHistoricalMatchFixtures(draft.courses, draft.divisions, [draft.fixtures[1]])
+  assert.equal(result.fixtures[0].played, false); assert.deepEqual(result.totalsByStandingId.get("a"), { played: 0, wins: 0, losses: 0, draws: 0, points: 0, holesWon: 0 })
+  assert.deepEqual(result.appearancesByStandingId.get("a")?.[0], { courseName: "COURSE TWO", played: false, outcome: null, holesWon: null, sourceHolesWon: null })
+})
+test("fixture validation rejects self play, repeated participation, and reversed duplicates", () => {
+  const draft = fixtureDraft(), base = draft.fixtures[0]
+  draft.fixtures = [base, { ...base, id: "reverse", player1StandingId: "b", player2StandingId: "a" }, { ...base, id: "self", player2StandingId: "a" }]
+  const errors = validateManualHistoricalMatch(draft).join(" ")
+  assert.match(errors, /duplicated or reversed/); assert.match(errors, /appears more than once/); assert.match(errors, /cannot be paired against themselves/)
+})
+test("fixture validation prevents cross-division participants", () => {
+  const draft = fixtureDraft(); draft.divisions.push({ id: "d2", divisionNumber: 2, standings: [{ ...emptyManualStanding("x"), historicalDisplayName: "OTHER DIVISION" }] }); draft.fixtures[0].player2StandingId = "x"
+  assert.match(validateManualHistoricalMatch(draft).join(" "), /participants must belong to this division/)
+})
+test("fixture preview uses calculated read-only totals while preserving rank and frozen name", () => {
+  const draft = fixtureDraft(), preview = manualHistoricalMatchPreview(draft), mulligan = preview.divisions[0].standings[0]
+  assert.deepEqual([mulligan.played, mulligan.wins, mulligan.losses, mulligan.draws, mulligan.points, mulligan.holesWon], [2, 1, 0, 1, 4, 12])
+  assert.deepEqual([mulligan.finalRank, mulligan.historicalDisplayName], [1, "MULLIGAN"])
+  const component = readFileSync("app/admin/import/csv/components/ManualHistoricalMatchEntry.tsx", "utf8")
+  assert.match(component, /readOnly={draft\.evidenceLevel === "fixture_detailed"}/)
+})
+test("fixture source SHA and preview fingerprint are deterministic and fact-sensitive", async () => {
+  const draft = fixtureDraft(), hash = await manualHistoricalSourceSha(draft), fingerprint = await previewFingerprint(manualHistoricalMatchPreview(draft))
+  assert.equal(await manualHistoricalSourceSha(draft), hash); assert.equal(await previewFingerprint(manualHistoricalMatchPreview(draft)), fingerprint)
+  draft.fixtures[0].player2StandingId = "c"; assert.notEqual(await manualHistoricalSourceSha(draft), hash); assert.notEqual(await previewFingerprint(manualHistoricalMatchPreview(draft)), fingerprint)
+  draft.fixtures[0].player2StandingId = "b"; draft.fixtures[0].player1HolesWon = 7; assert.notEqual(await previewFingerprint(manualHistoricalMatchPreview(draft)), fingerprint)
+})
+test("fixture commit payload exactly matches installed stable-rank contract", async () => {
+  const draft = fixtureDraft(), preview = manualHistoricalMatchPreview(draft)
+  const payload = buildHistoricalMatchCommitPayload(preview, {}, "manual-match-season-54", await manualHistoricalSourceSha(draft), await previewFingerprint(preview), draft.sourceReference)
+  assert.equal(payload.p_evidence_level, "fixture_detailed")
+  assert.deepEqual((payload.p_validated_preview.fixtures as Array<Record<string, unknown>>)[0], { divisionNumber: 1, courseOrder: 1, courseName: "COURSE ONE", player1FinalRank: 1, player2FinalRank: 2, played: true, player1HolesWon: 8, player2HolesWon: 5, sourceReference: "paper binder" })
+})
+test("non-fixture manual modes never create fixture facts", () => {
+  assert.deepEqual(manualHistoricalMatchPreview(manualDraft()).fixtures, [])
+  assert.deepEqual(manualHistoricalMatchPreview(manualDraft("aggregate_course")).fixtures, [])
+})
+test("historical fixture integration contains no managed Match mutation RPC", () => {
+  const sources = ["lib/importer/historicalMatchFixtures.ts", "lib/importer/manualHistoricalMatch.ts", "app/admin/import/csv/components/ManualHistoricalMatchEntry.tsx"].map((file) => readFileSync(file, "utf8")).join("\n")
+  assert.doesNotMatch(sources, /(?:schedule|results|season_standings|final_scorecard|transition).*\.rpc|\.rpc\([^)]*(?:schedule|result|standing|scorecard|transition)/i)
 })

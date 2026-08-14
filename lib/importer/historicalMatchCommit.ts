@@ -18,7 +18,7 @@ export type HistoricalMatchCommitPayload = {
   p_season_number: number
   p_historical_label: string
   p_historical_year: number | null
-  p_evidence_level: "standings_only" | "aggregate_course"
+  p_evidence_level: "standings_only" | "aggregate_course" | "fixture_detailed"
   p_source_filename: string
   p_source_sha256: string
   p_preview_fingerprint: string
@@ -111,6 +111,7 @@ function canonicalHistoricalFacts(preview: HistoricalMatchPreview) {
         })),
       })),
     })),
+    fixtures: preview.fixtures,
     audit: {
       realPlayerRows: preview.audit.realPlayerRows,
       courseAppearancesPlayed: preview.audit.courseAppearancesPlayed,
@@ -197,6 +198,6 @@ export function buildHistoricalMatchCommitPayload(
     p_source_sha256: sourceHash,
     p_preview_fingerprint: fingerprint,
     p_parser_version: HISTORICAL_MATCH_PARSER_VERSION,
-    p_validated_preview: { ...facts, entryMethod: sourceFilename.startsWith("manual-") ? "manual" : "csv", sourceReference: sourceReference || null, divisions },
+    p_validated_preview: { ...facts, entryMethod: sourceFilename.startsWith("manual-") ? "manual" : "csv", sourceReference: sourceReference || null, divisions, fixtures: preview.fixtures },
   }
 }

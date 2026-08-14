@@ -37,8 +37,20 @@ export type HistoricalMatchIgnoredRow = {
   reason: string
 }
 
+export type HistoricalMatchFixture = {
+  divisionNumber: number
+  courseOrder: number
+  courseName: string
+  player1FinalRank: number
+  player2FinalRank: number
+  played: boolean
+  player1HolesWon: number | null
+  player2HolesWon: number | null
+  sourceReference?: string | null
+}
+
 export type HistoricalMatchPreview = {
-  evidenceLevel: "standings_only" | "aggregate_course"
+  evidenceLevel: "standings_only" | "aggregate_course" | "fixture_detailed"
   layout: "duplicated_final_side" | "single_side" | "ambiguous"
   seasonNumber: number | null
   historicalLabel: string
@@ -48,6 +60,7 @@ export type HistoricalMatchPreview = {
     divisionNumber: number
     standings: HistoricalMatchStanding[]
   }>
+  fixtures: HistoricalMatchFixture[]
   ignoredRows: HistoricalMatchIgnoredRow[]
   warnings: string[]
   audit: {
@@ -61,7 +74,7 @@ export type HistoricalMatchPreview = {
     conflicts: number
     courseAppearancesPlayed: number
     courseAppearancesUnplayed: number
-    authoritativeFixtures: 0
+    authoritativeFixtures: number
   }
 }
 
@@ -410,6 +423,7 @@ export function previewHistoricalMatchCsv(matrix: string[][]): HistoricalMatchPr
     year: null,
     courses: detectedCourses,
     divisions,
+    fixtures: [],
     ignoredRows,
     warnings,
     audit: {

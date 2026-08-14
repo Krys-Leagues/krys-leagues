@@ -50,6 +50,12 @@ function databaseErrorMessage(error: { code?: string; message: string }) {
   return `Database error: ${message}`
 }
 
+function evidenceLabel(value: Preview["evidenceLevel"]) {
+  if (value === "standings_only") return "standings only"
+  if (value === "aggregate_course") return "standings + course results"
+  return "detailed matchups"
+}
+
 export default function HistoricalMatchPreview({
   preview,
   identityCandidates,
@@ -174,8 +180,8 @@ export default function HistoricalMatchPreview({
         <h2 className="mt-2 text-3xl font-bold">Season {preview.seasonNumber ?? "not detected"}</h2>
         <p className="mt-2 text-zinc-300">{preview.historicalLabel || "Historical label not detected"}</p>
         <p className="text-zinc-300">Layout: {preview.layout === "single_side" ? "single-side historical Match" : preview.layout === "duplicated_final_side" ? "duplicated final-side historical Match" : "ambiguous — review required"}</p>
-        <p className="text-zinc-400">Year: {preview.year ?? "unknown / not supplied"} · Evidence: {preview.evidenceLevel === "standings_only" ? "standings only" : "aggregate course"}</p>
-        <p className="mt-3 font-semibold text-emerald-200">No opponents or fixtures are inferred. Upload and identity review do not write to the database.</p>
+        <p className="text-zinc-400">Year: {preview.year ?? "unknown / not supplied"} · Evidence: {evidenceLabel(preview.evidenceLevel)}</p>
+        <p className="mt-3 font-semibold text-emerald-200">{preview.evidenceLevel === "fixture_detailed" ? "Fixtures are authoritative manual source facts; outcomes and totals are calculated from HW." : "No opponents or fixtures are inferred."} Preview and identity review do not write to the database.</p>
       </div>
 
       <details className="rounded-lg border border-zinc-700 bg-zinc-950 p-4">
@@ -223,10 +229,12 @@ export default function HistoricalMatchPreview({
         </section>
       ))}
 
+      {preview.evidenceLevel === "fixture_detailed" && <section className="rounded-xl border border-indigo-700 bg-indigo-950/20 p-4"><h3 className="text-xl font-bold">Historical fixtures</h3><div className="mt-3 space-y-2">{preview.fixtures.map((fixture, index) => { const division = preview.divisions.find((item) => item.divisionNumber === fixture.divisionNumber); const player1 = division?.standings.find((standing) => standing.finalRank === fixture.player1FinalRank); const player2 = division?.standings.find((standing) => standing.finalRank === fixture.player2FinalRank); return <div key={`${fixture.divisionNumber}:${fixture.courseOrder}:${index}`} className="rounded border border-zinc-700 p-3"><strong>Division {fixture.divisionNumber} · {fixture.courseName}</strong><div>{player1?.historicalDisplayName} vs {player2?.historicalDisplayName}</div><div>{fixture.played ? `Played · HW ${fixture.player1HolesWon}–${fixture.player2HolesWon}` : "Did Not Play"}</div></div> })}</div></section>}
+
       <section className="rounded-xl border border-zinc-700 bg-zinc-950 p-4">
         <h3 className="text-xl font-bold">Final commit review</h3>
         <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          <div>Season: {preview.seasonNumber ?? "invalid"}</div><div>Label: {preview.historicalLabel}</div><div>Evidence: {preview.evidenceLevel === "standings_only" ? "standings only" : "aggregate course"}</div>
+          <div>Season: {preview.seasonNumber ?? "invalid"}</div><div>Label: {preview.historicalLabel}</div><div>Evidence: {evidenceLabel(preview.evidenceLevel)}</div>
           <div>Divisions: {preview.audit.populatedDivisions}</div><div>Standings: {preview.audit.realPlayerRows}</div><div>Course appearances: {courseCount}</div>
           <div>Played: {preview.audit.courseAppearancesPlayed}</div><div>Unplayed: {preview.audit.courseAppearancesUnplayed}</div><div>Auto-linked identities: {reviewSummary.autoLinked}</div>
           <div>Manually approved identities: {reviewSummary.manuallyApproved}</div><div>Unresolved identities: {reviewSummary.unresolved}</div><div>Needs review: {reviewSummary.needsReview}</div><div>Authoritative fixtures: {preview.audit.authoritativeFixtures}</div>
@@ -238,7 +246,7 @@ export default function HistoricalMatchPreview({
       </section>
 
       {confirming && <div role="dialog" aria-modal="true" className="rounded-xl border-2 border-amber-500 bg-amber-950/50 p-5">
-        <h3 className="text-xl font-bold">Confirm Season {preview.seasonNumber} historical commit</h3><p className="mt-2">This freezes the validated historical source facts plus the shown automatic and manual identity selections. Unresolved identities remain allowed. It creates no fixtures and does not modify managed Match.</p>
+        <h3 className="text-xl font-bold">Confirm Season {preview.seasonNumber} historical commit</h3><p className="mt-2">This freezes the validated historical source facts plus the shown automatic and manual identity selections. Unresolved identities remain allowed. {preview.evidenceLevel === "fixture_detailed" ? `It creates ${preview.audit.authoritativeFixtures} authoritative historical fixture(s).` : "It creates no fixtures."} It does not modify managed Match.</p>
         <div className="mt-4 flex gap-3"><button type="button" onClick={() => void commitHistoricalSeason()} disabled={committing} className="rounded bg-emerald-700 px-4 py-2 font-bold">{committing ? "Committing…" : "Confirm and commit"}</button><button type="button" onClick={() => setConfirming(false)} disabled={committing} className="rounded border border-zinc-500 px-4 py-2">Cancel</button></div>
       </div>}
       {commitError && <div role="alert" className="rounded border border-red-700 bg-red-950/40 p-4 text-red-200">{commitError}</div>}
