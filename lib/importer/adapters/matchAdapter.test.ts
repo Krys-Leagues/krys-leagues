@@ -17,6 +17,11 @@ import type { PlayerRecord } from "../loadPlayers.ts"
 import type { PlayerIdentityAlias } from "../../identity/types.ts"
 import { matchPlayers } from "../matchPlayers.ts"
 import type { PlayerIdentityLink } from "../loadPlayerIdentityLinks.ts"
+import {
+  buildVerifiedAliasMemoryRequests,
+  rememberVerifiedPlayerAliases,
+  type VerifiedAliasMemoryRpcResult,
+} from "../rememberVerifiedPlayerAliases.ts"
 
 const SIDE_WIDTH = 19
 const RIGHT_START = 20
@@ -499,4 +504,85 @@ test("auto-link preview logic performs no database mutation or player creation",
   assert.doesNotMatch(files, /\.from\("players"\)\.(?:insert|upsert|update|delete)/)
   assert.doesNotMatch(files, /\.rpc\("set_historical_match_standing_identity"/)
   assert.doesNotMatch(files, /\.rpc\("(?:create_match_|save_match_|delete_match_|rebuild_match_|generate_match_|approve_match_)/)
+})
+
+test("only final explicit manual old-name decisions create frozen alias-memory requests", () => {
+  const selectedId = "11111111-1111-1111-1111-111111111111"
+  const requests = buildVerifiedAliasMemoryRequests([
+    { historicalDisplayName: " MULLIGAN ", playerId: selectedId, playerScreenName: "Mully", explicitlyApproved: true },
+    { historicalDisplayName: "AUTO OLD NAME", playerId: selectedId, playerScreenName: "Mully", explicitlyApproved: false },
+    { historicalDisplayName: "UNRESOLVED", playerId: null, playerScreenName: null, explicitlyApproved: true },
+    { historicalDisplayName: "Mully", playerId: selectedId, playerScreenName: "MULLY", explicitlyApproved: true },
+  ])
+  assert.deepEqual(requests, [{ p_player_id: selectedId, p_alias: "MULLIGAN" }])
+})
+
+test("alias memory treats created and same-identity idempotent results as success", async () => {
+  const requests = [
+    { p_player_id: "11111111-1111-1111-1111-111111111111", p_alias: "MULLIGAN" },
+    { p_player_id: "22222222-2222-2222-2222-222222222222", p_alias: "OLD NAME" },
+  ]
+  const results: VerifiedAliasMemoryRpcResult[] = requests.map((request, index) => ({
+    canonical_player_id: request.p_player_id,
+    alias: request.p_alias,
+    normalized_alias: request.p_alias.toLowerCase(),
+    verified: true,
+    idempotent: index === 1,
+    status: index === 1 ? "already_verified_same_identity" : "created",
+  }))
+  let index = 0
+  const summary = await rememberVerifiedPlayerAliases(requests, async () => ({ data: results[index++], error: null }))
+  assert.deepEqual(summary, { created: 1, alreadyKnown: 1, conflicts: [], failures: [] })
+})
+
+test("alias-memory conflicts and failures remain separate and retain their frozen names", async () => {
+  const conflict = { p_player_id: "11111111-1111-1111-1111-111111111111", p_alias: "CONFLICT NAME" }
+  const failure = { p_player_id: "22222222-2222-2222-2222-222222222222", p_alias: "FAILED NAME" }
+  let calls = 0
+  const summary = await rememberVerifiedPlayerAliases([conflict, failure], async () => {
+    calls += 1
+    return calls === 1
+      ? { data: null, error: { code: "23505", message: "Alias belongs to a different canonical player" } }
+      : { data: null, error: { message: "network unavailable" } }
+  })
+  assert.equal(summary.conflicts[0].request.p_alias, "CONFLICT NAME")
+  assert.equal(summary.failures[0].request.p_alias, "FAILED NAME")
+})
+
+test("historical commit succeeds before explicit alias memory and retry does not recommit", () => {
+  const component = readFileSync("app/admin/import/csv/components/HistoricalMatchPreview.tsx", "utf8")
+  const commitCall = component.indexOf('supabase.rpc("commit_historical_match_preview", payload)')
+  const commitSuccess = component.indexOf("setCommitResult(result as CommitResult)")
+  const memoryCall = component.indexOf('supabase.rpc("remember_verified_player_alias", request)')
+  const retryFunction = component.slice(component.indexOf("async function retryIdentityMemoryFailures"), component.indexOf("return ("))
+  assert.ok(commitCall >= 0 && commitCall < commitSuccess && commitSuccess < memoryCall)
+  assert.doesNotMatch(retryFunction, /commit_historical_match_preview/)
+  assert.match(component, /explicitlyApproved: decision\?\.selectionSource === "manual"/)
+  assert.match(readFileSync("lib/importer/rememberVerifiedPlayerAliases.ts", "utf8"), /p_alias: alias/)
+})
+
+test("manual identity UI is local until commit and adds no player or managed Match mutation", () => {
+  const component = readFileSync("app/admin/import/csv/components/HistoricalMatchPreview.tsx", "utf8")
+  const helper = readFileSync("lib/importer/rememberVerifiedPlayerAliases.ts", "utf8")
+  assert.match(component, /Approve &amp; remember identity/)
+  assert.match(component, /Link & remember identity/)
+  assert.match(component, /saved only after|remembered globally after the historical season commits successfully/i)
+  assert.doesNotMatch(component + helper, /\.from\(["']players["']\)\.(?:insert|upsert|update|delete)/)
+  assert.doesNotMatch(component + helper, /\.rpc\("(?:create_match_|save_match_|delete_match_|rebuild_match_|generate_match_|approve_match_)/)
+})
+
+test("a remembered verified alias is authoritative evidence for the shared resolver", () => {
+  const player = identityPlayer("11111111-1111-1111-1111-111111111111", "Mully")
+  const remembered: PlayerIdentityAlias = {
+    playerId: player.id,
+    aliasName: "MULLIGAN",
+    normalizedAlias: "mulligan",
+    source: "historical_alias",
+    active: true,
+    verified: true,
+  }
+  const match = matchPlayers(["MULLIGAN"], [player], [remembered])[0]
+  assert.equal(match.autoLinkEligible, true)
+  assert.equal(match.playerId, player.id)
+  assert.equal(match.autoLinkReason, "verified historical alias")
 })

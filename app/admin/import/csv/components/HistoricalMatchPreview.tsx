@@ -15,6 +15,11 @@ import {
   type HistoricalMatchIdentityDecisions,
 } from "@/lib/importer/historicalMatchCommit"
 import { supabase } from "@/lib/supabase"
+import {
+  buildVerifiedAliasMemoryRequests,
+  rememberVerifiedPlayerAliases,
+  type VerifiedAliasMemorySummary,
+} from "@/lib/importer/rememberVerifiedPlayerAliases"
 import ExistingPlayerPicker from "./ExistingPlayerPicker"
 import CommittedHistoricalMatchIdentities from "./CommittedHistoricalMatchIdentities"
 
@@ -57,6 +62,8 @@ export default function HistoricalMatchPreview({
   const [committing, setCommitting] = useState(false)
   const [commitError, setCommitError] = useState("")
   const [commitResult, setCommitResult] = useState<CommitResult | null>(null)
+  const [identityMemoryResult, setIdentityMemoryResult] = useState<VerifiedAliasMemorySummary | null>(null)
+  const [rememberingIdentities, setRememberingIdentities] = useState(false)
   const [searchingStanding, setSearchingStanding] = useState<string | null>(null)
   const [selectedPlayerNames, setSelectedPlayerNames] = useState<Record<string, string>>({})
   const blockers = useMemo(() => historicalMatchCommitBlockers(preview), [preview])
@@ -81,6 +88,9 @@ export default function HistoricalMatchPreview({
         selectionSource: "manual",
       },
     }))
+    if (match.matchedName) {
+      setSelectedPlayerNames((current) => ({ ...current, [key]: match.matchedName! }))
+    }
   }
 
   function leaveUnresolved(divisionNumber: number, finalRank: number) {
@@ -98,20 +108,61 @@ export default function HistoricalMatchPreview({
     setCommitting(true)
     setCommitError("")
     setCommitResult(null)
+    setIdentityMemoryResult(null)
     const payload = buildHistoricalMatchCommitPayload(preview, effectiveDecisions, sourceFilename, sourceSha256, previewFingerprint)
     const { data, error } = await supabase.rpc("commit_historical_match_preview", payload)
-    setCommitting(false)
     setConfirming(false)
     if (error) {
+      setCommitting(false)
       setCommitError(databaseErrorMessage(error))
       return
     }
     const result = Array.isArray(data) ? data[0] : data
     if (!result) {
+      setCommitting(false)
       setCommitError("Database error: the commit RPC returned no result.")
       return
     }
     setCommitResult(result as CommitResult)
+    const memoryRequests = buildVerifiedAliasMemoryRequests(
+      preview.divisions.flatMap((division) => division.standings.map((standing) => {
+        const key = historicalMatchStandingKey(division.divisionNumber, standing.finalRank)
+        const decision = decisions[key]
+        return {
+          historicalDisplayName: standing.historicalDisplayName,
+          playerId: decision?.canonicalPlayerId ?? null,
+          playerScreenName: selectedPlayerNames[key] ?? null,
+          explicitlyApproved: decision?.selectionSource === "manual",
+        }
+      }))
+    )
+    setRememberingIdentities(true)
+    const memoryResult = await rememberVerifiedPlayerAliases(
+      memoryRequests,
+      async (request) => supabase.rpc("remember_verified_player_alias", request)
+    )
+    setIdentityMemoryResult(memoryResult)
+    setRememberingIdentities(false)
+    setCommitting(false)
+  }
+
+  async function retryIdentityMemoryFailures() {
+    if (!identityMemoryResult) return
+    const requests = [...identityMemoryResult.conflicts, ...identityMemoryResult.failures]
+      .map((failure) => failure.request)
+    if (requests.length === 0) return
+    setRememberingIdentities(true)
+    const retry = await rememberVerifiedPlayerAliases(
+      requests,
+      async (request) => supabase.rpc("remember_verified_player_alias", request)
+    )
+    setIdentityMemoryResult({
+      created: identityMemoryResult.created + retry.created,
+      alreadyKnown: identityMemoryResult.alreadyKnown + retry.alreadyKnown,
+      conflicts: retry.conflicts,
+      failures: retry.failures,
+    })
+    setRememberingIdentities(false)
   }
 
   return (
@@ -153,14 +204,15 @@ export default function HistoricalMatchPreview({
                   <div className={isAutoLinked ? "font-bold text-emerald-200" : "text-amber-200"}>{isAutoLinked ? "Linked automatically — verified existing identity" : `Candidate: ${match.matchedName}`}</div>
                   {isAutoLinked && <div className="text-zinc-200">Linked current player: {match.matchedName}</div>}<div className="font-mono text-xs text-zinc-500">{match.playerId}</div>
                   <div className="text-xs text-zinc-400">Evidence: {isAutoLinked ? match.autoLinkReason : match.evidence} · confidence {match.confidence}%</div>
-                  <div className="flex flex-wrap gap-2">{!isAutoLinked && <button type="button" onClick={() => approveCandidate(division.divisionNumber, standing.finalRank, match)} className="rounded bg-emerald-700 px-3 py-1 font-bold">Approve candidate</button>}<button type="button" onClick={() => setSearchingStanding(key)} className="rounded bg-blue-700 px-3 py-1 font-bold">{isAutoLinked ? "Change linked player" : "Find / Link Existing Player"}</button><button type="button" onClick={() => leaveUnresolved(division.divisionNumber, standing.finalRank)} className="rounded border border-zinc-600 px-3 py-1">Leave unresolved</button></div>
+                  <div className="flex flex-wrap gap-2">{!isAutoLinked && <button type="button" onClick={() => approveCandidate(division.divisionNumber, standing.finalRank, match)} className="rounded bg-emerald-700 px-3 py-1 font-bold">Approve &amp; remember identity</button>}<button type="button" onClick={() => setSearchingStanding(key)} className="rounded bg-blue-700 px-3 py-1 font-bold">{isAutoLinked ? "Change linked player" : "Find / Link Existing Player"}</button><button type="button" onClick={() => leaveUnresolved(division.divisionNumber, standing.finalRank)} className="rounded border border-zinc-600 px-3 py-1">Leave unresolved</button></div>
                 </> : <><div className="text-zinc-400">No candidate · unresolved</div><div className="flex flex-wrap gap-2"><button type="button" onClick={() => setSearchingStanding(key)} className="rounded bg-blue-700 px-3 py-1 font-bold">Find / Link Existing Player</button><button type="button" onClick={() => leaveUnresolved(division.divisionNumber, standing.finalRank)} className="rounded border border-zinc-600 px-3 py-1">Leave unresolved</button></div></>}
                 <div className={`text-xs font-bold ${decision?.canonicalPlayerId ? "text-emerald-300" : "text-zinc-400"}`}>Review status: {decision?.canonicalPlayerId ? `${isAutoLinked ? "auto-linked" : "manually linked"} to ${selectedPlayerNames[key] || match?.matchedName || "selected player"}` : explicitDecision ? "left unresolved" : "needs review"}</div>
-                {searchingStanding === key && <ExistingPlayerPicker historicalDisplayName={standing.historicalDisplayName} onCancel={() => setSearchingStanding(null)} onSelect={(player) => {
+                {searchingStanding === key && <ExistingPlayerPicker historicalDisplayName={standing.historicalDisplayName} selectLabel="Link & remember identity" onCancel={() => setSearchingStanding(null)} onSelect={(player) => {
                   setDecisions((current) => ({ ...current, [key]: { canonicalPlayerId: player.id, resolutionNote: "Explicitly selected through Find / Link Existing Player before commit.", selectionSource: "manual" } }))
                   setSelectedPlayerNames((current) => ({ ...current, [key]: player.screen_name }))
                   setSearchingStanding(null)
                 }} />}
+                {explicitDecision?.selectionSource === "manual" && <div className="text-xs text-blue-200">This identity will be remembered globally after the historical season commits successfully.</div>}
               </td>
             </tr>
           })}</tbody></table></div>
@@ -187,6 +239,7 @@ export default function HistoricalMatchPreview({
       </div>}
       {commitError && <div role="alert" className="rounded border border-red-700 bg-red-950/40 p-4 text-red-200">{commitError}</div>}
       {commitResult && <div role="status" className="rounded border border-emerald-600 bg-emerald-950/50 p-4 text-emerald-100"><h3 className="font-bold">{commitResult.idempotent ? "Historical season already committed — idempotent success" : "Historical season committed successfully"}</h3><div className="mt-2">Import UUID: <span className="font-mono">{commitResult.historical_match_import_id}</span></div><div>Season: {preview.seasonNumber} · Idempotent: {commitResult.idempotent ? "yes" : "no"}</div><div>Standings: {commitResult.standing_count} · Course appearances: {commitResult.course_appearance_count}</div><div>Resolved: {commitResult.resolved_identity_count} · Unresolved: {commitResult.unresolved_identity_count}</div></div>}
+      {commitResult && <div className="rounded border border-blue-700 bg-blue-950/40 p-4 text-blue-100"><h3 className="font-bold">Global identity memory</h3>{rememberingIdentities ? <p className="mt-2">Remembering explicitly approved identities…</p> : identityMemoryResult ? <><div className="mt-2">Verified identities remembered globally: {identityMemoryResult.created}</div><div>Already known globally: {identityMemoryResult.alreadyKnown}</div><div>Identity-memory conflicts: {identityMemoryResult.conflicts.length}</div><div>Identity-memory failures: {identityMemoryResult.failures.length}</div>{identityMemoryResult.conflicts.length + identityMemoryResult.failures.length > 0 && <p className="mt-2 font-bold text-amber-200">Historical season committed successfully. Some identity relationships could not be remembered globally.</p>}{[...identityMemoryResult.conflicts, ...identityMemoryResult.failures].map((failure) => <div key={`${failure.request.p_player_id}:${failure.request.p_alias}`} className="mt-2 rounded border border-amber-700 p-2 text-amber-200"><strong>{failure.request.p_alias}</strong>: {failure.message}</div>)}{identityMemoryResult.conflicts.length + identityMemoryResult.failures.length > 0 && <button type="button" disabled={rememberingIdentities} onClick={() => void retryIdentityMemoryFailures()} className="mt-3 rounded bg-blue-700 px-3 py-2 font-bold">Retry failed identity memory</button>}</> : null}</div>}
       {commitResult && <CommittedHistoricalMatchIdentities initialImportId={commitResult.historical_match_import_id} />}
 
       {preview.ignoredRows.length > 0 && <details><summary className="cursor-pointer font-bold">Ignored structural/template rows ({preview.ignoredRows.length})</summary><div className="mt-2 space-y-2">{preview.ignoredRows.map((row, index) => <div key={`${row.sourceRow}-${index}`} className="rounded border border-zinc-700 bg-zinc-950 p-3">Division {row.divisionNumber}, CSV row {row.sourceRow}: {row.sourceName || "[blank name]"} — {row.reason}</div>)}</div></details>}

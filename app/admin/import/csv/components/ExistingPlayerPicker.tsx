@@ -12,9 +12,10 @@ type Props = {
   historicalDisplayName: string
   onSelect: (player: ExistingPlayerSearchResult) => void
   onCancel: () => void
+  selectLabel?: string
 }
 
-export default function ExistingPlayerPicker({ historicalDisplayName, onSelect, onCancel }: Props) {
+export default function ExistingPlayerPicker({ historicalDisplayName, onSelect, onCancel, selectLabel = "Link this player" }: Props) {
   const [query, setQuery] = useState("")
   const [players, setPlayers] = useState<PlayerRecord[]>([])
   const [aliases, setAliases] = useState<PlayerIdentityAlias[]>([])
@@ -54,7 +55,7 @@ export default function ExistingPlayerPicker({ historicalDisplayName, onSelect, 
         <div className="mt-1 text-sm text-zinc-300">Discord: {player.discord_name || player.discord_username || "—"} · ID: {player.discord_id || "—"}</div>
         <div className="text-sm text-zinc-400">Aliases: {player.aliases.length ? player.aliases.join(", ") : "—"}</div>
         <div className="text-xs text-blue-300">Matched by: {player.matchedBy.join(", ")}</div>
-        <div className="mt-2 flex flex-wrap gap-2"><button type="button" onClick={() => onSelect(player)} className="rounded bg-blue-700 px-3 py-1 font-bold">Link this player</button><Link href={`/admin/players/${player.id}`} target="_blank" className="rounded border border-zinc-600 px-3 py-1">Open Player Identity</Link></div>
+        <div className="mt-2 flex flex-wrap gap-2"><button type="button" onClick={() => onSelect(player)} className="rounded bg-blue-700 px-3 py-1 font-bold">{selectLabel}</button><Link href={`/admin/players/${player.id}`} target="_blank" className="rounded border border-zinc-600 px-3 py-1">Open Player Identity</Link></div>
       </div>)}
     </div>
     <button type="button" onClick={onCancel} className="mt-3 rounded border border-zinc-600 px-3 py-1">Cancel search</button>
