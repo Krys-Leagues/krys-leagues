@@ -4,12 +4,20 @@ import Link from "next/link"
 import HistoricalMatchPreview from "./components/HistoricalMatchPreview"
 import CommittedHistoricalMatchIdentities from "./components/CommittedHistoricalMatchIdentities"
 import ManualHistoricalMatchEntry from "./components/ManualHistoricalMatchEntry"
+import HistoricalStrokePreview from "./components/HistoricalStrokePreview"
 import { previewHistoricalMatchCsv } from "@/lib/importer/adapters/matchAdapter"
+import { parseHistoricalStrokeMatrix } from "@/lib/importer/adapters/historicalStrokeParser"
 import { loadPlayers } from "@/lib/importer/loadPlayers"
 import { loadPlayerAliases } from "@/lib/importer/loadPlayerAliases"
 import { loadPlayerIdentityLinks } from "@/lib/importer/loadPlayerIdentityLinks"
 import { matchPlayers, type PlayerMatch } from "@/lib/importer/matchPlayers"
-import { previewFingerprint, sourceSha256 } from "@/lib/importer/historicalMatchCommit"
+import { previewFingerprint } from "@/lib/importer/historicalMatchCommit"
+import { sourceSha256 } from "./lib/fileHash"
+import {
+  historicalStrokePreviewFingerprint,
+  reviewHistoricalStrokeIdentity,
+  type HistoricalStrokeIdentityReview,
+} from "@/lib/importer/historicalStrokeCommit"
 import {
   ChangeEvent,
   DragEvent,
@@ -28,6 +36,7 @@ type DetectedColumn = {
 
 type ImportType =
   | "stroke"
+  | "historical_stroke"
   | "match"
   | "pyp"
   | "doubles"
@@ -46,6 +55,14 @@ type ImportTypeOption = {
 }
 
 const IMPORT_TYPES: ImportTypeOption[] = [
+  {
+    value: "historical_stroke",
+    label: "Historical Stroke",
+    description:
+      "Read-only review and controlled commit of aggregate historical Stroke seasons.",
+    icon: "📜",
+    expectedColumns: ["PLAYER", "P", "W", "D", "L", "PTS", "STROKES"],
+  },
   {
     value: "stroke",
     label: "Stroke League",
@@ -442,7 +459,9 @@ export default function CsvImportPage() {
   const [analysisConfirmed, setAnalysisConfirmed] =
     useState(false)
   const [identityCandidates, setIdentityCandidates] = useState<Map<string, PlayerMatch>>(new Map())
+  const [strokeIdentityReviews, setStrokeIdentityReviews] = useState<Map<string, HistoricalStrokeIdentityReview>>(new Map())
   const [identityLoading, setIdentityLoading] = useState(false)
+  const [identityLoadError, setIdentityLoadError] = useState("")
 
   const historicalMatchPreview = useMemo(
     () => selectedImportType === "match" && analysisConfirmed && rawMatrix.length > 0
@@ -451,38 +470,64 @@ export default function CsvImportPage() {
     [analysisConfirmed, rawMatrix, selectedImportType]
   )
 
+  const historicalStrokePreview = useMemo(
+    () => selectedImportType === "historical_stroke" && analysisConfirmed && rawMatrix.length > 0
+      ? parseHistoricalStrokeMatrix(rawMatrix, { filename: fileName, sourceSha256: sourceHash })
+      : null,
+    [analysisConfirmed, fileName, rawMatrix, selectedImportType, sourceHash]
+  )
+
   useEffect(() => {
-    if (!historicalMatchPreview) return
+    if (!historicalMatchPreview && !historicalStrokePreview) return
     let cancelled = false
-    void previewFingerprint(historicalMatchPreview).then((value) => {
+    const fingerprintPromise = historicalStrokePreview
+      ? historicalStrokePreviewFingerprint(historicalStrokePreview)
+      : previewFingerprint(historicalMatchPreview!)
+    void fingerprintPromise.then((value) => {
       if (!cancelled) setFingerprint(value)
     })
     return () => { cancelled = true }
-  }, [historicalMatchPreview])
+  }, [historicalMatchPreview, historicalStrokePreview])
 
   useEffect(() => {
-    if (!historicalMatchPreview) return
+    const identityPreview = historicalMatchPreview ?? historicalStrokePreview
+    if (!identityPreview) return
 
     let cancelled = false
-    const names = historicalMatchPreview.divisions.flatMap((division) =>
+    const names = identityPreview.divisions.flatMap((division) =>
       division.standings.map((standing) => standing.historicalDisplayName)
     )
     Promise.all([loadPlayers({ includeInactive: true }), loadPlayerAliases(), loadPlayerIdentityLinks()])
       .then(([players, aliases, identityLinks]) => {
         if (cancelled) return
-        const matches = matchPlayers(names, players, aliases, identityLinks)
-        setIdentityCandidates(new Map(matches.map((match) => [match.importedName, match])))
+        if (historicalStrokePreview) {
+          const identityPlayers = players.map((player) => ({
+            id: player.id,
+            canonicalPlayerId: identityLinks.find((link) => link.historicalPlayerId === player.id)?.canonicalPlayerId,
+            screenName: player.screen_name,
+            discordName: player.discord_name,
+            discordId: player.discord_id,
+            active: player.active,
+          }))
+          const reviews = names.map((name) => reviewHistoricalStrokeIdentity(name, identityPlayers, aliases))
+          setStrokeIdentityReviews(new Map(reviews.map((review) => [review.historicalDisplayName, review])))
+        } else {
+          const matches = matchPlayers(names, players, aliases, identityLinks)
+          setIdentityCandidates(new Map(matches.map((match) => [match.importedName, match])))
+        }
         setIdentityLoading(false)
       })
-      .catch(() => {
+      .catch((loadError: unknown) => {
         if (!cancelled) {
           setIdentityCandidates(new Map())
+          setStrokeIdentityReviews(new Map())
           setIdentityLoading(false)
+          setIdentityLoadError(loadError instanceof Error ? loadError.message : "Unknown identity loading error.")
         }
       })
 
     return () => { cancelled = true }
-  }, [historicalMatchPreview])
+  }, [historicalMatchPreview, historicalStrokePreview])
 
   const detectedColumns = useMemo<DetectedColumn[]>(() => {
     if (headers.length === 0) {
@@ -528,7 +573,9 @@ export default function CsvImportPage() {
     setSelectedImportType(null)
     setAnalysisConfirmed(false)
     setIdentityCandidates(new Map())
+    setStrokeIdentityReviews(new Map())
     setIdentityLoading(false)
+    setIdentityLoadError("")
 
     if (!file.name.toLowerCase().endsWith(".csv")) {
       setError("Please select a CSV file.")
@@ -605,7 +652,9 @@ export default function CsvImportPage() {
     setSelectedImportType(null)
     setAnalysisConfirmed(false)
     setIdentityCandidates(new Map())
+    setStrokeIdentityReviews(new Map())
     setIdentityLoading(false)
+    setIdentityLoadError("")
   }
 
   function confirmImportType() {
@@ -617,7 +666,10 @@ export default function CsvImportPage() {
     }
 
     setError("")
-    if (selectedImportType === "match") setIdentityLoading(true)
+    if (selectedImportType === "match" || selectedImportType === "historical_stroke") {
+      setIdentityLoading(true)
+      setIdentityLoadError("")
+    }
     setAnalysisConfirmed(true)
   }
 
@@ -884,7 +936,20 @@ export default function CsvImportPage() {
               />
             )}
 
-            {!historicalMatchPreview && <section className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
+            {historicalStrokePreview && (
+              <HistoricalStrokePreview
+                key={`${sourceHash}:${fingerprint}`}
+                preview={historicalStrokePreview}
+                identityReviews={strokeIdentityReviews}
+                identityLoading={identityLoading}
+                identityLoadError={identityLoadError}
+                sourceFilename={fileName}
+                sourceSha256={sourceHash}
+                previewFingerprint={fingerprint}
+              />
+            )}
+
+            {!historicalMatchPreview && !historicalStrokePreview && <section className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
               <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
                 <div>
                   <h2 className="text-2xl font-bold">
@@ -928,7 +993,7 @@ export default function CsvImportPage() {
               </div>
             </section>}
 
-            {!historicalMatchPreview && <section className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
+            {!historicalMatchPreview && !historicalStrokePreview && <section className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
               <h2 className="text-2xl font-bold">
                 CSV Preview
               </h2>
@@ -986,7 +1051,7 @@ export default function CsvImportPage() {
               </div>
             </section>}
 
-            {!historicalMatchPreview && <section className="mt-8 rounded-2xl border border-blue-800 bg-blue-950/40 p-6">
+            {!historicalMatchPreview && !historicalStrokePreview && <section className="mt-8 rounded-2xl border border-blue-800 bg-blue-950/40 p-6">
   <h2 className="text-xl font-bold text-blue-200">
     Ready for Import
   </h2>

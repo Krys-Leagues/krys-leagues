@@ -28,7 +28,6 @@ export type PlayerIdentityAlias = {
   playerId: string
   aliasName: string
   normalizedAlias: string
-  verified: boolean
   source: IdentitySource
   firstSeenLeague?: string | null
   firstSeenSeason?: number | null

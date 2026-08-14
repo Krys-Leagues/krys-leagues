@@ -1,5 +1,8 @@
 import type { HistoricalMatchPreview } from "./adapters/matchAdapter"
 import type { PlayerMatch } from "./matchPlayers"
+import { sourceSha256 } from "../../app/admin/import/csv/lib/fileHash.ts"
+
+export { sourceSha256 }
 
 export const HISTORICAL_MATCH_PARSER_VERSION = "historical-match-v2"
 
@@ -132,10 +135,6 @@ async function sha256Hex(bytes: ArrayBuffer | Uint8Array) {
   stableBytes.set(source)
   const digest = await globalThis.crypto.subtle.digest("SHA-256", stableBytes.buffer)
   return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("")
-}
-
-export function sourceSha256(bytes: ArrayBuffer | Uint8Array) {
-  return sha256Hex(bytes)
 }
 
 export function previewFingerprint(preview: HistoricalMatchPreview) {
