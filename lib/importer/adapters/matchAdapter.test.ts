@@ -70,6 +70,25 @@ function season55Matrix() {
   return matrix
 }
 
+function season54RegressionMatrix() {
+  const matrix: string[][] = [["SEASON 54 * ENDS MAY 23rd"]]
+  let playerIndex = 0
+  for (let division = 1; division <= 5; division += 1) {
+    const count = division <= 3 ? 4 : 3
+    const names = Array.from({ length: count }, () => `S54 PLAYER ${++playerIndex}`)
+    const special = Object.fromEntries(names.map((name, index) => [name, { oneCourse: playerIndex - count + index < 12 }]))
+    const [marker, header, ...rows] = divisionRows(division, names, [...names].reverse(), special)
+    const titles = Array(RIGHT_START + SIDE_WIDTH).fill("")
+    for (const offset of [0, RIGHT_START]) {
+      titles[offset + 7] = "MARS GARDENS EASY"
+      titles[offset + 11] = "TIKI HARD"
+      titles[offset + 15] = "CHERRY BLOSSOM EASY"
+    }
+    matrix.push(marker, titles, header, ...rows)
+  }
+  return matrix
+}
+
 function conventionMatrix(
   name: string,
   totals: [string, string, string, string, string, string],
@@ -101,8 +120,17 @@ function parsedConventionCourse(markers: [string, string, string], holesWon = "0
   return { preview, course: preview.divisions[0].standings[0].courses[0] }
 }
 
+function csvMatrix(text: string) {
+  return text.replace(/^\uFEFF/, "").split(/\r?\n/).filter((row) => row.length > 0).map((row) => row.split(","))
+}
+
+function season32Preview() {
+  return previewHistoricalMatchCsv(csvMatrix(readFileSync("lib/importer/adapters/fixtures/match-play-32.csv", "utf8")))
+}
+
 test("collapses duplicated horizontal divisions and keeps right-side final order", () => {
   const preview = previewHistoricalMatchCsv(season55Matrix())
+  assert.equal(preview.layout, "duplicated_final_side")
   assert.equal(preview.audit.seasonsFound, 1)
   assert.equal(preview.audit.populatedDivisions, 5)
   assert.equal(preview.audit.realPlayerRows, 20)
@@ -208,6 +236,23 @@ test("Season-55-shaped commit payload contains 20 standings, 60 appearances, and
   assert.equal(preview.audit.courseAppearancesPlayed, 56)
   assert.equal(preview.audit.courseAppearancesUnplayed, 4)
   assert.equal(body.audit.authoritativeFixtures, 0)
+  assert.equal(preview.layout, "duplicated_final_side")
+})
+
+test("duplicated Season-54-shaped layout retains approved counts and source courses", () => {
+  const preview = previewHistoricalMatchCsv(season54RegressionMatrix())
+  assert.equal(preview.layout, "duplicated_final_side")
+  assert.deepEqual(preview.courses, ["MARS GARDENS EASY", "TIKI HARD", "CHERRY BLOSSOM EASY"])
+  assert.deepEqual({
+    divisions: preview.audit.populatedDivisions,
+    standings: preview.audit.realPlayerRows,
+    appearances: preview.audit.courseAppearancesPlayed + preview.audit.courseAppearancesUnplayed,
+    played: preview.audit.courseAppearancesPlayed,
+    unplayed: preview.audit.courseAppearancesUnplayed,
+    fixtures: preview.audit.authoritativeFixtures,
+    conflicts: preview.audit.conflicts,
+    malformed: preview.audit.malformedRows,
+  }, { divisions: 5, standings: 18, appearances: 54, played: 30, unplayed: 24, fixtures: 0, conflicts: 0, malformed: 0 })
 })
 
 test("historical review UI uses only the dedicated commit RPC and requires confirmation", () => {
@@ -223,6 +268,60 @@ test("historical review UI uses only the dedicated commit RPC and requires confi
   assert.match(component, /onClick=\{\(\) => void commitHistoricalSeason\(\)\}/)
   assert.doesNotMatch(historicalFiles, /\b(runImport|createImportBatch|saveImportRows)\b/)
   assert.doesNotMatch(historicalFiles, /\.rpc\("(?:create_match_season_with_roster|generate_match_schedule|review_match_schedule|save_match_result|delete_match_result|rebuild_match_standings|generate_match_final_scorecard|approve_match_final_scorecard)"/)
+})
+
+test("detects the authoritative Season 32 single-side layout structurally with exact audit counts", () => {
+  const preview = season32Preview()
+  assert.equal(preview.layout, "single_side")
+  assert.equal(preview.seasonNumber, 32)
+  assert.equal(preview.historicalLabel, "SEASON 32   *    ENDS DEC 31ST")
+  assert.deepEqual(preview.courses, ["ATLANTIS EASY", "LABYRINTH HARD", "JOURNEY EASY"])
+  assert.deepEqual({
+    populatedDivisions: preview.audit.populatedDivisions,
+    standings: preview.audit.realPlayerRows,
+    appearances: preview.audit.courseAppearancesPlayed + preview.audit.courseAppearancesUnplayed,
+    played: preview.audit.courseAppearancesPlayed,
+    unplayed: preview.audit.courseAppearancesUnplayed,
+    fixtures: preview.audit.authoritativeFixtures,
+    conflicts: preview.audit.conflicts,
+    malformed: preview.audit.malformedRows,
+  }, { populatedDivisions: 4, standings: 16, appearances: 48, played: 40, unplayed: 8, fixtures: 0, conflicts: 0, malformed: 0 })
+})
+
+test("single-side ranks use source row position and ignore global first-column numbering", () => {
+  const preview = season32Preview()
+  assert.deepEqual(preview.divisions[0].standings.map(({ finalRank, historicalDisplayName }) => [finalRank, historicalDisplayName]), [
+    [1, "DERBY_DAZ"], [2, "MULLIGAN"], [3, "PAUL-PPP"], [4, "SHAHOOFNA"],
+  ])
+  assert.deepEqual(preview.divisions[1].standings.map(({ finalRank, historicalDisplayName }) => [finalRank, historicalDisplayName]), [
+    [1, "DAWN_SOPHIA"], [2, "KEIRAROBERT"], [3, "CHIPNPUTT"], [4, "GUYB"],
+  ])
+})
+
+test("single-side zero-game player remains valid and numeric template divisions stay ignored", () => {
+  const preview = season32Preview()
+  const guyb = preview.divisions[1].standings[3]
+  assert.deepEqual({ name: guyb.historicalDisplayName, rank: guyb.finalRank, played: guyb.played }, { name: "GUYB", rank: 4, played: 0 })
+  assert.ok(guyb.courses.every((course) => !course.played && course.outcome === null && course.holesWon === null))
+  assert.deepEqual(preview.divisions.map((division) => division.divisionNumber), [1, 2, 3, 4])
+  assert.equal(preview.audit.templateRowsIgnored, 12)
+  assert.ok(preview.ignoredRows.filter((row) => /^\d+$/.test(row.sourceName)).every((row) => row.classification === "template_placeholder"))
+})
+
+test("layout detection does not use season number and incomplete duplication is ambiguous", () => {
+  const single = csvMatrix(readFileSync("lib/importer/adapters/fixtures/match-play-32.csv", "utf8"))
+  single[1][0] = "SEASON 99 * FORMAT TEST"
+  assert.equal(previewHistoricalMatchCsv(single).layout, "single_side")
+
+  const broken = season55Matrix()
+  const divisionMarker = broken.find((row) => row[0] === "Division 1")!
+  divisionMarker[20] = "Division 1"
+  const header = broken[broken.indexOf(divisionMarker) + 1]
+  header.splice(20)
+  const preview = previewHistoricalMatchCsv(broken)
+  assert.equal(preview.layout, "ambiguous")
+  assert.ok(preview.audit.conflicts > 0)
+  assert.match(preview.warnings.join("\n"), /incomplete or ambiguous/)
 })
 
 test("zero, dash, and blank W/L/D markers are unplayed even when source HW is zero", () => {

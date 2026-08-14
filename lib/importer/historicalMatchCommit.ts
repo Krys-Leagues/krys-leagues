@@ -1,7 +1,7 @@
 import type { HistoricalMatchPreview } from "./adapters/matchAdapter"
 import type { PlayerMatch } from "./matchPlayers"
 
-export const HISTORICAL_MATCH_PARSER_VERSION = "historical-match-v1"
+export const HISTORICAL_MATCH_PARSER_VERSION = "historical-match-v2"
 
 export type HistoricalMatchIdentityDecision = {
   canonicalPlayerId: string | null

@@ -171,6 +171,7 @@ export default function HistoricalMatchPreview({
         <p className="text-sm font-bold uppercase tracking-widest text-emerald-300">Historical Match review and commit</p>
         <h2 className="mt-2 text-3xl font-bold">Season {preview.seasonNumber ?? "not detected"}</h2>
         <p className="mt-2 text-zinc-300">{preview.historicalLabel || "Historical label not detected"}</p>
+        <p className="text-zinc-300">Layout: {preview.layout === "single_side" ? "single-side historical Match" : preview.layout === "duplicated_final_side" ? "duplicated final-side historical Match" : "ambiguous — review required"}</p>
         <p className="text-zinc-400">Year: unknown / not supplied · Evidence: aggregate course</p>
         <p className="mt-3 font-semibold text-emerald-200">No opponents or fixtures are inferred. Upload and identity review do not write to the database.</p>
       </div>

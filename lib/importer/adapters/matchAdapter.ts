@@ -38,6 +38,7 @@ export type HistoricalMatchIgnoredRow = {
 }
 
 export type HistoricalMatchPreview = {
+  layout: "duplicated_final_side" | "single_side" | "ambiguous"
   seasonNumber: number | null
   historicalLabel: string
   year: null
@@ -131,7 +132,7 @@ function findSideLayout(
         const courseNames = courseGroups.slice(0, 3).map((group, index) => {
           for (let titleRow = row - 1; titleRow >= Math.max(0, markerRow - 3); titleRow -= 1) {
             const title = cell(matrix, titleRow, group[0])
-            if (title) return title
+            if (/[A-Za-z]/.test(title)) return title
           }
           return HISTORICAL_MATCH_COURSES[index] ?? `Course ${index + 1}`
         })
@@ -281,6 +282,8 @@ export function previewHistoricalMatchCsv(matrix: string[][]): HistoricalMatchPr
   let conflicts = 0
   let malformedRows = 0
   let structuralHeadersIgnored = 0
+  const detectedLayouts = new Set<"duplicated_final_side" | "single_side">()
+  let ambiguousStructure = false
 
   const markerGroups = Array.from(new Set(markers.map((marker) => marker.row)))
   for (const markerRow of markerGroups) {
@@ -292,25 +295,33 @@ export function previewHistoricalMatchCsv(matrix: string[][]): HistoricalMatchPr
       .filter((layout): layout is SideLayout => layout !== null)
       .sort((left, right) => left.nameColumn - right.nameColumn)
 
-    if (layouts.length < 2) {
-      warnings.push(`Division ${divisionNumber}: duplicated left/right structure was not recognized.`)
+    const expectsDuplicatedLayout = rowMarkers.length > 1
+    if (layouts.length === 0 || (expectsDuplicatedLayout && layouts.length < 2)) {
+      warnings.push(expectsDuplicatedLayout
+        ? `Division ${divisionNumber}: duplicated left/right structure is incomplete or ambiguous.`
+        : `Division ${divisionNumber}: single-side structure was not recognized.`)
       malformedRows += 1
+      conflicts += 1
+      ambiguousStructure = true
       continue
     }
 
+    const duplicated = expectsDuplicatedLayout
+    detectedLayouts.add(duplicated ? "duplicated_final_side" : "single_side")
     const left = layouts[0]
-    const right = layouts.at(-1)!
-    detectedCourses = right.courseNames
-    const dataStart = Math.max(left.headerRow, right.headerRow) + 1
-    const rightStandings: HistoricalMatchStanding[] = []
+    const source = duplicated ? layouts.at(-1)! : left
+    detectedCourses = source.courseNames
+    const dataStart = duplicated ? Math.max(left.headerRow, source.headerRow) + 1 : source.headerRow + 1
+    const sourceStandings: HistoricalMatchStanding[] = []
 
     for (let row = dataStart; row < blockEnd; row += 1) {
-      const rightName = cell(matrix, row, right.nameColumn)
+      const sourceName = cell(matrix, row, source.nameColumn)
       const leftName = cell(matrix, row, left.nameColumn)
 
       if (isStructuralSeparatorRow(matrix[row] ?? [])) continue
+      if ((matrix[row] ?? []).every((value) => String(value).trim() === "")) continue
 
-      if (isStructuralHeaderName(leftName) || isStructuralHeaderName(rightName)) {
+      if (isStructuralHeaderName(leftName) || isStructuralHeaderName(sourceName)) {
         if (divisionNumber <= 5) {
           ignoredRows.push({
             divisionNumber,
@@ -324,64 +335,74 @@ export function previewHistoricalMatchCsv(matrix: string[][]): HistoricalMatchPr
         continue
       }
 
-      if (isByeName(rightName)) {
+      if (isByeName(sourceName)) {
         ignoredRows.push({
           divisionNumber,
           sourceRow: row + 1,
-          sourceName: rightName,
+          sourceName,
           classification: "template_placeholder",
           reason: "BYE / non-player slot",
         })
         continue
       }
 
-      if (divisionNumber > 5) {
-        const sourceName = rightName || leftName
+      if (isTemplateName(sourceName) || divisionNumber > 5) {
+        const ignoredName = sourceName || leftName
         ignoredRows.push({
           divisionNumber,
           sourceRow: row + 1,
-          sourceName,
-          classification: sourceName === "" ? "blank_template_slot" : "template_placeholder",
-          reason: sourceName === "" ? "Blank template/player slot" : /^\d+$/.test(sourceName) ? "Numeric template placeholder" : "Unsupported/template division row",
+          sourceName: ignoredName,
+          classification: ignoredName === "" ? "blank_template_slot" : "template_placeholder",
+          reason: ignoredName === "" ? "Blank template/player slot" : /^\d+$/.test(ignoredName) ? "Numeric template placeholder" : "Unsupported/template division row",
         })
         continue
       }
 
-      const standing = parseStanding(matrix, row, right, divisionNumber, rightStandings.length + 1, right.courseNames)
-      if (standing) rightStandings.push(standing)
-      else if (rightName !== "") {
-        ignoredRows.push({ divisionNumber, sourceRow: row + 1, sourceName: rightName, classification: "malformed", reason: "Malformed player row" })
+      const standing = parseStanding(matrix, row, source, divisionNumber, sourceStandings.length + 1, source.courseNames)
+      if (standing) sourceStandings.push(standing)
+      else if (sourceName !== "") {
+        ignoredRows.push({ divisionNumber, sourceRow: row + 1, sourceName, classification: "malformed", reason: "Malformed player row" })
         malformedRows += 1
       }
     }
 
-    const leftByName = new Map<string, HistoricalMatchStanding>()
-    for (let row = dataStart; row < blockEnd; row += 1) {
-      const candidate = parseStanding(matrix, row, left, divisionNumber, 0, left.courseNames)
-      if (candidate) leftByName.set(upper(candidate.historicalDisplayName), candidate)
-    }
-
-    for (const standing of rightStandings) {
-      const duplicate = leftByName.get(upper(standing.historicalDisplayName))
-      if (!duplicate) {
-        standing.warnings.push("Matching left-side duplicate was not found.")
-        conflicts += 1
-      } else {
-        collapsed += 1
-        if (standingSignature(duplicate) !== standingSignature(standing)) {
-          standing.warnings.push("Left and right source statistics disagree.")
-          conflicts += 1
-        }
+    if (duplicated) {
+      const leftByName = new Map<string, HistoricalMatchStanding>()
+      for (let row = dataStart; row < blockEnd; row += 1) {
+        const candidate = parseStanding(matrix, row, left, divisionNumber, 0, left.courseNames)
+        if (candidate) leftByName.set(upper(candidate.historicalDisplayName), candidate)
       }
-      conflicts += standing.warnings.length
+
+      for (const standing of sourceStandings) {
+        const duplicate = leftByName.get(upper(standing.historicalDisplayName))
+        if (!duplicate) {
+          standing.warnings.push("Matching left-side duplicate was not found.")
+          conflicts += 1
+        } else {
+          collapsed += 1
+          if (standingSignature(duplicate) !== standingSignature(standing)) {
+            standing.warnings.push("Left and right source statistics disagree.")
+            conflicts += 1
+          }
+        }
+        conflicts += standing.warnings.length
+      }
+    } else {
+      conflicts += sourceStandings.reduce((total, standing) => total + standing.warnings.length, 0)
     }
 
-    if (rightStandings.length > 0) divisions.push({ divisionNumber, standings: rightStandings })
+    if (sourceStandings.length > 0) divisions.push({ divisionNumber, standings: sourceStandings })
   }
 
+  const layout = !ambiguousStructure && detectedLayouts.size === 1 ? Array.from(detectedLayouts)[0] : "ambiguous"
+  if (detectedLayouts.size > 1) {
+    warnings.push("Historical Match layout is ambiguous: single-side and duplicated division structures were both detected.")
+    conflicts += 1
+  }
   const allStandings = divisions.flatMap((division) => division.standings)
   const allCourses = allStandings.flatMap((standing) => standing.courses)
   return {
+    layout,
     seasonNumber: seasonMatch ? Number(seasonMatch[1]) : null,
     historicalLabel: labelCell,
     year: null,
