@@ -20,6 +20,12 @@ import {
   historicalStrokeSourceSha256,
   reviewHistoricalStrokeIdentity,
 } from "../historicalStrokeCommit.ts"
+import {
+  HISTORICAL_STROKE_IMPORT_TYPE,
+  importWorkflowFor,
+  isStructuredHistoricalImportType,
+  selectedImportTypeAfterFileUpload,
+} from "../../../app/admin/import/csv/lib/importWorkflow.ts"
 
 const FIXTURE_URL = new URL("./fixtures/current-season-stroke-play-60.csv.base64", import.meta.url)
 const SOURCE_FILENAME = "CURRENT SEASON STROKE PLAY - 60.csv"
@@ -370,13 +376,29 @@ test("calculates parser blockers and categorizes commit outcomes and errors", as
 })
 
 test("Historical Stroke uses the complete structured review instead of the generic ten-row table", async () => {
+  const { preview } = await loadFixture()
   const page = await readFile("app/admin/import/csv/page.tsx", "utf8")
   const component = await readFile("app/admin/import/csv/components/HistoricalStrokePreview.tsx", "utf8")
 
-  assert.match(page, /selectedImportType === "historical_stroke"/)
-  assert.match(page, /usesStructuredHistoricalPreview/)
+  assert.equal(HISTORICAL_STROKE_IMPORT_TYPE, "historical_stroke")
+  const strokeTypeAfterUpload = selectedImportTypeAfterFileUpload(HISTORICAL_STROKE_IMPORT_TYPE)
+  const matchTypeAfterUpload = selectedImportTypeAfterFileUpload("match")
+  assert.equal(strokeTypeAfterUpload, HISTORICAL_STROKE_IMPORT_TYPE)
+  assert.equal(importWorkflowFor(strokeTypeAfterUpload), "historical_stroke")
+  assert.equal(isStructuredHistoricalImportType(strokeTypeAfterUpload), true)
+  assert.equal(matchTypeAfterUpload, "match")
+  assert.equal(importWorkflowFor(matchTypeAfterUpload), "historical_match")
+  assert.equal(selectedImportTypeAfterFileUpload(null), null)
+  assert.equal(importWorkflowFor(null), "none")
+  assert.equal(importWorkflowFor("stroke"), "generic")
+  assert.match(page, /value: HISTORICAL_STROKE_IMPORT_TYPE/)
+  assert.match(page, /setSelectedImportType\(\(current\) => selectedImportTypeAfterFileUpload\(current\)\)/)
+  assert.match(page, /isHistoricalStrokeWorkflow && analysisConfirmed/)
+  assert.equal(page.match(/isGenericImportWorkflow && <section/g)?.length, 3)
   assert.match(page, /\{historicalStrokePreview && \([\s\S]*?<HistoricalStrokePreview/)
-  assert.doesNotMatch(page, /!historicalMatchPreview && !historicalStrokePreview && <section/)
+  assert.doesNotMatch(page, /!historicalMatchPreview && !historicalStrokePreview && <section|!usesStructuredHistoricalPreview|!isStructuredHistoricalWorkflow && <section/)
+  assert.equal(preview.divisions.filter((division) => division.populated).length, 5)
+  assert.equal(preview.divisions.flatMap((division) => division.standings).length, 19)
   assert.match(component, /preview\.divisions\.filter\(\(division\) => division\.populated\)\.map/)
   assert.match(component, /division\.standings\.map/)
   assert.doesNotMatch(component, /max-h-|overflow-y-(?:auto|scroll)|slice\(0,\s*10\)/)

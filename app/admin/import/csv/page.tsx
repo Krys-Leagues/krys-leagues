@@ -14,6 +14,13 @@ import { matchPlayers, type PlayerMatch } from "@/lib/importer/matchPlayers"
 import { previewFingerprint } from "@/lib/importer/historicalMatchCommit"
 import { sourceSha256 } from "./lib/fileHash"
 import {
+  HISTORICAL_MATCH_IMPORT_TYPE,
+  HISTORICAL_STROKE_IMPORT_TYPE,
+  importWorkflowFor,
+  isStructuredHistoricalImportType,
+  selectedImportTypeAfterFileUpload,
+} from "./lib/importWorkflow"
+import {
   historicalStrokePreviewFingerprint,
   reviewHistoricalStrokeIdentity,
   type HistoricalStrokeIdentityReview,
@@ -36,8 +43,8 @@ type DetectedColumn = {
 
 type ImportType =
   | "stroke"
-  | "historical_stroke"
-  | "match"
+  | typeof HISTORICAL_STROKE_IMPORT_TYPE
+  | typeof HISTORICAL_MATCH_IMPORT_TYPE
   | "pyp"
   | "doubles"
   | "monthly"
@@ -56,7 +63,7 @@ type ImportTypeOption = {
 
 const IMPORT_TYPES: ImportTypeOption[] = [
   {
-    value: "historical_stroke",
+    value: HISTORICAL_STROKE_IMPORT_TYPE,
     label: "Historical Stroke",
     description:
       "Read-only review and controlled commit of aggregate historical Stroke seasons.",
@@ -80,7 +87,7 @@ const IMPORT_TYPES: ImportTypeOption[] = [
     ],
   },
   {
-    value: "match",
+    value: HISTORICAL_MATCH_IMPORT_TYPE,
     label: "Match Play",
     description:
       "Match results, holes won, points, opponents, and divisions.",
@@ -462,19 +469,24 @@ export default function CsvImportPage() {
   const [strokeIdentityReviews, setStrokeIdentityReviews] = useState<Map<string, HistoricalStrokeIdentityReview>>(new Map())
   const [identityLoading, setIdentityLoading] = useState(false)
   const [identityLoadError, setIdentityLoadError] = useState("")
+  const selectedWorkflow = importWorkflowFor(selectedImportType)
+  const isHistoricalMatchWorkflow = selectedWorkflow === "historical_match"
+  const isHistoricalStrokeWorkflow = selectedWorkflow === "historical_stroke"
+  const isStructuredHistoricalWorkflow = isStructuredHistoricalImportType(selectedImportType)
+  const isGenericImportWorkflow = selectedWorkflow === "generic"
 
   const historicalMatchPreview = useMemo(
-    () => selectedImportType === "match" && analysisConfirmed && rawMatrix.length > 0
+    () => isHistoricalMatchWorkflow && analysisConfirmed && rawMatrix.length > 0
       ? previewHistoricalMatchCsv(rawMatrix)
       : null,
-    [analysisConfirmed, rawMatrix, selectedImportType]
+    [analysisConfirmed, isHistoricalMatchWorkflow, rawMatrix]
   )
 
   const historicalStrokePreview = useMemo(
-    () => selectedImportType === "historical_stroke" && analysisConfirmed && rawMatrix.length > 0
+    () => isHistoricalStrokeWorkflow && analysisConfirmed && rawMatrix.length > 0
       ? parseHistoricalStrokeMatrix(rawMatrix, { filename: fileName, sourceSha256: sourceHash })
       : null,
-    [analysisConfirmed, fileName, rawMatrix, selectedImportType, sourceHash]
+    [analysisConfirmed, fileName, isHistoricalStrokeWorkflow, rawMatrix, sourceHash]
   )
 
   useEffect(() => {
@@ -570,7 +582,7 @@ export default function CsvImportPage() {
     setRawMatrix([])
     setSourceHash("")
     setFingerprint("")
-    setSelectedImportType(null)
+    setSelectedImportType((current) => selectedImportTypeAfterFileUpload(current))
     setAnalysisConfirmed(false)
     setIdentityCandidates(new Map())
     setStrokeIdentityReviews(new Map())
@@ -666,7 +678,7 @@ export default function CsvImportPage() {
     }
 
     setError("")
-    if (selectedImportType === "match" || selectedImportType === "historical_stroke") {
+    if (isStructuredHistoricalWorkflow) {
       setIdentityLoading(true)
       setIdentityLoadError("")
     }
@@ -678,10 +690,6 @@ export default function CsvImportPage() {
   }
 
   const previewRows = rows.slice(0, 10)
-  const usesStructuredHistoricalPreview =
-    selectedImportType === "match" ||
-    selectedImportType === "historical_stroke"
-
   return (
     <main className="min-h-screen bg-zinc-950 text-white">
       <div className="mx-auto max-w-7xl px-6 py-10">
@@ -952,7 +960,7 @@ export default function CsvImportPage() {
               />
             )}
 
-            {!usesStructuredHistoricalPreview && <section className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
+            {isGenericImportWorkflow && <section className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
               <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
                 <div>
                   <h2 className="text-2xl font-bold">
@@ -996,7 +1004,7 @@ export default function CsvImportPage() {
               </div>
             </section>}
 
-            {!usesStructuredHistoricalPreview && <section className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
+            {isGenericImportWorkflow && <section className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
               <h2 className="text-2xl font-bold">
                 CSV Preview
               </h2>
@@ -1054,7 +1062,7 @@ export default function CsvImportPage() {
               </div>
             </section>}
 
-            {!usesStructuredHistoricalPreview && <section className="mt-8 rounded-2xl border border-blue-800 bg-blue-950/40 p-6">
+            {isGenericImportWorkflow && <section className="mt-8 rounded-2xl border border-blue-800 bg-blue-950/40 p-6">
   <h2 className="text-xl font-bold text-blue-200">
     Ready for Import
   </h2>
