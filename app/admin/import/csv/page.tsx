@@ -3,6 +3,7 @@
 import Link from "next/link"
 import HistoricalMatchPreview from "./components/HistoricalMatchPreview"
 import CommittedHistoricalMatchIdentities from "./components/CommittedHistoricalMatchIdentities"
+import CommittedHistoricalStrokePairings from "./components/CommittedHistoricalStrokePairings"
 import ManualHistoricalMatchEntry from "./components/ManualHistoricalMatchEntry"
 import HistoricalStrokePreview from "./components/HistoricalStrokePreview"
 import { previewHistoricalMatchCsv } from "@/lib/importer/adapters/matchAdapter"
@@ -719,6 +720,7 @@ export default function CsvImportPage() {
         </div>
 
         <CommittedHistoricalMatchIdentities />
+        <CommittedHistoricalStrokePairings />
 
         <section className="mb-6 grid gap-4 md:grid-cols-2">
           <button type="button" onClick={() => setEntryMode("csv")} className={`rounded-xl border p-5 text-left ${entryMode === "csv" ? "border-indigo-400 bg-indigo-950/50" : "border-zinc-700 bg-zinc-900"}`}><strong className="text-xl">Upload CSV</strong><p className="mt-2 text-zinc-400">Analyze an existing historical league CSV.</p></button>
