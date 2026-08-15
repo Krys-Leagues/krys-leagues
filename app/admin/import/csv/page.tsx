@@ -678,6 +678,9 @@ export default function CsvImportPage() {
   }
 
   const previewRows = rows.slice(0, 10)
+  const usesStructuredHistoricalPreview =
+    selectedImportType === "match" ||
+    selectedImportType === "historical_stroke"
 
   return (
     <main className="min-h-screen bg-zinc-950 text-white">
@@ -949,7 +952,7 @@ export default function CsvImportPage() {
               />
             )}
 
-            {!historicalMatchPreview && !historicalStrokePreview && <section className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
+            {!usesStructuredHistoricalPreview && <section className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
               <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
                 <div>
                   <h2 className="text-2xl font-bold">
@@ -993,7 +996,7 @@ export default function CsvImportPage() {
               </div>
             </section>}
 
-            {!historicalMatchPreview && !historicalStrokePreview && <section className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
+            {!usesStructuredHistoricalPreview && <section className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
               <h2 className="text-2xl font-bold">
                 CSV Preview
               </h2>
@@ -1051,7 +1054,7 @@ export default function CsvImportPage() {
               </div>
             </section>}
 
-            {!historicalMatchPreview && !historicalStrokePreview && <section className="mt-8 rounded-2xl border border-blue-800 bg-blue-950/40 p-6">
+            {!usesStructuredHistoricalPreview && <section className="mt-8 rounded-2xl border border-blue-800 bg-blue-950/40 p-6">
   <h2 className="text-xl font-bold text-blue-200">
     Ready for Import
   </h2>

@@ -368,3 +368,16 @@ test("calculates parser blockers and categorizes commit outcomes and errors", as
   assert.match(categorizeHistoricalStrokeDatabaseError({ message: "alias belongs to a different canonical player identity" }), /^Identity conflict:/)
   assert.match(categorizeHistoricalStrokeDatabaseError({ message: "Preview payload is invalid" }), /^Invalid preview payload:/)
 })
+
+test("Historical Stroke uses the complete structured review instead of the generic ten-row table", async () => {
+  const page = await readFile("app/admin/import/csv/page.tsx", "utf8")
+  const component = await readFile("app/admin/import/csv/components/HistoricalStrokePreview.tsx", "utf8")
+
+  assert.match(page, /selectedImportType === "historical_stroke"/)
+  assert.match(page, /usesStructuredHistoricalPreview/)
+  assert.match(page, /\{historicalStrokePreview && \([\s\S]*?<HistoricalStrokePreview/)
+  assert.doesNotMatch(page, /!historicalMatchPreview && !historicalStrokePreview && <section/)
+  assert.match(component, /preview\.divisions\.filter\(\(division\) => division\.populated\)\.map/)
+  assert.match(component, /division\.standings\.map/)
+  assert.doesNotMatch(component, /max-h-|overflow-y-(?:auto|scroll)|slice\(0,\s*10\)/)
+})
