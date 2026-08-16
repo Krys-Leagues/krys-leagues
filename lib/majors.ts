@@ -31,6 +31,7 @@ export type MajorEvent = {
   later_release_used_at: string | null
   later_release_spots: number | null
   schedule_timezone: string
+  schedule_lock_hours_before_first_slot: number
   signup_instructions: string | null
   scheduling_instructions: string | null
   qualifier_information: string | null
@@ -158,6 +159,12 @@ export type MajorDayChoice = {
   group_label?: string | null
   group_competition?: MajorScheduleGroup["competition"] | null
   group_instructions?: string | null
+  room_roster?: MajorRoomRosterMember[]
+}
+
+export type MajorRoomRosterMember = {
+  player_id: string
+  player_screen_name_snapshot: string
 }
 
 export type MajorWeekendStatus = {
@@ -216,6 +223,27 @@ export function formatMajorSlot(value: string) {
   return new Intl.DateTimeFormat(undefined, {
     dateStyle: "full",
     timeStyle: "short",
+  }).format(new Date(value))
+}
+
+export function formatMajorLocalTime(value: string, timeZone?: string) {
+  return new Intl.DateTimeFormat(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone,
+    timeZoneName: "short",
+  }).format(new Date(value))
+}
+
+export function formatMajorDeadline(value: string, timeZone?: string) {
+  return new Intl.DateTimeFormat(undefined, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone,
   }).format(new Date(value))
 }
 

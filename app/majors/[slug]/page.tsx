@@ -4,7 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { useParams } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
-import { formatMajorDate, formatMajorSlot, isMajorDayLocked, isMastersScorecardTheme, type MajorDayChoice, type MajorEntry, type MajorEvent, type MajorPlayDay, type MajorSignupStatus, type MajorTimeSlot } from "@/lib/majors"
+import { formatMajorDate, formatMajorDeadline, formatMajorLocalTime, isMajorDayLocked, isMastersScorecardTheme, type MajorDayChoice, type MajorEntry, type MajorEvent, type MajorPlayDay, type MajorSignupStatus, type MajorTimeSlot } from "@/lib/majors"
 import { supabase } from "@/lib/supabase"
 import styles from "./page.module.css"
 
@@ -19,6 +19,7 @@ export default function MajorDetailPage() {
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState("")
   const [saving, setSaving] = useState(false)
+  const [reviewing, setReviewing] = useState(false)
   const [signupStatus, setSignupStatus] = useState<MajorSignupStatus | null>(null)
 
   const loadEvent = useCallback(async () => {
@@ -70,6 +71,7 @@ export default function MajorDetailPage() {
     setSaving(false)
     if (result.error) { setMessage(result.error.message); return }
     setMessage("You are registered and all four day choices are saved.")
+    setReviewing(false)
     await loadEvent()
   }
 
@@ -79,9 +81,14 @@ export default function MajorDetailPage() {
   const masters = isMastersScorecardTheme(event)
   const testEvent = event.is_test_event
   const signupState = signupStatus?.state || (event.signup_open ? "open" : "closed")
-  const signupDisabled = signupState !== "open" && signupState !== "priority"
+  const signupDisabled = schedule.length > 0 ? !event.signup_open : signupState !== "open" && signupState !== "priority"
   const weekendStatus = schedule[0]?.weekend_competition_status || "pending"
   const secondaryFieldName = event.secondary_trophy_display_name || "Secondary Trophy Field"
+  const localTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
+  const allFourSelected = days.length === 4 && days.every((day) => Boolean(choices[day.id]))
+  const publishedRooms = days
+    .map((day) => ({ day, assignment: schedule.find((choice) => choice.play_day_id === day.id) }))
+    .filter(({ assignment }) => Boolean(assignment?.group_label))
 
   return <main className={`${styles.page} ${masters ? styles.masters : styles.defaultTheme}`}><div className={styles.atmosphere}>{masters && <div className={styles.mastersScene} aria-hidden="true"><i className={styles.blossomTree} /><i className={styles.bench} /><i className={styles.putter} /><i className={styles.golfBall} /><i className={styles.golfBallTwo} /></div>}</div><div className={styles.container}>
     <Link href="/majors" className={styles.backLink}>← Four Majors</Link>
@@ -92,29 +99,34 @@ export default function MajorDetailPage() {
       <div className={styles.statusRow}><span className={styles.badge}>{event.status}</span><span className={`${styles.badge} ${styles[signupState]}`}>Signup {signupState}</span><span className={styles.capacity}>{signupStatus?.capacity ? `${signupStatus.spots_claimed} / ${signupStatus.capacity} spots claimed` : `${entries.length} claimed · field capacity not set`}</span></div>
       <p className={styles.meta}>{event.year || "Year to be announced"} · {formatMajorDate(event.starts_at)}</p>
       {event.description && <p className={styles.description}>{event.description}</p>}
-      {event.signup_open && <section className={styles.signupCard}>
-        <h2>Choose all four play times</h2>
-        <p className={styles.timezone}>◷ Times shown in your time zone: <strong>{Intl.DateTimeFormat().resolvedOptions().timeZone}</strong></p>
+      {(event.signup_open || schedule.length > 0) && <section className={styles.signupCard}>
+        <h2>Choose all four preferred times</h2>
+        <p className={styles.timezone}>Times shown in: <strong>{localTimeZone}</strong></p>
         {event.signup_instructions && <p className={styles.description}>{event.signup_instructions}</p>}
         <p className={styles.cutNotice}>Choose one independent time for Thursday, Friday, Saturday, and Sunday. After Friday qualifying, players in both weekend fields continue Saturday and Sunday; every saved weekend time remains intact.</p>
         {schedule.length > 0 && <p className={styles.assignment}>{event.weekend_status_published_at ? <>Weekend status: <strong>{weekendStatus === "main" ? "Masters Main Event" : weekendStatus === "secondary" ? secondaryFieldName : "Weekend field status pending"}</strong></> : <strong>Weekend field status pending</strong>}</p>}
         {signupState === "upcoming" && <p className={styles.notice}>Public signup opens {formatMajorDate(signupStatus?.public_signup_opens_at || null)}. Priority access is not active for this first Major.</p>}
         {signupState === "priority" && <p className={styles.notice}>Priority signup is open for eligible previous-Major players. Public signup opens {formatMajorDate(signupStatus?.public_signup_opens_at || null)}.</p>}
-        {signupState === "full" && <p className={styles.notice}>The current field is full.</p>}
+        {signupState === "full" && schedule.length === 0 && <p className={styles.notice}>The current field is full.</p>}
         {days.length !== 4 ? <p className={styles.notice}>Tournament staff is still configuring the four-day schedule.</p> : <div className={styles.days}>{days.map((day) => {
           const mine = schedule.find((choice) => choice.play_day_id === day.id)
           const daySlots = slots.filter((slot) => slot.play_day_id === day.id)
           const locked = mine?.is_locked ?? isMajorDayLocked(day)
+          const dayName = DAY_LABELS[day.day_number - 1]
           return <fieldset key={day.id} className={styles.dayCard} disabled={locked || signupDisabled}>
-            <legend><span>Day {day.day_number}</span>{day.label}</legend><p className={styles.dayDate}>{day.play_date}</p>
-            {daySlots.length ? daySlots.map((slot) => <label key={slot.id} className={`${styles.slotLabel} ${choices[day.id] === slot.id ? styles.selected : ""}`}><input type="radio" name={day.id} checked={choices[day.id] === slot.id} onChange={() => setChoices((old) => ({ ...old, [day.id]: slot.id }))} /><span>{formatMajorSlot(slot.starts_at)}{slot.label ? <small>{slot.label}</small> : null}</span></label>) : <p className={styles.notice}>No times available yet.</p>}
-            {mine?.group_label && <p className={styles.assignment}>{mine.group_label}{mine.assignment_location ? ` · ${mine.assignment_location}` : ""}{mine.group_instructions ? ` · ${mine.group_instructions}` : ""}</p>}
-            {!mine?.group_label && (mine?.assignment_location ? <p className={styles.assignment}>Play at: {mine.assignment_location}</p> : <p className={styles.meta}>Room and instructions will appear here after tournament staff publishes them.</p>)}
-            {day.selection_locks_at && <p className={styles.meta}>Day locks {formatMajorSlot(day.selection_locks_at)}</p>}
-            {locked && <p className={styles.locked}>◆ Selection locked</p>}
+            <legend><span>{dayName.day}</span>{day.label || dayName.round}</legend><p className={styles.dayDate}>{day.play_date}</p>
+            <div className={styles.slotHeader}><span>Choose</span><span>Slot</span><strong>Your local time</strong></div>
+            {daySlots.length ? daySlots.map((slot) => <label key={slot.id} className={`${styles.slotLabel} ${choices[day.id] === slot.id ? styles.selected : ""}`}><input type="radio" name={day.id} checked={choices[day.id] === slot.id} onChange={() => { setChoices((old) => ({ ...old, [day.id]: slot.id })); setReviewing(false) }} /><span className={styles.slotName}>{slot.label || "Available"}</span><span className={styles.localTime}>{formatMajorLocalTime(slot.starts_at, localTimeZone)}<small>{event.schedule_timezone !== localTimeZone ? `${formatMajorLocalTime(slot.starts_at, event.schedule_timezone)} · event time` : "Event reference time"}</small></span></label>) : <p className={styles.notice}>No times available yet.</p>}
+            <p className={styles.lockDeadline}>{dayName.day} selections lock:<strong>{day.selection_locks_at ? formatMajorDeadline(day.selection_locks_at, localTimeZone) : "Deadline appears after the first time is scheduled"}</strong><span>{localTimeZone}</span></p>
+            {locked && <p className={styles.locked}>Selection locked — tournament admins can still help</p>}
           </fieldset>
         })}</div>}
-        {days.length === 4 && <button onClick={signup} disabled={saving || signupDisabled} className={styles.primaryButton}>{saving ? "Saving…" : schedule.length ? "Update my four times" : "Register and save my four times"}</button>}
+        {days.length === 4 && !reviewing && <button onClick={() => setReviewing(true)} disabled={saving || signupDisabled || !allFourSelected} className={styles.primaryButton}>{schedule.length ? "Review my updated times" : "Review my four times"}</button>}
+        {reviewing && <section className={styles.signupReview}><p className={styles.eyebrow}>Your {testEvent ? "TEST" : masters ? "Masters" : "Major"} times</p><h3>Review all four days</h3><div>{days.map((day) => {
+          const slot = slots.find((item) => item.id === choices[day.id])
+          return <p key={day.id}><span>{DAY_LABELS[day.day_number - 1].day}</span><strong>{slot ? formatMajorLocalTime(slot.starts_at, localTimeZone) : "Not selected"}</strong></p>
+        })}</div><p className={styles.reviewHelp}>These are preferred scheduling times. Each day stays independently editable until that day’s lock deadline.</p><div className={styles.reviewActions}><button type="button" className={styles.secondaryButton} onClick={() => setReviewing(false)}>Change a time</button><button type="button" onClick={signup} disabled={saving || signupDisabled || !allFourSelected} className={styles.primaryButton}>{saving ? "Saving…" : schedule.length ? "Confirm updated times" : "Confirm signup"}</button></div></section>}
+        {publishedRooms.length > 0 && <section className={styles.roomSection}><p className={styles.eyebrow}>Your published rooms</p><h3>Who you’re playing with</h3><div className={styles.roomGrid}>{publishedRooms.map(({ day, assignment }) => assignment && <article key={day.id} className={styles.roomCard}><header><span>{DAY_LABELS[day.day_number - 1].day}</span><strong>{day.label || DAY_LABELS[day.day_number - 1].round}</strong></header><p className={styles.roomTime}>{assignment.starts_at ? formatMajorLocalTime(assignment.starts_at, localTimeZone) : "Time pending"}<small>{localTimeZone}</small></p><h4>{assignment.group_label}</h4><div className={styles.roomRoster}>{assignment.room_roster?.map((member) => <span key={member.player_id}>{member.player_screen_name_snapshot}</span>)}</div>{assignment.assignment_location && <div className={styles.roomDetail}><small>Course / lobby</small><strong>{assignment.assignment_location}</strong></div>}{assignment.group_instructions && <div className={styles.roomDetail}><small>Instructions</small><p>{assignment.group_instructions}</p></div>}</article>)}</div></section>}
       </section>}
       {message && <p className={styles.notice}>{message}</p>}
     </header>
@@ -134,3 +146,10 @@ export default function MajorDetailPage() {
 function InfoBlock({ title, body }: { title: string; body: string }) {
   return <div><h3>{title}</h3><p className={styles.description}>{body}</p></div>
 }
+
+const DAY_LABELS = [
+  { day: "Thursday", round: "Qualifier Round 1" },
+  { day: "Friday", round: "Qualifier Round 2" },
+  { day: "Saturday", round: "Round 3" },
+  { day: "Sunday", round: "Final Round" },
+] as const
