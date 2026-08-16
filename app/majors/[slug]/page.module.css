@@ -286,12 +286,18 @@
 .dayCard legend { padding: 0 8px; font-family: Georgia, serif; font-weight: 800; }
 .dayCard legend span { display: inline-block; margin-right: 8px; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; }
 .dayDate { margin: 0 0 10px; color: var(--muted); font-size: 0.85rem; }
-.slotLabel { display: flex; align-items: center; gap: 10px; margin: 7px 0; padding: 11px; border: 1px solid #573443; border-radius: 9px; background: rgba(21, 15, 18, 0.9); cursor: pointer; }
+.slotHeader { display: grid; grid-template-columns: 54px minmax(80px, .7fr) minmax(140px, 1.3fr); gap: 10px; padding: 0 11px 5px; color: var(--muted); font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; }
+.slotLabel { display: grid; grid-template-columns: 54px minmax(80px, .7fr) minmax(140px, 1.3fr); align-items: center; gap: 10px; margin: 7px 0; padding: 11px; border: 1px solid #573443; border-radius: 9px; background: rgba(21, 15, 18, 0.9); cursor: pointer; }
 .slotLabel:hover, .selected { border-color: var(--accent); background: rgba(83, 28, 53, 0.75); }
 .slotLabel input { width: 17px; height: 17px; accent-color: var(--accent); }
-.slotLabel small { display: block; margin-top: 3px; color: var(--accent); }
+.slotName { color: var(--muted); font-size: .84rem; }
+.localTime { color: #fff; font-size: 1.05rem; font-weight: 900; }
+.slotLabel small { display: block; margin-top: 3px; color: var(--accent); font-size: .68rem; font-weight: 700; }
 .assignment { padding: 10px; border: 1px solid #3d9366; border-radius: 8px; background: #0d3523; color: #d6ffe7; font-weight: 900; }
 .locked { color: #f6c65b; font-weight: 900; }
+.lockDeadline { display: grid; gap: 3px; margin: 13px 0 0; padding: 10px; border-radius: 8px; background: rgba(0, 0, 0, .38); color: var(--muted); font-size: .8rem; }
+.lockDeadline strong { color: #fff; font-size: .9rem; }
+.lockDeadline span { color: var(--accent); }
 
 .primaryButton {
   width: 100%;
@@ -309,6 +315,29 @@
 }
 
 .primaryButton:disabled { cursor: not-allowed; filter: grayscale(0.6); opacity: 0.6; }
+.secondaryButton { padding: 13px 17px; border: 1px solid #76606a; border-radius: 10px; background: #21151b; color: white; font-weight: 900; cursor: pointer; }
+.signupReview { margin-top: 20px; padding: 20px; border: 1px solid var(--accent); border-radius: 14px; background: rgba(5, 3, 4, .86); }
+.signupReview h3 { margin-top: 3px; font-family: Georgia, serif; font-size: 1.5rem; }
+.signupReview > div:not(.reviewActions) { display: grid; gap: 7px; }
+.signupReview > div:not(.reviewActions) p { display: flex; justify-content: space-between; gap: 16px; margin: 0; padding: 10px 12px; border-radius: 8px; background: rgba(40, 125, 80, .18); }
+.signupReview span { color: var(--muted); }
+.reviewHelp { color: var(--muted); line-height: 1.5; }
+.reviewActions { display: grid; grid-template-columns: .7fr 1.3fr; gap: 10px; }
+.reviewActions .primaryButton { margin-top: 0; }
+.roomSection { margin-top: 25px; padding-top: 22px; border-top: 1px solid rgba(240, 126, 172, .45); }
+.roomSection h3 { margin-top: 4px; font-family: Georgia, serif; font-size: 1.55rem; }
+.roomGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; }
+.roomCard { padding: 16px; border: 1px solid #8f4765; border-radius: 13px; background: linear-gradient(145deg, rgba(17, 70, 44, .42), rgba(10, 6, 8, .95)); }
+.roomCard header { display: grid; gap: 3px; padding-bottom: 10px; border-bottom: 1px solid #573443; }
+.roomCard header span { color: var(--accent); font-size: .7rem; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
+.roomTime { display: grid; gap: 2px; margin: 14px 0; color: white; font-size: 1.45rem; font-weight: 900; }
+.roomTime small { color: var(--muted); font-size: .7rem; font-weight: 700; }
+.roomCard h4 { margin: 12px 0 7px; color: var(--accent); font-family: Georgia, serif; font-size: 1.2rem; text-transform: uppercase; }
+.roomRoster { display: grid; gap: 5px; }
+.roomRoster span { padding: 8px 10px; border-radius: 7px; background: rgba(0, 0, 0, .4); font-weight: 800; }
+.roomDetail { margin-top: 12px; padding-top: 10px; border-top: 1px solid #573443; }
+.roomDetail small { display: block; margin-bottom: 3px; color: var(--accent); font-size: .68rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+.roomDetail p { margin: 0; color: var(--muted); line-height: 1.45; }
 .contentCard { margin-top: 18px; padding: 24px; }
 .masters .contentCard { border-color: rgba(240, 126, 172, 0.58); background: rgba(9, 5, 8, 0.9); }
 .contentCard h2 span { color: var(--accent); }
@@ -324,10 +353,13 @@
   .brandRow { align-items: flex-start; gap: 13px; min-height: 115px; }
   .logo { width: 84px; }
   .days { grid-template-columns: 1fr; }
+  .roomGrid { grid-template-columns: 1fr; }
   .capacity { width: 100%; margin-left: 0; }
   .hero { padding: 18px; }
   .eyebrow { letter-spacing: 0.13em; }
-  .slotLabel { align-items: flex-start; }
+  .slotHeader { display: none; }
+  .slotLabel { grid-template-columns: 32px minmax(70px, .7fr) minmax(125px, 1.3fr); align-items: flex-start; }
+  .reviewActions { grid-template-columns: 1fr; }
   .mastersFeature { min-height: 185px; background-position: center, center, 62% 1%; background-size: cover, cover, 285% auto; }
   .bench { right: 2%; transform: scale(0.72); }
   .blossomTree { width: 80%; }
