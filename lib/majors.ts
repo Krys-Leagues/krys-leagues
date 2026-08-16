@@ -261,9 +261,9 @@ function majorZonedParts(value: Date, timeZone: string) {
   return Object.fromEntries(parts.filter((part) => part.type !== "literal").map((part) => [part.type, Number(part.value)])) as Record<string, number>
 }
 
-export function toMajorEventDateTimeLocal(value: string, timeZone: string) {
+export function toMajorEventTimeInput(value: string, timeZone: string) {
   const parts = majorZonedParts(new Date(value), timeZone)
-  return `${parts.year}-${String(parts.month).padStart(2, "0")}-${String(parts.day).padStart(2, "0")}T${String(parts.hour).padStart(2, "0")}:${String(parts.minute).padStart(2, "0")}`
+  return `${String(parts.hour).padStart(2, "0")}:${String(parts.minute).padStart(2, "0")}`
 }
 
 export function majorEventLocalTimeToIso(value: string, timeZone: string) {
