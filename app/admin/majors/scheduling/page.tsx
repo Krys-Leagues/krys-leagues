@@ -8,7 +8,7 @@ import {
   isMajorDayLocked,
   majorEventLocalTimeToIso,
   toDateTimeLocal,
-  toMajorEventDateTimeLocal,
+  toMajorEventTimeInput,
   type MajorDayChoice,
   type MajorEntry,
   type MajorEvent,
@@ -146,9 +146,10 @@ export default function MajorSchedulingAdminPage() {
     if (showResult(result.error, `${DAY_NAMES[dayNumber - 1].short} settings saved.`)) await loadSchedule(eventId)
   }
 
-  async function addSlot(dayId: string, form: HTMLFormElement) {
+  async function addSlot(day: MajorPlayDay, form: HTMLFormElement) {
     const data = new FormData(form)
-    const result = await supabase.rpc("create_major_time_slot", { p_play_day_id: dayId, p_local_starts_at: String(data.get("time")), p_label: String(data.get("label") || "") })
+    const localStartsAt = `${day.play_date}T${String(data.get("time"))}`
+    const result = await supabase.rpc("create_major_time_slot", { p_play_day_id: day.id, p_local_starts_at: localStartsAt, p_label: String(data.get("label") || "") })
     if (showResult(result.error, "Time added and the lock deadline recalculated.")) {
       form.reset()
       await loadSchedule(eventId)
@@ -157,9 +158,14 @@ export default function MajorSchedulingAdminPage() {
 
   async function editSlot(slot: MajorTimeSlot, form: HTMLFormElement) {
     if (!selectedEvent) return
+    const day = days.find((item) => item.id === slot.play_day_id)
+    if (!day) {
+      setMessage("The official tournament day could not be found. Save the day in Event Setup before editing times.")
+      return
+    }
     const data = new FormData(form)
     try {
-      const startsAt = majorEventLocalTimeToIso(String(data.get("time")), selectedEvent.schedule_timezone)
+      const startsAt = majorEventLocalTimeToIso(`${day.play_date}T${String(data.get("time"))}`, selectedEvent.schedule_timezone)
       const selectedCount = choices.filter((choice) => choice.time_slot_id === slot.id).length
       if (startsAt !== slot.starts_at && selectedCount > 0 && !window.confirm(`${selectedCount} ${selectedCount === 1 ? "player has" : "players have"} selected this time. Editing it keeps them in this slot at the new time. Continue?`)) return
       const result = await supabase.from("major_time_slots").update({ starts_at: startsAt, label: String(data.get("label") || "").trim() || null }).eq("id", slot.id)
@@ -476,7 +482,7 @@ function DayWorkspace({ event, dayNumber, day, slots, entries, groups, members, 
   groups: MajorScheduleGroup[]
   members: MajorScheduleGroupMember[]
   choicesBySlot: Map<string, MajorDayChoice[]>
-  onAddSlot: (dayId: string, form: HTMLFormElement) => Promise<void>
+  onAddSlot: (day: MajorPlayDay, form: HTMLFormElement) => Promise<void>
   onEditSlot: (slot: MajorTimeSlot, form: HTMLFormElement) => Promise<void>
   onSetSlotAvailability: (slot: MajorTimeSlot, available: boolean, playerCount: number) => Promise<void>
   onRemoveSlot: (slot: MajorTimeSlot, playerCount: number, roomCount: number) => Promise<void>
@@ -494,7 +500,7 @@ function DayWorkspace({ event, dayNumber, day, slots, entries, groups, members, 
   return <section className={styles.workspace}>
     <div className={styles.sectionHeading}><div><p className={styles.step}>Day {dayNumber}</p><h2>{name.title}</h2><p>{day.play_date} · Times entered in {event.schedule_timezone}</p></div><div className={styles.lockSummary}><strong>{isMajorDayLocked(day) ? "Player choices locked" : "Player choices open"}</strong><span>{day.selection_locks_at ? `${formatMajorDeadline(day.selection_locks_at, event.schedule_timezone)} · ${event.schedule_timezone}` : "Add a time to calculate the deadline"}</span></div></div>
 
-    <div className={styles.dayActions}><form onSubmit={(e) => { e.preventDefault(); void onAddSlot(day.id, e.currentTarget) }}><label>Add signup time ({event.schedule_timezone})<input name="time" type="datetime-local" required /></label><label>Optional plain-language label<input name="label" placeholder="Featured time" /></label><button className={styles.primaryButton}>Add signup time</button></form><button type="button" className={styles.publishButton} onClick={() => void onPublishDay(day)}>{published ? `${name.short} rooms published` : `Publish ${name.short} rooms`}</button></div>
+    <div className={styles.dayActions}><form onSubmit={(e) => { e.preventDefault(); void onAddSlot(day, e.currentTarget) }}><label>Add signup time<input name="time" type="time" required /><small>Times entered in: {event.schedule_timezone}. Official date: {day.play_date}.</small></label><label>Optional plain-language label<input name="label" placeholder="Featured time" /></label><button className={styles.primaryButton}>Add signup time</button></form><button type="button" className={styles.publishButton} onClick={() => void onPublishDay(day)}>{published ? `${name.short} rooms published` : `Publish ${name.short} rooms`}</button></div>
 
     <section className={styles.timeManager}><div className={styles.inlineHeading}><div><p className={styles.step}>Times</p><h3>Available signup times</h3><p>Manage any practical number of times independently for this day. Times are entered in {event.schedule_timezone}; UTC is shown only as a reference.</p></div></div>
       {daySlots.length === 0 ? <div className={styles.emptyState}><h3>No times yet</h3><p>Add the first official play time above.</p></div> : <div className={styles.managerGrid}>{daySlots.map((slot) => {
@@ -503,7 +509,7 @@ function DayWorkspace({ event, dayNumber, day, slots, entries, groups, members, 
         return <form key={slot.id} className={`${styles.managerCard} ${!slot.is_available ? styles.disabledSlot : ""}`} onSubmit={(e) => { e.preventDefault(); void onEditSlot(slot, e.currentTarget) }}>
           <header><div><strong>{formatMajorLocalTime(slot.starts_at, event.schedule_timezone)}</strong><span>{slot.is_available ? "Available" : "Disabled"}</span></div><b>{playerCount} selected</b></header>
           <small>UTC reference: {new Date(slot.starts_at).toISOString()}</small>
-          <label>Event-local date and time<input name="time" type="datetime-local" defaultValue={toMajorEventDateTimeLocal(slot.starts_at, event.schedule_timezone)} required /></label>
+          <label>Event-local time<input name="time" type="time" defaultValue={toMajorEventTimeInput(slot.starts_at, event.schedule_timezone)} required /><small>Keeps the official {name.short} date: {day.play_date}.</small></label>
           <label>Optional label<input name="label" defaultValue={slot.label || ""} /></label>
           <div className={styles.slotActions}><button className={styles.secondaryButton}>Save time</button><button type="button" className={slot.is_available ? styles.warningButton : styles.primaryButton} onClick={() => void onSetSlotAvailability(slot, !slot.is_available, playerCount)}>{slot.is_available ? "Disable" : "Enable"}</button><button type="button" className={styles.dangerButton} onClick={() => void onRemoveSlot(slot, playerCount, roomCount)}>Remove unused</button></div>
           {!slot.is_available && playerCount > 0 && <p className={styles.slotWarning}>{playerCount} existing selection{playerCount === 1 ? " is" : "s are"} preserved. Move {playerCount === 1 ? "this player" : "these players"} with the admin override below.</p>}
