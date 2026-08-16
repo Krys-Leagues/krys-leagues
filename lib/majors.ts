@@ -247,6 +247,43 @@ export function formatMajorDeadline(value: string, timeZone?: string) {
   }).format(new Date(value))
 }
 
+function majorZonedParts(value: Date, timeZone: string) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(value)
+  return Object.fromEntries(parts.filter((part) => part.type !== "literal").map((part) => [part.type, Number(part.value)])) as Record<string, number>
+}
+
+export function toMajorEventDateTimeLocal(value: string, timeZone: string) {
+  const parts = majorZonedParts(new Date(value), timeZone)
+  return `${parts.year}-${String(parts.month).padStart(2, "0")}-${String(parts.day).padStart(2, "0")}T${String(parts.hour).padStart(2, "0")}:${String(parts.minute).padStart(2, "0")}`
+}
+
+export function majorEventLocalTimeToIso(value: string, timeZone: string) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(value)
+  if (!match) throw new Error("Choose a valid local date and time.")
+  const wanted = match.slice(1).map(Number)
+  const wallClockUtc = Date.UTC(wanted[0], wanted[1] - 1, wanted[2], wanted[3], wanted[4])
+  let instant = wallClockUtc
+  for (let pass = 0; pass < 3; pass += 1) {
+    const shown = majorZonedParts(new Date(instant), timeZone)
+    const shownAsUtc = Date.UTC(shown.year, shown.month - 1, shown.day, shown.hour, shown.minute)
+    instant += wallClockUtc - shownAsUtc
+  }
+  const verified = majorZonedParts(new Date(instant), timeZone)
+  if ([verified.year, verified.month, verified.day, verified.hour, verified.minute].some((part, index) => part !== wanted[index])) {
+    throw new Error(`That clock time does not exist in ${timeZone}, likely because of a daylight-saving change.`)
+  }
+  return new Date(instant).toISOString()
+}
+
 export const MAJOR_EVENT_STATUSES: MajorEvent["status"][] = [
   "draft",
   "registration",
