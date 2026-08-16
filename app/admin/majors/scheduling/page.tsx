@@ -6,7 +6,9 @@ import {
   formatMajorDeadline,
   formatMajorLocalTime,
   isMajorDayLocked,
+  majorEventLocalTimeToIso,
   toDateTimeLocal,
+  toMajorEventDateTimeLocal,
   type MajorDayChoice,
   type MajorEntry,
   type MajorEvent,
@@ -153,6 +155,36 @@ export default function MajorSchedulingAdminPage() {
     }
   }
 
+  async function editSlot(slot: MajorTimeSlot, form: HTMLFormElement) {
+    if (!selectedEvent) return
+    const data = new FormData(form)
+    try {
+      const startsAt = majorEventLocalTimeToIso(String(data.get("time")), selectedEvent.schedule_timezone)
+      const selectedCount = choices.filter((choice) => choice.time_slot_id === slot.id).length
+      if (startsAt !== slot.starts_at && selectedCount > 0 && !window.confirm(`${selectedCount} ${selectedCount === 1 ? "player has" : "players have"} selected this time. Editing it keeps them in this slot at the new time. Continue?`)) return
+      const result = await supabase.from("major_time_slots").update({ starts_at: startsAt, label: String(data.get("label") || "").trim() || null }).eq("id", slot.id)
+      if (showResult(result.error, "Signup time updated and the day lock deadline recalculated.")) await loadSchedule(eventId)
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Could not convert that event-local time.")
+    }
+  }
+
+  async function setSlotAvailability(slot: MajorTimeSlot, available: boolean, playerCount: number) {
+    if (!available && playerCount > 0 && !window.confirm(`${playerCount} ${playerCount === 1 ? "player has" : "players have"} selected this time. Disabling it preserves their selections, but they must be moved with the administrator override. Disable it?`)) return
+    const result = await supabase.from("major_time_slots").update({ is_available: available }).eq("id", slot.id)
+    if (showResult(result.error, available ? "Signup time enabled and available to players." : "Signup time disabled. Existing selections were preserved.")) await loadSchedule(eventId)
+  }
+
+  async function removeSlot(slot: MajorTimeSlot, playerCount: number, roomCount: number) {
+    if (playerCount || roomCount) {
+      setMessage(`This time cannot be removed because it has ${playerCount} player selection${playerCount === 1 ? "" : "s"} and ${roomCount} room record${roomCount === 1 ? "" : "s"}. Move the players and remove the rooms first; otherwise disable the time to preserve its history.`)
+      return
+    }
+    if (!window.confirm("Remove this unused signup time? This cannot be undone.")) return
+    const result = await supabase.from("major_time_slots").delete().eq("id", slot.id)
+    if (showResult(result.error, "Unused signup time removed and the day lock deadline recalculated.")) await loadSchedule(eventId)
+  }
+
   async function movePlayer(entryId: string, dayId: string, slotId: string) {
     if (!slotId) return
     const result = await supabase.rpc("admin_set_major_day_choice", { p_entry_id: entryId, p_play_day_id: dayId, p_time_slot_id: slotId })
@@ -163,12 +195,17 @@ export default function MajorSchedulingAdminPage() {
     const data = new FormData(form)
     const day = days.find((item) => item.id === slot.play_day_id)
     if (!day) return
+    const roomLabel = String(data.get("label")).trim()
+    if (groups.some((item) => item.play_day_id === day.id && item.id !== group?.id && item.group_label.toLocaleLowerCase() === roomLabel.toLocaleLowerCase())) {
+      setMessage(`${roomLabel} is already used on ${DAY_NAMES[day.day_number - 1].short}. Choose a different room label.`)
+      return
+    }
     const result = await supabase.rpc("save_major_schedule_group", {
       p_id: group?.id || null,
       p_major_event_id: eventId,
       p_play_day_id: day.id,
       p_time_slot_id: slot.id,
-      p_group_label: String(data.get("label")),
+      p_group_label: roomLabel,
       p_competition: String(data.get("competition")),
       p_location: String(data.get("location") || ""),
       p_instructions: String(data.get("instructions") || ""),
@@ -326,6 +363,9 @@ export default function MajorSchedulingAdminPage() {
         members={members}
         choicesBySlot={choicesBySlot}
         onAddSlot={addSlot}
+        onEditSlot={editSlot}
+        onSetSlotAvailability={setSlotAvailability}
+        onRemoveSlot={removeSlot}
         onMovePlayer={movePlayer}
         onSaveGroup={saveGroup}
         onDeleteGroup={deleteGroup}
@@ -427,7 +467,7 @@ function EventSetup({ event, events, days, onSaveOpening, onReleaseSpots, onSave
   </section>
 }
 
-function DayWorkspace({ event, dayNumber, day, slots, entries, groups, members, choicesBySlot, onAddSlot, onMovePlayer, onSaveGroup, onDeleteGroup, onPublishDay }: {
+function DayWorkspace({ event, dayNumber, day, slots, entries, groups, members, choicesBySlot, onAddSlot, onEditSlot, onSetSlotAvailability, onRemoveSlot, onMovePlayer, onSaveGroup, onDeleteGroup, onPublishDay }: {
   event: MajorEvent
   dayNumber: number
   day?: MajorPlayDay
@@ -437,6 +477,9 @@ function DayWorkspace({ event, dayNumber, day, slots, entries, groups, members, 
   members: MajorScheduleGroupMember[]
   choicesBySlot: Map<string, MajorDayChoice[]>
   onAddSlot: (dayId: string, form: HTMLFormElement) => Promise<void>
+  onEditSlot: (slot: MajorTimeSlot, form: HTMLFormElement) => Promise<void>
+  onSetSlotAvailability: (slot: MajorTimeSlot, available: boolean, playerCount: number) => Promise<void>
+  onRemoveSlot: (slot: MajorTimeSlot, playerCount: number, roomCount: number) => Promise<void>
   onMovePlayer: (entryId: string, dayId: string, slotId: string) => Promise<void>
   onSaveGroup: (slot: MajorTimeSlot, form: HTMLFormElement, group: MajorScheduleGroup | null, publish: boolean) => Promise<void>
   onDeleteGroup: (id: string) => Promise<void>
@@ -451,9 +494,25 @@ function DayWorkspace({ event, dayNumber, day, slots, entries, groups, members, 
   return <section className={styles.workspace}>
     <div className={styles.sectionHeading}><div><p className={styles.step}>Day {dayNumber}</p><h2>{name.title}</h2><p>{day.play_date} · Times entered in {event.schedule_timezone}</p></div><div className={styles.lockSummary}><strong>{isMajorDayLocked(day) ? "Player choices locked" : "Player choices open"}</strong><span>{day.selection_locks_at ? `${formatMajorDeadline(day.selection_locks_at, event.schedule_timezone)} · ${event.schedule_timezone}` : "Add a time to calculate the deadline"}</span></div></div>
 
-    <div className={styles.dayActions}><form onSubmit={(e) => { e.preventDefault(); void onAddSlot(day.id, e.currentTarget) }}><label>New local start time<input name="time" type="datetime-local" required /></label><label>Optional slot label<input name="label" placeholder="Featured time" /></label><button className={styles.primaryButton}>Add time</button></form><button type="button" className={styles.publishButton} onClick={() => void onPublishDay(day)}>{published ? `${name.short} rooms published` : `Publish ${name.short} rooms`}</button></div>
+    <div className={styles.dayActions}><form onSubmit={(e) => { e.preventDefault(); void onAddSlot(day.id, e.currentTarget) }}><label>Add signup time ({event.schedule_timezone})<input name="time" type="datetime-local" required /></label><label>Optional plain-language label<input name="label" placeholder="Featured time" /></label><button className={styles.primaryButton}>Add signup time</button></form><button type="button" className={styles.publishButton} onClick={() => void onPublishDay(day)}>{published ? `${name.short} rooms published` : `Publish ${name.short} rooms`}</button></div>
 
-    {daySlots.length === 0 ? <div className={styles.emptyState}><h3>No times yet</h3><p>Add the first official play time above.</p></div> : <div className={styles.slotStack}>{daySlots.map((slot) => {
+    <section className={styles.timeManager}><div className={styles.inlineHeading}><div><p className={styles.step}>Times</p><h3>Available signup times</h3><p>Manage any practical number of times independently for this day. Times are entered in {event.schedule_timezone}; UTC is shown only as a reference.</p></div></div>
+      {daySlots.length === 0 ? <div className={styles.emptyState}><h3>No times yet</h3><p>Add the first official play time above.</p></div> : <div className={styles.managerGrid}>{daySlots.map((slot) => {
+        const playerCount = (choicesBySlot.get(slot.id) || []).length
+        const roomCount = groups.filter((group) => group.time_slot_id === slot.id).length
+        return <form key={slot.id} className={`${styles.managerCard} ${!slot.is_available ? styles.disabledSlot : ""}`} onSubmit={(e) => { e.preventDefault(); void onEditSlot(slot, e.currentTarget) }}>
+          <header><div><strong>{formatMajorLocalTime(slot.starts_at, event.schedule_timezone)}</strong><span>{slot.is_available ? "Available" : "Disabled"}</span></div><b>{playerCount} selected</b></header>
+          <small>UTC reference: {new Date(slot.starts_at).toISOString()}</small>
+          <label>Event-local date and time<input name="time" type="datetime-local" defaultValue={toMajorEventDateTimeLocal(slot.starts_at, event.schedule_timezone)} required /></label>
+          <label>Optional label<input name="label" defaultValue={slot.label || ""} /></label>
+          <div className={styles.slotActions}><button className={styles.secondaryButton}>Save time</button><button type="button" className={slot.is_available ? styles.warningButton : styles.primaryButton} onClick={() => void onSetSlotAvailability(slot, !slot.is_available, playerCount)}>{slot.is_available ? "Disable" : "Enable"}</button><button type="button" className={styles.dangerButton} onClick={() => void onRemoveSlot(slot, playerCount, roomCount)}>Remove unused</button></div>
+          {!slot.is_available && playerCount > 0 && <p className={styles.slotWarning}>{playerCount} existing selection{playerCount === 1 ? " is" : "s are"} preserved. Move {playerCount === 1 ? "this player" : "these players"} with the admin override below.</p>}
+        </form>
+      })}</div>}
+      <p className={styles.deadlineNote}><strong>{name.short} selections lock:</strong> {day.selection_locks_at ? `${formatMajorDeadline(day.selection_locks_at, event.schedule_timezone)} · ${event.schedule_timezone}` : "No available time exists, so no calculated deadline is set."}</p>
+    </section>
+
+    {daySlots.length > 0 && <><div className={styles.countSectionHeading}><p className={styles.step}>Players → rooms</p><h3>Signup counts and room builder</h3><p>Counts are guidance only. Signup times have no player capacity.</p></div><div className={styles.slotStack}>{daySlots.map((slot) => {
       const selectedChoices = choicesBySlot.get(slot.id) || []
       const selectedEntries = selectedChoices.map((choice) => entries.find((entry) => entry.id === choice.entry_id)).filter((entry): entry is MajorEntry => Boolean(entry))
       const slotGroups = groups.filter((group) => group.time_slot_id === slot.id)
@@ -461,26 +520,28 @@ function DayWorkspace({ event, dayNumber, day, slots, entries, groups, members, 
       const count = selectedEntries.length
       const guidance = count === 1 ? "Needs attention" : count === 2 ? "Workable minimum" : count === 3 ? "Preferred room size" : count > 3 ? "Multiple rooms needed" : "No players yet"
       const tone = count === 3 ? styles.preferred : count === 2 ? styles.workable : count === 0 ? styles.quiet : styles.attention
-      return <article key={slot.id} className={styles.timeCard}>
-        <header><div><p className={styles.slotTime}>{formatMajorLocalTime(slot.starts_at, event.schedule_timezone)}</p><span>{slot.label || name.fallback}</span></div><div className={`${styles.countBadge} ${tone}`}><strong>{count} {count === 1 ? "player" : "players"}</strong><span>{guidance}</span></div></header>
+      return <article key={slot.id} className={`${styles.timeCard} ${!slot.is_available ? styles.disabledSlot : ""}`}>
+        <header><div><p className={styles.slotTime}>{formatMajorLocalTime(slot.starts_at, event.schedule_timezone)}</p><span>{slot.label || name.fallback} · {slot.is_available ? "AVAILABLE" : "DISABLED"}</span></div><div className={`${styles.countBadge} ${tone}`}><strong>{count} {count === 1 ? "player" : "players"}</strong><span>{guidance}</span></div></header>
         <div className={styles.playerChips}>{selectedEntries.length ? selectedEntries.map((entry) => <span key={entry.id}>{entry.player_screen_name_snapshot}</span>) : <em>No one has selected this time.</em>}</div>
-        <details className={styles.overridePanel}><summary>Move a player to another time</summary>{selectedEntries.map((entry) => <label key={entry.id}>{entry.player_screen_name_snapshot}<select defaultValue={slot.id} onChange={(e) => void onMovePlayer(entry.id, day.id, e.target.value)}>{daySlots.map((option) => <option key={option.id} value={option.id}>{formatMajorLocalTime(option.starts_at, event.schedule_timezone)}</option>)}</select></label>)}</details>
+        <details className={styles.overridePanel}><summary>Move a player to another time</summary>{selectedEntries.map((entry) => <label key={entry.id}>{entry.player_screen_name_snapshot}<select defaultValue={slot.id} onChange={(e) => void onMovePlayer(entry.id, day.id, e.target.value)}>{daySlots.filter((option) => option.is_available || option.id === slot.id).map((option) => <option key={option.id} value={option.id}>{formatMajorLocalTime(option.starts_at, event.schedule_timezone)}{option.is_available ? "" : " — disabled"}</option>)}</select></label>)}</details>
 
         <div className={styles.roomBuilder}><div className={styles.roomBuilderHeading}><div><h3>Rooms</h3><p>Target three players; two is workable. Save privately until ready.</p></div><span>{selectedEntries.filter((entry) => !assignedIds.has(entry.id)).length} unassigned</span></div>
-          {slotGroups.map((group) => <RoomForm key={group.id} group={group} slot={slot} dayNumber={dayNumber} selectedEntries={selectedEntries} allGroups={slotGroups} members={members} onSave={onSaveGroup} onDelete={onDeleteGroup} />)}
-          <RoomForm group={null} slot={slot} dayNumber={dayNumber} selectedEntries={selectedEntries.filter((entry) => !assignedIds.has(entry.id))} allGroups={slotGroups} members={members} onSave={onSaveGroup} onDelete={onDeleteGroup} />
+          {slotGroups.map((group) => <RoomForm key={group.id} group={group} slot={slot} dayNumber={dayNumber} selectedEntries={selectedEntries} allGroups={slotGroups} namingGroups={dayGroups} isTestEvent={event.is_test_event} members={members} onSave={onSaveGroup} onDelete={onDeleteGroup} />)}
+          <RoomForm group={null} slot={slot} dayNumber={dayNumber} selectedEntries={selectedEntries.filter((entry) => !assignedIds.has(entry.id))} allGroups={slotGroups} namingGroups={dayGroups} isTestEvent={event.is_test_event} members={members} onSave={onSaveGroup} onDelete={onDeleteGroup} />
         </div>
       </article>
-    })}</div>}
+    })}</div></>}
   </section>
 }
 
-function RoomForm({ group, slot, dayNumber, selectedEntries, allGroups, members, onSave, onDelete }: {
+function RoomForm({ group, slot, dayNumber, selectedEntries, allGroups, namingGroups, isTestEvent, members, onSave, onDelete }: {
   group: MajorScheduleGroup | null
   slot: MajorTimeSlot
   dayNumber: number
   selectedEntries: MajorEntry[]
   allGroups: MajorScheduleGroup[]
+  namingGroups: MajorScheduleGroup[]
+  isTestEvent: boolean
   members: MajorScheduleGroupMember[]
   onSave: (slot: MajorTimeSlot, form: HTMLFormElement, group: MajorScheduleGroup | null, publish: boolean) => Promise<void>
   onDelete: (id: string) => Promise<void>
@@ -488,10 +549,13 @@ function RoomForm({ group, slot, dayNumber, selectedEntries, allGroups, members,
   const currentIds = new Set(group ? members.filter((member) => member.group_id === group.id).map((member) => member.entry_id) : [])
   const assignedElsewhere = new Set(members.filter((member) => allGroups.some((item) => item.id === member.group_id && item.id !== group?.id)).map((member) => member.entry_id))
   const candidates = selectedEntries.filter((entry) => currentIds.has(entry.id) || !assignedElsewhere.has(entry.id))
+  const prefix = isTestEvent ? "TEST" : "KMGM"
+  const usedNumbers = namingGroups.map((item) => new RegExp(`^${prefix}(\\d+)$`, "i").exec(item.group_label)?.[1]).filter(Boolean).map(Number)
+  const suggestedLabel = `${prefix}${Math.max(0, ...usedNumbers) + 1}`
   return <form className={group ? styles.roomCard : styles.newRoomCard} onSubmit={(e) => e.preventDefault()}>
     <div className={styles.roomTitle}><strong>{group?.group_label || "Create another room"}</strong>{group && <span className={group.is_published ? styles.published : styles.private}>{group.is_published ? "Published" : "Private"}</span>}</div>
     <div className={styles.formGrid}>
-      <label>Room label<input name="label" defaultValue={group?.group_label || `Room ${allGroups.length + 1}`} required /></label>
+      <label>Room label<input name="label" defaultValue={group?.group_label || suggestedLabel} required /><small>{group ? "Customize if needed." : `Next suggested ${isTestEvent ? "TEST" : "official Krys Mini Golf Majors"} room label; you may override it.`}</small></label>
       <label>Competition<select name="competition" defaultValue={group?.competition || (dayNumber <= 2 ? "qualifying" : "main")}><option value="qualifying">Qualifier</option><option value="main">Main Event</option><option value="secondary">Secondary trophy field</option></select></label>
       <label>Course / lobby / location<input name="location" defaultValue={group?.location || ""} /></label>
       <label>Player instructions<input name="instructions" defaultValue={group?.instructions || ""} /></label>

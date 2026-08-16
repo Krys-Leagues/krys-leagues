@@ -37,6 +37,7 @@
 .secondaryButton { background: #30445e; }
 .publishButton { padding: 13px 18px; background: #b92963; text-transform: uppercase; letter-spacing: .04em; }
 .dangerButton { background: #8f2630; }
+.warningButton { padding: 10px 14px; border: 0; border-radius: 8px; background: #9a5b12; color: white; font-weight: 900; cursor: pointer; }
 .primaryButton:disabled, .publishButton:disabled { cursor: not-allowed; opacity: .55; }
 .deadlineList { display: grid; gap: 8px; margin-top: 16px; }
 .deadlineList div { display: grid; gap: 3px; padding: 10px; border-radius: 8px; background: #08101c; }
@@ -51,6 +52,23 @@
 .lockSummary span { color: #b7c5d3; font-size: .84rem; }
 .dayActions { margin-top: 16px; padding: 15px; border: 1px solid #334155; border-radius: 12px; background: #0e1725; }
 .dayActions form { display: flex; align-items: end; gap: 10px; }
+.timeManager { margin-top: 16px; padding: 20px; border: 1px solid #3b5068; border-radius: 14px; background: #0b1421; }
+.timeManager h3, .countSectionHeading h3 { margin: 3px 0; font-family: Georgia, serif; font-size: 1.55rem; }
+.timeManager p, .countSectionHeading p { margin: 4px 0; color: #aebccc; }
+.managerGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 15px; }
+.managerCard { display: grid; gap: 10px; padding: 14px; border: 1px solid #3c5169; border-radius: 11px; background: #07101b; }
+.managerCard header { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.managerCard header div { display: grid; gap: 3px; }
+.managerCard header strong { font-size: 1.35rem; }
+.managerCard header span { width: fit-content; padding: 4px 7px; border-radius: 999px; background: #17492e; color: #b7f7ce; font-size: .7rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+.managerCard header b { color: #dce6ef; }
+.managerCard > small { color: #8292a3; overflow-wrap: anywhere; }
+.slotActions { display: flex; flex-wrap: wrap; gap: 8px; }
+.disabledSlot { border-color: #765c35; opacity: .82; }
+.disabledSlot .managerCard header span, .disabledSlot header span { color: #ffe1a1; }
+.slotWarning { padding: 9px; border-radius: 8px; background: #4a2d0b; color: #ffe1a1 !important; font-weight: 750; }
+.deadlineNote { margin-top: 15px !important; padding: 12px; border-radius: 9px; background: #111f30; }
+.countSectionHeading { margin: 24px 0 10px; padding: 18px 20px; border: 1px solid #35465b; border-radius: 12px; background: #0e1725; }
 .slotStack { display: grid; gap: 18px; }
 .timeCard > header { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-bottom: 14px; border-bottom: 1px solid #2f4054; }
 .slotTime { margin: 0; color: white; font-size: clamp(1.7rem, 4vw, 2.5rem); font-weight: 950; }
@@ -94,7 +112,7 @@
 
 @media (max-width: 900px) {
   .workflowNav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .twoColumn, .daySetupGrid { grid-template-columns: 1fr 1fr; }
+  .twoColumn, .daySetupGrid, .managerGrid { grid-template-columns: 1fr 1fr; }
   .header, .sectionHeading, .dayActions { align-items: stretch; flex-direction: column; }
   .lockSummary { max-width: none; text-align: left; }
   .dayActions form { flex-wrap: wrap; }
@@ -102,7 +120,7 @@
 
 @media (max-width: 620px) {
   .page { padding: 16px 10px 45px; }
-  .workflowNav, .twoColumn, .daySetupGrid, .formGrid, .infoGrid, .resultCard, .resultCard form { grid-template-columns: 1fr; }
+  .workflowNav, .twoColumn, .daySetupGrid, .managerGrid, .formGrid, .infoGrid, .resultCard, .resultCard form { grid-template-columns: 1fr; }
   .header { padding: 18px; }
   .eventPicker { min-width: 0; }
   .timeCard > header, .inlineHeading, .roomBuilderHeading, .roomTitle, .roomActions { align-items: stretch; flex-direction: column; }
