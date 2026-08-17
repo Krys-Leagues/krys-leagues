@@ -20,6 +20,12 @@ import {
   type MajorTimeSlot,
   type MajorWeekendStatus,
 } from "@/lib/majors"
+import {
+  globalPlayerIdentitySummary,
+  globalPlayerMatchesSearch,
+  loadGlobalPlayerDirectory,
+  type GlobalPlayerDirectoryEntry,
+} from "@/lib/identity/globalPlayerDirectory"
 import { supabase } from "@/lib/supabase"
 import styles from "./page.module.css"
 
@@ -45,6 +51,7 @@ export default function MajorSchedulingAdminPage() {
   const [members, setMembers] = useState<MajorScheduleGroupMember[]>([])
   const [placements, setPlacements] = useState<MajorFinalPlacement[]>([])
   const [testers, setTesters] = useState<MajorTestTester[]>([])
+  const [globalPlayers, setGlobalPlayers] = useState<GlobalPlayerDirectoryEntry[]>([])
   const [message, setMessage] = useState("")
   const selectedEvent = events.find((event) => event.id === eventId)
 
@@ -80,10 +87,17 @@ export default function MajorSchedulingAdminPage() {
   }, [])
 
   const reloadEvents = useCallback(async (preferred?: string) => {
-    const result = await supabase.from("major_events").select("*").order("slug")
+    const [result, playerDirectoryResult] = await Promise.all([
+      supabase.from("major_events").select("*").order("slug"),
+      loadGlobalPlayerDirectory()
+        .then((data) => ({ data, error: null }))
+        .catch((error: Error) => ({ data: [], error })),
+    ])
     const loaded = (result.data as MajorEvent[] | null) || []
     const next = preferred || loaded[0]?.id || ""
     setEvents(loaded)
+    setGlobalPlayers(playerDirectoryResult.data)
+    if (playerDirectoryResult.error) setMessage(playerDirectoryResult.error.message)
     setEventId(next)
     if (next) await loadSchedule(next)
   }, [loadSchedule])
@@ -303,13 +317,11 @@ export default function MajorSchedulingAdminPage() {
     if (showResult(result.error, "Tournament information saved.")) await reloadEvents(eventId)
   }
 
-  async function addTester(form: HTMLFormElement) {
-    const playerId = String(new FormData(form).get("player_id") || "").trim()
+  async function addTester(playerId: string) {
     const result = await supabase.rpc("add_major_test_tester", { p_major_event_id: eventId, p_player_id: playerId })
-    if (showResult(result.error, "Trusted TEST player added by canonical UUID.")) {
-      form.reset()
-      await loadSchedule(eventId)
-    }
+    const saved = showResult(result.error, "Trusted TEST player added from Global Players.")
+    if (saved) await loadSchedule(eventId)
+    return saved
   }
 
   async function removeTester(playerId: string) {
@@ -396,6 +408,7 @@ export default function MajorSchedulingAdminPage() {
       {selectedEvent?.is_test_event && activeSection === "testers" && <Testers
         event={selectedEvent}
         testers={testers}
+        globalPlayers={globalPlayers}
         onAdd={addTester}
         onRemove={removeTester}
         onSetListing={setTestListing}
@@ -600,12 +613,22 @@ function Results({ entries, weekend, placements, onSave }: {
   })}</div></section>
 }
 
-function Testers({ event, testers, onAdd, onRemove, onSetListing }: {
+function Testers({ event, testers, globalPlayers, onAdd, onRemove, onSetListing }: {
   event: MajorEvent
   testers: MajorTestTester[]
-  onAdd: (form: HTMLFormElement) => Promise<void>
+  globalPlayers: GlobalPlayerDirectoryEntry[]
+  onAdd: (playerId: string) => Promise<boolean>
   onRemove: (playerId: string) => Promise<void>
   onSetListing: (listed: boolean) => Promise<void>
 }) {
-  return <section className={styles.workspace}><div className={styles.sectionHeading}><div><p className={styles.step}>TEST EVENT</p><h2>Trusted testers</h2><p>Canonical player allowlist for the real reusable workflow. TEST DATA — NOT OFFICIAL.</p></div><Link href={`/majors/${event.slug}`} className={styles.primaryLink}>Open tester signup</Link></div><form className={styles.panel} onSubmit={(e) => { e.preventDefault(); void onAdd(e.currentTarget) }}><label>Canonical player UUID<input name="player_id" required placeholder="00000000-0000-0000-0000-000000000000" /></label><button className={styles.primaryButton}>Add trusted tester</button></form><div className={styles.testerList}>{testers.length ? testers.map((tester) => <div key={tester.player_id}><span><strong>{tester.screen_name}</strong><small>{tester.player_id}</small></span><button type="button" className={styles.dangerButton} onClick={() => void onRemove(tester.player_id)}>Remove</button></div>) : <p>No trusted testers yet.</p>}</div><label className={styles.check}><input type="checkbox" checked={event.test_event_listed} onChange={(e) => void onSetListing(e.target.checked)} /> Show TEST in the signed-in trusted-tester Majors listing</label></section>
+  const [search, setSearch] = useState("")
+  const [selectedPlayerId, setSelectedPlayerId] = useState("")
+  const testerIds = useMemo(() => new Set(testers.map((tester) => tester.player_id)), [testers])
+  const matches = useMemo(
+    () => globalPlayers.filter((player) => player.active && globalPlayerMatchesSearch(player, search)).slice(0, 20),
+    [globalPlayers, search],
+  )
+  const selectedPlayer = globalPlayers.find((player) => player.id === selectedPlayerId)
+
+  return <section className={styles.workspace}><div className={styles.sectionHeading}><div><p className={styles.step}>TEST EVENT</p><h2>Trusted testers</h2><p>Search the Global Players identity directory. TEST DATA — NOT OFFICIAL.</p></div><Link href={`/majors/${event.slug}`} className={styles.primaryLink}>Open tester signup</Link></div><div className={styles.panel}><label>Find a Global Player<input value={search} onChange={(event) => { setSearch(event.target.value); setSelectedPlayerId("") }} placeholder="Search current name or verified identity alias…" /></label>{search.trim() && <div className={styles.playerSearchResults}>{matches.length ? matches.map((player) => <button key={player.id} type="button" className={selectedPlayerId === player.id ? styles.selectedPlayer : ""} onClick={() => setSelectedPlayerId(player.id)} disabled={testerIds.has(player.id)}><span><strong>{player.screenName}</strong><small>{globalPlayerIdentitySummary(player)}{player.discordId ? ` · ID ${player.discordId}` : ""}</small>{player.verifiedAliases.length > 0 && <small>Verified aliases: {player.verifiedAliases.join(", ")}</small>}</span><em>{testerIds.has(player.id) ? "Already trusted" : "Select"}</em></button>) : <p className={styles.help}>No active canonical Global Player matches that search.</p>}</div>}{selectedPlayer && <div className={styles.selectedPlayerSummary}><span><strong>{selectedPlayer.screenName}</strong><small>{globalPlayerIdentitySummary(selectedPlayer)}</small><small>Canonical player: {selectedPlayer.id}</small></span><button type="button" className={styles.primaryButton} onClick={() => { void onAdd(selectedPlayer.id).then((saved) => { if (saved) { setSearch(""); setSelectedPlayerId("") } }) }} disabled={testerIds.has(selectedPlayer.id)}>Add trusted tester</button></div>}<details className={styles.uuidFallback}><summary>Advanced UUID fallback</summary><form onSubmit={(event) => { event.preventDefault(); const form = event.currentTarget; const requestedId = String(new FormData(form).get("player_id") || "").trim(); const canonicalPlayer = globalPlayers.find((player) => player.id === requestedId); if (!canonicalPlayer) { setSearch(requestedId); return } void onAdd(canonicalPlayer.id).then((saved) => { if (saved) form.reset() }) }}><label>Canonical player UUID<input name="player_id" required placeholder="00000000-0000-0000-0000-000000000000" /></label><button className={styles.secondaryButton}>Add by UUID</button></form><p className={styles.help}>Fallback accepts only a current canonical UUID found in Global Players.</p></details></div><div className={styles.testerList}>{testers.length ? testers.map((tester) => <div key={tester.player_id}><span><strong>{tester.screen_name}</strong><small>{tester.player_id}</small></span><button type="button" className={styles.dangerButton} onClick={() => void onRemove(tester.player_id)}>Remove</button></div>) : <p>No trusted testers yet.</p>}</div><label className={styles.check}><input type="checkbox" checked={event.test_event_listed} onChange={(e) => void onSetListing(e.target.checked)} /> Show TEST in the signed-in trusted-tester Majors listing</label></section>
 }
