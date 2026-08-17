@@ -10,13 +10,16 @@ import {
   type MajorScoringParticipant,
   type MajorScoringSession,
 } from "@/lib/majors"
+import {
+  globalPlayerIdentitySummary,
+  loadGlobalPlayerDirectory,
+  type GlobalPlayerDirectoryEntry,
+} from "@/lib/identity/globalPlayerDirectory"
 import { supabase } from "@/lib/supabase"
-
-type Player = { id: string; screen_name: string; active: boolean | null; status: string | null }
 
 export default function MajorScoringAdminPage() {
   const [events, setEvents] = useState<MajorEvent[]>([])
-  const [players, setPlayers] = useState<Player[]>([])
+  const [players, setPlayers] = useState<GlobalPlayerDirectoryEntry[]>([])
   const [sessions, setSessions] = useState<MajorScoringSession[]>([])
   const [sessionId, setSessionId] = useState("")
   const [participants, setParticipants] = useState<MajorScoringParticipant[]>([])
@@ -68,13 +71,15 @@ export default function MajorScoringAdminPage() {
   const loadFoundation = useCallback(async () => {
     const [eventResponse, playerResponse, sessionResponse] = await Promise.all([
       supabase.from("major_events").select("*").order("slug"),
-      supabase.from("players").select("id, screen_name, active, status").eq("active", true).order("screen_name"),
+      loadGlobalPlayerDirectory()
+        .then((data) => ({ data, error: null }))
+        .catch((error: Error) => ({ data: [], error })),
       supabase.from("major_scoring_sessions").select("*").order("updated_at", { ascending: false }),
     ])
     const loadedEvents = (eventResponse.data as MajorEvent[] | null) || []
     const loadedSessions = (sessionResponse.data as MajorScoringSession[] | null) || []
     setEvents(loadedEvents)
-    setPlayers((playerResponse.data as Player[] | null) || [])
+    setPlayers(playerResponse.data.filter((player) => player.active))
     setSessions(loadedSessions)
     setNewEventId((current) => current || loadedEvents[0]?.id || "")
     setMessage(eventResponse.error?.message || playerResponse.error?.message || sessionResponse.error?.message || "")
@@ -205,7 +210,7 @@ export default function MajorScoringAdminPage() {
           <Field label="Major"><select value={newEventId} onChange={(event) => setNewEventId(event.target.value)} style={input}>{events.map((event) => <option key={event.id} value={event.id}>{event.name}</option>)}</select></Field>
           <Field label="Session label"><input value={newLabel} onChange={(event) => setNewLabel(event.target.value)} style={input} /></Field>
           <Field label="Players"><select value={mode} onChange={(event) => setMode(Number(event.target.value) as 2 | 3)} style={input}><option value={2}>2-player</option><option value={3}>3-player</option></select></Field>
-          {Array.from({ length: mode }, (_, index) => <Field key={index} label={`Player ${index + 1}`}><select value={newPlayerIds[index]} onChange={(event) => updateNewPlayer(index, event.target.value)} style={input}><option value="">Choose canonical player…</option>{players.map((player) => <option key={player.id} value={player.id}>{player.screen_name} · {player.id}</option>)}</select></Field>)}
+          {Array.from({ length: mode }, (_, index) => <Field key={index} label={`Player ${index + 1}`}><select value={newPlayerIds[index]} onChange={(event) => updateNewPlayer(index, event.target.value)} style={input}><option value="">Choose Global Player…</option>{players.map((player) => <option key={player.id} value={player.id} disabled={newPlayerIds.some((selectedId, position) => position !== index && selectedId === player.id)}>{player.screenName} · {globalPlayerIdentitySummary(player)} · {player.id}</option>)}</select></Field>)}
           <button onClick={createSession} disabled={busy} style={primary}>Create scoring session</button>
 
           <h2 style={sectionTitle}>Open session</h2>
