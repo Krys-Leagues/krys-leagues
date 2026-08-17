@@ -92,6 +92,69 @@ export type MajorHoleScore = {
   strokes: number
 }
 
+export const MAJOR_COURSES = {
+  CBE: { name: "Cherry Blossom Easy", pars: [3,4,3,4,3,3,3,4,3,5,3,4,2,3,3,3,3,7] },
+  CBH: { name: "Cherry Blossom Hard", pars: [3,4,3,4,3,3,3,4,3,8,3,3,2,4,3,4,4,6] },
+} as const
+
+export type MajorCourseCode = keyof typeof MAJOR_COURSES
+export type MajorScorecardStatus = "draft" | "submitted" | "verified" | "reopened"
+
+export type MajorPlayerScorecard = {
+  id: string
+  major_event_id: string
+  play_day_id: string
+  entry_id: string
+  player_id: string
+  player_screen_name_snapshot: string
+  course_code: MajorCourseCode
+  status: MajorScorecardStatus
+  submitted_at: string | null
+  submitted_by: string | null
+  verified_at: string | null
+  verified_by: string | null
+  verifier_screen_name: string | null
+  verification_notes: string | null
+  total_strokes: number | null
+  score_to_par: number | null
+  slot_starts_at: string | null
+  room_label: string | null
+  weekend_field?: "qualifying" | "pending" | "main" | "secondary"
+  day_number: 1 | 2 | 3 | 4
+  day_label: string
+  holes: Array<{ hole_number: number; par: number; strokes: number }>
+}
+
+export type MajorResultsPayload = {
+  event: Pick<MajorEvent, "id" | "slug" | "name" | "year" | "is_test_event">
+  notice: string
+  active_day_number: number | null
+  rounds: Array<{
+    day_number: 1 | 2 | 3 | 4
+    label: string
+    course_code: MajorCourseCode
+    is_entry_open: boolean
+    is_finalized: boolean
+    cards: MajorPlayerScorecard[]
+  }>
+  snapshots: Array<{ play_day_id: string; entry_id: string; round_position: number; overall_position: number; round_strokes: number; cumulative_strokes: number }>
+}
+
+export function majorHoleOutcome(strokes: number, par: number) {
+  const relative = strokes - par
+  if (strokes === 1) return "Ace / Hole in One"
+  if (relative <= -2) return "Eagle"
+  if (relative === -1) return "Birdie"
+  if (relative === 0) return "Par"
+  if (relative === 1) return "Bogey"
+  if (relative === 2) return "Double Bogey"
+  return "Triple Bogey or worse"
+}
+
+export function formatMajorToPar(value: number) {
+  return value === 0 ? "E" : value > 0 ? `+${value}` : String(value)
+}
+
 export type PublicMajorScoreboard = {
   session: Omit<MajorScoringSession, "major_event_id" | "is_public" | "created_at">
   event: Pick<

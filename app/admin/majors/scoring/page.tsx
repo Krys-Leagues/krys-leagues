@@ -196,7 +196,7 @@ export default function MajorScoringAdminPage() {
   return (
     <main style={page}>
       <header style={header}>
-        <div><Link href="/admin/majors" style={back}>← Four Majors</Link><h1>Live Major Scoring</h1><p style={muted}>Remote persistent controls for large and compact broadcast scorecards.</p></div>
+        <div><Link href="/admin/majors" style={back}>← Four Majors</Link><h1>Live Major Scoring</h1><p style={muted}>Remote persistent controls for large and compact broadcast scorecards.</p><Link href="/admin/majors/verification" style={primary}>Open Verify Results →</Link></div>
       </header>
       {message && <p style={notice}>{message}</p>}
       <div style={columns}>
