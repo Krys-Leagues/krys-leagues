@@ -92,6 +92,7 @@ export default function MajorDetailPage() {
 
   return <main className={`${styles.page} ${masters ? styles.masters : styles.defaultTheme}`}><div className={styles.atmosphere}>{masters && <div className={styles.mastersScene} aria-hidden="true"><i className={styles.blossomTree} /><i className={styles.bench} /><i className={styles.putter} /><i className={styles.golfBall} /><i className={styles.golfBallTwo} /></div>}</div><div className={styles.container}>
     <Link href="/majors" className={styles.backLink}>← Four Majors</Link>
+    <div className={styles.reviewActions}><Link href={`/majors/${slug}/scoring`} className={styles.primaryButton}>Enter my scores</Link><Link href={`/majors/${slug}/results`} className={styles.secondaryButton}>Live results</Link><Link href={`/majors/${slug}/stats`} className={styles.secondaryButton}>Bonus stats</Link></div>
     {testEvent && <div className={styles.testBanner}><strong>TEST EVENT</strong><span>TEST DATA — NOT OFFICIAL</span></div>}
     <header className={styles.hero}>
       <div className={styles.brandRow}><Image src="/league-media/BIG LOGO TRANSPARENT.png" width={136} height={136} alt="Krys Leagues" className={styles.logo} priority /><div><p className={styles.eyebrow}>{testEvent ? "Krys Leagues · Controlled testing" : "Krys Leagues · Majors Series"}</p><h1>{testEvent ? "TEST SIGNUP" : event.name}</h1><p className={styles.subtitle}>{testEvent ? "Reusable Major workflow rehearsal" : masters ? "Mini-Golf Style · Cherry Blossom" : "Major Championship"}</p></div></div>
