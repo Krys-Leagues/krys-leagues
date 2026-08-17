@@ -120,7 +120,7 @@ begin
  me:=public.current_major_player_id(); if me is null then raise exception 'Canonical player identity is required' using errcode='42501'; end if;
  select * into day from public.major_play_days where id=p_play_day_id; if not found or not day.scoring_entry_open then raise exception 'Score entry is not open for this round'; end if;
  select * into ent from public.major_entries where major_event_id=day.major_event_id and player_id=me and status in ('registered','confirmed'); if not found then raise exception 'You are not entered in this Major'; end if;
- if not exists(select 1 from public.major_day_choices dc where dc.entry_id=ent.id and dc.play_day_id=day.id) then raise exception 'A scheduled day choice is required'; end if;
+ if not exists(select 1 from public.major_entry_day_choices dc where dc.entry_id=ent.id and dc.play_day_id=day.id) then raise exception 'A scheduled day choice is required'; end if;
  insert into public.major_player_scorecards(major_event_id,play_day_id,entry_id,player_id,player_screen_name_snapshot,course_code)
  values(day.major_event_id,day.id,ent.id,me,ent.player_screen_name_snapshot,case when day.day_number<=2 then 'CBE' else 'CBH' end)
  on conflict(entry_id,play_day_id) do update set updated_at=now() where public.major_player_scorecards.status in ('draft','reopened') returning id into card;
@@ -250,7 +250,7 @@ select case when public.is_current_user_site_admin() then coalesce(jsonb_agg(jso
  'holes',(select jsonb_agg(jsonb_build_object('hole_number',h.hole_number,'par',h.par,'strokes',h.strokes) order by h.hole_number) from public.major_player_scorecard_holes h where h.scorecard_id=c.id)
 ) order by c.submitted_at desc),'[]'::jsonb) else '[]'::jsonb end
 from public.major_player_scorecards c join public.major_play_days d on d.id=c.play_day_id
-left join public.major_day_choices choice on choice.entry_id=c.entry_id and choice.play_day_id=c.play_day_id
+left join public.major_entry_day_choices choice on choice.entry_id=c.entry_id and choice.play_day_id=c.play_day_id
 left join public.major_time_slots slot on slot.id=choice.time_slot_id
 left join public.major_schedule_group_members gm on gm.entry_id=c.entry_id and gm.play_day_id=c.play_day_id
 left join public.major_schedule_groups grp on grp.id=gm.group_id
