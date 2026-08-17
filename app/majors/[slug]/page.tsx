@@ -5,6 +5,7 @@ import Image from "next/image"
 import { useParams } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
 import { formatMajorDate, formatMajorDeadline, formatMajorLocalTime, isMajorDayLocked, isMastersScorecardTheme, type MajorDayChoice, type MajorEntry, type MajorEvent, type MajorPlayDay, type MajorSignupStatus, type MajorTimeSlot } from "@/lib/majors"
+import { createDiscordAuthCallbackUrl } from "@/lib/authReturnTo"
 import { supabase } from "@/lib/supabase"
 import styles from "./page.module.css"
 
@@ -57,7 +58,7 @@ export default function MajorDetailPage() {
   }, [loadEvent])
 
   async function signIn() {
-    await supabase.auth.signInWithOAuth({ provider: "discord", options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(`/majors/${slug}`)}&type=player` } })
+    await supabase.auth.signInWithOAuth({ provider: "discord", options: { redirectTo: createDiscordAuthCallbackUrl("player") } })
   }
 
   async function signup() {

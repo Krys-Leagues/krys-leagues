@@ -2,16 +2,8 @@
 
 import { Suspense, useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { consumeAuthReturnTo } from "@/lib/authReturnTo"
 import { supabase } from "@/lib/supabase"
-
-function isSafeInternalPath(path: string | null): path is string {
-  return Boolean(
-    path &&
-      path.startsWith("/") &&
-      !path.startsWith("//") &&
-      !path.includes("\\")
-  )
-}
 
 function getDiscordProviderId(user: {
   identities?: Array<{
@@ -52,7 +44,7 @@ function CallbackHandler() {
   useEffect(() => {
     async function handleLogin() {
       const code = searchParams.get("code")
-      const next = searchParams.get("next")
+      const requestedNext = searchParams.get("next")
       const type = searchParams.get("type")
 
       const sessionResponse = code
@@ -67,10 +59,12 @@ function CallbackHandler() {
         return
       }
 
-      if (type === "admin" || (isSafeInternalPath(next) && next.startsWith("/admin"))) {
+      const next = consumeAuthReturnTo(requestedNext)
+
+      if (type === "admin" || next?.startsWith("/admin")) {
         try {
           if (await hasAdminAccess(session.access_token)) {
-            router.replace("/admin/command-center")
+            router.replace(next?.startsWith("/admin") ? next : "/admin/command-center")
             return
           }
         } catch {
@@ -82,7 +76,7 @@ function CallbackHandler() {
         return
       }
 
-      if (isSafeInternalPath(next)) {
+      if (next) {
         router.replace(next)
         return
       }

@@ -1,7 +1,8 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import { createDiscordAuthCallbackUrl } from "@/lib/authReturnTo"
 import { supabase } from "@/lib/supabase"
 
 type AdminAccess = "loading" | "signed_out" | "denied" | "authorized"
@@ -10,19 +11,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter()
   const [access, setAccess] = useState<AdminAccess>("loading")
 
-  useEffect(() => {
-    void checkAdminAccess()
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(() => {
-      void checkAdminAccess()
-    })
-
-    return () => subscription.unsubscribe()
-  }, [])
-
-  async function checkAdminAccess() {
+  const checkAdminAccess = useCallback(async () => {
     setAccess("loading")
 
     const { data, error } = await supabase.auth.getSession()
@@ -46,14 +35,28 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     } catch {
       setAccess("denied")
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    // Initial authenticated access synchronization.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void checkAdminAccess()
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(() => {
+      void checkAdminAccess()
+    })
+
+    return () => subscription.unsubscribe()
+  }, [checkAdminAccess])
 
   async function loginWithDiscord() {
     await supabase.auth.signInWithOAuth({
       provider: "discord",
       options: {
         scopes: "identify email",
-        redirectTo: `${window.location.origin}/auth/callback?type=admin`,
+        redirectTo: createDiscordAuthCallbackUrl("admin"),
       },
     })
   }

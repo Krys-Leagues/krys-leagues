@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
+import type { User } from "@supabase/supabase-js";
+import { createDiscordAuthCallbackUrl } from "@/lib/authReturnTo";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -69,7 +71,7 @@ const JOIN_OPTIONS = [
 ];
 
 export default function JoinPage() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -93,7 +95,7 @@ export default function JoinPage() {
     await supabase.auth.signInWithOAuth({
       provider: "discord",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=/join`,
+        redirectTo: createDiscordAuthCallbackUrl("player"),
       },
     });
   }

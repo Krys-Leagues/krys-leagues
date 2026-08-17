@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
+import type { User } from "@supabase/supabase-js";
 import { useSearchParams } from "next/navigation";
+import { createDiscordAuthCallbackUrl } from "@/lib/authReturnTo";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -25,7 +27,7 @@ function RegisterContent() {
   const leagueKey = searchParams.get("league") || "";
   const league = useMemo(() => LEAGUES[leagueKey], [leagueKey]);
 
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [screenName, setScreenName] = useState("");
   const [notes, setNotes] = useState("");
   const [status, setStatus] = useState("");
@@ -41,12 +43,10 @@ function RegisterContent() {
   }, []);
 
   async function signInWithDiscord() {
-    const nextPath = `/register?league=${leagueKey}`;
-
     await supabase.auth.signInWithOAuth({
       provider: "discord",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}&type=player`,
+        redirectTo: createDiscordAuthCallbackUrl("player"),
       },
     });
   }
@@ -119,6 +119,8 @@ function RegisterContent() {
         ← Back to League Selection
       </Link>
 
+      {/* Existing registration artwork supports dynamically configured image paths. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={league.image} alt={league.title} style={{ width: "100%", maxHeight: 620, objectFit: "contain", display: "block", background: "black" }} />
 
       <section style={{ maxWidth: 720, padding: 24 }}>
