@@ -206,6 +206,15 @@ export type MajorTimeSlot = {
   starts_at: string
   label: string | null
   is_available: boolean
+  standard_signup_time_id?: string | null
+}
+
+export type MajorStandardSignupTime = {
+  id: string
+  major_event_id: string
+  local_time: string
+  label: string | null
+  is_active: boolean
 }
 
 export type MajorDayChoice = {

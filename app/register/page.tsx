@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { useSearchParams } from "next/navigation";
+import { createDiscordAuthCallbackUrl } from "@/lib/authReturnTo";
 import { supabase } from "@/lib/supabase";
 
 const LEAGUES: Record<string, { title: string; subtitle: string; image: string; ageNote: string }> = {
@@ -37,12 +38,10 @@ function RegisterContent() {
   }, []);
 
   async function signInWithDiscord() {
-    const nextPath = `/register?league=${leagueKey}`;
-
     await supabase.auth.signInWithOAuth({
       provider: "discord",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}&type=player`,
+        redirectTo: createDiscordAuthCallbackUrl("player"),
       },
     });
   }
@@ -115,6 +114,8 @@ function RegisterContent() {
         ← Back to League Selection
       </Link>
 
+      {/* Existing registration artwork supports dynamically configured image paths. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={league.image} alt={league.title} style={{ width: "100%", maxHeight: 620, objectFit: "contain", display: "block", background: "black" }} />
 
       <section style={{ maxWidth: 720, padding: 24 }}>

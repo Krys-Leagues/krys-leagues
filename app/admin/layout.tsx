@@ -1,7 +1,8 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { usePathname, useRouter } from "next/navigation"
+import { createDiscordAuthCallbackUrl } from "@/lib/authReturnTo"
 import { supabase } from "@/lib/supabase"
 
 type AdminAccess = "loading" | "signed_out" | "denied" | "authorized"
@@ -11,21 +12,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname()
   const [access, setAccess] = useState<AdminAccess>("loading")
 
-  useEffect(() => {
-    void checkAdminAccess()
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "USER_UPDATED") {
-        void checkAdminAccess(false)
-      }
-    })
-
-    return () => subscription.unsubscribe()
-  }, [pathname])
-
-  async function checkAdminAccess(showLoading = true) {
+  const checkAdminAccess = useCallback(async (showLoading = true) => {
     if (showLoading) setAccess("loading")
 
     const { data, error } = await supabase.auth.getSession()
@@ -58,14 +45,30 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     } catch {
       setAccess("denied")
     }
-  }
+  }, [pathname])
+
+  useEffect(() => {
+    // Initial authenticated access synchronization.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void checkAdminAccess()
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "USER_UPDATED") {
+        void checkAdminAccess(false)
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [checkAdminAccess])
 
   async function loginWithDiscord() {
     await supabase.auth.signInWithOAuth({
       provider: "discord",
       options: {
         scopes: "identify email",
-        redirectTo: `${window.location.origin}/auth/callback?type=admin`,
+        redirectTo: createDiscordAuthCallbackUrl("admin"),
       },
     })
   }

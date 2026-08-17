@@ -16,6 +16,7 @@ import {
   type MajorPlayDay,
   type MajorScheduleGroup,
   type MajorScheduleGroupMember,
+  type MajorStandardSignupTime,
   type MajorTestTester,
   type MajorTimeSlot,
   type MajorWeekendStatus,
@@ -44,6 +45,7 @@ export default function MajorSchedulingAdminPage() {
   const [activeSection, setActiveSection] = useState<AdminSection>("setup")
   const [days, setDays] = useState<MajorPlayDay[]>([])
   const [slots, setSlots] = useState<MajorTimeSlot[]>([])
+  const [standardTimes, setStandardTimes] = useState<MajorStandardSignupTime[]>([])
   const [entries, setEntries] = useState<MajorEntry[]>([])
   const [choices, setChoices] = useState<MajorDayChoice[]>([])
   const [weekend, setWeekend] = useState<MajorWeekendStatus[]>([])
@@ -60,8 +62,9 @@ export default function MajorSchedulingAdminPage() {
     const dayResult = await supabase.from("major_play_days").select("*").eq("major_event_id", id).order("day_number")
     const loadedDays = (dayResult.data as MajorPlayDay[] | null) || []
     const dayIds = loadedDays.map((day) => day.id)
-    const [slotResult, entryResult, weekendResult, groupResult, placementResult, testerResult] = await Promise.all([
+    const [slotResult, standardTimeResult, entryResult, weekendResult, groupResult, placementResult, testerResult] = await Promise.all([
       dayIds.length ? supabase.from("major_time_slots").select("*").in("play_day_id", dayIds).order("starts_at") : Promise.resolve({ data: [], error: null }),
+      supabase.from("major_standard_signup_times").select("*").eq("major_event_id", id).eq("is_active", true).order("local_time"),
       supabase.from("major_entries").select("*").eq("major_event_id", id).order("player_screen_name_snapshot"),
       supabase.from("major_entry_weekend_status").select("*").eq("major_event_id", id),
       supabase.from("major_schedule_groups").select("*").eq("major_event_id", id).order("group_label"),
@@ -76,6 +79,7 @@ export default function MajorSchedulingAdminPage() {
     ])
     setDays(loadedDays)
     setSlots((slotResult.data as MajorTimeSlot[] | null) || [])
+    setStandardTimes((standardTimeResult.data as MajorStandardSignupTime[] | null) || [])
     setEntries(loadedEntries)
     setChoices((choiceResult.data as MajorDayChoice[] | null) || [])
     setWeekend((weekendResult.data as MajorWeekendStatus[] | null) || [])
@@ -83,7 +87,7 @@ export default function MajorSchedulingAdminPage() {
     setMembers((memberResult.data as MajorScheduleGroupMember[] | null) || [])
     setPlacements((placementResult.data as MajorFinalPlacement[] | null) || [])
     setTesters((testerResult.data as MajorTestTester[] | null) || [])
-    setMessage(dayResult.error?.message || slotResult.error?.message || entryResult.error?.message || choiceResult.error?.message || weekendResult.error?.message || groupResult.error?.message || memberResult.error?.message || placementResult.error?.message || testerResult.error?.message || "")
+    setMessage(dayResult.error?.message || slotResult.error?.message || standardTimeResult.error?.message || entryResult.error?.message || choiceResult.error?.message || weekendResult.error?.message || groupResult.error?.message || memberResult.error?.message || placementResult.error?.message || testerResult.error?.message || "")
   }, [])
 
   const reloadEvents = useCallback(async (preferred?: string) => {
@@ -160,6 +164,41 @@ export default function MajorSchedulingAdminPage() {
     if (showResult(result.error, `${DAY_NAMES[dayNumber - 1].short} settings saved.`)) await loadSchedule(eventId)
   }
 
+  async function saveStandardTime(form: HTMLFormElement, standardTime?: MajorStandardSignupTime) {
+    const data = new FormData(form)
+    const result = await supabase.rpc("save_major_standard_signup_time", {
+      p_id: standardTime?.id || null,
+      p_major_event_id: eventId,
+      p_local_time: String(data.get("time")),
+      p_label: String(data.get("label") || ""),
+    })
+    if (showResult(result.error, standardTime ? "Standard signup time updated. Apply the template when you are ready to update the four days." : "Standard signup time added. Apply the template when you are ready.")) {
+      form.reset()
+      await loadSchedule(eventId)
+    }
+  }
+
+  async function removeStandardTime(standardTime: MajorStandardSignupTime) {
+    if (!window.confirm("Remove this time from the standard template? Day slots will not change until you apply the template. Selected day slots will be preserved and disabled rather than deleted.")) return
+    const result = await supabase.rpc("remove_major_standard_signup_time", { p_id: standardTime.id, p_major_event_id: eventId })
+    if (showResult(result.error, "Time removed from the template. Apply the template to retire its unused day slots safely.")) await loadSchedule(eventId)
+  }
+
+  async function copyThursdayTimes() {
+    const result = await supabase.rpc("copy_major_thursday_times_to_standard", { p_major_event_id: eventId })
+    const count = Number(result.data || 0)
+    if (showResult(result.error, count ? `${count} Thursday signup time${count === 1 ? " was" : "s were"} added to the standard template.` : "Thursday's available times are already in the standard template.")) await loadSchedule(eventId)
+  }
+
+  async function applyStandardTimes() {
+    if (!window.confirm("Apply the standard times to all four days? Independent day overrides stay untouched. Any selected template slot that must be replaced will be disabled and preserved.")) return
+    const result = await supabase.rpc("apply_major_standard_signup_times", { p_major_event_id: eventId })
+    const summary = result.data as { created?: number; updated?: number; linked_existing?: number; removed_unused?: number; protected_disabled?: number } | null
+    const protectedCount = summary?.protected_disabled || 0
+    const success = `Standard times applied to all four days. ${summary?.created || 0} created, ${summary?.updated || 0} updated, ${summary?.linked_existing || 0} existing linked, ${summary?.removed_unused || 0} unused removed.${protectedCount ? ` ${protectedCount} selected or room-linked slot${protectedCount === 1 ? " was" : "s were"} preserved and disabled.` : ""}`
+    if (showResult(result.error, success)) await loadSchedule(eventId)
+  }
+
   async function addSlot(day: MajorPlayDay, form: HTMLFormElement) {
     const data = new FormData(form)
     const localStartsAt = `${day.play_date}T${String(data.get("time"))}`
@@ -182,7 +221,7 @@ export default function MajorSchedulingAdminPage() {
       const startsAt = majorEventLocalTimeToIso(`${day.play_date}T${String(data.get("time"))}`, selectedEvent.schedule_timezone)
       const selectedCount = choices.filter((choice) => choice.time_slot_id === slot.id).length
       if (startsAt !== slot.starts_at && selectedCount > 0 && !window.confirm(`${selectedCount} ${selectedCount === 1 ? "player has" : "players have"} selected this time. Editing it keeps them in this slot at the new time. Continue?`)) return
-      const result = await supabase.from("major_time_slots").update({ starts_at: startsAt, label: String(data.get("label") || "").trim() || null }).eq("id", slot.id)
+      const result = await supabase.from("major_time_slots").update({ starts_at: startsAt, label: String(data.get("label") || "").trim() || null, standard_signup_time_id: null }).eq("id", slot.id)
       if (showResult(result.error, "Signup time updated and the day lock deadline recalculated.")) await loadSchedule(eventId)
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Could not convert that event-local time.")
@@ -191,7 +230,7 @@ export default function MajorSchedulingAdminPage() {
 
   async function setSlotAvailability(slot: MajorTimeSlot, available: boolean, playerCount: number) {
     if (!available && playerCount > 0 && !window.confirm(`${playerCount} ${playerCount === 1 ? "player has" : "players have"} selected this time. Disabling it preserves their selections, but they must be moved with the administrator override. Disable it?`)) return
-    const result = await supabase.from("major_time_slots").update({ is_available: available }).eq("id", slot.id)
+    const result = await supabase.from("major_time_slots").update({ is_available: available, standard_signup_time_id: null }).eq("id", slot.id)
     if (showResult(result.error, available ? "Signup time enabled and available to players." : "Signup time disabled. Existing selections were preserved.")) await loadSchedule(eventId)
   }
 
@@ -364,10 +403,15 @@ export default function MajorSchedulingAdminPage() {
         event={selectedEvent}
         events={events}
         days={days}
+        standardTimes={standardTimes}
         onSaveOpening={saveOpening}
         onReleaseSpots={releaseSpots}
         onSaveLockHours={saveLockHours}
         onSaveDay={saveDay}
+        onSaveStandardTime={saveStandardTime}
+        onRemoveStandardTime={removeStandardTime}
+        onCopyThursdayTimes={copyThursdayTimes}
+        onApplyStandardTimes={applyStandardTimes}
         onSaveInformation={saveInformation}
       />}
 
@@ -417,14 +461,19 @@ export default function MajorSchedulingAdminPage() {
   </main>
 }
 
-function EventSetup({ event, events, days, onSaveOpening, onReleaseSpots, onSaveLockHours, onSaveDay, onSaveInformation }: {
+function EventSetup({ event, events, days, standardTimes, onSaveOpening, onReleaseSpots, onSaveLockHours, onSaveDay, onSaveStandardTime, onRemoveStandardTime, onCopyThursdayTimes, onApplyStandardTimes, onSaveInformation }: {
   event: MajorEvent
   events: MajorEvent[]
   days: MajorPlayDay[]
+  standardTimes: MajorStandardSignupTime[]
   onSaveOpening: (form: HTMLFormElement) => Promise<void>
   onReleaseSpots: (form: HTMLFormElement) => Promise<void>
   onSaveLockHours: (form: HTMLFormElement) => Promise<void>
   onSaveDay: (dayNumber: number, form: HTMLFormElement) => Promise<void>
+  onSaveStandardTime: (form: HTMLFormElement, standardTime?: MajorStandardSignupTime) => Promise<void>
+  onRemoveStandardTime: (standardTime: MajorStandardSignupTime) => Promise<void>
+  onCopyThursdayTimes: () => Promise<void>
+  onApplyStandardTimes: () => Promise<void>
   onSaveInformation: (form: HTMLFormElement) => Promise<void>
 }) {
   const informationFields = [
@@ -476,6 +525,14 @@ function EventSetup({ event, events, days, onSaveOpening, onReleaseSpots, onSave
       const day = days.find((item) => item.day_number === number)
       return <form key={`${event.id}-${number}`} onSubmit={(e) => { e.preventDefault(); void onSaveDay(number, e.currentTarget) }}><strong>{name.short}</strong><label>Day label<input name="label" defaultValue={day?.label || name.fallback} required /></label><label>Official date<input name="date" type="date" defaultValue={day?.play_date || ""} required /></label><label className={styles.check}><input name="locked" type="checkbox" defaultChecked={day?.choices_locked} /> Manual lock</label><button className={styles.secondaryButton}>Save day</button></form>
     })}</div></div>
+
+    <section className={`${styles.panel} ${styles.standardTimesPanel}`}>
+      <div className={styles.inlineHeading}><div><p className={styles.step}>Define once</p><h3>Standard signup times</h3><p>Enter normal clock times in {event.schedule_timezone}, then explicitly apply them to all four official dates. Each day remains independently editable afterward.</p></div><button type="button" className={styles.secondaryButton} onClick={() => void onCopyThursdayTimes()}>Use Thursday times as template</button></div>
+      <form className={styles.standardTimeAdd} onSubmit={(e) => { e.preventDefault(); void onSaveStandardTime(e.currentTarget) }}><label>Standard time<input name="time" type="time" required /></label><label>Optional label<input name="label" placeholder="Featured time" /></label><button className={styles.primaryButton}>Add standard time</button></form>
+      {standardTimes.length ? <div className={styles.standardTimeList}>{standardTimes.map((standardTime) => <form key={standardTime.id} onSubmit={(e) => { e.preventDefault(); void onSaveStandardTime(e.currentTarget, standardTime) }}><label>Clock time<input name="time" type="time" step="60" defaultValue={standardTime.local_time.slice(0, 5)} required /></label><label>Optional label<input name="label" defaultValue={standardTime.label || ""} /></label><div className={styles.slotActions}><button className={styles.secondaryButton}>Save template time</button><button type="button" className={styles.dangerButton} onClick={() => void onRemoveStandardTime(standardTime)}>Remove from template</button></div></form>)}</div> : <div className={styles.emptyState}><strong>No standard times yet.</strong><p>Add them once, or copy the currently available Thursday times.</p></div>}
+      <div className={styles.templateApply}><div><strong>Apply only when ready</strong><p>This synchronizes template-managed slots across Thursday–Sunday. Manual day overrides stay independent. Existing player choices and room-linked slots are never deleted or silently retimed.</p></div><button type="button" className={styles.publishButton} onClick={() => void onApplyStandardTimes()} disabled={days.length !== 4}>Apply standard times to all days</button></div>
+      {days.length !== 4 && <p className={styles.slotWarning}>Save all four official tournament days before applying the standard template.</p>}
+    </section>
 
     <form className={styles.panel} key={`info-${event.id}`} onSubmit={(e) => { e.preventDefault(); void onSaveInformation(e.currentTarget) }}>
       <h3>Tournament information & rules</h3>

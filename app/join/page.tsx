@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
+import { createDiscordAuthCallbackUrl } from "@/lib/authReturnTo";
 import { supabase } from "@/lib/supabase";
 
 const JOIN_OPTIONS = [
@@ -89,7 +90,7 @@ export default function JoinPage() {
     await supabase.auth.signInWithOAuth({
       provider: "discord",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=/join`,
+        redirectTo: createDiscordAuthCallbackUrl("player"),
       },
     });
   }

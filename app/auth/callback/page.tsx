@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { consumeAuthReturnTo } from "@/lib/authReturnTo"
 import { supabase } from "@/lib/supabase"
 
 const codeExchanges = new Map<string, ReturnType<typeof supabase.auth.exchangeCodeForSession>>()
@@ -13,15 +14,6 @@ function exchangeCodeOnce(code: string) {
   const exchange = supabase.auth.exchangeCodeForSession(code)
   codeExchanges.set(code, exchange)
   return exchange
-}
-
-function isSafeInternalPath(path: string | null): path is string {
-  return Boolean(
-    path &&
-      path.startsWith("/") &&
-      !path.startsWith("//") &&
-      !path.includes("\\")
-  )
 }
 
 function getDiscordProviderId(user: {
@@ -64,7 +56,7 @@ function CallbackHandler() {
   useEffect(() => {
     async function handleLogin() {
       const code = searchParams.get("code")
-      const next = searchParams.get("next")
+      const requestedNext = searchParams.get("next")
       const type = searchParams.get("type")
 
       const sessionResponse = code
@@ -79,15 +71,17 @@ function CallbackHandler() {
         return
       }
 
-      if (type === "admin" || (isSafeInternalPath(next) && next.startsWith("/admin"))) {
+      const next = consumeAuthReturnTo(requestedNext)
+
+      if (type === "admin" || next?.startsWith("/admin")) {
         try {
           const permissions = await hasAdminAccess(session.access_token)
           if (permissions?.siteAdmin) {
-            router.replace("/admin/command-center")
+            router.replace(next?.startsWith("/admin") ? next : "/admin/command-center")
             return
           }
           if (permissions?.soloAdmin) {
-            router.replace("/admin/solo")
+            router.replace(next?.startsWith("/admin/solo") ? next : "/admin/solo")
             return
           }
         } catch {
@@ -99,7 +93,7 @@ function CallbackHandler() {
         return
       }
 
-      if (isSafeInternalPath(next)) {
+      if (next) {
         router.replace(next)
         return
       }
