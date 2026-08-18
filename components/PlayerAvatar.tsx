@@ -27,6 +27,7 @@ export default function PlayerAvatar({
         width: size,
         height: size,
         flex: `0 0 ${size}px`,
+        position: "relative",
         display: "grid",
         placeItems: "center",
         overflow: "hidden",
@@ -44,7 +45,7 @@ export default function PlayerAvatar({
           src={avatarUrl}
           alt=""
           draggable={false}
-          style={{ width: "100%", height: "100%", objectFit: imageFit }}
+          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: imageFit }}
         />
       )}
       {!avatarUrl && playerAvatarInitials(screenName)}

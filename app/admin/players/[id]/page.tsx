@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
-import PlayerAvatar from "@/components/PlayerAvatar"
+import PlayerProfileHero from "@/components/PlayerProfileHero"
 import { getCanonicalPlayerAvatar, PLAYER_AVATAR_BUCKET, playerAvatarObjectPath, validatePlayerAvatarFile } from "@/lib/playerAvatars"
 
 type Player = {
@@ -259,10 +259,14 @@ const totalSeasons = new Set(
         </div>
 
         <div style={card}>
-          <div style={avatarHeader}>
-            <PlayerAvatar screenName={player.screen_name} avatarPath={avatarPreviewUrl || avatarPath} size={120} />
-            <div><h1 style={playerName}>{player.screen_name}</h1><p style={muted}>Canonical Global Player avatar</p></div>
-          </div>
+          <PlayerProfileHero
+            screenName={player.screen_name}
+            avatarPath={avatarPreviewUrl || avatarPath}
+            // TODO(identity): Replace these presentation fallbacks with canonical
+            // Identity Management values once booster/tag status is exposed.
+            isServerBooster={false}
+            hasKrysServerTag={false}
+          />
 
           <div style={avatarControls}>
             <label style={avatarFileButton}>{avatarPath ? "Replace Avatar" : "Upload Avatar"}<input type="file" accept="image/png,image/jpeg,image/webp" hidden disabled={avatarBusy} onChange={(event)=>void chooseAvatar(event.target.files?.[0]||null)} /></label>
@@ -307,14 +311,8 @@ const totalSeasons = new Set(
               <span>{careerStats.winPercent}</span>
             </div>
           </div>
-          <p style={muted}>Player ID: {player.id}</p>
-
           <p style={muted}>
             Discord: {player.discord_id ? player.discord_name || player.discord_username || "Linked" : "Not linked"}
-          </p>
-
-          <p style={muted}>
-            Status: {status}
           </p>
                   <div style={card}>
           <h2>Player Overview</h2>
@@ -460,12 +458,6 @@ const card: React.CSSProperties = {
   marginBottom: 20,
 }
 
-const playerName: React.CSSProperties = {
-  fontSize: 36,
-  marginBottom: 14,
-}
-
-const avatarHeader: React.CSSProperties = { display: "flex", alignItems: "center", gap: 18, flexWrap: "wrap" }
 const avatarControls: React.CSSProperties = { display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", margin: "16px 0" }
 const avatarFileButton: React.CSSProperties = { padding: "10px 14px", borderRadius: 8, background: "#2563eb", color: "white", fontWeight: 800, cursor: "pointer" }
 const avatarSaveButton: React.CSSProperties = { padding: "10px 14px", border: 0, borderRadius: 8, background: "#16a34a", color: "white", fontWeight: 800, cursor: "pointer" }
