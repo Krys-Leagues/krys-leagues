@@ -252,7 +252,6 @@ export default function PlayerProfilePage() {
     )
   }
 
-  const status = player.status || (player.active === false ? "inactive" : "active")
 const currentMembership = memberships[0]
 
 const totalSeasons = new Set(
@@ -260,6 +259,7 @@ const totalSeasons = new Set(
     .map((m) => m.season_number)
     .filter((s) => s !== null)
 ).size
+const hasCareerParticipation = memberships.length > 0 || careerStats.matchesPlayed > 0
   return (
     <main style={page}>
       <div style={container}>
@@ -289,14 +289,14 @@ const totalSeasons = new Set(
           </div>
           {avatarError && <p style={aliasErrorText}>{avatarError}</p>}
           {avatarMessage && <p style={avatarSuccessText}>{avatarMessage}</p>}
+          <p style={muted}>
+            Discord: {player.discord_id ? player.discord_name || player.discord_username || "Linked" : "Not linked"}
+          </p>
 
+          {hasCareerParticipation && <details style={statsDisclosure}>
+            <summary style={statsSummary}>Player Stats</summary>
           <div style={quickStats}>
-            <div style={statBox}>
-              <strong>Status</strong>
-              <span>{status}</span>
-            </div>
-
-                     <div style={statBox}>
+          <div style={statBox}>
             <strong>Leagues</strong>
             <span>{memberships.length}</span>
           </div>
@@ -325,10 +325,7 @@ const totalSeasons = new Set(
               <span>{careerStats.winPercent}</span>
             </div>
           </div>
-          <p style={muted}>
-            Discord: {player.discord_id ? player.discord_name || player.discord_username || "Linked" : "Not linked"}
-          </p>
-                  <div style={card}>
+          {memberships.length > 0 && <div style={nestedCard}>
           <h2>Player Overview</h2>
 
           <div style={quickStats}>
@@ -352,15 +349,14 @@ const totalSeasons = new Set(
               <span>{currentMembership?.division || "-"}</span>
             </div>
           </div>
-        </div>
+        </div>}
+        </details>}
         </div>
 
-        <div style={card}>
+        {(formerNames.length > 0 || formerNamesError) && <div style={card}>
           <h2>Former Names / Aliases</h2>
           {formerNamesError ? (
             <p style={aliasErrorText}>{formerNamesError}</p>
-          ) : formerNames.length === 0 ? (
-            <p style={emptyText}>No former names recorded.</p>
           ) : (
             <ul style={aliasList}>
               {formerNames.map((alias) => (
@@ -368,13 +364,10 @@ const totalSeasons = new Set(
               ))}
             </ul>
           )}
-        </div>
+        </div>}
 
-                         <div style={card}>
+        {memberships.length > 0 && <div style={card}>
           <h2>League Memberships ({memberships.length})</h2>
-          {memberships.length === 0 ? (
-            <p style={emptyText}>No league memberships yet.</p>
-          ) : (
             <div style={grid}>
               {memberships.map((membership) => (
                 <div key={membership.id} style={miniCard}>
@@ -384,14 +377,10 @@ const totalSeasons = new Set(
                 </div>
               ))}
             </div>
-          )}
-        </div>
+        </div>}
 
-        <div style={card}>
+        {trophies.length > 0 && <div style={card}>
           <h2>🏆 Trophies ({trophies.length})</h2>
-                    {trophies.length === 0 ? (
-            <p style={emptyText}>No trophies yet.</p>
-          ) : (
             <div style={grid}>
               {trophies.map((t) => (
                 <div key={t.id} style={trophyCard}>
@@ -409,7 +398,11 @@ const totalSeasons = new Set(
                       src={t.image_url}
                       alt={t.trophy_title || "Player trophy"}
                       style={{
-                        width: "100%",
+                        display: "block",
+                        width: "min(100%, 300px)",
+                        maxHeight: 280,
+                        objectFit: "contain",
+                        marginInline: "auto",
                         borderRadius: 10,
                         marginTop: 10,
                       }}
@@ -418,8 +411,7 @@ const totalSeasons = new Set(
                 </div>
               ))}
             </div>
-          )}
-        </div>
+        </div>}
       </div>
     </main>
   )
@@ -472,6 +464,29 @@ const card: React.CSSProperties = {
   marginBottom: 20,
 }
 
+const nestedCard: React.CSSProperties = {
+  background: "#0b0b0b",
+  border: "1px solid #333",
+  borderRadius: 14,
+  padding: 18,
+  marginTop: 16,
+}
+
+const statsDisclosure: React.CSSProperties = {
+  marginTop: 20,
+  padding: 16,
+  border: "1px solid #333",
+  borderRadius: 14,
+  background: "#090909",
+}
+
+const statsSummary: React.CSSProperties = {
+  cursor: "pointer",
+  fontSize: "1.05rem",
+  fontWeight: 850,
+  padding: "4px 2px",
+}
+
 const avatarControls: React.CSSProperties = { display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", margin: "16px 0" }
 const avatarFileButton: React.CSSProperties = { padding: "10px 14px", borderRadius: 8, background: "#2563eb", color: "white", fontWeight: 800, cursor: "pointer" }
 const avatarSaveButton: React.CSSProperties = { padding: "10px 14px", border: 0, borderRadius: 8, background: "#16a34a", color: "white", fontWeight: 800, cursor: "pointer" }
@@ -498,10 +513,6 @@ const statBox: React.CSSProperties = {
 const muted: React.CSSProperties = {
   color: "#aaa",
   margin: "6px 0",
-}
-
-const emptyText: React.CSSProperties = {
-  color: "#888",
 }
 
 const aliasErrorText: React.CSSProperties = {

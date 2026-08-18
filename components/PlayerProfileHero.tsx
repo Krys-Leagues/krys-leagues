@@ -32,26 +32,29 @@ export default function PlayerProfileHero({
       aria-labelledby="player-profile-name"
     >
       <div className={styles.backdrop} aria-hidden="true">
-        {hasKrysServerTag && <div className={styles.crest} />}
+        {hasKrysServerTag && <div className={styles.cornerCrest} />}
       </div>
 
       <div className={`${styles.identity} ${avatarPath ? styles.withAvatar : styles.withoutAvatar}`}>
         {avatarPath && (
-          <div className={styles.avatarFrame}>
-            <PlayerAvatar
-              screenName={screenName}
-              avatarPath={avatarPath}
-              size="var(--player-profile-avatar-size)"
-              imageFit="contain"
-              borderRadius={20}
-              className={styles.heroAvatar}
-              renderAsImage
-            />
+          <div className={styles.avatarStage}>
+            {hasKrysServerTag && <div className={styles.crest} aria-hidden="true" />}
+            {isServerBooster && <div className={styles.boosterAura} aria-hidden="true" />}
+            <div className={styles.avatarFrame}>
+              <PlayerAvatar
+                screenName={screenName}
+                avatarPath={avatarPath}
+                size="var(--player-profile-avatar-size)"
+                imageFit="contain"
+                borderRadius={24}
+                className={styles.heroAvatar}
+                renderAsImage
+              />
+            </div>
           </div>
         )}
 
         <div className={styles.copy}>
-          <p className={styles.eyebrow}>Krys Leagues Player Profile</p>
           <h1 id="player-profile-name" className={styles.name}>{screenName}</h1>
           {profileBadges.length > 0 && (
             <div className={styles.profileBadges} aria-label="Player recognition">
@@ -60,7 +63,6 @@ export default function PlayerProfileHero({
               ))}
             </div>
           )}
-          <p className={styles.subtitle}>Career history, league progression, statistics, trophies, and achievements.</p>
           {aliases.length > 0 && (
             <p className={styles.aliases}>Formerly known as {aliases.join(", ")}</p>
           )}

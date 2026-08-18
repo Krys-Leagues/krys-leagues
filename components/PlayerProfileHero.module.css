@@ -1,7 +1,7 @@
 .hero {
   position: relative;
   isolation: isolate;
-  min-height: 280px;
+  min-height: 640px;
   margin-bottom: 20px;
   overflow: hidden;
   border: 1px solid rgba(148, 163, 184, 0.22);
@@ -46,51 +46,87 @@
   pointer-events: none;
 }
 
-.booster .backdrop::after {
-  width: min(72vw, 620px);
-  height: min(46vw, 310px);
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(217, 70, 239, 0.3), rgba(99, 102, 241, 0.19) 42%, transparent 72%);
-  filter: blur(12px);
-  content: "";
-}
-
 .serverTag {
-  border-color: rgba(250, 204, 21, 0.28);
+  border-color: rgba(103, 232, 249, 0.4);
 }
 
 .crest {
   position: absolute;
-  width: clamp(240px, 42vw, 430px);
+  z-index: 0;
+  width: calc(var(--player-profile-avatar-size) + 105px);
   aspect-ratio: 1;
   background: center / contain no-repeat url("/league-media/BIG%20LOGO%20TRANSPARENT.png");
-  filter: drop-shadow(0 0 28px rgba(250, 204, 21, 0.24));
-  opacity: 0.16;
+  filter:
+    brightness(1.65) saturate(1.45)
+    drop-shadow(0 0 5px rgba(255, 255, 255, 0.95))
+    drop-shadow(0 0 15px rgba(34, 211, 238, 0.95))
+    drop-shadow(0 0 35px rgba(59, 130, 246, 0.85));
+  opacity: 0.78;
+}
+
+.cornerCrest {
+  position: absolute;
+  top: clamp(18px, 3vw, 32px);
+  right: clamp(18px, 3vw, 34px);
+  width: clamp(62px, 8vw, 96px);
+  aspect-ratio: 1;
+  background: center / contain no-repeat url("/league-media/BIG%20LOGO%20TRANSPARENT.png");
+  filter:
+    brightness(1.7) saturate(1.5)
+    drop-shadow(0 0 4px white)
+    drop-shadow(0 0 12px #22d3ee)
+    drop-shadow(0 0 25px #2563eb);
+  opacity: 0.92;
 }
 
 .identity {
   position: relative;
   z-index: 1;
   min-width: 0;
-  min-height: 280px;
-  padding: clamp(32px, 6vw, 64px);
+  min-height: 640px;
+  padding: clamp(58px, 7vw, 82px) clamp(20px, 5vw, 64px) clamp(42px, 6vw, 64px);
 }
 
-.withAvatar {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: center;
-  gap: clamp(24px, 5vw, 52px);
-}
-
+.withAvatar,
 .withoutAvatar {
   display: grid;
+  justify-items: center;
   place-items: center;
   text-align: center;
 }
 
+.withAvatar {
+  align-content: center;
+  gap: clamp(28px, 4vw, 42px);
+}
+
+.avatarStage {
+  --player-profile-avatar-size: clamp(450px, 46vw, 520px);
+  position: relative;
+  display: grid;
+  width: var(--player-profile-avatar-size);
+  height: var(--player-profile-avatar-size);
+  place-items: center;
+}
+
+.boosterAura {
+  position: absolute;
+  z-index: 1;
+  width: calc(var(--player-profile-avatar-size) + 74px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.72) 0 2%, rgba(244, 114, 182, 0.65) 35%, rgba(217, 70, 239, 0.48) 57%, rgba(236, 72, 153, 0.15) 72%, transparent 78%);
+  box-shadow:
+    0 0 34px 12px rgba(244, 114, 182, 0.82),
+    0 0 82px 30px rgba(217, 70, 239, 0.55),
+    0 0 145px 52px rgba(236, 72, 153, 0.3),
+    inset 0 0 54px rgba(255, 255, 255, 0.42);
+  filter: saturate(1.25);
+}
+
 .avatarFrame {
-  --player-profile-avatar-size: clamp(240px, 24vw, 280px);
+  position: relative;
+  z-index: 2;
   display: grid;
   flex: none;
   place-items: center;
@@ -105,22 +141,9 @@
   background-color: rgba(2, 6, 23, 0.72) !important;
 }
 
-.booster .avatarFrame {
-  box-shadow: 0 0 28px rgba(217, 70, 239, 0.42), 0 16px 45px rgba(0, 0, 0, 0.42);
-}
-
 .copy {
   min-width: 0;
-  max-width: 820px;
-}
-
-.eyebrow {
-  margin: 0 0 12px;
-  color: #93c5fd;
-  font-size: 0.75rem;
-  font-weight: 900;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+  width: min(100%, 940px);
 }
 
 .name {
@@ -157,18 +180,6 @@
   letter-spacing: 0.04em;
 }
 
-.subtitle {
-  max-width: 650px;
-  margin: 18px auto 0;
-  color: #cbd5e1;
-  font-size: clamp(0.95rem, 2vw, 1.08rem);
-  line-height: 1.65;
-}
-
-.withAvatar .subtitle {
-  margin-left: 0;
-}
-
 .aliases {
   margin: 13px 0 0;
   color: #94a3b8;
@@ -188,26 +199,19 @@
   }
 
   .identity {
-    padding: 34px 20px 38px;
+    padding: 58px 14px 36px;
   }
 
   .withAvatar {
-    grid-template-columns: minmax(0, 1fr);
-    justify-items: center;
-    gap: 24px;
-    text-align: center;
-  }
-
-  .withAvatar .subtitle {
-    margin-left: auto;
+    gap: 26px;
   }
 
   .profileBadges {
     justify-content: center;
   }
 
-  .avatarFrame {
-    --player-profile-avatar-size: clamp(170px, 52vw, 210px);
+  .avatarStage {
+    --player-profile-avatar-size: clamp(240px, 78vw, 310px);
   }
 
   .name {
@@ -215,15 +219,14 @@
     line-height: 1;
   }
 
-  .crest {
-    width: min(88vw, 340px);
-    opacity: 0.13;
+  .cornerCrest {
+    width: 58px;
   }
 }
 
 @media (min-width: 641px) and (max-width: 900px) {
-  .avatarFrame {
-    --player-profile-avatar-size: clamp(210px, 30vw, 250px);
+  .avatarStage {
+    --player-profile-avatar-size: clamp(350px, 49vw, 425px);
   }
 }
 

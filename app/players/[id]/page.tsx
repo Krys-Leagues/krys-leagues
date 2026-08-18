@@ -322,6 +322,10 @@ export default function PublicPlayerProfilePage() {
     ).size
   }, [memberships])
 
+  const hasCareerParticipation = memberships.length > 0 || results.length > 0 ||
+    strokeHistory.length > 0 || matchHistory.length > 0 || pypHistory.length > 0 ||
+    pypFixtureHistory.length > 0
+
   if (loading) {
     return (
       <main style={page}>
@@ -370,6 +374,8 @@ export default function PublicPlayerProfilePage() {
           profileBadges={recognition.profileBadges}
         />
 
+        {hasCareerParticipation && <details style={statsDisclosure}>
+          <summary style={statsSummary}>Player Stats</summary>
         <section style={statsGrid}>
           <div style={statCard}>
             <strong>Matches</strong>
@@ -407,12 +413,9 @@ export default function PublicPlayerProfilePage() {
           </div>
         </section>
 
-        <section style={card}>
+        {memberships.length > 0 && <section style={card}>
           <h2 style={sectionTitle}>League History</h2>
 
-          {memberships.length === 0 ? (
-            <p style={muted}>No league history is available yet.</p>
-          ) : (
             <div style={grid}>
               {memberships.map((membership) => (
                 <div key={membership.id} style={miniCard}>
@@ -430,18 +433,13 @@ export default function PublicPlayerProfilePage() {
                 </div>
               ))}
             </div>
-          )}
-        </section>
+        </section>}
 
-        <section style={card}>
+        {(strokeHistory.length > 0 || strokeHistoryError) && <section style={card}>
           <h2 style={sectionTitle}>Stroke Season History</h2>
 
           {strokeHistoryError ? (
             <p style={historyError}>{strokeHistoryError}</p>
-          ) : strokeHistory.length === 0 ? (
-            <p style={muted}>
-              No approved Stroke season history is available yet.
-            </p>
           ) : (
             <div style={tableWrap}>
               <table style={table}>
@@ -477,15 +475,13 @@ export default function PublicPlayerProfilePage() {
               </table>
             </div>
           )}
-        </section>
+        </section>}
 
-        <section style={card}>
+        {(matchHistory.length > 0 || matchHistoryError) && <section style={card}>
           <h2 style={sectionTitle}>Match Season History</h2>
 
           {matchHistoryError ? (
             <p style={historyError}>{matchHistoryError}</p>
-          ) : matchHistory.length === 0 ? (
-            <p style={muted}>No approved Match season history is available yet.</p>
           ) : (
             <div style={tableWrap}>
               <table style={table}>
@@ -511,15 +507,13 @@ export default function PublicPlayerProfilePage() {
               </table>
             </div>
           )}
-        </section>
+        </section>}
 
-        <section style={card}>
+        {(pypHistory.length > 0 || pypHistoryError) && <section style={card}>
           <h2 style={sectionTitle}>PYP Season History</h2>
 
           {pypHistoryError ? (
             <p style={historyError}>{pypHistoryError}</p>
-          ) : pypHistory.length === 0 ? (
-            <p style={muted}>No approved PYP season history is available yet.</p>
           ) : (
             <div style={tableWrap}>
               <table style={table}>
@@ -553,16 +547,14 @@ export default function PublicPlayerProfilePage() {
               })}
             </div>
           )}
-        </section>
+        </section>}
+        </details>}
 
-        <section style={card}>
+        {trophies.length > 0 && <section style={card}>
           <h2 style={sectionTitle}>
             🏆 Trophy Case
           </h2>
 
-          {trophies.length === 0 ? (
-            <p style={muted}>No trophies have been added yet.</p>
-          ) : (
             <div style={grid}>
               {trophies.map((trophy) => (
                 <div key={trophy.id} style={trophyCard}>
@@ -597,8 +589,7 @@ export default function PublicPlayerProfilePage() {
                 </div>
               ))}
             </div>
-          )}
-        </section>
+        </section>}
 
         <section style={linkGrid}>
           <Link href="/records" style={actionButton}>
@@ -661,6 +652,23 @@ const statsGrid: React.CSSProperties = {
   marginBottom: 20,
 }
 
+const statsDisclosure: React.CSSProperties = {
+  marginBottom: 20,
+  padding: 16,
+  border: "1px solid #334155",
+  borderRadius: 16,
+  background: "rgba(15, 23, 42, 0.86)",
+}
+
+const statsSummary: React.CSSProperties = {
+  cursor: "pointer",
+  color: "#e2e8f0",
+  fontSize: "1.05rem",
+  fontWeight: 850,
+  letterSpacing: "0.02em",
+  padding: "4px 2px",
+}
+
 const statCard: React.CSSProperties = {
   display: "flex",
   flexDirection: "column",
@@ -717,7 +725,11 @@ const trophyTitle: React.CSSProperties = {
 }
 
 const trophyImage: React.CSSProperties = {
-  width: "100%",
+  display: "block",
+  width: "min(100%, 300px)",
+  maxHeight: 280,
+  objectFit: "contain",
+  marginInline: "auto",
   marginTop: 12,
   borderRadius: 10,
 }
