@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { consumeAuthReturnTo } from "@/lib/authReturnTo"
+import { getDiscordPlayerLoginDestination } from "@/lib/discordPlayerLogin"
 import { supabase } from "@/lib/supabase"
 
 const codeExchanges = new Map<string, ReturnType<typeof supabase.auth.exchangeCodeForSession>>()
@@ -14,27 +15,6 @@ function exchangeCodeOnce(code: string) {
   const exchange = supabase.auth.exchangeCodeForSession(code)
   codeExchanges.set(code, exchange)
   return exchange
-}
-
-function getDiscordProviderId(user: {
-  identities?: Array<{
-    provider?: string
-    identity_data?: Record<string, unknown>
-  }>
-  user_metadata?: Record<string, unknown>
-}) {
-  const discordIdentity = user.identities?.find(
-    (identity) => identity.provider === "discord"
-  )
-  const identityData = discordIdentity?.identity_data
-  const providerId =
-    identityData?.provider_id ||
-    identityData?.id ||
-    identityData?.sub ||
-    user.user_metadata?.provider_id ||
-    user.user_metadata?.sub
-
-  return typeof providerId === "string" ? providerId.trim() : ""
 }
 
 async function hasAdminAccess(accessToken: string) {
@@ -93,30 +73,27 @@ function CallbackHandler() {
         return
       }
 
-      if (next) {
-        router.replace(next)
+      const { data: resolutionRows, error: resolutionError } = await supabase.rpc(
+        "resolve_current_discord_player_login"
+      )
+
+      if (resolutionError) {
+        setErrorMessage(`Player account lookup failed: ${resolutionError.message}`)
         return
       }
 
-      const discordProviderId = getDiscordProviderId(session.user)
+      const resolution = (Array.isArray(resolutionRows) ? resolutionRows[0] : resolutionRows) as {
+        resolution_status?: "matched" | "no_match" | "conflict"
+        canonical_player_id?: string | null
+      } | null
 
-      if (!discordProviderId) {
-        setErrorMessage("Discord identity could not be verified.")
+      const destination = getDiscordPlayerLoginDestination(resolution, next)
+      if (destination) {
+        router.replace(destination)
         return
       }
 
-      const { data: existingPlayer, error: playerError } = await supabase
-        .from("players")
-        .select("id")
-        .eq("discord_id", discordProviderId)
-        .maybeSingle()
-
-      if (playerError) {
-        setErrorMessage(`Player account lookup failed: ${playerError.message}`)
-        return
-      }
-
-      router.replace(existingPlayer ? "/dashboard" : "/join")
+      setErrorMessage("This Discord identity requires administrator review before it can be linked to a player.")
     }
 
     void handleLogin()

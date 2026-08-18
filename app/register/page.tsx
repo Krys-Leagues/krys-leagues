@@ -5,6 +5,7 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { useSearchParams } from "next/navigation";
 import { createDiscordAuthCallbackUrl } from "@/lib/authReturnTo";
+import { getAuthenticatedDiscordId } from "@/lib/discordPlayerLogin";
 import { supabase } from "@/lib/supabase";
 
 const LEAGUES: Record<string, { title: string; subtitle: string; image: string; ageNote: string }> = {
@@ -61,10 +62,8 @@ function RegisterContent() {
       user.email ||
       "Discord User";
 
-    const discordId =
-      user.user_metadata?.provider_id ||
-      user.user_metadata?.sub ||
-      user.id;
+    const discordId = getAuthenticatedDiscordId(user);
+    if (!discordId) return setStatus("Discord identity could not be verified. Please sign out and sign in with Discord again.");
 
     const { error } = await supabase.from("player_waitlist").insert({
       screen_name: screenName.trim(),
