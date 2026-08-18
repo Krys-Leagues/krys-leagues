@@ -1,14 +1,21 @@
-.hero { position: relative; isolation: isolate; display: grid; justify-items: center; min-width: 0; padding: clamp(12px,2.5vw,28px) 0 clamp(28px,5vw,54px); color: var(--profile-text); text-align: center; }
-.brandRow { display: flex; width: 100%; align-items: center; justify-content: space-between; padding-inline: clamp(4px,3vw,32px); pointer-events: none; }
-.brandLogo { width: clamp(54px,7vw,82px); height: clamp(54px,7vw,82px); object-fit: contain; opacity: .52; filter: saturate(.8) brightness(.85); }
+.hero { position: relative; isolation: isolate; display: grid; justify-items: center; min-width: 0; padding: 0 0 clamp(24px,4vw,42px); color: var(--profile-text); text-align: center; }
+.brandRow { display: grid; grid-template-columns: auto minmax(0,1fr) auto; width: 100%; align-items: center; gap: clamp(10px,3vw,30px); pointer-events: none; }
+.profileTitle { margin: 0; font-size: clamp(1.2rem,3vw,2.3rem); font-weight: 950; letter-spacing: .07em; line-height: 1.05; text-transform: uppercase; text-shadow: 0 3px 18px #0008; }
+.brandLogo { width: clamp(58px,8vw,92px); height: clamp(58px,8vw,92px); object-fit: contain; opacity: .94; filter: saturate(1.02) brightness(1.02); }
 .tagActive { opacity: 1; filter: drop-shadow(0 0 2px #fff) drop-shadow(0 0 8px var(--profile-glow)) drop-shadow(0 0 22px var(--profile-glow)) drop-shadow(0 0 42px var(--profile-glow)); }
-.avatarStage { --player-profile-avatar-size: clamp(340px,34vw,370px); position: relative; display: grid; width: var(--player-profile-avatar-size); height: var(--player-profile-avatar-size); margin-top: clamp(-34px,-3vw,-18px); place-items: center; }
+.avatarStage { --player-profile-avatar-size: clamp(340px,34vw,370px); position: relative; display: grid; width: var(--player-profile-avatar-size); height: var(--player-profile-avatar-size); margin-top: clamp(8px,2vw,20px); place-items: center; }
 .boosterGlow { position: absolute; z-index: -1; width: min(680px,88vw); aspect-ratio: 1; background: radial-gradient(circle,color-mix(in srgb,var(--profile-glow) 72%,white) 0%,color-mix(in srgb,var(--profile-glow) 64%,transparent) 25%,color-mix(in srgb,var(--profile-glow) 30%,transparent) 52%,transparent 73%); filter: blur(24px) saturate(1.35); opacity: .92; pointer-events: none; }
 .avatar { position: relative; overflow: visible !important; border: 0 !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important; }
 .identity { min-width: 0; width: min(100%,940px); margin-top: 18px; }
 .name { margin: 0; color: inherit; font-size: clamp(2.25rem,7vw,5rem); font-weight: 950; line-height: .98; letter-spacing: -.055em; overflow-wrap: anywhere; text-wrap: balance; text-shadow: 0 4px 26px #000c; }
 .badges { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 14px; }
 .badges span { padding: 6px 10px; border: 1px solid #facc1559; border-radius: 999px; background: #713f1257; color: #fef3c7; font-size: .75rem; font-weight: 850; letter-spacing: .04em; }
-.aliases { margin: 13px 0 0; color: color-mix(in srgb,var(--profile-text) 70%,transparent); font-size: .86rem; line-height: 1.5; overflow-wrap: anywhere; }
+.recognitionRow { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 18px; }
+.recognition { display: flex; min-height: 48px; align-items: center; gap: 9px; padding: 7px 14px; border: 1px solid color-mix(in srgb,var(--profile-glow) 45%,#fff); border-radius: 999px; background: #02061780; font-size: .78rem; letter-spacing: .1em; text-transform: uppercase; }
+.recognition img { width: 34px; height: 34px; object-fit: contain; }
+.boosterRecognition { color: #ffe4f3; text-shadow: 0 0 8px var(--profile-glow),0 0 18px var(--profile-glow); box-shadow: inset 0 0 18px color-mix(in srgb,var(--profile-glow) 22%,transparent),0 0 18px color-mix(in srgb,var(--profile-glow) 30%,transparent); }
+.boosterIcon { color: #fff; font-size: 1.75rem; line-height: 1; filter: drop-shadow(0 0 5px #fff) drop-shadow(0 0 12px var(--profile-glow)); }
+.tagRecognition { color: #fff; text-shadow: 0 0 8px var(--profile-glow),0 0 18px var(--profile-glow); box-shadow: inset 0 0 18px color-mix(in srgb,var(--profile-glow) 20%,transparent),0 0 18px color-mix(in srgb,var(--profile-glow) 28%,transparent); }
+.tagRecognition img { filter: drop-shadow(0 0 2px #fff) drop-shadow(0 0 9px var(--profile-glow)); }
 @media (max-width:900px) and (min-width:641px) { .avatarStage { --player-profile-avatar-size: clamp(285px,42vw,330px); } }
-@media (max-width:640px) { .hero { padding-bottom: 34px; } .brandRow { padding-inline: 2px; } .brandLogo { width: 52px; height: 52px; } .avatarStage { --player-profile-avatar-size: clamp(215px,68vw,260px); margin-top: -20px; } .boosterGlow { width: min(470px,112vw); filter: blur(20px); } .identity { margin-top: 14px; } .name { font-size: clamp(1.9rem,11vw,3.5rem); letter-spacing: -.04em; } }
+@media (max-width:640px) { .hero { padding-bottom: 28px; } .brandRow { gap: 7px; } .brandLogo { width: 48px; height: 48px; } .profileTitle { font-size: clamp(.88rem,4.6vw,1.1rem); letter-spacing: .035em; } .avatarStage { --player-profile-avatar-size: clamp(215px,68vw,260px); margin-top: 10px; } .boosterGlow { width: min(470px,112vw); filter: blur(20px); } .identity { margin-top: 10px; } .name { font-size: clamp(1.9rem,11vw,3.5rem); letter-spacing: -.04em; } .recognitionRow { display: grid; width: min(100%,280px); } .recognition { justify-content: center; } }

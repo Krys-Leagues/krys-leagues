@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase"
 import PlayerProfileHero from "@/components/PlayerProfileHero"
 import PlayerProfileEditor, { type ProfilePreferences } from "@/components/PlayerProfileEditor"
 import { getCanonicalPlayerAvatar } from "@/lib/playerAvatars"
+import styles from "./page.module.css"
 
 type Player = {
   id: string
@@ -286,8 +287,8 @@ export default function PublicPlayerProfilePage() {
       if (loaded) setPreferences(loaded as ProfilePreferences)
     }
     if (sessionResponse.data.session) {
-      const { data: editable } = await supabase.rpc("can_edit_player_profile_preferences", { p_player_id: canonicalId })
-      setCanEditProfile(Boolean(editable))
+      const { data: viewerCanonicalId } = await supabase.rpc("current_user_canonical_player_id")
+      setCanEditProfile(typeof viewerCanonicalId === "string" && viewerCanonicalId === canonicalId)
     } else {
       setCanEditProfile(false)
     }
@@ -297,6 +298,13 @@ export default function PublicPlayerProfilePage() {
   const hasCareerParticipation = memberships.length > 0 || results.length > 0 ||
     strokeHistory.length > 0 || matchHistory.length > 0 || pypHistory.length > 0 ||
     pypFixtureHistory.length > 0
+
+  const careerHighlights = [
+    trophies.length > 0 ? { label: "Trophies", value: trophies.length } : null,
+    strokeHistory.reduce((total, season) => total + season.wins, 0) > 0 ? { label: "Stroke Wins", value: strokeHistory.reduce((total, season) => total + season.wins, 0) } : null,
+    matchHistory.reduce((total, season) => total + season.wins, 0) > 0 ? { label: "Match Wins", value: matchHistory.reduce((total, season) => total + season.wins, 0) } : null,
+    pypHistory.reduce((total, season) => total + season.wins, 0) > 0 ? { label: "PYP Wins", value: pypHistory.reduce((total, season) => total + season.wins, 0) } : null,
+  ].filter((highlight): highlight is { label: string; value: number } => highlight !== null)
 
   if (loading) {
     return (
@@ -325,7 +333,7 @@ export default function PublicPlayerProfilePage() {
   }
 
   return (
-    <main style={{ ...page, background: `radial-gradient(circle at top, ${preferences.background_color} 0%, color-mix(in srgb, ${preferences.background_color} 72%, #000) 58%, #000 100%)`, color: preferences.text_color }}>
+    <main className={styles.page} style={{ "--profile-bg": preferences.background_color, "--profile-text": preferences.text_color } as React.CSSProperties}>
       <div style={container}>
         <div style={topBar}>
           <Link href="/players" style={backButton}>
@@ -340,7 +348,6 @@ export default function PublicPlayerProfilePage() {
         <PlayerProfileHero
           screenName={player.screen_name}
           avatarPath={avatarPath}
-          aliases={aliases}
           isServerBooster={recognition.isServerBooster}
           hasKrysServerTag={recognition.hasKrysServerTag}
           profileBadges={recognition.profileBadges}
@@ -355,15 +362,27 @@ export default function PublicPlayerProfilePage() {
           <p style={aboutCopy}>{preferences.about_me}</p>
         </section>}
 
-        {trophies[0] && <section style={featuredTrophy}>
-          <div><p style={eyebrow}>Featured Trophy</p><h2 style={sectionTitle}>{trophies[0].trophy_title || trophies[0].placement || "Trophy"}</h2><p style={muted}>{[trophies[0].event_name, trophies[0].division, trophies[0].season].filter(Boolean).join(" · ")}</p></div>
-          {/* Trophy URLs are authoritative media records and may use multiple approved hosts. */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          {trophies[0].image_url && <img src={trophies[0].image_url} alt={trophies[0].trophy_title || `${player.screen_name} trophy`} style={featuredTrophyImage} />}
-        </section>}
+        {(trophies[0] || careerHighlights.length > 0) && <div className={styles.spotlightGrid}>
+          {trophies[0] && <section className={`${styles.spotlightPanel} ${styles.featuredTrophy}`}>
+            <div><p className={styles.panelEyebrow}>Featured Trophy</p><h2 className={styles.panelTitle}>{trophies[0].trophy_title || trophies[0].placement || "Trophy"}</h2><p className={styles.panelMeta}>{[trophies[0].event_name, trophies[0].division, trophies[0].season].filter(Boolean).join(" · ")}</p></div>
+            {/* Trophy URLs are authoritative media records and may use multiple approved hosts. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            {trophies[0].image_url && <img src={trophies[0].image_url} alt={trophies[0].trophy_title || `${player.screen_name} trophy`} />}
+          </section>}
+          {careerHighlights.length > 0 && <section className={styles.spotlightPanel}>
+            <p className={styles.panelEyebrow}>Career Highlights</p>
+            <div className={styles.highlightGrid}>{careerHighlights.map(highlight => <div className={styles.highlight} key={highlight.label}><strong>{highlight.value}</strong><span>{highlight.label}</span></div>)}</div>
+          </section>}
+        </div>}
 
-        {hasCareerParticipation && <details style={statsDisclosure}>
-          <summary style={statsSummary}>Player Stats</summary>
+        {aliases.length > 0 && <details className={styles.profileDisclosure}>
+          <summary>Names / Known As</summary>
+          <div className={styles.disclosureContent}><ul className={styles.aliasList}>{aliases.map(alias => <li key={alias}>{alias}</li>)}</ul></div>
+        </details>}
+
+        {hasCareerParticipation && <details className={styles.profileDisclosure}>
+          <summary>Player Stats</summary>
+          <div className={styles.disclosureContent}>
         {memberships.length > 0 && <section style={card}>
           <h2 style={sectionTitle}>League History</h2>
 
@@ -499,12 +518,13 @@ export default function PublicPlayerProfilePage() {
             </div>
           )}
         </section>}
+          </div>
         </details>}
 
-        {trophies.length > 0 && <section style={card}>
-          <h2 style={sectionTitle}>
-            🏆 Trophy Case
-          </h2>
+        {trophies.length > 0 && <details className={styles.profileDisclosure}>
+          <summary>Trophies &amp; Achievements</summary>
+          <div className={styles.disclosureContent}>
+          <h2 style={sectionTitle}>🏆 Trophy Case</h2>
 
             <div style={grid}>
               {trophies.map((trophy) => (
@@ -540,7 +560,8 @@ export default function PublicPlayerProfilePage() {
                 </div>
               ))}
             </div>
-        </section>}
+          </div>
+        </details>}
 
       </div>
     </main>
@@ -558,9 +579,6 @@ const page: React.CSSProperties = {
 const eyebrow: React.CSSProperties = { margin: "0 0 8px", color: "#f9a8d4", fontSize: 12, fontWeight: 900, letterSpacing: ".14em", textTransform: "uppercase" }
 const aboutSection: React.CSSProperties = { width: "min(100%, 760px)", margin: "0 auto 28px", padding: "4px clamp(4px, 3vw, 24px)", textAlign: "center" }
 const aboutCopy: React.CSSProperties = { margin: 0, fontSize: "clamp(1rem, 2vw, 1.18rem)", lineHeight: 1.75, whiteSpace: "pre-wrap", overflowWrap: "anywhere" }
-const featuredTrophy: React.CSSProperties = { display: "flex", alignItems: "center", justifyContent: "center", gap: "clamp(20px, 5vw, 56px)", margin: "0 auto 32px", padding: "20px", textAlign: "center", flexWrap: "wrap" }
-const featuredTrophyImage: React.CSSProperties = { width: "clamp(150px, 20vw, 230px)", height: "clamp(150px, 20vw, 230px)", objectFit: "contain" }
-
 const container: React.CSSProperties = {
   width: "100%",
   maxWidth: 1100,
@@ -583,23 +601,6 @@ const backButton: React.CSSProperties = {
   color: "white",
   textDecoration: "none",
   fontWeight: 700,
-}
-
-const statsDisclosure: React.CSSProperties = {
-  marginBottom: 20,
-  padding: 16,
-  border: "1px solid #334155",
-  borderRadius: 16,
-  background: "rgba(15, 23, 42, 0.86)",
-}
-
-const statsSummary: React.CSSProperties = {
-  cursor: "pointer",
-  color: "#e2e8f0",
-  fontSize: "1.05rem",
-  fontWeight: 850,
-  letterSpacing: "0.02em",
-  padding: "4px 2px",
 }
 
 const card: React.CSSProperties = {
