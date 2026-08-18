@@ -139,6 +139,24 @@
   text-shadow: 0 0 18px rgba(232, 121, 249, 0.48), 0 4px 30px rgba(0, 0, 0, 0.8);
 }
 
+.profileBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.profileBadge {
+  padding: 6px 10px;
+  border: 1px solid rgba(250, 204, 21, 0.35);
+  border-radius: 999px;
+  background: rgba(113, 63, 18, 0.34);
+  color: #fef3c7;
+  font-size: 0.75rem;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+}
+
 .subtitle {
   max-width: 650px;
   margin: 18px auto 0;
@@ -182,6 +200,10 @@
 
   .withAvatar .subtitle {
     margin-left: auto;
+  }
+
+  .profileBadges {
+    justify-content: center;
   }
 
   .avatarFrame {

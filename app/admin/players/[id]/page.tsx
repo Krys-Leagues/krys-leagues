@@ -54,6 +54,9 @@ type CanonicalIdentity = {
   canonical_player_id: string
   canonical_screen_name: string
   aliases: string[] | null
+  is_server_booster?: boolean
+  has_krys_server_tag?: boolean
+  profile_badges?: string[]
 }
 
 export default function PlayerProfilePage() {
@@ -80,6 +83,11 @@ export default function PlayerProfilePage() {
   const [avatarBusy, setAvatarBusy] = useState(false)
   const [avatarError, setAvatarError] = useState("")
   const [avatarMessage, setAvatarMessage] = useState("")
+  const [recognition, setRecognition] = useState({
+    isServerBooster: false,
+    hasKrysServerTag: false,
+    profileBadges: [] as string[],
+  })
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/immutability
@@ -108,6 +116,12 @@ export default function PlayerProfilePage() {
       ) as CanonicalIdentity | null
       const currentCanonicalName =
         identity?.canonical_screen_name || ""
+
+      setRecognition({
+        isServerBooster: Boolean(identity?.is_server_booster),
+        hasKrysServerTag: Boolean(identity?.has_krys_server_tag),
+        profileBadges: identity?.profile_badges || [],
+      })
 
       setFormerNames(
         Array.from(
@@ -262,10 +276,9 @@ const totalSeasons = new Set(
           <PlayerProfileHero
             screenName={player.screen_name}
             avatarPath={avatarPreviewUrl || avatarPath}
-            // TODO(identity): Replace these presentation fallbacks with canonical
-            // Identity Management values once booster/tag status is exposed.
-            isServerBooster={false}
-            hasKrysServerTag={false}
+            isServerBooster={recognition.isServerBooster}
+            hasKrysServerTag={recognition.hasKrysServerTag}
+            profileBadges={recognition.profileBadges}
           />
 
           <div style={avatarControls}>

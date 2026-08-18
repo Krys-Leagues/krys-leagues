@@ -86,6 +86,9 @@ type CanonicalIdentity = {
   identity_player_ids: string[]
   aliases: string[]
   discord_linked: boolean
+  is_server_booster?: boolean
+  has_krys_server_tag?: boolean
+  profile_badges?: string[]
 }
 
 type PypFixtureHistory = {
@@ -130,6 +133,11 @@ export default function PublicPlayerProfilePage() {
   const [aliases, setAliases] = useState<string[]>([])
   const [identityPlayerIds, setIdentityPlayerIds] = useState<string[]>([])
   const [avatarPath, setAvatarPath] = useState<string | null>(null)
+  const [recognition, setRecognition] = useState({
+    isServerBooster: false,
+    hasKrysServerTag: false,
+    profileBadges: [] as string[],
+  })
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/immutability
@@ -167,6 +175,11 @@ export default function PublicPlayerProfilePage() {
       return
     }
     const canonicalId = identity.canonical_player_id
+    setRecognition({
+      isServerBooster: Boolean(identity.is_server_booster),
+      hasKrysServerTag: Boolean(identity.has_krys_server_tag),
+      profileBadges: identity.profile_badges || [],
+    })
     if (canonicalId !== playerId) {
       router.replace(`/players/${canonicalId}`)
     }
@@ -352,10 +365,9 @@ export default function PublicPlayerProfilePage() {
           screenName={player.screen_name}
           avatarPath={avatarPath}
           aliases={aliases}
-          // TODO(identity): Replace these presentation fallbacks with canonical
-          // Identity Management values once booster/tag status is exposed.
-          isServerBooster={false}
-          hasKrysServerTag={false}
+          isServerBooster={recognition.isServerBooster}
+          hasKrysServerTag={recognition.hasKrysServerTag}
+          profileBadges={recognition.profileBadges}
         />
 
         <section style={statsGrid}>

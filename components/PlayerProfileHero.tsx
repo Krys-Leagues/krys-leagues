@@ -7,6 +7,7 @@ type PlayerProfileHeroProps = {
   isServerBooster: boolean
   hasKrysServerTag: boolean
   aliases?: string[]
+  profileBadges?: string[]
 }
 
 export default function PlayerProfileHero({
@@ -15,6 +16,7 @@ export default function PlayerProfileHero({
   isServerBooster,
   hasKrysServerTag,
   aliases = [],
+  profileBadges = [],
 }: PlayerProfileHeroProps) {
   const recognitionClasses = [
     styles.hero,
@@ -51,6 +53,13 @@ export default function PlayerProfileHero({
         <div className={styles.copy}>
           <p className={styles.eyebrow}>Krys Leagues Player Profile</p>
           <h1 id="player-profile-name" className={styles.name}>{screenName}</h1>
+          {profileBadges.length > 0 && (
+            <div className={styles.profileBadges} aria-label="Player recognition">
+              {profileBadges.map((badge) => (
+                <span key={badge} className={styles.profileBadge}>{badge}</span>
+              ))}
+            </div>
+          )}
           <p className={styles.subtitle}>Career history, league progression, statistics, trophies, and achievements.</p>
           {aliases.length > 0 && (
             <p className={styles.aliases}>Formerly known as {aliases.join(", ")}</p>
