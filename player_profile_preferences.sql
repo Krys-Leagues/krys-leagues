@@ -20,14 +20,17 @@ revoke all on table public.player_profile_preferences from public, anon, authent
 
 create or replace function public.current_user_canonical_player_id()
 returns uuid language sql stable security definer set search_path to '' as $function$
-  select public.resolve_canonical_player_id(player.id)
-  from auth.identities as identity
-  join public.players as player
-    on nullif(btrim(player.discord_id), '') = coalesce(identity.identity_data ->> 'provider_id', identity.identity_data ->> 'sub')
-  where identity.user_id = auth.uid() and identity.provider = 'discord'
-  group by public.resolve_canonical_player_id(player.id)
-  having count(*) = 1
-  limit 1;
+  with canonical_matches as (
+    select distinct public.resolve_canonical_player_id(player.id) as canonical_player_id
+    from auth.identities as identity
+    join public.players as player
+      on nullif(btrim(player.discord_id), '') = coalesce(identity.identity_data ->> 'provider_id', identity.identity_data ->> 'sub')
+    where identity.user_id = auth.uid()
+      and identity.provider = 'discord'
+  )
+  select match.canonical_player_id
+  from canonical_matches as match
+  where (select count(*) from canonical_matches) = 1;
 $function$;
 
 create or replace function public.get_public_player_profile_preferences(p_player_id uuid)
