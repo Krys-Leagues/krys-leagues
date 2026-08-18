@@ -59,8 +59,6 @@ type CanonicalIdentity = {
   profile_badges?: string[]
 }
 
-const PROFILE_BADGE_OPTIONS = ["Owner", "Co-Head Admin", "Tournament Admin"] as const
-
 export default function PlayerProfilePage() {
   const params = useParams()
   const router = useRouter()
@@ -90,9 +88,6 @@ export default function PlayerProfilePage() {
     hasKrysServerTag: false,
     profileBadges: [] as string[],
   })
-  const [recognitionBusy, setRecognitionBusy] = useState(false)
-  const [recognitionError, setRecognitionError] = useState("")
-  const [recognitionMessage, setRecognitionMessage] = useState("")
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/immutability
@@ -236,52 +231,6 @@ export default function PlayerProfilePage() {
     await supabase.storage.from(PLAYER_AVATAR_BUCKET).remove([previousPath])
   }
 
-  function toggleProfileBadge(badge: string) {
-    setRecognitionMessage("")
-    setRecognition((current) => ({
-      ...current,
-      profileBadges: current.profileBadges.includes(badge)
-        ? current.profileBadges.filter((currentBadge) => currentBadge !== badge)
-        : [...current.profileBadges, badge],
-    }))
-  }
-
-  async function saveRecognition() {
-    if (!player) return
-    setRecognitionBusy(true)
-    setRecognitionError("")
-    setRecognitionMessage("")
-
-    const { data, error } = await supabase.rpc("set_site_player_profile_recognition", {
-      p_player_id: player.id,
-      p_is_server_booster: recognition.isServerBooster,
-      p_has_krys_server_tag: recognition.hasKrysServerTag,
-      p_profile_badges: recognition.profileBadges,
-    })
-
-    setRecognitionBusy(false)
-    if (error) {
-      setRecognitionError(error.message)
-      return
-    }
-
-    const saved = (Array.isArray(data) ? data[0] : data) as {
-      is_server_booster: boolean
-      has_krys_server_tag: boolean
-      profile_badges: string[]
-    } | null
-    if (!saved) {
-      setRecognitionError("Recognition settings were not returned after saving.")
-      return
-    }
-
-    setRecognition({
-      isServerBooster: saved.is_server_booster,
-      hasKrysServerTag: saved.has_krys_server_tag,
-      profileBadges: saved.profile_badges || [],
-    })
-    setRecognitionMessage("Profile recognition saved.")
-  }
     if (loading) {
     return <p style={{ color: "white", padding: 20 }}>Loading player...</p>
   }
@@ -340,61 +289,6 @@ const totalSeasons = new Set(
           </div>
           {avatarError && <p style={aliasErrorText}>{avatarError}</p>}
           {avatarMessage && <p style={avatarSuccessText}>{avatarMessage}</p>}
-
-          <section style={recognitionPanel} aria-labelledby="profile-recognition-title">
-            <div>
-              <h2 id="profile-recognition-title" style={recognitionTitle}>Profile Recognition</h2>
-              <p style={recognitionHelp}>Presentation only. These settings do not grant administrator permissions.</p>
-            </div>
-
-            <div style={recognitionToggleGrid}>
-              <label style={recognitionToggle}>
-                <input
-                  type="checkbox"
-                  checked={recognition.isServerBooster}
-                  disabled={recognitionBusy}
-                  onChange={(event) => {
-                    setRecognitionMessage("")
-                    setRecognition((current) => ({ ...current, isServerBooster: event.target.checked }))
-                  }}
-                />
-                <span><strong>Server Booster</strong><small style={recognitionSmall}>Booster profile presentation</small></span>
-              </label>
-
-              <label style={recognitionToggle}>
-                <input
-                  type="checkbox"
-                  checked={recognition.hasKrysServerTag}
-                  disabled={recognitionBusy}
-                  onChange={(event) => {
-                    setRecognitionMessage("")
-                    setRecognition((current) => ({ ...current, hasKrysServerTag: event.target.checked }))
-                  }}
-                />
-                <span><strong>Krys Server Tag</strong><small style={recognitionSmall}>Server-tag profile presentation</small></span>
-              </label>
-            </div>
-
-            <fieldset style={recognitionBadges} disabled={recognitionBusy}>
-              <legend style={recognitionLegend}>Profile Badge / Staff Recognition</legend>
-              {PROFILE_BADGE_OPTIONS.map((badge) => (
-                <label key={badge} style={recognitionBadgeOption}>
-                  <input
-                    type="checkbox"
-                    checked={recognition.profileBadges.includes(badge)}
-                    onChange={() => toggleProfileBadge(badge)}
-                  />
-                  {badge}
-                </label>
-              ))}
-            </fieldset>
-
-            <button type="button" style={recognitionSaveButton} disabled={recognitionBusy} onClick={saveRecognition}>
-              {recognitionBusy ? "Saving Recognition…" : "Save Profile Recognition"}
-            </button>
-            {recognitionError && <p role="alert" style={aliasErrorText}>{recognitionError}</p>}
-            {recognitionMessage && <p role="status" style={avatarSuccessText}>{recognitionMessage}</p>}
-          </section>
 
           <div style={quickStats}>
             <div style={statBox}>
@@ -583,16 +477,6 @@ const avatarFileButton: React.CSSProperties = { padding: "10px 14px", borderRadi
 const avatarSaveButton: React.CSSProperties = { padding: "10px 14px", border: 0, borderRadius: 8, background: "#16a34a", color: "white", fontWeight: 800, cursor: "pointer" }
 const avatarRemoveButton: React.CSSProperties = { padding: "10px 14px", border: "1px solid #dc2626", borderRadius: 8, background: "#450a0a", color: "#fecaca", fontWeight: 800, cursor: "pointer" }
 const avatarSuccessText: React.CSSProperties = { color: "#86efac" }
-const recognitionPanel: React.CSSProperties = { margin: "22px 0", padding: 18, border: "1px solid #3f3f46", borderRadius: 12, background: "#111113" }
-const recognitionTitle: React.CSSProperties = { margin: 0, fontSize: 22 }
-const recognitionHelp: React.CSSProperties = { margin: "6px 0 0", color: "#a1a1aa", lineHeight: 1.5 }
-const recognitionToggleGrid: React.CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 10, marginTop: 16 }
-const recognitionToggle: React.CSSProperties = { display: "flex", alignItems: "flex-start", gap: 10, padding: 12, border: "1px solid #3f3f46", borderRadius: 9, background: "#18181b", cursor: "pointer" }
-const recognitionSmall: React.CSSProperties = { display: "block", marginTop: 4, color: "#a1a1aa", fontWeight: 400 }
-const recognitionBadges: React.CSSProperties = { display: "flex", flexWrap: "wrap", gap: 10, margin: "16px 0 0", padding: 14, border: "1px solid #3f3f46", borderRadius: 9 }
-const recognitionLegend: React.CSSProperties = { padding: "0 6px", color: "#d4d4d8", fontWeight: 800 }
-const recognitionBadgeOption: React.CSSProperties = { display: "flex", alignItems: "center", gap: 7, padding: "7px 10px", borderRadius: 999, background: "#27272a", cursor: "pointer" }
-const recognitionSaveButton: React.CSSProperties = { marginTop: 16, padding: "10px 14px", border: 0, borderRadius: 8, background: "#2563eb", color: "white", fontWeight: 800, cursor: "pointer" }
 
 const quickStats: React.CSSProperties = {
   display: "grid",

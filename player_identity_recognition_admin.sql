@@ -1,5 +1,13 @@
 begin;
 
+alter table public.players
+  drop constraint if exists players_profile_badges_allowed;
+alter table public.players
+  add constraint players_profile_badges_allowed
+  check (
+    profile_badges <@ array['Owner', 'Co-Head Admin', 'Tournament Admin', 'Admin']::text[]
+  );
+
 create or replace function public.set_site_player_profile_recognition(
   p_player_id uuid,
   p_is_server_booster boolean,
@@ -39,7 +47,7 @@ begin
     select 1
     from unnest(v_badges) as badge
     where badge is null
-       or badge not in ('Owner', 'Co-Head Admin', 'Tournament Admin')
+       or badge not in ('Owner', 'Co-Head Admin', 'Tournament Admin', 'Admin')
   ) then
     raise exception 'One or more profile recognition badges are not allowed';
   end if;

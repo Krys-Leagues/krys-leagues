@@ -13,6 +13,9 @@ type Player = {
   status: string | null
   active: boolean | null
   avatar_path: string | null
+  is_server_booster: boolean
+  has_krys_server_tag: boolean
+  profile_badges: string[]
 }
 
 type LeagueMembership = {
@@ -74,6 +77,7 @@ const TOURNAMENT_BRACKETS = [
 ]
 
 const PLAYER_STATUSES = ["active", "inactive", "archived", "memorial"]
+const PROFILE_BADGE_OPTIONS = ["Owner", "Co-Head Admin", "Tournament Admin", "Admin"] as const
 
 const STATUS_COLORS: Record<string, string> = {
   active: "#16a34a",
@@ -118,6 +122,12 @@ export default function PlayersAdminPage() {
   const [discordName, setDiscordName] = useState("")
   const [savingDiscord, setSavingDiscord] = useState(false)
   const [discordError, setDiscordError] = useState("")
+  const [recognitionPlayer, setRecognitionPlayer] = useState<Player | null>(null)
+  const [recognitionBooster, setRecognitionBooster] = useState(false)
+  const [recognitionServerTag, setRecognitionServerTag] = useState(false)
+  const [recognitionBadges, setRecognitionBadges] = useState<string[]>([])
+  const [savingRecognition, setSavingRecognition] = useState(false)
+  const [recognitionError, setRecognitionError] = useState("")
   const [successMessage, setSuccessMessage] = useState("")
 
   useEffect(() => {
@@ -142,7 +152,7 @@ export default function PlayersAdminPage() {
     const [playersResult, membershipsResult, tournamentsResult, identityLinksResult] = await Promise.all([
       supabase
         .from("players")
-        .select("id, screen_name, discord_id, discord_name, status, active, avatar_path")
+        .select("id, screen_name, discord_id, discord_name, status, active, avatar_path, is_server_booster, has_krys_server_tag, profile_badges")
         .order("screen_name", { ascending: true }),
       supabase
         .from("player_league_memberships")
@@ -216,7 +226,54 @@ export default function PlayersAdminPage() {
     if (action === "league") openLeagueModal(player)
     if (action === "tournament") openTournamentModal(player)
     if (action === "status") openStatusModal(player)
+    if (action === "recognition") openRecognitionModal(player)
     if (action === "merge") router.push(`/admin/players/merge?remove=${player.id}`)
+  }
+
+  function openRecognitionModal(player: Player) {
+    setRecognitionPlayer(player)
+    setRecognitionBooster(Boolean(player.is_server_booster))
+    setRecognitionServerTag(Boolean(player.has_krys_server_tag))
+    setRecognitionBadges(player.profile_badges || [])
+    setRecognitionError("")
+    setSuccessMessage("")
+  }
+
+  function toggleRecognitionBadge(badge: string) {
+    setRecognitionBadges((current) => current.includes(badge)
+      ? current.filter((currentBadge) => currentBadge !== badge)
+      : [...current, badge])
+  }
+
+  async function saveProfileRecognition() {
+    if (!recognitionPlayer) return
+    setSavingRecognition(true)
+    setRecognitionError("")
+    const { data, error } = await supabase.rpc("set_site_player_profile_recognition", {
+      p_player_id: recognitionPlayer.id,
+      p_is_server_booster: recognitionBooster,
+      p_has_krys_server_tag: recognitionServerTag,
+      p_profile_badges: recognitionBadges,
+    })
+    setSavingRecognition(false)
+    if (error) { setRecognitionError(error.message); return }
+
+    const saved = (Array.isArray(data) ? data[0] : data) as {
+      is_server_booster: boolean
+      has_krys_server_tag: boolean
+      profile_badges: string[]
+    } | null
+    if (!saved) { setRecognitionError("Recognition settings were not returned after saving."); return }
+
+    const savedPlayerName = recognitionPlayer.screen_name
+    setPlayers((current) => current.map((player) => player.id === recognitionPlayer.id ? {
+      ...player,
+      is_server_booster: saved.is_server_booster,
+      has_krys_server_tag: saved.has_krys_server_tag,
+      profile_badges: saved.profile_badges || [],
+    } : player))
+    setRecognitionPlayer(null)
+    setSuccessMessage(`Profile recognition saved for ${savedPlayerName}.`)
   }
 
   function openDiscordModal(player: Player) {
@@ -700,6 +757,7 @@ export default function PlayersAdminPage() {
                       <option value="league">League</option>
                       <option value="tournament">Tournament</option>
                       <option value="status">Status</option>
+                      <option value="recognition">Profile Recognition</option>
                     </optgroup>
                     <optgroup label="Identity — use carefully">
                       <option value="merge">Merge</option>
@@ -890,6 +948,42 @@ export default function PlayersAdminPage() {
             <button type="button" style={cancelButton} disabled={savingDiscord} onClick={() => setDiscordPlayer(null)}>Cancel</button>
             <button type="button" style={saveButton} disabled={savingDiscord || !discordId.trim()} onClick={saveDiscordIdentity}>
               {savingDiscord ? "Saving..." : "Save Discord"}
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {recognitionPlayer && (
+        <Modal title="Profile Recognition" onClose={() => !savingRecognition && setRecognitionPlayer(null)}>
+          <p style={modalPlayerName}>{recognitionPlayer.screen_name}</p>
+          <p style={hint}>Presentation only. These controls never grant site permissions.</p>
+
+          <div style={recognitionToggleGrid}>
+            <label style={recognitionToggle}>
+              <input type="checkbox" checked={recognitionBooster} disabled={savingRecognition} onChange={(event) => setRecognitionBooster(event.target.checked)} />
+              Server Booster
+            </label>
+            <label style={recognitionToggle}>
+              <input type="checkbox" checked={recognitionServerTag} disabled={savingRecognition} onChange={(event) => setRecognitionServerTag(event.target.checked)} />
+              Krys Server Tag
+            </label>
+          </div>
+
+          <fieldset style={recognitionBadgeFieldset} disabled={savingRecognition}>
+            <legend style={recognitionLegend}>Profile Badge / Staff Recognition</legend>
+            {PROFILE_BADGE_OPTIONS.map((badge) => (
+              <label key={badge} style={recognitionBadgeOption}>
+                <input type="checkbox" checked={recognitionBadges.includes(badge)} onChange={() => toggleRecognitionBadge(badge)} />
+                {badge}
+              </label>
+            ))}
+          </fieldset>
+
+          {recognitionError && <p role="alert" style={modalError}>{recognitionError}</p>}
+          <div style={modalActions}>
+            <button type="button" style={cancelButton} disabled={savingRecognition} onClick={() => setRecognitionPlayer(null)}>Cancel</button>
+            <button type="button" style={saveButton} disabled={savingRecognition} onClick={saveProfileRecognition}>
+              {savingRecognition ? "Saving..." : "Save Recognition"}
             </button>
           </div>
         </Modal>
@@ -1228,3 +1322,9 @@ const successNotice: React.CSSProperties = {
   background: "#052e16",
   color: "#bbf7d0",
 }
+
+const recognitionToggleGrid: React.CSSProperties = { display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 10 }
+const recognitionToggle: React.CSSProperties = { display: "flex", alignItems: "center", gap: 8, padding: 11, border: "1px solid #3f3f46", borderRadius: 9, background: "#18181b", cursor: "pointer" }
+const recognitionBadgeFieldset: React.CSSProperties = { display: "flex", flexWrap: "wrap", gap: 9, padding: 13, border: "1px solid #3f3f46", borderRadius: 9 }
+const recognitionLegend: React.CSSProperties = { padding: "0 6px", color: "#d4d4d8", fontWeight: 800 }
+const recognitionBadgeOption: React.CSSProperties = { display: "flex", alignItems: "center", gap: 7, padding: "7px 10px", borderRadius: 999, background: "#27272a", cursor: "pointer" }

@@ -17,7 +17,7 @@ alter table public.players
 alter table public.players
   add constraint players_profile_badges_allowed
   check (
-    profile_badges <@ array['Owner', 'Co-Head Admin', 'Tournament Admin']::text[]
+    profile_badges <@ array['Owner', 'Co-Head Admin', 'Tournament Admin', 'Admin']::text[]
   );
 
 -- PostgreSQL requires the function to be dropped before adding OUT columns.
