@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
+import PlayerAvatar from "@/components/PlayerAvatar"
 
 type Player = {
   id: string
@@ -11,6 +12,7 @@ type Player = {
   discord_name: string | null
   status: string | null
   active: boolean | null
+  avatar_path: string | null
 }
 
 type LeagueMembership = {
@@ -140,7 +142,7 @@ export default function PlayersAdminPage() {
     const [playersResult, membershipsResult, tournamentsResult, identityLinksResult] = await Promise.all([
       supabase
         .from("players")
-        .select("id, screen_name, discord_id, discord_name, status, active")
+        .select("id, screen_name, discord_id, discord_name, status, active, avatar_path")
         .order("screen_name", { ascending: true }),
       supabase
         .from("player_league_memberships")
@@ -653,12 +655,15 @@ export default function PlayersAdminPage() {
             return (
               <tr key={p.id}>
                 <td style={playerTd}>
-                  <button
-                    onClick={() => router.push(`/admin/players/${p.id}`)}
-                    style={playerNameButton}
-                  >
-                    {p.screen_name}
-                  </button>
+                  <div style={playerIdentityCell}>
+                    <PlayerAvatar screenName={p.screen_name} avatarPath={p.avatar_path} size={40} />
+                    <button
+                      onClick={() => router.push(`/admin/players/${p.id}`)}
+                      style={playerNameButton}
+                    >
+                      {p.screen_name}
+                    </button>
+                  </div>
                 </td>
 
                 <td style={td}>
@@ -1049,6 +1054,13 @@ const membershipBadge: React.CSSProperties = {
 
 const emptyMembership: React.CSSProperties = {
   color: "#71717a",
+}
+
+const playerIdentityCell: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: 10,
+  minWidth: 0,
 }
 
 const actionsTd: React.CSSProperties = {

@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
+import PlayerAvatar from "@/components/PlayerAvatar"
+import { prepareCanonicalAvatarForMerge, removeOldPlayerAvatarObjects } from "@/lib/playerAvatars"
 
 type Candidate = {
   id: string
@@ -73,6 +75,8 @@ type MergePreview = {
   transition_reference_count: number
   trophy_count: number
   approved_history_count: number
+  avatar_conflict: boolean
+  avatar_candidates: Array<{player_id:string;screen_name:string;avatar_path:string}>
 }
 
 function candidateFromRow(row: CandidatePairRow, side: 1 | 2): Candidate {
@@ -156,6 +160,7 @@ export default function DuplicatePlayerReviewPage() {
   const [skipped, setSkipped] = useState<Set<string>>(new Set())
   const [preview, setPreview] = useState<MergePreview | null>(null)
   const [previewGroupId, setPreviewGroupId] = useState("")
+  const [selectedAvatarPath, setSelectedAvatarPath] = useState("")
 
   async function loadCandidates() {
     setLoading(true)
@@ -221,13 +226,14 @@ export default function DuplicatePlayerReviewPage() {
     }
     setBusy(true)
     setError("")
-    const { data, error: previewError } = await supabase.rpc("preview_site_player_identity_merge", {
-      p_keep_player_id: keepId,
-      p_merge_player_ids: selected.filter((id) => id !== keepId),
-    })
+    const mergeIds=selected.filter((id)=>id!==keepId)
+    const [{data,error:previewError},{data:avatarData,error:avatarError}]=await Promise.all([
+      supabase.rpc("preview_site_player_identity_merge",{p_keep_player_id:keepId,p_merge_player_ids:mergeIds}),
+      supabase.rpc("preview_site_player_avatar_merge",{p_keep_player_id:keepId,p_merge_player_ids:mergeIds}),
+    ])
     setBusy(false)
-    if (previewError) {
-      setError(previewError.message)
+    if (previewError || avatarError) {
+      setError(previewError?.message || avatarError?.message || "Merge preview failed.")
       return
     }
     const saved = Array.isArray(data) ? data[0] : data
@@ -235,7 +241,9 @@ export default function DuplicatePlayerReviewPage() {
       setError("The merge preview returned no information.")
       return
     }
-    setPreview(saved as MergePreview)
+    const avatarPreview=Array.isArray(avatarData)?avatarData[0]:avatarData
+    setPreview({...saved,...avatarPreview} as MergePreview)
+    setSelectedAvatarPath("")
     setPreviewGroupId(group.id)
   }
 
@@ -243,20 +251,41 @@ export default function DuplicatePlayerReviewPage() {
     if (!preview) return
     setBusy(true)
     setError("")
-    const { error: mergeError } = await supabase.rpc("merge_site_player_identities", {
-      p_keep_player_id: preview.keep_player_id,
-      p_merge_player_ids: preview.merging_players.map((player) => player.id),
-    })
-    setBusy(false)
-    if (mergeError) {
-      setError(mergeError.message)
+    let preparedAvatar
+    try {
+      preparedAvatar = await prepareCanonicalAvatarForMerge({
+        keepPlayerId: preview.keep_player_id,
+        candidates: preview.avatar_candidates,
+        selectedAvatarPath: selectedAvatarPath || undefined,
+      })
+    } catch (avatarError) {
+      setBusy(false)
+      setError(avatarError instanceof Error ? avatarError.message : "Avatar preservation failed")
       return
     }
+    const { error: mergeError } = await supabase.rpc("merge_site_player_identities_with_avatar", {
+      p_keep_player_id: preview.keep_player_id,
+      p_merge_player_ids: preview.merging_players.map((player) => player.id),
+      p_selected_avatar_path: preparedAvatar.sourceAvatarPath,
+      p_canonical_avatar_path: preparedAvatar.canonicalAvatarPath,
+    })
+    setBusy(false)
+    if (mergeError) { setError(mergeError.message); return }
+    const cleanupError = await removeOldPlayerAvatarObjects(preparedAvatar.oldAvatarPaths)
     setPreview(null)
     setSelectedByGroup((value) => ({ ...value, [previewGroupId]: [] }))
     setKeepByGroup((value) => ({ ...value, [previewGroupId]: "" }))
-    setMessage("Selected identities were merged into the canonical player.")
+    setMessage(cleanupError
+      ? `Selected identities were merged. Old avatar cleanup needs review: ${cleanupError}`
+      : "Selected identities were merged into the canonical player.")
     await loadCandidates()
+  }
+
+  function resolveAvatarConflict() {
+    if(!preview||!selectedAvatarPath)return
+    setError("")
+    setPreview({...preview,avatar_conflict:false})
+    setMessage("Canonical avatar selected. Review and confirm the identity merge.")
   }
 
   async function markDifferent(group: CandidateGroup) {
@@ -333,9 +362,10 @@ export default function DuplicatePlayerReviewPage() {
       <div style={previewSection}><strong>KEEP PLAYER</strong><div style={playerName}>{preview.keep_screen_name}</div><code style={uuid}>{preview.keep_player_id}</code><div>{preview.keep_discord_linked ? "Discord linked" : "Discord not linked"}</div></div>
       <div style={previewSection}><strong>MERGING / RETIRING</strong>{preview.merging_players.map((player) => <div key={player.id} style={previewPlayer}>{player.screen_name} · <code>{player.id}</code> · {player.discord_linked ? "Discord linked" : "Discord not linked"}</div>)}</div>
       <div style={previewSection}><strong>Aliases preserved</strong><div>{preview.aliases_to_create.length ? preview.aliases_to_create.join(", ") : "None"}</div></div>
+      <div style={previewSection}><strong>{preview.avatar_conflict?"AVATAR CONFLICT — REVIEW REQUIRED":"Canonical avatar"}</strong>{preview.avatar_candidates.length===0?<div>No avatar</div>:<div style={avatarCandidates}>{preview.avatar_candidates.map((candidate)=><label key={`${candidate.player_id}-${candidate.avatar_path}`} style={avatarChoice}><PlayerAvatar screenName={candidate.screen_name} avatarPath={candidate.avatar_path} size={76} />{preview.avatar_conflict&&<input type="radio" name="avatar-choice" checked={selectedAvatarPath===candidate.avatar_path} onChange={()=>setSelectedAvatarPath(candidate.avatar_path)} />}<span>{candidate.screen_name}</span></label>)}</div>}{preview.avatar_conflict&&<button style={primaryButton} disabled={busy||!selectedAvatarPath} onClick={resolveAvatarConflict}>Use Selected Avatar for KEEP Player</button>}</div>
       <div style={previewCounts}>Results {preview.results_count} · Schedule {preview.schedule_count} · League memberships {preview.league_membership_count} · Tournament entries {preview.tournament_entry_count} · Rosters {preview.roster_reference_count} · Transition decisions {preview.transition_reference_count} · Trophies {preview.trophy_count} · Approved history {preview.approved_history_count}</div>
       <p style={warning}>Frozen historical rows remain unchanged. Their UUIDs resolve to the KEEP player for combined career history.</p>
-      <div style={actions}><button style={secondaryButton} disabled={busy} onClick={() => setPreview(null)}>Cancel</button><button style={dangerButton} disabled={busy} onClick={confirmMerge}>{busy ? "Merging…" : "Confirm Permanent Merge"}</button></div>
+      <div style={actions}><button style={secondaryButton} disabled={busy} onClick={() => setPreview(null)}>Cancel</button><button style={dangerButton} disabled={busy||preview.avatar_conflict} onClick={confirmMerge}>{busy ? "Merging…" : "Confirm Permanent Merge"}</button></div>
     </section></div>}
   </div></main>
 }
@@ -375,3 +405,5 @@ const previewSection: React.CSSProperties = { marginTop: 14, padding: 13, backgr
 const previewPlayer: React.CSSProperties = { marginTop: 8, overflowWrap: "anywhere" }
 const previewCounts: React.CSSProperties = { marginTop: 14, lineHeight: 1.7, color: "#d4d4d8" }
 const warning: React.CSSProperties = { color: "#fde68a" }
+const avatarCandidates:React.CSSProperties={display:"flex",gap:12,flexWrap:"wrap",marginTop:12}
+const avatarChoice:React.CSSProperties={display:"flex",alignItems:"center",gap:8,padding:10,border:"1px solid #52525b",borderRadius:10}

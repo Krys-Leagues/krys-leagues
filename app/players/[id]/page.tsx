@@ -2,8 +2,10 @@
 
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
+import PlayerProfileHero from "@/components/PlayerProfileHero"
+import { getCanonicalPlayerAvatar } from "@/lib/playerAvatars"
 
 type Player = {
   id: string
@@ -109,6 +111,7 @@ type PypFixtureHistory = {
 
 export default function PublicPlayerProfilePage() {
   const params = useParams()
+  const router = useRouter()
   const playerId = Array.isArray(params.id) ? params.id[0] : params.id
 
   const [player, setPlayer] = useState<Player | null>(null)
@@ -126,6 +129,7 @@ export default function PublicPlayerProfilePage() {
   const [message, setMessage] = useState("")
   const [aliases, setAliases] = useState<string[]>([])
   const [identityPlayerIds, setIdentityPlayerIds] = useState<string[]>([])
+  const [avatarPath, setAvatarPath] = useState<string | null>(null)
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/immutability
@@ -163,6 +167,9 @@ export default function PublicPlayerProfilePage() {
       return
     }
     const canonicalId = identity.canonical_player_id
+    if (canonicalId !== playerId) {
+      router.replace(`/players/${canonicalId}`)
+    }
     const identityIds = identity.identity_player_ids.length > 0
       ? identity.identity_player_ids
       : [canonicalId]
@@ -180,6 +187,7 @@ export default function PublicPlayerProfilePage() {
       matchHistoryResponse,
       pypHistoryResponse,
       pypFixtureHistoryResponse,
+      avatarResponse,
     ] = await Promise.all([
       supabase
         .from("players")
@@ -217,6 +225,7 @@ export default function PublicPlayerProfilePage() {
       supabase.rpc("get_public_pyp_player_fixture_history", {
         p_player_id: playerId,
       }),
+      getCanonicalPlayerAvatar(playerId).catch(() => ({ canonicalPlayerId: playerId, avatarPath: null })),
     ])
 
     if (playerResponse.error) {
@@ -257,6 +266,7 @@ export default function PublicPlayerProfilePage() {
     if (pypFixtureHistoryResponse.error && !pypHistoryResponse.error) {
       setPypHistoryError(`PYP fixture history could not be loaded: ${pypFixtureHistoryResponse.error.message}`)
     }
+    setAvatarPath(avatarResponse.avatarPath)
     setLoading(false)
   }
 
@@ -299,10 +309,6 @@ export default function PublicPlayerProfilePage() {
     ).size
   }, [memberships])
 
-  const status =
-    player?.status ||
-    (player?.active === false ? "inactive" : "active")
-
   if (loading) {
     return (
       <main style={page}>
@@ -342,20 +348,15 @@ export default function PublicPlayerProfilePage() {
           </Link>
         </div>
 
-        <section style={hero}>
-          <h1 style={title}>{player.screen_name}</h1>
-
-          {aliases.length > 0 && (
-            <p style={aliasLine}>Aliases / former names: {aliases.join(", ")}</p>
-          )}
-
-          <p style={subtitle}>
-            Career history, league progression, statistics, trophies, and
-            achievements.
-          </p>
-
-          <span style={statusBadge}>{status.toUpperCase()}</span>
-        </section>
+        <PlayerProfileHero
+          screenName={player.screen_name}
+          avatarPath={avatarPath}
+          aliases={aliases}
+          // TODO(identity): Replace these presentation fallbacks with canonical
+          // Identity Management values once booster/tag status is exposed.
+          isServerBooster={false}
+          hasKrysServerTag={false}
+        />
 
         <section style={statsGrid}>
           <div style={statCard}>
@@ -641,35 +642,6 @@ const backButton: React.CSSProperties = {
   fontWeight: 700,
 }
 
-const hero: React.CSSProperties = {
-  padding: 26,
-  background: "rgba(2, 6, 23, 0.9)",
-  border: "1px solid #334155",
-  borderRadius: 20,
-  marginBottom: 20,
-}
-
-const title: React.CSSProperties = {
-  margin: 0,
-  fontSize: "clamp(36px, 8vw, 52px)",
-}
-
-const subtitle: React.CSSProperties = {
-  color: "#cbd5e1",
-  fontSize: 18,
-  lineHeight: 1.5,
-}
-
-const statusBadge: React.CSSProperties = {
-  display: "inline-block",
-  marginTop: 8,
-  padding: "7px 12px",
-  background: "#166534",
-  borderRadius: 999,
-  fontSize: 13,
-  fontWeight: 800,
-}
-
 const statsGrid: React.CSSProperties = {
   display: "grid",
   gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
@@ -740,12 +712,6 @@ const trophyImage: React.CSSProperties = {
 
 const muted: React.CSSProperties = {
   color: "#94a3b8",
-}
-
-const aliasLine: React.CSSProperties = {
-  color: "#cbd5e1",
-  margin: "8px 0 0",
-  fontSize: 14,
 }
 
 const historyError: React.CSSProperties = {

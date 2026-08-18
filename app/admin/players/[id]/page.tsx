@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
+import PlayerAvatar from "@/components/PlayerAvatar"
+import { getCanonicalPlayerAvatar, PLAYER_AVATAR_BUCKET, playerAvatarObjectPath, validatePlayerAvatarFile } from "@/lib/playerAvatars"
 
 type Player = {
   id: string
@@ -49,6 +51,7 @@ type CareerStats = {
 }
 
 type CanonicalIdentity = {
+  canonical_player_id: string
   canonical_screen_name: string
   aliases: string[] | null
 }
@@ -71,6 +74,12 @@ export default function PlayerProfilePage() {
     winPercent: "0%",
   })
   const [loading, setLoading] = useState(true)
+  const [avatarPath, setAvatarPath] = useState<string | null>(null)
+  const [avatarFile, setAvatarFile] = useState<File | null>(null)
+  const [avatarPreviewUrl, setAvatarPreviewUrl] = useState("")
+  const [avatarBusy, setAvatarBusy] = useState(false)
+  const [avatarError, setAvatarError] = useState("")
+  const [avatarMessage, setAvatarMessage] = useState("")
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/immutability
@@ -85,14 +94,6 @@ export default function PlayerProfilePage() {
     setLoading(true)
     setFormerNamesError("")
 
-    const { data: playerData } = await supabase
-      .from("players")
-      .select("id, screen_name, discord_id, discord_name, discord_username, status, active")
-      .eq("id", playerId)
-      .single()
-
-    setPlayer(playerData)
-
     const { data: identityData, error: identityError } = await supabase.rpc(
       "get_public_player_canonical_identity",
       { p_player_id: playerId }
@@ -106,7 +107,7 @@ export default function PlayerProfilePage() {
         Array.isArray(identityData) ? identityData[0] : identityData
       ) as CanonicalIdentity | null
       const currentCanonicalName =
-        identity?.canonical_screen_name || playerData?.screen_name || ""
+        identity?.canonical_screen_name || ""
 
       setFormerNames(
         Array.from(
@@ -118,6 +119,18 @@ export default function PlayerProfilePage() {
         )
       )
     }
+
+    const identity = (Array.isArray(identityData) ? identityData[0] : identityData) as CanonicalIdentity | null
+    const canonicalPlayerId = identity?.canonical_player_id || playerId
+    const [{ data: playerData }, avatarResult] = await Promise.all([
+      supabase.from("players").select("id, screen_name, discord_id, discord_name, discord_username, status, active").eq("id", canonicalPlayerId).single(),
+      getCanonicalPlayerAvatar(canonicalPlayerId)
+        .then((avatar) => ({ avatar, error: "" }))
+        .catch((error: unknown) => ({ avatar: null, error: error instanceof Error ? error.message : "Avatar could not be loaded" })),
+    ])
+    setPlayer(playerData)
+    if (avatarResult.error) setAvatarError(`Could not load avatar: ${avatarResult.error}`)
+    else setAvatarPath(avatarResult.avatar?.avatarPath || null)
 
     const { data: membershipData } = await supabase
       .from("player_league_memberships")
@@ -165,6 +178,44 @@ export default function PlayerProfilePage() {
 
     setLoading(false)
   }
+
+  async function chooseAvatar(file: File | null) {
+    if (avatarPreviewUrl) URL.revokeObjectURL(avatarPreviewUrl)
+    setAvatarError("")
+    setAvatarMessage("")
+    if (!file) { setAvatarFile(null); setAvatarPreviewUrl(""); return }
+    const validationError = await validatePlayerAvatarFile(file)
+    if (validationError) { setAvatarFile(null); setAvatarPreviewUrl(""); setAvatarError(validationError); return }
+    setAvatarFile(file)
+    setAvatarPreviewUrl(URL.createObjectURL(file))
+  }
+
+  async function saveAvatar() {
+    if (!player || !avatarFile) return
+    setAvatarBusy(true); setAvatarError(""); setAvatarMessage("")
+    const nextPath = playerAvatarObjectPath(player.id, avatarFile)
+    const { error: uploadError } = await supabase.storage.from(PLAYER_AVATAR_BUCKET).upload(nextPath, avatarFile, { contentType: avatarFile.type, upsert: false })
+    if (uploadError) { setAvatarBusy(false); setAvatarError(uploadError.message); return }
+    const { error: saveError } = await supabase.rpc("set_site_player_avatar_path", { p_player_id: player.id, p_avatar_path: nextPath })
+    if (saveError) {
+      await supabase.storage.from(PLAYER_AVATAR_BUCKET).remove([nextPath])
+      setAvatarBusy(false); setAvatarError(saveError.message); return
+    }
+    const previousPath = avatarPath
+    setAvatarPath(nextPath); await chooseAvatar(null); setAvatarBusy(false)
+    setAvatarMessage(previousPath ? "Avatar replaced." : "Avatar uploaded.")
+    if (previousPath && previousPath !== nextPath) await supabase.storage.from(PLAYER_AVATAR_BUCKET).remove([previousPath])
+  }
+
+  async function removeAvatar() {
+    if (!player || !avatarPath) return
+    setAvatarBusy(true); setAvatarError(""); setAvatarMessage("")
+    const previousPath = avatarPath
+    const { error: removeReferenceError } = await supabase.rpc("set_site_player_avatar_path", { p_player_id: player.id, p_avatar_path: null })
+    if (removeReferenceError) { setAvatarBusy(false); setAvatarError(removeReferenceError.message); return }
+    setAvatarPath(null); setAvatarBusy(false); setAvatarMessage("Avatar removed.")
+    await supabase.storage.from(PLAYER_AVATAR_BUCKET).remove([previousPath])
+  }
     if (loading) {
     return <p style={{ color: "white", padding: 20 }}>Loading player...</p>
   }
@@ -208,7 +259,18 @@ const totalSeasons = new Set(
         </div>
 
         <div style={card}>
-          <h1 style={playerName}>{player.screen_name}</h1>
+          <div style={avatarHeader}>
+            <PlayerAvatar screenName={player.screen_name} avatarPath={avatarPreviewUrl || avatarPath} size={120} />
+            <div><h1 style={playerName}>{player.screen_name}</h1><p style={muted}>Canonical Global Player avatar</p></div>
+          </div>
+
+          <div style={avatarControls}>
+            <label style={avatarFileButton}>{avatarPath ? "Replace Avatar" : "Upload Avatar"}<input type="file" accept="image/png,image/jpeg,image/webp" hidden disabled={avatarBusy} onChange={(event)=>void chooseAvatar(event.target.files?.[0]||null)} /></label>
+            {avatarFile && <button style={avatarSaveButton} disabled={avatarBusy} onClick={saveAvatar}>{avatarBusy?"Saving…":"Save Avatar"}</button>}
+            {avatarPath && <button style={avatarRemoveButton} disabled={avatarBusy} onClick={removeAvatar}>Remove Avatar</button>}
+          </div>
+          {avatarError && <p style={aliasErrorText}>{avatarError}</p>}
+          {avatarMessage && <p style={avatarSuccessText}>{avatarMessage}</p>}
 
           <div style={quickStats}>
             <div style={statBox}>
@@ -402,6 +464,13 @@ const playerName: React.CSSProperties = {
   fontSize: 36,
   marginBottom: 14,
 }
+
+const avatarHeader: React.CSSProperties = { display: "flex", alignItems: "center", gap: 18, flexWrap: "wrap" }
+const avatarControls: React.CSSProperties = { display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", margin: "16px 0" }
+const avatarFileButton: React.CSSProperties = { padding: "10px 14px", borderRadius: 8, background: "#2563eb", color: "white", fontWeight: 800, cursor: "pointer" }
+const avatarSaveButton: React.CSSProperties = { padding: "10px 14px", border: 0, borderRadius: 8, background: "#16a34a", color: "white", fontWeight: 800, cursor: "pointer" }
+const avatarRemoveButton: React.CSSProperties = { padding: "10px 14px", border: "1px solid #dc2626", borderRadius: 8, background: "#450a0a", color: "#fecaca", fontWeight: 800, cursor: "pointer" }
+const avatarSuccessText: React.CSSProperties = { color: "#86efac" }
 
 const quickStats: React.CSSProperties = {
   display: "grid",

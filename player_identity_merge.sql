@@ -131,6 +131,8 @@ declare
   v_final_discord_id text;
   v_final_discord_name text;
   v_distinct_discord_ids text[];
+  v_distinct_avatar_paths text[];
+  v_final_avatar_path text;
   v_aliases text[] := array[]::text[];
   v_alias_row record;
   v_inserted_alias_id uuid;
@@ -157,6 +159,9 @@ begin
   );
   perform pg_catalog.pg_advisory_xact_lock(
     pg_catalog.hashtextextended('site-player-discord-identity', 0)
+  );
+  perform pg_catalog.pg_advisory_xact_lock(
+    pg_catalog.hashtextextended('site-player-avatar', 0)
   );
 
   perform 1
@@ -314,6 +319,21 @@ begin
     raise exception 'The selected players have conflicting Discord identities and cannot be merged';
   end if;
 
+  select array_agg(distinct avatar_path order by avatar_path)
+  into v_distinct_avatar_paths
+  from (
+    select nullif(btrim(player.avatar_path), '') as avatar_path
+    from public.players as player
+    where player.id = p_keep_player_id or player.id = any(v_merge_ids)
+  ) as identity
+  where avatar_path is not null;
+
+  if coalesce(cardinality(v_distinct_avatar_paths), 0) > 1 then
+    raise exception 'AVATAR CONFLICT — REVIEW REQUIRED';
+  end if;
+
+  v_final_avatar_path := v_distinct_avatar_paths[1];
+
   v_final_discord_id := coalesce(v_keep_discord_id, v_distinct_discord_ids[1]);
 
   select coalesce(
@@ -452,13 +472,15 @@ begin
   update public.players as player
   set discord_id = null,
       discord_name = null,
+      avatar_path = null,
       active = false,
       status = 'archived'
   where player.id = any(v_merge_ids);
 
   update public.players as player
   set discord_id = v_final_discord_id,
-      discord_name = v_final_discord_name
+      discord_name = v_final_discord_name,
+      avatar_path = v_final_avatar_path
   where player.id = p_keep_player_id;
 
   return query select p_keep_player_id, v_keep_name, v_merge_ids, v_aliases;
@@ -469,6 +491,110 @@ revoke all on function public.merge_site_player_identities(uuid, uuid[]) from pu
 revoke all on function public.merge_site_player_identities(uuid, uuid[]) from anon;
 revoke all on function public.merge_site_player_identities(uuid, uuid[]) from authenticated;
 grant execute on function public.merge_site_player_identities(uuid, uuid[]) to authenticated;
+
+create or replace function public.merge_site_player_identities_with_avatar(
+  p_keep_player_id uuid,
+  p_merge_player_ids uuid[],
+  p_selected_avatar_path text default null,
+  p_canonical_avatar_path text default null
+)
+returns table(
+  canonical_player_id uuid,
+  canonical_screen_name text,
+  merged_player_ids uuid[],
+  aliases_created text[]
+)
+language plpgsql
+security definer
+set search_path to ''
+as $function$
+declare
+  v_merge_ids uuid[];
+  v_avatar_paths text[];
+  v_selected_path text := nullif(btrim(p_selected_avatar_path), '');
+  v_canonical_path text := nullif(btrim(p_canonical_avatar_path), '');
+begin
+  if not public.is_current_user_site_admin() then
+    raise exception 'Administrator authorization is required';
+  end if;
+
+  select array_agg(distinct value order by value)
+  into v_merge_ids
+  from unnest(p_merge_player_ids) as value
+  where value is not null and value <> p_keep_player_id;
+
+  if p_keep_player_id is null or coalesce(cardinality(v_merge_ids), 0) < 1 then
+    raise exception 'KEEP and MERGE players are required';
+  end if;
+
+  perform pg_catalog.pg_advisory_xact_lock(
+    pg_catalog.hashtextextended('site-player-avatar', 0)
+  );
+
+  perform 1
+  from public.players as player
+  where player.id = p_keep_player_id or player.id = any(v_merge_ids)
+  order by player.id
+  for update;
+
+  if (select count(*) from public.players as player
+      where player.id = p_keep_player_id or player.id = any(v_merge_ids))
+     <> cardinality(v_merge_ids) + 1 then
+    raise exception 'One or more selected players do not exist';
+  end if;
+
+  select array_agg(distinct avatar_path order by avatar_path)
+  into v_avatar_paths
+  from (
+    select nullif(btrim(player.avatar_path), '') as avatar_path
+    from public.players as player
+    where player.id = p_keep_player_id or player.id = any(v_merge_ids)
+  ) as identity
+  where avatar_path is not null;
+
+  if coalesce(cardinality(v_avatar_paths), 0) = 0 then
+    if v_selected_path is not null or v_canonical_path is not null then
+      raise exception 'No selected player owns the supplied avatar';
+    end if;
+  else
+    if v_selected_path is null and cardinality(v_avatar_paths) = 1 then
+      v_selected_path := v_avatar_paths[1];
+    end if;
+    if v_selected_path is null or not (v_selected_path = any(v_avatar_paths)) then
+      raise exception 'AVATAR CONFLICT — REVIEW REQUIRED';
+    end if;
+    if v_canonical_path is null or v_canonical_path !~ (
+      '^' || p_keep_player_id::text || '/avatar-[0-9]+[.](png|jpg|jpeg|webp)$'
+    ) then
+      raise exception 'Prepared avatar path must use the canonical KEEP player UUID';
+    end if;
+  end if;
+
+  update public.players as player
+  set avatar_path = null
+  where player.id = any(v_merge_ids);
+
+  update public.players as player
+  set avatar_path = v_canonical_path
+  where player.id = p_keep_player_id;
+
+  return query
+  select
+    merged.canonical_player_id,
+    merged.canonical_screen_name,
+    merged.merged_player_ids,
+    merged.aliases_created
+  from public.merge_site_player_identities(
+    p_keep_player_id,
+    v_merge_ids
+  ) as merged;
+end;
+$function$;
+
+revoke all on function public.merge_site_player_identities_with_avatar(uuid, uuid[], text, text) from public;
+revoke all on function public.merge_site_player_identities_with_avatar(uuid, uuid[], text, text) from anon;
+revoke all on function public.merge_site_player_identities_with_avatar(uuid, uuid[], text, text) from authenticated;
+grant execute on function public.merge_site_player_identities_with_avatar(uuid, uuid[], text, text) to authenticated;
 
 create or replace function public.merge_site_player_identity(
   p_keep_player_id uuid,

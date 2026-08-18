@@ -3,6 +3,8 @@
 import React, { useEffect, useMemo, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { supabase } from "@/lib/supabase"
+import PlayerAvatar from "@/components/PlayerAvatar"
+import { prepareCanonicalAvatarForMerge, removeOldPlayerAvatarObjects } from "@/lib/playerAvatars"
 
 type Player = {
   id: string
@@ -20,6 +22,7 @@ type MergeResult = {
   affected_stroke_season_numbers: number[]
   affected_season_count: number
 }
+type AvatarCandidate={player_id:string;screen_name:string;avatar_path:string}
 
 export default function MergePlayersPage() {
   const router = useRouter()
@@ -33,6 +36,9 @@ export default function MergePlayersPage() {
   const [merging, setMerging] = useState(false)
   const [mergeError, setMergeError] = useState("")
   const [mergeResult, setMergeResult] = useState<MergeResult | null>(null)
+  const [avatarCandidates,setAvatarCandidates]=useState<AvatarCandidate[]>([])
+  const [selectedAvatarPath,setSelectedAvatarPath]=useState("")
+  const [avatarConflict,setAvatarConflict]=useState(false)
 
   useEffect(() => {
     void loadPlayers()
@@ -78,6 +84,17 @@ export default function MergePlayersPage() {
       return
     }
 
+    setMerging(true);setMergeError("")
+    const {data:avatarPreviewData,error:avatarPreviewError}=await supabase.rpc("preview_site_player_avatar_merge",{
+      p_keep_player_id:keepPlayer.id,p_merge_player_ids:[removePlayer.id],
+    })
+    setMerging(false)
+    if(avatarPreviewError){setMergeError(avatarPreviewError.message);return}
+    const avatarPreview=Array.isArray(avatarPreviewData)?avatarPreviewData[0]:avatarPreviewData
+    const reviewedCandidates=(avatarPreview?.avatar_candidates || []) as AvatarCandidate[]
+    setAvatarCandidates(reviewedCandidates)
+    if(avatarPreview?.avatar_conflict && !selectedAvatarPath){setAvatarConflict(true);return}
+
     const confirmed = window.confirm(
       `KEEP PLAYER: ${keepPlayer.screen_name}\nMERGE / REMOVE PLAYER: ${removePlayer.screen_name}\n\nThis protected merge is permanent. Continue?`
     )
@@ -88,9 +105,16 @@ export default function MergePlayersPage() {
     setMergeResult(null)
 
     try {
-      const { data, error } = await supabase.rpc("merge_site_player_identity", {
+      const preparedAvatar = await prepareCanonicalAvatarForMerge({
+        keepPlayerId: keepPlayer.id,
+        candidates: reviewedCandidates,
+        selectedAvatarPath: selectedAvatarPath || undefined,
+      })
+      const { data, error } = await supabase.rpc("merge_site_player_identities_with_avatar", {
         p_keep_player_id: keepPlayer.id,
-        p_merge_player_id: removePlayer.id,
+        p_merge_player_ids: [removePlayer.id],
+        p_selected_avatar_path: preparedAvatar.sourceAvatarPath,
+        p_canonical_avatar_path: preparedAvatar.canonicalAvatarPath,
       })
 
       if (error) throw new Error(error.message)
@@ -98,15 +122,32 @@ export default function MergePlayersPage() {
       const saved = Array.isArray(data) ? data[0] : data
       if (!saved) throw new Error("The merge completed without returning confirmation")
 
-      setMergeResult(saved as MergeResult)
+      setMergeResult({
+        kept_player_id: saved.canonical_player_id,
+        kept_player_name: saved.canonical_screen_name,
+        removed_player_id: removePlayer.id,
+        removed_player_name: removePlayer.screen_name,
+        affected_stroke_season_ids: [],
+        affected_stroke_season_numbers: [],
+        affected_season_count: 0,
+      })
+      const cleanupError = await removeOldPlayerAvatarObjects(preparedAvatar.oldAvatarPaths)
+      if (cleanupError) setMergeError(`Merge succeeded, but old avatar cleanup needs review: ${cleanupError}`)
       setRemovePlayerId("")
       setKeepPlayerId("")
+      setAvatarCandidates([]);setSelectedAvatarPath("");setAvatarConflict(false)
       await loadPlayers()
     } catch (error: unknown) {
       setMergeError(error instanceof Error ? error.message : "Merge failed")
     } finally {
       setMerging(false)
     }
+  }
+
+  function resolveAvatarConflict(){
+    if(!keepPlayer||!removePlayer||!selectedAvatarPath)return
+    setMergeError("")
+    setAvatarConflict(false)
   }
 
   return (
@@ -132,7 +173,7 @@ export default function MergePlayersPage() {
               <h2 style={boxTitle}>MERGE / REMOVE PLAYER</h2>
               <select
                 value={removePlayerId}
-                onChange={(event) => setRemovePlayerId(event.target.value)}
+                onChange={(event) => {setRemovePlayerId(event.target.value);setAvatarCandidates([]);setSelectedAvatarPath("");setAvatarConflict(false)}}
                 style={input}
               >
                 <option value="">Select player to remove</option>
@@ -156,7 +197,7 @@ export default function MergePlayersPage() {
               <h2 style={boxTitle}>KEEP PLAYER</h2>
               <select
                 value={keepPlayerId}
-                onChange={(event) => setKeepPlayerId(event.target.value)}
+                onChange={(event) => {setKeepPlayerId(event.target.value);setAvatarCandidates([]);setSelectedAvatarPath("");setAvatarConflict(false)}}
                 style={input}
               >
                 <option value="">Select player to keep</option>
@@ -180,6 +221,8 @@ export default function MergePlayersPage() {
             making one atomic change. Approved Final Scorecard history is never rewritten.
           </div>
 
+          {avatarConflict&&<div style={avatarConflictBox}><strong>AVATAR CONFLICT — REVIEW REQUIRED</strong><p>Choose the avatar that should belong to the KEEP player before merging.</p><div style={avatarGrid}>{avatarCandidates.map((candidate)=><label key={`${candidate.player_id}-${candidate.avatar_path}`} style={avatarOption}><PlayerAvatar screenName={candidate.screen_name} avatarPath={candidate.avatar_path} size={82}/><input type="radio" name="merge-avatar" checked={selectedAvatarPath===candidate.avatar_path} onChange={()=>setSelectedAvatarPath(candidate.avatar_path)}/><span>{candidate.screen_name}</span></label>)}</div><button style={backButtonPrimary} disabled={merging||!selectedAvatarPath} onClick={resolveAvatarConflict}>Use Selected Avatar</button></div>}
+
           {mergeError && <div style={errorBox}>{mergeError}</div>}
 
           {mergeResult && (
@@ -202,7 +245,7 @@ export default function MergePlayersPage() {
 
           <button
             onClick={mergePlayers}
-            disabled={merging || loading || !removePlayer || !keepPlayer}
+            disabled={merging || loading || !removePlayer || !keepPlayer || avatarConflict}
             style={mergeSubmitButton}
           >
             {merging ? "Merging..." : "Confirm Protected Merge"}
@@ -276,3 +319,6 @@ const mergeSubmitButton: React.CSSProperties = {
   marginTop: 24, width: "100%", padding: 16, background: "#f59e0b", border: "none",
   borderRadius: 12, color: "black", fontSize: 20, fontWeight: 900, cursor: "pointer",
 }
+const avatarConflictBox:React.CSSProperties={marginTop:18,padding:16,background:"#2a1705",border:"1px solid #f59e0b",borderRadius:10,color:"#fde68a"}
+const avatarGrid:React.CSSProperties={display:"flex",gap:12,flexWrap:"wrap",margin:"12px 0"}
+const avatarOption:React.CSSProperties={display:"flex",alignItems:"center",gap:8,padding:10,background:"#111",border:"1px solid #52525b",borderRadius:10,color:"white"}
