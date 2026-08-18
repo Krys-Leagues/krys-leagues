@@ -36,7 +36,15 @@ export default function PlayerProfileHero({
       <div className={`${styles.identity} ${avatarPath ? styles.withAvatar : styles.withoutAvatar}`}>
         {avatarPath && (
           <div className={styles.avatarFrame}>
-            <PlayerAvatar screenName={screenName} avatarPath={avatarPath} size={156} />
+            <PlayerAvatar
+              screenName={screenName}
+              avatarPath={avatarPath}
+              size="var(--player-profile-avatar-size)"
+              imageFit="contain"
+              borderRadius={20}
+              className={styles.heroAvatar}
+              renderAsImage
+            />
           </div>
         )}
 

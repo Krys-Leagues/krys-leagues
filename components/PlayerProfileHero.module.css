@@ -90,14 +90,19 @@
 }
 
 .avatarFrame {
+  --player-profile-avatar-size: clamp(240px, 24vw, 280px);
   display: grid;
   flex: none;
   place-items: center;
   padding: 7px;
   border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 50%;
+  border-radius: 28px;
   background: linear-gradient(145deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.02));
   box-shadow: 0 16px 45px rgba(0, 0, 0, 0.42);
+}
+
+.heroAvatar {
+  background-color: rgba(2, 6, 23, 0.72) !important;
 }
 
 .booster .avatarFrame {
@@ -180,8 +185,7 @@
   }
 
   .avatarFrame {
-    transform: scale(0.88);
-    margin: -9px;
+    --player-profile-avatar-size: clamp(170px, 52vw, 210px);
   }
 
   .name {
@@ -192,6 +196,12 @@
   .crest {
     width: min(88vw, 340px);
     opacity: 0.13;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 900px) {
+  .avatarFrame {
+    --player-profile-avatar-size: clamp(210px, 30vw, 250px);
   }
 }
 
