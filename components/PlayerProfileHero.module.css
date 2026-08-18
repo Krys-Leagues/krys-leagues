@@ -130,15 +130,14 @@
   display: grid;
   flex: none;
   place-items: center;
-  padding: 7px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 28px;
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.02));
-  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.42);
 }
 
 .heroAvatar {
-  background-color: rgba(2, 6, 23, 0.72) !important;
+  overflow: visible !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 .copy {
