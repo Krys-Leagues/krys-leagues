@@ -353,6 +353,13 @@ export default function PublicPlayerProfilePage() {
           profileBadges={recognition.profileBadges}
           glowColor={preferences.glow_color}
           textColor={preferences.text_color}
+          featuredTrophy={trophies[0] ? {
+            title: trophies[0].trophy_title || trophies[0].placement || "Trophy",
+            meta: [trophies[0].event_name, trophies[0].division, trophies[0].season].filter(Boolean).join(" · "),
+            imageUrl: trophies[0].image_url,
+          } : null}
+          careerHighlights={careerHighlights}
+          publicLayout
         />
 
         {canEditProfile && <PlayerProfileEditor playerId={player.id} initial={preferences} onSaved={setPreferences} />}
@@ -362,27 +369,10 @@ export default function PublicPlayerProfilePage() {
           <p style={aboutCopy}>{preferences.about_me}</p>
         </section>}
 
-        {(trophies[0] || careerHighlights.length > 0) && <div className={styles.spotlightGrid}>
-          {trophies[0] && <section className={`${styles.spotlightPanel} ${styles.featuredTrophy}`}>
-            <div><p className={styles.panelEyebrow}>Featured Trophy</p><h2 className={styles.panelTitle}>{trophies[0].trophy_title || trophies[0].placement || "Trophy"}</h2><p className={styles.panelMeta}>{[trophies[0].event_name, trophies[0].division, trophies[0].season].filter(Boolean).join(" · ")}</p></div>
-            {/* Trophy URLs are authoritative media records and may use multiple approved hosts. */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            {trophies[0].image_url && <img src={trophies[0].image_url} alt={trophies[0].trophy_title || `${player.screen_name} trophy`} />}
-          </section>}
-          {careerHighlights.length > 0 && <section className={styles.spotlightPanel}>
-            <p className={styles.panelEyebrow}>Career Highlights</p>
-            <div className={styles.highlightGrid}>{careerHighlights.map(highlight => <div className={styles.highlight} key={highlight.label}><strong>{highlight.value}</strong><span>{highlight.label}</span></div>)}</div>
-          </section>}
-        </div>}
-
-        {aliases.length > 0 && <details className={styles.profileDisclosure}>
-          <summary>Names / Known As</summary>
-          <div className={styles.disclosureContent}><ul className={styles.aliasList}>{aliases.map(alias => <li key={alias}>{alias}</li>)}</ul></div>
-        </details>}
-
-        {hasCareerParticipation && <details className={styles.profileDisclosure}>
+        <details className={styles.profileDisclosure}>
           <summary>Player Stats</summary>
           <div className={styles.disclosureContent}>
+        {!hasCareerParticipation && <p className={styles.emptyDisclosure}>No verified league statistics yet.</p>}
         {memberships.length > 0 && <section style={card}>
           <h2 style={sectionTitle}>League History</h2>
 
@@ -519,12 +509,18 @@ export default function PublicPlayerProfilePage() {
           )}
         </section>}
           </div>
-        </details>}
+        </details>
 
-        {trophies.length > 0 && <details className={styles.profileDisclosure}>
+        <details className={styles.profileDisclosure}>
+          <summary>Names / Known As</summary>
+          <div className={styles.disclosureContent}>{aliases.length > 0 ? <ul className={styles.aliasList}>{aliases.map(alias => <li key={alias}>{alias}</li>)}</ul> : <p className={styles.emptyDisclosure}>No former names recorded.</p>}</div>
+        </details>
+
+        <details className={styles.profileDisclosure} id="trophy-case">
           <summary>Trophies &amp; Achievements</summary>
           <div className={styles.disclosureContent}>
-          <h2 style={sectionTitle}>🏆 Trophy Case</h2>
+          {trophies.length === 0 ? <p className={styles.emptyDisclosure}>No trophies or achievements recorded yet.</p> : <>
+          <h2 style={sectionTitle}>Trophy Case</h2>
 
             <div style={grid}>
               {trophies.map((trophy) => (
@@ -560,8 +556,9 @@ export default function PublicPlayerProfilePage() {
                 </div>
               ))}
             </div>
+          </>}
           </div>
-        </details>}
+        </details>
 
       </div>
     </main>
@@ -581,7 +578,7 @@ const aboutSection: React.CSSProperties = { width: "min(100%, 760px)", margin: "
 const aboutCopy: React.CSSProperties = { margin: 0, fontSize: "clamp(1rem, 2vw, 1.18rem)", lineHeight: 1.75, whiteSpace: "pre-wrap", overflowWrap: "anywhere" }
 const container: React.CSSProperties = {
   width: "100%",
-  maxWidth: 1100,
+  maxWidth: 1240,
   margin: "0 auto",
 }
 
