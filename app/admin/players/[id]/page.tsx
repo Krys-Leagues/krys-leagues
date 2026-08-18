@@ -273,7 +273,7 @@ const hasCareerParticipation = memberships.length > 0 || careerStats.matchesPlay
           </button>
         </div>
 
-        <div style={card}>
+        <div style={heroArea}>
           <PlayerProfileHero
             screenName={player.screen_name}
             avatarPath={avatarPreviewUrl || avatarPath}
@@ -461,6 +461,10 @@ const card: React.CSSProperties = {
   border: "1px solid #333",
   borderRadius: 18,
   padding: 24,
+  marginBottom: 20,
+}
+
+const heroArea: React.CSSProperties = {
   marginBottom: 20,
 }
 

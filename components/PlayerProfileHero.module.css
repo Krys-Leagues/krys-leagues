@@ -3,38 +3,10 @@
   isolation: isolate;
   min-height: 640px;
   margin-bottom: 20px;
-  overflow: hidden;
-  border: 1px solid rgba(148, 163, 184, 0.22);
-  border-radius: 28px;
-  background:
-    radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.16), transparent 42%),
-    linear-gradient(145deg, rgba(21, 27, 45, 0.98), rgba(7, 10, 20, 0.98) 58%, rgba(14, 9, 24, 0.98));
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.35), inset 0 1px rgba(255, 255, 255, 0.04);
-}
-
-.hero::before {
-  position: absolute;
-  z-index: -2;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
-  background-size: 36px 36px;
-  content: "";
-  mask-image: linear-gradient(to bottom, black, transparent 85%);
-}
-
-.hero::after {
-  position: absolute;
-  z-index: -1;
-  right: -10%;
-  bottom: -65%;
-  left: -10%;
-  height: 78%;
-  border-radius: 50%;
-  background: rgba(37, 99, 235, 0.1);
-  filter: blur(34px);
-  content: "";
+  overflow: visible;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .backdrop {
@@ -44,24 +16,6 @@
   display: grid;
   place-items: center;
   pointer-events: none;
-}
-
-.serverTag {
-  border-color: rgba(103, 232, 249, 0.4);
-}
-
-.crest {
-  position: absolute;
-  z-index: 0;
-  width: calc(var(--player-profile-avatar-size) + 105px);
-  aspect-ratio: 1;
-  background: center / contain no-repeat url("/league-media/BIG%20LOGO%20TRANSPARENT.png");
-  filter:
-    brightness(1.65) saturate(1.45)
-    drop-shadow(0 0 5px rgba(255, 255, 255, 0.95))
-    drop-shadow(0 0 15px rgba(34, 211, 238, 0.95))
-    drop-shadow(0 0 35px rgba(59, 130, 246, 0.85));
-  opacity: 0.78;
 }
 
 .cornerCrest {
@@ -112,16 +66,12 @@
 .boosterAura {
   position: absolute;
   z-index: 1;
-  width: calc(var(--player-profile-avatar-size) + 74px);
+  width: min(calc(var(--player-profile-avatar-size) + 180px), 92vw);
   aspect-ratio: 1;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.72) 0 2%, rgba(244, 114, 182, 0.65) 35%, rgba(217, 70, 239, 0.48) 57%, rgba(236, 72, 153, 0.15) 72%, transparent 78%);
-  box-shadow:
-    0 0 34px 12px rgba(244, 114, 182, 0.82),
-    0 0 82px 30px rgba(217, 70, 239, 0.55),
-    0 0 145px 52px rgba(236, 72, 153, 0.3),
-    inset 0 0 54px rgba(255, 255, 255, 0.42);
-  filter: saturate(1.25);
+  background: radial-gradient(circle, rgba(255, 228, 244, 0.62) 0%, rgba(244, 114, 182, 0.52) 24%, rgba(217, 70, 239, 0.36) 48%, rgba(236, 72, 153, 0.18) 66%, rgba(217, 70, 239, 0.06) 76%, transparent 88%);
+  box-shadow: 0 0 105px 45px rgba(217, 70, 239, 0.24);
+  filter: blur(18px) saturate(1.3);
 }
 
 .avatarFrame {
@@ -191,10 +141,6 @@
   .hero,
   .identity {
     min-height: 0;
-  }
-
-  .hero {
-    border-radius: 22px;
   }
 
   .identity {

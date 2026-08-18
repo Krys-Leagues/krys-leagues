@@ -21,7 +21,6 @@ export default function PlayerProfileHero({
   const recognitionClasses = [
     styles.hero,
     isServerBooster ? styles.booster : "",
-    hasKrysServerTag ? styles.serverTag : "",
   ].filter(Boolean).join(" ")
 
   return (
@@ -38,7 +37,6 @@ export default function PlayerProfileHero({
       <div className={`${styles.identity} ${avatarPath ? styles.withAvatar : styles.withoutAvatar}`}>
         {avatarPath && (
           <div className={styles.avatarStage}>
-            {hasKrysServerTag && <div className={styles.crest} aria-hidden="true" />}
             {isServerBooster && <div className={styles.boosterAura} aria-hidden="true" />}
             <div className={styles.avatarFrame}>
               <PlayerAvatar
