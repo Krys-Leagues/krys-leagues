@@ -339,16 +339,6 @@ export default function PublicPlayerProfilePage() {
   return (
     <main className={styles.page} style={{ "--profile-bg": preferences.background_color, "--profile-text": preferences.text_color } as React.CSSProperties}>
       <div style={container}>
-        <div style={topBar}>
-          <Link href="/players" style={backButton}>
-            ← Player Profiles
-          </Link>
-
-          <Link href="/" style={backButton}>
-            ← Krys Leagues
-          </Link>
-        </div>
-
         <PlayerProfileHero
           screenName={player.screen_name}
           avatarPath={avatarPath}
@@ -366,7 +356,13 @@ export default function PublicPlayerProfilePage() {
           publicLayout
         />
 
-        {canEditProfile && <PlayerProfileEditor playerId={player.id} initial={preferences} onSaved={setPreferences} />}
+        <div className={styles.utilityCluster}>
+          <nav className={styles.utilityLinks} aria-label="Player profile navigation">
+            <Link href="/" style={backButton}>← Krys Leagues</Link>
+            <Link href="/players" style={backButton}>← Player Profiles</Link>
+          </nav>
+          {canEditProfile && <PlayerProfileEditor playerId={player.id} initial={preferences} onSaved={setPreferences} />}
+        </div>
 
         {preferences.about_me && <section style={aboutSection}>
           <p style={eyebrow}>About Me</p>
@@ -589,15 +585,8 @@ const aboutSection: React.CSSProperties = { width: "min(100%, 760px)", margin: "
 const aboutCopy: React.CSSProperties = { margin: 0, fontSize: "clamp(1rem, 2vw, 1.18rem)", lineHeight: 1.75, whiteSpace: "pre-wrap", overflowWrap: "anywhere" }
 const container: React.CSSProperties = {
   width: "100%",
-  maxWidth: 1480,
+  maxWidth: 1900,
   margin: "0 auto",
-}
-
-const topBar: React.CSSProperties = {
-  display: "flex",
-  flexWrap: "wrap",
-  gap: 10,
-  marginBottom: 20,
 }
 
 const backButton: React.CSSProperties = {

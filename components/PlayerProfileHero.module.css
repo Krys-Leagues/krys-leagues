@@ -1,17 +1,20 @@
 .hero { position:relative; isolation:isolate; display:grid; min-width:0; padding:0 0 clamp(10px,2vw,24px); color:var(--profile-text); text-align:center; }
-.brandRow { display:grid; grid-template-columns:140px minmax(0,1fr) 140px; width:100%; align-items:center; gap:clamp(14px,2.5vw,38px); pointer-events:none; }
+.brandRow { display:grid; grid-template-columns:clamp(128px,8.5vw,160px) minmax(0,1fr) clamp(128px,8.5vw,160px); width:100%; align-items:center; gap:clamp(18px,2.6vw,48px); pointer-events:none; }
 .brandMark { display:grid; justify-items:center; }
-.brandLogo { width:clamp(84px,7vw,112px); height:clamp(84px,7vw,112px); object-fit:contain; opacity:1; filter:saturate(1.08) brightness(1.06) drop-shadow(0 3px 5px #0008); }
+.brandLogo { width:clamp(120px,8vw,152px); height:clamp(120px,8vw,152px); object-fit:contain; opacity:1; filter:saturate(1.08) brightness(1.06) drop-shadow(0 3px 5px #0008); }
 .tagActive { filter:drop-shadow(0 0 2px #fff) drop-shadow(0 0 9px var(--profile-glow)) drop-shadow(0 0 24px var(--profile-glow)) drop-shadow(0 0 44px var(--profile-glow)); }
 .titleLockup { display:grid; grid-template-columns:minmax(50px,1fr) auto minmax(50px,1fr); align-items:center; gap:clamp(14px,2vw,28px); min-width:0; }
 .titleLockup > span { height:3px; background:linear-gradient(90deg,transparent,#27f4dc 32%,#56dbea 75%,#fff); box-shadow:0 0 7px #25f4da,0 0 18px #25f4da88; }
 .titleLockup > span:last-child { background:linear-gradient(90deg,#fff,#fb4cbd 28%,#f52f9b 72%,transparent); box-shadow:0 0 7px #ff43ba,0 0 18px #ff43ba88; }
-.profileTitle { margin:0; color:#fff; font-size:clamp(1.6rem,2.6vw,2.65rem); font-weight:950; letter-spacing:.035em; line-height:1; text-transform:uppercase; text-shadow:0 3px 16px #000c; white-space:nowrap; }
-.heroGrid { display:grid; grid-template-areas:"featured player highlights"; grid-template-columns:minmax(235px,.75fr) minmax(410px,1.45fr) minmax(235px,.75fr); align-items:center; gap:clamp(24px,4vw,64px); margin-top:clamp(12px,2vw,24px); }
+.profileTitle { margin:0; color:#fff; font-size:clamp(2.5rem,3vw,3.5rem); font-weight:950; letter-spacing:.035em; line-height:1; text-transform:uppercase; text-shadow:0 3px 16px #000c; white-space:nowrap; }
+.heroGrid { display:grid; grid-template-areas:"featured player highlights"; grid-template-columns:minmax(250px,.72fr) minmax(520px,1.8fr) minmax(250px,.72fr); align-items:center; gap:clamp(26px,3.2vw,62px); margin-top:clamp(16px,2vw,30px); }
+.playerOnly { grid-template-areas:"player"; grid-template-columns:minmax(0,1fr); }
+.featuredOnly { grid-template-areas:"featured player"; grid-template-columns:minmax(270px,.7fr) minmax(0,1.8fr); }
+.highlightsOnly { grid-template-areas:"player highlights"; grid-template-columns:minmax(0,1.8fr) minmax(270px,.7fr); }
 .playerCore { grid-area:player; display:grid; justify-items:center; min-width:0; }
 .hero > .playerCore { margin-top:clamp(18px,3vw,34px); }
-.featuredPanel { grid-area:featured; border-color:#2bedd5; background:linear-gradient(160deg,#063e38d9,#031b26d9); }
-.highlightsPanel { grid-area:highlights; border-color:#f04fb6; background:linear-gradient(160deg,#40102fd9,#170d25e8); }
+.featuredPanel { grid-area:featured; border-color:#2bedd5; background:linear-gradient(160deg,#063e38b8,#031b26c4); }
+.highlightsPanel { grid-area:highlights; border-color:#f04fb6; background:linear-gradient(160deg,#40102fb8,#170d25c9); }
 .sidePanel { display:grid; align-content:center; min-width:0; min-height:330px; padding:clamp(20px,2vw,30px); border:1px solid; border-radius:22px; box-shadow:inset 0 1px #ffffff35,0 16px 38px #0007; backdrop-filter:blur(9px); }
 .panelEyebrow { margin:0 0 16px; color:#2cf6e1; font-size:.77rem; font-weight:950; letter-spacing:.08em; text-transform:uppercase; }
 .highlightsPanel .panelEyebrow { color:#ff4cb8; }
@@ -25,24 +28,25 @@
 .highlight:first-child { border-top:1px solid #ffffff25; }
 .highlight strong { grid-column:2; grid-row:1; color:#ff54ba; font-size:clamp(1.3rem,2.2vw,1.75rem); }
 .highlight span { grid-column:1; grid-row:1; color:#fff; font-size:.76rem; font-weight:900; letter-spacing:.04em; text-transform:uppercase; }
-.avatarStage { --player-profile-avatar-size:clamp(250px,22vw,300px); position:relative; display:grid; width:var(--player-profile-avatar-size); height:var(--player-profile-avatar-size); place-items:center; }
+.avatarStage { --player-profile-avatar-size:clamp(300px,21vw,360px); position:relative; display:grid; width:var(--player-profile-avatar-size); height:var(--player-profile-avatar-size); place-items:center; }
 .boosterGlow { position:absolute; z-index:-1; width:min(530px,65vw); aspect-ratio:1; background:radial-gradient(circle,color-mix(in srgb,var(--profile-glow) 66%,white) 0%,color-mix(in srgb,var(--profile-glow) 43%,transparent) 30%,color-mix(in srgb,var(--profile-glow) 18%,transparent) 56%,transparent 74%); filter:blur(28px) saturate(1.25); opacity:.85; pointer-events:none; }
 .avatar { position:relative; overflow:visible !important; border:0 !important; border-radius:0 !important; background:transparent !important; box-shadow:none !important; }
-.identity { min-width:0; width:100%; margin-top:8px; }
-.name { margin:0; color:inherit; font-size:clamp(2.7rem,5vw,5rem); font-weight:950; line-height:.98; letter-spacing:-.045em; overflow-wrap:anywhere; text-wrap:balance; text-shadow:0 4px 15px #000,0 0 20px #0009; }
+.identity { min-width:0; width:100%; margin-top:clamp(28px,2.1vw,38px); }
+.name { width:100%; margin:0; color:inherit; font-size:clamp(3rem,5vw,5.5rem); font-weight:950; line-height:.98; letter-spacing:-.045em; white-space:nowrap; text-shadow:0 4px 15px #000,0 0 20px #0009; }
+.nameSplit { display:none; }
 .badges { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin-top:12px; }
 .badges span { padding:6px 10px; border:1px solid #facc1559; border-radius:999px; background:#713f127a; color:#fef3c7; font-size:.75rem; font-weight:850; }
-.recognitionBand { min-height:42px; margin-top:clamp(12px,2vw,24px); padding:8px clamp(16px,2vw,28px); border:1px solid #ffffff50; border-radius:18px; background:linear-gradient(90deg,#033f39d9,#061529e8 50%,#3d0c31dc); box-shadow:inset 0 1px #ffffff32,0 12px 30px #0006; backdrop-filter:blur(10px); }
-.recognitionRow { display:flex; min-height:24px; flex-wrap:wrap; justify-content:center; align-items:center; gap:0; }
-.recognition { display:flex; min-width:245px; min-height:58px; align-items:center; gap:13px; padding:5px 28px; border-right:1px solid #ffffff3b; text-align:left; }
+.recognitionBand { width:fit-content; max-width:100%; min-height:68px; margin:clamp(12px,2vw,24px) auto 0; padding:8px 12px; border:1px solid #ffffff20; border-radius:18px; background:#02061724; box-shadow:0 8px 24px #0003; backdrop-filter:blur(5px); }
+.recognitionRow { display:flex; min-height:52px; flex-wrap:wrap; justify-content:center; align-items:center; gap:10px; }
+.recognition { display:flex; min-width:0; min-height:68px; align-items:center; gap:14px; padding:6px 16px; border-right:1px solid #ffffff24; text-align:left; }
 .recognition:last-child { border-right:0; }
-.recognition > span:last-child { display:grid; gap:3px; }
-.recognition strong { font-size:.8rem; letter-spacing:.06em; text-transform:uppercase; }
-.recognition small { color:#fff; font-size:.75rem; }
-.recognition img { width:46px; height:46px; object-fit:contain; }
+.recognition > span:last-child { display:grid; }
+.recognition strong { font-size:1rem; letter-spacing:.06em; text-transform:uppercase; }
+.recognition small { display:none; }
+.recognition img { width:64px; height:64px; object-fit:contain; }
 .boosterRecognition strong { color:#39f4ef; text-shadow:0 0 8px var(--profile-glow),0 0 18px var(--profile-glow); }
-.boosterIcon { color:#fff; font-size:2.6rem; line-height:1; filter:drop-shadow(0 0 5px #fff) drop-shadow(0 0 13px var(--profile-glow)); }
+.boosterIcon { color:#fff; font-size:3.5rem; line-height:1; filter:drop-shadow(0 0 5px #fff) drop-shadow(0 0 13px var(--profile-glow)); }
 .tagRecognition strong { color:#ff58bb; text-shadow:0 0 8px var(--profile-glow),0 0 18px var(--profile-glow); }
 .tagRecognition img { filter:drop-shadow(0 0 2px #fff) drop-shadow(0 0 10px var(--profile-glow)); }
-@media (max-width:1050px) { .brandRow { grid-template-columns:105px minmax(0,1fr) 105px; } .heroGrid { grid-template-areas:"player player" "featured highlights"; grid-template-columns:repeat(2,minmax(0,1fr)); } .avatarStage { --player-profile-avatar-size:clamp(220px,31vw,260px); } .sidePanel { min-height:250px; } }
-@media (max-width:640px) { .brandRow { grid-template-columns:54px minmax(0,1fr) 54px; gap:6px; } .brandLogo { width:52px; height:52px; } .titleLockup { grid-template-columns:minmax(7px,1fr) auto minmax(7px,1fr); gap:7px; } .profileTitle { font-size:clamp(.82rem,4.3vw,1.08rem); white-space:normal; } .heroGrid { grid-template-areas:"player" "featured" "highlights"; grid-template-columns:minmax(0,1fr); width:100%; } .avatarStage { --player-profile-avatar-size:clamp(180px,57vw,210px); } .name { font-size:clamp(2.25rem,12vw,3.5rem); } .sidePanel { width:100%; min-height:0; } .recognitionBand { min-height:54px; } .recognitionRow { display:grid; } .recognition { min-width:0; width:100%; padding:8px; border-right:0; border-bottom:1px solid #ffffff2e; } .recognition:last-child { border-bottom:0; } }
+@media (max-width:1050px) { .brandRow { grid-template-columns:clamp(92px,13vw,124px) minmax(0,1fr) clamp(92px,13vw,124px); } .brandLogo { width:clamp(92px,13vw,124px); height:clamp(92px,13vw,124px); } .profileTitle { font-size:clamp(1.9rem,4.3vw,2.8rem); } .heroGrid,.featuredOnly,.highlightsOnly { grid-template-areas:"player player" "featured highlights"; grid-template-columns:repeat(2,minmax(0,1fr)); } .playerOnly { grid-template-areas:"player"; grid-template-columns:minmax(0,1fr); } .avatarStage { --player-profile-avatar-size:clamp(250px,34vw,300px); } .name { font-size:clamp(3rem,7.5vw,4.6rem); } .sidePanel { min-height:250px; } }
+@media (max-width:640px) { .brandRow { grid-template-columns:58px minmax(0,1fr) 58px; gap:7px; } .brandLogo { width:56px; height:56px; } .titleLockup { grid-template-columns:minmax(7px,1fr) auto minmax(7px,1fr); gap:7px; } .profileTitle { font-size:clamp(.88rem,4.35vw,1.08rem); white-space:normal; } .heroGrid,.featuredOnly,.highlightsOnly { grid-template-areas:"player" "featured" "highlights"; grid-template-columns:minmax(0,1fr); width:100%; } .avatarStage { --player-profile-avatar-size:clamp(185px,59vw,210px); } .identity { margin-top:24px; } .name { font-size:clamp(2.25rem,12vw,3.5rem); white-space:normal; overflow-wrap:anywhere; text-wrap:balance; } .nameFull:has(+ .nameSplit) { display:none; } .nameSplit { display:grid; } .sidePanel { width:100%; min-height:0; } .recognitionBand { width:fit-content; min-height:64px; } .recognitionRow { display:grid; } .recognition { min-width:0; width:100%; padding:8px; border-right:0; border-bottom:1px solid #ffffff24; } .recognition:last-child { border-bottom:0; } .recognition img { width:56px; height:56px; } }

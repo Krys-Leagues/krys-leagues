@@ -1,4 +1,4 @@
-.wrap { display: grid; justify-items: center; margin: -24px 0 32px; color: #f8fafc; }
+.wrap { display: grid; width:100%; justify-items:start; margin:0; color:#f8fafc; }
 .editButton,.save,.reset { min-height: 44px; border-radius: 999px; padding: 10px 18px; font: inherit; font-weight: 800; cursor: pointer; }
 .editButton { border: 1px solid #f472b666; background: #83184399; color: #fff; }
 .editor { width: min(100%,760px); margin-top: 14px; padding: clamp(18px,4vw,28px); border: 1px solid #475569; border-radius: 18px; background: #0f172af2; box-shadow: 0 20px 60px #0008; }
