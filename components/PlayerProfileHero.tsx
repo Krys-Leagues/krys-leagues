@@ -16,17 +16,17 @@ export default function PlayerProfileHero({ screenName, avatarPath, isServerBoos
       <div className={styles.brandMark}><Image className={`${styles.brandLogo} ${hasKrysServerTag ? styles.tagActive : ""}`} src="/league-media/BIG%20LOGO%20TRANSPARENT.png" width={112} height={112} alt="" aria-hidden="true" /><span>Krys Leagues</span></div>
     </div>
     {publicLayout && <div className={styles.heroGrid}>
-      <section className={`${styles.sidePanel} ${styles.featuredPanel}`} aria-labelledby="featured-trophy-title">
+      {featuredTrophy && <section className={`${styles.sidePanel} ${styles.featuredPanel}`} aria-labelledby="featured-trophy-title">
         <p className={styles.panelEyebrow} id="featured-trophy-title">Featured Trophy</p>
-        {featuredTrophy ? <>
+        <>
           {/* Trophy URLs are authoritative media records and may use multiple approved hosts. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           {featuredTrophy.imageUrl && <img className={styles.trophyImage} src={featuredTrophy.imageUrl} alt={featuredTrophy.title} />}
           <h2 className={styles.panelTitle}>{featuredTrophy.title}</h2>
           {featuredTrophy.meta && <p className={styles.panelMeta}>{featuredTrophy.meta}</p>}
           <a className={styles.panelAction} href="#trophy-case">Trophy Case</a>
-        </> : <p className={styles.emptyState}>No featured trophy yet.</p>}
-      </section>
+        </>
+      </section>}
       <div className={styles.playerCore}>
         <div className={styles.avatarStage}>
           {isServerBooster && <div className={styles.boosterGlow} aria-hidden="true" />}
@@ -37,16 +37,16 @@ export default function PlayerProfileHero({ screenName, avatarPath, isServerBoos
           {profileBadges.length > 0 && <div className={styles.badges} aria-label="Player recognition">{profileBadges.map(badge => <span key={badge}>{badge}</span>)}</div>}
         </div>
       </div>
-      <section className={`${styles.sidePanel} ${styles.highlightsPanel}`} aria-labelledby="career-highlights-title">
+      {careerHighlights.length > 0 && <section className={`${styles.sidePanel} ${styles.highlightsPanel}`} aria-labelledby="career-highlights-title">
         <p className={styles.panelEyebrow} id="career-highlights-title">Career Highlights</p>
-        {careerHighlights.length > 0 ? <div className={styles.highlightGrid}>{careerHighlights.map(highlight => <div className={styles.highlight} key={highlight.label}><strong>{highlight.value}</strong><span>{highlight.label}</span></div>)}</div> : <p className={styles.emptyState}>No verified highlights yet.</p>}
-      </section>
+        <div className={styles.highlightGrid}>{careerHighlights.map(highlight => <div className={styles.highlight} key={highlight.label}><strong>{highlight.value}</strong><span>{highlight.label}</span></div>)}</div>
+      </section>}
     </div>}
     {!publicLayout && <div className={styles.playerCore}>
       <div className={styles.avatarStage}>{isServerBooster && <div className={styles.boosterGlow} aria-hidden="true" />}<PlayerAvatar screenName={screenName} avatarPath={avatarPath} size="var(--player-profile-avatar-size)" imageFit="contain" borderRadius={0} className={styles.avatar} renderAsImage /></div>
       <div className={styles.identity}><h1 id="player-profile-name" className={styles.name}>{screenName}</h1>{profileBadges.length > 0 && <div className={styles.badges} aria-label="Player recognition">{profileBadges.map(badge => <span key={badge}>{badge}</span>)}</div>}{(isServerBooster || hasKrysServerTag) && <div className={styles.recognitionRow}>{isServerBooster && <div className={`${styles.recognition} ${styles.boosterRecognition}`}><span className={styles.boosterIcon} aria-hidden="true">✦</span><strong>Server Booster</strong></div>}{hasKrysServerTag && <div className={`${styles.recognition} ${styles.tagRecognition}`}><Image src="/league-media/BIG%20LOGO%20TRANSPARENT.png" width={38} height={38} alt="" aria-hidden="true" /><strong>Server Tag</strong></div>}</div>}</div>
     </div>}
-    {publicLayout && <section className={styles.recognitionBand} aria-label="Community recognition">
+    {publicLayout && (isServerBooster || hasKrysServerTag) && <section className={styles.recognitionBand} aria-label="Community recognition">
       <div className={styles.recognitionRow}>
         {isServerBooster && <div className={`${styles.recognition} ${styles.boosterRecognition}`}><span className={styles.boosterIcon} aria-hidden="true">✦</span><span><strong>Server Booster</strong><small>Thank you for supporting the server!</small></span></div>}
         {hasKrysServerTag && <div className={`${styles.recognition} ${styles.tagRecognition}`}><Image src="/league-media/BIG%20LOGO%20TRANSPARENT.png" width={46} height={46} alt="" aria-hidden="true" /><span><strong>Server Tag</strong><small>Proud to wear the Krys tag!</small></span></div>}

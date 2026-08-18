@@ -306,6 +306,10 @@ export default function PublicPlayerProfilePage() {
     pypHistory.reduce((total, season) => total + season.wins, 0) > 0 ? { label: "PYP Wins", value: pypHistory.reduce((total, season) => total + season.wins, 0) } : null,
   ].filter((highlight): highlight is { label: string; value: number } => highlight !== null)
 
+  const knownAliases = aliases.filter((alias) =>
+    alias.trim().localeCompare(player?.screen_name.trim() || "", undefined, { sensitivity: "accent" }) !== 0
+  )
+
   if (loading) {
     return (
       <main style={page}>
@@ -369,10 +373,9 @@ export default function PublicPlayerProfilePage() {
           <p style={aboutCopy}>{preferences.about_me}</p>
         </section>}
 
-        <details className={styles.profileDisclosure}>
+        {hasCareerParticipation && <details className={styles.profileDisclosure}>
           <summary><span className={styles.summaryIcon} aria-hidden="true">▥</span><span><strong>Player Stats</strong><small>Career statistics and performance overview</small></span></summary>
           <div className={styles.disclosureContent}>
-        {!hasCareerParticipation && <p className={styles.emptyDisclosure}>No verified league statistics yet.</p>}
         {memberships.length > 0 && <section style={card}>
           <h2 style={sectionTitle}>League History</h2>
 
@@ -509,17 +512,16 @@ export default function PublicPlayerProfilePage() {
           )}
         </section>}
           </div>
-        </details>
+        </details>}
 
-        <details className={styles.profileDisclosure}>
+        {knownAliases.length > 0 && <details className={styles.profileDisclosure}>
           <summary><span className={styles.summaryIcon} aria-hidden="true">●</span><span><strong>Names / Known As</strong><small>Player identity and name history</small></span></summary>
-          <div className={styles.disclosureContent}>{aliases.length > 0 ? <ul className={styles.aliasList}>{aliases.map(alias => <li key={alias}>{alias}</li>)}</ul> : <p className={styles.emptyDisclosure}>No former names recorded.</p>}</div>
-        </details>
+          <div className={styles.disclosureContent}><ul className={styles.aliasList}>{knownAliases.map(alias => <li key={alias}>{alias}</li>)}</ul></div>
+        </details>}
 
-        <details className={styles.profileDisclosure} id="trophy-case">
+        {trophies.length > 0 && <details className={styles.profileDisclosure} id="trophy-case">
           <summary><span className={styles.summaryIcon} aria-hidden="true">🏆</span><span><strong>Trophies &amp; Achievements</strong><small>Complete trophy case and achievement history</small></span></summary>
           <div className={styles.disclosureContent}>
-          {trophies.length === 0 ? <p className={styles.emptyDisclosure}>No trophies or achievements recorded yet.</p> : <>
           <h2 style={sectionTitle}>Trophy Case</h2>
 
             <div style={grid}>
@@ -556,9 +558,8 @@ export default function PublicPlayerProfilePage() {
                 </div>
               ))}
             </div>
-          </>}
           </div>
-        </details>
+        </details>}
 
       </div>
     </main>

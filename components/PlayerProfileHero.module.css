@@ -17,7 +17,7 @@
 .highlightsPanel .panelEyebrow { color:#ff4cb8; }
 .panelEyebrow::after { content:""; display:block; height:1px; margin-top:16px; background:#ffffff28; }
 .panelTitle { margin:14px 0 0; font-size:clamp(1.1rem,1.8vw,1.55rem); line-height:1.12; overflow-wrap:anywhere; }
-.panelMeta,.emptyState { margin:10px 0 0; color:color-mix(in srgb,var(--profile-text) 78%,transparent); line-height:1.5; }
+.panelMeta { margin:10px 0 0; color:color-mix(in srgb,var(--profile-text) 78%,transparent); line-height:1.5; }
 .trophyImage { width:min(100%,180px); height:175px; margin:0 auto; object-fit:contain; filter:drop-shadow(0 12px 12px #0008); }
 .panelAction { justify-self:center; margin-top:18px; padding:10px 16px; border:1px solid #2cf6e1; border-radius:9px; color:inherit; background:#03191c80; font-size:.76rem; font-weight:900; letter-spacing:.05em; text-decoration:none; text-transform:uppercase; }
 .highlightGrid { display:grid; }
@@ -34,7 +34,6 @@
 .badges span { padding:6px 10px; border:1px solid #facc1559; border-radius:999px; background:#713f127a; color:#fef3c7; font-size:.75rem; font-weight:850; }
 .recognitionBand { min-height:42px; margin-top:clamp(12px,2vw,24px); padding:8px clamp(16px,2vw,28px); border:1px solid #ffffff50; border-radius:18px; background:linear-gradient(90deg,#033f39d9,#061529e8 50%,#3d0c31dc); box-shadow:inset 0 1px #ffffff32,0 12px 30px #0006; backdrop-filter:blur(10px); }
 .recognitionRow { display:flex; min-height:24px; flex-wrap:wrap; justify-content:center; align-items:center; gap:0; }
-.recognitionRow:empty::after { content:""; width:min(360px,70%); height:2px; background:linear-gradient(90deg,transparent,#2df4df,#5ad7e8 50%,#fb49b9,transparent); box-shadow:0 0 12px #41ddea; opacity:.72; }
 .recognition { display:flex; min-width:245px; min-height:58px; align-items:center; gap:13px; padding:5px 28px; border-right:1px solid #ffffff3b; text-align:left; }
 .recognition:last-child { border-right:0; }
 .recognition > span:last-child { display:grid; gap:3px; }
