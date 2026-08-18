@@ -33,10 +33,12 @@ export default function PlayerProfileHero({
         {hasKrysServerTag && <div className={styles.crest} />}
       </div>
 
-      <div className={`${styles.identity} ${styles.withAvatar}`}>
-        <div className={styles.avatarFrame}>
-          <PlayerAvatar screenName={screenName} avatarPath={avatarPath} size={156} />
-        </div>
+      <div className={`${styles.identity} ${avatarPath ? styles.withAvatar : styles.withoutAvatar}`}>
+        {avatarPath && (
+          <div className={styles.avatarFrame}>
+            <PlayerAvatar screenName={screenName} avatarPath={avatarPath} size={156} />
+          </div>
+        )}
 
         <div className={styles.copy}>
           <p className={styles.eyebrow}>Krys Leagues Player Profile</p>
