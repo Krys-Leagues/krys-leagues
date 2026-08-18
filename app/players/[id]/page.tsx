@@ -1,10 +1,11 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import PlayerProfileHero from "@/components/PlayerProfileHero"
+import PlayerProfileEditor, { type ProfilePreferences } from "@/components/PlayerProfileEditor"
 import { getCanonicalPlayerAvatar } from "@/lib/playerAvatars"
 
 type Player = {
@@ -30,7 +31,10 @@ type Trophy = {
   season: string | null
   week: string | null
   image_url: string | null
+  created_at: string
 }
+
+const DEFAULT_PREFERENCES: ProfilePreferences = { background_color: "#07111f", glow_color: "#ff2bd6", text_color: "#f8fafc", about_me: null }
 
 type Result = {
   id: string
@@ -40,14 +44,6 @@ type Result = {
   player2_id: string | null
   winner: string | null
   is_draw: boolean | null
-}
-
-type CareerStats = {
-  matches: number
-  wins: number
-  draws: number
-  losses: number
-  winPercent: number
 }
 
 type StrokeSeasonHistory = {
@@ -131,13 +127,14 @@ export default function PublicPlayerProfilePage() {
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState("")
   const [aliases, setAliases] = useState<string[]>([])
-  const [identityPlayerIds, setIdentityPlayerIds] = useState<string[]>([])
   const [avatarPath, setAvatarPath] = useState<string | null>(null)
   const [recognition, setRecognition] = useState({
     isServerBooster: false,
     hasKrysServerTag: false,
     profileBadges: [] as string[],
   })
+  const [preferences, setPreferences] = useState<ProfilePreferences>(DEFAULT_PREFERENCES)
+  const [canEditProfile, setCanEditProfile] = useState(false)
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/immutability
@@ -201,6 +198,8 @@ export default function PublicPlayerProfilePage() {
       pypHistoryResponse,
       pypFixtureHistoryResponse,
       avatarResponse,
+      preferencesResponse,
+      sessionResponse,
     ] = await Promise.all([
       supabase
         .from("players")
@@ -217,9 +216,10 @@ export default function PublicPlayerProfilePage() {
       supabase
         .from("player_trophies")
         .select(
-          "id, trophy_title, placement, event_name, division, season, week, image_url"
+          "id, trophy_title, placement, event_name, division, season, week, image_url, created_at"
         )
-        .in("player_id", identityIds),
+        .in("player_id", identityIds)
+        .order("created_at", { ascending: false }),
 
       supabase
         .from("results")
@@ -239,6 +239,8 @@ export default function PublicPlayerProfilePage() {
         p_player_id: playerId,
       }),
       getCanonicalPlayerAvatar(playerId).catch(() => ({ canonicalPlayerId: playerId, avatarPath: null })),
+      supabase.rpc("get_public_player_profile_preferences", { p_player_id: canonicalId }),
+      supabase.auth.getSession(),
     ])
 
     if (playerResponse.error) {
@@ -255,7 +257,6 @@ export default function PublicPlayerProfilePage() {
 
     setPlayer(playerResponse.data)
     setAliases(identity.aliases || [])
-    setIdentityPlayerIds(identityIds)
     setMemberships(membershipsResponse.data || [])
     setTrophies(trophiesResponse.data || [])
     setResults(resultsResponse.data || [])
@@ -280,47 +281,18 @@ export default function PublicPlayerProfilePage() {
       setPypHistoryError(`PYP fixture history could not be loaded: ${pypFixtureHistoryResponse.error.message}`)
     }
     setAvatarPath(avatarResponse.avatarPath)
+    if (!preferencesResponse.error) {
+      const loaded = Array.isArray(preferencesResponse.data) ? preferencesResponse.data[0] : preferencesResponse.data
+      if (loaded) setPreferences(loaded as ProfilePreferences)
+    }
+    if (sessionResponse.data.session) {
+      const { data: editable } = await supabase.rpc("can_edit_player_profile_preferences", { p_player_id: canonicalId })
+      setCanEditProfile(Boolean(editable))
+    } else {
+      setCanEditProfile(false)
+    }
     setLoading(false)
   }
-
-  const careerStats = useMemo<CareerStats>(() => {
-    if (!player) {
-      return {
-        matches: 0,
-        wins: 0,
-        draws: 0,
-        losses: 0,
-        winPercent: 0,
-      }
-    }
-
-    const matches = results.length
-    const draws = results.filter((result) => result.is_draw).length
-    const playerIds = new Set(identityPlayerIds)
-    const wins = results.filter((result) =>
-      (result.player1_id && playerIds.has(result.player1_id) && result.winner === result.player1)
-      || (result.player2_id && playerIds.has(result.player2_id) && result.winner === result.player2)
-    ).length
-    const losses = Math.max(matches - wins - draws, 0)
-    const winPercent =
-      matches > 0 ? Math.round((wins / matches) * 100) : 0
-
-    return {
-      matches,
-      wins,
-      draws,
-      losses,
-      winPercent,
-    }
-  }, [player, results, identityPlayerIds])
-
-  const totalSeasons = useMemo(() => {
-    return new Set(
-      memberships
-        .map((membership) => membership.season_number)
-        .filter((seasonNumber) => seasonNumber !== null)
-    ).size
-  }, [memberships])
 
   const hasCareerParticipation = memberships.length > 0 || results.length > 0 ||
     strokeHistory.length > 0 || matchHistory.length > 0 || pypHistory.length > 0 ||
@@ -353,7 +325,7 @@ export default function PublicPlayerProfilePage() {
   }
 
   return (
-    <main style={page}>
+    <main style={{ ...page, background: `radial-gradient(circle at top, ${preferences.background_color} 0%, color-mix(in srgb, ${preferences.background_color} 72%, #000) 58%, #000 100%)`, color: preferences.text_color }}>
       <div style={container}>
         <div style={topBar}>
           <Link href="/players" style={backButton}>
@@ -372,47 +344,26 @@ export default function PublicPlayerProfilePage() {
           isServerBooster={recognition.isServerBooster}
           hasKrysServerTag={recognition.hasKrysServerTag}
           profileBadges={recognition.profileBadges}
+          glowColor={preferences.glow_color}
+          textColor={preferences.text_color}
         />
+
+        {canEditProfile && <PlayerProfileEditor playerId={player.id} initial={preferences} onSaved={setPreferences} />}
+
+        {preferences.about_me && <section style={aboutSection}>
+          <p style={eyebrow}>About Me</p>
+          <p style={aboutCopy}>{preferences.about_me}</p>
+        </section>}
+
+        {trophies[0] && <section style={featuredTrophy}>
+          <div><p style={eyebrow}>Featured Trophy</p><h2 style={sectionTitle}>{trophies[0].trophy_title || trophies[0].placement || "Trophy"}</h2><p style={muted}>{[trophies[0].event_name, trophies[0].division, trophies[0].season].filter(Boolean).join(" · ")}</p></div>
+          {/* Trophy URLs are authoritative media records and may use multiple approved hosts. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          {trophies[0].image_url && <img src={trophies[0].image_url} alt={trophies[0].trophy_title || `${player.screen_name} trophy`} style={featuredTrophyImage} />}
+        </section>}
 
         {hasCareerParticipation && <details style={statsDisclosure}>
           <summary style={statsSummary}>Player Stats</summary>
-        <section style={statsGrid}>
-          <div style={statCard}>
-            <strong>Matches</strong>
-            <span style={statNumber}>{careerStats.matches}</span>
-          </div>
-
-          <div style={statCard}>
-            <strong>Wins</strong>
-            <span style={statNumber}>{careerStats.wins}</span>
-          </div>
-
-          <div style={statCard}>
-            <strong>Draws</strong>
-            <span style={statNumber}>{careerStats.draws}</span>
-          </div>
-
-          <div style={statCard}>
-            <strong>Losses</strong>
-            <span style={statNumber}>{careerStats.losses}</span>
-          </div>
-
-          <div style={statCard}>
-            <strong>Win Percentage</strong>
-            <span style={statNumber}>{careerStats.winPercent}%</span>
-          </div>
-
-          <div style={statCard}>
-            <strong>Seasons</strong>
-            <span style={statNumber}>{totalSeasons}</span>
-          </div>
-
-          <div style={statCard}>
-            <strong>Trophies</strong>
-            <span style={statNumber}>{trophies.length}</span>
-          </div>
-        </section>
-
         {memberships.length > 0 && <section style={card}>
           <h2 style={sectionTitle}>League History</h2>
 
@@ -591,23 +542,6 @@ export default function PublicPlayerProfilePage() {
             </div>
         </section>}
 
-        <section style={linkGrid}>
-          <Link href="/records" style={actionButton}>
-            View League Records
-          </Link>
-
-          <Link href="/champions" style={actionButton}>
-            View Hall of Champions
-          </Link>
-
-          <Link href="/standings" style={actionButton}>
-            View Standings
-          </Link>
-
-          <Link href="/matches" style={actionButton}>
-            View Matches
-          </Link>
-        </section>
       </div>
     </main>
   )
@@ -620,6 +554,12 @@ const page: React.CSSProperties = {
   color: "white",
   padding: "30px 18px",
 }
+
+const eyebrow: React.CSSProperties = { margin: "0 0 8px", color: "#f9a8d4", fontSize: 12, fontWeight: 900, letterSpacing: ".14em", textTransform: "uppercase" }
+const aboutSection: React.CSSProperties = { width: "min(100%, 760px)", margin: "0 auto 28px", padding: "4px clamp(4px, 3vw, 24px)", textAlign: "center" }
+const aboutCopy: React.CSSProperties = { margin: 0, fontSize: "clamp(1rem, 2vw, 1.18rem)", lineHeight: 1.75, whiteSpace: "pre-wrap", overflowWrap: "anywhere" }
+const featuredTrophy: React.CSSProperties = { display: "flex", alignItems: "center", justifyContent: "center", gap: "clamp(20px, 5vw, 56px)", margin: "0 auto 32px", padding: "20px", textAlign: "center", flexWrap: "wrap" }
+const featuredTrophyImage: React.CSSProperties = { width: "clamp(150px, 20vw, 230px)", height: "clamp(150px, 20vw, 230px)", objectFit: "contain" }
 
 const container: React.CSSProperties = {
   width: "100%",
@@ -645,13 +585,6 @@ const backButton: React.CSSProperties = {
   fontWeight: 700,
 }
 
-const statsGrid: React.CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
-  gap: 12,
-  marginBottom: 20,
-}
-
 const statsDisclosure: React.CSSProperties = {
   marginBottom: 20,
   padding: 16,
@@ -667,22 +600,6 @@ const statsSummary: React.CSSProperties = {
   fontWeight: 850,
   letterSpacing: "0.02em",
   padding: "4px 2px",
-}
-
-const statCard: React.CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  gap: 8,
-  padding: 16,
-  background: "#0f172a",
-  border: "1px solid #334155",
-  borderRadius: 14,
-  textAlign: "center",
-}
-
-const statNumber: React.CSSProperties = {
-  fontSize: 28,
-  fontWeight: 900,
 }
 
 const card: React.CSSProperties = {
@@ -770,23 +687,6 @@ const td: React.CSSProperties = {
   padding: 12,
   borderBottom: "1px solid #334155",
   whiteSpace: "nowrap",
-}
-
-const linkGrid: React.CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))",
-  gap: 12,
-}
-
-const actionButton: React.CSSProperties = {
-  padding: "16px 18px",
-  background: "#1e293b",
-  border: "1px solid #475569",
-  borderRadius: 12,
-  color: "white",
-  textDecoration: "none",
-  textAlign: "center",
-  fontWeight: 800,
 }
 
 const messageCard: React.CSSProperties = {
