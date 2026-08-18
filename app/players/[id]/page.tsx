@@ -370,7 +370,7 @@ export default function PublicPlayerProfilePage() {
         </section>}
 
         <details className={styles.profileDisclosure}>
-          <summary>Player Stats</summary>
+          <summary><span className={styles.summaryIcon} aria-hidden="true">▥</span><span><strong>Player Stats</strong><small>Career statistics and performance overview</small></span></summary>
           <div className={styles.disclosureContent}>
         {!hasCareerParticipation && <p className={styles.emptyDisclosure}>No verified league statistics yet.</p>}
         {memberships.length > 0 && <section style={card}>
@@ -512,12 +512,12 @@ export default function PublicPlayerProfilePage() {
         </details>
 
         <details className={styles.profileDisclosure}>
-          <summary>Names / Known As</summary>
+          <summary><span className={styles.summaryIcon} aria-hidden="true">●</span><span><strong>Names / Known As</strong><small>Player identity and name history</small></span></summary>
           <div className={styles.disclosureContent}>{aliases.length > 0 ? <ul className={styles.aliasList}>{aliases.map(alias => <li key={alias}>{alias}</li>)}</ul> : <p className={styles.emptyDisclosure}>No former names recorded.</p>}</div>
         </details>
 
         <details className={styles.profileDisclosure} id="trophy-case">
-          <summary>Trophies &amp; Achievements</summary>
+          <summary><span className={styles.summaryIcon} aria-hidden="true">🏆</span><span><strong>Trophies &amp; Achievements</strong><small>Complete trophy case and achievement history</small></span></summary>
           <div className={styles.disclosureContent}>
           {trophies.length === 0 ? <p className={styles.emptyDisclosure}>No trophies or achievements recorded yet.</p> : <>
           <h2 style={sectionTitle}>Trophy Case</h2>
@@ -578,7 +578,7 @@ const aboutSection: React.CSSProperties = { width: "min(100%, 760px)", margin: "
 const aboutCopy: React.CSSProperties = { margin: 0, fontSize: "clamp(1rem, 2vw, 1.18rem)", lineHeight: 1.75, whiteSpace: "pre-wrap", overflowWrap: "anywhere" }
 const container: React.CSSProperties = {
   width: "100%",
-  maxWidth: 1240,
+  maxWidth: 1480,
   margin: "0 auto",
 }
 

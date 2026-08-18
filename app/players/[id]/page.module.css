@@ -1,12 +1,30 @@
 .page {
+  position: relative;
+  isolation: isolate;
   min-height: 100vh;
-  padding: 24px 18px 48px;
+  padding: 24px clamp(14px, 2.4vw, 38px) 48px;
   color: var(--profile-text);
   background:
-    radial-gradient(circle at -8% 18%, color-mix(in srgb, var(--profile-bg) 34%, #39e6ae) 0%, transparent 42%),
-    radial-gradient(circle at 108% 18%, color-mix(in srgb, var(--profile-bg) 34%, #f05aaa) 0%, transparent 42%),
-    linear-gradient(112deg, color-mix(in srgb, var(--profile-bg) 68%, #0f766e) 0%, var(--profile-bg) 48%, color-mix(in srgb, var(--profile-bg) 70%, #9d174d) 100%);
+    linear-gradient(90deg, color-mix(in srgb, var(--profile-bg) 38%, #12d9a0aa), color-mix(in srgb, var(--profile-bg) 48%, #001d43aa) 50%, color-mix(in srgb, var(--profile-bg) 38%, #ef2b91aa)),
+    linear-gradient(#00131a42, #0206175c);
   background-attachment: fixed;
+  overflow: hidden;
+}
+
+.page::before {
+  content: "";
+  position: fixed;
+  z-index: -1;
+  inset: -18px;
+  background: url("/league-media/match.png") center / cover;
+  filter: blur(18px) saturate(.92);
+  opacity: .35;
+  transform: scale(1.04);
+}
+
+.page > * {
+  position: relative;
+  z-index: 1;
 }
 
 .spotlightGrid {
@@ -92,20 +110,56 @@
   width: 100%;
   margin-bottom: 18px;
   border: 1px solid #ffffff48;
-  border-radius: 18px;
-  background: linear-gradient(90deg, #071a2ecc, #020617d9, #241029c7);
+  border-radius: 13px;
+  background: linear-gradient(90deg, #033a3bd9, #061325e8 52%, #271027e8);
   box-shadow: inset 0 1px #ffffff29, 0 12px 30px #02061735;
   overflow: hidden;
   backdrop-filter: blur(10px);
 }
 
 .profileDisclosure > summary {
+  display: flex;
+  align-items: center;
+  gap: 18px;
   cursor: pointer;
   padding: clamp(18px, 2.4vw, 24px) clamp(20px, 3vw, 32px);
   font-size: clamp(.95rem, 2vw, 1.15rem);
   font-weight: 950;
   letter-spacing: .08em;
+  list-style-position: outside;
   text-transform: uppercase;
+}
+
+.profileDisclosure > summary::marker {
+  color: #58dff2;
+}
+
+.profileDisclosure > summary > span:not(.summaryIcon) {
+  display: grid;
+  gap: 4px;
+}
+
+.profileDisclosure > summary strong {
+  color: #38e9ee;
+}
+
+.profileDisclosure > summary small {
+  color: #dbeafe;
+  font-size: .74rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.summaryIcon {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  place-items: center;
+  color: #3ceef0;
+  font-size: 1.7rem;
+  text-shadow: 0 0 12px #2cf2e3;
 }
 
 .disclosureContent {
@@ -141,6 +195,8 @@
 
 @media (max-width: 640px) {
   .page { padding: 16px 12px 36px; background-attachment: scroll; }
+  .profileDisclosure > summary { gap: 10px; padding-inline: 14px; }
+  .profileDisclosure > summary small { font-size: .68rem; }
   .featuredTrophy { grid-template-columns: 1fr; justify-items: center; text-align: center; }
   .highlightGrid { grid-template-columns: 1fr 1fr; }
 }
