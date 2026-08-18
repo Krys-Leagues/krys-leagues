@@ -4,7 +4,7 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
-import PlayerProfileHero from "@/components/PlayerProfileHero"
+import PlayerProfileHero, { PlayerProfileRecognition } from "@/components/PlayerProfileHero"
 import PlayerProfileEditor, { type ProfilePreferences } from "@/components/PlayerProfileEditor"
 import { getCanonicalPlayerAvatar } from "@/lib/playerAvatars"
 import styles from "./page.module.css"
@@ -373,6 +373,14 @@ export default function PublicPlayerProfilePage() {
           <p style={aboutCopy}>{preferences.about_me}</p>
         </section>}
 
+        <div className={styles.profileContent}>
+        <PlayerProfileRecognition
+          isServerBooster={recognition.isServerBooster}
+          hasKrysServerTag={recognition.hasKrysServerTag}
+          glowColor={preferences.glow_color}
+          textColor={preferences.text_color}
+        />
+
         {hasCareerParticipation && <details className={styles.profileDisclosure}>
           <summary><span className={styles.summaryIcon} aria-hidden="true">▥</span><span><strong>Player Stats</strong><small>Career statistics and performance overview</small></span></summary>
           <div className={styles.disclosureContent}>
@@ -560,6 +568,8 @@ export default function PublicPlayerProfilePage() {
             </div>
           </div>
         </details>}
+
+        </div>
 
       </div>
     </main>

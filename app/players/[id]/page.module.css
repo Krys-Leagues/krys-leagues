@@ -5,8 +5,8 @@
   padding: 24px clamp(14px, 2.4vw, 38px) 48px;
   color: var(--profile-text);
   background:
-    linear-gradient(90deg, color-mix(in srgb, var(--profile-bg) 38%, #12d9a0aa), color-mix(in srgb, var(--profile-bg) 48%, #001d43aa) 50%, color-mix(in srgb, var(--profile-bg) 38%, #ef2b91aa)),
-    linear-gradient(#00131a42, #0206175c);
+    linear-gradient(90deg, color-mix(in srgb, var(--profile-bg) 25%, #12d9a082), color-mix(in srgb, var(--profile-bg) 36%, #001d4382) 50%, color-mix(in srgb, var(--profile-bg) 25%, #ef2b9182)),
+    linear-gradient(#00131a17, #02061738);
   background-attachment: fixed;
   overflow: hidden;
 }
@@ -15,16 +15,33 @@
   content: "";
   position: fixed;
   z-index: -1;
-  inset: -18px;
-  background: url("/league-media/match.png") center / cover;
-  filter: blur(18px) saturate(.92);
-  opacity: .35;
-  transform: scale(1.04);
+  inset: 0;
+  background:
+    radial-gradient(circle at 4% 56%, #092f25 0 3.2%, transparent 3.5%),
+    radial-gradient(circle at 11% 59%, #124934 0 4.2%, transparent 4.5%),
+    radial-gradient(circle at 18% 55%, #0b3829 0 3.8%, transparent 4.1%),
+    radial-gradient(circle at 27% 60%, #174e37 0 4.5%, transparent 4.8%),
+    radial-gradient(circle at 73% 58%, #174536 0 4.3%, transparent 4.6%),
+    radial-gradient(circle at 82% 54%, #123629 0 3.7%, transparent 4%),
+    radial-gradient(circle at 90% 59%, #1a4935 0 4.4%, transparent 4.7%),
+    radial-gradient(circle at 97% 55%, #0a3025 0 3.4%, transparent 3.7%),
+    radial-gradient(ellipse at 50% 112%, #8ecb72 0 17%, #4c985d 31%, #256346 48%, transparent 66%),
+    radial-gradient(ellipse at 12% 76%, #245a3f 0 27%, transparent 28%),
+    radial-gradient(ellipse at 88% 76%, #294f42 0 27%, transparent 28%),
+    linear-gradient(to bottom, #72d5cb 0%, #6cb9bd 35%, #8cc89c 55%, #24573d 56%, #0a2d22 100%);
 }
 
 .page > * {
   position: relative;
   z-index: 1;
+}
+
+.profileContent {
+  margin-top: clamp(72px, 8vw, 120px);
+}
+
+.profileContent > [aria-label="Community recognition"] {
+  margin: 0 0 22px;
 }
 
 .spotlightGrid {
