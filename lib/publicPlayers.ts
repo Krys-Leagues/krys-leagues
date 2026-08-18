@@ -1,18 +1,12 @@
 import { supabase } from "@/lib/supabase"
+import {
+  buildCanonicalPublicPlayerChoices,
+  type CanonicalIdentity,
+  type CanonicalPublicPlayer,
+  type PublicPlayerRow,
+} from "@/lib/publicPlayerChoices"
 
-export type CanonicalPublicPlayer = {
-  id: string
-  screen_name: string
-  status: string | null
-  active: boolean | null
-  avatar_path: string | null
-  identity_player_ids: string[]
-}
-
-type CanonicalIdentity = {
-  canonical_player_id: string
-  identity_player_ids: string[] | null
-}
+export type { CanonicalPublicPlayer } from "@/lib/publicPlayerChoices"
 
 export async function loadCanonicalPublicPlayers(): Promise<{
   data: CanonicalPublicPlayer[]
@@ -20,7 +14,7 @@ export async function loadCanonicalPublicPlayers(): Promise<{
 }> {
   const playersResponse = await supabase
     .from("players")
-    .select("id, screen_name, status, active, avatar_path")
+    .select("id, screen_name, status, active, avatar_path, is_server_booster, has_krys_server_tag, profile_badges")
     .eq("active", true)
     .order("screen_name", { ascending: true })
 
@@ -28,10 +22,7 @@ export async function loadCanonicalPublicPlayers(): Promise<{
     return { data: [], error: new Error(playersResponse.error.message) }
   }
 
-  const activePlayers = (playersResponse.data || []).filter((player) => {
-    const status = player.status?.trim().toLowerCase()
-    return status !== "merged" && status !== "retired" && status !== "archived"
-  })
+  const activePlayers = (playersResponse.data || []) as PublicPlayerRow[]
 
   const identityResponses = await Promise.all(
     activePlayers.map((player) =>
@@ -41,30 +32,19 @@ export async function loadCanonicalPublicPlayers(): Promise<{
     )
   )
 
-  const canonicalPlayers = new Map<string, CanonicalPublicPlayer>()
+  const identities: Array<CanonicalIdentity | null> = []
 
   for (let index = 0; index < activePlayers.length; index += 1) {
-    const player = activePlayers[index]
     const identityResponse = identityResponses[index]
 
     if (identityResponse.error) {
       return { data: [], error: new Error(identityResponse.error.message) }
     }
 
-    const identity = (Array.isArray(identityResponse.data)
+    identities.push((Array.isArray(identityResponse.data)
       ? identityResponse.data[0]
-      : identityResponse.data) as CanonicalIdentity | null
-
-    if (!identity || identity.canonical_player_id !== player.id) continue
-
-    canonicalPlayers.set(player.id, {
-      ...player,
-      identity_player_ids:
-        identity.identity_player_ids && identity.identity_player_ids.length > 0
-          ? identity.identity_player_ids
-          : [player.id],
-    })
+      : identityResponse.data) as CanonicalIdentity | null)
   }
 
-  return { data: Array.from(canonicalPlayers.values()), error: null }
+  return { data: buildCanonicalPublicPlayerChoices(activePlayers, identities), error: null }
 }

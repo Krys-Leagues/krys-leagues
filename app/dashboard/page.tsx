@@ -3,13 +3,9 @@
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { supabase } from "@/lib/supabase"
+import { loadCanonicalPublicPlayers, type CanonicalPublicPlayer } from "@/lib/publicPlayers"
 
-type Player = {
-  id: string
-  screen_name: string
-  status: string | null
-  active: boolean | null
-}
+type Player = CanonicalPublicPlayer
 
 type Membership = {
   id: string
@@ -52,10 +48,7 @@ export default function PlayerDashboardPage() {
       scheduleResponse,
       resultsResponse,
     ] = await Promise.all([
-      supabase
-        .from("players")
-        .select("id, screen_name, status, active")
-        .order("screen_name", { ascending: true }),
+      loadCanonicalPublicPlayers(),
 
       supabase
         .from("player_league_memberships")
@@ -89,32 +82,37 @@ export default function PlayerDashboardPage() {
     [players, selectedPlayerId]
   )
 
+  const selectedIdentityIds = useMemo(
+    () => new Set(selectedPlayer?.identity_player_ids || []),
+    [selectedPlayer],
+  )
+
   const playerMemberships = useMemo(
     () =>
       memberships.filter(
-        (membership) => membership.player_id === selectedPlayerId
+          (membership) => selectedIdentityIds.has(membership.player_id)
       ),
-    [memberships, selectedPlayerId]
+    [memberships, selectedIdentityIds]
   )
 
   const scheduledMatches = useMemo(
     () =>
       schedule.filter(
         (match) =>
-          match.player1_id === selectedPlayerId ||
-          match.player2_id === selectedPlayerId
+          selectedIdentityIds.has(match.player1_id || "") ||
+          selectedIdentityIds.has(match.player2_id || "")
       ),
-    [schedule, selectedPlayerId]
+    [schedule, selectedIdentityIds]
   )
 
   const completedMatches = useMemo(
     () =>
       results.filter(
         (result) =>
-          result.player1_id === selectedPlayerId ||
-          result.player2_id === selectedPlayerId
+          selectedIdentityIds.has(result.player1_id || "") ||
+          selectedIdentityIds.has(result.player2_id || "")
       ),
-    [results, selectedPlayerId]
+    [results, selectedIdentityIds]
   )
 
   const matchesLeft = Math.max(

@@ -3,13 +3,9 @@
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { supabase } from "@/lib/supabase"
+import { loadCanonicalPublicPlayers, type CanonicalPublicPlayer } from "@/lib/publicPlayers"
 
-type Player = {
-  id: string
-  screen_name: string
-  status: string | null
-  active: boolean | null
-}
+type Player = CanonicalPublicPlayer
 
 type Result = {
   id: string
@@ -64,10 +60,7 @@ export default function CareerAdminPage() {
       membershipsResponse,
       trophiesResponse,
     ] = await Promise.all([
-      supabase
-        .from("players")
-        .select("id, screen_name, status, active")
-        .order("screen_name", { ascending: true }),
+      loadCanonicalPublicPlayers(),
 
       supabase
         .from("results")
@@ -128,31 +121,34 @@ export default function CareerAdminPage() {
     )
   }, [players, selectedPlayerId])
 
+  const selectedIdentityIds = useMemo(
+    () => new Set(selectedPlayer?.identity_player_ids || []),
+    [selectedPlayer],
+  )
+
   const playerResults = useMemo(() => {
     return results.filter(
-      (result) =>
-        result.player1_id === selectedPlayerId ||
-        result.player2_id === selectedPlayerId
+      (result) => selectedIdentityIds.has(result.player1_id || "") || selectedIdentityIds.has(result.player2_id || "")
     )
-  }, [results, selectedPlayerId])
+  }, [results, selectedIdentityIds])
 
   const playerMemberships = useMemo(() => {
     return memberships
       .filter(
-        (membership) => membership.player_id === selectedPlayerId
+        (membership) => selectedIdentityIds.has(membership.player_id)
       )
       .sort(
         (first, second) =>
           Number(second.season_number || 0) -
           Number(first.season_number || 0)
       )
-  }, [memberships, selectedPlayerId])
+  }, [memberships, selectedIdentityIds])
 
   const playerTrophies = useMemo(() => {
     return trophies.filter(
-      (trophy) => trophy.player_id === selectedPlayerId
+      (trophy) => selectedIdentityIds.has(trophy.player_id)
     )
-  }, [trophies, selectedPlayerId])
+  }, [trophies, selectedIdentityIds])
 
   const careerStats = useMemo(() => {
     if (!selectedPlayer) {
