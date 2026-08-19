@@ -13,7 +13,7 @@ create table if not exists public.player_profile_preferences (
   updated_at timestamptz not null default now(),
   constraint player_profile_background_hex check (background_color ~ '^#[0-9a-f]{6}$'),
   constraint player_profile_background_key check (background_key in ('krys-default', 'neon-mountain', 'neon-night', 'electric-blue', 'coastal-sunset', 'pink-coast', 'coastal-teal', 'krys-coastal')),
-  constraint player_profile_name_effect check (name_effect in ('auto', 'white', 'booster', 'server-tag', 'both')),
+  constraint player_profile_name_effect check (name_effect in ('auto', 'white', 'booster', 'server-tag', 'both', 'holographic')),
   constraint player_profile_glow_hex check (glow_color ~ '^#[0-9a-f]{6}$'),
   constraint player_profile_text_hex check (text_color ~ '^#[0-9a-f]{6}$'),
   constraint player_profile_about_length check (char_length(about_me) <= 500),
@@ -50,7 +50,7 @@ alter table public.player_profile_preferences
   drop constraint if exists player_profile_name_effect;
 alter table public.player_profile_preferences
   add constraint player_profile_name_effect
-  check (name_effect in ('auto', 'white', 'booster', 'server-tag', 'both'));
+  check (name_effect in ('auto', 'white', 'booster', 'server-tag', 'both', 'holographic'));
 
 alter table public.player_profile_preferences enable row level security;
 revoke all on table public.player_profile_preferences from public, anon, authenticated;
@@ -103,6 +103,7 @@ language sql stable security definer set search_path to '' as $function$
       when pref.name_effect = 'booster' and not canonical.is_server_booster then 'auto'
       when pref.name_effect = 'server-tag' and not canonical.has_krys_server_tag then 'auto'
       when pref.name_effect = 'both' and not (canonical.is_server_booster and canonical.has_krys_server_tag) then 'auto'
+      when pref.name_effect = 'holographic' and not (canonical.profile_badges && array['Owner', 'Co-Head Admin', 'Tournament Admin', 'Admin']::text[]) then 'auto'
       else coalesce(pref.name_effect, 'auto')
     end,
     coalesce(pref.background_color, '#07111f'), coalesce(pref.glow_color, '#ff2bd6'),
@@ -150,21 +151,25 @@ declare v_background_key text := lower(btrim(p_background_key));
 declare v_name_effect text := lower(btrim(p_name_effect));
 declare v_is_server_booster boolean := false;
 declare v_has_krys_server_tag boolean := false;
+declare v_profile_badges text[] := array[]::text[];
+declare v_is_staff boolean := false;
 declare v_background text := lower(btrim(p_background_color));
 declare v_glow text := lower(btrim(p_glow_color));
 declare v_text text := lower(btrim(p_text_color));
 declare v_about text := nullif(btrim(replace(replace(p_about_me, chr(13) || chr(10), chr(10)), chr(13), chr(10))), '');
 begin
   if not public.can_edit_player_profile_preferences(v_player_id) then raise exception 'You may edit only your own player profile' using errcode = '42501'; end if;
-  select player.is_server_booster, player.has_krys_server_tag
-  into v_is_server_booster, v_has_krys_server_tag
+  select player.is_server_booster, player.has_krys_server_tag, player.profile_badges
+  into v_is_server_booster, v_has_krys_server_tag, v_profile_badges
   from public.players as player
   where player.id = v_player_id;
+  v_is_staff := coalesce(v_profile_badges, array[]::text[]) && array['Owner', 'Co-Head Admin', 'Tournament Admin', 'Admin']::text[];
   if v_background_key is null or v_background_key not in ('krys-default', 'neon-mountain', 'neon-night', 'electric-blue', 'coastal-sunset', 'pink-coast', 'coastal-teal', 'krys-coastal') then raise exception 'Unsupported player profile background'; end if;
-  if v_name_effect is null or v_name_effect not in ('auto', 'white', 'booster', 'server-tag', 'both') then raise exception 'Unsupported player name effect'; end if;
+  if v_name_effect is null or v_name_effect not in ('auto', 'white', 'booster', 'server-tag', 'both', 'holographic') then raise exception 'Unsupported player name effect'; end if;
   if v_name_effect = 'booster' and not v_is_server_booster then raise exception 'Server Booster name effect requires Server Booster recognition' using errcode = '42501'; end if;
   if v_name_effect = 'server-tag' and not v_has_krys_server_tag then raise exception 'Server Tag name effect requires Server Tag recognition' using errcode = '42501'; end if;
   if v_name_effect = 'both' and not (v_is_server_booster and v_has_krys_server_tag) then raise exception 'Booster + Tag name effect requires both recognitions' using errcode = '42501'; end if;
+  if v_name_effect = 'holographic' and not v_is_staff then raise exception 'Holographic name effect requires a staff presentation badge' using errcode = '42501'; end if;
   if v_background !~ '^#[0-9a-f]{6}$' or v_glow !~ '^#[0-9a-f]{6}$' or v_text !~ '^#[0-9a-f]{6}$' then raise exception 'Profile colors must be six-digit hexadecimal colors'; end if;
   if char_length(v_about) > 500 then raise exception 'About Me must be 500 characters or fewer'; end if;
   if v_about ~ '[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]' then raise exception 'About Me contains unsupported control characters'; end if;
