@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
+import { createDiscordAuthCallbackUrl } from "@/lib/authReturnTo"
 import { supabase } from "@/lib/supabase"
 import PlayerProfileHero, { PlayerProfileRecognition } from "@/components/PlayerProfileHero"
 import PlayerProfileEditor, { type ProfilePreferences } from "@/components/PlayerProfileEditor"
@@ -136,6 +137,7 @@ export default function PublicPlayerProfilePage() {
     profileBadges: [] as string[],
   })
   const [preferences, setPreferences] = useState<ProfilePreferences>(DEFAULT_PREFERENCES)
+  const [hasSession, setHasSession] = useState(false)
   const [canEditProfile, setCanEditProfile] = useState(false)
   const [openProfileSection, setOpenProfileSection] = useState<"stats" | "aliases" | "trophies" | null>(null)
 
@@ -288,13 +290,26 @@ export default function PublicPlayerProfilePage() {
       const loaded = Array.isArray(preferencesResponse.data) ? preferencesResponse.data[0] : preferencesResponse.data
       if (loaded) setPreferences(loaded as ProfilePreferences)
     }
-    if (sessionResponse.data.session) {
+    const session = sessionResponse.data.session
+    setHasSession(Boolean(session))
+    if (session) {
       const { data: viewerCanonicalId } = await supabase.rpc("current_user_canonical_player_id")
       setCanEditProfile(typeof viewerCanonicalId === "string" && viewerCanonicalId === canonicalId)
     } else {
       setCanEditProfile(false)
     }
     setLoading(false)
+  }
+
+  async function signInWithDiscord() {
+    if (!player) return
+
+    await supabase.auth.signInWithOAuth({
+      provider: "discord",
+      options: {
+        redirectTo: createDiscordAuthCallbackUrl("player", `/players/${player.id}`),
+      },
+    })
   }
 
   const hasCareerParticipation = memberships.length > 0 || results.length > 0 ||
@@ -379,6 +394,7 @@ export default function PublicPlayerProfilePage() {
           {hasCareerParticipation && <button type="button" className={styles.profileActionButton} aria-pressed={openProfileSection === "stats"} onClick={() => setOpenProfileSection(current => current === "stats" ? null : "stats")}>Player Stats</button>}
           {knownAliases.length > 0 && <button type="button" className={styles.profileActionButton} aria-pressed={openProfileSection === "aliases"} onClick={() => setOpenProfileSection(current => current === "aliases" ? null : "aliases")}>Names / Known As</button>}
           {trophies.length > 0 && <button type="button" className={styles.profileActionButton} aria-pressed={openProfileSection === "trophies"} onClick={() => setOpenProfileSection(current => current === "trophies" ? null : "trophies")}>Trophies &amp; Achievements</button>}
+          {!hasSession && <button type="button" className={styles.profileActionButton} onClick={() => void signInWithDiscord()}>Sign in with Discord</button>}
           {canEditProfile && <PlayerProfileEditor playerId={player.id} initial={preferences} isServerBooster={recognition.isServerBooster} hasKrysServerTag={recognition.hasKrysServerTag} profileBadges={recognition.profileBadges} onSaved={setPreferences} />}
         </nav>
 

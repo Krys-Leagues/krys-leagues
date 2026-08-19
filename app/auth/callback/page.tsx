@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { consumeAuthReturnTo } from "@/lib/authReturnTo"
+import { consumeAuthReturnTo, createDiscordAuthCallbackUrl, safeInternalReturnTo } from "@/lib/authReturnTo"
 import { getDiscordPlayerLoginDestination } from "@/lib/discordPlayerLogin"
 import { supabase } from "@/lib/supabase"
 
@@ -32,6 +32,8 @@ function CallbackHandler() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [errorMessage, setErrorMessage] = useState("")
+  const [retryAvailable, setRetryAvailable] = useState(false)
+  const [retrying, setRetrying] = useState(false)
 
   useEffect(() => {
     async function handleLogin() {
@@ -45,9 +47,8 @@ function CallbackHandler() {
       const session = sessionResponse.data.session
 
       if (sessionResponse.error || !session) {
-        setErrorMessage(
-          sessionResponse.error?.message || "Discord authentication failed."
-        )
+        setRetryAvailable(true)
+        setErrorMessage("Discord sign-in did not complete in this browser. Please try signing in again.")
         return
       }
 
@@ -78,7 +79,7 @@ function CallbackHandler() {
       )
 
       if (resolutionError) {
-        setErrorMessage(`Player account lookup failed: ${resolutionError.message}`)
+        setErrorMessage("Your Discord account was signed in, but your player profile could not be verified. Please try again later.")
         return
       }
 
@@ -99,9 +100,31 @@ function CallbackHandler() {
     void handleLogin()
   }, [router, searchParams])
 
+  async function retrySignIn() {
+    setRetrying(true)
+    setErrorMessage("")
+
+    const returnTo = safeInternalReturnTo(searchParams.get("next")) || undefined
+    const authType = searchParams.get("type") === "admin" ? "admin" : "player"
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "discord",
+      options: {
+        redirectTo: createDiscordAuthCallbackUrl(authType, returnTo),
+      },
+    })
+
+    if (error) {
+      setRetrying(false)
+      setRetryAvailable(true)
+      setErrorMessage("Discord sign-in could not be restarted. Please return to the site and try again.")
+    }
+  }
+
   return (
     <main style={page}>
       <h2>{errorMessage || "Logging you in..."}</h2>
+      {errorMessage && <p style={helpText}>Your public player profiles are still available while you are signed out.</p>}
+      {errorMessage && retryAvailable && <button type="button" style={retryButton} disabled={retrying} onClick={() => void retrySignIn()}>{retrying ? "Opening Discord..." : "Retry Sign In"}</button>}
     </main>
   )
 }
@@ -119,4 +142,23 @@ const page: React.CSSProperties = {
   padding: 40,
   background: "black",
   color: "white",
+}
+
+const helpText: React.CSSProperties = {
+  maxWidth: 560,
+  color: "#cbd5e1",
+  lineHeight: 1.5,
+}
+
+const retryButton: React.CSSProperties = {
+  minHeight: 44,
+  marginTop: 12,
+  padding: "10px 18px",
+  border: "1px solid #818cf8",
+  borderRadius: 10,
+  background: "#4f46e5",
+  color: "white",
+  font: "inherit",
+  fontWeight: 800,
+  cursor: "pointer",
 }
