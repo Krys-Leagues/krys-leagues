@@ -5,22 +5,24 @@ import styles from "./PlayerProfileHero.module.css"
 type FeaturedTrophy = { title: string; meta: string; imageUrl: string | null }
 type CareerHighlight = { label: string; value: number }
 
-type Props = { screenName: string; avatarPath: string | null; isServerBooster: boolean; hasKrysServerTag: boolean; profileBadges?: string[]; glowColor?: string; textColor?: string; featuredTrophy?: FeaturedTrophy | null; careerHighlights?: CareerHighlight[]; publicLayout?: boolean }
+export type PlayerNameEffect = "white" | "booster" | "server-tag"
+type Props = { screenName: string; avatarPath: string | null; isServerBooster: boolean; hasKrysServerTag: boolean; nameEffect?: PlayerNameEffect; profileBadges?: string[]; glowColor?: string; textColor?: string; featuredTrophy?: FeaturedTrophy | null; careerHighlights?: CareerHighlight[]; publicLayout?: boolean }
 
-type RecognitionProps = Pick<Props, "isServerBooster" | "hasKrysServerTag" | "glowColor" | "textColor">
+type RecognitionProps = Pick<Props, "isServerBooster" | "hasKrysServerTag" | "profileBadges" | "glowColor" | "textColor">
 
-export function PlayerProfileRecognition({ isServerBooster, hasKrysServerTag, glowColor = "#ff2bd6", textColor = "#f8fafc" }: RecognitionProps) {
-  if (!isServerBooster && !hasKrysServerTag) return null
+export function PlayerProfileRecognition({ isServerBooster, hasKrysServerTag, profileBadges = [], glowColor = "#ff2bd6", textColor = "#f8fafc" }: RecognitionProps) {
+  if (!isServerBooster && !hasKrysServerTag && profileBadges.length === 0) return null
   const theme = { "--profile-glow": glowColor, "--profile-text": textColor } as React.CSSProperties
   return <section className={styles.recognitionBand} style={theme} aria-label="Community recognition">
     <div className={styles.recognitionRow}>
       {isServerBooster && <div className={`${styles.recognition} ${styles.boosterRecognition}`}><span className={styles.boosterIcon} aria-hidden="true">✦</span><span><strong>Server Booster</strong><small>Thank you for supporting the server!</small></span></div>}
       {hasKrysServerTag && <div className={`${styles.recognition} ${styles.tagRecognition}`}><Image src="/league-media/BIG%20LOGO%20TRANSPARENT.png" width={46} height={46} alt="" aria-hidden="true" /><span><strong>Server Tag</strong><small>Proud to wear the Krys tag!</small></span></div>}
+      {profileBadges.map(badge => <div className={`${styles.recognition} ${styles.badgeRecognition}`} key={badge}><span className={styles.badgeIcon} aria-hidden="true">◆</span><span><strong>{badge}</strong></span></div>)}
     </div>
   </section>
 }
 
-export default function PlayerProfileHero({ screenName, avatarPath, isServerBooster, hasKrysServerTag, profileBadges = [], glowColor = "#ff2bd6", textColor = "#f8fafc", featuredTrophy = null, careerHighlights = [], publicLayout = false }: Props) {
+export default function PlayerProfileHero({ screenName, avatarPath, isServerBooster, hasKrysServerTag, nameEffect = "white", profileBadges = [], glowColor = "#ff2bd6", textColor = "#f8fafc", featuredTrophy = null, careerHighlights = [], publicLayout = false }: Props) {
   const theme = { "--profile-glow": glowColor, "--profile-text": textColor } as React.CSSProperties
   const wrappedNameParts = screenName.length > 16 && screenName.includes("_")
     ? screenName.split("_")
@@ -32,13 +34,11 @@ export default function PlayerProfileHero({ screenName, avatarPath, isServerBoos
       : careerHighlights.length > 0
         ? `${styles.heroGrid} ${styles.highlightsOnly}`
         : `${styles.heroGrid} ${styles.playerOnly}`
-  const nameEffectClass = isServerBooster && hasKrysServerTag
-    ? styles.nameBoth
-    : isServerBooster
-      ? styles.nameBooster
-      : hasKrysServerTag
-        ? styles.nameServerTag
-        : ""
+  const nameEffectClass = nameEffect === "booster" && isServerBooster
+    ? styles.nameBooster
+    : nameEffect === "server-tag" && hasKrysServerTag
+      ? styles.nameServerTag
+      : styles.nameWhite
   return <section className={styles.hero} style={theme} aria-labelledby="player-profile-name" data-server-booster={isServerBooster} data-krys-server-tag={hasKrysServerTag}>
     <div className={styles.brandRow} aria-label={hasKrysServerTag ? "Krys Server Tag recognition" : "Krys Leagues"}>
       <div className={styles.brandMark}><Image className={`${styles.brandLogo} ${hasKrysServerTag ? styles.tagActive : ""}`} src="/league-media/BIG%20LOGO%20TRANSPARENT.png" width={112} height={112} alt="" aria-hidden="true" /></div>
@@ -67,7 +67,7 @@ export default function PlayerProfileHero({ screenName, avatarPath, isServerBoos
             <span className={styles.nameFull}>{screenName}</span>
             {wrappedNameParts && <span className={styles.nameSplit} aria-hidden="true">{wrappedNameParts.map((part, index) => <span key={`${part}-${index}`}>{part}</span>)}</span>}
           </h1>
-          {profileBadges.length > 0 && <div className={styles.badges} aria-label="Player recognition">{profileBadges.map(badge => <span key={badge}>{badge}</span>)}</div>}
+          {!publicLayout && profileBadges.length > 0 && <div className={styles.badges} aria-label="Player recognition">{profileBadges.map(badge => <span key={badge}>{badge}</span>)}</div>}
         </div>
       </div>
       {careerHighlights.length > 0 && <section className={`${styles.sidePanel} ${styles.highlightsPanel}`} aria-labelledby="career-highlights-title">

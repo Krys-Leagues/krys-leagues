@@ -11,6 +11,13 @@
 .backgroundOption:focus-visible { outline: 3px solid #f472b6; outline-offset: 2px; }
 .backgroundOptionSelected { border-color: #f472b6; box-shadow: 0 0 0 2px #f472b633, 0 0 22px #f472b644; }
 .backgroundThumbnail { display: block; width: 100%; aspect-ratio: 16/9; border-radius: 8px; background-position: center; background-repeat: no-repeat; background-size: cover; }
+.nameEffectPicker { min-width:0; margin:0 0 18px; padding:0; border:0; }
+.nameEffectPicker legend { margin-bottom:10px; font-weight:800; }
+.nameEffectOptions { display:flex; flex-wrap:wrap; gap:8px; }
+.nameEffectOptions button { min-height:40px; padding:8px 14px; border:1px solid #64748b; border-radius:999px; background:#020617; color:#e2e8f0; font:inherit; font-weight:800; cursor:pointer; }
+.nameEffectOptions button:hover { border-color:#cbd5e1; }
+.nameEffectOptions button:focus-visible { outline:3px solid #f472b6; outline-offset:2px; }
+.nameEffectOptions .nameEffectSelected { border-color:#f472b6; background:#83184399; box-shadow:0 0 16px #f472b644; color:#fff; }
 .colors { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
 .colorField { display: grid; grid-template-columns: auto 1fr; gap: 8px 12px; align-items: center; padding: 12px; border-radius: 12px; background: #020617; }
 .colorField span { grid-column: 1/-1; font-weight: 750; }.colorField input { width: 48px; height: 44px; padding: 2px; border: 1px solid #64748b; border-radius: 8px; background: transparent; }.colorField code { color: #cbd5e1; }

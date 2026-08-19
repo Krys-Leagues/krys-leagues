@@ -5,11 +5,12 @@ import { supabase } from "@/lib/supabase"
 import { DEFAULT_PLAYER_PROFILE_BACKGROUND_KEY, getPlayerProfileBackground, PLAYER_PROFILE_BACKGROUNDS } from "@/lib/playerProfileBackgrounds"
 import styles from "./PlayerProfileEditor.module.css"
 
-export type ProfilePreferences = { background_key: string; background_color: string; glow_color: string; text_color: string; about_me: string | null }
-type Props = { playerId: string; initial: ProfilePreferences; onSaved: (value: ProfilePreferences) => void }
-const DEFAULTS = { background_key: DEFAULT_PLAYER_PROFILE_BACKGROUND_KEY, background_color: "#07111f", glow_color: "#ff2bd6", text_color: "#f8fafc" }
+export type PlayerNameEffect = "white" | "booster" | "server-tag"
+export type ProfilePreferences = { background_key: string; name_effect: PlayerNameEffect; background_color: string; glow_color: string; text_color: string; about_me: string | null }
+type Props = { playerId: string; initial: ProfilePreferences; isServerBooster: boolean; hasKrysServerTag: boolean; onSaved: (value: ProfilePreferences) => void }
+const DEFAULTS = { background_key: DEFAULT_PLAYER_PROFILE_BACKGROUND_KEY, name_effect: "white" as PlayerNameEffect, background_color: "#07111f", glow_color: "#ff2bd6", text_color: "#f8fafc" }
 
-export default function PlayerProfileEditor({ playerId, initial, onSaved }: Props) {
+export default function PlayerProfileEditor({ playerId, initial, isServerBooster, hasKrysServerTag, onSaved }: Props) {
   const [open, setOpen] = useState(false)
   const [draft, setDraft] = useState(initial)
   const [saving, setSaving] = useState(false)
@@ -18,7 +19,7 @@ export default function PlayerProfileEditor({ playerId, initial, onSaved }: Prop
 
   async function save() {
     setSaving(true); setMessage("")
-    const { data, error } = await supabase.rpc("save_player_profile_preferences_v2", { p_player_id: playerId, p_background_key: draft.background_key, p_background_color: draft.background_color, p_glow_color: draft.glow_color, p_text_color: draft.text_color, p_about_me: draft.about_me || null })
+    const { data, error } = await supabase.rpc("save_player_profile_preferences_v3", { p_player_id: playerId, p_background_key: draft.background_key, p_name_effect: draft.name_effect, p_background_color: draft.background_color, p_glow_color: draft.glow_color, p_text_color: draft.text_color, p_about_me: draft.about_me || null })
     setSaving(false)
     if (error) return setMessage(error.message)
     const saved = (Array.isArray(data) ? data[0] : data) as ProfilePreferences
@@ -42,6 +43,14 @@ export default function PlayerProfileEditor({ playerId, initial, onSaved }: Prop
             <span className={styles.backgroundThumbnail} style={{ backgroundImage: `url("${background.imagePath}")` }} />
             <span>{background.label}</span>
           </button>)}
+        </div>
+      </fieldset>
+      <fieldset className={styles.nameEffectPicker}>
+        <legend>Player Name Effect</legend>
+        <div className={styles.nameEffectOptions}>
+          <button type="button" className={draft.name_effect === "white" ? styles.nameEffectSelected : ""} onClick={() => set("name_effect", "white")} aria-pressed={draft.name_effect === "white"}>White</button>
+          {isServerBooster && <button type="button" className={draft.name_effect === "booster" ? styles.nameEffectSelected : ""} onClick={() => set("name_effect", "booster")} aria-pressed={draft.name_effect === "booster"}>Server Booster</button>}
+          {hasKrysServerTag && <button type="button" className={draft.name_effect === "server-tag" ? styles.nameEffectSelected : ""} onClick={() => set("name_effect", "server-tag")} aria-pressed={draft.name_effect === "server-tag"}>Server Tag</button>}
         </div>
       </fieldset>
       <div className={styles.colors}>

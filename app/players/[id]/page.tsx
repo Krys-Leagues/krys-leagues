@@ -36,7 +36,7 @@ type Trophy = {
   created_at: string
 }
 
-const DEFAULT_PREFERENCES: ProfilePreferences = { background_key: DEFAULT_PLAYER_PROFILE_BACKGROUND_KEY, background_color: "#07111f", glow_color: "#ff2bd6", text_color: "#f8fafc", about_me: null }
+const DEFAULT_PREFERENCES: ProfilePreferences = { background_key: DEFAULT_PLAYER_PROFILE_BACKGROUND_KEY, name_effect: "white", background_color: "#07111f", glow_color: "#ff2bd6", text_color: "#f8fafc", about_me: null }
 
 type Result = {
   id: string
@@ -242,7 +242,7 @@ export default function PublicPlayerProfilePage() {
         p_player_id: playerId,
       }),
       getCanonicalPlayerAvatar(playerId).catch(() => ({ canonicalPlayerId: playerId, avatarPath: null })),
-      supabase.rpc("get_public_player_profile_preferences_v2", { p_player_id: canonicalId }),
+      supabase.rpc("get_public_player_profile_preferences_v3", { p_player_id: canonicalId }),
       supabase.auth.getSession(),
     ])
 
@@ -340,12 +340,13 @@ export default function PublicPlayerProfilePage() {
 
   return (
     <main className={styles.page} style={{ "--profile-bg": preferences.background_color, "--profile-text": preferences.text_color, "--profile-background-image": `url("${getPlayerProfileBackground(preferences.background_key).imagePath}")` } as React.CSSProperties}>
-      <div style={container}>
+      <div style={container} className={styles.profilePageContainer}>
         <PlayerProfileHero
           screenName={player.screen_name}
           avatarPath={avatarPath}
           isServerBooster={recognition.isServerBooster}
           hasKrysServerTag={recognition.hasKrysServerTag}
+          nameEffect={preferences.name_effect}
           profileBadges={recognition.profileBadges}
           glowColor={preferences.glow_color}
           textColor={preferences.text_color}
@@ -358,10 +359,6 @@ export default function PublicPlayerProfilePage() {
           publicLayout
         />
 
-        {canEditProfile && <div className={styles.utilityCluster}>
-          <PlayerProfileEditor playerId={player.id} initial={preferences} onSaved={setPreferences} />
-        </div>}
-
         {preferences.about_me && <section style={aboutSection}>
           <p style={eyebrow}>About Me</p>
           <p style={aboutCopy}>{preferences.about_me}</p>
@@ -371,16 +368,18 @@ export default function PublicPlayerProfilePage() {
         <PlayerProfileRecognition
           isServerBooster={recognition.isServerBooster}
           hasKrysServerTag={recognition.hasKrysServerTag}
+          profileBadges={recognition.profileBadges}
           glowColor={preferences.glow_color}
           textColor={preferences.text_color}
         />
 
         <nav className={styles.profileActions} aria-label="Player profile sections and navigation">
+          <Link href="/" style={backButton}>← Krys Leagues</Link>
+          <Link href="/players" style={backButton}>← Player Profiles</Link>
           {hasCareerParticipation && <button type="button" className={styles.profileActionButton} aria-pressed={openProfileSection === "stats"} onClick={() => setOpenProfileSection(current => current === "stats" ? null : "stats")}>Player Stats</button>}
           {knownAliases.length > 0 && <button type="button" className={styles.profileActionButton} aria-pressed={openProfileSection === "aliases"} onClick={() => setOpenProfileSection(current => current === "aliases" ? null : "aliases")}>Names / Known As</button>}
           {trophies.length > 0 && <button type="button" className={styles.profileActionButton} aria-pressed={openProfileSection === "trophies"} onClick={() => setOpenProfileSection(current => current === "trophies" ? null : "trophies")}>Trophies &amp; Achievements</button>}
-          <Link href="/" style={backButton}>← Krys Leagues</Link>
-          <Link href="/players" style={backButton}>← Player Profiles</Link>
+          {canEditProfile && <PlayerProfileEditor playerId={player.id} initial={preferences} isServerBooster={recognition.isServerBooster} hasKrysServerTag={recognition.hasKrysServerTag} onSaved={setPreferences} />}
         </nav>
 
         {openProfileSection === "stats" && hasCareerParticipation && <section className={styles.profileSectionPanel} id="player-stats-panel" aria-label="Player Stats">
