@@ -106,6 +106,7 @@
   background: linear-gradient(90deg, #033a3b66, #0613257a 52%, #27102770);
   box-shadow: inset 0 1px #ffffff29, 0 12px 30px #02061735;
   backdrop-filter: blur(8px);
+  color: #f8fafc;
 }
 
 .spotlightGrid {
@@ -155,7 +156,7 @@
 
 .panelMeta {
   margin: 10px 0 0;
-  color: color-mix(in srgb, var(--profile-text) 72%, transparent);
+  color: #cbd5e1;
   line-height: 1.5;
 }
 
@@ -180,7 +181,7 @@
 }
 
 .highlight span {
-  color: color-mix(in srgb, var(--profile-text) 72%, transparent);
+  color: #cbd5e1;
   font-size: .78rem;
   font-weight: 800;
   letter-spacing: .08em;
@@ -189,7 +190,7 @@
 
 .sectionDescription {
   margin: 0 0 14px;
-  color: color-mix(in srgb, var(--profile-text) 76%, transparent);
+  color: #dbe4f0;
   font-size: .86rem;
   line-height: 1.45;
 }
@@ -200,7 +201,7 @@
   border: 1px solid #ffffff20;
   border-radius: 13px;
   background: #0206174d;
-  color: color-mix(in srgb, var(--profile-text) 68%, transparent);
+  color: #cbd5e1;
   text-align: center;
 }
 

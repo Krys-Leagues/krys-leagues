@@ -580,9 +580,9 @@ const page: React.CSSProperties = {
   padding: "30px 18px",
 }
 
-const eyebrow: React.CSSProperties = { margin: "0 0 8px", color: "#f9a8d4", fontSize: 12, fontWeight: 900, letterSpacing: ".14em", textTransform: "uppercase" }
-const aboutSection: React.CSSProperties = { width: "min(100%, 760px)", margin: "0 auto 28px", padding: "4px clamp(4px, 3vw, 24px)", textAlign: "center" }
-const aboutCopy: React.CSSProperties = { margin: 0, fontSize: "clamp(1rem, 2vw, 1.18rem)", lineHeight: 1.75, whiteSpace: "pre-wrap", overflowWrap: "anywhere" }
+const eyebrow: React.CSSProperties = { margin: "0 0 8px", color: "#f8fafc", fontSize: "clamp(1.05rem, 1.35vw, 1.375rem)", fontWeight: 900, letterSpacing: ".12em", lineHeight: 1.2, textTransform: "uppercase" }
+const aboutSection: React.CSSProperties = { width: "min(100%, 760px)", margin: "0 auto 28px", padding: "clamp(14px, 2vw, 20px) clamp(18px, 3vw, 32px)", border: "1px solid #ffffff30", borderRadius: 16, background: "#02061766", boxShadow: "inset 0 1px #ffffff1f, 0 10px 28px #0003", backdropFilter: "blur(7px)", color: "#f8fafc", textAlign: "center" }
+const aboutCopy: React.CSSProperties = { margin: 0, color: "#f8fafc", fontSize: "clamp(1.25rem, 1.65vw, 1.625rem)", lineHeight: 1.55, whiteSpace: "pre-wrap", overflowWrap: "anywhere" }
 const container: React.CSSProperties = {
   width: "100%",
   maxWidth: 1900,
@@ -652,7 +652,7 @@ const trophyImage: React.CSSProperties = {
 }
 
 const muted: React.CSSProperties = {
-  color: "#94a3b8",
+  color: "#cbd5e1",
 }
 
 const historyError: React.CSSProperties = {

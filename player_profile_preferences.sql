@@ -98,7 +98,13 @@ returns table(player_id uuid, background_key text, name_effect text, background_
 language sql stable security definer set search_path to '' as $function$
   select canonical.id,
     coalesce(pref.background_key, 'krys-default'),
-    case when pref.name_effect_is_custom then coalesce(pref.name_effect, 'auto') else 'auto' end,
+    case
+      when not coalesce(pref.name_effect_is_custom, false) then 'auto'
+      when pref.name_effect = 'booster' and not canonical.is_server_booster then 'auto'
+      when pref.name_effect = 'server-tag' and not canonical.has_krys_server_tag then 'auto'
+      when pref.name_effect = 'both' and not (canonical.is_server_booster and canonical.has_krys_server_tag) then 'auto'
+      else coalesce(pref.name_effect, 'auto')
+    end,
     coalesce(pref.background_color, '#07111f'), coalesce(pref.glow_color, '#ff2bd6'),
     coalesce(pref.text_color, '#f8fafc'), nullif(btrim(pref.about_me), '')
   from public.players as canonical
@@ -108,10 +114,8 @@ $function$;
 
 create or replace function public.can_edit_player_profile_preferences(p_player_id uuid)
 returns boolean language sql stable security definer set search_path to '' as $function$
-  select auth.uid() is not null and (
-    public.is_current_user_site_admin()
-    or public.current_user_canonical_player_id() = public.resolve_canonical_player_id(p_player_id)
-  );
+  select auth.uid() is not null
+    and public.current_user_canonical_player_id() = public.resolve_canonical_player_id(p_player_id);
 $function$;
 
 create or replace function public.save_player_profile_preferences_v2(
@@ -144,14 +148,23 @@ language plpgsql security definer set search_path to '' as $function$
 declare v_player_id uuid := public.resolve_canonical_player_id(p_player_id);
 declare v_background_key text := lower(btrim(p_background_key));
 declare v_name_effect text := lower(btrim(p_name_effect));
+declare v_is_server_booster boolean := false;
+declare v_has_krys_server_tag boolean := false;
 declare v_background text := lower(btrim(p_background_color));
 declare v_glow text := lower(btrim(p_glow_color));
 declare v_text text := lower(btrim(p_text_color));
 declare v_about text := nullif(btrim(replace(replace(p_about_me, chr(13) || chr(10), chr(10)), chr(13), chr(10))), '');
 begin
   if not public.can_edit_player_profile_preferences(v_player_id) then raise exception 'You may edit only your own player profile' using errcode = '42501'; end if;
+  select player.is_server_booster, player.has_krys_server_tag
+  into v_is_server_booster, v_has_krys_server_tag
+  from public.players as player
+  where player.id = v_player_id;
   if v_background_key is null or v_background_key not in ('krys-default', 'neon-mountain', 'neon-night', 'electric-blue', 'coastal-sunset', 'pink-coast', 'coastal-teal', 'krys-coastal') then raise exception 'Unsupported player profile background'; end if;
   if v_name_effect is null or v_name_effect not in ('auto', 'white', 'booster', 'server-tag', 'both') then raise exception 'Unsupported player name effect'; end if;
+  if v_name_effect = 'booster' and not v_is_server_booster then raise exception 'Server Booster name effect requires Server Booster recognition' using errcode = '42501'; end if;
+  if v_name_effect = 'server-tag' and not v_has_krys_server_tag then raise exception 'Server Tag name effect requires Server Tag recognition' using errcode = '42501'; end if;
+  if v_name_effect = 'both' and not (v_is_server_booster and v_has_krys_server_tag) then raise exception 'Booster + Tag name effect requires both recognitions' using errcode = '42501'; end if;
   if v_background !~ '^#[0-9a-f]{6}$' or v_glow !~ '^#[0-9a-f]{6}$' or v_text !~ '^#[0-9a-f]{6}$' then raise exception 'Profile colors must be six-digit hexadecimal colors'; end if;
   if char_length(v_about) > 500 then raise exception 'About Me must be 500 characters or fewer'; end if;
   if v_about ~ '[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]' then raise exception 'About Me contains unsupported control characters'; end if;
