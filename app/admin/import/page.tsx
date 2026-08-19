@@ -32,6 +32,13 @@ const cards = [
     color: "bg-orange-600",
   },
   {
+    title: "Trophies",
+    description:
+      "Upload trophy artwork, connect winners, and publish player trophies.",
+    href: "/admin/trophies",
+    color: "bg-yellow-600",
+  },
+  {
     title: "Google Sheets",
     description:
       "Connect and import data directly from Google Sheets (coming soon).",

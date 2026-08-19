@@ -219,7 +219,7 @@ export default function PublicPlayerProfilePage() {
         .select(
           "id, trophy_title, placement, event_name, division, season, week, image_url, created_at"
         )
-        .in("player_id", identityIds)
+        .eq("player_id", canonicalId)
         .order("created_at", { ascending: false }),
 
       supabase

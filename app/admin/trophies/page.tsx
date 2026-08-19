@@ -1,398 +1,133 @@
 "use client"
 
+import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { supabase } from "@/lib/supabase"
+import { loadGlobalPlayerDirectory, type GlobalPlayerDirectoryEntry } from "@/lib/identity/globalPlayerDirectory"
+import { normalizeTrophyPlayerName, trophySemanticKey, type TrophyImportCandidate } from "@/lib/trophies/trophyImport"
+import { TROPHY_IMAGE_BUCKET, trophyImageObjectPath, trophyImagePublicUrl, trophyImageSha256, validateTrophyImageFile } from "@/lib/trophies/trophyImages"
+import styles from "./trophies.module.css"
 
-type Trophy = {
-  id: string
-  player_name: string
-  player_id: string | null
-  event_type: string | null
-  event_name: string | null
-  league_type: string | null
-  division: string | null
-  placement: string | null
-  season: string | null
-  week: string | null
-  month: string | null
-  trophy_title: string | null
-  image_url: string | null
-  notes: string | null
-  created_at: string | null
-}
-
-type Player = {
-  id: string
-  screen_name: string
-}
-
-const EVENT_TYPES = ["KWT", "Monthly", "Cup", "League", "Special"]
-const PLACEMENTS = ["1st", "2nd", "3rd", "Most Aces", "Clean Round", "Badge", "Other"]
+type Trophy = { id: string; player_name: string; player_id: string | null; trophy_title: string | null; placement: string | null; event_name: string | null; division: string | null; season: string | null; month: string | null; image_url: string | null; source_key: string | null }
+type ReviewCandidate = TrophyImportCandidate & { selected: boolean }
 
 export default function TrophyAdminPage() {
   const [trophies, setTrophies] = useState<Trophy[]>([])
-  const [players, setPlayers] = useState<Player[]>([])
-  const [search, setSearch] = useState("")
+  const [players, setPlayers] = useState<GlobalPlayerDirectoryEntry[]>([])
+  const [candidates, setCandidates] = useState<ReviewCandidate[]>([])
   const [loading, setLoading] = useState(true)
+  const [scanning, setScanning] = useState(false)
+  const [importing, setImporting] = useState(false)
+  const [filter, setFilter] = useState<"all" | "ready" | "needs-player" | "duplicate">("all")
+  const [message, setMessage] = useState("")
+  const [uploading, setUploading] = useState(false)
+  const [uploadFile, setUploadFile] = useState<File | null>(null)
+  const [uploadForm, setUploadForm] = useState({ playerId: "", title: "", eventName: "", division: "", placement: "", season: "", month: "" })
 
-  const [form, setForm] = useState({
-    player_name: "",
-    player_id: "",
-    event_type: "KWT",
-    event_name: "",
-    league_type: "",
-    division: "",
-    placement: "1st",
-    season: "",
-    week: "",
-    month: "",
-    trophy_title: "",
-    image_url: "",
-    notes: "",
-  })
+  const trophySelect = "id, player_name, player_id, trophy_title, placement, event_name, division, season, month, image_url, source_key"
 
   useEffect(() => {
-    loadData()
+    Promise.all([
+      supabase.from("player_trophies").select(trophySelect).order("created_at", { ascending: false }),
+      loadGlobalPlayerDirectory(),
+    ]).then(([trophyResult, directory]) => {
+      if (trophyResult.error) throw trophyResult.error
+      setTrophies((trophyResult.data || []) as Trophy[])
+      setPlayers(directory)
+    }).catch((error) => setMessage(error instanceof Error ? error.message : "Could not load trophy data."))
+      .finally(() => setLoading(false))
   }, [])
 
-  async function loadData() {
-    setLoading(true)
-
-    const { data: trophyData, error: trophyError } = await supabase
-      .from("player_trophies")
-      .select("*")
-      .order("created_at", { ascending: false })
-
-    if (trophyError) {
-      alert(trophyError.message)
-      console.error(trophyError)
-    }
-
-    const { data: playerData, error: playerError } = await supabase
-      .from("player_tracker")
-      .select("id, screen_name")
-      .order("screen_name", { ascending: true })
-
-    if (playerError) {
-      console.error(playerError)
-    }
-
-    setTrophies((trophyData || []) as Trophy[])
-    setPlayers((playerData || []) as Player[])
-    setLoading(false)
+  async function scanLibrary() {
+    setScanning(true); setMessage("")
+    try {
+      const response = await fetch("/api/trophies/assets")
+      const payload = await response.json()
+      if (!response.ok) throw new Error(payload.error || "Could not scan trophy assets.")
+      const existingUrls = new Set(trophies.map((trophy) => trophy.image_url).filter(Boolean))
+      const existingSources = new Set(trophies.map((trophy) => trophy.source_key).filter(Boolean))
+      const existingSemantics = new Set(trophies.map((trophy) => trophySemanticKey({ playerId: trophy.player_id, playerName: trophy.player_name, eventName: trophy.event_name || "", division: trophy.division || "", placement: trophy.placement || "", season: trophy.season || "", month: trophy.month || "" })))
+      const identityMap = new Map<string, GlobalPlayerDirectoryEntry>()
+      for (const player of players) {
+        identityMap.set(normalizeTrophyPlayerName(player.screenName), player)
+        for (const alias of player.verifiedAliases) identityMap.set(normalizeTrophyPlayerName(alias), player)
+      }
+      setCandidates((payload.candidates as TrophyImportCandidate[]).map((candidate) => {
+        const player = identityMap.get(normalizeTrophyPlayerName(candidate.playerName))
+        const matched = { ...candidate, playerId: player?.id || null, playerName: player?.screenName || candidate.playerName }
+        const duplicate = existingSources.has(candidate.sourceKey) || existingUrls.has(candidate.imageUrl) || existingSemantics.has(trophySemanticKey(matched))
+        const status = duplicate ? "duplicate" : player ? "ready" : "needs-player"
+        return { ...matched, status, selected: status === "ready" }
+      }))
+    } catch (error) { setMessage(error instanceof Error ? error.message : "Could not scan trophy assets.") }
+    finally { setScanning(false) }
   }
 
-  function choosePlayer(playerId: string) {
-    const player = players.find((p) => p.id === playerId)
-
-    setForm({
-      ...form,
-      player_id: playerId,
-      player_name: player?.screen_name || form.player_name,
-    })
+  function assignPlayer(key: string, playerId: string) {
+    const player = players.find((item) => item.id === playerId)
+    setCandidates((current) => current.map((candidate) => candidate.key === key ? { ...candidate, playerId: player?.id || null, playerName: player?.screenName || "", status: player ? "ready" : "needs-player", selected: Boolean(player) } : candidate))
   }
 
-  async function addTrophy() {
-    if (!form.player_name.trim()) {
-      alert("Player name required")
+  async function importSelected() {
+    const selected = candidates.filter((candidate) => candidate.selected && candidate.status === "ready" && candidate.playerId)
+    if (selected.length === 0) return
+    setImporting(true); setMessage("")
+    const rows = selected.map((candidate) => ({ player_name: candidate.playerName, player_id: candidate.playerId, event_type: candidate.eventType, event_name: candidate.eventName, league_type: candidate.leagueType, division: candidate.division, placement: candidate.placement, season: candidate.season, month: candidate.month, trophy_title: candidate.trophyTitle, image_url: candidate.imageUrl, source_key: candidate.sourceKey, notes: "Imported from trophy asset library" }))
+    const { error } = await supabase.from("player_trophies").insert(rows)
+    if (error) setMessage(error.message)
+    else {
+      setMessage(`${rows.length} ${rows.length === 1 ? "trophy" : "trophies"} imported and connected to player profiles.`)
+      setCandidates((current) => current.map((candidate) => selected.some((item) => item.key === candidate.key) ? { ...candidate, status: "duplicate", selected: false } : candidate))
+      const { data } = await supabase.from("player_trophies").select(trophySelect).order("created_at", { ascending: false })
+      setTrophies((data || []) as Trophy[])
+    }
+    setImporting(false)
+  }
+
+  async function uploadTrophy() {
+    const player = players.find((item) => item.id === uploadForm.playerId)
+    if (!uploadFile || !player || !uploadForm.title.trim() || !uploadForm.eventName.trim()) {
+      setMessage("Choose an image and canonical player, then enter the trophy title and event.")
       return
     }
-
-    const { error } = await supabase.from("player_trophies").insert({
-      player_name: form.player_name.trim(),
-      player_id: form.player_id || null,
-      event_type: form.event_type,
-      event_name: form.event_name.trim(),
-      league_type: form.league_type.trim(),
-      division: form.division.trim(),
-      placement: form.placement,
-      season: form.season.trim(),
-      week: form.week.trim(),
-      month: form.month.trim(),
-      trophy_title: form.trophy_title.trim(),
-      image_url: form.image_url.trim(),
-      notes: form.notes.trim(),
-    })
-
-    if (error) {
-      alert(error.message)
-      console.error(error)
-      return
-    }
-
-    setForm({
-      player_name: "",
-      player_id: "",
-      event_type: "KWT",
-      event_name: "",
-      league_type: "",
-      division: "",
-      placement: "1st",
-      season: "",
-      week: "",
-      month: "",
-      trophy_title: "",
-      image_url: "",
-      notes: "",
-    })
-
-    loadData()
+    setUploading(true); setMessage("")
+    let objectPath = ""
+    try {
+      const validation = await validateTrophyImageFile(uploadFile)
+      if (validation) throw new Error(validation)
+      const digest = await trophyImageSha256(uploadFile)
+      const sourceKey = `upload:sha256:${digest}`
+      const semanticKey = trophySemanticKey({ playerId: player.id, playerName: player.screenName, eventName: uploadForm.eventName, division: uploadForm.division, placement: uploadForm.placement, season: uploadForm.season, month: uploadForm.month })
+      const duplicate = trophies.some((trophy) => trophy.source_key === sourceKey || trophySemanticKey({ playerId: trophy.player_id, playerName: trophy.player_name, eventName: trophy.event_name || "", division: trophy.division || "", placement: trophy.placement || "", season: trophy.season || "", month: trophy.month || "" }) === semanticKey)
+      if (duplicate) throw new Error("This image or trophy achievement is already recorded.")
+      objectPath = trophyImageObjectPath(player.id, uploadFile, digest)
+      const { error: uploadError } = await supabase.storage.from(TROPHY_IMAGE_BUCKET).upload(objectPath, uploadFile, { contentType: uploadFile.type, upsert: false })
+      if (uploadError) throw new Error(uploadError.message)
+      const imageUrl = trophyImagePublicUrl(objectPath)
+      const { error: insertError } = await supabase.from("player_trophies").insert({ player_name: player.screenName, player_id: player.id, event_type: "Uploaded", event_name: uploadForm.eventName.trim(), league_type: "", division: uploadForm.division.trim(), placement: uploadForm.placement.trim(), season: uploadForm.season.trim(), month: uploadForm.month.trim(), trophy_title: uploadForm.title.trim(), image_url: imageUrl, source_key: sourceKey, notes: "Uploaded through Trophy Importer" })
+      if (insertError) {
+        await supabase.storage.from(TROPHY_IMAGE_BUCKET).remove([objectPath])
+        throw new Error(insertError.message)
+      }
+      const { data } = await supabase.from("player_trophies").select(trophySelect).order("created_at", { ascending: false })
+      setTrophies((data || []) as Trophy[])
+      setUploadFile(null)
+      setUploadForm({ playerId: "", title: "", eventName: "", division: "", placement: "", season: "", month: "" })
+      setMessage("Trophy image uploaded and the canonical player trophy was published.")
+    } catch (error) { setMessage(error instanceof Error ? error.message : "Trophy upload failed.") }
+    finally { setUploading(false) }
   }
 
-  async function deleteTrophy(id: string) {
-    const ok = confirm("Delete this trophy entry?")
-    if (!ok) return
+  const counts = useMemo(() => ({ ready: candidates.filter((item) => item.status === "ready").length, review: candidates.filter((item) => item.status === "needs-player").length, duplicate: candidates.filter((item) => item.status === "duplicate").length, selected: candidates.filter((item) => item.selected && item.status === "ready").length }), [candidates])
+  const visible = filter === "all" ? candidates : candidates.filter((item) => item.status === filter)
 
-    const { error } = await supabase.from("player_trophies").delete().eq("id", id)
-
-    if (error) {
-      alert(error.message)
-      console.error(error)
-      return
-    }
-
-    loadData()
-  }
-
-  const filteredTrophies = useMemo(() => {
-    const q = search.toLowerCase().trim()
-
-    return trophies.filter((t) => {
-      const text = `${t.player_name || ""} ${t.event_type || ""} ${t.event_name || ""} ${t.league_type || ""} ${t.division || ""} ${t.placement || ""} ${t.season || ""} ${t.week || ""} ${t.month || ""} ${t.trophy_title || ""}`
-        .toLowerCase()
-        .trim()
-
-      return text.includes(q)
-    })
-  }, [trophies, search])
-
-  return (
-    <main style={{ background: "black", color: "white", minHeight: "100vh", padding: 24 }}>
-      <h1>Trophy Admin</h1>
-
-      <p style={{ color: "#aaa" }}>
-        Add and manage trophy records. Trophies are manually created elsewhere; this page stores and connects them.
-      </p>
-
-      <section style={card}>
-        <h2>Add Trophy</h2>
-
-        <div style={{ display: "grid", gap: 10, maxWidth: 520 }}>
-          <label>Connect to Player Profile</label>
-          <select value={form.player_id} onChange={(e) => choosePlayer(e.target.value)} style={inputStyle}>
-            <option value="">No linked profile / manual name</option>
-            {players.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.screen_name}
-              </option>
-            ))}
-          </select>
-
-          <label>Player Name</label>
-          <input
-            value={form.player_name}
-            onChange={(e) => setForm({ ...form, player_name: e.target.value })}
-            style={inputStyle}
-          />
-
-          <label>Event Type</label>
-          <select
-            value={form.event_type}
-            onChange={(e) => setForm({ ...form, event_type: e.target.value })}
-            style={inputStyle}
-          >
-            {EVENT_TYPES.map((item) => (
-              <option key={item}>{item}</option>
-            ))}
-          </select>
-
-          <label>Event Name</label>
-          <input
-            placeholder="KWT Week 12, Spicy Cup, Monthly April..."
-            value={form.event_name}
-            onChange={(e) => setForm({ ...form, event_name: e.target.value })}
-            style={inputStyle}
-          />
-
-          <label>League Type</label>
-          <input
-            placeholder="kwt, monthly, cups, stroke, pyp..."
-            value={form.league_type}
-            onChange={(e) => setForm({ ...form, league_type: e.target.value })}
-            style={inputStyle}
-          />
-
-          <label>Division</label>
-          <input
-            placeholder="Amateur, Semi Pro, Pro, Elite, etc."
-            value={form.division}
-            onChange={(e) => setForm({ ...form, division: e.target.value })}
-            style={inputStyle}
-          />
-
-          <label>Placement / Trophy Type</label>
-          <select
-            value={form.placement}
-            onChange={(e) => setForm({ ...form, placement: e.target.value })}
-            style={inputStyle}
-          >
-            {PLACEMENTS.map((item) => (
-              <option key={item}>{item}</option>
-            ))}
-          </select>
-
-          <label>Season</label>
-          <input
-            placeholder="S12"
-            value={form.season}
-            onChange={(e) => setForm({ ...form, season: e.target.value })}
-            style={inputStyle}
-          />
-
-          <label>Week</label>
-          <input
-            placeholder="W11"
-            value={form.week}
-            onChange={(e) => setForm({ ...form, week: e.target.value })}
-            style={inputStyle}
-          />
-
-          <label>Month</label>
-          <input
-            placeholder="April 2026"
-            value={form.month}
-            onChange={(e) => setForm({ ...form, month: e.target.value })}
-            style={inputStyle}
-          />
-
-          <label>Trophy Title</label>
-          <input
-            placeholder="Elite 1st Place, Most Aces, Kiwi..."
-            value={form.trophy_title}
-            onChange={(e) => setForm({ ...form, trophy_title: e.target.value })}
-            style={inputStyle}
-          />
-
-          <label>Image URL</label>
-          <input
-            placeholder="Paste trophy image URL"
-            value={form.image_url}
-            onChange={(e) => setForm({ ...form, image_url: e.target.value })}
-            style={inputStyle}
-          />
-
-          <label>Notes</label>
-          <textarea
-            value={form.notes}
-            onChange={(e) => setForm({ ...form, notes: e.target.value })}
-            style={inputStyle}
-          />
-
-          <button onClick={addTrophy} style={buttonGreen}>
-            Add Trophy
-          </button>
-        </div>
-      </section>
-
-      <section style={card}>
-        <h2>Trophy List</h2>
-
-        <input
-          placeholder="Search player, event, division, week..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          style={{ ...inputStyle, width: "100%", maxWidth: 520 }}
-        />
-
-        <p style={{ color: "#aaa" }}>
-          Showing {filteredTrophies.length} / {trophies.length}
-        </p>
-
-        {loading ? (
-          <p>Loading trophies...</p>
-        ) : filteredTrophies.length === 0 ? (
-          <p style={{ color: "#888" }}>No trophies found.</p>
-        ) : (
-          <div style={{ display: "grid", gap: 14 }}>
-            {filteredTrophies.map((trophy) => (
-              <div key={trophy.id} style={trophyCard}>
-                <h3 style={{ marginTop: 0 }}>
-                  {trophy.trophy_title || trophy.placement || "Trophy"}
-                </h3>
-
-                <p><strong>Player:</strong> {trophy.player_name}</p>
-                <p><strong>Event:</strong> {trophy.event_name || trophy.event_type || "Not set"}</p>
-                <p><strong>League:</strong> {trophy.league_type || "Not set"}</p>
-                <p><strong>Division:</strong> {trophy.division || "Not set"}</p>
-                <p><strong>Season/Week/Month:</strong> {[trophy.season, trophy.week, trophy.month].filter(Boolean).join(" / ") || "Not set"}</p>
-                <p><strong>Placement:</strong> {trophy.placement || "Not set"}</p>
-
-                {trophy.image_url && (
-                  <img
-                    src={trophy.image_url}
-                    alt={trophy.trophy_title || trophy.player_name}
-                    style={{
-                      width: "100%",
-                      maxWidth: 240,
-                      borderRadius: 10,
-                      border: "1px solid #333",
-                      marginTop: 8,
-                    }}
-                  />
-                )}
-
-                {trophy.notes && <p><strong>Notes:</strong> {trophy.notes}</p>}
-
-                <button onClick={() => deleteTrophy(trophy.id)} style={buttonRed}>
-                  Delete Trophy
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
-    </main>
-  )
-}
-
-const card: React.CSSProperties = {
-  border: "1px solid #333",
-  borderRadius: 12,
-  padding: 18,
-  marginBottom: 20,
-  background: "#080808",
-}
-
-const trophyCard: React.CSSProperties = {
-  border: "1px solid #333",
-  borderRadius: 12,
-  padding: 16,
-  background: "#111",
-}
-
-const inputStyle: React.CSSProperties = {
-  background: "#111",
-  color: "white",
-  border: "1px solid #555",
-  padding: 10,
-  borderRadius: 8,
-}
-
-const buttonGreen: React.CSSProperties = {
-  background: "#22c55e",
-  color: "white",
-  border: "none",
-  borderRadius: 8,
-  padding: "10px 14px",
-  cursor: "pointer",
-}
-
-const buttonRed: React.CSSProperties = {
-  background: "#7f1d1d",
-  color: "white",
-  border: "none",
-  borderRadius: 8,
-  padding: "10px 14px",
-  cursor: "pointer",
-  marginTop: 10,
+  return <main className={styles.page}><div className={styles.shell}>
+    <header className={styles.hero}><div><p className={styles.eyebrow}>Krys Leagues · Awards Desk</p><h1>Trophy Importer</h1><p>Scan the artwork library, match winners to canonical player identities, and publish their achievements to every trophy case.</p></div><div className={styles.heroActions}><Link href="/admin">Admin home</Link><Link href="/champions">Hall of Champions</Link></div></header>
+    <section className={styles.stats} aria-label="Trophy importer summary"><div><strong>{trophies.length}</strong><span>Published</span></div><div><strong>{counts.ready}</strong><span>Ready</span></div><div><strong>{counts.review}</strong><span>Needs a player</span></div><div><strong>{counts.duplicate}</strong><span>Already imported</span></div></section>
+    <section className={styles.toolbar}><div><h2>Artwork library</h2><p>The importer reads Monthly trophy images already shipped in <code>public/league-media/trophies</code>.</p></div><div className={styles.actions}><button className={styles.secondary} onClick={scanLibrary} disabled={scanning || loading}>{scanning ? "Scanning…" : candidates.length ? "Scan again" : "Scan trophy library"}</button><button className={styles.primary} onClick={importSelected} disabled={importing || counts.selected === 0}>{importing ? "Importing…" : `Import selected (${counts.selected})`}</button></div></section>
+    <section className={styles.uploadPanel}><div><h2>Upload from computer</h2><p>The selected file is copied to Supabase Storage before its trophy record is saved.</p></div><div className={styles.uploadGrid}><label>Image<input type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => setUploadFile(event.target.files?.[0] || null)} /></label><label>Canonical player<select value={uploadForm.playerId} onChange={(event) => setUploadForm({ ...uploadForm, playerId: event.target.value })}><option value="">Choose a player…</option>{players.map((player) => <option key={player.id} value={player.id}>{player.screenName}</option>)}</select></label><label>Trophy title<input value={uploadForm.title} onChange={(event) => setUploadForm({ ...uploadForm, title: event.target.value })} /></label><label>Event<input value={uploadForm.eventName} onChange={(event) => setUploadForm({ ...uploadForm, eventName: event.target.value })} /></label><label>Division<input value={uploadForm.division} onChange={(event) => setUploadForm({ ...uploadForm, division: event.target.value })} /></label><label>Placement<input value={uploadForm.placement} onChange={(event) => setUploadForm({ ...uploadForm, placement: event.target.value })} /></label><label>Season<input value={uploadForm.season} onChange={(event) => setUploadForm({ ...uploadForm, season: event.target.value })} /></label><label>Month<input value={uploadForm.month} onChange={(event) => setUploadForm({ ...uploadForm, month: event.target.value })} /></label></div><button className={styles.primary} onClick={uploadTrophy} disabled={uploading || loading}>{uploading ? "Uploading…" : "Upload and publish trophy"}</button></section>
+    {message && <p className={styles.message} role="status">{message}</p>}
+    {candidates.length > 0 && <><nav className={styles.filters} aria-label="Filter candidates">{(["all", "ready", "needs-player", "duplicate"] as const).map((item) => <button key={item} onClick={() => setFilter(item)} aria-pressed={filter === item}>{item === "needs-player" ? "Needs player" : item[0].toUpperCase() + item.slice(1)}</button>)}</nav><section className={styles.grid} aria-label="Trophy import candidates">{visible.map((candidate) => <article className={styles.card} key={candidate.key} data-status={candidate.status}><div className={styles.art}><img src={candidate.imageUrl} alt={candidate.trophyTitle} /></div><div className={styles.cardBody}><div className={styles.cardHeading}><span className={styles.badge}>{candidate.status === "needs-player" ? "Review" : candidate.status}</span><label className={styles.checkbox}><input type="checkbox" checked={candidate.selected} disabled={candidate.status !== "ready"} onChange={(event) => setCandidates((current) => current.map((item) => item.key === candidate.key ? { ...item, selected: event.target.checked } : item))} /> Select</label></div><h3>{candidate.trophyTitle}</h3><p>{candidate.eventName} · {candidate.division}</p><label className={styles.playerLabel}>Winner<select value={candidate.playerId || ""} disabled={candidate.status === "duplicate"} onChange={(event) => assignPlayer(candidate.key, event.target.value)}><option value="">Choose a player…</option>{players.map((player) => <option key={player.id} value={player.id}>{player.screenName}</option>)}</select></label>{candidate.playerName && !candidate.playerId && <small>Filename suggests: {candidate.playerName}</small>}</div></article>)}</section></>}
+    {!loading && candidates.length === 0 && <section className={styles.empty}><span>🏆</span><h2>Ready for the first scan</h2><p>Nothing is written until you review the matches and choose Import selected.</p></section>}
+  </div></main>
 }
