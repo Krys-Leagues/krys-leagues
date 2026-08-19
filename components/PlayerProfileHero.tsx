@@ -32,6 +32,13 @@ export default function PlayerProfileHero({ screenName, avatarPath, isServerBoos
       : careerHighlights.length > 0
         ? `${styles.heroGrid} ${styles.highlightsOnly}`
         : `${styles.heroGrid} ${styles.playerOnly}`
+  const nameEffectClass = isServerBooster && hasKrysServerTag
+    ? styles.nameBoth
+    : isServerBooster
+      ? styles.nameBooster
+      : hasKrysServerTag
+        ? styles.nameServerTag
+        : ""
   return <section className={styles.hero} style={theme} aria-labelledby="player-profile-name" data-server-booster={isServerBooster} data-krys-server-tag={hasKrysServerTag}>
     <div className={styles.brandRow} aria-label={hasKrysServerTag ? "Krys Server Tag recognition" : "Krys Leagues"}>
       <div className={styles.brandMark}><Image className={`${styles.brandLogo} ${hasKrysServerTag ? styles.tagActive : ""}`} src="/league-media/BIG%20LOGO%20TRANSPARENT.png" width={112} height={112} alt="" aria-hidden="true" /></div>
@@ -56,7 +63,7 @@ export default function PlayerProfileHero({ screenName, avatarPath, isServerBoos
           <PlayerAvatar screenName={screenName} avatarPath={avatarPath} size="var(--player-profile-avatar-size)" imageFit="contain" borderRadius={0} className={styles.avatar} renderAsImage />
         </div>
         <div className={styles.identity}>
-          <h1 id="player-profile-name" className={styles.name} aria-label={screenName}>
+          <h1 id="player-profile-name" className={`${styles.name} ${nameEffectClass}`} aria-label={screenName}>
             <span className={styles.nameFull}>{screenName}</span>
             {wrappedNameParts && <span className={styles.nameSplit} aria-hidden="true">{wrappedNameParts.map((part, index) => <span key={`${part}-${index}`}>{part}</span>)}</span>}
           </h1>
@@ -70,7 +77,7 @@ export default function PlayerProfileHero({ screenName, avatarPath, isServerBoos
     </div>}
     {!publicLayout && <div className={styles.playerCore}>
       <div className={styles.avatarStage}>{isServerBooster && <div className={styles.boosterGlow} aria-hidden="true" />}<PlayerAvatar screenName={screenName} avatarPath={avatarPath} size="var(--player-profile-avatar-size)" imageFit="contain" borderRadius={0} className={styles.avatar} renderAsImage /></div>
-      <div className={styles.identity}><h1 id="player-profile-name" className={styles.name} aria-label={screenName}><span className={styles.nameFull}>{screenName}</span>{wrappedNameParts && <span className={styles.nameSplit} aria-hidden="true">{wrappedNameParts.map((part, index) => <span key={`${part}-${index}`}>{part}</span>)}</span>}</h1>{profileBadges.length > 0 && <div className={styles.badges} aria-label="Player recognition">{profileBadges.map(badge => <span key={badge}>{badge}</span>)}</div>}{(isServerBooster || hasKrysServerTag) && <div className={styles.recognitionRow}>{isServerBooster && <div className={`${styles.recognition} ${styles.boosterRecognition}`}><span className={styles.boosterIcon} aria-hidden="true">✦</span><strong>Server Booster</strong></div>}{hasKrysServerTag && <div className={`${styles.recognition} ${styles.tagRecognition}`}><Image src="/league-media/BIG%20LOGO%20TRANSPARENT.png" width={38} height={38} alt="" aria-hidden="true" /><strong>Server Tag</strong></div>}</div>}</div>
+      <div className={styles.identity}><h1 id="player-profile-name" className={`${styles.name} ${nameEffectClass}`} aria-label={screenName}><span className={styles.nameFull}>{screenName}</span>{wrappedNameParts && <span className={styles.nameSplit} aria-hidden="true">{wrappedNameParts.map((part, index) => <span key={`${part}-${index}`}>{part}</span>)}</span>}</h1>{profileBadges.length > 0 && <div className={styles.badges} aria-label="Player recognition">{profileBadges.map(badge => <span key={badge}>{badge}</span>)}</div>}{(isServerBooster || hasKrysServerTag) && <div className={styles.recognitionRow}>{isServerBooster && <div className={`${styles.recognition} ${styles.boosterRecognition}`}><span className={styles.boosterIcon} aria-hidden="true">✦</span><strong>Server Booster</strong></div>}{hasKrysServerTag && <div className={`${styles.recognition} ${styles.tagRecognition}`}><Image src="/league-media/BIG%20LOGO%20TRANSPARENT.png" width={38} height={38} alt="" aria-hidden="true" /><strong>Server Tag</strong></div>}</div>}</div>
     </div>}
   </section>
 }
