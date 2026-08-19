@@ -41,6 +41,7 @@
 .nameBooster,.nameServerTag { background-size:300% 100%; background-position:0 50%; background-clip:text; -webkit-background-clip:text; color:transparent; -webkit-text-fill-color:transparent; text-shadow:none; -webkit-text-stroke:.45px #0009; filter:none; animation:nameGradientFlow 7s ease-in-out infinite; }
 .nameBooster { background-image:linear-gradient(90deg,#ff4db8,#ff00c8,#b86cff,#ff4db8); }
 .nameServerTag { background-image:linear-gradient(90deg,#66ff4d,#00e6b8,#35f5ff,#3b8cff,#00e6b8,#66ff4d); }
+.nameBoth { color:#c084fc; text-shadow:0 2px 0 #0009; -webkit-text-stroke:.45px #0009; filter:none; }
 @keyframes nameGradientFlow { 0%,100% { background-position:0 50%; } 50% { background-position:100% 50%; } }
 .nameSplit { display:none; }
 .badges { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin-top:12px; }
@@ -50,14 +51,14 @@
 .recognition { display:flex; min-width:0; min-height:68px; align-items:center; gap:14px; padding:6px 16px; border-right:1px solid #ffffff24; text-align:left; }
 .recognition:last-child { border-right:0; }
 .recognition > span:last-child { display:grid; }
-.recognition strong { font-size:1rem; letter-spacing:.06em; text-transform:uppercase; }
+.recognition strong { font-size:1.12rem; font-weight:900; line-height:1.1; letter-spacing:.035em; text-transform:uppercase; text-shadow:0 1px 1px #000d; }
 .recognition small { display:none; }
-.recognition img { width:64px; height:64px; object-fit:contain; }
-.boosterRecognition strong { color:#39f4ef; text-shadow:0 0 8px var(--profile-glow),0 0 18px var(--profile-glow); }
+.recognition img { width:68px; height:68px; object-fit:contain; object-position:center; }
+.boosterRecognition strong { color:#67f7ff; }
 .boosterIcon { color:#fff; font-size:3.5rem; line-height:1; filter:drop-shadow(0 0 5px #fff) drop-shadow(0 0 13px var(--profile-glow)); }
-.tagRecognition strong { color:#ff58bb; text-shadow:0 0 8px var(--profile-glow),0 0 18px var(--profile-glow); }
-.tagRecognition img { filter:drop-shadow(0 0 2px #fff) drop-shadow(0 0 10px var(--profile-glow)); }
-.badgeRecognition strong { color:#fef3c7; text-shadow:0 0 8px #facc15aa,0 0 16px #f59e0b66; }
+.tagRecognition strong { color:#ff75c8; }
+.tagRecognition img { filter:drop-shadow(0 1px 1px #000b); }
+.badgeRecognition strong { color:#fff1a8; }
 .badgeIcon { display:grid; width:56px; height:56px; place-items:center; color:#fef3c7; font-size:2rem; line-height:1; filter:drop-shadow(0 0 5px #fff) drop-shadow(0 0 12px #facc15aa); }
 @media (max-width:1050px) { .brandRow { grid-template-columns:clamp(92px,13vw,124px) minmax(0,1fr) clamp(92px,13vw,124px); } .brandLogo { width:clamp(92px,13vw,124px); height:clamp(92px,13vw,124px); } .profileTitle { font-size:clamp(1.9rem,4.3vw,2.8rem); } .heroGrid,.featuredOnly,.highlightsOnly { grid-template-areas:"player player" "featured highlights"; grid-template-columns:repeat(2,minmax(0,1fr)); } .playerOnly { grid-template-areas:"player"; grid-template-columns:minmax(0,1fr); } .avatarStage { --player-profile-avatar-size:clamp(250px,34vw,300px); } .name { font-size:clamp(3rem,7.5vw,4.6rem); } .sidePanel { min-height:220px; } .highlightsPanel { width:100%; } }
 @media (max-width:640px) { .brandRow { grid-template-columns:58px minmax(0,1fr) 58px; gap:7px; } .brandLogo { width:56px; height:56px; } .titleLockup { grid-template-columns:minmax(7px,1fr) auto minmax(7px,1fr); gap:7px; } .profileTitle { font-size:clamp(.88rem,4.35vw,1.08rem); white-space:normal; } .heroGrid,.featuredOnly,.highlightsOnly { grid-template-areas:"player" "featured" "highlights"; grid-template-columns:minmax(0,1fr); width:100%; } .avatarStage { --player-profile-avatar-size:clamp(185px,59vw,210px); } .identity { margin-top:24px; } .name { font-size:clamp(2.25rem,12vw,3.5rem); white-space:normal; overflow-wrap:anywhere; text-wrap:balance; } .nameFull:has(+ .nameSplit) { display:none; } .nameSplit { display:grid; } .sidePanel { width:100%; min-height:0; } .recognitionBand { width:fit-content; min-height:64px; } .recognitionRow { display:grid; } .recognition { min-width:0; width:100%; padding:8px; border-right:0; border-bottom:1px solid #ffffff24; } .recognition:last-child { border-bottom:0; } .recognition img { width:56px; height:56px; } }

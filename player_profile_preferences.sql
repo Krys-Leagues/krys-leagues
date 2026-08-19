@@ -3,7 +3,8 @@ begin;
 create table if not exists public.player_profile_preferences (
   player_id uuid primary key references public.players(id) on delete cascade,
   background_key text not null default 'krys-default',
-  name_effect text not null default 'white',
+  name_effect text not null default 'auto',
+  name_effect_is_custom boolean not null default false,
   background_color text not null default '#07111f',
   glow_color text not null default '#ff2bd6',
   text_color text not null default '#f8fafc',
@@ -12,7 +13,7 @@ create table if not exists public.player_profile_preferences (
   updated_at timestamptz not null default now(),
   constraint player_profile_background_hex check (background_color ~ '^#[0-9a-f]{6}$'),
   constraint player_profile_background_key check (background_key in ('krys-default', 'neon-mountain', 'neon-night', 'electric-blue', 'coastal-sunset', 'pink-coast', 'coastal-teal', 'krys-coastal')),
-  constraint player_profile_name_effect check (name_effect in ('white', 'booster', 'server-tag')),
+  constraint player_profile_name_effect check (name_effect in ('auto', 'white', 'booster', 'server-tag', 'both')),
   constraint player_profile_glow_hex check (glow_color ~ '^#[0-9a-f]{6}$'),
   constraint player_profile_text_hex check (text_color ~ '^#[0-9a-f]{6}$'),
   constraint player_profile_about_length check (char_length(about_me) <= 500),
@@ -23,7 +24,13 @@ alter table public.player_profile_preferences
   add column if not exists background_key text not null default 'krys-default';
 
 alter table public.player_profile_preferences
-  add column if not exists name_effect text not null default 'white';
+  add column if not exists name_effect text not null default 'auto';
+
+alter table public.player_profile_preferences
+  add column if not exists name_effect_is_custom boolean not null default false;
+
+alter table public.player_profile_preferences
+  alter column name_effect set default 'auto';
 
 do $migration$
 begin
@@ -39,19 +46,11 @@ begin
 end
 $migration$;
 
-do $migration$
-begin
-  if not exists (
-    select 1 from pg_constraint
-    where conname = 'player_profile_name_effect'
-      and conrelid = 'public.player_profile_preferences'::regclass
-  ) then
-    alter table public.player_profile_preferences
-      add constraint player_profile_name_effect
-      check (name_effect in ('white', 'booster', 'server-tag'));
-  end if;
-end
-$migration$;
+alter table public.player_profile_preferences
+  drop constraint if exists player_profile_name_effect;
+alter table public.player_profile_preferences
+  add constraint player_profile_name_effect
+  check (name_effect in ('auto', 'white', 'booster', 'server-tag', 'both'));
 
 alter table public.player_profile_preferences enable row level security;
 revoke all on table public.player_profile_preferences from public, anon, authenticated;
@@ -98,7 +97,8 @@ create or replace function public.get_public_player_profile_preferences_v3(p_pla
 returns table(player_id uuid, background_key text, name_effect text, background_color text, glow_color text, text_color text, about_me text)
 language sql stable security definer set search_path to '' as $function$
   select canonical.id,
-    coalesce(pref.background_key, 'krys-default'), coalesce(pref.name_effect, 'white'),
+    coalesce(pref.background_key, 'krys-default'),
+    case when pref.name_effect_is_custom then coalesce(pref.name_effect, 'auto') else 'auto' end,
     coalesce(pref.background_color, '#07111f'), coalesce(pref.glow_color, '#ff2bd6'),
     coalesce(pref.text_color, '#f8fafc'), nullif(btrim(pref.about_me), '')
   from public.players as canonical
@@ -132,7 +132,7 @@ begin
   if v_about ~ '[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]' then raise exception 'About Me contains unsupported control characters'; end if;
   insert into public.player_profile_preferences as pref (player_id, background_key, background_color, glow_color, text_color, about_me)
   values (v_player_id, v_background_key, v_background, v_glow, v_text, v_about)
-  on conflict (player_id) do update set background_key = excluded.background_key, background_color = excluded.background_color, glow_color = excluded.glow_color, text_color = excluded.text_color, about_me = excluded.about_me, updated_at = now();
+  on conflict on constraint player_profile_preferences_pkey do update set background_key = excluded.background_key, background_color = excluded.background_color, glow_color = excluded.glow_color, text_color = excluded.text_color, about_me = excluded.about_me, updated_at = now();
   return query select pref.player_id, pref.background_key, pref.background_color, pref.glow_color, pref.text_color, pref.about_me from public.player_profile_preferences as pref where pref.player_id = v_player_id;
 end;
 $function$;
@@ -151,13 +151,13 @@ declare v_about text := nullif(btrim(replace(replace(p_about_me, chr(13) || chr(
 begin
   if not public.can_edit_player_profile_preferences(v_player_id) then raise exception 'You may edit only your own player profile' using errcode = '42501'; end if;
   if v_background_key is null or v_background_key not in ('krys-default', 'neon-mountain', 'neon-night', 'electric-blue', 'coastal-sunset', 'pink-coast', 'coastal-teal', 'krys-coastal') then raise exception 'Unsupported player profile background'; end if;
-  if v_name_effect is null or v_name_effect not in ('white', 'booster', 'server-tag') then raise exception 'Unsupported player name effect'; end if;
+  if v_name_effect is null or v_name_effect not in ('auto', 'white', 'booster', 'server-tag', 'both') then raise exception 'Unsupported player name effect'; end if;
   if v_background !~ '^#[0-9a-f]{6}$' or v_glow !~ '^#[0-9a-f]{6}$' or v_text !~ '^#[0-9a-f]{6}$' then raise exception 'Profile colors must be six-digit hexadecimal colors'; end if;
   if char_length(v_about) > 500 then raise exception 'About Me must be 500 characters or fewer'; end if;
   if v_about ~ '[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]' then raise exception 'About Me contains unsupported control characters'; end if;
-  insert into public.player_profile_preferences as pref (player_id, background_key, name_effect, background_color, glow_color, text_color, about_me)
-  values (v_player_id, v_background_key, v_name_effect, v_background, v_glow, v_text, v_about)
-  on conflict (player_id) do update set background_key = excluded.background_key, name_effect = excluded.name_effect, background_color = excluded.background_color, glow_color = excluded.glow_color, text_color = excluded.text_color, about_me = excluded.about_me, updated_at = now();
+  insert into public.player_profile_preferences as pref (player_id, background_key, name_effect, name_effect_is_custom, background_color, glow_color, text_color, about_me)
+  values (v_player_id, v_background_key, v_name_effect, true, v_background, v_glow, v_text, v_about)
+  on conflict on constraint player_profile_preferences_pkey do update set background_key = excluded.background_key, name_effect = excluded.name_effect, name_effect_is_custom = true, background_color = excluded.background_color, glow_color = excluded.glow_color, text_color = excluded.text_color, about_me = excluded.about_me, updated_at = now();
   return query select pref.player_id, pref.background_key, pref.name_effect, pref.background_color, pref.glow_color, pref.text_color, pref.about_me from public.player_profile_preferences as pref where pref.player_id = v_player_id;
 end;
 $function$;
@@ -178,7 +178,7 @@ begin
   if v_about ~ '[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]' then raise exception 'About Me contains unsupported control characters'; end if;
   insert into public.player_profile_preferences as pref (player_id, background_color, glow_color, text_color, about_me)
   values (v_player_id, v_background, v_glow, v_text, v_about)
-  on conflict (player_id) do update set background_color = excluded.background_color, glow_color = excluded.glow_color, text_color = excluded.text_color, about_me = excluded.about_me, updated_at = now();
+  on conflict on constraint player_profile_preferences_pkey do update set background_color = excluded.background_color, glow_color = excluded.glow_color, text_color = excluded.text_color, about_me = excluded.about_me, updated_at = now();
   return query select pref.player_id, pref.background_color, pref.glow_color, pref.text_color, pref.about_me from public.player_profile_preferences as pref where pref.player_id = v_player_id;
 end;
 $function$;

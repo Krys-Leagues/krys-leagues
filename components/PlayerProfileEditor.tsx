@@ -5,10 +5,10 @@ import { supabase } from "@/lib/supabase"
 import { DEFAULT_PLAYER_PROFILE_BACKGROUND_KEY, getPlayerProfileBackground, PLAYER_PROFILE_BACKGROUNDS } from "@/lib/playerProfileBackgrounds"
 import styles from "./PlayerProfileEditor.module.css"
 
-export type PlayerNameEffect = "white" | "booster" | "server-tag"
+export type PlayerNameEffect = "auto" | "white" | "booster" | "server-tag" | "both"
 export type ProfilePreferences = { background_key: string; name_effect: PlayerNameEffect; background_color: string; glow_color: string; text_color: string; about_me: string | null }
 type Props = { playerId: string; initial: ProfilePreferences; isServerBooster: boolean; hasKrysServerTag: boolean; onSaved: (value: ProfilePreferences) => void }
-const DEFAULTS = { background_key: DEFAULT_PLAYER_PROFILE_BACKGROUND_KEY, name_effect: "white" as PlayerNameEffect, background_color: "#07111f", glow_color: "#ff2bd6", text_color: "#f8fafc" }
+const DEFAULTS = { background_key: DEFAULT_PLAYER_PROFILE_BACKGROUND_KEY, name_effect: "auto" as PlayerNameEffect, background_color: "#07111f", glow_color: "#ff2bd6", text_color: "#f8fafc" }
 
 export default function PlayerProfileEditor({ playerId, initial, isServerBooster, hasKrysServerTag, onSaved }: Props) {
   const [open, setOpen] = useState(false)
@@ -48,9 +48,11 @@ export default function PlayerProfileEditor({ playerId, initial, isServerBooster
       <fieldset className={styles.nameEffectPicker}>
         <legend>Player Name Effect</legend>
         <div className={styles.nameEffectOptions}>
+          <button type="button" className={draft.name_effect === "auto" ? styles.nameEffectSelected : ""} onClick={() => set("name_effect", "auto")} aria-pressed={draft.name_effect === "auto"}>Automatic</button>
           <button type="button" className={draft.name_effect === "white" ? styles.nameEffectSelected : ""} onClick={() => set("name_effect", "white")} aria-pressed={draft.name_effect === "white"}>White</button>
           {isServerBooster && <button type="button" className={draft.name_effect === "booster" ? styles.nameEffectSelected : ""} onClick={() => set("name_effect", "booster")} aria-pressed={draft.name_effect === "booster"}>Server Booster</button>}
           {hasKrysServerTag && <button type="button" className={draft.name_effect === "server-tag" ? styles.nameEffectSelected : ""} onClick={() => set("name_effect", "server-tag")} aria-pressed={draft.name_effect === "server-tag"}>Server Tag</button>}
+          {isServerBooster && hasKrysServerTag && <button type="button" className={draft.name_effect === "both" ? styles.nameEffectSelected : ""} onClick={() => set("name_effect", "both")} aria-pressed={draft.name_effect === "both"}>Booster + Tag</button>}
         </div>
       </fieldset>
       <div className={styles.colors}>
