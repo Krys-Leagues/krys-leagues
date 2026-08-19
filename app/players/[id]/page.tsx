@@ -357,13 +357,9 @@ export default function PublicPlayerProfilePage() {
           publicLayout
         />
 
-        <div className={styles.utilityCluster}>
-          <nav className={styles.utilityLinks} aria-label="Player profile navigation">
-            <Link href="/" style={backButton}>← Krys Leagues</Link>
-            <Link href="/players" style={backButton}>← Player Profiles</Link>
-          </nav>
-          {canEditProfile && <PlayerProfileEditor playerId={player.id} initial={preferences} onSaved={setPreferences} />}
-        </div>
+        {canEditProfile && <div className={styles.utilityCluster}>
+          <PlayerProfileEditor playerId={player.id} initial={preferences} onSaved={setPreferences} />
+        </div>}
 
         {preferences.about_me && <section style={aboutSection}>
           <p style={eyebrow}>About Me</p>
@@ -379,8 +375,9 @@ export default function PublicPlayerProfilePage() {
         />
 
         {hasCareerParticipation && <details className={styles.profileDisclosure}>
-          <summary><span className={styles.summaryIcon} aria-hidden="true">▥</span><span><strong>Player Stats</strong><small>Career statistics and performance overview</small></span></summary>
+          <summary><span className={styles.summaryIcon} aria-hidden="true">▥</span><span><strong>Player Stats</strong></span></summary>
           <div className={styles.disclosureContent}>
+        <p className={styles.sectionDescription}>Career statistics and performance overview</p>
         {memberships.length > 0 && <section style={card}>
           <h2 style={sectionTitle}>League History</h2>
 
@@ -520,13 +517,14 @@ export default function PublicPlayerProfilePage() {
         </details>}
 
         {knownAliases.length > 0 && <details className={styles.profileDisclosure}>
-          <summary><span className={styles.summaryIcon} aria-hidden="true">●</span><span><strong>Names / Known As</strong><small>Player identity and name history</small></span></summary>
-          <div className={styles.disclosureContent}><ul className={styles.aliasList}>{knownAliases.map(alias => <li key={alias}>{alias}</li>)}</ul></div>
+          <summary><span className={styles.summaryIcon} aria-hidden="true">●</span><span><strong>Names / Known As</strong></span></summary>
+          <div className={styles.disclosureContent}><p className={styles.sectionDescription}>Player identity and name history</p><ul className={styles.aliasList}>{knownAliases.map(alias => <li key={alias}>{alias}</li>)}</ul></div>
         </details>}
 
         {trophies.length > 0 && <details className={styles.profileDisclosure} id="trophy-case">
-          <summary><span className={styles.summaryIcon} aria-hidden="true">🏆</span><span><strong>Trophies &amp; Achievements</strong><small>Complete trophy case and achievement history</small></span></summary>
+          <summary><span className={styles.summaryIcon} aria-hidden="true">🏆</span><span><strong>Trophies &amp; Achievements</strong></span></summary>
           <div className={styles.disclosureContent}>
+          <p className={styles.sectionDescription}>Complete trophy case and achievement history</p>
           <h2 style={sectionTitle}>Trophy Case</h2>
 
             <div style={grid}>
@@ -568,6 +566,11 @@ export default function PublicPlayerProfilePage() {
 
         </div>
 
+        <nav className={`${styles.utilityLinks} ${styles.lowerNavigation}`} aria-label="Player profile navigation">
+          <Link href="/" style={backButton}>← Krys Leagues</Link>
+          <Link href="/players" style={backButton}>← Player Profiles</Link>
+        </nav>
+
       </div>
     </main>
   )
@@ -592,13 +595,14 @@ const container: React.CSSProperties = {
 
 const backButton: React.CSSProperties = {
   display: "inline-block",
-  padding: "10px 16px",
-  background: "#1e293b",
-  border: "1px solid #475569",
+  padding: "8px 14px",
+  background: "#0206172e",
+  border: "1px solid #ffffff38",
   borderRadius: 10,
   color: "white",
   textDecoration: "none",
   fontWeight: 700,
+  backdropFilter: "blur(7px)",
 }
 
 const card: React.CSSProperties = {
