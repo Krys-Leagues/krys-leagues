@@ -137,6 +137,7 @@ export default function PublicPlayerProfilePage() {
   })
   const [preferences, setPreferences] = useState<ProfilePreferences>(DEFAULT_PREFERENCES)
   const [canEditProfile, setCanEditProfile] = useState(false)
+  const [openProfileSection, setOpenProfileSection] = useState<"stats" | "aliases" | "trophies" | null>(null)
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/immutability
@@ -374,10 +375,16 @@ export default function PublicPlayerProfilePage() {
           textColor={preferences.text_color}
         />
 
-        {hasCareerParticipation && <details className={styles.profileDisclosure}>
-          <summary><span className={styles.summaryIcon} aria-hidden="true">▥</span><span><strong>Player Stats</strong></span></summary>
-          <div className={styles.disclosureContent}>
-        <p className={styles.sectionDescription}>Career statistics and performance overview</p>
+        <nav className={styles.profileActions} aria-label="Player profile sections and navigation">
+          {hasCareerParticipation && <button type="button" className={styles.profileActionButton} aria-pressed={openProfileSection === "stats"} onClick={() => setOpenProfileSection(current => current === "stats" ? null : "stats")}>Player Stats</button>}
+          {knownAliases.length > 0 && <button type="button" className={styles.profileActionButton} aria-pressed={openProfileSection === "aliases"} onClick={() => setOpenProfileSection(current => current === "aliases" ? null : "aliases")}>Names / Known As</button>}
+          {trophies.length > 0 && <button type="button" className={styles.profileActionButton} aria-pressed={openProfileSection === "trophies"} onClick={() => setOpenProfileSection(current => current === "trophies" ? null : "trophies")}>Trophies &amp; Achievements</button>}
+          <Link href="/" style={backButton}>← Krys Leagues</Link>
+          <Link href="/players" style={backButton}>← Player Profiles</Link>
+        </nav>
+
+        {openProfileSection === "stats" && hasCareerParticipation && <section className={styles.profileSectionPanel} id="player-stats-panel" aria-label="Player Stats">
+          <p className={styles.sectionDescription}>Career statistics and performance overview</p>
         {memberships.length > 0 && <section style={card}>
           <h2 style={sectionTitle}>League History</h2>
 
@@ -513,17 +520,13 @@ export default function PublicPlayerProfilePage() {
             </div>
           )}
         </section>}
-          </div>
-        </details>}
+        </section>}
 
-        {knownAliases.length > 0 && <details className={styles.profileDisclosure}>
-          <summary><span className={styles.summaryIcon} aria-hidden="true">●</span><span><strong>Names / Known As</strong></span></summary>
-          <div className={styles.disclosureContent}><p className={styles.sectionDescription}>Player identity and name history</p><ul className={styles.aliasList}>{knownAliases.map(alias => <li key={alias}>{alias}</li>)}</ul></div>
-        </details>}
+        {openProfileSection === "aliases" && knownAliases.length > 0 && <section className={styles.profileSectionPanel} id="names-known-as-panel" aria-label="Names / Known As">
+          <p className={styles.sectionDescription}>Player identity and name history</p><ul className={styles.aliasList}>{knownAliases.map(alias => <li key={alias}>{alias}</li>)}</ul>
+        </section>}
 
-        {trophies.length > 0 && <details className={styles.profileDisclosure} id="trophy-case">
-          <summary><span className={styles.summaryIcon} aria-hidden="true">🏆</span><span><strong>Trophies &amp; Achievements</strong></span></summary>
-          <div className={styles.disclosureContent}>
+        {openProfileSection === "trophies" && trophies.length > 0 && <section className={styles.profileSectionPanel} id="trophy-case" aria-label="Trophies & Achievements">
           <p className={styles.sectionDescription}>Complete trophy case and achievement history</p>
           <h2 style={sectionTitle}>Trophy Case</h2>
 
@@ -561,15 +564,9 @@ export default function PublicPlayerProfilePage() {
                 </div>
               ))}
             </div>
-          </div>
-        </details>}
+        </section>}
 
         </div>
-
-        <nav className={`${styles.utilityLinks} ${styles.lowerNavigation}`} aria-label="Player profile navigation">
-          <Link href="/" style={backButton}>← Krys Leagues</Link>
-          <Link href="/players" style={backButton}>← Player Profiles</Link>
-        </nav>
 
       </div>
     </main>
@@ -602,6 +599,7 @@ const backButton: React.CSSProperties = {
   color: "white",
   textDecoration: "none",
   fontWeight: 700,
+  lineHeight: 1.25,
   backdropFilter: "blur(7px)",
 }
 
