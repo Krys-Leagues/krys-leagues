@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase"
 import PlayerProfileHero, { PlayerProfileRecognition } from "@/components/PlayerProfileHero"
 import PlayerProfileEditor, { type ProfilePreferences } from "@/components/PlayerProfileEditor"
 import { getCanonicalPlayerAvatar } from "@/lib/playerAvatars"
+import { DEFAULT_PLAYER_PROFILE_BACKGROUND_KEY, getPlayerProfileBackground } from "@/lib/playerProfileBackgrounds"
 import styles from "./page.module.css"
 
 type Player = {
@@ -35,7 +36,7 @@ type Trophy = {
   created_at: string
 }
 
-const DEFAULT_PREFERENCES: ProfilePreferences = { background_color: "#07111f", glow_color: "#ff2bd6", text_color: "#f8fafc", about_me: null }
+const DEFAULT_PREFERENCES: ProfilePreferences = { background_key: DEFAULT_PLAYER_PROFILE_BACKGROUND_KEY, background_color: "#07111f", glow_color: "#ff2bd6", text_color: "#f8fafc", about_me: null }
 
 type Result = {
   id: string
@@ -240,7 +241,7 @@ export default function PublicPlayerProfilePage() {
         p_player_id: playerId,
       }),
       getCanonicalPlayerAvatar(playerId).catch(() => ({ canonicalPlayerId: playerId, avatarPath: null })),
-      supabase.rpc("get_public_player_profile_preferences", { p_player_id: canonicalId }),
+      supabase.rpc("get_public_player_profile_preferences_v2", { p_player_id: canonicalId }),
       supabase.auth.getSession(),
     ])
 
@@ -337,7 +338,7 @@ export default function PublicPlayerProfilePage() {
   }
 
   return (
-    <main className={styles.page} style={{ "--profile-bg": preferences.background_color, "--profile-text": preferences.text_color } as React.CSSProperties}>
+    <main className={styles.page} style={{ "--profile-bg": preferences.background_color, "--profile-text": preferences.text_color, "--profile-background-image": `url("${getPlayerProfileBackground(preferences.background_key).imagePath}")` } as React.CSSProperties}>
       <div style={container}>
         <PlayerProfileHero
           screenName={player.screen_name}

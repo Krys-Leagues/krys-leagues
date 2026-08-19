@@ -4,7 +4,7 @@
   min-height: 100vh;
   padding: 24px clamp(14px, 2.4vw, 38px) 48px;
   color: var(--profile-text);
-  background-image: url("/player-profile-background.png");
+  background-image: var(--profile-background-image, url("/player-profile-background.png"));
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
