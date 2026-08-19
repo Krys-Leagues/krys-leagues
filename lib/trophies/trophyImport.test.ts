@@ -1,6 +1,6 @@
 import assert from "node:assert/strict"
 import test from "node:test"
-import { parseTrophyAsset, trophySemanticKey } from "./trophyImport.ts"
+import { parseTrophyAsset, resolveTrophyPlayer, trophySemanticKey } from "./trophyImport.ts"
 
 test("parses a named monthly trophy asset", () => {
   const result = parseTrophyAsset("/league-media/trophies/Monthly/2026/June/SEMI%20PRO%201/KrysMonthly_2026_June_SemiPro1_2nd_Audrey.webp")
@@ -22,4 +22,17 @@ test("keeps opaque legacy assets for manual player review", () => {
   assert.equal(result?.playerName, "")
   assert.equal(result?.status, "needs-player")
   assert.equal(result?.division, "Elite")
+})
+
+test("verified alias matching returns the canonical player ID", () => {
+  const player = resolveTrophyPlayer("YANKEEDUDE1123", [{ id: "canonical-player-id", screenName: "Current Discord Name 🏆", verifiedAliases: ["YankeeDude1123"] }])
+  assert.equal(player?.id, "canonical-player-id")
+})
+
+test("unknown or ambiguous owners remain unresolved", () => {
+  assert.equal(resolveTrophyPlayer("Unknown", []), null)
+  assert.equal(resolveTrophyPlayer("Shared Alias", [
+    { id: "one", screenName: "One", verifiedAliases: ["Shared Alias"] },
+    { id: "two", screenName: "Two", verifiedAliases: ["Shared Alias"] },
+  ]), null)
 })

@@ -40,6 +40,14 @@ export function normalizeTrophyPlayerName(value: string) {
   return value.trim().toLocaleLowerCase().replace(/[^a-z0-9]+/g, "")
 }
 
+export function resolveTrophyPlayer(name: string, players: Array<{ id: string; screenName: string; verifiedAliases: string[] }>) {
+  const normalized = normalizeTrophyPlayerName(name)
+  if (!normalized) return null
+  const matches = players.filter((player) => [player.screenName, ...player.verifiedAliases].some((candidate) => normalizeTrophyPlayerName(candidate) === normalized))
+  const canonicalIds = new Set(matches.map((player) => player.id))
+  return canonicalIds.size === 1 ? matches[0] : null
+}
+
 export function trophySemanticKey(value: Pick<TrophyImportCandidate, "playerId" | "playerName" | "eventName" | "division" | "placement" | "season" | "month">) {
   return [value.playerId || normalizeTrophyPlayerName(value.playerName), value.eventName, value.division, value.placement, value.season, value.month]
     .map((part) => String(part || "").trim().toLocaleLowerCase().replace(/\s+/g, " "))

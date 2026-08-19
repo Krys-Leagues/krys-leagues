@@ -9,6 +9,7 @@ import PlayerProfileEditor, { type ProfilePreferences } from "@/components/Playe
 import { getCanonicalPlayerAvatar } from "@/lib/playerAvatars"
 import styles from "./page.module.css"
 import { profileBackgroundPublicUrl } from "@/lib/profileBackgrounds"
+import TrophyMedia from "@/components/TrophyMedia"
 
 type Player = {
   id: string
@@ -554,16 +555,7 @@ export default function PublicPlayerProfilePage() {
                       .join(" • ")}
                   </p>
 
-                  {trophy.image_url && (
-                    <img
-                      src={trophy.image_url}
-                      alt={
-                        trophy.trophy_title ||
-                        `${player.screen_name} trophy`
-                      }
-                      style={trophyImage}
-                    />
-                  )}
+                  {trophy.image_url && <TrophyMedia src={trophy.image_url} alt={trophy.trophy_title || `${player.screen_name} trophy`} style={trophyImage} />}
                 </div>
               ))}
             </div>

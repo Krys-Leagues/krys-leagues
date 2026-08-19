@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import PlayerProfileHero from "@/components/PlayerProfileHero"
+import TrophyMedia from "@/components/TrophyMedia"
 import { getCanonicalPlayerAvatar, PLAYER_AVATAR_BUCKET, playerAvatarObjectPath, validatePlayerAvatarFile } from "@/lib/playerAvatars"
 
 type Player = {
@@ -394,7 +395,7 @@ const hasCareerParticipation = memberships.length > 0 || careerStats.matchesPlay
                   </p>
 
                   {t.image_url && (
-                    <img
+                    <TrophyMedia
                       src={t.image_url}
                       alt={t.trophy_title || "Player trophy"}
                       style={{

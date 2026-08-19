@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { supabase } from "@/lib/supabase"
+import TrophyMedia from "@/components/TrophyMedia"
 
 type Player = {
   id: string
@@ -11,7 +12,8 @@ type Player = {
 
 type Trophy = {
   id: string
-  player_id: string
+  player_id: string | null
+  player_name: string | null
   trophy_title: string | null
   placement: string | null
   event_name: string | null
@@ -32,6 +34,7 @@ export default function ChampionsPage() {
   const [message, setMessage] = useState("")
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/immutability
     loadChampions()
   }, [])
 
@@ -48,7 +51,7 @@ export default function ChampionsPage() {
       supabase
         .from("player_trophies")
         .select(
-          "id, player_id, trophy_title, placement, event_name, division, season, week, image_url"
+          "id, player_id, player_name, trophy_title, placement, event_name, division, season, week, image_url"
         )
         .order("season", { ascending: false }),
     ])
@@ -74,7 +77,7 @@ export default function ChampionsPage() {
     return trophies.map((trophy) => ({
       ...trophy,
       playerName:
-        playerNames.get(trophy.player_id) || "Unknown Player",
+        (trophy.player_id ? playerNames.get(trophy.player_id) : null) || trophy.player_name || "Unresolved Player",
     }))
   }, [players, trophies])
 
@@ -111,12 +114,6 @@ export default function ChampionsPage() {
   const spicyCupEntries = useMemo(() => {
     return championEntries.filter((entry) =>
       searchableText(entry).includes("spicy cup")
-    )
-  }, [championEntries])
-
-  const championOfChampionsEntries = useMemo(() => {
-    return championEntries.filter((entry) =>
-      searchableText(entry).includes("champion of champions")
     )
   }, [championEntries])
 
@@ -307,24 +304,10 @@ function ChampionList({
     <div style={championList}>
       {entries.map((entry) => (
         <article key={entry.id} style={championRow}>
-          {entry.image_url && (
-            <img
-              src={entry.image_url}
-              alt={
-                entry.trophy_title ||
-                `${entry.playerName} trophy`
-              }
-              style={trophyImage}
-            />
-          )}
+          {entry.image_url && <TrophyMedia src={entry.image_url} alt={entry.trophy_title || `${entry.playerName} trophy`} style={trophyImage} />}
 
           <div style={championInformation}>
-            <Link
-              href={`/players/${entry.player_id}`}
-              style={championName}
-            >
-              {entry.playerName}
-            </Link>
+            {entry.player_id ? <Link href={`/players/${entry.player_id}`} style={championName}>{entry.playerName}</Link> : <strong style={championName}>{entry.playerName}</strong>}
 
             <strong style={trophyName}>
               {entry.trophy_title ||
