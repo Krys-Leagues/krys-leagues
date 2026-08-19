@@ -603,7 +603,7 @@ const backButton: React.CSSProperties = {
 
 const card: React.CSSProperties = {
   padding: 24,
-  background: "#0f172a",
+  background: "#0f172aa6",
   border: "1px solid #334155",
   borderRadius: 18,
   marginBottom: 20,
@@ -624,14 +624,14 @@ const miniCard: React.CSSProperties = {
   flexDirection: "column",
   gap: 8,
   padding: 16,
-  background: "#020617",
+  background: "#020617b8",
   border: "1px solid #334155",
   borderRadius: 12,
 }
 
 const trophyCard: React.CSSProperties = {
   padding: 16,
-  background: "#020617",
+  background: "#020617b8",
   border: "1px solid #334155",
   borderRadius: 12,
 }

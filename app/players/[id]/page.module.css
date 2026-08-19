@@ -163,6 +163,11 @@
   transform: rotate(180deg);
 }
 
+.profileDisclosure[open] {
+  background: linear-gradient(90deg, #033a3b66, #0613257a 52%, #27102770);
+  backdrop-filter: blur(8px);
+}
+
 .profileDisclosure > summary > span:not(.summaryIcon) {
   display: grid;
   gap: 4px;
