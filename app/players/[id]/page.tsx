@@ -8,6 +8,7 @@ import PlayerProfileHero, { PlayerProfileRecognition } from "@/components/Player
 import PlayerProfileEditor, { type ProfilePreferences } from "@/components/PlayerProfileEditor"
 import { getCanonicalPlayerAvatar } from "@/lib/playerAvatars"
 import styles from "./page.module.css"
+import { profileBackgroundPublicUrl } from "@/lib/profileBackgrounds"
 
 type Player = {
   id: string
@@ -35,7 +36,7 @@ type Trophy = {
   created_at: string
 }
 
-const DEFAULT_PREFERENCES: ProfilePreferences = { background_color: "#07111f", glow_color: "#ff2bd6", text_color: "#f8fafc", about_me: null }
+const DEFAULT_PREFERENCES: ProfilePreferences = { background_color: "#07111f", glow_color: "#ff2bd6", text_color: "#f8fafc", about_me: null, background_id: null, background_path: null }
 
 type Result = {
   id: string
@@ -337,7 +338,7 @@ export default function PublicPlayerProfilePage() {
   }
 
   return (
-    <main className={styles.page} style={{ "--profile-bg": preferences.background_color, "--profile-text": preferences.text_color } as React.CSSProperties}>
+    <main className={styles.page} style={{ "--profile-bg": preferences.background_color, "--profile-text": preferences.text_color, "--profile-background-image": `url("${profileBackgroundPublicUrl(preferences.background_path) || "/player-profile-background.png"}")` } as React.CSSProperties}>
       <div style={container}>
         <div style={topBar}>
           <Link href="/players" style={backButton}>

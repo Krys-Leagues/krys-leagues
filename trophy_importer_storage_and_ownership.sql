@@ -26,6 +26,16 @@ create unique index if not exists player_trophies_source_key_unique
   on public.player_trophies(source_key)
   where source_key is not null;
 
+alter table public.player_trophies enable row level security;
+drop policy if exists "Public read player trophies" on public.player_trophies;
+create policy "Public read player trophies" on public.player_trophies for select to anon,authenticated using (true);
+drop policy if exists "Site admins insert player trophies" on public.player_trophies;
+create policy "Site admins insert player trophies" on public.player_trophies for insert to authenticated with check (public.is_current_user_site_admin());
+drop policy if exists "Site admins update player trophies" on public.player_trophies;
+create policy "Site admins update player trophies" on public.player_trophies for update to authenticated using (public.is_current_user_site_admin()) with check (public.is_current_user_site_admin());
+drop policy if exists "Site admins delete player trophies" on public.player_trophies;
+create policy "Site admins delete player trophies" on public.player_trophies for delete to authenticated using (public.is_current_user_site_admin());
+
 create or replace function public.enforce_canonical_player_trophy_owner()
 returns trigger language plpgsql set search_path to '' as $function$
 begin

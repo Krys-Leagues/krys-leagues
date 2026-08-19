@@ -34,9 +34,16 @@ const cards = [
   {
     title: "Trophies",
     description:
-      "Upload trophy artwork, connect winners, and publish player trophies.",
+      "Import historical trophies and awards and connect them to player profiles.",
     href: "/admin/trophies",
     color: "bg-yellow-600",
+  },
+  {
+    title: "Profile Backgrounds",
+    description:
+      "Upload approved backgrounds for Player Profiles.",
+    href: "/admin/import/profile-backgrounds",
+    color: "bg-cyan-700",
   },
   {
     title: "Google Sheets",
