@@ -25,8 +25,11 @@ import TrophyMedia from "@/components/TrophyMedia";
 import {
   assignPendingTrophyPlayer,
   clearPendingTrophyPlayer,
+  monthlyTrophyNeedsPlacement,
   parsePendingTrophyAssignments,
+  parsePendingTrophyMetadata,
   selectedTrophiesForReview,
+  updatePendingTrophyMetadata,
   validTrophiesForImport,
 } from "@/lib/trophies/pendingTrophyAssignments";
 
@@ -50,10 +53,17 @@ type ReviewCandidate = TrophyImportCandidate & {
 };
 
 const PENDING_ASSIGNMENTS_KEY = "krys-leagues:trophy-importer:pending-assignments:v1";
+const PENDING_METADATA_KEY = "krys-leagues:trophy-importer:pending-metadata:v1";
 
 function readPendingAssignments() {
   return parsePendingTrophyAssignments(
     window.localStorage.getItem(PENDING_ASSIGNMENTS_KEY),
+  );
+}
+
+function readPendingMetadata() {
+  return parsePendingTrophyMetadata(
+    window.localStorage.getItem(PENDING_METADATA_KEY),
   );
 }
 
@@ -167,6 +177,59 @@ function TrophyPlayerPicker({
   );
 }
 
+const STANDARD_PLACEMENTS = ["", "1st", "2nd", "3rd", "Winner", "Champion"];
+
+function PendingMetadataControls({
+  candidate,
+  onChange,
+}: {
+  candidate: ReviewCandidate;
+  onChange: (
+    update: Partial<Pick<ReviewCandidate, "playerName" | "placement">>,
+  ) => void;
+}) {
+  const customPlacement =
+    Boolean(candidate.placement) &&
+    !STANDARD_PLACEMENTS.includes(candidate.placement);
+  return (
+    <div className={styles.metadataControls}>
+      <label data-missing={!candidate.placement.trim()}>
+        Placement
+        <select
+          value={customPlacement ? "Other" : candidate.placement}
+          onChange={(event) => onChange({ placement: event.target.value })}
+        >
+          <option value="">Missing</option>
+          <option value="1st">1st</option>
+          <option value="2nd">2nd</option>
+          <option value="3rd">3rd</option>
+          <option value="Winner">Winner</option>
+          <option value="Champion">Champion</option>
+          <option value="Other">Other / custom</option>
+        </select>
+      </label>
+      {(customPlacement || candidate.placement === "Other") && (
+        <label>
+          Custom placement
+          <input
+            value={candidate.placement === "Other" ? "" : candidate.placement}
+            onChange={(event) => onChange({ placement: event.target.value })}
+            placeholder="Enter award type"
+          />
+        </label>
+      )}
+      <label data-missing={!candidate.playerName.trim()}>
+        Historical Name
+        <input
+          value={candidate.playerName}
+          onChange={(event) => onChange({ playerName: event.target.value })}
+          placeholder="Missing"
+        />
+      </label>
+    </div>
+  );
+}
+
 export default function TrophyAdminPage() {
   const [trophies, setTrophies] = useState<Trophy[]>([]);
   const [players, setPlayers] = useState<GlobalPlayerDirectoryEntry[]>([]);
@@ -251,6 +314,24 @@ export default function TrophyAdminPage() {
     window.localStorage.setItem(PENDING_ASSIGNMENTS_KEY, JSON.stringify(pending));
   }, [candidates, players]);
   useEffect(() => {
+    if (candidates.length === 0) return;
+    const pendingMetadata = Object.fromEntries(
+      candidates
+        .filter((candidate) => candidate.status !== "duplicate")
+        .map((candidate) => [
+          candidate.sourceKey,
+          {
+            historicalName: candidate.playerName,
+            placement: candidate.placement,
+          },
+        ]),
+    );
+    window.localStorage.setItem(
+      PENDING_METADATA_KEY,
+      JSON.stringify(pendingMetadata),
+    );
+  }, [candidates]);
+  useEffect(() => {
     if (!reviewingImport) return;
     importReviewRef.current?.scrollIntoView({
       behavior: "smooth",
@@ -294,6 +375,7 @@ export default function TrophyAdminPage() {
         ),
       );
       const pendingAssignments = readPendingAssignments();
+      const pendingMetadata = readPendingMetadata();
       setCandidates(
         (payload.candidates as TrophyImportCandidate[]).map((candidate) => {
           const automaticPlayer = resolveTrophyPlayer(candidate.playerName, players);
@@ -307,9 +389,12 @@ export default function TrophyAdminPage() {
               )
             : undefined;
           const player = hasPendingAssignment ? pendingPlayer : automaticPlayer;
+          const metadata = pendingMetadata[candidate.sourceKey];
           const matched = {
             ...candidate,
             playerId: player?.id || null,
+            playerName: metadata?.historicalName ?? candidate.playerName,
+            placement: metadata?.placement ?? candidate.placement,
           };
           const duplicate =
             existingSources.has(candidate.sourceKey) ||
@@ -350,6 +435,16 @@ export default function TrophyAdminPage() {
 
   function clearPlayer(key: string) {
     setCandidates((current) => clearPendingTrophyPlayer(current, key));
+  }
+
+
+  function updateMetadata(
+    key: string,
+    update: Partial<Pick<ReviewCandidate, "playerName" | "placement">>,
+  ) {
+    setCandidates((current) =>
+      updatePendingTrophyMetadata(current, key, update),
+    );
   }
 
   function reviewSelected() {
@@ -582,7 +677,10 @@ export default function TrophyAdminPage() {
   const selectedForReview = selectedTrophiesForReview(candidates);
   const validSelectedForReview = validTrophiesForImport(candidates);
   const reviewHasInvalid = selectedForReview.some(
-    (candidate) => candidate.status !== "ready" || !candidate.playerId,
+    (candidate) =>
+      candidate.status !== "ready" ||
+      !candidate.playerId ||
+      monthlyTrophyNeedsPlacement(candidate),
   );
   const filteredPlayers = useMemo(
     () =>
@@ -711,14 +809,18 @@ export default function TrophyAdminPage() {
               <p>Confirm these exact canonical owners before publishing.</p>
               {reviewHasInvalid && (
                 <p className={styles.reviewWarning}>
-                  Needs Player items cannot be published. Correct them first, or confirm to import only the valid reviewed trophies.
+                  Needs Player items and Monthly trophies with Missing Placement cannot be published. Correct them below, or confirm to import only the valid reviewed trophies.
                 </p>
               )}
             </div>
             <div className={styles.importReviewList}>
               {selectedForReview.map((candidate) => {
                 const player = players.find((item) => item.id === candidate.playerId);
-                const valid = candidate.status === "ready" && Boolean(player);
+                const needsPlacement = monthlyTrophyNeedsPlacement(candidate);
+                const valid =
+                  candidate.status === "ready" &&
+                  Boolean(player) &&
+                  !needsPlacement;
                 return (
                   <article key={candidate.key}>
                     <div className={styles.reviewThumbnail}>
@@ -738,7 +840,19 @@ export default function TrophyAdminPage() {
                       <span>Division: {displayMetadata(candidate.division)}</span>
                       <span>Placement: {displayMetadata(candidate.placement)}</span>
                       <small>{sourceFilename(candidate.imageUrl)}</small>
-                      <b data-valid={valid}>{valid ? "Ready" : "Needs Player"}</b>
+                      <b data-valid={valid}>
+                        {valid
+                          ? "Ready"
+                          : needsPlacement
+                            ? "Needs Placement"
+                            : "Needs Player"}
+                      </b>
+                      <PendingMetadataControls
+                        candidate={candidate}
+                        onChange={(update) =>
+                          updateMetadata(candidate.key, update)
+                        }
+                      />
                     </div>
                   </article>
                 );
@@ -1051,24 +1165,32 @@ export default function TrophyAdminPage() {
                         </div>
                       </dl>
                       {candidate.status !== "duplicate" && (
-                        <div className={styles.assignmentActions}>
-                          <TrophyPlayerPicker
-                            players={players}
-                            selectedPlayer={canonicalPlayer}
-                            onSelect={(playerId) =>
-                              assignPlayer(candidate.key, playerId)
+                        <>
+                          <PendingMetadataControls
+                            candidate={candidate}
+                            onChange={(update) =>
+                              updateMetadata(candidate.key, update)
                             }
                           />
-                          {candidate.manuallyReviewed && candidate.playerId && (
-                            <button
-                              type="button"
-                              className={styles.clearPlayer}
-                              onClick={() => clearPlayer(candidate.key)}
-                            >
-                              Clear Player
-                            </button>
-                          )}
-                        </div>
+                          <div className={styles.assignmentActions}>
+                            <TrophyPlayerPicker
+                              players={players}
+                              selectedPlayer={canonicalPlayer}
+                              onSelect={(playerId) =>
+                                assignPlayer(candidate.key, playerId)
+                              }
+                            />
+                            {candidate.manuallyReviewed && candidate.playerId && (
+                              <button
+                                type="button"
+                                className={styles.clearPlayer}
+                                onClick={() => clearPlayer(candidate.key)}
+                              >
+                                Clear Player
+                              </button>
+                            )}
+                          </div>
+                        </>
                       )}
                     </div>
                   </article>

@@ -3,9 +3,12 @@ import test from "node:test";
 import {
   assignPendingTrophyPlayer,
   clearPendingTrophyPlayer,
+  monthlyTrophyNeedsPlacement,
   parsePendingTrophyAssignments,
+  parsePendingTrophyMetadata,
   selectedTrophiesForReview,
   type PendingTrophyMatch,
+  updatePendingTrophyMetadata,
   validTrophiesForImport,
 } from "./pendingTrophyAssignments.ts";
 
@@ -60,4 +63,43 @@ test("review includes unresolved trophies while final import includes only valid
   assert.equal(review.length, 2);
   assert.equal(validTrophiesForImport(review).length, 1);
   assert.equal(review[1].status, "needs-player");
+});
+
+test("placement and historical name corrections update only the chosen candidate", () => {
+  const editable = [
+    { key: "one", playerName: "", placement: "" },
+    { key: "two", playerName: "Keep Me", placement: "1st" },
+  ];
+  const corrected = updatePendingTrophyMetadata(editable, "one", {
+    playerName: "Legacy Name",
+    placement: "2nd",
+  });
+  assert.deepEqual(corrected[0], {
+    key: "one",
+    playerName: "Legacy Name",
+    placement: "2nd",
+  });
+  assert.deepEqual(corrected[1], editable[1]);
+});
+
+test("pending metadata safely round-trips explicit corrections", () => {
+  assert.deepEqual(
+    parsePendingTrophyMetadata(
+      '{"asset:one":{"historicalName":"Legacy Name","placement":"2nd"}}',
+    ),
+    { "asset:one": { historicalName: "Legacy Name", placement: "2nd" } },
+  );
+});
+
+test("Monthly trophies require placement but non-Monthly trophies do not", () => {
+  const monthly = {
+    ...candidates[1],
+    eventType: "Monthly",
+    placement: "",
+  };
+  const other = { ...monthly, eventType: "Cup", leagueType: "cup" };
+  assert.equal(monthlyTrophyNeedsPlacement(monthly), true);
+  assert.equal(validTrophiesForImport([monthly]).length, 0);
+  assert.equal(monthlyTrophyNeedsPlacement(other), false);
+  assert.equal(validTrophiesForImport([other]).length, 1);
 });

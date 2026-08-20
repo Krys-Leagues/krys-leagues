@@ -380,6 +380,44 @@
   font-size: 0.68rem;
   font-weight: 500;
 }
+.metadataControls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 13px;
+  padding-top: 12px;
+  border-top: 1px solid #ffffff1d;
+}
+.metadataControls label {
+  display: grid;
+  gap: 5px;
+  color: #cbd5e1;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.metadataControls label[data-missing="true"] {
+  color: #fbbf24;
+}
+.metadataControls input,
+.metadataControls select {
+  min-width: 0;
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ffffff28;
+  border-radius: 8px;
+  color: white;
+  background: #111827;
+  font: inherit;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.metadataControls label[data-missing="true"] input,
+.metadataControls label[data-missing="true"] select {
+  border-color: #f59e0b;
+  background: #451a03;
+}
 .playerPicker {
   position: relative;
   flex: 1;
