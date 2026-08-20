@@ -48,10 +48,55 @@ export function resolveTrophyPlayer(name: string, players: Array<{ id: string; s
   return canonicalIds.size === 1 ? matches[0] : null
 }
 
-export function trophySemanticKey(value: Pick<TrophyImportCandidate, "playerId" | "playerName" | "eventName" | "division" | "placement" | "season" | "month">) {
-  return [value.playerId || normalizeTrophyPlayerName(value.playerName), value.eventName, value.division, value.placement, value.season, value.month]
+export type TrophyDuplicateComparable = {
+  playerId: string | null
+  playerName: string
+  trophyTitle: string
+  eventType: string
+  eventName: string
+  leagueType: string
+  division: string
+  placement: string
+  season: string
+  month: string
+  imageUrl?: string | null
+  sourceKey?: string | null
+}
+
+export function trophySemanticKey(value: TrophyDuplicateComparable) {
+  return [value.playerId || normalizeTrophyPlayerName(value.playerName), value.trophyTitle, value.eventType, value.eventName, value.leagueType, value.division, value.placement, value.season, value.month]
     .map((part) => String(part || "").trim().toLocaleLowerCase().replace(/\s+/g, " "))
     .join("|")
+}
+
+function hasSpecificTrophyIdentity(value: TrophyDuplicateComparable) {
+  const normalize = (part: string) => part.trim().toLocaleLowerCase().replace(/\s+/g, " ")
+  const title = normalize(value.trophyTitle)
+  const eventName = normalize(value.eventName)
+  const genericLabels = new Set([
+    "",
+    normalize(value.placement),
+    normalize(value.eventType),
+    "trophy",
+  ])
+  return Boolean(eventName || (title && !genericLabels.has(title)))
+}
+
+export function findTrophyDuplicate(candidate: TrophyDuplicateComparable, existing: TrophyDuplicateComparable[]) {
+  if (candidate.sourceKey) {
+    const sourceMatch = existing.find((trophy) => trophy.sourceKey === candidate.sourceKey)
+    if (sourceMatch) return { kind: "source" as const, trophy: sourceMatch }
+  }
+  if (candidate.imageUrl) {
+    const imageMatch = existing.find((trophy) => trophy.imageUrl === candidate.imageUrl)
+    if (imageMatch) return { kind: "image" as const, trophy: imageMatch }
+  }
+  if (!hasSpecificTrophyIdentity(candidate)) return null
+  const semanticKey = trophySemanticKey(candidate)
+  const achievementMatch = existing.find((trophy) =>
+    hasSpecificTrophyIdentity(trophy) && trophySemanticKey(trophy) === semanticKey,
+  )
+  return achievementMatch ? { kind: "achievement" as const, trophy: achievementMatch } : null
 }
 
 export function parseTrophyAsset(imageUrl: string): TrophyImportCandidate | null {
