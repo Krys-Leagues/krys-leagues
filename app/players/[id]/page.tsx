@@ -33,6 +33,7 @@ type Trophy = {
   event_name: string | null
   division: string | null
   season: string | null
+  month: string | null
   week: string | null
   image_url: string | null
   created_at: string
@@ -222,7 +223,7 @@ export default function PublicPlayerProfilePage() {
       supabase
         .from("player_trophies")
         .select(
-          "id, trophy_title, placement, event_name, division, season, week, image_url, created_at"
+          "id, trophy_title, placement, event_name, division, season, month, week, image_url, created_at"
         )
         .eq("player_id", canonicalId)
         .order("created_at", { ascending: false }),
@@ -317,12 +318,23 @@ export default function PublicPlayerProfilePage() {
     strokeHistory.length > 0 || matchHistory.length > 0 || pypHistory.length > 0 ||
     pypFixtureHistory.length > 0
 
-  const careerHighlights = [
-    trophies.length > 0 ? { label: "Trophies", value: trophies.length } : null,
-    strokeHistory.reduce((total, season) => total + season.wins, 0) > 0 ? { label: "Stroke Wins", value: strokeHistory.reduce((total, season) => total + season.wins, 0) } : null,
-    matchHistory.reduce((total, season) => total + season.wins, 0) > 0 ? { label: "Match Wins", value: matchHistory.reduce((total, season) => total + season.wins, 0) } : null,
-    pypHistory.reduce((total, season) => total + season.wins, 0) > 0 ? { label: "PYP Wins", value: pypHistory.reduce((total, season) => total + season.wins, 0) } : null,
-  ].filter((highlight): highlight is { label: string; value: number } => highlight !== null)
+  const statHighlights = [
+    trophies.length > 0 ? { kind: "stat" as const, label: "Trophies", value: trophies.length } : null,
+    strokeHistory.reduce((total, season) => total + season.wins, 0) > 0 ? { kind: "stat" as const, label: "Stroke Wins", value: strokeHistory.reduce((total, season) => total + season.wins, 0) } : null,
+    matchHistory.reduce((total, season) => total + season.wins, 0) > 0 ? { kind: "stat" as const, label: "Match Wins", value: matchHistory.reduce((total, season) => total + season.wins, 0) } : null,
+    pypHistory.reduce((total, season) => total + season.wins, 0) > 0 ? { kind: "stat" as const, label: "PYP Wins", value: pypHistory.reduce((total, season) => total + season.wins, 0) } : null,
+  ].filter((highlight): highlight is NonNullable<typeof highlight> => highlight !== null)
+  const monthlyHighlights = trophies.flatMap((trophy) => {
+    const podium = trophy.placement?.trim().match(/^(1st|2nd|3rd)(?:\s+place)?$/i)?.[1]?.toLowerCase()
+    const isMonthly = Boolean(trophy.month?.trim() || /\bmonthly\b/i.test(trophy.event_name || ""))
+    if (!podium || !isMonthly || !trophy.division?.trim()) return []
+    const placement = podium === "1st" ? "1st" : podium === "2nd" ? "2nd" : "3rd"
+    const medal = placement === "1st" ? "🥇" : placement === "2nd" ? "🥈" : "🥉"
+    const datedMonthly = [trophy.month?.trim(), trophy.season?.trim()].filter((part, index, parts) => Boolean(part) && (index === 0 || !parts[0]?.includes(part!))).join(" ")
+    const label = trophy.event_name?.trim() || `${datedMonthly} Monthly`
+    return [{ kind: "monthly" as const, label, division: trophy.division.trim(), placement, medal }]
+  }).slice(0, 3)
+  const careerHighlights = [...statHighlights, ...monthlyHighlights]
 
   const knownAliases = aliases.filter((alias) =>
     alias.trim().localeCompare(player?.screen_name.trim() || "", undefined, { sensitivity: "accent" }) !== 0
@@ -542,13 +554,13 @@ export default function PublicPlayerProfilePage() {
           <p className={styles.sectionDescription}>Player identity and name history</p><ul className={styles.aliasList}>{knownAliases.map(alias => <li key={alias}>{alias}</li>)}</ul>
         </section>}
 
-        {openProfileSection === "trophies" && trophies.length > 0 && <section className={styles.profileSectionPanel} id="trophy-case" aria-label="Trophies & Achievements">
+        {openProfileSection === "trophies" && trophies.length > 0 && <section className={`${styles.profileSectionPanel} ${styles.trophyCasePanel}`} id="trophy-case" aria-label="Trophies & Achievements">
           <p className={styles.sectionDescription}>Complete trophy case and achievement history</p>
           <h2 style={sectionTitle}>Trophy Case</h2>
 
-            <div style={grid}>
+            <div className={styles.trophyGrid}>
               {trophies.map((trophy) => (
-                <div key={trophy.id} style={trophyCard}>
+                <article key={trophy.id} className={styles.trophyCard}>
                   <h3 style={trophyTitle}>
                     {trophy.trophy_title ||
                       trophy.placement ||
@@ -567,8 +579,8 @@ export default function PublicPlayerProfilePage() {
                       .join(" • ")}
                   </p>
 
-                  {trophy.image_url && <TrophyMedia src={trophy.image_url} alt={trophy.trophy_title || `${player.screen_name} trophy`} style={trophyImage} />}
-                </div>
+                  {trophy.image_url && <TrophyMedia src={trophy.image_url} alt={trophy.trophy_title || `${player.screen_name} trophy`} className={styles.trophyMedia} />}
+                </article>
               ))}
             </div>
         </section>}
@@ -638,25 +650,8 @@ const miniCard: React.CSSProperties = {
   borderRadius: 12,
 }
 
-const trophyCard: React.CSSProperties = {
-  padding: 16,
-  background: "#020617b8",
-  border: "1px solid #334155",
-  borderRadius: 12,
-}
-
 const trophyTitle: React.CSSProperties = {
   marginTop: 0,
-}
-
-const trophyImage: React.CSSProperties = {
-  display: "block",
-  width: "min(100%, 300px)",
-  maxHeight: 280,
-  objectFit: "contain",
-  marginInline: "auto",
-  marginTop: 12,
-  borderRadius: 10,
 }
 
 const muted: React.CSSProperties = {

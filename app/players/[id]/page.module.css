@@ -109,6 +109,41 @@
   color: #f8fafc;
 }
 
+.trophyCasePanel {
+  border-color: #ffffff20;
+  background: #02061714;
+  box-shadow: 0 8px 24px #0003;
+  backdrop-filter: blur(7px);
+}
+
+.trophyGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: clamp(16px, 2.4vw, 28px);
+}
+
+.trophyCard {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  padding: clamp(16px, 2vw, 22px);
+  border: 1px solid #ffffff20;
+  border-radius: 18px;
+  background: #02061714;
+  box-shadow: 0 8px 24px #0003;
+  backdrop-filter: blur(7px);
+}
+
+.trophyMedia {
+  display: block;
+  width: 100%;
+  height: clamp(240px, 28vw, 340px);
+  margin: auto auto 0;
+  object-fit: contain;
+  object-position: center;
+  filter: drop-shadow(0 12px 14px #0008);
+}
+
 .spotlightGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 310px), 1fr));
@@ -232,4 +267,6 @@
   .profileActions > * { flex: 1 1 145px; text-align: center; }
   .featuredTrophy { grid-template-columns: 1fr; justify-items: center; text-align: center; }
   .highlightGrid { grid-template-columns: 1fr 1fr; }
+  .trophyGrid { grid-template-columns: 1fr; }
+  .trophyMedia { height: clamp(220px, 78vw, 300px); }
 }

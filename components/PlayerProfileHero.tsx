@@ -3,7 +3,9 @@ import Image from "next/image"
 import styles from "./PlayerProfileHero.module.css"
 
 type FeaturedTrophy = { title: string; meta: string; imageUrl: string | null }
-type CareerHighlight = { label: string; value: number }
+type CareerHighlight =
+  | { kind: "stat"; label: string; value: number }
+  | { kind: "monthly"; label: string; division: string; placement: string; medal: string }
 
 export type PlayerNameEffect = "auto" | "white" | "booster" | "server-tag" | "both" | "holographic"
 type Props = { screenName: string; avatarPath: string | null; isServerBooster: boolean; hasKrysServerTag: boolean; nameEffect?: PlayerNameEffect; profileBadges?: string[]; glowColor?: string; textColor?: string; featuredTrophy?: FeaturedTrophy | null; careerHighlights?: CareerHighlight[]; publicLayout?: boolean }
@@ -103,7 +105,9 @@ export default function PlayerProfileHero({ screenName, avatarPath, isServerBoos
       </div>
       {careerHighlights.length > 0 && <section className={`${styles.sidePanel} ${styles.highlightsPanel}`} aria-labelledby="career-highlights-title">
         <p className={styles.panelEyebrow} id="career-highlights-title">Career Highlights</p>
-        <div className={styles.highlightGrid}>{careerHighlights.map(highlight => <div className={styles.highlight} key={highlight.label}><strong>{highlight.value}</strong><span>{highlight.label}</span></div>)}</div>
+        <div className={styles.highlightGrid}>{careerHighlights.map(highlight => highlight.kind === "monthly"
+          ? <div className={`${styles.highlight} ${styles.monthlyHighlight}`} key={`${highlight.label}-${highlight.division}-${highlight.placement}`}><strong aria-hidden="true">{highlight.medal}</strong><span><b>{highlight.label}</b><small>{highlight.division} · {highlight.placement} Place</small></span></div>
+          : <div className={styles.highlight} key={highlight.label}><strong>{highlight.value}</strong><span>{highlight.label}</span></div>)}</div>
       </section>}
     </div>}
     {!publicLayout && <div className={styles.playerCore}>
