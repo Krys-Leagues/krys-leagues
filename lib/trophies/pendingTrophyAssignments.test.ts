@@ -4,7 +4,9 @@ import {
   assignPendingTrophyPlayer,
   clearPendingTrophyPlayer,
   parsePendingTrophyAssignments,
+  selectedTrophiesForReview,
   type PendingTrophyMatch,
+  validTrophiesForImport,
 } from "./pendingTrophyAssignments.ts";
 
 const candidates: PendingTrophyMatch[] = [
@@ -40,4 +42,22 @@ test("pending browser assignments preserve canonical IDs and intentional clears"
     { one: "canonical-id", two: null },
   );
   assert.deepEqual(parsePendingTrophyAssignments("not json"), {});
+});
+
+test("all 87 selected trophies appear in final review", () => {
+  const selected = Array.from({ length: 87 }, (_, index) => ({
+    ...candidates[1],
+    key: `trophy-${index}`,
+  }));
+  assert.equal(selectedTrophiesForReview(selected).length, 87);
+});
+
+test("review includes unresolved trophies while final import includes only valid ones", () => {
+  const review = selectedTrophiesForReview([
+    candidates[1],
+    { ...candidates[0], selected: true },
+  ]);
+  assert.equal(review.length, 2);
+  assert.equal(validTrophiesForImport(review).length, 1);
+  assert.equal(review[1].status, "needs-player");
 });

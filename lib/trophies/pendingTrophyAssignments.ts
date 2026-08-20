@@ -61,3 +61,17 @@ export function parsePendingTrophyAssignments(value: string | null) {
     return {} as Record<string, string | null>;
   }
 }
+
+export function selectedTrophiesForReview<T extends PendingTrophyMatch>(
+  candidates: T[],
+) {
+  return candidates.filter((candidate) => candidate.selected);
+}
+
+export function validTrophiesForImport<T extends PendingTrophyMatch>(
+  candidates: T[],
+) {
+  return selectedTrophiesForReview(candidates).filter(
+    (candidate) => candidate.status === "ready" && candidate.playerId,
+  );
+}
