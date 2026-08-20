@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
+import TrophyMedia from "@/components/TrophyMedia"
 
 type Player = {
   id: string
@@ -309,7 +310,7 @@ const totalSeasons = new Set(
                   </p>
 
                   {t.image_url && (
-                    <img
+                    <TrophyMedia
                       src={t.image_url}
                       alt={t.trophy_title || "Player trophy"}
                       style={{

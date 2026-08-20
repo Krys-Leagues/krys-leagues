@@ -10,6 +10,7 @@ import PlayerProfileEditor, { type ProfilePreferences } from "@/components/Playe
 import { getCanonicalPlayerAvatar } from "@/lib/playerAvatars"
 import { DEFAULT_PLAYER_PROFILE_BACKGROUND_KEY, getPlayerProfileBackground } from "@/lib/playerProfileBackgrounds"
 import styles from "./page.module.css"
+import TrophyMedia from "@/components/TrophyMedia"
 
 type Player = {
   id: string
@@ -223,7 +224,7 @@ export default function PublicPlayerProfilePage() {
         .select(
           "id, trophy_title, placement, event_name, division, season, week, image_url, created_at"
         )
-        .in("player_id", identityIds)
+        .eq("player_id", canonicalId)
         .order("created_at", { ascending: false }),
 
       supabase
@@ -566,16 +567,7 @@ export default function PublicPlayerProfilePage() {
                       .join(" • ")}
                   </p>
 
-                  {trophy.image_url && (
-                    <img
-                      src={trophy.image_url}
-                      alt={
-                        trophy.trophy_title ||
-                        `${player.screen_name} trophy`
-                      }
-                      style={trophyImage}
-                    />
-                  )}
+                  {trophy.image_url && <TrophyMedia src={trophy.image_url} alt={trophy.trophy_title || `${player.screen_name} trophy`} style={trophyImage} />}
                 </div>
               ))}
             </div>
