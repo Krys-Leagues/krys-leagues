@@ -2,49 +2,86 @@
 
 import { useState } from "react"
 import { supabase } from "@/lib/supabase"
-import { DEFAULT_PLAYER_PROFILE_BACKGROUND_KEY, getPlayerProfileBackground, PLAYER_PROFILE_BACKGROUNDS } from "@/lib/playerProfileBackgrounds"
+import { loadApprovedProfileBackgrounds, profileBackgroundPublicUrl, type ApprovedProfileBackground } from "@/lib/profileBackgrounds"
+import { DEFAULT_PLAYER_PROFILE_BACKGROUND_KEY, getPlayerProfileBackground } from "@/lib/playerProfileBackgrounds"
 import styles from "./PlayerProfileEditor.module.css"
 
 export type PlayerNameEffect = "auto" | "white" | "booster" | "server-tag" | "both" | "holographic"
-export type ProfilePreferences = { background_key: string; name_effect: PlayerNameEffect; background_color: string; glow_color: string; text_color: string; about_me: string | null }
+export type ProfilePreferences = { background_key: string; background_id: string | null; background_path: string | null; background_display_name: string | null; name_effect: PlayerNameEffect; background_color: string; glow_color: string; text_color: string; about_me: string | null }
 type Props = { playerId: string; initial: ProfilePreferences; isServerBooster: boolean; hasKrysServerTag: boolean; profileBadges: string[]; onSaved: (value: ProfilePreferences) => void }
-const DEFAULTS = { background_key: DEFAULT_PLAYER_PROFILE_BACKGROUND_KEY, name_effect: "auto" as PlayerNameEffect, background_color: "#07111f", glow_color: "#ff2bd6", text_color: "#f8fafc" }
+const DEFAULTS = { background_key: DEFAULT_PLAYER_PROFILE_BACKGROUND_KEY, background_id: null, background_path: null, background_display_name: null, name_effect: "auto" as PlayerNameEffect, background_color: "#07111f", glow_color: "#ff2bd6", text_color: "#f8fafc" }
 
 export default function PlayerProfileEditor({ playerId, initial, isServerBooster, hasKrysServerTag, profileBadges, onSaved }: Props) {
   const [open, setOpen] = useState(false)
   const [draft, setDraft] = useState(initial)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState("")
+  const [backgrounds, setBackgrounds] = useState<ApprovedProfileBackground[]>([])
+  const [backgroundsLoaded, setBackgroundsLoaded] = useState(false)
+  const [backgroundsLoading, setBackgroundsLoading] = useState(false)
   const isStaff = profileBadges.some(badge => ["Owner", "Co-Head Admin", "Tournament Admin", "Admin"].includes(badge))
   const set = (key: keyof ProfilePreferences, value: string) => setDraft(current => ({ ...current, [key]: value }))
 
   async function save() {
     setSaving(true); setMessage("")
-    const { data, error } = await supabase.rpc("save_player_profile_preferences_v3", { p_player_id: playerId, p_background_key: draft.background_key, p_name_effect: draft.name_effect, p_background_color: draft.background_color, p_glow_color: draft.glow_color, p_text_color: draft.text_color, p_about_me: draft.about_me || null })
+    const { data, error } = await supabase.rpc("save_player_profile_preferences_v4", { p_player_id: playerId, p_background_key: draft.background_key, p_background_id: draft.background_id, p_name_effect: draft.name_effect, p_background_color: draft.background_color, p_glow_color: draft.glow_color, p_text_color: draft.text_color, p_about_me: draft.about_me || null })
     setSaving(false)
     if (error) return setMessage(error.message)
     const saved = (Array.isArray(data) ? data[0] : data) as ProfilePreferences
     setDraft(saved); onSaved(saved); setMessage("Profile saved.")
   }
 
+  async function toggleEditor() {
+    const willOpen = !open
+    setOpen(willOpen)
+    if (!willOpen || backgroundsLoaded || backgroundsLoading) return
+    setBackgroundsLoading(true)
+    setMessage("")
+    try {
+      const loaded = await loadApprovedProfileBackgrounds()
+      setBackgrounds(loaded.filter(background => background.display_name.trim().toLocaleLowerCase() !== "krys default"))
+      setBackgroundsLoaded(true)
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Profile backgrounds could not be loaded.")
+    } finally {
+      setBackgroundsLoading(false)
+    }
+  }
+
+  function selectImportedBackground(background: ApprovedProfileBackground) {
+    setDraft(current => ({ ...current, background_key: DEFAULT_PLAYER_PROFILE_BACKGROUND_KEY, background_id: background.id, background_path: background.storage_path, background_display_name: background.display_name }))
+  }
+
+  const importedBackgroundUrl = profileBackgroundPublicUrl(draft.background_path)
+  const previewImage = importedBackgroundUrl || getPlayerProfileBackground(draft.background_key).imagePath
+  const currentImportedIsInactive = Boolean(backgroundsLoaded && draft.background_id && draft.background_path && !backgrounds.some(background => background.id === draft.background_id))
+
   return <section className={styles.wrap}>
-    <button type="button" className={styles.editButton} onClick={() => setOpen(value => !value)} aria-expanded={open}>{open ? "Close Editor" : "Edit My Profile"}</button>
+    <button type="button" className={styles.editButton} onClick={() => void toggleEditor()} aria-expanded={open}>{open ? "Close Editor" : "Edit My Profile"}</button>
     {open && <div className={styles.editor}>
       <div className={styles.heading}><div><h2>Make it yours</h2><p>Choose your profile colors and tell the league a little about yourself.</p></div></div>
       <fieldset className={styles.backgroundPicker}>
         <legend>Profile Background</legend>
         <div className={styles.backgroundGrid}>
-          {PLAYER_PROFILE_BACKGROUNDS.map(background => <button
-            key={background.key}
+          <button
             type="button"
-            className={`${styles.backgroundOption} ${draft.background_key === background.key ? styles.backgroundOptionSelected : ""}`}
-            onClick={() => set("background_key", background.key)}
-            aria-pressed={draft.background_key === background.key}
+            className={`${styles.backgroundOption} ${draft.background_id === null && draft.background_key === DEFAULT_PLAYER_PROFILE_BACKGROUND_KEY ? styles.backgroundOptionSelected : ""}`}
+            onClick={() => setDraft(current => ({ ...current, background_key: DEFAULT_PLAYER_PROFILE_BACKGROUND_KEY, background_id: null, background_path: null, background_display_name: null }))}
+            aria-pressed={draft.background_id === null && draft.background_key === DEFAULT_PLAYER_PROFILE_BACKGROUND_KEY}
           >
-            <span className={styles.backgroundThumbnail} style={{ backgroundImage: `url("${background.imagePath}")` }} />
-            <span>{background.label}</span>
+            <span className={styles.backgroundThumbnail} style={{ backgroundImage: 'url("/player-profile-background.png")' }} />
+            <span>Krys Default</span>
+          </button>
+          {backgrounds.map(background => <button key={background.id} type="button" className={`${styles.backgroundOption} ${draft.background_id === background.id ? styles.backgroundOptionSelected : ""}`} onClick={() => selectImportedBackground(background)} aria-pressed={draft.background_id === background.id}>
+            <span className={styles.backgroundThumbnail} style={{ backgroundImage: `url("${profileBackgroundPublicUrl(background.storage_path)}")` }} />
+            <span>{background.display_name}</span>
           </button>)}
+          {currentImportedIsInactive && <button type="button" className={`${styles.backgroundOption} ${styles.backgroundOptionSelected}`} aria-pressed="true" disabled>
+            <span className={styles.backgroundThumbnail} style={{ backgroundImage: `url("${importedBackgroundUrl}")` }} />
+            <span>{draft.background_display_name || "Current background"} (no longer available)</span>
+          </button>}
         </div>
+        {backgroundsLoading && <p>Loading approved backgrounds…</p>}
       </fieldset>
       <fieldset className={styles.nameEffectPicker}>
         <legend>Player Name Effect</legend>
@@ -61,7 +98,7 @@ export default function PlayerProfileEditor({ playerId, initial, isServerBooster
         {([['background_color','Background Color'],['glow_color','Glow Color'],['text_color','Text Color']] as const).map(([key, label]) => <label key={key} className={styles.colorField}><span>{label}</span><input type="color" value={draft[key] || DEFAULTS[key]} onChange={event => set(key, event.target.value)} /><code>{draft[key]}</code></label>)}
       </div>
       <label className={styles.about}><span>About Me</span><textarea value={draft.about_me || ""} maxLength={500} rows={6} onChange={event => set("about_me", event.target.value)} placeholder="What should other golfers know about you?" /><small>{(draft.about_me || "").length}/500</small></label>
-      <div className={styles.preview} style={{ backgroundColor: draft.background_color, backgroundImage: `url("${getPlayerProfileBackground(draft.background_key).imagePath}")`, color: draft.text_color, boxShadow: `inset 0 0 70px ${draft.glow_color}33` }}><strong>Preview</strong><span>Your profile background and colors update here before you save.</span></div>
+      <div className={styles.preview} style={{ backgroundColor: draft.background_color, backgroundImage: `url("${previewImage}")`, color: draft.text_color, boxShadow: `inset 0 0 70px ${draft.glow_color}33` }}><strong>Preview</strong><span>Your profile background and colors update here before you save.</span></div>
       <div className={styles.actions}>
         <button type="button" className={styles.save} disabled={saving} onClick={save}>{saving ? "Saving…" : "Save"}</button>
         <button type="button" className={styles.reset} disabled={saving} onClick={() => setDraft(current => ({ ...current, ...DEFAULTS }))}>Reset Appearance to Krys Default</button>

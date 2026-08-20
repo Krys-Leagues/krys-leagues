@@ -1,4 +1,6 @@
-export const PLAYER_PROFILE_BACKGROUNDS = [
+// Retained only so profiles saved before the importer integration keep rendering.
+// New selections come from approved_player_profile_backgrounds.
+export const LEGACY_PLAYER_PROFILE_BACKGROUNDS = [
   { key: "krys-default", label: "Krys Default", imagePath: "/player-profile-background.png" },
   { key: "neon-mountain", label: "Neon Mountain Twilight", imagePath: "/player-profile-bg-neon-mountain.png" },
   { key: "neon-night", label: "Neon Night Fairway", imagePath: "/player-profile-bg-neon-night.png" },
@@ -9,10 +11,10 @@ export const PLAYER_PROFILE_BACKGROUNDS = [
   { key: "krys-coastal", label: "Krys Coastal", imagePath: "/player-profile-bg-krys-coastal.png" },
 ] as const
 
-export type PlayerProfileBackgroundKey = typeof PLAYER_PROFILE_BACKGROUNDS[number]["key"]
+export type PlayerProfileBackgroundKey = typeof LEGACY_PLAYER_PROFILE_BACKGROUNDS[number]["key"]
 export const DEFAULT_PLAYER_PROFILE_BACKGROUND_KEY: PlayerProfileBackgroundKey = "krys-default"
 
 export function getPlayerProfileBackground(key: unknown) {
-  return PLAYER_PROFILE_BACKGROUNDS.find(background => background.key === key)
-    ?? PLAYER_PROFILE_BACKGROUNDS[0]
+  return LEGACY_PLAYER_PROFILE_BACKGROUNDS.find(background => background.key === key)
+    ?? LEGACY_PLAYER_PROFILE_BACKGROUNDS[0]
 }

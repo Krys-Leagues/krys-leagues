@@ -9,6 +9,7 @@ import PlayerProfileHero, { PlayerProfileRecognition } from "@/components/Player
 import PlayerProfileEditor, { type ProfilePreferences } from "@/components/PlayerProfileEditor"
 import { getCanonicalPlayerAvatar } from "@/lib/playerAvatars"
 import { DEFAULT_PLAYER_PROFILE_BACKGROUND_KEY, getPlayerProfileBackground } from "@/lib/playerProfileBackgrounds"
+import { profileBackgroundPublicUrl } from "@/lib/profileBackgrounds"
 import styles from "./page.module.css"
 import TrophyMedia from "@/components/TrophyMedia"
 
@@ -39,7 +40,7 @@ type Trophy = {
   created_at: string
 }
 
-const DEFAULT_PREFERENCES: ProfilePreferences = { background_key: DEFAULT_PLAYER_PROFILE_BACKGROUND_KEY, name_effect: "auto", background_color: "#07111f", glow_color: "#ff2bd6", text_color: "#f8fafc", about_me: null }
+const DEFAULT_PREFERENCES: ProfilePreferences = { background_key: DEFAULT_PLAYER_PROFILE_BACKGROUND_KEY, background_id: null, background_path: null, background_display_name: null, name_effect: "auto", background_color: "#07111f", glow_color: "#ff2bd6", text_color: "#f8fafc", about_me: null }
 
 type Result = {
   id: string
@@ -246,7 +247,7 @@ export default function PublicPlayerProfilePage() {
         p_player_id: playerId,
       }),
       getCanonicalPlayerAvatar(playerId).catch(() => ({ canonicalPlayerId: playerId, avatarPath: null })),
-      supabase.rpc("get_public_player_profile_preferences_v3", { p_player_id: canonicalId }),
+      supabase.rpc("get_public_player_profile_preferences_v4", { p_player_id: canonicalId }),
       supabase.auth.getSession(),
     ])
 
@@ -339,6 +340,8 @@ export default function PublicPlayerProfilePage() {
   const knownAliases = aliases.filter((alias) =>
     alias.trim().localeCompare(player?.screen_name.trim() || "", undefined, { sensitivity: "accent" }) !== 0
   )
+  const profileBackgroundImage = profileBackgroundPublicUrl(preferences.background_path)
+    || getPlayerProfileBackground(preferences.background_key).imagePath
 
   if (loading) {
     return (
@@ -367,7 +370,7 @@ export default function PublicPlayerProfilePage() {
   }
 
   return (
-    <main className={styles.page} style={{ "--profile-bg": preferences.background_color, "--profile-text": preferences.text_color, "--profile-background-image": `url("${getPlayerProfileBackground(preferences.background_key).imagePath}")` } as React.CSSProperties}>
+    <main className={styles.page} style={{ "--profile-bg": preferences.background_color, "--profile-text": preferences.text_color, "--profile-background-image": `url("${profileBackgroundImage}")` } as React.CSSProperties}>
       <div style={container} className={styles.profilePageContainer}>
         <PlayerProfileHero
           screenName={player.screen_name}
