@@ -307,6 +307,15 @@ export function formatMajorLocalTime(value: string, timeZone?: string) {
   }).format(new Date(value))
 }
 
+export function majorRoundLabel(dayNumber: number) {
+  return (["Round 1", "Round 2", "Round 3", "Final Round"] as const)[dayNumber - 1] || `Round ${dayNumber}`
+}
+
+export function majorRoundDayLabel(dayNumber: number) {
+  const day = (["Thursday", "Friday", "Saturday", "Sunday"] as const)[dayNumber - 1]
+  return day ? `${day} — ${majorRoundLabel(dayNumber)}` : majorRoundLabel(dayNumber)
+}
+
 export function formatMajorDeadline(value: string, timeZone?: string) {
   return new Intl.DateTimeFormat(undefined, {
     weekday: "long",
