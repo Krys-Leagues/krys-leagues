@@ -175,6 +175,8 @@ export default function TrophyAdminPage() {
   const [scanning, setScanning] = useState(false);
   const [importing, setImporting] = useState(false);
   const [reviewingImport, setReviewingImport] = useState(false);
+  const [previewCandidate, setPreviewCandidate] =
+    useState<ReviewCandidate | null>(null);
   const importReviewRef = useRef<HTMLElement>(null);
   const [filter, setFilter] = useState<
     "all" | "ready" | "needs-player" | "duplicate"
@@ -255,6 +257,14 @@ export default function TrophyAdminPage() {
       block: "start",
     });
   }, [reviewingImport]);
+  useEffect(() => {
+    if (!previewCandidate) return;
+    function closePreviewOnEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") setPreviewCandidate(null);
+    }
+    document.addEventListener("keydown", closePreviewOnEscape);
+    return () => document.removeEventListener("keydown", closePreviewOnEscape);
+  }, [previewCandidate]);
 
   async function scanLibrary() {
     setScanning(true);
@@ -713,6 +723,12 @@ export default function TrophyAdminPage() {
                   <article key={candidate.key}>
                     <div className={styles.reviewThumbnail}>
                       <TrophyMedia src={candidate.imageUrl} alt={candidate.trophyTitle} />
+                      <button
+                        type="button"
+                        className={styles.previewTrigger}
+                        onClick={() => setPreviewCandidate(candidate)}
+                        aria-label={`Open large preview of ${candidate.trophyTitle}`}
+                      />
                     </div>
                     <div>
                       <strong>{player?.screenName || "Needs Player"}</strong>
@@ -737,6 +753,39 @@ export default function TrophyAdminPage() {
               </button>
             </div>
           </section>
+        )}
+        {previewCandidate && (
+          <div
+            className={styles.previewOverlay}
+            role="presentation"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) {
+                setPreviewCandidate(null);
+              }
+            }}
+          >
+            <div
+              className={styles.previewModal}
+              role="dialog"
+              aria-modal="true"
+              aria-label={`Large preview of ${previewCandidate.trophyTitle}`}
+            >
+              <button
+                type="button"
+                className={styles.previewClose}
+                onClick={() => setPreviewCandidate(null)}
+                aria-label="Close large trophy preview"
+              >
+                ×
+              </button>
+              <div className={styles.largePreviewMedia}>
+                <TrophyMedia
+                  src={previewCandidate.imageUrl}
+                  alt={previewCandidate.trophyTitle}
+                />
+              </div>
+            </div>
+          </div>
         )}
         <section className={styles.uploadPanel}>
           <div>
