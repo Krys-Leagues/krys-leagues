@@ -8,9 +8,10 @@ import {
   type GlobalPlayerDirectoryEntry,
 } from "@/lib/identity/globalPlayerDirectory";
 import {
+  findTrophyDuplicate,
   parseTrophyAsset,
   resolveTrophyPlayer,
-  trophySemanticKey,
+  type TrophyDuplicateComparable,
   type TrophyImportCandidate,
 } from "@/lib/trophies/trophyImport";
 import {
@@ -38,8 +39,10 @@ type Trophy = {
   player_name: string;
   player_id: string | null;
   trophy_title: string | null;
+  event_type: string | null;
   placement: string | null;
   event_name: string | null;
+  league_type: string | null;
   division: string | null;
   season: string | null;
   month: string | null;
@@ -79,6 +82,23 @@ function sourceFilename(imageUrl: string) {
   } catch {
     return filename;
   }
+}
+
+function publishedTrophyComparable(trophy: Trophy): TrophyDuplicateComparable {
+  return {
+    playerId: trophy.player_id,
+    playerName: trophy.player_name,
+    trophyTitle: trophy.trophy_title || "",
+    eventType: trophy.event_type || "",
+    eventName: trophy.event_name || "",
+    leagueType: trophy.league_type || "",
+    division: trophy.division || "",
+    placement: trophy.placement || "",
+    season: trophy.season || "",
+    month: trophy.month || "",
+    imageUrl: trophy.image_url,
+    sourceKey: trophy.source_key,
+  };
 }
 
 function isManualAssignment(
@@ -265,7 +285,7 @@ export default function TrophyAdminPage() {
   );
 
   const trophySelect =
-    "id, player_name, player_id, trophy_title, placement, event_name, division, season, month, image_url, source_key";
+    "id, player_name, player_id, trophy_title, event_type, placement, event_name, league_type, division, season, month, image_url, source_key";
 
   useEffect(() => {
     Promise.all([
@@ -355,25 +375,7 @@ export default function TrophyAdminPage() {
       const payload = await response.json();
       if (!response.ok)
         throw new Error(payload.error || "Could not scan trophy assets.");
-      const existingUrls = new Set(
-        trophies.map((trophy) => trophy.image_url).filter(Boolean),
-      );
-      const existingSources = new Set(
-        trophies.map((trophy) => trophy.source_key).filter(Boolean),
-      );
-      const existingSemantics = new Set(
-        trophies.map((trophy) =>
-          trophySemanticKey({
-            playerId: trophy.player_id,
-            playerName: trophy.player_name,
-            eventName: trophy.event_name || "",
-            division: trophy.division || "",
-            placement: trophy.placement || "",
-            season: trophy.season || "",
-            month: trophy.month || "",
-          }),
-        ),
-      );
+      const existingTrophies = trophies.map(publishedTrophyComparable);
       const pendingAssignments = readPendingAssignments();
       const pendingMetadata = readPendingMetadata();
       setCandidates(
@@ -396,10 +398,9 @@ export default function TrophyAdminPage() {
             playerName: metadata?.historicalName ?? candidate.playerName,
             placement: metadata?.placement ?? candidate.placement,
           };
-          const duplicate =
-            existingSources.has(candidate.sourceKey) ||
-            existingUrls.has(candidate.imageUrl) ||
-            existingSemantics.has(trophySemanticKey(matched));
+          const duplicate = Boolean(
+            findTrophyDuplicate(matched, existingTrophies),
+          );
           const status = duplicate
             ? "duplicate"
             : player
@@ -529,32 +530,31 @@ export default function TrophyAdminPage() {
       if (validation) throw new Error(validation);
       const digest = await trophyImageSha256(uploadFile);
       const sourceKey = `upload:sha256:${digest}`;
-      const semanticKey = trophySemanticKey({
+      const pendingTrophy: TrophyDuplicateComparable = {
         playerId: player.id,
         playerName: player.screenName,
+        trophyTitle: uploadForm.title,
+        eventType: "Uploaded",
         eventName: uploadForm.eventName,
+        leagueType: "",
         division: uploadForm.division,
         placement: uploadForm.placement,
         season: uploadForm.season,
         month: uploadForm.month,
-      });
-      const duplicate = trophies.some(
-        (trophy) =>
-          trophy.source_key === sourceKey ||
-          trophySemanticKey({
-            playerId: trophy.player_id,
-            playerName: trophy.player_name,
-            eventName: trophy.event_name || "",
-            division: trophy.division || "",
-            placement: trophy.placement || "",
-            season: trophy.season || "",
-            month: trophy.month || "",
-          }) === semanticKey,
+        sourceKey,
+      };
+      const duplicate = findTrophyDuplicate(
+        pendingTrophy,
+        trophies.map(publishedTrophyComparable),
       );
-      if (duplicate)
+      if (duplicate?.kind === "source" || duplicate?.kind === "image") {
+        throw new Error("This exact source file has already been imported.");
+      }
+      if (duplicate) {
         throw new Error(
-          "This image or trophy achievement is already recorded.",
+          `Already recorded: ${duplicate.trophy.trophyTitle || duplicate.trophy.eventName || "this exact trophy achievement"}.`,
         );
+      }
       objectPath = trophyImageObjectPath(player.id, uploadFile, digest);
       const { error: uploadError } = await supabase.storage
         .from(TROPHY_IMAGE_BUCKET)
