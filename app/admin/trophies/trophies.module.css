@@ -309,6 +309,7 @@
 }
 .cardBody {
   padding: 17px;
+  background: #0b111b;
 }
 .cardHeading {
   display: flex;
@@ -330,12 +331,24 @@
 .checkbox input {
   accent-color: #f59e0b;
 }
-.card h3 {
-  margin: 13px 0 6px;
-}
 .card p,
 .card small {
   color: #94a3b8;
+}
+.playerName {
+  display: grid;
+  gap: 3px;
+  margin: 14px 0 0;
+  color: #f8fafc !important;
+  font-size: 1.08rem;
+  font-weight: 900;
+}
+.playerName span {
+  color: #94a3b8;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 .playerLabel {
   display: grid;
@@ -356,6 +369,36 @@
   color: white;
   text-transform: none;
   letter-spacing: 0;
+}
+.metadata {
+  display: grid;
+  gap: 7px;
+  margin: 15px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid #ffffff1d;
+}
+.metadata div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+  gap: 10px;
+}
+.metadata dt {
+  color: #94a3b8;
+  font-size: 0.72rem;
+}
+.metadata dd {
+  overflow: hidden;
+  margin: 0;
+  color: #e2e8f0;
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.metadata div:last-child dd {
+  font-size: 0.68rem;
+  font-weight: 500;
 }
 .empty {
   margin-top: 34px;

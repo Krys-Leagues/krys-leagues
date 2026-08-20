@@ -37,6 +37,20 @@ type Trophy = {
 };
 type ReviewCandidate = TrophyImportCandidate & { selected: boolean };
 
+function displayMetadata(value: string | null | undefined) {
+  return value?.trim() || "Missing";
+}
+
+function sourceFilename(imageUrl: string) {
+  const filename = imageUrl.split(/[\\/]/).at(-1)?.split(/[?#]/)[0];
+  if (!filename) return "Missing";
+  try {
+    return decodeURIComponent(filename);
+  } catch {
+    return filename;
+  }
+}
+
 export default function TrophyAdminPage() {
   const [trophies, setTrophies] = useState<Trophy[]>([]);
   const [players, setPlayers] = useState<GlobalPlayerDirectoryEntry[]>([]);
@@ -648,67 +662,105 @@ export default function TrophyAdminPage() {
               className={styles.grid}
               aria-label="Trophy import candidates"
             >
-              {visible.map((candidate) => (
-                <article
-                  className={styles.card}
-                  key={candidate.key}
-                  data-status={candidate.status}
-                >
-                  <div className={styles.art}>
-                    <TrophyMedia src={candidate.imageUrl} alt={candidate.trophyTitle} />
-                  </div>
-                  <div className={styles.cardBody}>
-                    <div className={styles.cardHeading}>
-                      <span className={styles.badge}>
-                        {candidate.status === "needs-player"
-                          ? "Review"
-                          : candidate.status}
-                      </span>
-                      <label className={styles.checkbox}>
-                        <input
-                          type="checkbox"
-                          checked={candidate.selected}
-                          disabled={candidate.status !== "ready"}
-                          onChange={(event) =>
-                            setCandidates((current) =>
-                              current.map((item) =>
-                                item.key === candidate.key
-                                  ? { ...item, selected: event.target.checked }
-                                  : item,
-                              ),
-                            )
-                          }
-                        />{" "}
-                        Select
-                      </label>
+              {visible.map((candidate) => {
+                const canonicalPlayer = players.find(
+                  (player) => player.id === candidate.playerId,
+                );
+                return (
+                  <article
+                    className={styles.card}
+                    key={candidate.key}
+                    data-status={candidate.status}
+                  >
+                    <div className={styles.art}>
+                      <TrophyMedia
+                        src={candidate.imageUrl}
+                        alt={candidate.trophyTitle}
+                      />
                     </div>
-                    <h3>{candidate.trophyTitle}</h3>
-                    <p>
-                      {candidate.eventName} · {candidate.division}
-                    </p>
-                    <label className={styles.playerLabel}>
-                      Winner
-                      <select
-                        value={candidate.playerId || ""}
-                        disabled={candidate.status === "duplicate"}
-                        onChange={(event) =>
-                          assignPlayer(candidate.key, event.target.value)
-                        }
-                      >
-                        <option value="">Choose a player…</option>
-                        {players.map((player) => (
-                          <option key={player.id} value={player.id}>
-                            {player.screenName}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                    {candidate.playerName && !candidate.playerId && (
-                      <small>Filename suggests: {candidate.playerName}</small>
-                    )}
-                  </div>
-                </article>
-              ))}
+                    <div className={styles.cardBody}>
+                      <div className={styles.cardHeading}>
+                        <span className={styles.badge}>
+                          {candidate.status === "needs-player"
+                            ? "Review · Needs Player"
+                            : candidate.status}
+                        </span>
+                        <label className={styles.checkbox}>
+                          <input
+                            type="checkbox"
+                            checked={candidate.selected}
+                            disabled={candidate.status !== "ready"}
+                            onChange={(event) =>
+                              setCandidates((current) =>
+                                current.map((item) =>
+                                  item.key === candidate.key
+                                    ? {
+                                        ...item,
+                                        selected: event.target.checked,
+                                      }
+                                    : item,
+                                ),
+                              )
+                            }
+                          />{" "}
+                          Select
+                        </label>
+                      </div>
+                      <p className={styles.playerName}>
+                        <span>Player</span>
+                        {canonicalPlayer?.screenName || "Needs Player"}
+                      </p>
+                      <dl className={styles.metadata}>
+                      <div>
+                        <dt>Historical Name</dt>
+                        <dd>{displayMetadata(candidate.playerName)}</dd>
+                      </div>
+                      <div>
+                        <dt>Month</dt>
+                        <dd>{displayMetadata(candidate.month)}</dd>
+                      </div>
+                      <div>
+                        <dt>Year</dt>
+                        <dd>{displayMetadata(candidate.season)}</dd>
+                      </div>
+                      <div>
+                        <dt>Division</dt>
+                        <dd>{displayMetadata(candidate.division)}</dd>
+                      </div>
+                      <div>
+                        <dt>Placement</dt>
+                        <dd>{displayMetadata(candidate.placement)}</dd>
+                      </div>
+                      <div>
+                        <dt>Source</dt>
+                        <dd title={sourceFilename(candidate.imageUrl)}>
+                          {sourceFilename(candidate.imageUrl)}
+                        </dd>
+                      </div>
+                      </dl>
+                      {!candidate.playerId && (
+                        <label className={styles.playerLabel}>
+                          Choose a player
+                          <select
+                            value=""
+                            disabled={candidate.status === "duplicate"}
+                            onChange={(event) =>
+                              assignPlayer(candidate.key, event.target.value)
+                            }
+                          >
+                            <option value="">Choose a player…</option>
+                            {players.map((player) => (
+                              <option key={player.id} value={player.id}>
+                                {player.screenName}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                      )}
+                    </div>
+                  </article>
+                );
+              })}
             </section>
           </>
         )}
