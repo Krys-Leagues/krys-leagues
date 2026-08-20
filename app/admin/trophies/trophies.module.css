@@ -350,26 +350,6 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
-.playerLabel {
-  display: grid;
-  gap: 6px;
-  margin-top: 15px;
-  color: #cbd5e1;
-  font-size: 0.78rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-.playerLabel select {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ffffff28;
-  border-radius: 9px;
-  background: #111827;
-  color: white;
-  text-transform: none;
-  letter-spacing: 0;
-}
 .metadata {
   display: grid;
   gap: 7px;
@@ -399,6 +379,146 @@
 .metadata div:last-child dd {
   font-size: 0.68rem;
   font-weight: 500;
+}
+.playerPicker {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+.pickerButton,
+.clearPlayer {
+  width: 100%;
+  padding: 9px 11px;
+  border: 1px solid #ffffff2c;
+  border-radius: 9px;
+  color: #f8fafc;
+  background: #1e293b;
+  font-weight: 800;
+  cursor: pointer;
+}
+.pickerMenu {
+  display: grid;
+  gap: 8px;
+  margin-top: 7px;
+  padding: 9px;
+  border: 1px solid #fbbf2455;
+  border-radius: 10px;
+  background: #020617;
+}
+.pickerMenu input {
+  width: 100%;
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid #ffffff30;
+  border-radius: 8px;
+  color: white;
+  background: #111827;
+}
+.pickerResults {
+  display: grid;
+  gap: 4px;
+  max-height: 210px;
+  overflow-y: auto;
+}
+.pickerResults button {
+  padding: 8px 9px;
+  border: 0;
+  border-radius: 7px;
+  color: #e2e8f0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+.pickerResults button:hover,
+.pickerResults button:focus-visible {
+  background: #334155;
+}
+.pickerResults span {
+  padding: 8px;
+  color: #94a3b8;
+  font-size: 0.78rem;
+}
+.assignmentActions {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 13px;
+}
+.clearPlayer {
+  width: auto;
+  flex: 0 0 auto;
+  border-color: #f8717166;
+  color: #fecaca;
+  background: #450a0a;
+}
+.reviewPanel {
+  display: grid;
+  gap: 16px;
+  margin-top: 18px;
+  padding: 20px;
+  border: 1px solid #ffffff20;
+  border-radius: 18px;
+  background: #0b111c;
+}
+.reviewPanel h2,
+.reviewPanel p {
+  margin: 0;
+}
+.reviewPanel p {
+  margin-top: 5px;
+  color: #94a3b8;
+}
+.assignmentList,
+.importReviewList {
+  display: grid;
+  gap: 9px;
+}
+.assignmentRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  padding: 12px;
+  border: 1px solid #ffffff18;
+  border-radius: 10px;
+  background: #020617;
+}
+.assignmentRow > div:first-child,
+.importReviewList article > div:last-child {
+  display: grid;
+  gap: 4px;
+}
+.assignmentRow span,
+.assignmentRow small,
+.importReviewList span,
+.importReviewList small {
+  color: #94a3b8;
+}
+.importReviewList article {
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr);
+  gap: 13px;
+  padding: 12px;
+  border: 1px solid #ffffff18;
+  border-radius: 10px;
+  background: #020617;
+}
+.reviewThumbnail {
+  width: 90px;
+  height: 90px;
+}
+.reviewThumbnail img,
+.reviewThumbnail video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.importReviewList b {
+  width: fit-content;
+  margin-top: 4px;
+  color: #fecaca;
+}
+.importReviewList b[data-valid="true"] {
+  color: #86efac;
 }
 .empty {
   margin-top: 34px;

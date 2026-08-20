@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import {
   loadGlobalPlayerDirectory,
   type GlobalPlayerDirectoryEntry,
 } from "@/lib/identity/globalPlayerDirectory";
 import {
+  parseTrophyAsset,
   resolveTrophyPlayer,
   trophySemanticKey,
   type TrophyImportCandidate,
@@ -21,6 +22,11 @@ import {
 } from "@/lib/trophies/trophyImages";
 import styles from "./trophies.module.css";
 import TrophyMedia from "@/components/TrophyMedia";
+import {
+  assignPendingTrophyPlayer,
+  clearPendingTrophyPlayer,
+  parsePendingTrophyAssignments,
+} from "@/lib/trophies/pendingTrophyAssignments";
 
 type Trophy = {
   id: string;
@@ -35,7 +41,19 @@ type Trophy = {
   image_url: string | null;
   source_key: string | null;
 };
-type ReviewCandidate = TrophyImportCandidate & { selected: boolean };
+type ReviewCandidate = TrophyImportCandidate & {
+  selected: boolean;
+  manuallyReviewed: boolean;
+  manualPlayerId: string | null;
+};
+
+const PENDING_ASSIGNMENTS_KEY = "krys-leagues:trophy-importer:pending-assignments:v1";
+
+function readPendingAssignments() {
+  return parsePendingTrophyAssignments(
+    window.localStorage.getItem(PENDING_ASSIGNMENTS_KEY),
+  );
+}
 
 function displayMetadata(value: string | null | undefined) {
   return value?.trim() || "Missing";
@@ -51,6 +69,102 @@ function sourceFilename(imageUrl: string) {
   }
 }
 
+function isManualAssignment(
+  candidate: ReviewCandidate,
+  players: GlobalPlayerDirectoryEntry[],
+) {
+  if (candidate.manuallyReviewed !== undefined) {
+    return candidate.manuallyReviewed;
+  }
+  const parsedName =
+    parseTrophyAsset(candidate.imageUrl)?.playerName || candidate.playerName;
+  const automaticPlayer = resolveTrophyPlayer(parsedName, players);
+  return Boolean(candidate.playerId && automaticPlayer?.id !== candidate.playerId);
+}
+
+function TrophyPlayerPicker({
+  players,
+  selectedPlayer,
+  onSelect,
+}: {
+  players: GlobalPlayerDirectoryEntry[];
+  selectedPlayer: GlobalPlayerDirectoryEntry | undefined;
+  onSelect: (playerId: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const pickerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function closeWithoutSelecting(event: PointerEvent) {
+      if (!pickerRef.current?.contains(event.target as Node)) setOpen(false);
+    }
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("pointerdown", closeWithoutSelecting);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeWithoutSelecting);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [open]);
+
+  const query = search.trim().toLocaleLowerCase();
+  const results = players.filter((player) =>
+    [player.screenName, ...player.verifiedAliases].some((name) =>
+      name.toLocaleLowerCase().includes(query),
+    ),
+  );
+
+  return (
+    <div className={styles.playerPicker} ref={pickerRef}>
+      <button
+        type="button"
+        className={styles.pickerButton}
+        onClick={() => {
+          setSearch("");
+          setOpen((current) => !current);
+        }}
+        aria-expanded={open}
+      >
+        {selectedPlayer ? "Change player" : "Choose a player"}
+      </button>
+      {open && (
+        <div className={styles.pickerMenu} role="dialog" aria-label="Choose a canonical player">
+          <input
+            autoFocus
+            type="search"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search screen name or alias…"
+            aria-label="Search canonical players"
+          />
+          <div className={styles.pickerResults}>
+            {results.length ? (
+              results.map((player) => (
+                <button
+                  type="button"
+                  key={player.id}
+                  onClick={() => {
+                    onSelect(player.id);
+                    setOpen(false);
+                  }}
+                >
+                  {player.screenName}
+                </button>
+              ))
+            ) : (
+              <span>No players found.</span>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function TrophyAdminPage() {
   const [trophies, setTrophies] = useState<Trophy[]>([]);
   const [players, setPlayers] = useState<GlobalPlayerDirectoryEntry[]>([]);
@@ -58,6 +172,7 @@ export default function TrophyAdminPage() {
   const [loading, setLoading] = useState(true);
   const [scanning, setScanning] = useState(false);
   const [importing, setImporting] = useState(false);
+  const [reviewingImport, setReviewingImport] = useState(false);
   const [filter, setFilter] = useState<
     "all" | "ready" | "needs-player" | "duplicate"
   >("all");
@@ -112,6 +227,24 @@ export default function TrophyAdminPage() {
     },
     [uploadPreview],
   );
+  useEffect(() => {
+    if (candidates.length === 0) return;
+    const pending = Object.fromEntries(
+      candidates
+        .map((candidate) => {
+          if (candidate.manuallyReviewed !== undefined) {
+            return candidate.manuallyReviewed
+              ? [candidate.sourceKey, candidate.manualPlayerId]
+              : null;
+          }
+          return isManualAssignment(candidate, players) && candidate.playerId
+            ? [candidate.sourceKey, candidate.playerId]
+            : null;
+        })
+        .filter((entry): entry is [string, string | null] => entry !== null),
+    );
+    window.localStorage.setItem(PENDING_ASSIGNMENTS_KEY, JSON.stringify(pending));
+  }, [candidates, players]);
 
   async function scanLibrary() {
     setScanning(true);
@@ -140,13 +273,23 @@ export default function TrophyAdminPage() {
           }),
         ),
       );
+      const pendingAssignments = readPendingAssignments();
       setCandidates(
         (payload.candidates as TrophyImportCandidate[]).map((candidate) => {
-          const player = resolveTrophyPlayer(candidate.playerName, players);
+          const automaticPlayer = resolveTrophyPlayer(candidate.playerName, players);
+          const hasPendingAssignment = Object.hasOwn(
+            pendingAssignments,
+            candidate.sourceKey,
+          );
+          const pendingPlayer = hasPendingAssignment
+            ? players.find(
+                (player) => player.id === pendingAssignments[candidate.sourceKey],
+              )
+            : undefined;
+          const player = hasPendingAssignment ? pendingPlayer : automaticPlayer;
           const matched = {
             ...candidate,
             playerId: player?.id || null,
-            playerName: candidate.playerName || player?.screenName || "",
           };
           const duplicate =
             existingSources.has(candidate.sourceKey) ||
@@ -157,7 +300,13 @@ export default function TrophyAdminPage() {
             : player
               ? "ready"
               : "needs-player";
-          return { ...matched, status, selected: status === "ready" };
+          return {
+            ...matched,
+            status,
+            selected: status === "ready",
+            manuallyReviewed: !duplicate && hasPendingAssignment,
+            manualPlayerId: !duplicate && hasPendingAssignment ? player?.id || null : null,
+          };
         }),
       );
     } catch (error) {
@@ -173,22 +322,23 @@ export default function TrophyAdminPage() {
 
   function assignPlayer(key: string, playerId: string) {
     const player = players.find((item) => item.id === playerId);
+    if (!player) return;
     setCandidates((current) =>
-      current.map((candidate) =>
-        candidate.key === key
-          ? {
-              ...candidate,
-              playerId: player?.id || null,
-              playerName: player?.screenName || "",
-              status: player ? "ready" : "needs-player",
-              selected: Boolean(player),
-            }
-          : candidate,
-      ),
+      assignPendingTrophyPlayer(current, key, player.id),
     );
   }
 
-  async function importSelected() {
+  function clearPlayer(key: string) {
+    setCandidates((current) => clearPendingTrophyPlayer(current, key));
+  }
+
+  function reviewSelected() {
+    if (candidates.some((candidate) => candidate.selected)) {
+      setReviewingImport(true);
+    }
+  }
+
+  async function confirmImport() {
     const selected = candidates.filter(
       (candidate) =>
         candidate.selected &&
@@ -199,7 +349,10 @@ export default function TrophyAdminPage() {
     setImporting(true);
     setMessage("");
     const rows = selected.map((candidate) => ({
-      player_name: candidate.playerName,
+      player_name:
+        candidate.playerName ||
+        players.find((player) => player.id === candidate.playerId)?.screenName ||
+        "",
       player_id: candidate.playerId,
       event_type: candidate.eventType,
       event_name: candidate.eventName,
@@ -222,7 +375,13 @@ export default function TrophyAdminPage() {
       setCandidates((current) =>
         current.map((candidate) =>
           selected.some((item) => item.key === candidate.key)
-            ? { ...candidate, status: "duplicate", selected: false }
+            ? {
+                ...candidate,
+                status: "duplicate",
+                selected: false,
+                manuallyReviewed: false,
+                manualPlayerId: null,
+              }
             : candidate,
         ),
       );
@@ -233,6 +392,7 @@ export default function TrophyAdminPage() {
       setTrophies((data || []) as Trophy[]);
     }
     setImporting(false);
+    setReviewingImport(false);
   }
 
   async function uploadTrophy() {
@@ -395,6 +555,13 @@ export default function TrophyAdminPage() {
     filter === "all"
       ? candidates
       : candidates.filter((item) => item.status === filter);
+  const manualAssignments = candidates.filter(
+    (candidate) => isManualAssignment(candidate, players) && candidate.playerId,
+  );
+  const selectedForReview = candidates.filter((candidate) => candidate.selected);
+  const reviewHasInvalid = selectedForReview.some(
+    (candidate) => candidate.status !== "ready" || !candidate.playerId,
+  );
   const filteredPlayers = useMemo(
     () =>
       players.filter(
@@ -466,15 +633,92 @@ export default function TrophyAdminPage() {
             </button>
             <button
               className={styles.primary}
-              onClick={importSelected}
+              onClick={reviewSelected}
               disabled={importing || counts.selected === 0}
             >
-              {importing
-                ? "Importing…"
-                : `Import selected (${counts.selected})`}
+              {`Import selected (${counts.selected})`}
             </button>
           </div>
         </section>
+        {manualAssignments.length > 0 && (
+          <section className={styles.reviewPanel}>
+            <div>
+              <h2>Current Manual Assignments</h2>
+              <p>Pending browser review only. Nothing here is published yet.</p>
+            </div>
+            <div className={styles.assignmentList}>
+              {manualAssignments.map((candidate) => {
+                const player = players.find(
+                  (item) => item.id === candidate.playerId,
+                );
+                return (
+                  <div key={candidate.key} className={styles.assignmentRow}>
+                    <div>
+                      <strong>{player?.screenName || "Needs Player"}</strong>
+                      <span>
+                        {displayMetadata(candidate.playerName)} · {displayMetadata(candidate.month)} · {displayMetadata(candidate.season)} · {displayMetadata(candidate.division)} · {displayMetadata(candidate.placement)}
+                      </span>
+                      <small>{sourceFilename(candidate.imageUrl)}</small>
+                    </div>
+                    <div className={styles.assignmentActions}>
+                      <TrophyPlayerPicker
+                        players={players}
+                        selectedPlayer={player}
+                        onSelect={(playerId) => assignPlayer(candidate.key, playerId)}
+                      />
+                      <button
+                        type="button"
+                        className={styles.clearPlayer}
+                        onClick={() => clearPlayer(candidate.key)}
+                      >
+                        Clear Player
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
+        {reviewingImport && (
+          <section className={styles.reviewPanel} aria-label="Final trophy import review">
+            <div>
+              <h2>Final Import Review</h2>
+              <p>Confirm these exact canonical owners before publishing.</p>
+            </div>
+            <div className={styles.importReviewList}>
+              {selectedForReview.map((candidate) => {
+                const player = players.find((item) => item.id === candidate.playerId);
+                const valid = candidate.status === "ready" && Boolean(player);
+                return (
+                  <article key={candidate.key}>
+                    <div className={styles.reviewThumbnail}>
+                      <TrophyMedia src={candidate.imageUrl} alt={candidate.trophyTitle} />
+                    </div>
+                    <div>
+                      <strong>{player?.screenName || "Needs Player"}</strong>
+                      <span>Historical Name: {displayMetadata(candidate.playerName)}</span>
+                      <span>Month: {displayMetadata(candidate.month)}</span>
+                      <span>Year: {displayMetadata(candidate.season)}</span>
+                      <span>Division: {displayMetadata(candidate.division)}</span>
+                      <span>Placement: {displayMetadata(candidate.placement)}</span>
+                      <small>{sourceFilename(candidate.imageUrl)}</small>
+                      <b data-valid={valid}>{valid ? "Ready" : "Needs Player"}</b>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+            <div className={styles.actions}>
+              <button type="button" className={styles.secondary} onClick={() => setReviewingImport(false)} disabled={importing}>
+                Back to review
+              </button>
+              <button type="button" className={styles.primary} onClick={confirmImport} disabled={importing || reviewHasInvalid || selectedForReview.length === 0}>
+                {importing ? "Importing…" : "Confirm Import"}
+              </button>
+            </div>
+          </section>
+        )}
         <section className={styles.uploadPanel}>
           <div>
             <h2>Upload from computer</h2>
@@ -711,51 +955,52 @@ export default function TrophyAdminPage() {
                         {canonicalPlayer?.screenName || "Needs Player"}
                       </p>
                       <dl className={styles.metadata}>
-                      <div>
-                        <dt>Historical Name</dt>
-                        <dd>{displayMetadata(candidate.playerName)}</dd>
-                      </div>
-                      <div>
-                        <dt>Month</dt>
-                        <dd>{displayMetadata(candidate.month)}</dd>
-                      </div>
-                      <div>
-                        <dt>Year</dt>
-                        <dd>{displayMetadata(candidate.season)}</dd>
-                      </div>
-                      <div>
-                        <dt>Division</dt>
-                        <dd>{displayMetadata(candidate.division)}</dd>
-                      </div>
-                      <div>
-                        <dt>Placement</dt>
-                        <dd>{displayMetadata(candidate.placement)}</dd>
-                      </div>
-                      <div>
-                        <dt>Source</dt>
-                        <dd title={sourceFilename(candidate.imageUrl)}>
-                          {sourceFilename(candidate.imageUrl)}
-                        </dd>
-                      </div>
+                        <div>
+                          <dt>Historical Name</dt>
+                          <dd>{displayMetadata(candidate.playerName)}</dd>
+                        </div>
+                        <div>
+                          <dt>Month</dt>
+                          <dd>{displayMetadata(candidate.month)}</dd>
+                        </div>
+                        <div>
+                          <dt>Year</dt>
+                          <dd>{displayMetadata(candidate.season)}</dd>
+                        </div>
+                        <div>
+                          <dt>Division</dt>
+                          <dd>{displayMetadata(candidate.division)}</dd>
+                        </div>
+                        <div>
+                          <dt>Placement</dt>
+                          <dd>{displayMetadata(candidate.placement)}</dd>
+                        </div>
+                        <div>
+                          <dt>Source</dt>
+                          <dd title={sourceFilename(candidate.imageUrl)}>
+                            {sourceFilename(candidate.imageUrl)}
+                          </dd>
+                        </div>
                       </dl>
-                      {!candidate.playerId && (
-                        <label className={styles.playerLabel}>
-                          Choose a player
-                          <select
-                            value=""
-                            disabled={candidate.status === "duplicate"}
-                            onChange={(event) =>
-                              assignPlayer(candidate.key, event.target.value)
+                      {candidate.status !== "duplicate" && (
+                        <div className={styles.assignmentActions}>
+                          <TrophyPlayerPicker
+                            players={players}
+                            selectedPlayer={canonicalPlayer}
+                            onSelect={(playerId) =>
+                              assignPlayer(candidate.key, playerId)
                             }
-                          >
-                            <option value="">Choose a player…</option>
-                            {players.map((player) => (
-                              <option key={player.id} value={player.id}>
-                                {player.screenName}
-                              </option>
-                            ))}
-                          </select>
-                        </label>
+                          />
+                          {candidate.manuallyReviewed && candidate.playerId && (
+                            <button
+                              type="button"
+                              className={styles.clearPlayer}
+                              onClick={() => clearPlayer(candidate.key)}
+                            >
+                              Clear Player
+                            </button>
+                          )}
+                        </div>
                       )}
                     </div>
                   </article>
