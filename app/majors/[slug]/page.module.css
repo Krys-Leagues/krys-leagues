@@ -177,6 +177,25 @@
   padding: clamp(20px, 4vw, 42px);
 }
 
+.signupProgress {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 28px;
+}
+
+.signupProgress span { display: flex; align-items: center; gap: 8px; min-width: 0; padding: 9px; border-bottom: 2px solid #4a3941; color: var(--muted); font-size: .72rem; font-weight: 800; }
+.signupProgress b { display: grid; flex: 0 0 25px; width: 25px; height: 25px; place-items: center; border: 1px solid #6b5660; border-radius: 50%; }
+.signupProgress .progressActive { border-color: var(--accent); color: var(--ink); }
+.signupProgress .progressActive b { border-color: var(--accent); background: var(--accent2); }
+
+.majorsIntro { max-width: 880px; margin: 0 auto 34px; text-align: center; }
+.majorsIntro h1 { font-size: clamp(2rem, 6vw, 4.4rem); line-height: 1.02; }
+.majorsIntro > p:not(.eyebrow):not(.majorNames) { max-width: 720px; margin: 9px auto; color: var(--muted); font-size: clamp(.98rem, 2vw, 1.12rem); line-height: 1.55; }
+.majorNames { margin: 18px 0; color: var(--ink); font-family: Georgia, serif; font-size: clamp(.9rem, 2.4vw, 1.25rem); font-weight: 800; }
+.majorNames i { padding: 0 5px; color: var(--accent); font-style: normal; }
+.aspirational { display: block; margin-top: 23px; color: var(--accent); font-family: Georgia, serif; font-size: clamp(1.15rem, 3vw, 1.7rem); letter-spacing: .08em; text-shadow: 0 2px 12px #000; }
+
 .masters .hero {
   border-color: rgba(240, 126, 172, 0.82);
   background: linear-gradient(145deg, rgba(8, 4, 7, 0.96), rgba(13, 6, 10, 0.98) 68%);
@@ -250,6 +269,9 @@
   text-shadow: 0 3px 0 #000, 0 0 30px color-mix(in srgb, var(--accent) 40%, transparent);
 }
 
+.eventTitle { margin: 4px 0; font-family: Georgia, "Times New Roman", serif; font-size: clamp(2.2rem, 7vw, 5rem); line-height: .95; text-transform: uppercase; text-shadow: 0 3px 0 #000, 0 0 30px color-mix(in srgb, var(--accent) 40%, transparent); }
+.eventIdentity { margin: 10px 0 0; color: var(--ink); font-family: Georgia, serif; font-size: clamp(1rem, 2.4vw, 1.45rem); font-weight: 900; letter-spacing: .12em; }
+
 .statusRow { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 9px; margin: 22px 0 10px; }
 .badge { padding: 7px 11px; border: 1px solid #6b5660; border-radius: 999px; background: #21151b; font-size: 0.72rem; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; }
 .open { border-color: #3d9366; background: #123c28; color: #d6ffe7; }
@@ -258,6 +280,14 @@
 .capacity { margin-left: auto; color: var(--accent); font-weight: 900; }
 .meta { position: relative; color: var(--muted); line-height: 1.55; }
 .description { position: relative; max-width: 760px; font-size: 1.08rem; line-height: 1.65; }
+
+.commitmentCard { margin-top: 24px; padding: clamp(17px, 3vw, 26px); border: 1px solid color-mix(in srgb, var(--accent) 55%, #111); border-radius: 15px; background: rgba(0, 0, 0, .34); }
+.commitmentCard h2 { margin: 4px 0 17px; font-family: Georgia, serif; }
+.commitmentCard > p:not(.eyebrow) { color: var(--muted); line-height: 1.55; }
+.commitmentCard > p strong { color: var(--ink); }
+.roundList { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 18px; }
+.roundList p { display: grid; gap: 4px; margin: 0; padding: 12px; border-left: 3px solid var(--accent); background: rgba(40, 125, 80, .16); }
+.roundList span { color: var(--muted); font-size: .84rem; }
 
 .signupCard {
   position: relative;
@@ -270,6 +300,7 @@
 }
 
 .signupCard h2, .contentCard h2 { margin-top: 0; font-family: Georgia, serif; letter-spacing: 0.04em; }
+.signupExplainer { max-width: 760px; color: var(--muted); font-size: 1.02rem; line-height: 1.6; }
 .timezone { display: inline-block; padding: 9px 12px; border-radius: 8px; background: rgba(0, 0, 0, 0.42); color: #f5d9e5; }
 .cutNotice, .notice { padding: 12px 14px; border-left: 3px solid var(--accent); background: rgba(79, 25, 49, 0.68); color: #ffd5e5; line-height: 1.5; }
 .days { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 18px; }
@@ -285,13 +316,16 @@
 .dayCard:disabled { opacity: 0.76; }
 .dayCard legend { padding: 0 8px; font-family: Georgia, serif; font-weight: 800; }
 .dayCard legend span { display: inline-block; margin-right: 8px; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; }
-.dayDate { margin: 0 0 10px; color: var(--muted); font-size: 0.85rem; }
+.dayContext { margin: 0 0 10px; color: var(--muted); font-size: 0.75rem; }
 .slotHeader { display: grid; grid-template-columns: 54px minmax(80px, .7fr) minmax(140px, 1.3fr); gap: 10px; padding: 0 11px 5px; color: var(--muted); font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; }
 .slotLabel { display: grid; grid-template-columns: 54px minmax(80px, .7fr) minmax(140px, 1.3fr); align-items: center; gap: 10px; margin: 7px 0; padding: 11px; border: 1px solid #573443; border-radius: 9px; background: rgba(21, 15, 18, 0.9); cursor: pointer; }
 .slotLabel:hover, .selected { border-color: var(--accent); background: rgba(83, 28, 53, 0.75); }
 .slotLabel input { width: 17px; height: 17px; accent-color: var(--accent); }
 .slotName { color: var(--muted); font-size: .84rem; }
-.localTime { color: #fff; font-size: 1.05rem; font-weight: 900; }
+.localDateTime { display: grid; gap: 2px; color: #fff; }
+.localDateTime > strong { font-size: .9rem; }
+.localDateTime > b { font-size: 1.08rem; }
+.localDateTime em { width: fit-content; margin-top: 4px; padding: 3px 6px; border-radius: 999px; background: #49360d; color: #ffe29a; font-size: .65rem; font-style: normal; font-weight: 900; }
 .slotLabel small { display: block; margin-top: 3px; color: var(--accent); font-size: .68rem; font-weight: 700; }
 .assignment { padding: 10px; border: 1px solid #3d9366; border-radius: 8px; background: #0d3523; color: #d6ffe7; font-weight: 900; }
 .locked { color: #f6c65b; font-weight: 900; }
@@ -321,6 +355,8 @@
 .signupReview > div:not(.reviewActions) { display: grid; gap: 7px; }
 .signupReview > div:not(.reviewActions) p { display: flex; justify-content: space-between; gap: 16px; margin: 0; padding: 10px 12px; border-radius: 8px; background: rgba(40, 125, 80, .18); }
 .signupReview span { color: var(--muted); }
+.signupReview strong { display: grid; gap: 2px; text-align: right; }
+.signupReview strong small { color: var(--accent); font-size: .72rem; }
 .reviewHelp { color: var(--muted); line-height: 1.5; }
 .reviewActions { display: grid; grid-template-columns: .7fr 1.3fr; gap: 10px; }
 .reviewActions .primaryButton { margin-top: 0; }
@@ -360,6 +396,12 @@
   .slotHeader { display: none; }
   .slotLabel { grid-template-columns: 32px minmax(70px, .7fr) minmax(125px, 1.3fr); align-items: flex-start; }
   .reviewActions { grid-template-columns: 1fr; }
+  .signupProgress { grid-template-columns: repeat(2, 1fr); margin-bottom: 22px; }
+  .signupProgress span { padding: 7px 4px; }
+  .majorsIntro { margin-bottom: 25px; }
+  .majorNames { display: grid; gap: 3px; }
+  .majorNames i { display: none; }
+  .roundList { grid-template-columns: 1fr; }
   .mastersFeature { min-height: 185px; background-position: center, center, 62% 1%; background-size: cover, cover, 285% auto; }
   .bench { right: 2%; transform: scale(0.72); }
   .blossomTree { width: 80%; }

@@ -33,8 +33,8 @@ import styles from "./page.module.css"
 type AdminSection = "setup" | `day-${1 | 2 | 3 | 4}` | "weekend" | "results" | "testers"
 
 const DAY_NAMES = [
-  { short: "Thursday", title: "Thursday — Qualifier 1", fallback: "Qualifier Round 1" },
-  { short: "Friday", title: "Friday — Qualifier 2", fallback: "Qualifier Round 2" },
+  { short: "Thursday", title: "Thursday — Round 1", fallback: "Round 1" },
+  { short: "Friday", title: "Friday — Round 2", fallback: "Round 2" },
   { short: "Saturday", title: "Saturday — Round 3", fallback: "Round 3" },
   { short: "Sunday", title: "Sunday — Final Round", fallback: "Final Round" },
 ] as const
@@ -479,7 +479,7 @@ function EventSetup({ event, events, days, standardTimes, onSaveOpening, onRelea
   const informationFields = [
     { name: "signup", label: "Signup instructions", value: event.signup_instructions },
     { name: "scheduling", label: "Scheduling and changes", value: event.scheduling_instructions },
-    { name: "qualifier", label: "Qualifying", value: event.qualifier_information },
+    { name: "qualifier", label: "Rounds 1 and 2", value: event.qualifier_information },
     { name: "cut", label: "Friday cut", value: event.cut_information },
     { name: "weekend", label: "Weekend fields", value: event.weekend_information },
     { name: "rooms", label: "Room and play rules", value: event.room_rules },
@@ -632,7 +632,7 @@ function RoomForm({ group, slot, dayNumber, selectedEntries, allGroups, namingGr
     <div className={styles.roomTitle}><strong>{group?.group_label || "Create another room"}</strong>{group && <span className={group.is_published ? styles.published : styles.private}>{group.is_published ? "Published" : "Private"}</span>}</div>
     <div className={styles.formGrid}>
       <label>Room label<input name="label" defaultValue={group?.group_label || suggestedLabel} required /><small>{group ? "Customize if needed." : `Next suggested ${isTestEvent ? "TEST" : "official Krys Mini Golf Majors"} room label; you may override it.`}</small></label>
-      <label>Competition<select name="competition" defaultValue={group?.competition || (dayNumber <= 2 ? "qualifying" : "main")}><option value="qualifying">Qualifier</option><option value="main">Main Event</option><option value="secondary">Secondary trophy field</option></select></label>
+      <label>Competition<select name="competition" defaultValue={group?.competition || (dayNumber <= 2 ? "qualifying" : "main")}><option value="qualifying">Rounds 1–2 field</option><option value="main">Main Event</option><option value="secondary">Secondary trophy field</option></select></label>
       <label>Course / lobby / location<input name="location" defaultValue={group?.location || ""} /></label>
       <label>Player instructions<input name="instructions" defaultValue={group?.instructions || ""} /></label>
       <label>Private admin notes<input name="notes" defaultValue={group?.admin_notes || ""} /></label>

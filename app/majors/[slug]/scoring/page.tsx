@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { MAJOR_COURSES, formatMajorToPar, majorHoleOutcome, type MajorEvent, type MajorPlayerScorecard } from "@/lib/majors"
+import { MAJOR_COURSES, formatMajorToPar, majorHoleOutcome, majorRoundDayLabel, type MajorEvent, type MajorPlayerScorecard } from "@/lib/majors"
 import { supabase } from "@/lib/supabase"
 
 type MyRound = MajorPlayerScorecard & { scoring_entry_open: boolean; label: string }
@@ -64,9 +64,9 @@ export default function MajorPlayerScoringPage() {
     <Link href={`/majors/${slug}`}>← {event?.name || "Major"}</Link>
     {event?.is_test_event && <p style={test}>TEST EVENT · TEST DATA — NOT OFFICIAL</p>}
     <h1>My Major scorecard</h1><p style={muted}>One 18-hole card per tournament day. Enter your own strokes, save a draft, then submit for verification.</p>
-    <nav style={tabs}>{rounds.map((item) => <button key={item.play_day_id} onClick={() => setDay(item.day_number)} style={day === item.day_number ? selectedTab : tab}>Day {item.day_number}<small>{item.label}</small></button>)}</nav>
+    <nav style={tabs}>{rounds.map((item) => <button key={item.play_day_id} onClick={() => setDay(item.day_number)} style={day === item.day_number ? selectedTab : tab}>{majorRoundDayLabel(item.day_number)}</button>)}</nav>
     {!round ? <p>No tournament rounds are configured for your entry.</p> : <>
-      <section style={summary}><div><strong>{round.label}</strong><span>{course.name} · Par {course.pars.reduce((a,b)=>a+b,0)}</span></div><div><strong>{strokes || "—"}</strong><span>{entered.length} / 18 holes · {formatMajorToPar(strokes - parThrough)}</span></div></section>
+      <section style={summary}><div><strong>{majorRoundDayLabel(round.day_number)}</strong><span>{course.name} · Par {course.pars.reduce((a,b)=>a+b,0)}</span></div><div><strong>{strokes || "—"}</strong><span>{entered.length} / 18 holes · {formatMajorToPar(strokes - parThrough)}</span></div></section>
       {!round.scoring_entry_open && round.status !== "verified" && <p style={notice}>Score entry is currently closed. An admin opens each round when it is ready.</p>}
       {round.status === "submitted" && <p style={pending}>Awaiting admin verification. Submitted scores cannot be silently changed.</p>}
       {round.status === "verified" && <p style={verified}>Official score verified.</p>}
