@@ -464,6 +464,14 @@
 .reviewPanel p {
   margin: 0;
 }
+.reviewPanel .reviewWarning {
+  padding: 10px 12px;
+  border: 1px solid #f59e0b66;
+  border-radius: 9px;
+  color: #fde68a;
+  background: #451a03;
+  font-weight: 700;
+}
 .reviewPanel p {
   margin-top: 5px;
   color: #94a3b8;

@@ -26,6 +26,8 @@ import {
   assignPendingTrophyPlayer,
   clearPendingTrophyPlayer,
   parsePendingTrophyAssignments,
+  selectedTrophiesForReview,
+  validTrophiesForImport,
 } from "@/lib/trophies/pendingTrophyAssignments";
 
 type Trophy = {
@@ -173,6 +175,7 @@ export default function TrophyAdminPage() {
   const [scanning, setScanning] = useState(false);
   const [importing, setImporting] = useState(false);
   const [reviewingImport, setReviewingImport] = useState(false);
+  const importReviewRef = useRef<HTMLElement>(null);
   const [filter, setFilter] = useState<
     "all" | "ready" | "needs-player" | "duplicate"
   >("all");
@@ -245,6 +248,13 @@ export default function TrophyAdminPage() {
     );
     window.localStorage.setItem(PENDING_ASSIGNMENTS_KEY, JSON.stringify(pending));
   }, [candidates, players]);
+  useEffect(() => {
+    if (!reviewingImport) return;
+    importReviewRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }, [reviewingImport]);
 
   async function scanLibrary() {
     setScanning(true);
@@ -333,19 +343,22 @@ export default function TrophyAdminPage() {
   }
 
   function reviewSelected() {
-    if (candidates.some((candidate) => candidate.selected)) {
-      setReviewingImport(true);
+    if (!candidates.some((candidate) => candidate.selected)) {
+      setMessage("Select at least one trophy before opening final review.");
+      return;
     }
+    setMessage("");
+    setReviewingImport(true);
   }
 
   async function confirmImport() {
-    const selected = candidates.filter(
-      (candidate) =>
-        candidate.selected &&
-        candidate.status === "ready" &&
-        candidate.playerId,
-    );
-    if (selected.length === 0) return;
+    const selected = validTrophiesForImport(candidates);
+    if (selected.length === 0) {
+      setMessage(
+        "No selected trophies have a canonical player. Correct the Needs Player items before confirming.",
+      );
+      return;
+    }
     setImporting(true);
     setMessage("");
     const rows = selected.map((candidate) => ({
@@ -545,9 +558,7 @@ export default function TrophyAdminPage() {
         .length,
       duplicate: candidates.filter((item) => item.status === "duplicate")
         .length,
-      selected: candidates.filter(
-        (item) => item.selected && item.status === "ready",
-      ).length,
+      selected: candidates.filter((item) => item.selected).length,
     }),
     [candidates],
   );
@@ -558,7 +569,8 @@ export default function TrophyAdminPage() {
   const manualAssignments = candidates.filter(
     (candidate) => isManualAssignment(candidate, players) && candidate.playerId,
   );
-  const selectedForReview = candidates.filter((candidate) => candidate.selected);
+  const selectedForReview = selectedTrophiesForReview(candidates);
+  const validSelectedForReview = validTrophiesForImport(candidates);
   const reviewHasInvalid = selectedForReview.some(
     (candidate) => candidate.status !== "ready" || !candidate.playerId,
   );
@@ -621,6 +633,7 @@ export default function TrophyAdminPage() {
           </div>
           <div className={styles.actions}>
             <button
+              type="button"
               className={styles.secondary}
               onClick={scanLibrary}
               disabled={scanning || loading}
@@ -632,6 +645,7 @@ export default function TrophyAdminPage() {
                   : "Scan trophy library"}
             </button>
             <button
+              type="button"
               className={styles.primary}
               onClick={reviewSelected}
               disabled={importing || counts.selected === 0}
@@ -681,10 +695,15 @@ export default function TrophyAdminPage() {
           </section>
         )}
         {reviewingImport && (
-          <section className={styles.reviewPanel} aria-label="Final trophy import review">
+          <section ref={importReviewRef} className={styles.reviewPanel} aria-label="Final trophy import review">
             <div>
               <h2>Final Import Review</h2>
               <p>Confirm these exact canonical owners before publishing.</p>
+              {reviewHasInvalid && (
+                <p className={styles.reviewWarning}>
+                  Needs Player items cannot be published. Correct them first, or confirm to import only the valid reviewed trophies.
+                </p>
+              )}
             </div>
             <div className={styles.importReviewList}>
               {selectedForReview.map((candidate) => {
@@ -713,8 +732,8 @@ export default function TrophyAdminPage() {
               <button type="button" className={styles.secondary} onClick={() => setReviewingImport(false)} disabled={importing}>
                 Back to review
               </button>
-              <button type="button" className={styles.primary} onClick={confirmImport} disabled={importing || reviewHasInvalid || selectedForReview.length === 0}>
-                {importing ? "Importing…" : "Confirm Import"}
+              <button type="button" className={styles.primary} onClick={confirmImport} disabled={importing || validSelectedForReview.length === 0}>
+                {importing ? "Importing…" : `Confirm Import (${validSelectedForReview.length})`}
               </button>
             </div>
           </section>
