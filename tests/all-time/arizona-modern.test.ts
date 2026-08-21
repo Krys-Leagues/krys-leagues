@@ -31,6 +31,7 @@ import {
 import { matchPlayers } from "../../lib/importer/matchPlayers.ts"
 import type { PlayerRecord } from "../../lib/importer/loadPlayers.ts"
 import type { PlayerIdentityAlias } from "../../lib/identity/types.ts"
+import { denseRanks } from "../../lib/all-time/dense-rank.ts"
 
 const downloads = "C:\\Users\\kryst\\Downloads"
 
@@ -72,6 +73,34 @@ test("negative scores are valid and lower score wins", () => {
   assert.equal(classifyBestScore(-24, -27), "better_score")
   assert.equal(classifyBestScore(-27, -24), "worse_score_ignored")
   assert.equal(classifyBestScore(-27, -27), "equal_unchanged")
+})
+
+test("Single Course Records use dense ranking for tied distinct scores", () => {
+  const records = [-25, -25, -25, -24, -24, -22, -20, -20].map((score) => ({ score }))
+  assert.deepEqual(denseRanks(records), [1, 1, 1, 2, 2, 3, 4, 4])
+})
+
+test("missing scores do not consume a dense rank", () => {
+  const records = [{ score: -25 }, { score: null }, { score: -24 }, { score: undefined }, { score: -22 }]
+  assert.deepEqual(denseRanks(records), [1, null, 2, null, 3])
+})
+
+test("Easy and Hard Single Course rankings are calculated independently", () => {
+  const easy = [-25, -25, -24].map((score) => ({ score }))
+  const hard = [-18, -17, -17].map((score) => ({ score }))
+  assert.deepEqual(denseRanks(easy), [1, 1, 2])
+  assert.deepEqual(denseRanks(hard), [1, 2, 2])
+})
+
+test("rank layout reserves room through three digits without changing player names", () => {
+  const page = readFileSync("app/admin/records/single/page.tsx", "utf8")
+  const ranks = denseRanks(Array.from({ length: 111 }, (_, index) => ({ score: index - 111 })))
+  assert.deepEqual([ranks[8], ranks[9], ranks[98], ranks[99], ranks[110]], [9, 10, 99, 100, 111])
+  assert.match(page, /gridTemplateColumns: "88px minmax\(0, 1fr\) auto"/)
+  assert.match(page, /whiteSpace: "nowrap"/)
+  assert.match(page, /overflowWrap: "anywhere"/)
+  assert.match(page, /\{record\.player_name\}/)
+  assert.match(page, /left\.score - right\.score/)
 })
 
 test("two different players may remain tied", () => {

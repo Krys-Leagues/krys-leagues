@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
+import { denseRanks } from "@/lib/all-time/dense-rank"
 import { supabase } from "@/lib/supabase"
 
 type SingleRecord = {
@@ -34,12 +35,6 @@ type UnresolvedObservationRow = {
   course_id: string
   score: number
   historical_player_name: string
-}
-
-export function competitiveRanks(records: Array<{ score: number }>) {
-  return records.map((record, index) =>
-    index > 0 && record.score === records[index - 1].score ? null : index + 1
-  ).map((rank, index, ranks) => rank ?? ranks.slice(0, index).findLast((value) => value !== null) ?? 1)
 }
 
 export function individualCourseLabel(course: AllTimeCourse) {
@@ -109,7 +104,7 @@ export default function SingleRecordsPage() {
   }, [records, courseFilter])
 
   const selectedCourse = courses.find((course) => course.id === courseFilter) ?? null
-  const ranks = competitiveRanks(filteredRecords)
+  const ranks = denseRanks(filteredRecords)
 
   return (
     <main style={page}>
@@ -157,7 +152,7 @@ export default function SingleRecordsPage() {
 
                   {filteredRecords.map((record, index) => (
                     <div key={record.id} style={recordCard}>
-                      <div style={placement}>#{ranks[index]}</div>
+                      <div style={placement}>{ranks[index] === null ? "—" : `#${ranks[index]}`}</div>
 
                       <div style={recordMain}>
                         <div style={recordPlayer}>
@@ -292,7 +287,7 @@ const difficultyTitleHard: React.CSSProperties = {
 
 const recordCard: React.CSSProperties = {
   display: "grid",
-  gridTemplateColumns: "70px 1fr auto",
+  gridTemplateColumns: "88px minmax(0, 1fr) auto",
   gap: 16,
   alignItems: "center",
   padding: 16,
@@ -306,13 +301,18 @@ const placement: React.CSSProperties = {
   fontWeight: 900,
   color: "#aaa",
   textAlign: "center",
+  whiteSpace: "nowrap",
+  fontVariantNumeric: "tabular-nums",
 }
 
-const recordMain: React.CSSProperties = {}
+const recordMain: React.CSSProperties = {
+  minWidth: 0,
+}
 
 const recordPlayer: React.CSSProperties = {
   fontSize: 22,
   fontWeight: 900,
+  overflowWrap: "anywhere",
 }
 
 const recordMeta: React.CSSProperties = {
