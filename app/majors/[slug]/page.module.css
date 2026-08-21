@@ -191,9 +191,10 @@
 
 .majorsIntro { max-width: 880px; margin: 0 auto 34px; text-align: center; }
 .majorsIntro h1 { font-size: clamp(2rem, 6vw, 4.4rem); line-height: 1.02; }
-.majorsIntro > p:not(.eyebrow):not(.majorNames) { max-width: 720px; margin: 9px auto; color: var(--muted); font-size: clamp(.98rem, 2vw, 1.12rem); line-height: 1.55; }
+.majorsIntro > p:not(.eyebrow):not(.majorNames):not(.miniGolfStyle) { max-width: 720px; margin: 9px auto; color: var(--muted); font-size: clamp(.98rem, 2vw, 1.12rem); line-height: 1.55; }
 .majorNames { margin: 18px 0; color: var(--ink); font-family: Georgia, serif; font-size: clamp(.9rem, 2.4vw, 1.25rem); font-weight: 800; }
 .majorNames i { padding: 0 5px; color: var(--accent); font-style: normal; }
+.miniGolfStyle { margin: -8px auto 18px; color: var(--accent); font-size: clamp(.72rem, 1.8vw, .9rem); font-weight: 900; letter-spacing: .2em; }
 .aspirational { display: block; margin-top: 23px; color: var(--accent); font-family: Georgia, serif; font-size: clamp(1.15rem, 3vw, 1.7rem); letter-spacing: .08em; text-shadow: 0 2px 12px #000; }
 
 .masters .hero {
@@ -401,6 +402,7 @@
   .majorsIntro { margin-bottom: 25px; }
   .majorNames { display: grid; gap: 3px; }
   .majorNames i { display: none; }
+  .miniGolfStyle { margin-top: 10px; letter-spacing: .15em; }
   .roundList { grid-template-columns: 1fr; }
   .mastersFeature { min-height: 185px; background-position: center, center, 62% 1%; background-size: cover, cover, 285% auto; }
   .bench { right: 2%; transform: scale(0.72); }
