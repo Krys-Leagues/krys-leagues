@@ -444,6 +444,8 @@ test("generic admin page is catalog-driven, CSV-only, and apply remains protecte
   assert.match(page, /INITIAL BEST RECORD/)
   assert.match(page, /NOT LINKED/)
   assert.match(page, /isUnlinked \? "border-b border-amber-500 bg-amber-950\/60/)
+  assert.match(page, /isUnlinked \? "bg-amber-400 p-3 text-slate-950"/)
+  assert.match(page, /block text-base font-black/)
   assert.match(shared, /all_time_courses/)
   assert.match(shared, /\.eq\("active", true\)/)
   assert.match(shared, /\.in\("difficulty", \["Easy", "Hard"\]\)/)
