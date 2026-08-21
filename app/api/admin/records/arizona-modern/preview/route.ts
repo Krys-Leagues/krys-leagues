@@ -1,9 +1,16 @@
 import { parseArizonaCourseCsv } from "@/lib/all-time/arizona/csv"
 import { buildPreviewRows } from "@/lib/all-time/arizona/scoring"
-import type { ArizonaCourseCode, BestRecordSnapshot, IdentityPreview } from "@/lib/all-time/arizona/types"
-import { authorizedAdminClient, loadIdentityDirectory } from "../_shared"
+import type { BestRecordSnapshot, IdentityPreview } from "@/lib/all-time/arizona/types"
+import { authorizedAdminClient, loadIdentityDirectory, loadIndividualCourses, loadSelectedCourse } from "../_shared"
 
 export const runtime = "nodejs"
+
+export async function GET(request: Request) {
+  const authorization = await authorizedAdminClient(request)
+  if (authorization.error) return authorization.error
+  try { return Response.json({ courses: await loadIndividualCourses(authorization.supabase!) }) }
+  catch (error) { return Response.json({ error: error instanceof Error ? error.message : "Course catalog failed." }, { status: 400 }) }
+}
 
 export async function POST(request: Request) {
   const authorization = await authorizedAdminClient(request)
@@ -12,11 +19,11 @@ export async function POST(request: Request) {
     const form = await request.formData()
     const courseCode = form.get("courseCode")
     const file = form.get("csv")
-    if (courseCode !== "AME" && courseCode !== "AMH") return Response.json({ error: "Choose AME or AMH." }, { status: 400 })
     if (!(file instanceof File) || !file.name.toLowerCase().endsWith(".csv")) return Response.json({ error: "Upload one CSV file." }, { status: 400 })
     if (file.size > 2_000_000) return Response.json({ error: "CSV must be 2 MB or smaller." }, { status: 400 })
-    const target = courseCode as ArizonaCourseCode
-    const parsed = parseArizonaCourseCsv(await file.text(), target, file.name)
+    const course = await loadSelectedCourse(authorization.supabase!, courseCode)
+    const target = course.code
+    const parsed = parseArizonaCourseCsv(await file.text(), course, file.name)
     const directory = await loadIdentityDirectory(authorization.supabase!)
     const matches = directory.matchNames([...new Set(parsed.records.map((row) => row.historicalPlayerName))])
     const identities = new Map<string, IdentityPreview>(matches.map((match) => {

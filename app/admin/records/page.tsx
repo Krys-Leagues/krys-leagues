@@ -10,9 +10,9 @@ export default function RecordsAdminPage() {
       </p>
 
       <div style={grid}>
-        <Link href="/admin/records/arizona-modern" style={card}>
-          <strong>Arizona Modern Pilot</strong>
-          <span>Preview AME/AMH workbook imports and legacy combined reconciliation.</span>
+        <Link href="/admin/records/all-time" style={card}>
+          <strong>All-Time Easy/Hard Importer</strong>
+          <span>Preview and import any active catalog course from one-course CSV files.</span>
         </Link>
 
         <Link href="/admin/records/combined" style={card}>

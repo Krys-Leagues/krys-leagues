@@ -3,10 +3,11 @@ import { inflateRawSync } from "node:zlib"
 
 import {
   ALL_TIME_WORKSHEET,
+  ARIZONA_COURSES,
   ARIZONA_SOURCE_COURSE,
-  mapArizonaCourse,
 } from "./catalog.ts"
 import type {
+  ArizonaDifficulty,
   ArizonaParseIssue,
   ArizonaSourceRecord,
   ArizonaWorkbookParseResult,
@@ -172,7 +173,7 @@ function parseCell(tag: string, body: string, sharedStrings: string[]): CellValu
   return Number.isFinite(numeric) ? numeric : decoded
 }
 
-function parseRelevantCells(xml: string, sharedStrings: string[]) {
+function parseRelevantCells(xml: string, sharedStrings: string[], sourceCourseName: string) {
   const rowOne = new Map<number, CellValue>()
   const rawCells: Array<{ reference: string; row: number; column: number; value: CellValue }> = []
 
@@ -187,16 +188,16 @@ function parseRelevantCells(xml: string, sharedStrings: string[]) {
 
   const headerCourseColumn = [...rowOne.entries()].find(
     ([column, value]) =>
-      value === ARIZONA_SOURCE_COURSE &&
+      value === sourceCourseName &&
       rowOne.get(column - 1) === "Easy" &&
       rowOne.get(column + 1) === "Hard"
   )?.[0]
   if (!headerCourseColumn) {
     const matches = [...rowOne.entries()]
-      .filter(([, value]) => value === ARIZONA_SOURCE_COURSE)
+      .filter(([, value]) => value === sourceCourseName)
       .map(([column]) => [column, rowOne.get(column - 1), rowOne.get(column + 1)])
     throw new Error(
-      `The exact source heading "Arazona Modern" Easy block was not found on All Time row 1: ${JSON.stringify(matches)}`
+      `The exact source heading "${sourceCourseName}" Easy block was not found on All Time row 1: ${JSON.stringify(matches)}`
     )
   }
   const sourceColumn = headerCourseColumn - 2
@@ -214,22 +215,24 @@ function integerScore(value: CellValue) {
   return typeof value === "number" && Number.isInteger(value) ? value : null
 }
 
-export function parseArizonaModernWorkbook(
+export function parseIndividualCourseWorkbook(
   input: Uint8Array,
-  sourceFilename: string
+  sourceFilename: string,
+  sourceCourseName: string,
+  courses: Record<ArizonaDifficulty, { code: string; difficulty: ArizonaDifficulty; baseMap: string; displayName: string }>
 ): ArizonaWorkbookParseResult {
   const entries = readZipEntries(input)
   const worksheetPath = findAllTimeWorksheetPath(input, entries)
   const worksheetXml = readZipText(input, entries, worksheetPath)
   const sharedStrings = readSharedStrings(input, entries)
-  const { sourceColumn, relevant } = parseRelevantCells(worksheetXml, sharedStrings)
+  const { sourceColumn, relevant } = parseRelevantCells(worksheetXml, sharedStrings, sourceCourseName)
   const sourceFileHash = sha256(input)
   const records: ArizonaSourceRecord[] = []
   const issues: ArizonaParseIssue[] = []
   const logicalFingerprints = new Set<string>()
 
   for (const difficulty of ["Easy", "Hard"] as const) {
-    const course = mapArizonaCourse(ARIZONA_SOURCE_COURSE, difficulty)
+    const course = courses[difficulty]
     if (!course) {
       issues.push({
         category: "course_mapping_issue",
@@ -239,7 +242,7 @@ export function parseArizonaModernWorkbook(
         difficulty,
         historicalPlayerName: null,
         rawScore: null,
-        message: `No explicit mapping exists for ${ARIZONA_SOURCE_COURSE} ${difficulty}.`,
+        message: `No explicit mapping exists for ${sourceCourseName} ${difficulty}.`,
       })
       continue
     }
@@ -301,7 +304,7 @@ export function parseArizonaModernWorkbook(
         difficulty,
         canonicalBaseMap: course.baseMap,
         canonicalDisplayName: course.displayName,
-        sourceCourseName: ARIZONA_SOURCE_COURSE,
+        sourceCourseName,
         sourceWorksheet: ALL_TIME_WORKSHEET,
         sourceFilename,
         sourceFileHash,
@@ -331,8 +334,12 @@ export function parseArizonaModernWorkbook(
     sourceFilename,
     sourceFileHash,
     sourceWorksheet: ALL_TIME_WORKSHEET,
-    sourceCourseName: ARIZONA_SOURCE_COURSE,
+    sourceCourseName,
     records,
     issues,
   }
+}
+
+export function parseArizonaModernWorkbook(input: Uint8Array, sourceFilename: string) {
+  return parseIndividualCourseWorkbook(input, sourceFilename, ARIZONA_SOURCE_COURSE, ARIZONA_COURSES)
 }

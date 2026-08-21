@@ -1,9 +1,10 @@
 import { createHash } from "node:crypto"
 
 import Papa from "papaparse"
+import { ARIZONA_COURSES, ARIZONA_SOURCE_COURSE } from "./catalog.ts"
 
-import { ARIZONA_COURSES } from "./catalog.ts"
 import type {
+  AllTimeCourseTarget,
   ArizonaCourseCode,
   ArizonaCsvIssue,
   ArizonaCsvParseResult,
@@ -43,11 +44,14 @@ function optionalPositiveInteger(value: string) {
 
 export function parseArizonaCourseCsv(
   csvText: string,
-  courseCode: ArizonaCourseCode,
+  target: AllTimeCourseTarget | ArizonaCourseCode,
   csvFilename: string,
   csvFileHash = sha256(csvText)
 ): ArizonaCsvParseResult {
-  const course = courseCode === "AME" ? ARIZONA_COURSES.Easy : ARIZONA_COURSES.Hard
+  const course = typeof target === "string"
+    ? { ...(target === "AME" ? ARIZONA_COURSES.Easy : ARIZONA_COURSES.Hard), sourceCourseName: ARIZONA_SOURCE_COURSE }
+    : target
+  const courseCode = course.code
   const parsed = Papa.parse<CsvRow>(csvText, {
     header: true,
     skipEmptyLines: "greedy",
@@ -104,9 +108,9 @@ export function parseArizonaCourseCsv(
     records.push({
       courseCode,
       difficulty: course.difficulty,
-      canonicalBaseMap: "Arizona Modern",
+      canonicalBaseMap: course.baseMap,
       canonicalDisplayName: course.displayName,
-      sourceCourseName: "Arazona Modern",
+      sourceCourseName: course.sourceCourseName,
       sourceWorksheet: "All Time",
       sourceFilename: sourceWorkbook,
       sourceFileHash: csvFileHash,

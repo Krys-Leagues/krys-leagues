@@ -1,13 +1,21 @@
 export type ArizonaDifficulty = "Easy" | "Hard"
 
-export type ArizonaCourseCode = "AME" | "AMH"
+export type ArizonaCourseCode = string
+
+export type AllTimeCourseTarget = {
+  code: string
+  difficulty: ArizonaDifficulty
+  baseMap: string
+  displayName: string
+  sourceCourseName: string
+}
 
 export type ArizonaSourceRecord = {
   courseCode: ArizonaCourseCode
   difficulty: ArizonaDifficulty
-  canonicalBaseMap: "Arizona Modern"
-  canonicalDisplayName: "Arizona Modern Easy" | "Arizona Modern Hard"
-  sourceCourseName: "Arazona Modern"
+  canonicalBaseMap: string
+  canonicalDisplayName: string
+  sourceCourseName: string
   sourceWorksheet: "All Time"
   sourceFilename: string
   sourceFileHash: string
@@ -61,7 +69,7 @@ export type ArizonaWorkbookParseResult = {
   sourceFilename: string
   sourceFileHash: string
   sourceWorksheet: "All Time"
-  sourceCourseName: "Arazona Modern"
+  sourceCourseName: string
   records: ArizonaSourceRecord[]
   issues: ArizonaParseIssue[]
 }

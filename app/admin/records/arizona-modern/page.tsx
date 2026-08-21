@@ -1,16 +1,16 @@
 "use client"
 
 import Link from "next/link"
-import { FormEvent, useMemo, useState } from "react"
+import { FormEvent, useEffect, useMemo, useState } from "react"
 
 import ExistingPlayerPicker from "@/app/admin/import/csv/components/ExistingPlayerPicker"
 import { ALL_TIME_PAGE_SIZES, DEFAULT_ALL_TIME_PAGE_SIZE, buildReviewedPreviewRows, identityReviewComplete, paginateRows } from "@/lib/all-time/arizona/review"
-import type { ArizonaCourseCode, ArizonaCsvIssue, ArizonaIdentityDecision, ArizonaPreviewRow, BestRecordSnapshot } from "@/lib/all-time/arizona/types"
+import type { AllTimeCourseTarget, ArizonaCsvIssue, ArizonaIdentityDecision, ArizonaPreviewRow, BestRecordSnapshot } from "@/lib/all-time/arizona/types"
 import { supabase } from "@/lib/supabase"
 
 type PreviewResponse = {
   error?: string
-  courseCode: ArizonaCourseCode
+  courseCode: string
   csvFilename: string
   csvFileHash: string
   sourceRowsScanned: number
@@ -25,10 +25,11 @@ type ImportResponse = {
   identityMemory?: { created: number; alreadyKnown: number; conflicts: unknown[]; failures: unknown[] }
 }
 
-const COURSE_LABELS = { AME: "Arizona Modern Easy", AMH: "Arizona Modern Hard" } as const
+const ACTION_LABELS: Record<string, string> = { new_record: "INITIAL BEST RECORD", better_score: "BETTER SCORE", equal_unchanged: "EQUAL / UNCHANGED", worse_score_ignored: "KEEP EXISTING BETTER SCORE", unresolved_identity: "UNRESOLVED IDENTITY", ambiguous_identity: "AMBIGUOUS IDENTITY" }
 
 export default function ArizonaModernPilotPage() {
-  const [courseCode, setCourseCode] = useState<ArizonaCourseCode>("AME")
+  const [courses, setCourses] = useState<AllTimeCourseTarget[]>([])
+  const [courseCode, setCourseCode] = useState("")
   const [csvFile, setCsvFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<PreviewResponse | null>(null)
   const [decisions, setDecisions] = useState<Record<string, ArizonaIdentityDecision>>({})
@@ -39,6 +40,15 @@ export default function ArizonaModernPilotPage() {
   const [error, setError] = useState("")
   const [confirming, setConfirming] = useState(false)
   const [importResult, setImportResult] = useState<ImportResponse | null>(null)
+
+  useEffect(() => { void (async () => {
+    try {
+      const response = await fetch("/api/admin/records/all-time/preview", { headers: { Authorization: `Bearer ${await sessionToken()}` } })
+      const payload = await response.json() as { courses?: AllTimeCourseTarget[]; error?: string }
+      if (!response.ok || payload.error) throw new Error(payload.error || "Course catalog failed.")
+      setCourses(payload.courses ?? []); setCourseCode((current) => current || payload.courses?.[0]?.code || "")
+    } catch (caught) { setError(caught instanceof Error ? caught.message : "Course catalog failed.") }
+  })() }, [])
 
   const effectiveRows = useMemo(() => buildReviewedPreviewRows(preview?.previewRows ?? [], decisions, preview?.existingBest ?? []), [decisions, preview])
   const paged = useMemo(() => paginateRows(effectiveRows, pageNumber, pageSize), [effectiveRows, pageNumber, pageSize])
@@ -58,7 +68,7 @@ export default function ArizonaModernPilotPage() {
     setBusy(true); setError(""); setPreview(null); setDecisions({}); setImportResult(null); setPageNumber(1)
     try {
       const form = new FormData(); form.set("courseCode", courseCode); form.set("csv", csvFile)
-      const response = await fetch("/api/admin/records/arizona-modern/preview", { method: "POST", headers: { Authorization: `Bearer ${await sessionToken()}` }, body: form })
+      const response = await fetch("/api/admin/records/all-time/preview", { method: "POST", headers: { Authorization: `Bearer ${await sessionToken()}` }, body: form })
       const payload = await response.json() as PreviewResponse
       if (!response.ok || payload.error) throw new Error(payload.error || "Preview failed.")
       setPreview(payload)
@@ -76,7 +86,7 @@ export default function ArizonaModernPilotPage() {
     setBusy(true); setError(""); setConfirming(false)
     try {
       const form = new FormData(); form.set("courseCode", courseCode); form.set("csv", csvFile); form.set("decisions", JSON.stringify(decisions))
-      const response = await fetch("/api/admin/records/arizona-modern/apply", { method: "POST", headers: { Authorization: `Bearer ${await sessionToken()}` }, body: form })
+      const response = await fetch("/api/admin/records/all-time/apply", { method: "POST", headers: { Authorization: `Bearer ${await sessionToken()}` }, body: form })
       const payload = await response.json() as ImportResponse
       if (!response.ok || payload.error) throw new Error(payload.error || "Import failed.")
       setImportResult(payload)
@@ -86,12 +96,12 @@ export default function ArizonaModernPilotPage() {
 
   return <main className="min-h-screen bg-slate-950 p-6 text-white">
     <Link href="/admin/records" className="text-blue-300">← Records Admin</Link>
-    <h1 className="mt-4 text-4xl font-bold">Arizona Modern All-Time Records</h1>
+    <h1 className="mt-4 text-4xl font-bold">All-Time Easy/Hard Records</h1>
     <p className="mt-2 max-w-4xl text-slate-300">Import one Easy or Hard historical course CSV at a time. Preview and identity review are read-only; the protected All-Time RPC remains authoritative on final import.</p>
     <section className="mt-5 rounded-xl border border-blue-700 bg-blue-950/40 p-4 text-blue-100">CSV only. Easy and Hard remain separate. Combined records and the 104 pending legacy rows are not part of this importer.</section>
 
     <form onSubmit={buildPreview} className="mt-6 space-y-5 rounded-2xl border border-slate-700 bg-slate-900 p-6">
-      <fieldset><legend className="font-bold">1. Target course</legend><div className="mt-3 flex flex-wrap gap-3">{(["AME", "AMH"] as const).map((code) => <label key={code} className={`cursor-pointer rounded-lg border p-4 ${courseCode === code ? "border-emerald-400 bg-emerald-950/40" : "border-slate-600"}`}><input type="radio" checked={courseCode === code} onChange={() => { setCourseCode(code); setPreview(null); setImportResult(null) }} className="mr-2" />{code} — {COURSE_LABELS[code]}</label>)}</div></fieldset>
+      <label className="block font-bold">1. Target course<select value={courseCode} onChange={(event) => { setCourseCode(event.target.value); setPreview(null); setImportResult(null) }} className="mt-2 block w-full rounded border border-slate-600 bg-slate-950 p-3">{courses.map((course) => <option key={course.code} value={course.code}>{course.code} — {course.displayName}</option>)}</select></label>
       <label className="block font-bold">2. Choose one CSV<input type="file" accept=".csv,text/csv" onChange={(event) => { setCsvFile(event.target.files?.[0] ?? null); setPreview(null); setImportResult(null) }} className="mt-2 block w-full rounded border border-slate-600 bg-slate-950 p-3" /></label>
       <p className="text-sm text-slate-400">Required columns: <code>historical_player_name,score</code>. Optional: <code>source_row,rank,source_workbook,source_date,notes,course_code</code>.</p>
       <button disabled={busy || !csvFile} className="rounded bg-blue-700 px-5 py-3 font-bold disabled:bg-slate-700">{busy ? "Working…" : "Preview CSV"}</button>
@@ -109,7 +119,7 @@ export default function ArizonaModernPilotPage() {
         <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-2xl font-bold">3. Review player matches</h2><label>Rows per page <select value={pageSize} onChange={(event) => { setPageSize(Number(event.target.value)); setPageNumber(1) }} className="ml-2 rounded bg-slate-950 p-2">{ALL_TIME_PAGE_SIZES.map((size) => <option key={size}>{size}</option>)}</select></label></div>
         <div className="mt-4 overflow-x-auto"><table className="min-w-full text-sm"><thead><tr className="border-b border-slate-600 text-left text-slate-400"><th className="p-2">Historical source</th><th className="p-2">Score</th><th className="p-2">Identity review</th><th className="p-2">Existing best</th><th className="p-2">Action</th></tr></thead><tbody>{paged.rows.map(({ row, category, existingBestScore }) => {
           const decision = decisions[row.fingerprint]; const currentName = decision?.canonicalScreenName ?? row.identity.canonicalScreenName
-          return <tr key={row.fingerprint} className="border-b border-slate-800 align-top"><td className="p-2"><strong>{row.historicalPlayerName}</strong><div className="text-xs text-slate-500">{row.sourceFilename} · source row {row.sourceRow} · CSV row {row.csvRow}</div></td><td className="p-2 text-lg font-bold">{row.score}</td><td className="min-w-80 space-y-2 p-2"><div className={currentName ? "font-bold text-emerald-300" : row.identity.status === "ambiguous" && !decision ? "font-bold text-amber-300" : "text-slate-300"}>{currentName ? `Linked to ${currentName}` : decision ? "Explicitly left unresolved" : row.identity.status === "ambiguous" ? "Ambiguous suggestion — review required" : "Unresolved — review required"}</div><div className="text-xs text-slate-400">Evidence: {row.identity.matchedSource} · confidence {row.identity.confidence}%</div>{row.identity.candidates.map((candidate) => <div key={candidate.playerId} className="text-sm text-amber-200">Suggestion only: {candidate.screenName} ({candidate.confidence}%)</div>)}<div className="flex flex-wrap gap-2"><button type="button" onClick={() => setSearching(row.fingerprint)} className="rounded bg-blue-700 px-3 py-1 font-bold">{currentName ? "Change player" : "Find / Link Existing Player"}</button><button type="button" onClick={() => leaveUnresolved(row)} className="rounded border border-slate-500 px-3 py-1">Leave unresolved</button></div>{searching === row.fingerprint && <ExistingPlayerPicker historicalDisplayName={row.historicalPlayerName} selectLabel="Link & remember identity" onCancel={() => setSearching(null)} onSelect={(player) => { setDecisions((current) => ({ ...current, [row.fingerprint]: { playerId: player.id, canonicalScreenName: player.screen_name, selectionSource: "manual" } })); setSearching(null) }} />}</td><td className="p-2">{existingBestScore ?? "—"}</td><td className="p-2 font-bold">{category.replaceAll("_", " ")}</td></tr>
+          return <tr key={row.fingerprint} className="border-b border-slate-800 align-top"><td className="p-2"><strong>{row.historicalPlayerName}</strong><div className="text-xs text-slate-500">{row.sourceFilename} · source row {row.sourceRow} · CSV row {row.csvRow}</div></td><td className="p-2 text-lg font-bold">{row.score}</td><td className="min-w-80 space-y-2 p-2"><div className={currentName ? "font-bold text-emerald-300" : row.identity.status === "ambiguous" && !decision ? "font-bold text-amber-300" : "text-slate-300"}>{currentName ? `Linked to ${currentName}` : decision ? "Explicitly left unresolved" : row.identity.status === "ambiguous" ? "Ambiguous suggestion — review required" : "Unresolved — review required"}</div><div className="text-xs text-slate-400">Evidence: {row.identity.matchedSource} · confidence {row.identity.confidence}%</div>{row.identity.candidates.map((candidate) => <div key={candidate.playerId} className="text-sm text-amber-200">Suggestion only: {candidate.screenName} ({candidate.confidence}%)</div>)}<div className="flex flex-wrap gap-2"><button type="button" onClick={() => setSearching(row.fingerprint)} className="rounded bg-blue-700 px-3 py-1 font-bold">{currentName ? "Change player" : "Find / Link Existing Player"}</button><button type="button" onClick={() => leaveUnresolved(row)} className="rounded border border-slate-500 px-3 py-1">Leave unresolved</button></div>{searching === row.fingerprint && <ExistingPlayerPicker historicalDisplayName={row.historicalPlayerName} selectLabel="Link & remember identity" onCancel={() => setSearching(null)} onSelect={(player) => { setDecisions((current) => ({ ...current, [row.fingerprint]: { playerId: player.id, canonicalScreenName: player.screen_name, selectionSource: "manual" } })); setSearching(null) }} />}</td><td className="p-2">{existingBestScore ?? "—"}</td><td className="p-2 font-bold">{ACTION_LABELS[category]}</td></tr>
         })}</tbody></table></div>
         <div className="mt-4 flex items-center justify-between"><button type="button" disabled={paged.page <= 1} onClick={() => setPageNumber((page) => page - 1)} className="rounded border border-slate-600 px-3 py-2 disabled:opacity-40">Previous</button><span>Page {paged.page} of {paged.totalPages}</span><button type="button" disabled={paged.page >= paged.totalPages} onClick={() => setPageNumber((page) => page + 1)} className="rounded border border-slate-600 px-3 py-2 disabled:opacity-40">Next</button></div>
       </section>

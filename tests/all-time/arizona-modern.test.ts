@@ -20,7 +20,7 @@ import type {
   ArizonaSourceRecord,
   IdentityPreview,
 } from "../../lib/all-time/arizona/types.ts"
-import { parseArizonaModernWorkbook } from "../../lib/all-time/arizona/xlsm.ts"
+import { parseArizonaModernWorkbook, parseIndividualCourseWorkbook } from "../../lib/all-time/arizona/xlsm.ts"
 import { parseArizonaCourseCsv } from "../../lib/all-time/arizona/csv.ts"
 import {
   DEFAULT_ALL_TIME_PAGE_SIZE,
@@ -335,6 +335,47 @@ test("AMH CSV maps only to Arizona Modern Hard", () => {
   assert.equal(parsed.records[0].historicalPlayerName, "KD0017")
 })
 
+const aroundCourses = {
+  Easy: { code: "AWE", difficulty: "Easy" as const, baseMap: "Around The World", displayName: "Around The World Easy" },
+  Hard: { code: "AWH", difficulty: "Hard" as const, baseMap: "Around The World", displayName: "Around The World Hard" },
+}
+
+test("generic CSV parser supports AWE and AWH while keeping difficulties separate", () => {
+  const easy = parseArizonaCourseCsv(`${csvHeader}\nWorld Player,-20,2,1,August.xlsm,2026-08-14,,AWE`, { ...aroundCourses.Easy, sourceCourseName: "Around The World" }, "awe.csv")
+  const hard = parseArizonaCourseCsv(`${csvHeader}\nWorld Player,-12,2,1,August.xlsm,2026-08-14,,AWH`, { ...aroundCourses.Hard, sourceCourseName: "Around The World" }, "awh.csv")
+  assert.equal(easy.issues.length, 0)
+  assert.equal(hard.issues.length, 0)
+  assert.deepEqual([easy.records[0].courseCode, easy.records[0].difficulty, easy.records[0].sourceCourseName], ["AWE", "Easy", "Around The World"])
+  assert.deepEqual([hard.records[0].courseCode, hard.records[0].difficulty, hard.records[0].sourceCourseName], ["AWH", "Hard", "Around The World"])
+  const mismatch = parseArizonaCourseCsv(`${csvHeader}\nWorld Player,-12,2,1,August.xlsm,2026-08-14,,AWH`, { ...aroundCourses.Easy, sourceCourseName: "Around The World" }, "wrong.csv")
+  assert.equal(mismatch.records.length, 0)
+  assert.equal(mismatch.issues[0].category, "course_mapping_issue")
+})
+
+test("latest workbook has exactly 119 AWE and 114 AWH observations", { skip: !existsSync(`${downloads}\\All Time Leaderboard To 14th Aug 2026 Dawn.xlsm`) }, () => {
+  const parsed = parseIndividualCourseWorkbook(readFileSync(`${downloads}\\All Time Leaderboard To 14th Aug 2026 Dawn.xlsm`), "All Time Leaderboard To 14th Aug 2026 Dawn.xlsm", "Around The World", aroundCourses)
+  assert.equal(parsed.issues.length, 0)
+  assert.equal(parsed.records.filter((row) => row.courseCode === "AWE").length, 119)
+  assert.equal(parsed.records.filter((row) => row.courseCode === "AWH").length, 114)
+  assert.ok(parsed.records.every((row) => row.sourceWorksheet === "All Time" && row.sourceCourseName === "Around The World"))
+})
+
+test("generic migration catalogs AWE/AWH and validates catalog, activity, difficulty, and mapping", () => {
+  const sql = readFileSync("all_time_records_generic_course_import.sql", "utf8")
+  assert.match(sql, /'AWE', 'Around The World', 'Easy', 'Around The World Easy'/)
+  assert.match(sql, /'AWH', 'Around The World', 'Hard', 'Around The World Hard'/)
+  assert.match(sql, /course\.active/)
+  assert.match(sql, /course\.difficulty in \('Easy', 'Hard'\)/)
+  assert.match(sql, /mapping\.source_course_name = v_item->>'source_course_name'/)
+  assert.match(sql, /unknown, inactive, Combined/)
+  assert.doesNotMatch(sql, /update public\.all_time_record_observations/)
+  assert.doesNotMatch(sql, /course\.code in \('AME', 'AMH'\)/)
+  assert.doesNotMatch(sql, /all_time_combined_observations/)
+  assert.match(sql, /security definer set search_path to ''/)
+  assert.match(sql, /resolve_canonical_player_id/)
+  assert.match(sql, /site-player-identity-merge/)
+})
+
 test("one-course CSV rejects mixed targets and Combined columns", () => {
   const mixed = parseArizonaCourseCsv(`${csvHeader}\nPlayer,-8,2,1,August.xlsm,2026-08-14,source,AMH`, "AME", "mixed.csv")
   assert.equal(mixed.records.length, 0)
@@ -393,11 +434,17 @@ test("admin-selected player and explicit leave-unresolved complete review", () =
   assert.equal(effectivePreviewCategory(previewRow, unresolved, []).category, "unresolved_identity")
 })
 
-test("admin page is CSV-only and apply remains protected server-side", () => {
+test("generic admin page is catalog-driven, CSV-only, and apply remains protected server-side", () => {
   const page = readFileSync("app/admin/records/arizona-modern/page.tsx", "utf8")
   const applyRoute = readFileSync("app/api/admin/records/arizona-modern/apply/route.ts", "utf8")
+  const shared = readFileSync("app/api/admin/records/arizona-modern/_shared.ts", "utf8")
   assert.match(page, /accept="\.csv,text\/csv"/)
   assert.doesNotMatch(page, /accept="\.xlsm"/)
+  assert.match(page, /\/api\/admin\/records\/all-time/)
+  assert.match(page, /INITIAL BEST RECORD/)
+  assert.match(shared, /all_time_courses/)
+  assert.match(shared, /\.eq\("active", true\)/)
+  assert.match(shared, /\.in\("difficulty", \["Easy", "Hard"\]\)/)
   assert.match(applyRoute, /authorizedAdminClient/)
   assert.match(applyRoute, /apply_all_time_record_import/)
   assert.doesNotMatch(applyRoute, /apply_all_time_combined_observation/)

@@ -1,6 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js"
 import { matchPlayers } from "@/lib/importer/matchPlayers"
 import type { PlayerIdentityAlias } from "@/lib/identity"
+import type { AllTimeCourseTarget } from "@/lib/all-time/arizona/types"
 
 type PlayerRow = { id: string; screen_name: string; discord_name: string | null; discord_username: string | null; discord_id: string | null; active: boolean }
 type AliasRow = { id: string; player_id: string; alias: string; normalized_alias: string; source: string | null; verified: boolean }
@@ -33,4 +34,32 @@ export async function loadIdentityDirectory(supabase: SupabaseClient) {
   const aliases: PlayerIdentityAlias[] = ((aliasesResult.data ?? []) as AliasRow[]).map((row) => ({ id: row.id, playerId: canonicalId(row.player_id), aliasName: row.alias, normalizedAlias: row.normalized_alias, source: row.source === "manual" || row.source === "import" || row.source === "discord_name" || row.source === "screen_name" || row.source === "historical_alias" ? row.source : "unknown", active: true, verified: row.verified }))
   const links = rawLinks.map((link) => ({ historicalPlayerId: link.historical_player_id, canonicalPlayerId: link.canonical_player_id }))
   return { rawPlayers, canonicalId, matchNames: (names: string[]) => matchPlayers(names, rawPlayers, aliases, links) }
+}
+
+export async function loadIndividualCourses(supabase: SupabaseClient): Promise<AllTimeCourseTarget[]> {
+  const { data: courses, error: courseError } = await supabase
+    .from("all_time_courses")
+    .select("id, code, base_map, difficulty, display_name")
+    .eq("active", true)
+    .in("difficulty", ["Easy", "Hard"])
+    .order("code")
+  if (courseError) throw new Error(`Could not load All-Time courses: ${courseError.message}`)
+  const ids = (courses ?? []).map((course) => course.id)
+  const { data: mappings, error: mappingError } = ids.length
+    ? await supabase.from("all_time_course_source_mappings").select("course_id, source_course_name, difficulty").eq("source_type", "historical_workbook").in("course_id", ids)
+    : { data: [], error: null }
+  if (mappingError) throw new Error(`Could not load All-Time source mappings: ${mappingError.message}`)
+  const byCourse = new Map((mappings ?? []).map((mapping) => [`${mapping.course_id}:${mapping.difficulty}`, mapping.source_course_name]))
+  return (courses ?? []).flatMap((course) => {
+    if (course.difficulty !== "Easy" && course.difficulty !== "Hard") return []
+    const sourceCourseName = byCourse.get(`${course.id}:${course.difficulty}`)
+    return sourceCourseName ? [{ code: course.code, difficulty: course.difficulty, baseMap: course.base_map, displayName: course.display_name, sourceCourseName }] : []
+  })
+}
+
+export async function loadSelectedCourse(supabase: SupabaseClient, courseCode: unknown) {
+  if (typeof courseCode !== "string" || !courseCode) throw new Error("Choose an active Easy/Hard course.")
+  const course = (await loadIndividualCourses(supabase)).find((candidate) => candidate.code === courseCode)
+  if (!course) throw new Error("The selected course is unknown, inactive, Combined, or has no historical source mapping.")
+  return course
 }
