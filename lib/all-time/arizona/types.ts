@@ -2,11 +2,14 @@ export type ArizonaDifficulty = "Easy" | "Hard"
 
 export type ArizonaCourseCode = string
 
-export type AllTimeCourseTarget = {
+export type AllTimeCourseOption = {
   code: string
   difficulty: ArizonaDifficulty
   baseMap: string
   displayName: string
+}
+
+export type AllTimeCourseTarget = AllTimeCourseOption & {
   sourceCourseName: string
 }
 

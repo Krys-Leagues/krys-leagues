@@ -1,7 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js"
 import { matchPlayers } from "@/lib/importer/matchPlayers"
 import type { PlayerIdentityAlias } from "@/lib/identity"
-import type { AllTimeCourseTarget } from "@/lib/all-time/arizona/types"
+import type { AllTimeCourseOption, AllTimeCourseTarget } from "@/lib/all-time/arizona/types"
 
 type PlayerRow = { id: string; screen_name: string; discord_name: string | null; discord_username: string | null; discord_id: string | null; active: boolean }
 type AliasRow = { id: string; player_id: string; alias: string; normalized_alias: string; source: string | null; verified: boolean }
@@ -36,7 +36,7 @@ export async function loadIdentityDirectory(supabase: SupabaseClient) {
   return { rawPlayers, canonicalId, matchNames: (names: string[]) => matchPlayers(names, rawPlayers, aliases, links) }
 }
 
-export async function loadIndividualCourses(supabase: SupabaseClient): Promise<AllTimeCourseTarget[]> {
+export async function loadIndividualCourses(supabase: SupabaseClient): Promise<AllTimeCourseOption[]> {
   const { data: courses, error: courseError } = await supabase
     .from("all_time_courses")
     .select("id, code, base_map, difficulty, display_name")
@@ -44,22 +44,31 @@ export async function loadIndividualCourses(supabase: SupabaseClient): Promise<A
     .in("difficulty", ["Easy", "Hard"])
     .order("code")
   if (courseError) throw new Error(`Could not load All-Time courses: ${courseError.message}`)
-  const ids = (courses ?? []).map((course) => course.id)
-  const { data: mappings, error: mappingError } = ids.length
-    ? await supabase.from("all_time_course_source_mappings").select("course_id, source_course_name, difficulty").eq("source_type", "historical_workbook").in("course_id", ids)
-    : { data: [], error: null }
-  if (mappingError) throw new Error(`Could not load All-Time source mappings: ${mappingError.message}`)
-  const byCourse = new Map((mappings ?? []).map((mapping) => [`${mapping.course_id}:${mapping.difficulty}`, mapping.source_course_name]))
   return (courses ?? []).flatMap((course) => {
     if (course.difficulty !== "Easy" && course.difficulty !== "Hard") return []
-    const sourceCourseName = byCourse.get(`${course.id}:${course.difficulty}`)
-    return sourceCourseName ? [{ code: course.code, difficulty: course.difficulty, baseMap: course.base_map, displayName: course.display_name, sourceCourseName }] : []
+    return [{ code: course.code, difficulty: course.difficulty, baseMap: course.base_map, displayName: course.display_name }]
   })
 }
 
-export async function loadSelectedCourse(supabase: SupabaseClient, courseCode: unknown) {
+export async function loadSelectedCourse(supabase: SupabaseClient, courseCode: unknown): Promise<AllTimeCourseTarget> {
   if (typeof courseCode !== "string" || !courseCode) throw new Error("Choose an active Easy/Hard course.")
-  const course = (await loadIndividualCourses(supabase)).find((candidate) => candidate.code === courseCode)
-  if (!course) throw new Error("The selected course is unknown, inactive, Combined, or has no historical source mapping.")
-  return course
+  const { data: course, error: courseError } = await supabase
+    .from("all_time_courses")
+    .select("id, code, base_map, difficulty, display_name")
+    .eq("code", courseCode)
+    .eq("active", true)
+    .in("difficulty", ["Easy", "Hard"])
+    .maybeSingle()
+  if (courseError) throw new Error(`Could not load the selected All-Time course: ${courseError.message}`)
+  if (!course || (course.difficulty !== "Easy" && course.difficulty !== "Hard")) throw new Error("The selected course is unknown, inactive, or Combined.")
+  const { data: mapping, error } = await supabase
+    .from("all_time_course_source_mappings")
+    .select("source_course_name")
+    .eq("source_type", "historical_workbook")
+    .eq("difficulty", course.difficulty)
+    .eq("course_id", course.id)
+    .maybeSingle()
+  if (error) throw new Error(`Could not load the selected course source mapping: ${error.message}`)
+  if (!mapping?.source_course_name) throw new Error(`${course.code} has no historical workbook source mapping and cannot be previewed or imported.`)
+  return { code: course.code, difficulty: course.difficulty, baseMap: course.base_map, displayName: course.display_name, sourceCourseName: mapping.source_course_name }
 }

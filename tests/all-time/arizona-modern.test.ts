@@ -445,6 +445,12 @@ test("generic admin page is catalog-driven, CSV-only, and apply remains protecte
   assert.match(shared, /all_time_courses/)
   assert.match(shared, /\.eq\("active", true\)/)
   assert.match(shared, /\.in\("difficulty", \["Easy", "Hard"\]\)/)
+  const catalogLoader = shared.slice(shared.indexOf("export async function loadIndividualCourses"), shared.indexOf("export async function loadSelectedCourse"))
+  assert.doesNotMatch(catalogLoader, /all_time_course_source_mappings/)
+  assert.match(shared, /has no historical workbook source mapping and cannot be previewed or imported/)
+  for (const code of ["EDE", "EDH", "GBE", "GBH", "SSE", "SSH", "TTE", "TTH"]) {
+    assert.doesNotMatch(page, new RegExp(`value=["']${code}["']`))
+  }
   assert.match(applyRoute, /authorizedAdminClient/)
   assert.match(applyRoute, /apply_all_time_record_import/)
   assert.doesNotMatch(applyRoute, /apply_all_time_combined_observation/)

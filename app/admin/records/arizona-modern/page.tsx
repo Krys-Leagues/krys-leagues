@@ -5,7 +5,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react"
 
 import ExistingPlayerPicker from "@/app/admin/import/csv/components/ExistingPlayerPicker"
 import { ALL_TIME_PAGE_SIZES, DEFAULT_ALL_TIME_PAGE_SIZE, buildReviewedPreviewRows, identityReviewComplete, paginateRows } from "@/lib/all-time/arizona/review"
-import type { AllTimeCourseTarget, ArizonaCsvIssue, ArizonaIdentityDecision, ArizonaPreviewRow, BestRecordSnapshot } from "@/lib/all-time/arizona/types"
+import type { AllTimeCourseOption, ArizonaCsvIssue, ArizonaIdentityDecision, ArizonaPreviewRow, BestRecordSnapshot } from "@/lib/all-time/arizona/types"
 import { supabase } from "@/lib/supabase"
 
 type PreviewResponse = {
@@ -28,7 +28,7 @@ type ImportResponse = {
 const ACTION_LABELS: Record<string, string> = { new_record: "INITIAL BEST RECORD", better_score: "BETTER SCORE", equal_unchanged: "EQUAL / UNCHANGED", worse_score_ignored: "KEEP EXISTING BETTER SCORE", unresolved_identity: "UNRESOLVED IDENTITY", ambiguous_identity: "AMBIGUOUS IDENTITY" }
 
 export default function ArizonaModernPilotPage() {
-  const [courses, setCourses] = useState<AllTimeCourseTarget[]>([])
+  const [courses, setCourses] = useState<AllTimeCourseOption[]>([])
   const [courseCode, setCourseCode] = useState("")
   const [csvFile, setCsvFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<PreviewResponse | null>(null)
@@ -44,7 +44,7 @@ export default function ArizonaModernPilotPage() {
   useEffect(() => { void (async () => {
     try {
       const response = await fetch("/api/admin/records/all-time/preview", { headers: { Authorization: `Bearer ${await sessionToken()}` } })
-      const payload = await response.json() as { courses?: AllTimeCourseTarget[]; error?: string }
+      const payload = await response.json() as { courses?: AllTimeCourseOption[]; error?: string }
       if (!response.ok || payload.error) throw new Error(payload.error || "Course catalog failed.")
       setCourses(payload.courses ?? []); setCourseCode((current) => current || payload.courses?.[0]?.code || "")
     } catch (caught) { setError(caught instanceof Error ? caught.message : "Course catalog failed.") }
