@@ -22,6 +22,7 @@ export default function MajorDetailPage() {
   const [saving, setSaving] = useState(false)
   const [reviewing, setReviewing] = useState(false)
   const [signupStatus, setSignupStatus] = useState<MajorSignupStatus | null>(null)
+  const [currentTime, setCurrentTime] = useState(0)
 
   const loadEvent = useCallback(async () => {
     const eventResult = await supabase.from("major_events").select("*").eq("slug", slug).maybeSingle()
@@ -48,6 +49,7 @@ export default function MajorDetailPage() {
       setChoices(Object.fromEntries(mine.map((choice) => [choice.play_day_id, choice.time_slot_id])))
     }
     setMessage(eventResult.error?.message || entryResult.error?.message || dayResult.error?.message || slotResult.error?.message || "")
+    setCurrentTime(Date.now())
     setLoading(false)
   }, [slug])
 
@@ -56,6 +58,11 @@ export default function MajorDetailPage() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadEvent()
   }, [loadEvent])
+
+  useEffect(() => {
+    const clock = window.setInterval(() => setCurrentTime(Date.now()), 60_000)
+    return () => window.clearInterval(clock)
+  }, [])
 
   async function signIn() {
     await supabase.auth.signInWithOAuth({ provider: "discord", options: { redirectTo: createDiscordAuthCallbackUrl("player") } })
@@ -102,14 +109,14 @@ export default function MajorDetailPage() {
         })}
       </nav>
       <section className={styles.majorsIntro}>
-        <p className={styles.eyebrow}>Welcome to the Four Majors</p>
         <h1>WELCOME TO THE FOUR MAJORS</h1>
         <p className={styles.majorNames}>The Masters <i>·</i> The PGA <i>·</i> The U.S. Open <i>·</i> The Open Championship</p>
+        <p className={styles.miniGolfStyle}>MINI GOLF STYLE</p>
         <p>In traditional major-championship style, each Major will be played over four rounds of golf — Thursday, Friday, Saturday, and Sunday.</p>
         <p>Choose your preferred playing time for each round below.</p>
         <strong className={styles.aspirational}>WHO WILL BE THE FIRST TO WIN ALL FOUR?</strong>
       </section>
-      <div className={styles.brandRow}><Image src="/league-media/BIG LOGO TRANSPARENT.png" width={136} height={136} alt="Krys Leagues" className={styles.logo} priority /><div><p className={styles.eyebrow}>{testEvent ? "Krys Leagues · Controlled testing" : "Krys Leagues · Majors Series"}</p><h2 className={styles.eventTitle}>{testEvent ? "TEST EVENT" : masters ? "THE MASTERS" : event.name}</h2><p className={styles.eventIdentity}>{testEvent ? "TEST DATA — NOT OFFICIAL" : masters ? "MINI GOLF MASTERS" : "MAJOR CHAMPIONSHIP"}</p><p className={styles.subtitle}>{testEvent ? "The real Major workflow, rehearsed safely" : masters ? "CHERRY BLOSSOM" : "Four-round mini golf championship"}</p></div></div>
+      <div className={styles.brandRow}><Image src="/league-media/BIG LOGO TRANSPARENT.png" width={136} height={136} alt="Krys Leagues" className={styles.logo} priority /><div><h2 className={styles.eventTitle}>{testEvent ? "TEST EVENT" : masters ? "THE MASTERS" : event.name}</h2><p className={styles.eventIdentity}>{testEvent ? "TEST DATA — NOT OFFICIAL" : masters ? "MINI GOLF MASTERS" : "MAJOR CHAMPIONSHIP"}</p><p className={styles.subtitle}>{testEvent ? "The real Major workflow, rehearsed safely" : masters ? "CHERRY BLOSSOM" : "Four-round mini golf championship"}</p></div></div>
       {masters && <div className={styles.mastersFeature} role="img" aria-label="Cherry Blossom course artwork from the Masters scorecard"><div className={styles.featureSheen} /></div>}
       <div className={styles.statusRow}><span className={styles.badge}>{event.status}</span><span className={`${styles.badge} ${styles[signupState]}`}>Signup {signupState}</span><span className={styles.capacity}>{signupStatus?.capacity ? `${signupStatus.spots_claimed} / ${signupStatus.capacity} spots claimed` : `${entries.length} claimed · field capacity not set`}</span></div>
       <p className={styles.meta}>{event.year || "Year to be announced"} · {formatMajorDate(event.starts_at)}</p>
@@ -136,6 +143,8 @@ export default function MajorDetailPage() {
           const mine = schedule.find((choice) => choice.play_day_id === day.id)
           const daySlots = slots.filter((slot) => slot.play_day_id === day.id)
           const locked = mine?.is_locked ?? isMajorDayLocked(day)
+          const firstScheduledTime = daySlots.reduce<string | null>((earliest, slot) => !earliest || slot.starts_at < earliest ? slot.starts_at : earliest, null)
+          const firstScheduledTimeHasBegun = firstScheduledTime ? currentTime >= new Date(firstScheduledTime).getTime() : false
           const dayName = DAY_LABELS[day.day_number - 1]
           return <fieldset key={day.id} className={styles.dayCard} disabled={locked || signupDisabled}>
             <legend><span>{dayName.day}</span>{dayName.round}</legend><p className={styles.dayContext}>Official round date: {formatPlayDate(day.play_date)}</p>
@@ -145,7 +154,7 @@ export default function MajorDetailPage() {
               return <label key={slot.id} className={`${styles.slotLabel} ${choices[day.id] === slot.id ? styles.selected : ""}`}><input type="radio" name={day.id} checked={choices[day.id] === slot.id} onChange={() => { setChoices((old) => ({ ...old, [day.id]: slot.id })); setReviewing(false) }} /><span className={styles.slotName}>{slot.label || "Available"}</span><span className={styles.localDateTime}><strong>{formatMajorLocalDate(slot.starts_at, localTimeZone)}</strong><b>{formatMajorLocalTime(slot.starts_at, localTimeZone)}</b><small>{event.schedule_timezone !== localTimeZone ? `${formatMajorLocalTime(slot.starts_at, event.schedule_timezone)} · event time` : "Event reference time"}</small>{dateShift && <em>{dateShift}</em>}</span></label>
             }) : <p className={styles.notice}>No times available yet.</p>}
             <p className={styles.lockDeadline}>{dayName.day} selections lock:<strong>{day.selection_locks_at ? formatMajorDeadline(day.selection_locks_at, localTimeZone) : "Deadline appears after the first time is scheduled"}</strong><span>{localTimeZone}</span></p>
-            {locked && <p className={styles.locked}>Selection locked — tournament admins can still help</p>}
+            {locked && <p className={styles.locked}>{firstScheduledTimeHasBegun ? "Selection locked" : "Selection locked — tournament admins can still help"}</p>}
           </fieldset>
         })}</div>}
         {days.length === 4 && !reviewing && <button onClick={() => setReviewing(true)} disabled={saving || signupDisabled || !allFourSelected} className={styles.primaryButton}>{schedule.length ? "REVIEW MY UPDATED TIMES" : "REVIEW MY 4 DAY SIGNUP"}</button>}

@@ -5,6 +5,13 @@ import { useEffect, useState } from "react"
 import { supabase } from "@/lib/supabase"
 import { formatMajorDate, type MajorEvent } from "@/lib/majors"
 
+const MAJOR_CARD_DISPLAY: Record<string, { name: string; date: string }> = {
+  "major-1": { name: "MINI GOLF MASTERS", date: "SEPTEMBER 2026" },
+  "major-2": { name: "THE MGA", date: "2026" },
+  "major-3": { name: "THE MINI GOLF OPEN", date: "2026" },
+  "major-4": { name: "THE MINI GOLF CHAMPIONSHIP", date: "2026" },
+}
+
 export default function MajorsPage() {
   const [events, setEvents] = useState<MajorEvent[]>([])
   const [loading, setLoading] = useState(true)
@@ -40,19 +47,19 @@ export default function MajorsPage() {
           <section style={card}>Major details are being prepared. Please check back soon.</section>
         )}
         <div style={grid}>
-          {events.map((event) => (
-            <Link key={event.id} href={`/majors/${event.slug}`} style={cardLink}>
+          {events.map((event) => {
+            const display = MAJOR_CARD_DISPLAY[event.slug]
+            return <Link key={event.id} href={`/majors/${event.slug}`} style={cardLink}>
               <div style={cardHeader}>
                 <span style={statusBadge}>{event.status}</span>
                 {event.signup_open && <span style={signupBadge}>Signup open</span>}
               </div>
-              <h2 style={cardTitle}>{event.name}</h2>
+              <h2 style={cardTitle}>{display?.name || event.name}</h2>
               {event.is_test_event && <p style={testText}>TEST DATA — NOT OFFICIAL</p>}
-              <p style={muted}>{event.year || "Year to be announced"}</p>
-              <p style={muted}>{formatMajorDate(event.starts_at)}</p>
+              <p style={muted}>{display?.date || (event.starts_at ? formatMajorDate(event.starts_at) : event.year || "2026")}</p>
               {event.stream_is_live && <p style={liveText}>● Live now</p>}
             </Link>
-          ))}
+          })}
         </div>
       </div>
     </main>
