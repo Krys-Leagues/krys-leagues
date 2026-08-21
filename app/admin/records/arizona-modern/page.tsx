@@ -1,217 +1,125 @@
 "use client"
 
 import Link from "next/link"
-import { FormEvent, useState } from "react"
+import { FormEvent, useMemo, useState } from "react"
 
+import ExistingPlayerPicker from "@/app/admin/import/csv/components/ExistingPlayerPicker"
+import { ALL_TIME_PAGE_SIZES, DEFAULT_ALL_TIME_PAGE_SIZE, buildReviewedPreviewRows, identityReviewComplete, paginateRows } from "@/lib/all-time/arizona/review"
+import type { ArizonaCourseCode, ArizonaCsvIssue, ArizonaIdentityDecision, ArizonaPreviewRow, BestRecordSnapshot } from "@/lib/all-time/arizona/types"
 import { supabase } from "@/lib/supabase"
 
 type PreviewResponse = {
   error?: string
-  foundationInstalled?: boolean
-  sourceRowsScanned?: number
-  categoryCounts?: Record<string, number>
-  workbookResults?: Array<{
-    sourceFilename: string
-    sourceFileHash: string
-    sourceCourseName: string
-    recordCount: number
-    issues: Array<{ category: string; message: string; sourceRow: number | null }>
-  }>
-  previewRows?: Array<{
-    fingerprint: string
-    sourceFilename: string
-    sourceRow: number
-    sourceNameCell: string
-    sourceScoreCell: string
-    sourceCourseName: string
-    historicalPlayerName: string
-    difficulty: string
-    courseCode: string
-    score: number
-    category: string
-    existingBestScore: number | null
-    identity: {
-      status: string
-      canonicalScreenName: string | null
-      matchedSource: string
-      candidates: Array<{ screenName: string; confidence: number }>
-    }
-  }>
-  legacy?: {
-    reconciliation: Record<string, number>
-    issues: Array<{ filename: string; row: number; message: string }>
-  }
-  identityFollowUps?: Array<{
-    historicalPlayerName: string
-    status: string
-    candidates: Array<{ screenName: string; confidence: number }>
-  }>
+  courseCode: ArizonaCourseCode
+  csvFilename: string
+  csvFileHash: string
+  sourceRowsScanned: number
+  issues: ArizonaCsvIssue[]
+  existingBest: BestRecordSnapshot[]
+  previewRows: ArizonaPreviewRow[]
 }
+
+type ImportResponse = {
+  error?: string
+  result?: Record<string, unknown>
+  identityMemory?: { created: number; alreadyKnown: number; conflicts: unknown[]; failures: unknown[] }
+}
+
+const COURSE_LABELS = { AME: "Arizona Modern Easy", AMH: "Arizona Modern Hard" } as const
 
 export default function ArizonaModernPilotPage() {
+  const [courseCode, setCourseCode] = useState<ArizonaCourseCode>("AME")
+  const [csvFile, setCsvFile] = useState<File | null>(null)
+  const [preview, setPreview] = useState<PreviewResponse | null>(null)
+  const [decisions, setDecisions] = useState<Record<string, ArizonaIdentityDecision>>({})
+  const [searching, setSearching] = useState<string | null>(null)
+  const [pageNumber, setPageNumber] = useState(1)
+  const [pageSize, setPageSize] = useState(DEFAULT_ALL_TIME_PAGE_SIZE)
   const [busy, setBusy] = useState(false)
-  const [result, setResult] = useState<PreviewResponse | null>(null)
+  const [error, setError] = useState("")
+  const [confirming, setConfirming] = useState(false)
+  const [importResult, setImportResult] = useState<ImportResponse | null>(null)
 
-  async function preview(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setBusy(true)
-    setResult(null)
+  const effectiveRows = useMemo(() => buildReviewedPreviewRows(preview?.previewRows ?? [], decisions, preview?.existingBest ?? []), [decisions, preview])
+  const paged = useMemo(() => paginateRows(effectiveRows, pageNumber, pageSize), [effectiveRows, pageNumber, pageSize])
+  const pendingReview = (preview?.previewRows ?? []).filter((row) => !identityReviewComplete(row, decisions[row.fingerprint])).length
+  const categoryCounts = effectiveRows.reduce<Record<string, number>>((counts, item) => { counts[item.category] = (counts[item.category] ?? 0) + 1; return counts }, {})
+  const canImport = Boolean(preview && csvFile && preview.issues.length === 0 && preview.previewRows.length > 0 && pendingReview === 0 && !busy && !importResult)
 
+  async function sessionToken() {
     const session = (await supabase.auth.getSession()).data.session
-    if (!session) {
-      setResult({ error: "An authenticated site-admin session is required." })
-      setBusy(false)
-      return
-    }
-
-    const response = await fetch("/api/admin/records/arizona-modern/preview", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${session.access_token}` },
-      body: new FormData(event.currentTarget),
-    })
-    const payload = (await response.json()) as PreviewResponse
-    setResult(payload)
-    setBusy(false)
+    if (!session) throw new Error("An authenticated site-admin session is required.")
+    return session.access_token
   }
 
-  return (
-    <main style={page}>
-      <Link href="/admin/records" style={backLink}>← Records Admin</Link>
-      <h1 style={title}>Arizona Modern All-Time Pilot</h1>
-      <p style={subtitle}>
-        Read-only preview for <strong>Arazona Modern</strong> historical workbook rows,
-        canonical AME/AMH identity resolution, and the 104-row legacy combined snapshot.
-      </p>
+  async function buildPreview(event: FormEvent) {
+    event.preventDefault()
+    if (!csvFile) return setError("Choose one CSV file.")
+    setBusy(true); setError(""); setPreview(null); setDecisions({}); setImportResult(null); setPageNumber(1)
+    try {
+      const form = new FormData(); form.set("courseCode", courseCode); form.set("csv", csvFile)
+      const response = await fetch("/api/admin/records/arizona-modern/preview", { method: "POST", headers: { Authorization: `Bearer ${await sessionToken()}` }, body: form })
+      const payload = await response.json() as PreviewResponse
+      if (!response.ok || payload.error) throw new Error(payload.error || "Preview failed.")
+      setPreview(payload)
+    } catch (caught) { setError(caught instanceof Error ? caught.message : "Preview failed.") }
+    finally { setBusy(false) }
+  }
 
-      <section style={notice}>
-        Preview does not apply records. Combined legacy rows remain pending source verification;
-        handicap_rounds notes do not establish KWT or PRO provenance.
+  function leaveUnresolved(row: ArizonaPreviewRow) {
+    setDecisions((current) => ({ ...current, [row.fingerprint]: { playerId: null, canonicalScreenName: null, selectionSource: "unresolved" } }))
+    setSearching(null)
+  }
+
+  async function applyImport() {
+    if (!canImport || !csvFile) return
+    setBusy(true); setError(""); setConfirming(false)
+    try {
+      const form = new FormData(); form.set("courseCode", courseCode); form.set("csv", csvFile); form.set("decisions", JSON.stringify(decisions))
+      const response = await fetch("/api/admin/records/arizona-modern/apply", { method: "POST", headers: { Authorization: `Bearer ${await sessionToken()}` }, body: form })
+      const payload = await response.json() as ImportResponse
+      if (!response.ok || payload.error) throw new Error(payload.error || "Import failed.")
+      setImportResult(payload)
+    } catch (caught) { setError(caught instanceof Error ? caught.message : "Import failed.") }
+    finally { setBusy(false) }
+  }
+
+  return <main className="min-h-screen bg-slate-950 p-6 text-white">
+    <Link href="/admin/records" className="text-blue-300">← Records Admin</Link>
+    <h1 className="mt-4 text-4xl font-bold">Arizona Modern All-Time Records</h1>
+    <p className="mt-2 max-w-4xl text-slate-300">Import one Easy or Hard historical course CSV at a time. Preview and identity review are read-only; the protected All-Time RPC remains authoritative on final import.</p>
+    <section className="mt-5 rounded-xl border border-blue-700 bg-blue-950/40 p-4 text-blue-100">CSV only. Easy and Hard remain separate. Combined records and the 104 pending legacy rows are not part of this importer.</section>
+
+    <form onSubmit={buildPreview} className="mt-6 space-y-5 rounded-2xl border border-slate-700 bg-slate-900 p-6">
+      <fieldset><legend className="font-bold">1. Target course</legend><div className="mt-3 flex flex-wrap gap-3">{(["AME", "AMH"] as const).map((code) => <label key={code} className={`cursor-pointer rounded-lg border p-4 ${courseCode === code ? "border-emerald-400 bg-emerald-950/40" : "border-slate-600"}`}><input type="radio" checked={courseCode === code} onChange={() => { setCourseCode(code); setPreview(null); setImportResult(null) }} className="mr-2" />{code} — {COURSE_LABELS[code]}</label>)}</div></fieldset>
+      <label className="block font-bold">2. Choose one CSV<input type="file" accept=".csv,text/csv" onChange={(event) => { setCsvFile(event.target.files?.[0] ?? null); setPreview(null); setImportResult(null) }} className="mt-2 block w-full rounded border border-slate-600 bg-slate-950 p-3" /></label>
+      <p className="text-sm text-slate-400">Required columns: <code>historical_player_name,score</code>. Optional: <code>source_row,rank,source_workbook,source_date,notes,course_code</code>.</p>
+      <button disabled={busy || !csvFile} className="rounded bg-blue-700 px-5 py-3 font-bold disabled:bg-slate-700">{busy ? "Working…" : "Preview CSV"}</button>
+    </form>
+
+    {error && <div role="alert" className="mt-5 rounded border border-red-700 bg-red-950/50 p-4 text-red-200">{error}</div>}
+    {preview && <>
+      <section className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <Summary label="Rows scanned" value={preview.sourceRowsScanned} /><Summary label="Needs identity review" value={pendingReview} /><Summary label="Invalid / duplicate" value={preview.issues.length} />
+        {Object.entries(categoryCounts).map(([label, value]) => <Summary key={label} label={label.replaceAll("_", " ")} value={value} />)}
+      </section>
+      <section className="mt-6 rounded-xl border border-slate-700 bg-slate-900 p-4"><h2 className="text-xl font-bold">Source</h2><div>{preview.csvFilename} · {preview.courseCode} · {preview.previewRows.length} valid rows</div><code className="break-all text-xs text-slate-500">{preview.csvFileHash}</code>{preview.issues.map((issue, index) => <div key={`${issue.csvRow}-${index}`} className="mt-2 text-amber-200"><strong>{issue.category.replaceAll("_", " ")}</strong> · CSV row {issue.csvRow}: {issue.message}</div>)}</section>
+
+      <section className="mt-6 rounded-2xl border border-slate-700 bg-slate-900 p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-2xl font-bold">3. Review player matches</h2><label>Rows per page <select value={pageSize} onChange={(event) => { setPageSize(Number(event.target.value)); setPageNumber(1) }} className="ml-2 rounded bg-slate-950 p-2">{ALL_TIME_PAGE_SIZES.map((size) => <option key={size}>{size}</option>)}</select></label></div>
+        <div className="mt-4 overflow-x-auto"><table className="min-w-full text-sm"><thead><tr className="border-b border-slate-600 text-left text-slate-400"><th className="p-2">Historical source</th><th className="p-2">Score</th><th className="p-2">Identity review</th><th className="p-2">Existing best</th><th className="p-2">Action</th></tr></thead><tbody>{paged.rows.map(({ row, category, existingBestScore }) => {
+          const decision = decisions[row.fingerprint]; const currentName = decision?.canonicalScreenName ?? row.identity.canonicalScreenName
+          return <tr key={row.fingerprint} className="border-b border-slate-800 align-top"><td className="p-2"><strong>{row.historicalPlayerName}</strong><div className="text-xs text-slate-500">{row.sourceFilename} · source row {row.sourceRow} · CSV row {row.csvRow}</div></td><td className="p-2 text-lg font-bold">{row.score}</td><td className="min-w-80 space-y-2 p-2"><div className={currentName ? "font-bold text-emerald-300" : row.identity.status === "ambiguous" && !decision ? "font-bold text-amber-300" : "text-slate-300"}>{currentName ? `Linked to ${currentName}` : decision ? "Explicitly left unresolved" : row.identity.status === "ambiguous" ? "Ambiguous suggestion — review required" : "Unresolved — review required"}</div><div className="text-xs text-slate-400">Evidence: {row.identity.matchedSource} · confidence {row.identity.confidence}%</div>{row.identity.candidates.map((candidate) => <div key={candidate.playerId} className="text-sm text-amber-200">Suggestion only: {candidate.screenName} ({candidate.confidence}%)</div>)}<div className="flex flex-wrap gap-2"><button type="button" onClick={() => setSearching(row.fingerprint)} className="rounded bg-blue-700 px-3 py-1 font-bold">{currentName ? "Change player" : "Find / Link Existing Player"}</button><button type="button" onClick={() => leaveUnresolved(row)} className="rounded border border-slate-500 px-3 py-1">Leave unresolved</button></div>{searching === row.fingerprint && <ExistingPlayerPicker historicalDisplayName={row.historicalPlayerName} selectLabel="Link & remember identity" onCancel={() => setSearching(null)} onSelect={(player) => { setDecisions((current) => ({ ...current, [row.fingerprint]: { playerId: player.id, canonicalScreenName: player.screen_name, selectionSource: "manual" } })); setSearching(null) }} />}</td><td className="p-2">{existingBestScore ?? "—"}</td><td className="p-2 font-bold">{category.replaceAll("_", " ")}</td></tr>
+        })}</tbody></table></div>
+        <div className="mt-4 flex items-center justify-between"><button type="button" disabled={paged.page <= 1} onClick={() => setPageNumber((page) => page - 1)} className="rounded border border-slate-600 px-3 py-2 disabled:opacity-40">Previous</button><span>Page {paged.page} of {paged.totalPages}</span><button type="button" disabled={paged.page >= paged.totalPages} onClick={() => setPageNumber((page) => page + 1)} className="rounded border border-slate-600 px-3 py-2 disabled:opacity-40">Next</button></div>
       </section>
 
-      <form onSubmit={preview} style={card}>
-        <label style={label}>
-          Historical workbooks (.xlsm, maximum two)
-          <input name="workbooks" type="file" accept=".xlsm" multiple style={input} />
-        </label>
-        <label style={label}>
-          Legacy Arizona Modern CSV exports (maximum two)
-          <input name="legacyCsvs" type="file" accept=".csv,text/csv" multiple style={input} />
-        </label>
-        <button disabled={busy} style={button}>{busy ? "Building preview…" : "Build read-only preview"}</button>
-      </form>
+      <section className="mt-6 rounded-xl border border-emerald-800 bg-emerald-950/20 p-5"><h2 className="text-2xl font-bold">4. Import {preview.courseCode}</h2><p className="mt-2 text-slate-300">All legitimate observations are preserved. Resolved players update current best only when the incoming score is lower. Explicitly unresolved rows are stored without a best record.</p>{pendingReview > 0 && <p className="mt-3 font-bold text-amber-200">Review required for {pendingReview} row(s): select a player or explicitly leave unresolved.</p>}{preview.issues.length > 0 && <p className="mt-3 font-bold text-red-200">Remove invalid or duplicate rows and preview again before import.</p>}<button type="button" disabled={!canImport} onClick={() => setConfirming(true)} className="mt-4 rounded bg-emerald-700 px-5 py-3 font-bold disabled:bg-slate-700">Import {preview.courseCode}</button></section>
+    </>}
 
-      {result?.error && <section style={errorBox}>{result.error}</section>}
-
-      {result && !result.error && (
-        <>
-          {!result.foundationInstalled && (
-            <section style={warningBox}>
-              The normalized SQL foundation is not installed in this environment. Categories are
-              compared across uploaded sources only; no production mutation was attempted.
-            </section>
-          )}
-
-          <section style={summaryGrid}>
-            <Summary label="Source rows scanned" value={result.sourceRowsScanned ?? 0} />
-            {Object.entries(result.categoryCounts ?? {}).map(([label, value]) => (
-              <Summary key={label} label={label.replaceAll("_", " ")} value={value} />
-            ))}
-          </section>
-
-          <section style={card}>
-            <h2>Workbook provenance</h2>
-            {(result.workbookResults ?? []).map((workbook) => (
-              <div key={workbook.sourceFileHash} style={rowBlock}>
-                <strong>{workbook.sourceFilename}</strong>
-                <span>{workbook.recordCount} rows · source spelling: {workbook.sourceCourseName}</span>
-                <code style={hash}>{workbook.sourceFileHash}</code>
-                {workbook.issues.map((issue, index) => (
-                  <span key={`${issue.category}-${index}`} style={warningText}>
-                    {issue.category} {issue.sourceRow ? `row ${issue.sourceRow}` : ""}: {issue.message}
-                  </span>
-                ))}
-              </div>
-            ))}
-          </section>
-
-          <section style={card}>
-            <h2>Legacy combined reconciliation</h2>
-            <div style={summaryGrid}>
-              {Object.entries(result.legacy?.reconciliation ?? {}).map(([label, value]) => (
-                <Summary key={label} label={label.replaceAll(/([A-Z])/g, " $1")} value={value} />
-              ))}
-            </div>
-            {(result.legacy?.issues ?? []).map((issue, index) => (
-              <p key={`${issue.filename}-${issue.row}-${index}`} style={warningText}>
-                {issue.filename} row {issue.row}: {issue.message}
-              </p>
-            ))}
-          </section>
-
-          <section style={card}>
-            <h2>Identity follow-up</h2>
-            {(result.identityFollowUps ?? []).length === 0 ? (
-              <p>No unresolved or ambiguous historical names.</p>
-            ) : (
-              (result.identityFollowUps ?? []).map((identity) => (
-                <div key={identity.historicalPlayerName} style={rowBlock}>
-                  <strong>{identity.historicalPlayerName}</strong>
-                  <span>{identity.status}</span>
-                  {identity.candidates.length > 0 && (
-                    <span>Suggestions only: {identity.candidates.map((candidate) => `${candidate.screenName} (${candidate.confidence}%)`).join(", ")}</span>
-                  )}
-                </div>
-              ))
-            )}
-          </section>
-
-          <section style={card}>
-            <h2>Observation preview</h2>
-            <div style={tableWrap}>
-              <table style={table}>
-                <thead><tr><th>Source</th><th>Cell</th><th>Course</th><th>Historical name</th><th>Canonical</th><th>Score</th><th>Existing</th><th>Action</th></tr></thead>
-                <tbody>
-                  {(result.previewRows ?? []).map((row) => (
-                    <tr key={row.fingerprint}>
-                      <td>{row.sourceFilename} · row {row.sourceRow}</td>
-                      <td>{row.sourceNameCell}/{row.sourceScoreCell}</td>
-                      <td>{row.courseCode} ({row.difficulty})<br /><small>source: {row.sourceCourseName}</small></td>
-                      <td>{row.historicalPlayerName}</td>
-                      <td>{row.identity.canonicalScreenName ?? row.identity.status}</td>
-                      <td>{row.score}</td>
-                      <td>{row.existingBestScore ?? "—"}</td>
-                      <td>{row.category.replaceAll("_", " ")}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
-        </>
-      )}
-    </main>
-  )
+    {confirming && <div role="dialog" aria-modal="true" className="mt-5 rounded-xl border-2 border-amber-500 bg-amber-950/50 p-5"><h2 className="text-xl font-bold">Confirm {courseCode} import</h2><p className="mt-2">This calls the protected All-Time apply function. It does not import the other difficulty or any Combined record.</p><div className="mt-4 flex gap-3"><button type="button" onClick={() => void applyImport()} className="rounded bg-emerald-700 px-4 py-2 font-bold">Confirm and import</button><button type="button" onClick={() => setConfirming(false)} className="rounded border border-slate-500 px-4 py-2">Cancel</button></div></div>}
+    {importResult && <div role="status" className="mt-5 rounded border border-emerald-600 bg-emerald-950/50 p-5 text-emerald-100"><h2 className="font-bold">All-Time CSV import completed</h2><pre className="mt-2 overflow-x-auto text-xs">{JSON.stringify(importResult.result, null, 2)}</pre>{importResult.identityMemory && <p className="mt-2">Verified aliases remembered: {importResult.identityMemory.created}; already known: {importResult.identityMemory.alreadyKnown}; conflicts: {importResult.identityMemory.conflicts.length}; failures: {importResult.identityMemory.failures.length}.</p>}</div>}
+  </main>
 }
 
-function Summary({ label, value }: { label: string; value: number }) {
-  return <div style={summary}><span>{label}</span><strong>{value}</strong></div>
-}
-
-const page: React.CSSProperties = { minHeight: "100vh", padding: 24, background: "#020617", color: "white" }
-const title: React.CSSProperties = { fontSize: 38, marginBottom: 8 }
-const subtitle: React.CSSProperties = { color: "#cbd5e1", maxWidth: 900, lineHeight: 1.6 }
-const backLink: React.CSSProperties = { color: "#93c5fd", textDecoration: "none" }
-const card: React.CSSProperties = { marginTop: 20, padding: 20, border: "1px solid #334155", borderRadius: 14, background: "#0f172a" }
-const notice: React.CSSProperties = { ...card, borderColor: "#1d4ed8", background: "#172554" }
-const warningBox: React.CSSProperties = { ...card, borderColor: "#a16207", background: "#422006" }
-const errorBox: React.CSSProperties = { ...card, borderColor: "#dc2626", background: "#450a0a" }
-const label: React.CSSProperties = { display: "grid", gap: 8, marginBottom: 18, fontWeight: 700 }
-const input: React.CSSProperties = { padding: 10, borderRadius: 8, color: "white", background: "#020617", border: "1px solid #475569" }
-const button: React.CSSProperties = { padding: "12px 18px", borderRadius: 8, border: 0, background: "#2563eb", color: "white", fontWeight: 800, cursor: "pointer" }
-const summaryGrid: React.CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(170px,1fr))", gap: 12, marginTop: 20 }
-const summary: React.CSSProperties = { display: "grid", gap: 6, padding: 14, borderRadius: 10, background: "#111827", border: "1px solid #334155", textTransform: "capitalize" }
-const rowBlock: React.CSSProperties = { display: "grid", gap: 5, padding: "12px 0", borderBottom: "1px solid #334155" }
-const warningText: React.CSSProperties = { color: "#fde68a" }
-const hash: React.CSSProperties = { overflowWrap: "anywhere", color: "#94a3b8" }
-const tableWrap: React.CSSProperties = { overflowX: "auto" }
-const table: React.CSSProperties = { width: "100%", borderCollapse: "collapse", textAlign: "left" }
+function Summary({ label, value }: { label: string; value: number }) { return <div className="rounded-lg border border-slate-700 bg-slate-900 p-4 capitalize"><div className="text-sm text-slate-400">{label}</div><strong className="text-2xl">{value}</strong></div> }

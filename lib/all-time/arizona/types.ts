@@ -18,6 +18,32 @@ export type ArizonaSourceRecord = {
   historicalPlayerName: string
   score: number
   fingerprint: string
+  csvFilename?: string
+  csvRow?: number
+  sourceDate?: string | null
+  notes?: string | null
+}
+
+export type ArizonaCsvIssue = {
+  category: "invalid_row" | "duplicate_source_row" | "course_mapping_issue"
+  csvRow: number
+  historicalPlayerName: string | null
+  rawScore: string | null
+  message: string
+}
+
+export type ArizonaCsvParseResult = {
+  courseCode: ArizonaCourseCode
+  csvFilename: string
+  csvFileHash: string
+  records: ArizonaSourceRecord[]
+  issues: ArizonaCsvIssue[]
+}
+
+export type ArizonaIdentityDecision = {
+  playerId: string | null
+  canonicalScreenName: string | null
+  selectionSource: "auto" | "manual" | "unresolved"
 }
 
 export type ArizonaParseIssue = {

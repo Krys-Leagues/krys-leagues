@@ -21,6 +21,16 @@ import type {
   IdentityPreview,
 } from "../../lib/all-time/arizona/types.ts"
 import { parseArizonaModernWorkbook } from "../../lib/all-time/arizona/xlsm.ts"
+import { parseArizonaCourseCsv } from "../../lib/all-time/arizona/csv.ts"
+import {
+  DEFAULT_ALL_TIME_PAGE_SIZE,
+  effectivePreviewCategory,
+  identityReviewComplete,
+  paginateRows,
+} from "../../lib/all-time/arizona/review.ts"
+import { matchPlayers } from "../../lib/importer/matchPlayers.ts"
+import type { PlayerRecord } from "../../lib/importer/loadPlayers.ts"
+import type { PlayerIdentityAlias } from "../../lib/identity/types.ts"
 
 const downloads = "C:\\Users\\kryst\\Downloads"
 
@@ -300,4 +310,95 @@ test("merge integration is deferred, canonical, and classifies all four referenc
     assert.match(audit, new RegExp(`\\('${table}', 'player_id'`))
     assert.match(centralAudit, new RegExp(`\\('${table}', 'player_id'`))
   }
+})
+
+const csvHeader = "historical_player_name,score,source_row,rank,source_workbook,source_date,notes,course_code"
+
+test("AME CSV preserves negative, zero, positive scores and exact historical names", () => {
+  const parsed = parseArizonaCourseCsv([
+    csvHeader,
+    "THE REAL JB,-28,36,35,August.xlsm,2026-08-14,source,AME",
+    "KD0017,0,86,85,August.xlsm,2026-08-14,source,AME",
+    "Exact_Name,4,90,89,August.xlsm,2026-08-14,source,AME",
+  ].join("\n"), "AME", "easy.csv")
+  assert.equal(parsed.issues.length, 0)
+  assert.deepEqual(parsed.records.map((row) => [row.courseCode, row.historicalPlayerName, row.score]), [
+    ["AME", "THE REAL JB", -28], ["AME", "KD0017", 0], ["AME", "Exact_Name", 4],
+  ])
+})
+
+test("AMH CSV maps only to Arizona Modern Hard", () => {
+  const parsed = parseArizonaCourseCsv(`${csvHeader}\nKD0017,-8,109,108,August.xlsm,2026-08-14,source,AMH`, "AMH", "hard.csv")
+  assert.equal(parsed.issues.length, 0)
+  assert.equal(parsed.records[0].courseCode, "AMH")
+  assert.equal(parsed.records[0].difficulty, "Hard")
+  assert.equal(parsed.records[0].historicalPlayerName, "KD0017")
+})
+
+test("one-course CSV rejects mixed targets and Combined columns", () => {
+  const mixed = parseArizonaCourseCsv(`${csvHeader}\nPlayer,-8,2,1,August.xlsm,2026-08-14,source,AMH`, "AME", "mixed.csv")
+  assert.equal(mixed.records.length, 0)
+  assert.equal(mixed.issues[0].category, "course_mapping_issue")
+  const combined = parseArizonaCourseCsv("historical_player_name,score,easy_score,hard_score,combined_score\nPlayer,-8,-4,-4,-8", "AME", "combined.csv")
+  assert.equal(combined.records.length, 0)
+  assert.match(combined.issues[0].message, /Combined/)
+})
+
+test("CSV duplicate rows are identified and skipped deterministically", () => {
+  const source = `${csvHeader}\nPlayer,-8,2,1,August.xlsm,2026-08-14,source,AME\nPlayer,-8,3,2,August.xlsm,2026-08-14,source,AME`
+  const parsed = parseArizonaCourseCsv(source, "AME", "duplicate.csv")
+  assert.equal(parsed.records.length, 1)
+  assert.equal(parsed.issues[0].category, "duplicate_source_row")
+  assert.equal(parseArizonaCourseCsv(source, "AME", "duplicate.csv").records[0].fingerprint, parsed.records[0].fingerprint)
+})
+
+test("review pagination defaults to 50 and supports stable next pages", () => {
+  const rows = Array.from({ length: 126 }, (_, index) => index + 1)
+  const first = paginateRows(rows, 1, DEFAULT_ALL_TIME_PAGE_SIZE)
+  const second = paginateRows(rows, 2, DEFAULT_ALL_TIME_PAGE_SIZE)
+  assert.equal(first.rows.length, 50)
+  assert.equal(second.rows[0], 51)
+  assert.equal(first.totalPages, 3)
+})
+
+function player(id: string, screenName: string): PlayerRecord {
+  return { id, screen_name: screenName, discord_name: null, discord_username: null, discord_id: null, active: true }
+}
+
+test("All-Time review reuses exact and verified-alias canonical matching", () => {
+  const canonical = player("player-1", "CURRENT")
+  assert.equal(matchPlayers(["CURRENT"], [canonical])[0].autoLinkEligible, true)
+  const alias: PlayerIdentityAlias = { playerId: canonical.id, aliasName: "OLD_NAME", normalizedAlias: "oldname", source: "historical_alias", active: true, verified: true }
+  const matched = matchPlayers(["OLD_NAME"], [canonical], [alias])[0]
+  assert.equal(matched.playerId, canonical.id)
+  assert.equal(matched.autoLinkEligible, true)
+  assert.equal(matched.evidence, "historical_alias")
+})
+
+test("ambiguous and unresolved identities are never auto-accepted", () => {
+  const ambiguous = matchPlayers(["SAME"], [player("one", "SAME"), player("two", "SAME")])[0]
+  assert.equal(ambiguous.autoLinkEligible, false)
+  const unresolved = matchPlayers(["NO SUCH PLAYER"], [player("one", "CURRENT")])[0]
+  assert.equal(unresolved.playerId, null)
+  assert.equal(unresolved.autoLinkEligible, false)
+})
+
+test("admin-selected player and explicit leave-unresolved complete review", () => {
+  const previewRow = buildPreviewRows([record()], new Map(), [])[0]
+  const selected = { playerId: "chosen", canonicalScreenName: "Chosen", selectionSource: "manual" as const }
+  const unresolved = { playerId: null, canonicalScreenName: null, selectionSource: "unresolved" as const }
+  assert.equal(identityReviewComplete(previewRow, selected), true)
+  assert.equal(effectivePreviewCategory(previewRow, selected, []).category, "new_record")
+  assert.equal(identityReviewComplete(previewRow, unresolved), true)
+  assert.equal(effectivePreviewCategory(previewRow, unresolved, []).category, "unresolved_identity")
+})
+
+test("admin page is CSV-only and apply remains protected server-side", () => {
+  const page = readFileSync("app/admin/records/arizona-modern/page.tsx", "utf8")
+  const applyRoute = readFileSync("app/api/admin/records/arizona-modern/apply/route.ts", "utf8")
+  assert.match(page, /accept="\.csv,text\/csv"/)
+  assert.doesNotMatch(page, /accept="\.xlsm"/)
+  assert.match(applyRoute, /authorizedAdminClient/)
+  assert.match(applyRoute, /apply_all_time_record_import/)
+  assert.doesNotMatch(applyRoute, /apply_all_time_combined_observation/)
 })
