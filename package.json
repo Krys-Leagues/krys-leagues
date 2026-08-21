@@ -9,7 +9,8 @@
     "lint": "eslint",
     "test:match-preview": "node --experimental-strip-types --test lib/importer/adapters/matchAdapter.test.ts",
     "test:stroke-history-preview": "node --experimental-strip-types --test lib/importer/adapters/historicalStrokeParser.test.ts",
-    "test:trophy-import": "node --experimental-strip-types --test lib/trophies/trophyImport.test.ts lib/trophies/trophyMedia.test.ts lib/trophies/pendingTrophyAssignments.test.ts"
+    "test:trophy-import": "node --experimental-strip-types --test lib/trophies/trophyImport.test.ts lib/trophies/trophyMedia.test.ts lib/trophies/pendingTrophyAssignments.test.ts",
+    "test:all-time": "node --experimental-strip-types --test tests/all-time/arizona-modern.test.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.104.1",

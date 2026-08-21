@@ -269,6 +269,10 @@ expected_player_columns(table_name, column_name, treatment) as (
     ('scores', 'player_id', 'historical competition record; canonicalize on read'),
     ('scores', 'opponent_id', 'historical competition opponent; canonicalize on read'),
     ('single_course_records', 'player_id', 'historical record ownership; canonicalize on read'),
+    ('all_time_record_observations', 'player_id', 'historical observation preserved; ownership canonicalized on merge'),
+    ('all_time_best_records', 'player_id', 'derived individual best reconciled to one canonical row per course'),
+    ('all_time_combined_observations', 'player_id', 'historical combined observation preserved; ownership canonicalized on merge'),
+    ('all_time_combined_best_records', 'player_id', 'derived official combined best reconciled to one canonical row per base map'),
     ('major_entries', 'player_id', 'current Major registration canonicalized; completed/cancelled event history retained'),
     ('major_scoring_participants', 'player_id', 'active Major scoring participation canonicalized; inactive session history retained')
 ),

@@ -10,6 +10,11 @@ export default function RecordsAdminPage() {
       </p>
 
       <div style={grid}>
+        <Link href="/admin/records/arizona-modern" style={card}>
+          <strong>Arizona Modern Pilot</strong>
+          <span>Preview AME/AMH workbook imports and legacy combined reconciliation.</span>
+        </Link>
+
         <Link href="/admin/records/combined" style={card}>
           <strong>Combined Course Records</strong>
           <span>View Easy and Hard all-time course records.</span>
