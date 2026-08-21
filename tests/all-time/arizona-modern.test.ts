@@ -405,6 +405,178 @@ test("generic migration catalogs AWE/AWH and validates catalog, activity, diffic
   assert.match(sql, /site-player-identity-merge/)
 })
 
+test("complete catalog migration has unique official individual courses and is rerunnable", () => {
+  const sql = readFileSync("all_time_complete_course_catalog.sql", "utf8")
+  const rowPattern = /^\s*\('([A-Z0-9]{3})', '((?:''|[^'])*)', '(Easy|Hard)', '((?:''|[^'])*)', 'https:[^']+', \d+, '\d{4}-\d{2}-\d{2}', (null|'((?:''|[^'])*)')\)(?:,|$)/gm
+  const rows = [...sql.matchAll(rowPattern)].map((match) => ({
+    code: match[1],
+    baseMap: match[2].replaceAll("''", "'"),
+    difficulty: match[3],
+    displayName: match[4].replaceAll("''", "'"),
+    sourceCourseName: match[5] === "null" ? null : match[6].replaceAll("''", "'"),
+  }))
+
+  assert.equal(rows.length, 82)
+  assert.equal(rows.filter((row) => row.difficulty === "Easy").length, 41)
+  assert.equal(rows.filter((row) => row.difficulty === "Hard").length, 41)
+  assert.equal(new Set(rows.map((row) => row.code)).size, rows.length)
+  assert.equal(new Set(rows.map((row) => `${row.baseMap}\0${row.difficulty}`)).size, rows.length)
+  assert.equal(rows.filter((row) => row.sourceCourseName !== null).length, 78)
+  assert.equal((sql.match(/on conflict \([^)]*\) do nothing;/g) ?? []).length, 2)
+  assert.doesNotMatch(sql, /on conflict[\s\S]{0,100}do update/i)
+  assert.doesNotMatch(sql, /all_time_record_observations|all_time_best_records|all_time_combined/i)
+})
+
+test("complete catalog migration has no temporary staging dependency", () => {
+  const sql = readFileSync("all_time_complete_course_catalog.sql", "utf8")
+  assert.doesNotMatch(sql, /create\s+(?:temporary|temp)\s+table/i)
+  assert.doesNotMatch(sql, /_all_time_catalog_stage/)
+  assert.doesNotMatch(sql, /\btruncate\s+table\b/i)
+  assert.match(sql, /do \$migration\$[\s\S]*jsonb_agg\(to_jsonb\(staged\)/)
+  assert.ok((sql.match(/jsonb_to_recordset\(v_catalog\)/g) ?? []).length >= 6)
+  assert.match(sql, /insert into public\.all_time_courses[\s\S]*on conflict \(code\) do nothing/)
+  assert.match(sql, /insert into public\.all_time_course_source_mappings[\s\S]*on conflict \(source_type, source_course_name, difficulty\) do nothing/)
+})
+
+test("complete catalog preserves exact historical aliases and does not invent Gloop sources", () => {
+  const sql = readFileSync("all_time_complete_course_catalog.sql", "utf8")
+  assert.match(sql, /\('AME',[^\n]*'Arazona Modern'\)/)
+  assert.match(sql, /\('AMH',[^\n]*'Arazona Modern'\)/)
+  assert.match(sql, /\('SLE', 'Shangri-La',[^\n]*'Shangri La'\)/)
+  assert.match(sql, /\('SLH', 'Shangri-La',[^\n]*'Shangri La'\)/)
+  assert.match(sql, /\('MOE', 'Mount Olympus', 'Easy',[^\n]*'Olympus Easy'\)/)
+  assert.match(sql, /\('MOH', 'Mount Olympus', 'Hard',[^\n]*'Olympus Hard'\)/)
+  assert.match(sql, /\('GLE', 'Gloop Lair', 'Easy',[^\n]*, null\)/)
+  assert.match(sql, /\('GLH', 'Gloop Lair', 'Hard',[^\n]*, null\)/)
+  assert.doesNotMatch(sql, /\bSBE\b|Strong Badia/)
+})
+
+test("admin All-Time course choices use active catalog rows without an SBE special case", () => {
+  const singlePage = readFileSync("app/admin/records/single/page.tsx", "utf8")
+  const sharedLoader = readFileSync("app/api/admin/records/arizona-modern/_shared.ts", "utf8")
+  const allTimePage = readFileSync("app/admin/records/all-time/page.tsx", "utf8")
+  const allTimePreview = readFileSync("app/api/admin/records/all-time/preview/route.ts", "utf8")
+  const choices = [
+    { code: "SBE", active: false, difficulty: "Easy" },
+    { code: "GLE", active: true, difficulty: "Easy" },
+    { code: "GLH", active: true, difficulty: "Hard" },
+  ].filter((course) => course.active && (course.difficulty === "Easy" || course.difficulty === "Hard"))
+
+  assert.deepEqual(choices.map((course) => course.code), ["GLE", "GLH"])
+  assert.match(singlePage, /from\("all_time_courses"\)[\s\S]{0,200}\.eq\("active", true\)/)
+  assert.ok((sharedLoader.match(/\.eq\("active", true\)/g) ?? []).length >= 2)
+  assert.match(allTimePage, /export \{ default \} from "\.\.\/arizona-modern\/page"/)
+  assert.match(allTimePreview, /arizona-modern\/preview\/route/)
+  assert.doesNotMatch(singlePage, /\bSBE\b|Strong Badia/)
+  assert.doesNotMatch(sharedLoader, /\bSBE\b|Strong Badia/)
+})
+
+test("Single Course Records loads each leaderboard by canonical course UUID", () => {
+  const page = readFileSync("app/admin/records/single/page.tsx", "utf8")
+  const scopedQueries = page.match(/\.eq\("course_id", selected\.id\)/g) ?? []
+  const courses = {
+    twentyEasy: "00000000-0000-0000-0000-000000000020",
+    otherEasy: "00000000-0000-0000-0000-000000000021",
+    hard: "00000000-0000-0000-0000-000000000022",
+    empty: "00000000-0000-0000-0000-000000000023",
+  }
+  const bestRows = [
+    ...Array.from({ length: 132 }, (_, index) => ({ course_id: courses.twentyEasy, score: index - 40 })),
+    ...Array.from({ length: 3 }, (_, index) => ({ course_id: courses.otherEasy, score: index - 20 })),
+    ...Array.from({ length: 2 }, (_, index) => ({ course_id: courses.hard, score: index - 10 })),
+  ]
+  const forCourse = (courseId: string) => bestRows.filter((row) => row.course_id === courseId)
+
+  assert.equal(scopedQueries.length, 2)
+  assert.equal(forCourse(courses.twentyEasy).length, 132)
+  assert.equal(forCourse(courses.otherEasy).length, 3)
+  assert.equal(forCourse(courses.hard).length, 2)
+  assert.equal(forCourse(courses.empty).length, 0)
+  assert.doesNotMatch(page, /single_course_records/)
+  assert.doesNotMatch(page, /course_name/)
+  assert.match(page, /left\.score - right\.score/)
+})
+
+type WorkbookLayout = {
+  heading: string
+  rank: string
+  easyName: string
+  easyScore: string
+  easyCount: number
+  easyLast: number
+  hardName: string
+  hardScore: string
+  hardCount: number
+  hardLast: number
+}
+
+const workbookLayouts: WorkbookLayout[] = [
+  { heading: "8 BIT Lair", rank: "A", easyName: "B", easyScore: "C", easyCount: 108, easyLast: 109, hardName: "D", hardScore: "E", hardCount: 107, hardLast: 108 },
+  { heading: "20000 Leagues", rank: "F", easyName: "G", easyScore: "H", easyCount: 133, easyLast: 134, hardName: "I", hardScore: "J", hardCount: 130, hardLast: 131 },
+  { heading: "Alfheim", rank: "K", easyName: "L", easyScore: "M", easyCount: 138, easyLast: 139, hardName: "N", hardScore: "O", hardCount: 142, hardLast: 143 },
+  { heading: "Alice In Wonderland", rank: "P", easyName: "Q", easyScore: "R", easyCount: 62, easyLast: 63, hardName: "S", hardScore: "T", hardCount: 60, hardLast: 61 },
+  { heading: "Arazona Modern", rank: "U", easyName: "V", easyScore: "W", easyCount: 125, easyLast: 126, hardName: "X", hardScore: "Y", hardCount: 126, hardLast: 127 },
+  { heading: "Around The World", rank: "Z", easyName: "AA", easyScore: "AB", easyCount: 119, easyLast: 120, hardName: "AC", hardScore: "AD", hardCount: 114, hardLast: 115 },
+  { heading: "Atlantis", rank: "AE", easyName: "AF", easyScore: "AG", easyCount: 159, easyLast: 160, hardName: "AH", hardScore: "AI", hardCount: 151, hardLast: 152 },
+  { heading: "Bogeys Bonanza", rank: "AJ", easyName: "AK", easyScore: "AL", easyCount: 144, easyLast: 145, hardName: "AM", hardScore: "AN", hardCount: 146, hardLast: 147 },
+  { heading: "Cherry Blossom", rank: "AO", easyName: "AP", easyScore: "AQ", easyCount: 135, easyLast: 136, hardName: "AR", hardScore: "AS", hardCount: 126, hardLast: 127 },
+  { heading: "Crystal Lair", rank: "AT", easyName: "AU", easyScore: "AV", easyCount: 83, easyLast: 84, hardName: "AW", hardScore: "AX", hardCount: 82, hardLast: 83 },
+  { heading: "El Dorado", rank: "AY", easyName: "AZ", easyScore: "BA", easyCount: 153, easyLast: 154, hardName: "BB", hardScore: "BC", hardCount: 152, hardLast: 153 },
+  { heading: "Forgotten Fairyland", rank: "BD", easyName: "BE", easyScore: "BF", easyCount: 80, easyLast: 81, hardName: "BG", hardScore: "BH", hardCount: 71, hardLast: 72 },
+  { heading: "Gardens of Babylon", rank: "BI", easyName: "BJ", easyScore: "BK", easyCount: 148, easyLast: 149, hardName: "BL", hardScore: "BM", hardCount: 145, hardLast: 146 },
+  { heading: "Holiday Hideaway", rank: "BN", easyName: "BO", easyScore: "BP", easyCount: 101, easyLast: 102, hardName: "BQ", hardScore: "BR", hardCount: 100, hardLast: 101 },
+  { heading: "Ice Lair", rank: "BS", easyName: "BT", easyScore: "BU", easyCount: 116, easyLast: 117, hardName: "BV", hardScore: "BW", hardCount: 112, hardLast: 113 },
+  { heading: "Journey", rank: "BX", easyName: "BY", easyScore: "BZ", easyCount: 137, easyLast: 138, hardName: "CA", hardScore: "CB", hardCount: 137, hardLast: 138 },
+  { heading: "Labyrinth", rank: "CC", easyName: "CD", easyScore: "CE", easyCount: 146, easyLast: 147, hardName: "CF", hardScore: "CG", hardCount: 148, hardLast: 149 },
+  { heading: "Laser Lair", rank: "CH", easyName: "CI", easyScore: "CJ", easyCount: 143, easyLast: 144, hardName: "CK", hardScore: "CL", hardCount: 141, hardLast: 142 },
+  { heading: "Mars Gardens", rank: "CM", easyName: "CN", easyScore: "CO", easyCount: 111, easyLast: 112, hardName: "CP", hardScore: "CQ", hardCount: 109, hardLast: 110 },
+  { heading: "Meow Wolf", rank: "CR", easyName: "CS", easyScore: "CT", easyCount: 104, easyLast: 105, hardName: "CU", hardScore: "CV", hardCount: 100, hardLast: 101 },
+  { heading: "Myst", rank: "CW", easyName: "CX", easyScore: "CY", easyCount: 136, easyLast: 137, hardName: "CZ", hardScore: "DA", hardCount: 136, hardLast: 137 },
+  { heading: "Original Gothic", rank: "DG", easyName: "DH", easyScore: "DI", easyCount: 136, easyLast: 137, hardName: "DJ", hardScore: "DK", hardCount: 143, hardLast: 144 },
+  { heading: "Quixote Valley", rank: "DL", easyName: "DM", easyScore: "DN", easyCount: 125, easyLast: 126, hardName: "DO", hardScore: "DP", hardCount: 129, hardLast: 130 },
+  { heading: "Raptor Cliffs", rank: "DQ", easyName: "DR", easyScore: "DS", easyCount: 93, easyLast: 94, hardName: "DT", hardScore: "DU", hardCount: 93, hardLast: 94 },
+  { heading: "Seagull Stacks", rank: "DV", easyName: "DW", easyScore: "DX", easyCount: 149, easyLast: 150, hardName: "DY", hardScore: "DZ", hardCount: 149, hardLast: 150 },
+  { heading: "Shangri La", rank: "EA", easyName: "EB", easyScore: "EC", easyCount: 141, easyLast: 142, hardName: "ED", hardScore: "EE", hardCount: 133, hardLast: 134 },
+  { heading: "Sweetopia", rank: "EF", easyName: "EG", easyScore: "EH", easyCount: 141, easyLast: 142, hardName: "EI", hardScore: "EJ", hardCount: 136, hardLast: 137 },
+  { heading: "Tiki a Coco", rank: "EK", easyName: "EL", easyScore: "EM", easyCount: 66, easyLast: 67, hardName: "EN", hardScore: "EO", hardCount: 66, hardLast: 67 },
+  { heading: "Temple at Zerzura", rank: "EP", easyName: "EQ", easyScore: "ER", easyCount: 132, easyLast: 133, hardName: "ES", hardScore: "ET", hardCount: 134, hardLast: 135 },
+  { heading: "Tethys Station", rank: "EU", easyName: "EV", easyScore: "EW", easyCount: 133, easyLast: 134, hardName: "EX", hardScore: "EY", hardCount: 137, hardLast: 138 },
+  { heading: "Tokyo", rank: "EZ", easyName: "FA", easyScore: "FB", easyCount: 89, easyLast: 90, hardName: "FC", hardScore: "FD", hardCount: 88, hardLast: 89 },
+  { heading: "Tourist Trap", rank: "FE", easyName: "FF", easyScore: "FG", easyCount: 142, easyLast: 143, hardName: "FH", hardScore: "FI", hardCount: 138, hardLast: 139 },
+  { heading: "Upside Town", rank: "FJ", easyName: "FK", easyScore: "FL", easyCount: 99, easyLast: 100, hardName: "FM", hardScore: "FN", hardCount: 97, hardLast: 98 },
+  { heading: "Venice", rank: "FO", easyName: "FP", easyScore: "FQ", easyCount: 112, easyLast: 113, hardName: "FR", hardScore: "FS", hardCount: 109, hardLast: 110 },
+  { heading: "Viva Las Elvis", rank: "FT", easyName: "FU", easyScore: "FV", easyCount: 97, easyLast: 98, hardName: "FW", hardScore: "FX", hardCount: 97, hardLast: 98 },
+  { heading: "Wallace & Gromit", rank: "FY", easyName: "FZ", easyScore: "GA", easyCount: 112, easyLast: 113, hardName: "GB", hardScore: "GC", hardCount: 107, hardLast: 108 },
+  { heading: "Widows Walkabout", rank: "GD", easyName: "GE", easyScore: "GF", easyCount: 105, easyLast: 106, hardName: "GG", hardScore: "GH", hardCount: 105, hardLast: 106 },
+  { heading: "Hollywood", rank: "GI", easyName: "GJ", easyScore: "GK", easyCount: 58, easyLast: 59, hardName: "GL", hardScore: "GM", hardCount: 57, hardLast: 58 },
+]
+
+test("latest workbook exact All Time blocks match every historical source mapping", {
+  skip: !existsSync(`${downloads}\\All Time Leaderboard To 14th Aug 2026 Dawn.xlsm`),
+}, () => {
+  const input = readFileSync(`${downloads}\\All Time Leaderboard To 14th Aug 2026 Dawn.xlsm`)
+  const courses = {
+    Easy: { code: "TESTE", difficulty: "Easy" as const, baseMap: "Test", displayName: "Test Easy" },
+    Hard: { code: "TESTH", difficulty: "Hard" as const, baseMap: "Test", displayName: "Test Hard" },
+  }
+  for (const layout of workbookLayouts) {
+    const parsed = parseIndividualCourseWorkbook(input, "All Time Leaderboard To 14th Aug 2026 Dawn.xlsm", layout.heading, courses)
+    const easy = parsed.records.filter((row) => row.difficulty === "Easy")
+    const hard = parsed.records.filter((row) => row.difficulty === "Hard")
+    assert.deepEqual([easy.length, easy[0].sourceRow, easy.at(-1)?.sourceRow, easy[0].sourceNameCell, easy[0].sourceScoreCell], [layout.easyCount, 2, layout.easyLast, `${layout.easyName}2`, `${layout.easyScore}2`], `${layout.heading} Easy`)
+    assert.deepEqual([hard.length, hard[0].sourceRow, hard.at(-1)?.sourceRow, hard[0].sourceNameCell, hard[0].sourceScoreCell], [layout.hardCount, 2, layout.hardLast, `${layout.hardName}2`, `${layout.hardScore}2`], `${layout.heading} Hard`)
+    assert.equal(easy[0].sourceRank, 1, `${layout.heading} rank ${layout.rank}`)
+  }
+
+  const olympus = parseIndividualCourseWorkbook(input, "All Time Leaderboard To 14th Aug 2026 Dawn.xlsm", "Olympus Hard", courses)
+  const olympusEasy = olympus.records.filter((row) => row.difficulty === "Easy")
+  const olympusHard = olympus.records.filter((row) => row.difficulty === "Hard")
+  assert.deepEqual([olympusEasy.length, olympusEasy[0].sourceRow, olympusEasy.at(-1)?.sourceRow, olympusEasy[0].sourceNameCell, olympusEasy[0].sourceScoreCell], [92, 2, 93, "DC2", "DD2"])
+  assert.deepEqual([olympusHard.length, olympusHard[0].sourceRow, olympusHard.at(-1)?.sourceRow, olympusHard[0].sourceNameCell, olympusHard[0].sourceScoreCell], [92, 2, 93, "DE2", "DF2"])
+  assert.equal(olympusEasy[0].sourceRank, 1)
+  assert.equal(olympusHard[0].sourceRank, 1)
+})
+
 test("one-course CSV rejects mixed targets and Combined columns", () => {
   const mixed = parseArizonaCourseCsv(`${csvHeader}\nPlayer,-8,2,1,August.xlsm,2026-08-14,source,AMH`, "AME", "mixed.csv")
   assert.equal(mixed.records.length, 0)

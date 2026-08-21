@@ -54,48 +54,79 @@ export default function SingleRecordsPage() {
 
   const [courseFilter, setCourseFilter] = useState("")
 
-  async function loadData() {
-    try {
-      const [courseResult, bestResult, unresolvedResult] = await Promise.all([
-        supabase.from("all_time_courses").select("id, code, display_name, difficulty").eq("active", true).in("difficulty", ["Easy", "Hard"]).order("display_name"),
-        supabase.from("all_time_best_records").select("id, course_id, score, historical_player_name, player:players(screen_name)"),
-        supabase.from("all_time_record_observations").select("id, course_id, score, historical_player_name").in("identity_status", ["unresolved", "ambiguous"]),
-      ])
-      if (courseResult.error) throw courseResult.error
-      if (bestResult.error) throw bestResult.error
-      if (unresolvedResult.error) throw unresolvedResult.error
-
-      const catalog = (courseResult.data ?? []) as AllTimeCourse[]
-      const byId = new Map(catalog.map((course) => [course.id, course]))
-      const linked = ((bestResult.data ?? []) as BestRecordRow[]).flatMap((row) => {
-        const course = byId.get(row.course_id)
-        const player = Array.isArray(row.player) ? row.player[0] : row.player
-        return course ? [{ id: row.id, course_id: course.id, course_code: course.code, player_name: player?.screen_name ?? row.historical_player_name, historical_player_name: row.historical_player_name, identity_linked: Boolean(player), score: row.score }] : []
-      })
-      const unresolvedBest = new Map<string, SingleRecord>()
-      for (const row of (unresolvedResult.data ?? []) as UnresolvedObservationRow[]) {
-        const course = byId.get(row.course_id)
-        if (!course) continue
-        const key = `${row.course_id}\u001f${row.historical_player_name}`
-        const existing = unresolvedBest.get(key)
-        if (!existing || row.score < existing.score) unresolvedBest.set(key, { id: row.id, course_id: course.id, course_code: course.code, player_name: row.historical_player_name, historical_player_name: row.historical_player_name, identity_linked: false, score: row.score })
+  useEffect(() => {
+    let cancelled = false
+    const timeout = window.setTimeout(() => void (async () => {
+      try {
+        const courseResult = await supabase
+          .from("all_time_courses")
+          .select("id, code, display_name, difficulty")
+          .eq("active", true)
+          .in("difficulty", ["Easy", "Hard"])
+          .order("display_name")
+        if (courseResult.error) throw courseResult.error
+        if (cancelled) return
+        const catalog = (courseResult.data ?? []) as AllTimeCourse[]
+        setCourses(catalog)
+        setCourseFilter((current) => current || catalog[0]?.id || "")
+        if (!catalog.length) setLoading(false)
+      } catch (caught) {
+        if (cancelled) return
+        setError(caught instanceof Error ? caught.message : "All-Time courses could not be loaded.")
+        setCourses([])
+        setRecords([])
+        setLoading(false)
       }
-      setCourses(catalog)
-      setCourseFilter((current) => current || catalog[0]?.id || "")
-      setRecords([...linked, ...unresolvedBest.values()])
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "All-Time records could not be loaded.")
-      setCourses([])
-      setRecords([])
-    } finally {
-      setLoading(false)
-    }
-  }
+    })(), 0)
+    return () => { cancelled = true; window.clearTimeout(timeout) }
+  }, [])
 
   useEffect(() => {
-    const timeout = window.setTimeout(() => void loadData(), 0)
-    return () => window.clearTimeout(timeout)
-  }, [])
+    const selected = courses.find((course) => course.id === courseFilter)
+    if (!selected) return
+    let cancelled = false
+
+    const timeout = window.setTimeout(() => void (async () => {
+      setLoading(true)
+      setError("")
+      setRecords([])
+      try {
+        const [bestResult, unresolvedResult] = await Promise.all([
+          supabase
+            .from("all_time_best_records")
+            .select("id, course_id, score, historical_player_name, player:players(screen_name)")
+            .eq("course_id", selected.id),
+          supabase
+            .from("all_time_record_observations")
+            .select("id, course_id, score, historical_player_name")
+            .eq("course_id", selected.id)
+            .in("identity_status", ["unresolved", "ambiguous"]),
+        ])
+        if (bestResult.error) throw bestResult.error
+        if (unresolvedResult.error) throw unresolvedResult.error
+        if (cancelled) return
+
+        const linked = ((bestResult.data ?? []) as BestRecordRow[]).map((row) => {
+          const player = Array.isArray(row.player) ? row.player[0] : row.player
+          return { id: row.id, course_id: selected.id, course_code: selected.code, player_name: player?.screen_name ?? row.historical_player_name, historical_player_name: row.historical_player_name, identity_linked: Boolean(player), score: row.score }
+        })
+        const unresolvedBest = new Map<string, SingleRecord>()
+        for (const row of (unresolvedResult.data ?? []) as UnresolvedObservationRow[]) {
+          const existing = unresolvedBest.get(row.historical_player_name)
+          if (!existing || row.score < existing.score) unresolvedBest.set(row.historical_player_name, { id: row.id, course_id: selected.id, course_code: selected.code, player_name: row.historical_player_name, historical_player_name: row.historical_player_name, identity_linked: false, score: row.score })
+        }
+        setRecords([...linked, ...unresolvedBest.values()])
+      } catch (caught) {
+        if (cancelled) return
+        setError(caught instanceof Error ? caught.message : "All-Time records could not be loaded.")
+        setRecords([])
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    })(), 0)
+
+    return () => { cancelled = true; window.clearTimeout(timeout) }
+  }, [courseFilter, courses])
 
   const filteredRecords = useMemo(() => {
     return records
