@@ -42,6 +42,13 @@ export function competitiveRanks(records: Array<{ score: number }>) {
   ).map((rank, index, ranks) => rank ?? ranks.slice(0, index).findLast((value) => value !== null) ?? 1)
 }
 
+export function individualCourseLabel(course: AllTimeCourse) {
+  const name = course.display_name.toLowerCase().endsWith(course.difficulty.toLowerCase())
+    ? course.display_name
+    : `${course.display_name} ${course.difficulty}`
+  return `${name} (${course.code})`
+}
+
 export default function SingleRecordsPage() {
   const router = useRouter()
 
@@ -50,7 +57,7 @@ export default function SingleRecordsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
 
-  const [courseFilter, setCourseFilter] = useState("ALL")
+  const [courseFilter, setCourseFilter] = useState("")
 
   async function loadData() {
     try {
@@ -79,6 +86,7 @@ export default function SingleRecordsPage() {
         if (!existing || row.score < existing.score) unresolvedBest.set(key, { id: row.id, course_id: course.id, course_code: course.code, player_name: row.historical_player_name, historical_player_name: row.historical_player_name, identity_linked: false, score: row.score })
       }
       setCourses(catalog)
+      setCourseFilter((current) => current || catalog[0]?.id || "")
       setRecords([...linked, ...unresolvedBest.values()])
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "All-Time records could not be loaded.")
@@ -95,29 +103,13 @@ export default function SingleRecordsPage() {
   }, [])
 
   const filteredRecords = useMemo(() => {
-    if (courseFilter === "ALL") return records
-
-    return records.filter((r) => r.course_id === courseFilter)
+    return records
+      .filter((record) => record.course_id === courseFilter)
+      .sort((left, right) => left.score - right.score || left.player_name.localeCompare(right.player_name))
   }, [records, courseFilter])
 
-  const recordsByCourse = useMemo(() => {
-    const grouped: Record<string, SingleRecord[]> = {}
-
-    filteredRecords.forEach((record) => {
-      if (!grouped[record.course_id]) {
-        grouped[record.course_id] = []
-      }
-
-      grouped[record.course_id].push(record)
-    })
-
-    return grouped
-  }, [filteredRecords])
-
-  const coursesToShow = useMemo(() => {
-    if (courseFilter !== "ALL") return courses.filter((course) => course.id === courseFilter)
-    return courses.filter((course) => recordsByCourse[course.id]?.length)
-  }, [courseFilter, courses, recordsByCourse])
+  const selectedCourse = courses.find((course) => course.id === courseFilter) ?? null
+  const ranks = competitiveRanks(filteredRecords)
 
   return (
     <main style={page}>
@@ -149,27 +141,21 @@ export default function SingleRecordsPage() {
             onChange={(e) => setCourseFilter(e.target.value)}
             style={filterSelect}
           >
-            <option value="ALL">All Courses</option>
-
             {courses.map((course) => (
-              <option key={course.id} value={course.id}>{course.code} — {course.display_name}</option>
+              <option key={course.id} value={course.id}>{individualCourseLabel(course)}</option>
             ))}
           </select>
         </div>
 
         <div style={recordsList}>
-          {coursesToShow.map((course) => {
-            const courseRecords = (recordsByCourse[course.id] || []).sort((a, b) => a.score - b.score || a.player_name.localeCompare(b.player_name))
-            const ranks = competitiveRanks(courseRecords)
-
-            return (
-              <div key={course.id} style={courseGroup}>
-                <h3 style={courseHeader}>{course.display_name} — {course.code}</h3>
+          {selectedCourse && (
+              <div key={selectedCourse.id} style={courseGroup}>
+                <h3 style={courseHeader}>{individualCourseLabel(selectedCourse)}</h3>
 
                 <div style={difficultySection}>
-                  <div style={course.difficulty === "Easy" ? difficultyTitle : difficultyTitleHard}>{course.difficulty} · {courseRecords.length} records</div>
+                  <div style={selectedCourse.difficulty === "Easy" ? difficultyTitle : difficultyTitleHard}>{selectedCourse.difficulty} course · {filteredRecords.length} records</div>
 
-                  {courseRecords.map((record, index) => (
+                  {filteredRecords.map((record, index) => (
                     <div key={record.id} style={recordCard}>
                       <div style={placement}>#{ranks[index]}</div>
 
@@ -187,15 +173,14 @@ export default function SingleRecordsPage() {
                     </div>
                   ))}
 
-                  {!courseRecords.length && (
+                  {!filteredRecords.length && (
                     <div style={emptyMini}>
-                      No {course.difficulty} records
+                      No {selectedCourse.difficulty} records
                     </div>
                   )}
                 </div>
               </div>
-            )
-          })}
+          )}
 
           {!filteredRecords.length && !loading && (
             <div style={emptyState}>
