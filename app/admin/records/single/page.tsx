@@ -6,106 +6,118 @@ import { supabase } from "@/lib/supabase"
 
 type SingleRecord = {
   id: string
+  course_id: string
+  course_code: string
   player_name: string
-  course_name: string
-  difficulty: string
+  historical_player_name: string
+  identity_linked: boolean
   score: number
-  played_at: string | null
-  notes: string | null
 }
 
-const COURSES = [
-  "Atlantis",
-  "Bogey's Bonanza",
-  "Cherry Blossom",
-  "El Dorado",
-  "Ice Lair",
-  "Journey To The Center Of The Earth",
-  "Labyrinth",
-  "Laser Lair",
-  "Meow Wolf",
-  "Myst",
-  "Quixote Valley",
-  "Shangri-La",
-  "Sweetopia",
-  "Temple At Zerzura",
-  "The Upside Town",
-  "Tethys Station",
-  "Wallace & Gromit",
-  "Venice",
-  "Viva Las Elvis",
-  "Blokhaven",
-]
+type AllTimeCourse = {
+  id: string
+  code: string
+  display_name: string
+  difficulty: "Easy" | "Hard"
+}
+
+type BestRecordRow = {
+  id: string
+  course_id: string
+  score: number
+  historical_player_name: string
+  player: { screen_name: string } | Array<{ screen_name: string }> | null
+}
+
+type UnresolvedObservationRow = {
+  id: string
+  course_id: string
+  score: number
+  historical_player_name: string
+}
+
+export function competitiveRanks(records: Array<{ score: number }>) {
+  return records.map((record, index) =>
+    index > 0 && record.score === records[index - 1].score ? null : index + 1
+  ).map((rank, index, ranks) => rank ?? ranks.slice(0, index).findLast((value) => value !== null) ?? 1)
+}
 
 export default function SingleRecordsPage() {
   const router = useRouter()
 
   const [records, setRecords] = useState<SingleRecord[]>([])
-  const [loading, setLoading] = useState(false)
+  const [courses, setCourses] = useState<AllTimeCourse[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
 
   const [courseFilter, setCourseFilter] = useState("ALL")
 
-  useEffect(() => {
-    loadData()
-  }, [])
-
   async function loadData() {
-    setLoading(true)
+    try {
+      const [courseResult, bestResult, unresolvedResult] = await Promise.all([
+        supabase.from("all_time_courses").select("id, code, display_name, difficulty").eq("active", true).in("difficulty", ["Easy", "Hard"]).order("display_name"),
+        supabase.from("all_time_best_records").select("id, course_id, score, historical_player_name, player:players(screen_name)"),
+        supabase.from("all_time_record_observations").select("id, course_id, score, historical_player_name").in("identity_status", ["unresolved", "ambiguous"]),
+      ])
+      if (courseResult.error) throw courseResult.error
+      if (bestResult.error) throw bestResult.error
+      if (unresolvedResult.error) throw unresolvedResult.error
 
-    const { data } = await supabase
-      .from("single_course_records")
-      .select("*")
-      .order("course_name", { ascending: true })
-      .order("difficulty", { ascending: true })
-      .order("score", { ascending: true })
-
-    setRecords(data || [])
-
-    setLoading(false)
+      const catalog = (courseResult.data ?? []) as AllTimeCourse[]
+      const byId = new Map(catalog.map((course) => [course.id, course]))
+      const linked = ((bestResult.data ?? []) as BestRecordRow[]).flatMap((row) => {
+        const course = byId.get(row.course_id)
+        const player = Array.isArray(row.player) ? row.player[0] : row.player
+        return course ? [{ id: row.id, course_id: course.id, course_code: course.code, player_name: player?.screen_name ?? row.historical_player_name, historical_player_name: row.historical_player_name, identity_linked: Boolean(player), score: row.score }] : []
+      })
+      const unresolvedBest = new Map<string, SingleRecord>()
+      for (const row of (unresolvedResult.data ?? []) as UnresolvedObservationRow[]) {
+        const course = byId.get(row.course_id)
+        if (!course) continue
+        const key = `${row.course_id}\u001f${row.historical_player_name}`
+        const existing = unresolvedBest.get(key)
+        if (!existing || row.score < existing.score) unresolvedBest.set(key, { id: row.id, course_id: course.id, course_code: course.code, player_name: row.historical_player_name, historical_player_name: row.historical_player_name, identity_linked: false, score: row.score })
+      }
+      setCourses(catalog)
+      setRecords([...linked, ...unresolvedBest.values()])
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "All-Time records could not be loaded.")
+      setCourses([])
+      setRecords([])
+    } finally {
+      setLoading(false)
+    }
   }
 
-  function formatDate(value: string | null) {
-    if (!value) return ""
-
-    const date = new Date(`${value}T00:00:00`)
-    const month = date.getMonth() + 1
-    const day = date.getDate()
-    const year = String(date.getFullYear()).slice(-2)
-
-    return `${month}/${day}/${year}`
-  }
+  useEffect(() => {
+    const timeout = window.setTimeout(() => void loadData(), 0)
+    return () => window.clearTimeout(timeout)
+  }, [])
 
   const filteredRecords = useMemo(() => {
     if (courseFilter === "ALL") return records
 
-    return records.filter((r) => r.course_name === courseFilter)
+    return records.filter((r) => r.course_id === courseFilter)
   }, [records, courseFilter])
 
   const recordsByCourse = useMemo(() => {
     const grouped: Record<string, SingleRecord[]> = {}
 
     filteredRecords.forEach((record) => {
-      if (!grouped[record.course_name]) {
-        grouped[record.course_name] = []
+      if (!grouped[record.course_id]) {
+        grouped[record.course_id] = []
       }
 
-      grouped[record.course_name].push(record)
+      grouped[record.course_id].push(record)
     })
 
     return grouped
   }, [filteredRecords])
 
   const coursesToShow = useMemo(() => {
-    if (courseFilter !== "ALL") return [courseFilter]
-
-    return COURSES.filter((course) => recordsByCourse[course]?.length)
-  }, [courseFilter, recordsByCourse])
-
-  function getDifficultyRecords(course: string, difficulty: string) {
-    return (recordsByCourse[course] || [])
-      .filter((r) => r.difficulty.toLowerCase() === difficulty.toLowerCase())
-      .sort((a, b) => a.score - b.score)
-  }
+    if (courseFilter !== "ALL") return courses.filter((course) => course.id === courseFilter)
+    return courses.filter((course) => recordsByCourse[course.id]?.length)
+  }, [courseFilter, courses, recordsByCourse])
 
   return (
     <main style={page}>
@@ -139,44 +151,34 @@ export default function SingleRecordsPage() {
           >
             <option value="ALL">All Courses</option>
 
-            {COURSES.map((course) => (
-              <option key={course}>{course}</option>
+            {courses.map((course) => (
+              <option key={course.id} value={course.id}>{course.code} — {course.display_name}</option>
             ))}
           </select>
         </div>
 
         <div style={recordsList}>
           {coursesToShow.map((course) => {
-            const easyRecords = getDifficultyRecords(course, "easy")
-            const hardRecords = getDifficultyRecords(course, "hard")
+            const courseRecords = (recordsByCourse[course.id] || []).sort((a, b) => a.score - b.score || a.player_name.localeCompare(b.player_name))
+            const ranks = competitiveRanks(courseRecords)
 
             return (
-              <div key={course} style={courseGroup}>
-                <h3 style={courseHeader}>{course}</h3>
+              <div key={course.id} style={courseGroup}>
+                <h3 style={courseHeader}>{course.display_name} — {course.code}</h3>
 
                 <div style={difficultySection}>
-                  <div style={difficultyTitle}>Easy</div>
+                  <div style={course.difficulty === "Easy" ? difficultyTitle : difficultyTitleHard}>{course.difficulty} · {courseRecords.length} records</div>
 
-                  {easyRecords.map((record, index) => (
+                  {courseRecords.map((record, index) => (
                     <div key={record.id} style={recordCard}>
-                      <div style={placement}>#{index + 1}</div>
+                      <div style={placement}>#{ranks[index]}</div>
 
                       <div style={recordMain}>
                         <div style={recordPlayer}>
                           {record.player_name}
                         </div>
 
-                        <div style={recordMeta}>
-                          {record.played_at && (
-                            <span>{formatDate(record.played_at)}</span>
-                          )}
-                        </div>
-
-                        {record.notes && (
-                          <div style={recordNotes}>
-                            {record.notes}
-                          </div>
-                        )}
+                        <div style={recordMeta}>{record.identity_linked ? `Historical source: ${record.historical_player_name}` : "Unresolved historical identity"}</div>
                       </div>
 
                       <div style={scoreBox}>
@@ -185,47 +187,9 @@ export default function SingleRecordsPage() {
                     </div>
                   ))}
 
-                  {!easyRecords.length && (
+                  {!courseRecords.length && (
                     <div style={emptyMini}>
-                      No Easy records
-                    </div>
-                  )}
-                </div>
-
-                <div style={difficultySection}>
-                  <div style={difficultyTitleHard}>Hard</div>
-
-                  {hardRecords.map((record, index) => (
-                    <div key={record.id} style={recordCard}>
-                      <div style={placement}>#{index + 1}</div>
-
-                      <div style={recordMain}>
-                        <div style={recordPlayer}>
-                          {record.player_name}
-                        </div>
-
-                        <div style={recordMeta}>
-                          {record.played_at && (
-                            <span>{formatDate(record.played_at)}</span>
-                          )}
-                        </div>
-
-                        {record.notes && (
-                          <div style={recordNotes}>
-                            {record.notes}
-                          </div>
-                        )}
-                      </div>
-
-                      <div style={scoreBox}>
-                        {record.score}
-                      </div>
-                    </div>
-                  ))}
-
-                  {!hardRecords.length && (
-                    <div style={emptyMini}>
-                      No Hard records
+                      No {course.difficulty} records
                     </div>
                   )}
                 </div>
@@ -238,6 +202,7 @@ export default function SingleRecordsPage() {
               No single records found.
             </div>
           )}
+          {error && <div style={emptyState}>{error}</div>}
         </div>
       </div>
     </main>
@@ -368,12 +333,6 @@ const recordPlayer: React.CSSProperties = {
 const recordMeta: React.CSSProperties = {
   marginTop: 8,
   color: "#aaa",
-}
-
-const recordNotes: React.CSSProperties = {
-  marginTop: 8,
-  color: "#777",
-  fontStyle: "italic",
 }
 
 const scoreBox: React.CSSProperties = {
