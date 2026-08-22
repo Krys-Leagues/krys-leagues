@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { authorizeSiteAdminMutation } from "@/lib/auth/siteAdminMutation"
 
 function getDivisionWebhook(division: string) {
   const key = division?.trim()
@@ -109,6 +110,9 @@ function buildDiscordEmbeds(body: any) {
 }
 
 export async function POST(req: Request) {
+  const authorization = await authorizeSiteAdminMutation()
+  if (!authorization.authorized) return authorization.response
+
   try {
     const body = await req.json()
 

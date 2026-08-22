@@ -13,6 +13,7 @@
     "test:all-time": "node --experimental-strip-types --test tests/all-time/arizona-modern.test.ts"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.104.1",
     "next": "16.2.4",
     "papaparse": "^5.5.3",

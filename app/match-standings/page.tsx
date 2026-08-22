@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { supabase } from "@/lib/supabase"
+import { findCanonicalFamilyConflicts, loadCanonicalPlayerDisplays } from "@/lib/canonicalPlayerDisplay"
 
 const DIVISIONS = [
   "Match Play D1",
@@ -79,13 +80,10 @@ export default function MatchStandingsPage() {
     const savedRows = (data || []) as StandingRow[]
     const playerIds = savedRows.map((row) => row.player_id).filter(Boolean)
 
-    let playerMap = new Map<string, string>()
+    let playerMap = new Map<string, { id: string; screen_name: string }>()
 
     if (playerIds.length > 0) {
-      const { data: playerData, error: playerError } = await supabase
-        .from("players")
-        .select("id, screen_name")
-        .in("id", playerIds)
+      const { data: playerData, error: playerError } = await loadCanonicalPlayerDisplays(playerIds)
 
       if (playerError) {
         setStandings([])
@@ -94,22 +92,28 @@ export default function MatchStandingsPage() {
         return
       }
 
-      playerMap = new Map(
-        ((playerData || []) as PlayerRow[]).map((player) => [
-          player.id,
-          player.screen_name,
-        ])
-      )
+      const conflicts = findCanonicalFamilyConflicts(playerIds, playerData)
+      if (conflicts.length > 0) {
+        setStandings([])
+        setMessage("Standings data conflict: multiple identity rows resolve to the same current player.")
+        setLoading(false)
+        return
+      }
+
+      playerMap = new Map(playerData.filter((player) => player.eligible && player.canonical_player_id && player.screen_name).map((player) => [
+        player.source_player_id,
+        { id: player.canonical_player_id!, screen_name: player.screen_name! },
+      ]))
     }
 
-    const rows = savedRows.map((row) => {
+    const rows = savedRows.filter((row) => playerMap.has(row.player_id)).map((row) => {
       const wins = Number(row.wins || 0)
       const draws = Number(row.ties || 0)
       const losses = Number(row.losses || 0)
 
       return {
-        playerId: row.player_id,
-        player: playerMap.get(row.player_id) || "Unknown Player",
+        playerId: playerMap.get(row.player_id)!.id,
+        player: playerMap.get(row.player_id)!.screen_name,
         played: wins + draws + losses,
         wins,
         draws,

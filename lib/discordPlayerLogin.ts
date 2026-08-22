@@ -24,7 +24,9 @@ export function getDiscordPlayerLoginDestination(
   }
 
   if (resolution?.resolution_status === "no_match") {
-    return requestedDestination?.startsWith("/register") || requestedDestination === "/join"
+    return requestedDestination?.startsWith("/register") ||
+      requestedDestination?.startsWith("/testing-access") ||
+      requestedDestination === "/join"
       ? requestedDestination
       : "/join"
   }

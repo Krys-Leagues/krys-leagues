@@ -1,14 +1,6 @@
-import { createClient } from "@supabase/supabase-js"
+import { createBrowserSupabaseClient } from "@/lib/supabase/browser"
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    // The dedicated callback page exchanges the PKCE code exactly once.
-    detectSessionInUrl: false,
-    flowType: "pkce",
-  },
-})
+// Stable compatibility export for existing client components. The underlying
+// browser client now stores the same PKCE session in cookies so server-side
+// authorization can verify it on subsequent requests.
+export const supabase = createBrowserSupabaseClient()

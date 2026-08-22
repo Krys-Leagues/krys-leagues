@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { authorizeSiteAdminMutation } from "@/lib/auth/siteAdminMutation"
 
 function getDivisionWebhook(division: string) {
   const key = division.trim()
@@ -15,6 +16,9 @@ function getDivisionWebhook(division: string) {
 }
 
 export async function POST(request: Request) {
+  const authorization = await authorizeSiteAdminMutation()
+  if (!authorization.authorized) return authorization.response
+
   try {
     const body = await request.json()
     const { division, fixtures } = body

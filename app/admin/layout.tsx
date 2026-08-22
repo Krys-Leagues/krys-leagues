@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { useCallback, useEffect, useState } from "react"
 import { usePathname, useRouter } from "next/navigation"
 import { createDiscordAuthCallbackUrl } from "@/lib/authReturnTo"
@@ -67,7 +68,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     await supabase.auth.signInWithOAuth({
       provider: "discord",
       options: {
-        scopes: "identify email",
         redirectTo: createDiscordAuthCallbackUrl("admin"),
       },
     })
@@ -113,6 +113,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <main style={adminShell}>
       <div style={logoutRow}>
+        <Link href="/" style={playerSiteLink}>
+          ← Player Site
+        </Link>
         <button onClick={logout} style={secondaryButton}>
           Logout
         </button>
@@ -141,6 +144,9 @@ const adminShell: React.CSSProperties = {
 
 const logoutRow: React.CSSProperties = {
   display: "flex",
+  flexWrap: "wrap",
+  alignItems: "center",
+  gap: 12,
   padding: 16,
 }
 
@@ -159,6 +165,13 @@ const primaryButton: React.CSSProperties = {
   color: "white",
   cursor: "pointer",
   fontWeight: 700,
+}
+
+const playerSiteLink: React.CSSProperties = {
+  ...primaryButton,
+  background: "#1e293b",
+  border: "1px solid #475569",
+  textDecoration: "none",
 }
 
 const secondaryButton: React.CSSProperties = {

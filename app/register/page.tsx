@@ -59,7 +59,6 @@ function RegisterContent() {
       user.user_metadata?.name ||
       user.user_metadata?.preferred_username ||
       user.user_metadata?.user_name ||
-      user.email ||
       "Discord User";
 
     const discordId = getAuthenticatedDiscordId(user);
@@ -128,7 +127,7 @@ function RegisterContent() {
         ) : (
           <>
             <p style={{ marginTop: 24, fontSize: 18 }}>
-              Logged in as <strong>{user.user_metadata?.preferred_username || user.user_metadata?.name || user.email}</strong>
+              Logged in as <strong>{user.user_metadata?.preferred_username || user.user_metadata?.name || "Discord User"}</strong>
             </p>
 
             <input value={screenName} onChange={(e) => setScreenName(e.target.value)} placeholder="Walkabout screen name" style={{ width: "100%", maxWidth: 520, padding: 14, background: "#111", color: "white", border: "1px solid #444", borderRadius: 8, fontSize: 18, marginTop: 14, display: "block" }} />

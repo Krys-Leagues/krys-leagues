@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { authorizeSiteAdminMutation } from "@/lib/auth/siteAdminMutation"
 
 function getResultWebhook(leagueType: string, division: string) {
   const webhooks: Record<string, string | undefined> = {
@@ -52,6 +53,9 @@ function getLeagueName(leagueType: string) {
 }
 
 export async function POST(req: Request) {
+  const authorization = await authorizeSiteAdminMutation()
+  if (!authorization.authorized) return authorization.response
+
   try {
     const result = await req.json()
 

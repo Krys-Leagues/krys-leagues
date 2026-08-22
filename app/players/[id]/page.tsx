@@ -263,6 +263,18 @@ export default function PublicPlayerProfilePage() {
       return
     }
 
+    const canonicalStatus = playerResponse.data.status?.trim().toLowerCase()
+    if (
+      playerResponse.data.active !== true ||
+      canonicalStatus === "retired" ||
+      canonicalStatus === "merged" ||
+      canonicalStatus === "archived"
+    ) {
+      setMessage("This player profile is not currently available.")
+      setLoading(false)
+      return
+    }
+
     setPlayer(playerResponse.data)
     setAliases(identity.aliases || [])
     setMemberships(membershipsResponse.data || [])

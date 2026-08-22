@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { supabase } from "@/lib/supabase"
+import { loadCanonicalPlayerDisplays, type CanonicalPlayerDisplay } from "@/lib/canonicalPlayerDisplay"
 
 type Player = {
   id: string
@@ -64,7 +65,7 @@ const DIVISIONS = [
 ]
 
 export default function MatchesPage() {
-  const [players, setPlayers] = useState<Player[]>([])
+  const [players, setPlayers] = useState<CanonicalPlayerDisplay[]>([])
   const [schedule, setSchedule] = useState<ScheduledMatch[]>([])
   const [results, setResults] = useState<Result[]>([])
   const [division, setDivision] = useState("Stroke D1")
@@ -78,9 +79,8 @@ export default function MatchesPage() {
   async function loadData() {
     setLoading(true)
 
-    const [playersResponse, scheduleResponse, resultsResponse] =
+    const [scheduleResponse, resultsResponse] =
       await Promise.all([
-        supabase.from("players").select("id, screen_name"),
         supabase
           .from("schedule")
           .select(
@@ -94,9 +94,16 @@ export default function MatchesPage() {
           ),
       ])
 
-    setPlayers(playersResponse.data || [])
-    setSchedule(scheduleResponse.data || [])
-    setResults(resultsResponse.data || [])
+    const loadedSchedule = scheduleResponse.data || []
+    const loadedResults = resultsResponse.data || []
+    const sourcePlayerIds = [...loadedSchedule, ...loadedResults].flatMap((row) =>
+      [row.player1_id, row.player2_id].filter((id): id is string => Boolean(id)),
+    )
+    const playerResponse = await loadCanonicalPlayerDisplays(sourcePlayerIds)
+
+    setPlayers(playerResponse.data)
+    setSchedule(loadedSchedule)
+    setResults(loadedResults)
     setLoading(false)
   }
 
@@ -104,7 +111,7 @@ export default function MatchesPage() {
     const map = new Map<string, string>()
 
     players.forEach((player) => {
-      map.set(player.id, player.screen_name)
+      if (player.eligible && player.screen_name) map.set(player.source_player_id, player.screen_name)
     })
 
     return map

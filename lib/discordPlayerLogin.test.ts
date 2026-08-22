@@ -26,6 +26,14 @@ test("a no-match identity reaches only the approved onboarding path", () => {
   assert.equal(getDiscordPlayerLoginDestination(resolution, "/majors/example"), "/join")
 })
 
+test("an unmatched prelaunch login remains at the testing boundary", () => {
+  const resolution = { resolution_status: "no_match" as const, canonical_player_id: null }
+  assert.equal(
+    getDiscordPlayerLoginDestination(resolution, "/testing-access?next=%2Fplayers"),
+    "/testing-access?next=%2Fplayers",
+  )
+})
+
 test("conflicting or malformed identity evidence cannot select a player", () => {
   assert.equal(getDiscordPlayerLoginDestination({ resolution_status: "conflict", canonical_player_id: null }, null), null)
   assert.equal(getDiscordPlayerLoginDestination({ resolution_status: "matched", canonical_player_id: null }, null), null)

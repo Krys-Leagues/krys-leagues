@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { authorizeSiteAdminMutation } from "@/lib/auth/siteAdminMutation"
 
 function getWebhookForDivision(division: string) {
   const webhookMap: Record<string, string | undefined> = {
@@ -45,6 +46,9 @@ function getWebhookForDivision(division: string) {
 }
 
 export async function POST(req: Request) {
+  const authorization = await authorizeSiteAdminMutation()
+  if (!authorization.authorized) return authorization.response
+
   const { content, division } = await req.json()
 
   const webhookUrl = getWebhookForDivision(division)

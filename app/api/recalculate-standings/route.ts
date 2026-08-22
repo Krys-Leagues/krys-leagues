@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { supabase } from "@/lib/supabase"
+import { authorizeSiteAdminMutation } from "@/lib/auth/siteAdminMutation"
 
 type ResultRow = {
   player1: string
@@ -43,6 +43,9 @@ function ensurePlayer(map: Map<string, Standing>, player: string, playerId: stri
 }
 
 export async function POST(req: Request) {
+  const authorization = await authorizeSiteAdminMutation()
+  if (!authorization.authorized) return authorization.response
+
   try {
     const body = await req.json()
 
@@ -70,7 +73,7 @@ export async function POST(req: Request) {
       )
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await authorization.supabase
       .from("results")
       .select("player1, player2, player1_id, player2_id, player1_score, player2_score, winner, is_draw")
       .eq("league_type", leagueType)
@@ -168,7 +171,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: true, saved: 0 })
     }
 
-    const { error: saveError } = await supabase
+    const { error: saveError } = await authorization.supabase
       .from("season_standings")
       .upsert(rows, {
         onConflict: "player_id,league_type,season_number,division",

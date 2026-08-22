@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { supabase } from "@/lib/supabase"
+import { loadCanonicalPublicPlayers, type CanonicalPublicPlayer } from "@/lib/publicPlayers"
 
 type Player = {
   id: string
@@ -31,7 +32,7 @@ type Result = {
 const CURRENT_SEASON = 59
 
 export default function HomePage() {
-  const [players, setPlayers] = useState<Player[]>([])
+  const [players, setPlayers] = useState<CanonicalPublicPlayer[]>([])
   const [schedule, setSchedule] = useState<ScheduledMatch[]>([])
   const [results, setResults] = useState<Result[]>([])
   const [loadingStats, setLoadingStats] = useState(true)
@@ -45,7 +46,7 @@ export default function HomePage() {
 
     const [playersResponse, scheduleResponse, resultsResponse] =
       await Promise.all([
-        supabase.from("players").select("id, status, active"),
+        loadCanonicalPublicPlayers(),
 
         supabase
           .from("schedule")
@@ -93,11 +94,7 @@ export default function HomePage() {
   }
 
   const stats = useMemo(() => {
-    const activePlayers = players.filter((player) => {
-      if (player.active === false) return false
-      if ((player.status || "").toLowerCase() === "inactive") return false
-      return true
-    }).length
+    const activePlayers = players.length
 
     const seasonSchedule = schedule.filter(
       (match) => Number(match.season_number) === CURRENT_SEASON

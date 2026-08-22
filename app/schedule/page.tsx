@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react"
 import { supabase } from "@/lib/supabase"
+import { loadCanonicalPlayerDisplays, type CanonicalPlayerDisplay } from "@/lib/canonicalPlayerDisplay"
 
 export default function SchedulePage() {
   const [schedule, setSchedule] = useState<any[]>([])
-  const [players, setPlayers] = useState<any[]>([])
+  const [players, setPlayers] = useState<CanonicalPlayerDisplay[]>([])
   const [division, setDivision] = useState("Stroke D1")
   const [seasonNumber, setSeasonNumber] = useState("59")
   const [posting, setPosting] = useState(false)
@@ -21,16 +22,16 @@ export default function SchedulePage() {
       .select("*")
       .order("game", { ascending: true })
 
-    const { data: playersData } = await supabase
-      .from("players")
-      .select("*")
-
     if (scheduleData) setSchedule(scheduleData)
-    if (playersData) setPlayers(playersData)
+    const sourcePlayerIds = (scheduleData || []).flatMap((row) =>
+      [row.player1_id, row.player2_id].filter((id): id is string => Boolean(id)),
+    )
+    const playerResponse = await loadCanonicalPlayerDisplays(sourcePlayerIds)
+    setPlayers(playerResponse.data)
   }
 
   function getPlayerName(id: string) {
-    return players.find((p) => p.id === id)?.screen_name || "Unknown Player"
+    return players.find((player) => player.source_player_id === id && player.eligible)?.screen_name || "Unavailable Player"
   }
 
   const filteredSchedule = schedule.filter(

@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { supabase } from "@/lib/supabase"
+import { historicalPlayerName, loadCanonicalPlayerDisplays, type CanonicalPlayerDisplay } from "@/lib/canonicalPlayerDisplay"
 import TrophyMedia from "@/components/TrophyMedia"
 
 type Player = {
@@ -28,7 +29,7 @@ type ChampionEntry = Trophy & {
 }
 
 export default function ChampionsPage() {
-  const [players, setPlayers] = useState<Player[]>([])
+  const [players, setPlayers] = useState<CanonicalPlayerDisplay[]>([])
   const [trophies, setTrophies] = useState<Trophy[]>([])
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState("")
@@ -42,22 +43,14 @@ export default function ChampionsPage() {
     setLoading(true)
     setMessage("")
 
-    const [playersResponse, trophiesResponse] = await Promise.all([
-      supabase
-        .from("players")
-        .select("id, screen_name")
-        .order("screen_name", { ascending: true }),
-
-      supabase
+    const trophiesResponse = await supabase
         .from("player_trophies")
         .select(
           "id, player_id, player_name, trophy_title, placement, event_name, division, season, week, image_url"
         )
-        .order("season", { ascending: false }),
-    ])
+        .order("season", { ascending: false })
 
-    const firstError =
-      playersResponse.error || trophiesResponse.error
+    const firstError = trophiesResponse.error
 
     if (firstError) {
       setMessage(firstError.message)
@@ -65,19 +58,29 @@ export default function ChampionsPage() {
       return
     }
 
-    setPlayers(playersResponse.data || [])
-    setTrophies(trophiesResponse.data || [])
+    const loadedTrophies = trophiesResponse.data || []
+    const playerResponse = await loadCanonicalPlayerDisplays(
+      loadedTrophies.map((trophy) => trophy.player_id).filter((id): id is string => Boolean(id)),
+    )
+    if (playerResponse.error) {
+      setMessage(playerResponse.error.message)
+      setLoading(false)
+      return
+    }
+    setPlayers(playerResponse.data)
+    setTrophies(loadedTrophies)
     setLoading(false)
   }
     const championEntries = useMemo<ChampionEntry[]>(() => {
-    const playerNames = new Map(
-      players.map((player) => [player.id, player.screen_name])
-    )
+    const playerDisplays = new Map(players.map((player) => [player.source_player_id, player]))
 
     return trophies.map((trophy) => ({
       ...trophy,
       playerName:
-        (trophy.player_id ? playerNames.get(trophy.player_id) : null) || trophy.player_name || "Unresolved Player",
+        historicalPlayerName(
+          trophy.player_id ? playerDisplays.get(trophy.player_id) : undefined,
+          trophy.player_name,
+        ),
     }))
   }, [players, trophies])
 
