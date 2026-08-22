@@ -12,6 +12,7 @@ import { DEFAULT_PLAYER_PROFILE_BACKGROUND_KEY, getPlayerProfileBackground } fro
 import { profileBackgroundPublicUrl } from "@/lib/profileBackgrounds"
 import styles from "./page.module.css"
 import TrophyMedia from "@/components/TrophyMedia"
+import PlayerCourseRecords from "@/components/records/PlayerCourseRecords"
 
 type Player = {
   id: string
@@ -142,7 +143,7 @@ export default function PublicPlayerProfilePage() {
   const [preferences, setPreferences] = useState<ProfilePreferences>(DEFAULT_PREFERENCES)
   const [hasSession, setHasSession] = useState(false)
   const [canEditProfile, setCanEditProfile] = useState(false)
-  const [openProfileSection, setOpenProfileSection] = useState<"stats" | "aliases" | "trophies" | null>(null)
+  const [openProfileSection, setOpenProfileSection] = useState<"records" | "stats" | "aliases" | "trophies" | null>(null)
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/immutability
@@ -419,12 +420,15 @@ export default function PublicPlayerProfilePage() {
         <nav className={styles.profileActions} aria-label="Player profile sections and navigation">
           <Link href="/" style={backButton}>← Krys Leagues</Link>
           <Link href="/players" style={backButton}>← Player Profiles</Link>
+          <button type="button" className={styles.profileActionButton} aria-pressed={openProfileSection === "records"} onClick={() => setOpenProfileSection(current => current === "records" ? null : "records")}>Course Records</button>
           {hasCareerParticipation && <button type="button" className={styles.profileActionButton} aria-pressed={openProfileSection === "stats"} onClick={() => setOpenProfileSection(current => current === "stats" ? null : "stats")}>Player Stats</button>}
           {knownAliases.length > 0 && <button type="button" className={styles.profileActionButton} aria-pressed={openProfileSection === "aliases"} onClick={() => setOpenProfileSection(current => current === "aliases" ? null : "aliases")}>Names / Known As</button>}
           {trophies.length > 0 && <button type="button" className={styles.profileActionButton} aria-pressed={openProfileSection === "trophies"} onClick={() => setOpenProfileSection(current => current === "trophies" ? null : "trophies")}>Trophies &amp; Achievements</button>}
           {!hasSession && <button type="button" className={styles.profileActionButton} onClick={() => void signInWithDiscord()}>Sign in with Discord</button>}
           {canEditProfile && <PlayerProfileEditor playerId={player.id} initial={preferences} isServerBooster={recognition.isServerBooster} hasKrysServerTag={recognition.hasKrysServerTag} profileBadges={recognition.profileBadges} onSaved={setPreferences} />}
         </nav>
+
+        {openProfileSection === "records" && <PlayerCourseRecords playerId={player.id} />}
 
         {openProfileSection === "stats" && hasCareerParticipation && <section className={styles.profileSectionPanel} id="player-stats-panel" aria-label="Player Stats">
           <p className={styles.sectionDescription}>Career statistics and performance overview</p>

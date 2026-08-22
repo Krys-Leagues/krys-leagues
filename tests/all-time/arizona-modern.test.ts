@@ -94,11 +94,13 @@ test("Easy and Hard Single Course rankings are calculated independently", () => 
 
 test("rank layout reserves room through three digits without changing player names", () => {
   const page = readFileSync("app/admin/records/single/page.tsx", "utf8")
+  const styles = readFileSync("components/admin/records/AdminRecordsUI.module.css", "utf8")
   const ranks = denseRanks(Array.from({ length: 111 }, (_, index) => ({ score: index - 111 })))
   assert.deepEqual([ranks[8], ranks[9], ranks[98], ranks[99], ranks[110]], [9, 10, 99, 100, 111])
-  assert.match(page, /gridTemplateColumns: "88px minmax\(0, 1fr\) auto"/)
-  assert.match(page, /whiteSpace: "nowrap"/)
-  assert.match(page, /overflowWrap: "anywhere"/)
+  assert.match(styles, /grid-template-columns:76px minmax\(0,1fr\) minmax\(72px,auto\)/)
+  assert.match(styles, /\.rank \{ width:76px;/)
+  assert.match(styles, /\.player \{ min-width:0;/)
+  assert.match(styles, /overflow-wrap:anywhere/)
   assert.match(page, /\{record\.player_name\}/)
   assert.match(page, /left\.score - right\.score/)
 })

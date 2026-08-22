@@ -4,6 +4,7 @@ import Link from "next/link"
 import { FormEvent, useEffect, useMemo, useState } from "react"
 
 import ExistingPlayerPicker from "@/app/admin/import/csv/components/ExistingPlayerPicker"
+import { AdminRecordsHero, AdminRecordsShell, adminRecordsStyles as styles } from "@/components/admin/records/AdminRecordsUI"
 import { ALL_TIME_PAGE_SIZES, DEFAULT_ALL_TIME_PAGE_SIZE, buildReviewedPreviewRows, identityReviewComplete, paginateRows } from "@/lib/all-time/arizona/review"
 import type { AllTimeCourseOption, ArizonaCsvIssue, ArizonaIdentityDecision, ArizonaPreviewRow, BestRecordSnapshot } from "@/lib/all-time/arizona/types"
 import { supabase } from "@/lib/supabase"
@@ -94,17 +95,16 @@ export default function ArizonaModernPilotPage() {
     finally { setBusy(false) }
   }
 
-  return <main className="min-h-screen bg-slate-950 p-6 text-white">
-    <Link href="/admin/records" className="text-blue-300">← Records Admin</Link>
-    <h1 className="mt-4 text-4xl font-bold">All-Time Easy/Hard Records</h1>
-    <p className="mt-2 max-w-4xl text-slate-300">Import one Easy or Hard historical course CSV at a time. Preview and identity review are read-only; the protected All-Time RPC remains authoritative on final import.</p>
-    <section className="mt-5 rounded-xl border border-blue-700 bg-blue-950/40 p-4 text-blue-100">CSV only. Easy and Hard remain separate. Combined records and the 104 pending legacy rows are not part of this importer.</section>
+  return <AdminRecordsShell>
+    <nav className={styles.nav}><Link href="/admin/records" className={styles.button}>← Records hub</Link></nav>
+    <AdminRecordsHero title="Historical All-Time Import" description="Import one Easy or Hard historical course CSV at a time. Preview and identity review remain read-only until final confirmation." />
+    <section className={styles.notice}>CSV only. Easy and Hard remain separate. Combined records and the 104 pending legacy rows are not part of this importer.</section>
 
-    <form onSubmit={buildPreview} className="mt-6 space-y-5 rounded-2xl border border-slate-700 bg-slate-900 p-6">
-      <label className="block font-bold">1. Target course<select value={courseCode} onChange={(event) => { setCourseCode(event.target.value); setPreview(null); setImportResult(null) }} className="mt-2 block w-full rounded border border-slate-600 bg-slate-950 p-3">{courses.map((course) => <option key={course.code} value={course.code}>{course.code} — {course.displayName}</option>)}</select></label>
-      <label className="block font-bold">2. Choose one CSV<input type="file" accept=".csv,text/csv" onChange={(event) => { setCsvFile(event.target.files?.[0] ?? null); setPreview(null); setImportResult(null) }} className="mt-2 block w-full rounded border border-slate-600 bg-slate-950 p-3" /></label>
+    <form onSubmit={buildPreview} className={`${styles.glass} ${styles.cardPadding} mt-6 space-y-5`}>
+      <label className={styles.field}>1. Target course<select value={courseCode} onChange={(event) => { setCourseCode(event.target.value); setPreview(null); setImportResult(null) }} className={styles.select}>{courses.map((course) => <option key={course.code} value={course.code}>{course.code} — {course.displayName}</option>)}</select></label>
+      <label className={styles.field}>2. Choose one CSV<input type="file" accept=".csv,text/csv" onChange={(event) => { setCsvFile(event.target.files?.[0] ?? null); setPreview(null); setImportResult(null) }} className={styles.input} /></label>
       <p className="text-sm text-slate-400">Required columns: <code>historical_player_name,score</code>. Optional: <code>source_row,rank,source_workbook,source_date,notes,course_code</code>.</p>
-      <button disabled={busy || !csvFile} className="rounded bg-blue-700 px-5 py-3 font-bold disabled:bg-slate-700">{busy ? "Working…" : "Preview CSV"}</button>
+      <button disabled={busy || !csvFile} className={styles.buttonPrimary}>{busy ? "Working…" : "Preview CSV"}</button>
     </form>
 
     {error && <div role="alert" className="mt-5 rounded border border-red-700 bg-red-950/50 p-4 text-red-200">{error}</div>}
@@ -130,7 +130,7 @@ export default function ArizonaModernPilotPage() {
 
     {confirming && <div role="dialog" aria-modal="true" className="mt-5 rounded-xl border-2 border-amber-500 bg-amber-950/50 p-5"><h2 className="text-xl font-bold">Confirm {courseCode} import</h2><p className="mt-2">This calls the protected All-Time apply function. It does not import the other difficulty or any Combined record.</p><div className="mt-4 flex gap-3"><button type="button" onClick={() => void applyImport()} className="rounded bg-emerald-700 px-4 py-2 font-bold">Confirm and import</button><button type="button" onClick={() => setConfirming(false)} className="rounded border border-slate-500 px-4 py-2">Cancel</button></div></div>}
     {importResult && <div role="status" className="mt-5 rounded border border-emerald-600 bg-emerald-950/50 p-5 text-emerald-100"><h2 className="font-bold">All-Time CSV import completed</h2><pre className="mt-2 overflow-x-auto text-xs">{JSON.stringify(importResult.result, null, 2)}</pre>{importResult.identityMemory && <p className="mt-2">Verified aliases remembered: {importResult.identityMemory.created}; already known: {importResult.identityMemory.alreadyKnown}; conflicts: {importResult.identityMemory.conflicts.length}; failures: {importResult.identityMemory.failures.length}.</p>}</div>}
-  </main>
+  </AdminRecordsShell>
 }
 
 function Summary({ label, value }: { label: string; value: number }) { return <div className="rounded-lg border border-slate-700 bg-slate-900 p-4 capitalize"><div className="text-sm text-slate-400">{label}</div><strong className="text-2xl">{value}</strong></div> }

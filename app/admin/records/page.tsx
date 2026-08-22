@@ -1,70 +1,14 @@
-import Link from "next/link"
+import { AdminActionCard, AdminRecordsHero, AdminRecordsShell, RecordsIcon, adminRecordsStyles as styles } from "@/components/admin/records/AdminRecordsUI"
 
 export default function RecordsAdminPage() {
-  return (
-    <main style={page}>
-      <h1 style={title}>Records Admin</h1>
-
-      <p style={subtitle}>
-        Choose which records page you want to open.
-      </p>
-
-      <div style={grid}>
-        <Link href="/admin/records/all-time" style={card}>
-          <strong>All-Time Easy/Hard Importer</strong>
-          <span>Preview and import any active catalog course from one-course CSV files.</span>
-        </Link>
-
-        <Link href="/admin/records/combined" style={card}>
-          <strong>Combined Course Records</strong>
-          <span>View Easy and Hard all-time course records.</span>
-        </Link>
-
-        <Link href="/admin/records/single" style={card}>
-          <strong>Single Course Records</strong>
-          <span>View individual course leaderboards.</span>
-        </Link>
-
-        <Link href="/admin" style={card}>
-          <strong>Back to Admin Home</strong>
-          <span>Return to the main admin dashboard.</span>
-        </Link>
-      </div>
-    </main>
-  )
-}
-
-const page: React.CSSProperties = {
-  minHeight: "100vh",
-  padding: 24,
-  background: "black",
-  color: "white",
-}
-
-const title: React.CSSProperties = {
-  fontSize: 34,
-  marginBottom: 8,
-}
-
-const subtitle: React.CSSProperties = {
-  color: "#cfcfcf",
-  marginBottom: 28,
-}
-
-const grid: React.CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))",
-  gap: 14,
-}
-
-const card: React.CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  gap: 8,
-  padding: 18,
-  borderRadius: 14,
-  border: "1px solid #333",
-  background: "#111",
-  color: "white",
-  textDecoration: "none",
+  return <AdminRecordsShell>
+    <nav className={styles.nav}><a href="/admin" className={styles.button}>← Admin home</a></nav>
+    <AdminRecordsHero title="Records Control Center" description="Manage individual leaderboards, combined results, and historical All-Time imports from one focused workspace." />
+    <div className={styles.actionGrid}>
+      <AdminActionCard href="/admin/records/single" title="Single Course Records" description="Explore each active Easy or Hard course as its own ranked leaderboard." accent="#22d3ee" icon={<RecordsIcon kind="single" />} />
+      <AdminActionCard href="/admin/records/combined" title="Combined Records" description="Review the existing Easy + Hard combined record workspace." accent="#a78bfa" icon={<RecordsIcon kind="combined" />} />
+      <AdminActionCard href="/admin/records/all-time" title="Historical All-Time Import" description="Preview, identity-review, and import one approved course CSV at a time." accent="#34d399" icon={<RecordsIcon kind="import" />} />
+      <AdminActionCard href="/admin" title="Admin Home" description="Return to the main Krys Leagues administration dashboard." accent="#60a5fa" icon={<RecordsIcon kind="home" />} />
+    </div>
+  </AdminRecordsShell>
 }
