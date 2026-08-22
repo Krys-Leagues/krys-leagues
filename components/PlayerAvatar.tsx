@@ -1,4 +1,6 @@
-import { playerAvatarInitials, playerAvatarPublicUrl } from "@/lib/playerAvatars"
+import { playerAvatarPublicUrl } from "@/lib/playerAvatars"
+
+const KRYS_LEAGUES_LOGO = "/league-media/BIG%20LOGO%20TRANSPARENT.png"
 
 export default function PlayerAvatar({
   screenName,
@@ -18,6 +20,8 @@ export default function PlayerAvatar({
   renderAsImage?: boolean
 }) {
   const avatarUrl = playerAvatarPublicUrl(avatarPath)
+  const displayedAvatarUrl = avatarUrl || KRYS_LEAGUES_LOGO
+  const displayedImageFit = avatarUrl ? imageFit : "contain"
   return (
     <div
       className={className}
@@ -33,22 +37,21 @@ export default function PlayerAvatar({
         overflow: "hidden",
         borderRadius,
         border: "2px solid #52525b",
-        background: avatarUrl && !renderAsImage ? `center / ${imageFit} no-repeat url("${avatarUrl}")` : "linear-gradient(145deg,#27272a,#09090b)",
+        background: !renderAsImage ? `center / ${displayedImageFit} no-repeat url("${displayedAvatarUrl}")` : "linear-gradient(145deg,#27272a,#09090b)",
         color: "white",
         fontSize: typeof size === "number" ? Math.max(18, Math.round(size * 0.3)) : "clamp(18px, 8vw, 52px)",
         fontWeight: 900,
         letterSpacing: "0.04em",
       }}
     >
-      {avatarUrl && renderAsImage && (
+      {renderAsImage && (
         <img
-          src={avatarUrl}
+          src={displayedAvatarUrl}
           alt=""
           draggable={false}
-          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: imageFit }}
+          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: displayedImageFit }}
         />
       )}
-      {!avatarUrl && playerAvatarInitials(screenName)}
     </div>
   )
 }
