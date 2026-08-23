@@ -10,6 +10,7 @@ import PlayerProfileEditor, { type ProfilePreferences } from "@/components/Playe
 import { getCanonicalPlayerAvatar } from "@/lib/playerAvatars"
 import { DEFAULT_PLAYER_PROFILE_BACKGROUND_KEY, getPlayerProfileBackground } from "@/lib/playerProfileBackgrounds"
 import { profileBackgroundPublicUrl } from "@/lib/profileBackgrounds"
+import { DEFAULT_PROFILE_PRESENTATION, normalizeProfilePresentation, profilePresentationStyle } from "@/lib/playerProfilePresentation"
 import styles from "./page.module.css"
 import TrophyMedia from "@/components/TrophyMedia"
 import PlayerCourseRecords from "@/components/records/PlayerCourseRecords"
@@ -41,7 +42,7 @@ type Trophy = {
   created_at: string
 }
 
-const DEFAULT_PREFERENCES: ProfilePreferences = { background_key: DEFAULT_PLAYER_PROFILE_BACKGROUND_KEY, background_id: null, background_path: null, background_display_name: null, name_effect: "auto", background_color: "#07111f", glow_color: "#ff2bd6", text_color: "#f8fafc", about_me: null }
+const DEFAULT_PREFERENCES: ProfilePreferences = { background_key: DEFAULT_PLAYER_PROFILE_BACKGROUND_KEY, background_id: null, background_path: null, background_display_name: null, name_effect: "auto", background_color: "#07111f", glow_color: "#ff2bd6", text_color: "#f8fafc", about_me: null, ...DEFAULT_PROFILE_PRESENTATION }
 
 type Result = {
   id: string
@@ -248,7 +249,10 @@ export default function PublicPlayerProfilePage() {
         p_player_id: playerId,
       }),
       getCanonicalPlayerAvatar(playerId).catch(() => ({ canonicalPlayerId: playerId, avatarPath: null })),
-      supabase.rpc("get_public_player_profile_preferences_v4", { p_player_id: canonicalId }),
+      (async () => {
+        const v5 = await supabase.rpc("get_public_player_profile_preferences_v5", { p_player_id: canonicalId })
+        return v5.error ? supabase.rpc("get_public_player_profile_preferences_v4", { p_player_id: canonicalId }) : v5
+      })(),
       supabase.auth.getSession(),
     ])
 
@@ -304,7 +308,7 @@ export default function PublicPlayerProfilePage() {
     setAvatarPath(avatarResponse.avatarPath)
     if (!preferencesResponse.error) {
       const loaded = Array.isArray(preferencesResponse.data) ? preferencesResponse.data[0] : preferencesResponse.data
-      if (loaded) setPreferences(loaded as ProfilePreferences)
+      if (loaded) setPreferences({ ...DEFAULT_PREFERENCES, ...loaded, ...normalizeProfilePresentation({ ...loaded, avatar_glow_color: loaded.avatar_glow_color || loaded.glow_color }) } as ProfilePreferences)
     }
     const session = sessionResponse.data.session
     setHasSession(Boolean(session))
@@ -383,7 +387,7 @@ export default function PublicPlayerProfilePage() {
   }
 
   return (
-    <main className={styles.page} style={{ "--profile-bg": preferences.background_color, "--profile-text": preferences.text_color, "--profile-background-image": `url("${profileBackgroundImage}")` } as React.CSSProperties}>
+    <main className={styles.page} data-glass-style={preferences.glass_style} data-blue-panel-glow={preferences.blue_panel_glow} style={{ "--profile-bg": preferences.background_color, "--profile-text": preferences.text_color, "--profile-background-image": `url("${profileBackgroundImage}")`, ...profilePresentationStyle(preferences) } as React.CSSProperties}>
       <div style={container} className={styles.profilePageContainer}>
         <PlayerProfileHero
           screenName={player.screen_name}
@@ -393,13 +397,16 @@ export default function PublicPlayerProfilePage() {
           nameEffect={preferences.name_effect}
           profileBadges={recognition.profileBadges}
           glowColor={preferences.glow_color}
+          avatarGlowColor={preferences.avatar_glow_color}
           textColor={preferences.text_color}
-          featuredTrophy={trophies[0] ? {
+          showAvatarGlow={preferences.show_avatar_glow}
+          avatarGlowStrength={preferences.avatar_glow_strength}
+          featuredTrophy={preferences.show_featured_trophy && trophies[0] ? {
             title: trophies[0].trophy_title || trophies[0].placement || "Trophy",
             meta: [trophies[0].event_name, trophies[0].division, trophies[0].season].filter(Boolean).join(" · "),
             imageUrl: trophies[0].image_url,
           } : null}
-          careerHighlights={careerHighlights}
+          careerHighlights={preferences.show_career_highlights ? careerHighlights : []}
           publicLayout
         />
 
@@ -409,13 +416,13 @@ export default function PublicPlayerProfilePage() {
         </section>}
 
         <div className={styles.profileContent}>
-        <PlayerProfileRecognition
+        {preferences.show_recognition_box && <PlayerProfileRecognition
           isServerBooster={recognition.isServerBooster}
           hasKrysServerTag={recognition.hasKrysServerTag}
           profileBadges={recognition.profileBadges}
           glowColor={preferences.glow_color}
           textColor={preferences.text_color}
-        />
+        />}
 
         <nav className={styles.profileActions} aria-label="Player profile sections and navigation">
           <Link href="/" style={backButton}>← Krys Leagues</Link>
