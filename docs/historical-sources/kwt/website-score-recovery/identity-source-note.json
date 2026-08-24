@@ -1,0 +1,10 @@
+{
+  "purpose": "Read-only identity candidate preview for names found in recovered KWT score rows",
+  "playersRowsRead": 347,
+  "verifiedAliasRowsRead": 240,
+  "playerIdentityLinksRead": false,
+  "playerIdentityLinksErrorCode": "42501",
+  "playerIdentityLinksNote": "The public Supabase REST key is denied read access by RLS. Candidate counts must be treated as exact screen-name/verified-alias candidates pending canonical-link reconciliation in the authenticated review UI.",
+  "fullPlayerDirectoryCommitted": false,
+  "scoresWritten": false
+}

@@ -1,0 +1,994 @@
+[
+  {
+    "id": "KWT10W01",
+    "season": "KWT10",
+    "seasonNumber": 10,
+    "weekNumber": 1,
+    "easy": "LLE",
+    "hard": "LLH"
+  },
+  {
+    "id": "KWT10W02",
+    "season": "KWT10",
+    "seasonNumber": 10,
+    "weekNumber": 2,
+    "easy": "TTE",
+    "hard": "TTH"
+  },
+  {
+    "id": "KWT10W03",
+    "season": "KWT10",
+    "seasonNumber": 10,
+    "weekNumber": 3,
+    "easy": "HHE",
+    "hard": "HHH"
+  },
+  {
+    "id": "KWT10W04",
+    "season": "KWT10",
+    "seasonNumber": 10,
+    "weekNumber": 4,
+    "easy": "GBE",
+    "hard": "GBH"
+  },
+  {
+    "id": "KWT10W05",
+    "season": "KWT10",
+    "seasonNumber": 10,
+    "weekNumber": 5,
+    "easy": "TOE",
+    "hard": "TOH"
+  },
+  {
+    "id": "KWT10W06",
+    "season": "KWT10",
+    "seasonNumber": 10,
+    "weekNumber": 6,
+    "easy": "8BE",
+    "hard": "8BH"
+  },
+  {
+    "id": "KWT10W07",
+    "season": "KWT10",
+    "seasonNumber": 10,
+    "weekNumber": 7,
+    "easy": "RCE",
+    "hard": "RCH"
+  },
+  {
+    "id": "KWT10W08",
+    "season": "KWT10",
+    "seasonNumber": 10,
+    "weekNumber": 8,
+    "easy": "WGE",
+    "hard": "WGH"
+  },
+  {
+    "id": "KWT10W09",
+    "season": "KWT10",
+    "seasonNumber": 10,
+    "weekNumber": 9,
+    "easy": "SSE",
+    "hard": "SSH"
+  },
+  {
+    "id": "KWT10W10",
+    "season": "KWT10",
+    "seasonNumber": 10,
+    "weekNumber": 10,
+    "easy": "LBE",
+    "hard": "LBH"
+  },
+  {
+    "id": "KWT10W11",
+    "season": "KWT10",
+    "seasonNumber": 10,
+    "weekNumber": 11,
+    "easy": "CBE",
+    "hard": "CBH"
+  },
+  {
+    "id": "KWT10W12",
+    "season": "KWT10",
+    "seasonNumber": 10,
+    "weekNumber": 12,
+    "easy": "ZZE",
+    "hard": "ZZH"
+  },
+  {
+    "id": "KWT11W01",
+    "season": "KWT11",
+    "seasonNumber": 11,
+    "weekNumber": 1,
+    "easy": "FFE",
+    "hard": "FFH"
+  },
+  {
+    "id": "KWT11W02",
+    "season": "KWT11",
+    "seasonNumber": 11,
+    "weekNumber": 2,
+    "easy": "20E",
+    "hard": "20H"
+  },
+  {
+    "id": "KWT11W03",
+    "season": "KWT11",
+    "seasonNumber": 11,
+    "weekNumber": 3,
+    "easy": "MYE",
+    "hard": "MYH"
+  },
+  {
+    "id": "KWT11W04",
+    "season": "KWT11",
+    "seasonNumber": 11,
+    "weekNumber": 4,
+    "easy": "VNE",
+    "hard": "VNH"
+  },
+  {
+    "id": "KWT11W05",
+    "season": "KWT11",
+    "seasonNumber": 11,
+    "weekNumber": 5,
+    "easy": "SLE",
+    "hard": "SLH"
+  },
+  {
+    "id": "KWT11W06",
+    "season": "KWT11",
+    "seasonNumber": 11,
+    "weekNumber": 6,
+    "easy": "ELE",
+    "hard": "ELH"
+  },
+  {
+    "id": "KWT11W07",
+    "season": "KWT11",
+    "seasonNumber": 11,
+    "weekNumber": 7,
+    "easy": "WOE",
+    "hard": "WOH"
+  },
+  {
+    "id": "KWT11W08",
+    "season": "KWT11",
+    "seasonNumber": 11,
+    "weekNumber": 8,
+    "easy": "AWE",
+    "hard": "AWH"
+  },
+  {
+    "id": "KWT11W09",
+    "season": "KWT11",
+    "seasonNumber": 11,
+    "weekNumber": 9,
+    "easy": "MOE",
+    "hard": "MOH"
+  },
+  {
+    "id": "KWT11W10",
+    "season": "KWT11",
+    "seasonNumber": 11,
+    "weekNumber": 10,
+    "easy": "TSE",
+    "hard": "TSH"
+  },
+  {
+    "id": "KWT11W11",
+    "season": "KWT11",
+    "seasonNumber": 11,
+    "weekNumber": 11,
+    "easy": "WWE",
+    "hard": "WWH"
+  },
+  {
+    "id": "KWT11W12",
+    "season": "KWT11",
+    "seasonNumber": 11,
+    "weekNumber": 12,
+    "easy": "MWE",
+    "hard": "MWH"
+  },
+  {
+    "id": "KWT12W01",
+    "season": "KWT12",
+    "seasonNumber": 12,
+    "weekNumber": 1,
+    "easy": "CLE",
+    "hard": "CLH"
+  },
+  {
+    "id": "KWT12W02",
+    "season": "KWT12",
+    "seasonNumber": 12,
+    "weekNumber": 2,
+    "easy": "TCE",
+    "hard": "TCH"
+  },
+  {
+    "id": "KWT12W03",
+    "season": "KWT12",
+    "seasonNumber": 12,
+    "weekNumber": 3,
+    "easy": "AME",
+    "hard": "AMH"
+  },
+  {
+    "id": "KWT12W04",
+    "season": "KWT12",
+    "seasonNumber": 12,
+    "weekNumber": 4,
+    "easy": "LLE",
+    "hard": "LLH"
+  },
+  {
+    "id": "KWT12W05",
+    "season": "KWT12",
+    "seasonNumber": 12,
+    "weekNumber": 5,
+    "easy": "SWE",
+    "hard": "SWH"
+  },
+  {
+    "id": "KWT12W06",
+    "season": "KWT12",
+    "seasonNumber": 12,
+    "weekNumber": 6,
+    "easy": "OGE",
+    "hard": "OGH"
+  },
+  {
+    "id": "KWT12W07",
+    "season": "KWT12",
+    "seasonNumber": 12,
+    "weekNumber": 7,
+    "easy": "ILE",
+    "hard": "ILH"
+  },
+  {
+    "id": "KWT12W08",
+    "season": "KWT12",
+    "seasonNumber": 12,
+    "weekNumber": 8,
+    "easy": "EDE",
+    "hard": "EDH"
+  },
+  {
+    "id": "KWT12W09",
+    "season": "KWT12",
+    "seasonNumber": 12,
+    "weekNumber": 9,
+    "easy": "8BE",
+    "hard": "8BH"
+  },
+  {
+    "id": "KWT12W10",
+    "season": "KWT12",
+    "seasonNumber": 12,
+    "weekNumber": 10,
+    "easy": "WGE",
+    "hard": "WGH"
+  },
+  {
+    "id": "KWT12W11",
+    "season": "KWT12",
+    "seasonNumber": 12,
+    "weekNumber": 11,
+    "easy": "LBE",
+    "hard": "LBH"
+  },
+  {
+    "id": "KWT12W12",
+    "season": "KWT12",
+    "seasonNumber": 12,
+    "weekNumber": 12,
+    "easy": "RCE",
+    "hard": "RCH"
+  },
+  {
+    "id": "KWT13W01",
+    "season": "KWT13",
+    "seasonNumber": 13,
+    "weekNumber": 1,
+    "easy": "TOE",
+    "hard": "TOH"
+  },
+  {
+    "id": "KWT13W02",
+    "season": "KWT13",
+    "seasonNumber": 13,
+    "weekNumber": 2,
+    "easy": "QVE",
+    "hard": "QVH"
+  },
+  {
+    "id": "KWT13W03",
+    "season": "KWT13",
+    "seasonNumber": 13,
+    "weekNumber": 3,
+    "easy": "ATE",
+    "hard": "ATH"
+  },
+  {
+    "id": "KWT13W04",
+    "season": "KWT13",
+    "seasonNumber": 13,
+    "weekNumber": 4,
+    "easy": "HHE",
+    "hard": "HHH"
+  },
+  {
+    "id": "KWT13W05",
+    "season": "KWT13",
+    "seasonNumber": 13,
+    "weekNumber": 5,
+    "easy": "BBE",
+    "hard": "BBH"
+  },
+  {
+    "id": "KWT13W06",
+    "season": "KWT13",
+    "seasonNumber": 13,
+    "weekNumber": 6,
+    "easy": "SSE",
+    "hard": "SSH"
+  },
+  {
+    "id": "KWT13W07",
+    "season": "KWT13",
+    "seasonNumber": 13,
+    "weekNumber": 7,
+    "easy": "ALE",
+    "hard": "ALH"
+  },
+  {
+    "id": "KWT13W08",
+    "season": "KWT13",
+    "seasonNumber": 13,
+    "weekNumber": 8,
+    "easy": "JCE",
+    "hard": "JCH"
+  },
+  {
+    "id": "KWT13W09",
+    "season": "KWT13",
+    "seasonNumber": 13,
+    "weekNumber": 9,
+    "easy": "UTE",
+    "hard": "UTH"
+  },
+  {
+    "id": "KWT13W10",
+    "season": "KWT13",
+    "seasonNumber": 13,
+    "weekNumber": 10,
+    "easy": "MGE",
+    "hard": "MGH"
+  },
+  {
+    "id": "KWT13W11",
+    "season": "KWT13",
+    "seasonNumber": 13,
+    "weekNumber": 11,
+    "easy": "GBE",
+    "hard": "GBH"
+  },
+  {
+    "id": "KWT13W12",
+    "season": "KWT13",
+    "seasonNumber": 13,
+    "weekNumber": 12,
+    "easy": "TTE",
+    "hard": "TTH"
+  },
+  {
+    "id": "KWT14W01",
+    "season": "KWT14",
+    "seasonNumber": 14,
+    "weekNumber": 1,
+    "easy": "ZZE",
+    "hard": "ZZH"
+  },
+  {
+    "id": "KWT14W02",
+    "season": "KWT14",
+    "seasonNumber": 14,
+    "weekNumber": 2,
+    "easy": "HWE",
+    "hard": "HWH"
+  },
+  {
+    "id": "KWT14W03",
+    "season": "KWT14",
+    "seasonNumber": 14,
+    "weekNumber": 3,
+    "easy": "CBE",
+    "hard": "CBH"
+  },
+  {
+    "id": "KWT14W04",
+    "season": "KWT14",
+    "seasonNumber": 14,
+    "weekNumber": 4,
+    "easy": "ILE",
+    "hard": "ILH"
+  },
+  {
+    "id": "KWT4W01",
+    "season": "KWT4",
+    "seasonNumber": 4,
+    "weekNumber": 1,
+    "easy": "QVE",
+    "hard": "QVH"
+  },
+  {
+    "id": "KWT4W02",
+    "season": "KWT4",
+    "seasonNumber": 4,
+    "weekNumber": 2,
+    "easy": "ILE",
+    "hard": "ILH"
+  },
+  {
+    "id": "KWT4W03",
+    "season": "KWT4",
+    "seasonNumber": 4,
+    "weekNumber": 3,
+    "easy": "LBE",
+    "hard": "LBH"
+  },
+  {
+    "id": "KWT4W04",
+    "season": "KWT4",
+    "seasonNumber": 4,
+    "weekNumber": 4,
+    "easy": "ATE",
+    "hard": "ATH"
+  },
+  {
+    "id": "KWT4W05",
+    "season": "KWT4",
+    "seasonNumber": 4,
+    "weekNumber": 5,
+    "easy": "ALE",
+    "hard": "ALH"
+  },
+  {
+    "id": "KWT4W06",
+    "season": "KWT4",
+    "seasonNumber": 4,
+    "weekNumber": 6,
+    "easy": "CBE",
+    "hard": "CBH"
+  },
+  {
+    "id": "KWT4W07",
+    "season": "KWT4",
+    "seasonNumber": 4,
+    "weekNumber": 7,
+    "easy": "VNE",
+    "hard": "VNH"
+  },
+  {
+    "id": "KWT4W08",
+    "season": "KWT4",
+    "seasonNumber": 4,
+    "weekNumber": 8,
+    "easy": "TTE",
+    "hard": "TTH"
+  },
+  {
+    "id": "KWT4W09",
+    "season": "KWT4",
+    "seasonNumber": 4,
+    "weekNumber": 9,
+    "easy": "MYE",
+    "hard": "MYH"
+  },
+  {
+    "id": "KWT4W10",
+    "season": "KWT4",
+    "seasonNumber": 4,
+    "weekNumber": 10,
+    "easy": "BBE",
+    "hard": "BBH"
+  },
+  {
+    "id": "KWT4W11",
+    "season": "KWT4",
+    "seasonNumber": 4,
+    "weekNumber": 11,
+    "easy": "SSE",
+    "hard": "SSH"
+  },
+  {
+    "id": "KWT4W12",
+    "season": "KWT4",
+    "seasonNumber": 4,
+    "weekNumber": 12,
+    "easy": "JCE",
+    "hard": "JCH"
+  },
+  {
+    "id": "KWT5W01",
+    "season": "KWT5",
+    "seasonNumber": 5,
+    "weekNumber": 1,
+    "easy": "EDE",
+    "hard": "EDH"
+  },
+  {
+    "id": "KWT5W02",
+    "season": "KWT5",
+    "seasonNumber": 5,
+    "weekNumber": 2,
+    "easy": "AWE",
+    "hard": "AWH"
+  },
+  {
+    "id": "KWT5W03",
+    "season": "KWT5",
+    "seasonNumber": 5,
+    "weekNumber": 3,
+    "easy": "LLE",
+    "hard": "LLH"
+  },
+  {
+    "id": "KWT5W04",
+    "season": "KWT5",
+    "seasonNumber": 5,
+    "weekNumber": 4,
+    "easy": "OGE",
+    "hard": "OGH"
+  },
+  {
+    "id": "KWT5W05",
+    "season": "KWT5",
+    "seasonNumber": 5,
+    "weekNumber": 5,
+    "easy": "GBE",
+    "hard": "GBH"
+  },
+  {
+    "id": "KWT5W06",
+    "season": "KWT5",
+    "seasonNumber": 5,
+    "weekNumber": 6,
+    "easy": "20E",
+    "hard": "20H"
+  },
+  {
+    "id": "KWT5W07",
+    "season": "KWT5",
+    "seasonNumber": 5,
+    "weekNumber": 7,
+    "easy": "WWE",
+    "hard": "WWH"
+  },
+  {
+    "id": "KWT5W08",
+    "season": "KWT5",
+    "seasonNumber": 5,
+    "weekNumber": 8,
+    "easy": "WGE",
+    "hard": "WGH"
+  },
+  {
+    "id": "KWT5W09",
+    "season": "KWT5",
+    "seasonNumber": 5,
+    "weekNumber": 9,
+    "easy": "MWE",
+    "hard": "MWH"
+  },
+  {
+    "id": "KWT5W10",
+    "season": "KWT5",
+    "seasonNumber": 5,
+    "weekNumber": 10,
+    "easy": "ZZE",
+    "hard": "ZZH"
+  },
+  {
+    "id": "KWT5W11",
+    "season": "KWT5",
+    "seasonNumber": 5,
+    "weekNumber": 11,
+    "easy": "TSE",
+    "hard": "TSH"
+  },
+  {
+    "id": "KWT5W12",
+    "season": "KWT5",
+    "seasonNumber": 5,
+    "weekNumber": 12,
+    "easy": "SWE",
+    "hard": "SWH"
+  },
+  {
+    "id": "KWT6W01",
+    "season": "KWT6",
+    "seasonNumber": 6,
+    "weekNumber": 1,
+    "easy": "SLE",
+    "hard": "SLH"
+  },
+  {
+    "id": "KWT6W02",
+    "season": "KWT6",
+    "seasonNumber": 6,
+    "weekNumber": 2,
+    "easy": "LBE",
+    "hard": "LBH"
+  },
+  {
+    "id": "KWT6W03",
+    "season": "KWT6",
+    "seasonNumber": 6,
+    "weekNumber": 3,
+    "easy": "MGE",
+    "hard": "MGH"
+  },
+  {
+    "id": "KWT6W04",
+    "season": "KWT6",
+    "seasonNumber": 6,
+    "weekNumber": 4,
+    "easy": "AME",
+    "hard": "AMH"
+  },
+  {
+    "id": "KWT6W05",
+    "season": "KWT6",
+    "seasonNumber": 6,
+    "weekNumber": 5,
+    "easy": "SSE",
+    "hard": "SSH"
+  },
+  {
+    "id": "KWT6W06",
+    "season": "KWT6",
+    "seasonNumber": 6,
+    "weekNumber": 6,
+    "easy": "VNE",
+    "hard": "VNH"
+  },
+  {
+    "id": "KWT6W07",
+    "season": "KWT6",
+    "seasonNumber": 6,
+    "weekNumber": 7,
+    "easy": "ATE",
+    "hard": "ATH"
+  },
+  {
+    "id": "KWT6W08",
+    "season": "KWT6",
+    "seasonNumber": 6,
+    "weekNumber": 8,
+    "easy": "BBE",
+    "hard": "BBH"
+  },
+  {
+    "id": "KWT6W09",
+    "season": "KWT6",
+    "seasonNumber": 6,
+    "weekNumber": 9,
+    "easy": "QVE",
+    "hard": "QVH"
+  },
+  {
+    "id": "KWT6W10",
+    "season": "KWT6",
+    "seasonNumber": 6,
+    "weekNumber": 10,
+    "easy": "ILE",
+    "hard": "ILH"
+  },
+  {
+    "id": "KWT6W11",
+    "season": "KWT6",
+    "seasonNumber": 6,
+    "weekNumber": 11,
+    "easy": "CBE",
+    "hard": "CBH"
+  },
+  {
+    "id": "KWT6W12",
+    "season": "KWT6",
+    "seasonNumber": 6,
+    "weekNumber": 12,
+    "easy": "MYE",
+    "hard": "MYH"
+  },
+  {
+    "id": "KWT7W01",
+    "season": "KWT7",
+    "seasonNumber": 7,
+    "weekNumber": 1,
+    "easy": "HHE",
+    "hard": "HHH"
+  },
+  {
+    "id": "KWT7W02",
+    "season": "KWT7",
+    "seasonNumber": 7,
+    "weekNumber": 2,
+    "easy": "8BE",
+    "hard": "8BH"
+  },
+  {
+    "id": "KWT7W03",
+    "season": "KWT7",
+    "seasonNumber": 7,
+    "weekNumber": 3,
+    "easy": "ALE",
+    "hard": "ALH"
+  },
+  {
+    "id": "KWT7W04",
+    "season": "KWT7",
+    "seasonNumber": 7,
+    "weekNumber": 4,
+    "easy": "TTE",
+    "hard": "TTH"
+  },
+  {
+    "id": "KWT7W05",
+    "season": "KWT7",
+    "seasonNumber": 7,
+    "weekNumber": 5,
+    "easy": "JCE",
+    "hard": "JCH"
+  },
+  {
+    "id": "KWT7W06",
+    "season": "KWT7",
+    "seasonNumber": 7,
+    "weekNumber": 6,
+    "easy": "UTE",
+    "hard": "UTH"
+  },
+  {
+    "id": "KWT7W07",
+    "season": "KWT7",
+    "seasonNumber": 7,
+    "weekNumber": 7,
+    "easy": "EDE",
+    "hard": "EDH"
+  },
+  {
+    "id": "KWT7W08",
+    "season": "KWT7",
+    "seasonNumber": 7,
+    "weekNumber": 8,
+    "easy": "WGE",
+    "hard": "WGH"
+  },
+  {
+    "id": "KWT7W09",
+    "season": "KWT7",
+    "seasonNumber": 7,
+    "weekNumber": 9,
+    "easy": "GBE",
+    "hard": "GBH"
+  },
+  {
+    "id": "KWT7W10",
+    "season": "KWT7",
+    "seasonNumber": 7,
+    "weekNumber": 10,
+    "easy": "ELE",
+    "hard": "ELH"
+  },
+  {
+    "id": "KWT7W11",
+    "season": "KWT7",
+    "seasonNumber": 7,
+    "weekNumber": 11,
+    "easy": "ZZE",
+    "hard": "ZZH"
+  },
+  {
+    "id": "KWT7W12",
+    "season": "KWT7",
+    "seasonNumber": 7,
+    "weekNumber": 12,
+    "easy": "TSE",
+    "hard": "TSH"
+  },
+  {
+    "id": "KWT8W01",
+    "season": "KWT8",
+    "seasonNumber": 8,
+    "weekNumber": 1,
+    "easy": "20E",
+    "hard": "20H"
+  },
+  {
+    "id": "KWT8W02",
+    "season": "KWT8",
+    "seasonNumber": 8,
+    "weekNumber": 2,
+    "easy": "AWE",
+    "hard": "AWH"
+  },
+  {
+    "id": "KWT8W03",
+    "season": "KWT8",
+    "seasonNumber": 8,
+    "weekNumber": 3,
+    "easy": "MYE",
+    "hard": "MYH"
+  },
+  {
+    "id": "KWT8W04",
+    "season": "KWT8",
+    "seasonNumber": 8,
+    "weekNumber": 4,
+    "easy": "SWE",
+    "hard": "SWH"
+  },
+  {
+    "id": "KWT8W05",
+    "season": "KWT8",
+    "seasonNumber": 8,
+    "weekNumber": 5,
+    "easy": "MOE",
+    "hard": "MOH"
+  },
+  {
+    "id": "KWT8W06",
+    "season": "KWT8",
+    "seasonNumber": 8,
+    "weekNumber": 6,
+    "easy": "WWE",
+    "hard": "WWH"
+  },
+  {
+    "id": "KWT8W07",
+    "season": "KWT8",
+    "seasonNumber": 8,
+    "weekNumber": 7,
+    "easy": "LLE",
+    "hard": "LLH"
+  },
+  {
+    "id": "KWT8W08",
+    "season": "KWT8",
+    "seasonNumber": 8,
+    "weekNumber": 8,
+    "easy": "MWE",
+    "hard": "MWH"
+  },
+  {
+    "id": "KWT8W09",
+    "season": "KWT8",
+    "seasonNumber": 8,
+    "weekNumber": 9,
+    "easy": "OGE",
+    "hard": "OGH"
+  },
+  {
+    "id": "KWT8W10",
+    "season": "KWT8",
+    "seasonNumber": 8,
+    "weekNumber": 10,
+    "easy": "LBE",
+    "hard": "LBH"
+  },
+  {
+    "id": "KWT8W11",
+    "season": "KWT8",
+    "seasonNumber": 8,
+    "weekNumber": 11,
+    "easy": "RCE",
+    "hard": "RCH"
+  },
+  {
+    "id": "KWT8W12",
+    "season": "KWT8",
+    "seasonNumber": 8,
+    "weekNumber": 12,
+    "easy": "VNE",
+    "hard": "VNH"
+  },
+  {
+    "id": "KWT9W01",
+    "season": "KWT9",
+    "seasonNumber": 9,
+    "weekNumber": 1,
+    "easy": "AME",
+    "hard": "AMH"
+  },
+  {
+    "id": "KWT9W02",
+    "season": "KWT9",
+    "seasonNumber": 9,
+    "weekNumber": 2,
+    "easy": "MGE",
+    "hard": "MGH"
+  },
+  {
+    "id": "KWT9W03",
+    "season": "KWT9",
+    "seasonNumber": 9,
+    "weekNumber": 3,
+    "easy": "QVE",
+    "hard": "QVH"
+  },
+  {
+    "id": "KWT9W04",
+    "season": "KWT9",
+    "seasonNumber": 9,
+    "weekNumber": 4,
+    "easy": "BBE",
+    "hard": "BBH"
+  },
+  {
+    "id": "KWT9W05",
+    "season": "KWT9",
+    "seasonNumber": 9,
+    "weekNumber": 5,
+    "easy": "JCE",
+    "hard": "JCH"
+  },
+  {
+    "id": "KWT9W06",
+    "season": "KWT9",
+    "seasonNumber": 9,
+    "weekNumber": 6,
+    "easy": "UTE",
+    "hard": "UTH"
+  },
+  {
+    "id": "KWT9W07",
+    "season": "KWT9",
+    "seasonNumber": 9,
+    "weekNumber": 7,
+    "easy": "CLE",
+    "hard": "CLH"
+  },
+  {
+    "id": "KWT9W08",
+    "season": "KWT9",
+    "seasonNumber": 9,
+    "weekNumber": 8,
+    "easy": "ATE",
+    "hard": "ATH"
+  },
+  {
+    "id": "KWT9W09",
+    "season": "KWT9",
+    "seasonNumber": 9,
+    "weekNumber": 9,
+    "easy": "EDE",
+    "hard": "EDH"
+  },
+  {
+    "id": "KWT9W10",
+    "season": "KWT9",
+    "seasonNumber": 9,
+    "weekNumber": 10,
+    "easy": "ALE",
+    "hard": "ALH"
+  },
+  {
+    "id": "KWT9W11",
+    "season": "KWT9",
+    "seasonNumber": 9,
+    "weekNumber": 11,
+    "easy": "ILE",
+    "hard": "ILH"
+  },
+  {
+    "id": "KWT9W12",
+    "season": "KWT9",
+    "seasonNumber": 9,
+    "weekNumber": 12,
+    "easy": "ELE",
+    "hard": "ELH"
+  }
+]

@@ -174,7 +174,7 @@ export default function HistoricalKwtImportPage() {
   return <main className="min-h-screen bg-black p-6 text-white"><div className="mx-auto max-w-7xl">
     <h1 className="text-3xl font-black">Historical KWT Importer</h1>
     <p className="mt-2 text-zinc-300">Review historical KWT scores, resolve every name to an existing canonical Global Player, then apply the validated source records.</p>
-    <div className="mt-4 flex flex-wrap gap-3"><Link href="/admin/kwt-import/discord-season-9" className="rounded border border-indigo-500 px-4 py-2 font-bold text-indigo-200">Review Season 9 Discord evidence</Link><Link href="/admin/kwt-import/library" className="rounded border border-zinc-600 px-4 py-2 font-bold text-zinc-200">Preview KWT score-history library</Link></div>
+    <div className="mt-4 flex flex-wrap gap-3"><Link href="/admin/kwt-import/website-recovery" className="rounded border border-emerald-500 px-4 py-2 font-bold text-emerald-200">Review recovered website scores (7,179 rows)</Link><Link href="/admin/kwt-import/discord-season-9" className="rounded border border-indigo-500 px-4 py-2 font-bold text-indigo-200">Review Season 9 Discord evidence</Link><Link href="/admin/kwt-import/library" className="rounded border border-zinc-600 px-4 py-2 font-bold text-zinc-200">Preview KWT score-history library</Link></div>
 
     <section className="mt-6 rounded-xl border border-zinc-700 bg-zinc-900 p-5">
       <h2 className="text-xl font-bold">1. Stage historical score files</h2>

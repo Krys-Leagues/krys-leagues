@@ -52,11 +52,13 @@ const aliases = {
 // codes are blocked so a typo cannot become an untraceable course reference.
 export const HISTORICAL_KWT_COURSE_CODES = new Set([
   "ZZE", "ZZH", "QVE", "QVH", "LBE", "LBH", "ILE", "ILH", "ATE", "ATH",
-  "CBE", "CBH", "GBE", "GBH", "HWE", "HWH", "FFE", "FFH", "RCE", "RCH",
-  "MWE", "MWH", "VNE", "VNH", "MYE", "MYH", "JCE", "JCH", "SWE", "SWH",
-  "OGE", "OGH", "EDE", "EDH", "8BE", "8BH", "WGE", "WGH", "ELE", "ELH",
-  "WOE", "WOH", "AWE", "AWH", "MOE", "MOH", "TSE", "TSH", "WWE", "WWH",
-  "20E", "20H", "SLE", "SLH",
+  "ALE", "ALH", "AME", "AMH", "AWE", "AWH", "BBE", "BBH", "CBE", "CBH",
+  "CLE", "CLH", "EDE", "EDH", "ELE", "ELH", "FFE", "FFH", "GBE", "GBH",
+  "HHE", "HHH", "HWE", "HWH", "JCE", "JCH", "LLE", "LLH", "MGE", "MGH",
+  "MOE", "MOH", "MWE", "MWH", "MYE", "MYH", "OGE", "OGH", "RCE", "RCH",
+  "SLE", "SLH", "SSE", "SSH", "SWE", "SWH", "TCE", "TCH", "TOE", "TOH",
+  "TSE", "TSH", "TTE", "TTH", "UTE", "UTH", "VNE", "VNH", "WGE", "WGH",
+  "WOE", "WOH", "WWE", "WWH", "20E", "20H", "8BE", "8BH",
 ])
 
 function headerKey(value: string) {
@@ -95,7 +97,7 @@ export function normalizeHistoricalKwtRank(raw: string): HistoricalKwtRank | nul
   if (key === "elite" || key === "e") return "Elite"
   if (key === "pro" || key === "p") return "Pro"
   if (key === "semipro" || key === "semi" || key === "sp") return "Semi-Pro"
-  if (key === "amateur" || key === "am" || key === "a") return "Amateur"
+  if (key === "amateur" || key === "ama" || key === "am" || key === "a") return "Amateur"
   return null
 }
 
