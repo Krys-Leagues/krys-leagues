@@ -130,7 +130,38 @@ begin
   if p_rows is null or jsonb_typeof(p_rows)<>'array' or jsonb_array_length(p_rows)=0 then raise exception 'At least one reviewed KWT scorecard is required'; end if;
   perform pg_advisory_xact_lock(hashtextextended('historical-kwt:'||lower(btrim(p_source_sha256)),0));
   select * into v_import from public.historical_kwt_imports where source_sha256=lower(btrim(p_source_sha256));
-  if found then historical_kwt_import_id:=v_import.id;idempotent:=true;select count(*)::integer into scorecard_count from public.historical_kwt_scorecards where historical_kwt_import_id=v_import.id;score_count:=scorecard_count*2;return next;return;end if;
+  if found then
+    if v_import.source_filename is distinct from btrim(p_source_filename)
+       or v_import.parser_version is distinct from btrim(p_parser_version)
+       or v_import.row_count is distinct from jsonb_array_length(p_rows) then
+      raise exception 'KWT source SHA conflicts with the existing filename, parser version, or row count';
+    end if;
+    if (select count(distinct incoming.value->>'rowKey') from jsonb_array_elements(p_rows) as incoming(value)) <> jsonb_array_length(p_rows) then
+      raise exception 'KWT source SHA payload contains duplicate or blank source fingerprints';
+    end if;
+    if exists (
+      select 1
+      from jsonb_array_elements(p_rows) as incoming(value)
+      where not exists (
+        select 1
+        from public.historical_kwt_scorecards score
+        where score.historical_kwt_import_id = v_import.id
+          and score.source_fingerprint = incoming.value->>'rowKey'
+      )
+    ) or exists (
+      select 1
+      from public.historical_kwt_scorecards score
+      where score.historical_kwt_import_id = v_import.id
+        and not exists (
+          select 1
+          from jsonb_array_elements(p_rows) as incoming(value)
+          where incoming.value->>'rowKey' = score.source_fingerprint
+        )
+    ) then
+      raise exception 'KWT source SHA conflicts with the existing reviewed source fingerprints';
+    end if;
+    historical_kwt_import_id:=v_import.id;idempotent:=true;select count(*)::integer into scorecard_count from public.historical_kwt_scorecards where historical_kwt_import_id=v_import.id;score_count:=scorecard_count*2;return next;return;
+  end if;
   insert into public.historical_kwt_imports(source_filename,source_sha256,parser_version,row_count,committed_by) values(btrim(p_source_filename),lower(btrim(p_source_sha256)),btrim(p_parser_version),jsonb_array_length(p_rows),v_user) returning * into v_import;
   for v_row in select value from jsonb_array_elements(p_rows) loop
     begin v_player:=(v_row->>'canonicalPlayerId')::uuid; exception when invalid_text_representation then raise exception 'Every KWT row requires a valid canonical Global Player UUID'; end;
