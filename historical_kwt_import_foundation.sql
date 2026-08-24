@@ -3,7 +3,7 @@ begin;
 create table if not exists public.historical_kwt_imports (
   id uuid primary key default gen_random_uuid(),
   source_filename text not null check (btrim(source_filename) <> ''),
-  source_sha256 text not null unique check (source_sha256 ~ '^[0-9a-f]{64}$'),
+  source_sha256 text not null unique check (source_sha256 = lower(source_sha256) and source_sha256 ~ '^[0-9a-f]{64}$'),
   parser_version text not null check (btrim(parser_version) <> ''),
   row_count integer not null check (row_count > 0),
   committed_by uuid null references auth.users(id) on delete set null,
@@ -37,6 +37,75 @@ create table if not exists public.historical_kwt_scorecards (
 
 create index if not exists historical_kwt_scorecards_player_idx on public.historical_kwt_scorecards(canonical_player_id,season_number,week_number);
 create index if not exists historical_kwt_scorecards_period_idx on public.historical_kwt_scorecards(season_number,week_number);
+
+do $historical_kwt_schema_check$
+declare
+  v_missing text;
+begin
+  if to_regclass('public.players') is null
+     or to_regprocedure('public.is_current_user_site_admin()') is null
+     or to_regprocedure('public.resolve_canonical_player_id(uuid)') is null then
+    raise exception 'Historical KWT prerequisites are missing: players and Global Identity must be installed first';
+  end if;
+
+  select string_agg(required.table_name || '.' || required.column_name, ', ' order by required.table_name, required.column_name)
+  into v_missing
+  from (values
+    ('historical_kwt_imports', 'id'),
+    ('historical_kwt_imports', 'source_filename'),
+    ('historical_kwt_imports', 'source_sha256'),
+    ('historical_kwt_imports', 'parser_version'),
+    ('historical_kwt_imports', 'row_count'),
+    ('historical_kwt_imports', 'committed_by'),
+    ('historical_kwt_scorecards', 'id'),
+    ('historical_kwt_scorecards', 'historical_kwt_import_id'),
+    ('historical_kwt_scorecards', 'source_fingerprint'),
+    ('historical_kwt_scorecards', 'source_row'),
+    ('historical_kwt_scorecards', 'season_number'),
+    ('historical_kwt_scorecards', 'week_number'),
+    ('historical_kwt_scorecards', 'historical_player_name'),
+    ('historical_kwt_scorecards', 'canonical_player_id'),
+    ('historical_kwt_scorecards', 'historical_rank'),
+    ('historical_kwt_scorecards', 'raw_historical_rank'),
+    ('historical_kwt_scorecards', 'easy_course_code'),
+    ('historical_kwt_scorecards', 'easy_score'),
+    ('historical_kwt_scorecards', 'hard_course_code'),
+    ('historical_kwt_scorecards', 'hard_score'),
+    ('historical_kwt_scorecards', 'total_score')
+  ) required(table_name, column_name)
+  where not exists (
+    select 1
+    from information_schema.columns column_info
+    where column_info.table_schema = 'public'
+      and column_info.table_name = required.table_name
+      and column_info.column_name = required.column_name
+  );
+
+  if v_missing is not null then
+    raise exception 'Incompatible Historical KWT schema; missing columns: %', v_missing;
+  end if;
+
+  if not exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'historical_kwt_imports'
+      and column_name = 'source_sha256'
+      and data_type = 'text'
+      and is_nullable = 'NO'
+  ) or not exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'historical_kwt_scorecards'
+      and column_name = 'canonical_player_id'
+      and data_type = 'uuid'
+      and is_nullable = 'NO'
+  ) then
+    raise exception 'Incompatible Historical KWT schema; critical column types or nullability differ';
+  end if;
+end;
+$historical_kwt_schema_check$;
 
 alter table public.historical_kwt_imports enable row level security;
 alter table public.historical_kwt_scorecards enable row level security;
@@ -94,7 +163,8 @@ grant execute on function public.get_public_player_kwt_history(uuid) to anon,aut
 
 do $historical_kwt_foundation_check$
 begin
-  if to_regprocedure('public.is_current_user_site_admin()') is null
+  if to_regclass('public.players') is null
+     or to_regprocedure('public.is_current_user_site_admin()') is null
      or to_regprocedure('public.resolve_canonical_player_id(uuid)') is null then
     raise exception 'Historical KWT foundation requires site-admin authorization and canonical player identity functions';
   end if;
