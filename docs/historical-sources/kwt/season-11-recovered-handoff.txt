@@ -1,0 +1,913 @@
+Yes. Here is **Season 11 written out week-by-week from the material I still have**, ready to give Codex. I am **not including Weeks 1–2**, because you said they are not in this set.
+
+Two important preservation rules before the data:
+
+* Where I have the actual badge earners, I list them.
+* For **S11 W3 and S11 W5**, I retained that badge information was supplied, but I do **not** have every original badge-earner line preserved. Those must be marked **not retained / unknown**, never interpreted as “no badges.”
+* `Rimblas` is the historical source identity for **El Jorge**; preserve `Rimblas` in source evidence and resolve canonically to El Jorge.
+* Do **not** assume other apparent name variants are aliases unless the canonical resolver/verified aliases prove them.
+
+---
+
+# KWT SEASON 11 — AUTHORITATIVE DISCORD HISTORICAL RESULTS
+
+## SEASON 11 WEEK 3 — MYST — 62 PLAYERS
+
+### Amateur
+
+* **1st:** RealJB2001 / The Real JB
+* **2nd:** Nic790
+* **3rd:** Small_Fry521
+* **Best Easy:** **-23**
+
+  * RealJB
+  * Nic790
+  * Small_Fry521
+  * DJTwigg
+* **Best Hard:** **-12**
+
+  * Ultrafox_Lynne
+
+### Semi-Pro
+
+* **1st:** Hatchtag101
+* **2nd:** Slappy0088
+* **3rd:** KnockoutG
+* **Best Easy:** **-29 Hatchtag101**
+* **Best Hard:** **-20 Slappy0088**
+* **Promotions to Pro:**
+
+  * Hatchtag101
+  * Slappy0088
+
+### Pro
+
+* **1st:** PMWillo
+* **2nd:** Duckk7770
+* **3rd:** Princess_Bankshot
+* **Best Easy:** **-25**
+
+  * PMWillo
+  * Duckk7770
+* **Best Hard:** **-21 PMWillo**
+* **Promotion to Elite:** PMWillo
+
+### Elite
+
+* **1st:** INDY
+* **2nd:** Gobson04 + Zanetti
+* **Best Easy:** **-26**
+
+  * Gobson04
+  * BigJA33
+  * Gomarino13
+  * G8R4L
+* **Best Hard:** **-25 INDY**
+
+### Overall
+
+* **1st:** INDY
+* **2nd:** PMWillo + Gobson04 + Zanetti
+* **Overall Best Easy:** **-29 Hatchtag101**
+* **Overall Best Hard:** **-25 INDY**
+
+### Badges
+
+Badge information **was supplied in the original Discord material**, but I do not have the complete individual badge-earner lines retained here.
+
+**Important:** store this as `badge evidence not retained in handoff`, **not** as zero badges.
+
+The copied Discord result post takes precedence over conflicting/non-explicit trophy artwork for these historical results.
+
+---
+
+# SEASON 11 WEEK 4 — VENICE — 58 PLAYERS
+
+### Amateur
+
+* **1st:** RealJB2001
+* **2nd:** IndianChief
+* **3rd:** BadWolff
+* **Best Easy:** **-16**
+
+  * RealJB2001
+  * IndianChief
+* **Best Hard:** **-13 RealJB2001**
+* **Promotion to Semi-Pro:** RealJB2001
+
+### Semi-Pro
+
+* **1st:** LinusHoeren
+* **2nd:** Boggiraffe + Plucky1971
+* **Best Easy:** **-21 Boggiraffe**
+* **Best Hard:** **-15 LinusHoeren**
+* **Promotion to Pro:** LinusHoeren
+
+### Pro
+
+* **1st:** Metum
+* **2nd:** GoPats37
+* **3rd:** wvueers257585
+* **Best Easy:** **-20 StewieStewie**
+* **Best Hard:** **-20 GoPats37**
+
+Do **not** automatically assume `wvueers257585 = StewieStewie`. Preserve the source names and let canonical identity resolution decide.
+
+### Elite
+
+* **1st:** Rimblas
+* **2nd:** Zanetti
+* **3rd:** INDY
+* **Best Easy:** **-24 Rimblas**
+* **Best Hard:** **-20 INDY**
+
+### Overall
+
+* **1st:** Rimblas
+* **2nd:** Zanetti
+* **3rd:** INDY
+* **Overall Best Easy:** **-24 Rimblas**
+* **Overall Best Hard:** **-20**
+
+  * INDY
+  * GoPats37
+
+### Badges
+
+**Coconut**
+
+* Rimblas
+* Zanetti
+* Gomarino13
+* GoPats37
+* RealJB2001
+* TrickyDicky
+* IndianChief
+
+**Diamond**
+
+* Rimblas — source states **4**
+* Yuk1n — source states **4**
+
+Preserve exactly what the source says regarding the `4`; do not reinterpret the meaning without the raw line.
+
+**Cactus**
+
+* Rimblas
+* GoPats37 ×2
+* G8R4L
+* StewieStewie
+* YankeeDude1123
+
+**Duck**
+
+* Rimblas ×3
+* Yuk1n ×2
+* Boggiraffe
+* PaulV966
+* RealJB2001
+* Laurent
+* PMWillo
+* D3bb13
+* Master_KP
+* Larryr
+* Alyssa38
+
+---
+
+# SEASON 11 WEEK 5 — SHANGRI-LA — 61 PLAYERS
+
+### Amateur
+
+* **1st:** Awesome_Kris
+* **2nd:** Small_Fry521
+* **3rd:** DMD_Enditnow
+* **Best Easy:** **-25 DMD_Enditnow**
+* **Best Hard:** **-14 Awesome_Kris**
+* **Promotion to Semi-Pro:** Awesome_Kris
+
+### Semi-Pro
+
+* **1st:** PaulV966
+* **2nd:** SweetPeach88
+* **3rd:** NuttyGrandpa
+* **Best Easy:** **-25**
+
+  * PaulV966
+  * SweetPeach88
+  * Sarahloo1971
+* **Best Hard:** **-18**
+
+  * PaulV966
+  * Master_KP
+
+### Pro
+
+* **1st:** Metum
+* **2nd:** GoPats37
+* **3rd:** PMWillo
+* **Best Easy:** **-31 Metum**
+* **Best Hard:** **-24 Metum**
+* **Promotions to Elite:**
+
+  * Metum
+  * GoPats37
+
+### Elite
+
+* **1st:** INDY
+* **2nd:** Rimblas + Gobson04
+* **Best Easy:** **-33 INDY**
+* **Best Hard:** **-26 Rimblas**
+
+### Overall
+
+* **1st:** INDY
+* **2nd:** Metum
+* **3rd:** GoPats37
+* **Overall Best Easy:** **-33 INDY**
+* **Overall Best Hard:** **-26 Rimblas**
+
+### -50 Club
+
+* INDY **-56**
+* Metum **-55**
+* GoPats37 **-52**
+* PMWillo **-51**
+* Rimblas **-51**
+* Gobson04 **-51**
+* Yuk1n **-50**
+* Zanetti **-50**
+
+### Badges
+
+Badge information was supplied with this week, but I do **not** have every individual badge-earner line retained in my current record.
+
+Again: **unknown/not retained is not the same thing as none.**
+
+---
+
+# SEASON 11 WEEK 6 — VIVA LAS ELVIS — 50 PLAYERS
+
+### Amateur
+
+* **1st:** RubberDucky
+* **2nd:** Small_Fry521
+* **3rd:** Raccoons Whisker
+* **Best Easy:** **-19 RubberDucky**
+* **Best Hard:** **-12 Raccoons Whisker**
+
+### Semi-Pro
+
+* **1st:** Gatorsfan89
+* **2nd:** Alyssa38 + RealJB2001
+* **Best Easy:** **-17 Gatorsfan89**
+* **Best Hard:** **-16 Alyssa38**
+
+### Pro
+
+* **1st:** Larryr
+* **2nd:** wvueers257585
+* **3rd:** DeeBee64
+* **Best Easy:** **-22 Larryr**
+* **Best Hard:** **-21 wvueers257585**
+
+Do not automatically rename `wvueers257585`.
+
+### Elite
+
+* **1st:** Zanetti
+* **2nd:** BigJA33
+* **3rd:** INDY
+* **Best Easy:** **-25 BigJA33**
+* **Best Hard:** **-24**
+
+  * Zanetti
+  * INDY
+
+### Overall
+
+The source states:
+
+* **1st:** Zanetti
+* followed by **BigJA33 + INDY**
+
+Do **not** manufacture exact 2nd/3rd placements if the source did not explicitly assign them.
+
+### Badges
+
+**Coconut**
+
+* Zanetti
+* BigJA33
+* Leanin2it
+* Gobson04
+* Larryr
+* TrickyDicky
+* Laurent
+
+**Diamond**
+
+* **9 aces — Rimblas**
+
+**Cactus**
+
+* BigJA33
+* GoPats37
+* Laurent
+* WickedShack
+* PaulV966
+
+**Duck**
+
+* Source header indicates **0**
+* No Duck earners listed
+
+Preserve that as an explicit source zero if the raw post confirms the header.
+
+**Beetle**
+
+* GoPats37
+* TrickyDicky
+* Jennem
+
+---
+
+# SEASON 11 WEEK 7 — ALICE'S ADVENTURES IN WONDERLAND — 53 PLAYERS
+
+### Amateur
+
+* **1st:** BadWolff + KD0017
+* **3rd:** IndianChief + SFreitag68
+* **Best Easy:** **-16**
+
+  * SlugJug33
+  * Raccoons Whisker
+* **Best Hard:** **-5 Nic790**
+
+The two 1sts mean the next published position is 3rd. Preserve exactly.
+
+### Semi-Pro
+
+* **1st:** KnockoutG + DawnSophia
+* **3rd:** Chelle1843
+* **Best Easy:** **-19 DawnSophia**
+* **Best Hard:** **-9 KnockoutG**
+* **Promotions to Pro:**
+
+  * KnockoutG
+  * DawnSophia
+
+### Pro
+
+* **1st:** WickedShack
+* **2nd:** NeoImpossible + PMWillo
+* **Best Easy:** **-22 PMWillo**
+* **Best Hard:** **-7 WickedShack**
+
+### Elite
+
+* **1st:** Gomarino13
+* **2nd:** Zanetti
+* **3rd:** Blutes87 + YankeeDude1123 + Yuk1n
+* **Best Easy:** **-23 YankeeDude1123**
+* **Best Hard:** **-16 G8R4L**
+
+### Overall
+
+Same published top results:
+
+* **1st:** Gomarino13
+* **2nd:** Zanetti
+* **3rd:** Blutes87 + YankeeDude1123 + Yuk1n
+* **Overall Best Easy:** **-23 YankeeDude1123**
+* **Overall Best Hard:** **-16 G8R4L**
+
+### Badges
+
+**Coconut**
+
+* **None**
+
+**Diamond — 2 aces**
+
+* Boggiraffe
+* KD0017
+* SFreitag68
+* NuttyGrandpa
+* INDY
+* Gomarino13
+
+**Cactus**
+
+* DeeBee64
+* INDY
+* SerenityMoon
+* SFreitag68
+* NuttyGrandpa
+
+**Duck**
+
+* YankeeDude1123
+* Rimblas
+* INDY
+* StewieStewie
+* KD0017
+* Nic790
+* NuttyGrandpa
+* Boggiraffe
+
+**Beetle**
+
+* G8R4L ×2
+* Chelle1843 ×2
+* Blutes87
+* Nic790
+
+---
+
+# SEASON 11 WEEK 8 — AROUND THE WORLD IN 80 DAYS — 59 PLAYERS
+
+### Amateur
+
+* **1st:** DMD_Enditnow
+* **2nd:** BadWolff
+* **3rd:** DJTwigg + IndianChief
+* **Best Easy:** **-18 DMD_Enditnow**
+* **Best Hard:** **-9 BadWolff**
+* **Promotions to Semi-Pro:**
+
+  * DMD_Enditnow
+  * BadWolff
+
+### Semi-Pro
+
+* **1st:** Jennem
+* **2nd:** Master_KP
+* **3rd:** LynnieBodd
+* **Best Easy:** **-20 Master_KP**
+* **Best Hard:** **-12 Jennem**
+
+### Pro
+
+* **1st:** LinusHoeren + NeoImpossible
+* **3rd:** Laurent
+* **Best Easy:** **-25 LinusHoeren**
+* **Best Hard:** **-10**
+
+  * NeoImpossible
+  * Laurent
+
+### Elite
+
+* **1st:** Zanetti
+* **2nd:** Gobson04
+* **3rd:** Rimblas
+* **Best Easy:** **-24 Gobson04**
+* **Best Hard:** **-22 Zanetti**
+
+### Overall
+
+* **1st:** Zanetti
+* **2nd:** Gobson04
+* **3rd:** Rimblas
+* **Overall Best Easy:** **-25 LinusHoeren**
+* **Overall Best Hard:** **-22 Zanetti**
+
+### Badges
+
+**Coconut**
+
+* Zanetti
+
+**Diamond — 9 aces**
+
+* Rimblas
+* LinusHoeren
+
+**Cactus**
+
+* Rimblas
+* StoneyMan69
+* Gatorsfan89
+* Awesome_Kris
+
+**Duck**
+
+* Zanetti
+* LinusHoeren
+* NeoImpossible
+* GoPats37
+* DawnSophia
+* KnockoutG
+* BadWolff
+* Raccoons Whisker
+
+**Beetle**
+
+* LinusHoeren
+* NeoImpossible
+* ZoeDarlin
+
+---
+
+# SEASON 11 WEEK 9 — MOUNT OLYMPUS — 62 PLAYERS
+
+### Amateur
+
+* **1st:** Lake
+* **2nd:** IndianChief + SFreitag68
+* **Best Easy:** **-21 Lake**
+* **Best Hard:** **-10 Lake**
+* **Promotion to Semi-Pro:** Lake
+
+### Semi-Pro
+
+* **1st:** BadWolff + Boggiraffe
+* **3rd:** Gatorsfan89 + Plucky1971
+* **Best Easy:** **-19 Gatorsfan89**
+* **Best Hard:** **-18 Boggiraffe**
+
+### Pro
+
+* **1st:** Laurent
+* **2nd:** Princess_Bankshot
+* **3rd:** Slappy
+* **Best Easy:** **-24 WickedShack**
+* **Best Hard:** **-17 Laurent**
+
+### Elite
+
+* **1st:** TrickyDicky
+* **2nd:** Gomarino13
+* **3rd:** Blutes87
+* **Best Easy:** **-26**
+
+  * TrickyDicky
+  * Leanin2it
+* **Best Hard:** **-19**
+
+  * TrickyDicky
+  * Gomarino13
+  * Blutes87
+  * INDY
+
+### Overall
+
+* **1st:** TrickyDicky
+* **2nd:** Gomarino13
+* **3rd:** Blutes87
+* **Overall Best Easy:** **-26**
+
+  * TrickyDicky
+  * Leanin2it
+* **Overall Best Hard:** **-19**
+
+  * TrickyDicky
+  * Gomarino13
+  * Blutes87
+  * INDY
+
+### Badges
+
+**Amateur**
+
+* Cactus: SFreitag68
+* Diamond: SFreitag68
+
+**Semi-Pro**
+
+* Cactus: ROKNHORSEBRAT
+* Duck: StoneyMan69
+
+**Pro**
+
+* Coconut: Laurent, Slappy, Stewie, wvueers257585
+* Diamond: **3 aces — Larryr**
+* Cactus: Larryr
+* Duck: Princess_Bankshot, Slappy, KnockoutG
+
+**Elite**
+
+* Coconut: TrickyDicky, Gomarino13, Blutes87, Zanetti
+* Diamond: Yuk1n
+* Cactus: TrickyDicky, Rimblas
+* Duck: Gomarino13, Rimblas
+
+No additional Beetle facts are retained for this week; do not infer zero.
+
+---
+
+# SEASON 11 WEEK 10 — TETHYS STATION — 52 PLAYERS
+
+This source contains an unusual Pro result. Preserve it literally.
+
+### Amateur
+
+* **1st:** SlugJug33
+* **2nd:** Kill_er_Bee + Wyndemere
+* **Best Easy:** **-22 SlugJug33**
+* **Best Hard:** **-4 SlugJug33**
+* Cactus: Nic790
+* Duck: awinters86
+
+### Semi-Pro
+
+* **1st:** BadWolff
+* **2nd:** D3bb13
+* **3rd:** Sarahloo1971
+* **Best Easy:** **-25 RealJB**
+* **Best Hard:** **-24 BadWolff**
+* **Promotion to Pro:** BadWolff
+
+Badges:
+
+* Coconut: BadWolff, Sarahloo1971
+* Cactus: Sarahloo1971, Plucky, Slabdaddy
+* Beetle: BadWolff
+
+### Pro
+
+The original source's Top result line gives:
+
+* **1st:** PMWillo
+* **1st:** KnockoutG
+* **1st:** LinusHoeren
+* **1st:** WickedShack
+
+Preserve **all four published 1sts exactly**. Do not create 2nd/3rd placements.
+
+* **Best Easy:** **-24 PMWillo**
+* **Best Hard:** **-16**
+
+  * KnockoutG
+  * LinusHoeren
+  * LaurentDelf
+* Duck: wvueers257585
+
+### Elite
+
+* **1st:** Julian1830
+* **2nd:** Zanetti
+* **3rd:** Matt916
+* **Best Easy:** **-28 Matt916**
+* **Best Hard:** **-24**
+
+  * Julian1830
+  * Zanetti
+
+### Overall
+
+* **1st:** Julian1830
+* **2nd:** Zanetti
+* **3rd:** Matt916
+* **Overall Best Easy:** **-28 Matt916**
+* **Overall Best Hard:** **-24**
+
+  * Julian1830
+  * Zanetti
+  * BadWolff
+
+### Trophy evidence
+
+Contemporaneous trophy image also shows **Julian1830 — S11 W10 — 1st**.
+
+Only badge facts explicitly retained above should be imported from this handoff; do not invent missing badge categories.
+
+---
+
+# SEASON 11 WEEK 11 — WIDOWS WALKABOUT — 50 PLAYERS
+
+### Amateur
+
+* **1st:** Fry_Lock
+* **2nd:** DBCQ
+* **3rd:** IndianChief
+* **Best Easy:** **-22 Fry_Lock**
+* **Best Hard:** **-7 DBCQ**
+
+### Semi-Pro
+
+* **1st:** Plucky
+* **2nd:** StrokeLimitReached
+* **3rd:** PaulV-PPP
+* **Best Easy:** **-26 Plucky**
+* **Best Hard:** **-17 Plucky**
+* **Promotion to Pro:** Plucky
+
+### Pro
+
+* **1st:** Princess_Bankshot
+* **2nd:** Laurent
+* **3rd:** Slappy
+* **Best Easy:** **-24 Slappy**
+* **Best Hard:** **-20 Princess_Bankshot**
+
+### Elite
+
+The Discord post explicitly states the ties shown from standings:
+
+* **1st:** Julian1830
+* **2nd:** BigJA33 + Rimblas
+* **3rd:** Maximus + Zanetti
+* **Best Easy:** **-29 Julian1830**
+* **Best Hard:** **-22 BigJA33**
+
+### Overall
+
+* **1st:** Julian1830
+* **2nd:** BigJA33 + Rimblas
+* **3rd:** Maximus + Zanetti
+* **Overall Best Easy:** **-29 Julian1830**
+* **Overall Best Hard:** **-22 BigJA33**
+
+### Badges
+
+**Coconut**
+
+* BigJA33
+* Maximus
+* PaulV-PPP
+
+**Diamond**
+
+* Rimblas — canonical El Jorge
+* Julian1830
+
+**Cactus**
+
+* Mully
+* YankeeDude1123
+* Slabdaddy
+* IndianChief
+* JRT1976
+
+**Duck**
+
+* Rimblas — canonical El Jorge
+* Zanetti
+* Princess_Bankshot
+* GoMarino13
+* StrokeLimitReached
+* Wyndemere
+
+**Beetle**
+
+* Julian1830
+* BigJA33
+* INDY
+* GoMarino33
+* The_Real_JB
+* Ultrafox_Lynne
+
+Preserve `GoMarino13` and `GoMarino33` exactly as source names until identity resolution determines whether they are the same person.
+
+### Trophy evidence
+
+A contemporaneous trophy image confirms **Julian1830 — S11 W11 — 1st**.
+
+---
+
+# SEASON 11 WEEK 12 — MEOW WOLF — 50 PLAYERS
+
+### Amateur
+
+* **1st:** Fry_Lock
+* **2nd:** IndianChief
+* **3rd:** Nic79
+* **Best Easy:** **-17 Fry_Lock**
+* **Best Hard:** **-13 Fry_Lock**
+* **Promotion to Semi-Pro:** Fry_Lock
+
+### Semi-Pro
+
+* **1st:** Master_KP
+* **2nd:** D3bb13
+* **3rd:** Sticky
+* **Best Easy:** **-22 Master_KP**
+* **Best Hard:** **-16 Sticky**
+
+### Pro
+
+* **1st:** Slappy
+* **2nd:** Princess_Bankshot
+* **3rd:** DABIGWILLO
+* **Best Easy:** **-22 ChipnPutt**
+* **Best Hard:** **-19 Slappy**
+* **Promotion to Elite:** Slappy
+
+### Elite
+
+* **1st:** Julian1830
+* **2nd:** INDY
+* **3rd:** Leanin2it
+* **Best Easy:** **-22 Leanin2it**
+* **Best Hard:** **-23 Julian1830**
+
+### Overall
+
+* **1st:** Julian1830
+* **2nd:** INDY
+* **3rd:** Leanin2it
+* **3rd:** Slappy
+
+Preserve both published 3rds.
+
+* **Overall Best Easy:** **-22**
+
+  * Leanin2it
+  * Master_KP
+  * ChipnPutt
+* **Overall Best Hard:** **-23 Julian1830**
+
+### Badges
+
+**Coconut**
+
+* Julian1830
+* INDY
+* Leanin2it
+* Slappy
+* Gobson
+* Princess_Bankshot
+* YankeeDude1123
+* DABIGWILLO
+
+**Diamond**
+
+* Julian1830
+* YankeeDude1123
+
+**Cactus**
+
+* Leanin2it
+* Slappy
+* Nic79
+* Larryr
+* YankeeDude1123
+
+**Duck**
+
+* Gobson
+* Gomarino13
+* Larryr
+* Maximus
+* Master_KP
+* D3bb13
+
+**Beetle**
+
+* **None**
+
+### Trophy evidence
+
+Contemporaneous trophy image confirms **Julian1830 — S11 W12 — 1st**.
+
+---
+
+# SEASON 11 FINAL DIVISION AWARDS
+
+These are **season-final awards**, not Week 12 placements.
+
+## Amateur
+
+* **1st:** IndianChief
+* **2nd:** NIC079
+* **3rd:** Raccoons Whisker
+
+## Semi-Pro
+
+* **1st:** BadWolff
+* **1st:** D3bb13
+* **3rd:** PaulV-PPP
+
+This is deliberately unusual. The trophy evidence visibly gives **two 1st-place awards**. Preserve both exactly. Do not invent a 2nd-place finisher and do not invent a tie explanation that the evidence does not state.
+
+## Pro
+
+* **1st:** DABIGWILLO
+* **2nd:** Princess_Bankshot
+* **3rd:** Laurent
+
+## Elite
+
+* **1st:** Zanetti
+* **2nd:** INDY
+* **3rd:** El Jorge
+* **3rd:** BigJA
+
+Preserve both published 3rds exactly.
+
+---
+
+## Codex preservation instruction
+
+**Every item above is historical data, not commentary.** Save the representable facts: placements, ties, divisions, Best Easy/Hard, Overall results, promotions, badges, badge quantities/ace counts where stated, -50 Club recognition, player counts, courses, source usernames, and provenance.
+
+For **S11 W3 and W5**, do not create `0 badges`; the detailed badge lists are simply **not retained in this handoff**.
+
+For any other category not explicitly listed for a week, use **unknown/not supplied**, not zero.
+
+And do not use later-downloaded CSV Rank/Division/Pos to fill any of those gaps. The CSVs remain authoritative for the Easy/Hard **scores**, while these Discord posts are authoritative for the historical competition results.
+
+That is the Season 11 material I have. **You do not need to re-paste W3–W12 to me.**

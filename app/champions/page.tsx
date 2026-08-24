@@ -138,7 +138,7 @@ export default function ChampionsPage() {
         </div>
 
         <section style={hero}>
-          <h1 style={title}>🏆 Hall of Champions</h1>
+          <h1 style={title}>🏆 Trophy Case</h1>
 
           <p style={subtitle}>
             Celebrating league champions, tournament winners, cup
@@ -148,7 +148,7 @@ export default function ChampionsPage() {
         </section>
                 {loading ? (
           <div style={messageCard}>
-            Loading Hall of Champions...
+            Loading Trophy Case...
           </div>
         ) : message ? (
           <div style={errorCard}>{message}</div>

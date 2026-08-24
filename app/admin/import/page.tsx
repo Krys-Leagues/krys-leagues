@@ -14,21 +14,21 @@ const cards = [
     title: "Tournament",
     description:
       "Import tournament brackets and historical tournament results.",
-    href: "/admin/import/tournament",
+    href: "/admin/tournament-import",
     color: "bg-purple-600",
   },
   {
     title: "KWT",
     description:
       "Import Krys Weekend Tourney scores and statistics.",
-    href: "/admin/import/kwt",
+    href: "/admin/kwt-import",
     color: "bg-green-600",
   },
   {
     title: "Monthly Ladder",
     description:
       "Import Monthly Ladder standings and promotions.",
-    href: "/admin/import/monthly",
+    href: "/admin/tournament-import",
     color: "bg-orange-600",
   },
   {

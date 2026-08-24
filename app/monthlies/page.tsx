@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { MONTHLY_PUBLIC_URL } from "@/lib/externalCompetitionSites"
 
 export default function MonthliesPage() {
   return (
@@ -17,6 +18,10 @@ export default function MonthliesPage() {
         </section>
 
         <div style={grid}>
+      <a href={MONTHLY_PUBLIC_URL} target="_blank" rel="noreferrer" style={linkCard}>
+  <h2>🌐 Open Current Monthly Site</h2>
+  <p>View the official public Monthly standings and results.</p>
+</a>
       <section style={card}>
   <h2>📅 Current Monthly</h2>
   <p>Current event details and registration information will appear here.</p>
@@ -34,7 +39,7 @@ export default function MonthliesPage() {
 
 <Link href="/champions" style={linkCard}>
   <h2>🏆 Past Winners</h2>
-  <p>View past winners in the Hall of Champions.</p>
+  <p>View past winners in the Trophy Case.</p>
 </Link>
         </div>
       </div>

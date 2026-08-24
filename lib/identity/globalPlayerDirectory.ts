@@ -18,6 +18,7 @@ type IdentityLinkRow = {
 type AliasRow = {
   player_id: string
   alias: string
+  source: string | null
 }
 
 export type GlobalPlayerDirectoryEntry = {
@@ -30,6 +31,7 @@ export type GlobalPlayerDirectoryEntry = {
   status: string | null
   active: boolean
   verifiedAliases: string[]
+  identityAliases: Array<{ name: string; source: string | null }>
 }
 
 function resolveCanonicalId(playerId: string, links: Map<string, string>) {
@@ -74,7 +76,7 @@ export async function loadGlobalPlayerDirectory() {
       .select("historical_player_id, canonical_player_id"),
     supabase
       .from("player_aliases")
-      .select("player_id, alias")
+      .select("player_id, alias, source")
       .eq("verified", true)
       .order("alias"),
   ])
@@ -90,12 +92,16 @@ export async function loadGlobalPlayerDirectory() {
     ]),
   )
   const aliasesByCanonicalId = new Map<string, Set<string>>()
+  const identityAliasesByCanonicalId = new Map<string, Array<{ name: string; source: string | null }>>()
 
   for (const alias of (aliasesResult.data || []) as AliasRow[]) {
     const canonicalId = resolveCanonicalId(alias.player_id, links)
     const aliases = aliasesByCanonicalId.get(canonicalId) || new Set<string>()
     aliases.add(alias.alias)
     aliasesByCanonicalId.set(canonicalId, aliases)
+    const identityAliases = identityAliasesByCanonicalId.get(canonicalId) || []
+    if (!identityAliases.some(value => value.name === alias.alias)) identityAliases.push({ name: alias.alias, source: alias.source })
+    identityAliasesByCanonicalId.set(canonicalId, identityAliases)
   }
 
   return players
@@ -112,6 +118,7 @@ export async function loadGlobalPlayerDirectory() {
       verifiedAliases: [...(aliasesByCanonicalId.get(player.id) || [])]
         .filter((alias) => normalizeGlobalPlayerSearch(alias) !== normalizeGlobalPlayerSearch(player.screen_name))
         .sort((left, right) => left.localeCompare(right)),
+      identityAliases: (identityAliasesByCanonicalId.get(player.id) || []).sort((left, right) => left.name.localeCompare(right.name)),
     }))
     .sort((left, right) => left.screenName.localeCompare(right.screenName))
 }

@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { KWT_PUBLIC_URL } from "@/lib/externalCompetitionSites"
 export default function KWTPage() {
   return (
     <main
@@ -23,7 +24,10 @@ export default function KWTPage() {
           gap: 20,
           marginTop: 30,
         }}
-      ><div style={card}>
+      ><a href={KWT_PUBLIC_URL} target="_blank" rel="noreferrer" style={linkCard}>
+  <h2>🌐 Open Current KWT Site</h2>
+  <p>View the official public KWT home, standings, and event information.</p>
+</a><div style={card}>
   <h2>🏆 Current Tournament</h2>
   <p>Current KWT tournament details will appear here.</p>
 </div>
@@ -35,7 +39,7 @@ export default function KWTPage() {
 
 <Link href="/champions" style={linkCard}>
   <h2>👑 Past Champions</h2>
-  <p>View KWT champions in the Hall of Champions.</p>
+  <p>View KWT champions in the Trophy Case.</p>
 </Link>
 
 <Link href="/records" style={linkCard}>

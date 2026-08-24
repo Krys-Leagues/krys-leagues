@@ -76,7 +76,12 @@ const TOURNAMENT_BRACKETS = [
   "D5",
 ]
 
-const PLAYER_STATUSES = ["active", "inactive", "archived", "memorial"]
+const PLAYER_STATUSES = ["active", "inactive", "archived"]
+const STATUS_CONSEQUENCES: Record<string, string[]> = {
+  active: ["Current server/player state", "Eligible for normal current workflows", "Profile and history remain visible"],
+  inactive: ["Remains on All-Time boards", "Profile and history remain", "Still a valid canonical identity"],
+  archived: ["No new current submissions", "Hidden from normal current-player browsing", "History and canonical identity are preserved", "Historical imports still resolve", "Records cleanup waits for a safe Climbers finalization boundary"],
+}
 const PROFILE_BADGE_OPTIONS = ["Owner", "Co-Head Admin", "Tournament Admin", "Admin"] as const
 
 const STATUS_COLORS: Record<string, string> = {
@@ -116,6 +121,7 @@ export default function PlayersAdminPage() {
   const [statusPlayer, setStatusPlayer] = useState<Player | null>(null)
   const [playerStatus, setPlayerStatus] = useState("active")
   const [savingStatus, setSavingStatus] = useState(false)
+  const [statusConfirmed, setStatusConfirmed] = useState(false)
 
   const [discordPlayer, setDiscordPlayer] = useState<Player | null>(null)
   const [discordId, setDiscordId] = useState("")
@@ -494,7 +500,9 @@ export default function PlayersAdminPage() {
 
   function openStatusModal(player: Player) {
     setStatusPlayer(player)
-    setPlayerStatus(getPlayerStatus(player))
+    const status = getPlayerStatus(player)
+    setPlayerStatus(status === "memorial" ? "archived" : status)
+    setStatusConfirmed(false)
   }
 
   async function savePlayerStatus() {
@@ -502,15 +510,15 @@ export default function PlayersAdminPage() {
 
     setSavingStatus(true)
 
-    const shouldBeActive = playerStatus === "active"
-
-    const { error } = await supabase
-      .from("players")
-      .update({
-        status: playerStatus,
-        active: shouldBeActive,
-      })
-      .eq("id", statusPlayer.id)
+    if (!statusConfirmed) { setSavingStatus(false); return }
+    const { error } = await supabase.rpc("set_site_player_status", {
+      p_player_id: statusPlayer.id,
+      p_new_status: playerStatus,
+      p_reason_source: "website_admin",
+      p_reason: "Intentional Global Players admin status change",
+      p_source_departure_case_id: null,
+      p_confirming_admin_discord_id: null,
+    })
 
     setSavingStatus(false)
 
@@ -889,7 +897,7 @@ export default function PlayersAdminPage() {
 
           <select
             value={playerStatus}
-            onChange={(e) => setPlayerStatus(e.target.value)}
+            onChange={(e) => { setPlayerStatus(e.target.value); setStatusConfirmed(false) }}
             style={modalInput}
           >
             {PLAYER_STATUSES.map((status) => (
@@ -899,13 +907,12 @@ export default function PlayersAdminPage() {
             ))}
           </select>
 
-          <p style={hint}>
-            Active players show in league and tournament tools. Inactive, Archived, and Memorial players are preserved but removed from active assignment.
-          </p>
+          <div style={hint}><strong>Confirm these consequences:</strong><ul>{(STATUS_CONSEQUENCES[playerStatus] || []).map((item) => <li key={item}>{item}</li>)}</ul><p>Memorial is managed separately. Archived + Memorial keeps the permanent Memorial profile and active All-Time Records.</p></div>
+          <label style={recognitionToggle}><input type="checkbox" checked={statusConfirmed} disabled={savingStatus} onChange={(event) => setStatusConfirmed(event.target.checked)} /> I reviewed the consequences and want to change this canonical player status.</label>
 
           <button
             onClick={savePlayerStatus}
-            disabled={savingStatus}
+            disabled={savingStatus || !statusConfirmed}
             style={saveButton}
           >
             {savingStatus ? "Saving..." : "Save Status"}

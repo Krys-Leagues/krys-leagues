@@ -1,5 +1,7 @@
 
 import Link from "next/link"
+import MyProfileLink from "@/components/MyProfileLink"
+import { KWT_PUBLIC_URL, MONTHLY_PUBLIC_URL } from "@/lib/externalCompetitionSites"
 
 export default function HomePage() {
   return (
@@ -28,25 +30,25 @@ export default function HomePage() {
               Player Dashboard
             </Link>
 
+            <MyProfileLink style={button} />
+
             <Link href="/league-play" style={button}>
               League Play
             </Link>
 
-            <Link href="/admin/stroke/standings" style={button}>
-              Standings
+            <Link href="/standings" style={button}>
+              Stroke Standings
             </Link>
 
             <Link href="/players" style={button}>
-              Player Profiles
+              Browse Player Profiles
             </Link>
 
-            <Link href="/kwt" style={button}>
+            <a href={KWT_PUBLIC_URL} target="_blank" rel="noreferrer" style={button}>
               KWT
-            </Link>
+            </a>
 
-            <Link href="/monthlies" style={button}>
-              Monthlies
-            </Link>
+            <a href={MONTHLY_PUBLIC_URL} target="_blank" rel="noreferrer" style={button}>Kry&apos;s Monthly</a>
 <Link href="/tournaments" style={button}>
   Bracket Tournaments
 </Link>
@@ -64,7 +66,7 @@ export default function HomePage() {
 </Link>
 
             <Link href="/champions" style={button}>
-              Hall of Champions
+              Trophy Case
             </Link>
           </div>
         </section>

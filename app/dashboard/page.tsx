@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { supabase } from "@/lib/supabase"
 import { loadCanonicalPublicPlayers, type CanonicalPublicPlayer } from "@/lib/publicPlayers"
+import { resolveCurrentPlayer, type CurrentPlayerResolution } from "@/lib/currentPlayer"
 
 type Player = CanonicalPublicPlayer
 
@@ -34,20 +35,19 @@ export default function PlayerDashboardPage() {
   const [results, setResults] = useState<Result[]>([])
   const [selectedPlayerId, setSelectedPlayerId] = useState("")
   const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    loadData()
-  }, [])
+  const [resolution, setResolution] = useState<CurrentPlayerResolution | null>(null)
 
   async function loadData() {
     setLoading(true)
 
     const [
+      currentPlayer,
       playersResponse,
       membershipsResponse,
       scheduleResponse,
       resultsResponse,
     ] = await Promise.all([
+      resolveCurrentPlayer(),
       loadCanonicalPublicPlayers(),
 
       supabase
@@ -69,13 +69,17 @@ export default function PlayerDashboardPage() {
     setMemberships(membershipsResponse.data || [])
     setSchedule(scheduleResponse.data || [])
     setResults(resultsResponse.data || [])
-
-    if (loadedPlayers.length > 0) {
-      setSelectedPlayerId(loadedPlayers[0].id)
-    }
+    setResolution(currentPlayer)
+    setSelectedPlayerId(currentPlayer.status === "matched" ? currentPlayer.playerId || "" : "")
 
     setLoading(false)
   }
+
+  useEffect(() => {
+    // Data loading synchronizes this client dashboard with Supabase.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void loadData()
+  }, [])
 
   const selectedPlayer = useMemo(
     () => players.find((player) => player.id === selectedPlayerId),
@@ -136,29 +140,21 @@ export default function PlayerDashboardPage() {
         <section style={headerCard}>
           <h1 style={title}>Player Dashboard</h1>
 
-          <p style={subtitle}>
-            Choose a player to see their leagues, matches, and progress.
-          </p>
-
-          <label style={label}>Player</label>
-
-          <select
-            value={selectedPlayerId}
-            onChange={(event) => setSelectedPlayerId(event.target.value)}
-            style={select}
-          >
-            {players.map((player) => (
-              <option key={player.id} value={player.id}>
-                {player.screen_name}
-              </option>
-            ))}
-          </select>
+          <p style={subtitle}>Your leagues, matches, schedule, and progress.</p>
         </section>
 
         {loading ? (
           <div style={card}>Loading dashboard...</div>
         ) : !selectedPlayer ? (
-          <div style={card}>No player selected.</div>
+          <div style={card}>
+            <h2>{resolution?.status === "signed_out" ? "Sign in to view your dashboard" : "Set up your Krys player profile"}</h2>
+            <p style={muted}>{resolution?.status === "conflict" ? "Your Discord identity needs administrator review." : "No canonical player is linked to this signed-in Discord account yet."}</p>
+            <section style={actionGrid}>
+              <Link href="/join" style={actionButton}>Join / Connect Profile</Link>
+              <Link href="/players" style={actionButton}>Browse Player Profiles</Link>
+              <Link href="/league-play" style={actionButton}>Explore League Play</Link>
+            </section>
+          </div>
         ) : (
           <>
             <section style={card}>
@@ -214,7 +210,7 @@ export default function PlayerDashboardPage() {
   </Link>
 
   <Link href="/players" style={actionButton}>
-    Player Profiles
+    Browse Player Profiles
   </Link>
 
   <Link href="/standings" style={actionButton}>
@@ -277,22 +273,6 @@ const title: React.CSSProperties = {
 const subtitle: React.CSSProperties = {
   color: "#cbd5e1",
   lineHeight: 1.5,
-}
-
-const label: React.CSSProperties = {
-  display: "block",
-  margin: "18px 0 8px",
-  fontWeight: 700,
-}
-
-const select: React.CSSProperties = {
-  width: "100%",
-  padding: 12,
-  background: "#0f172a",
-  color: "white",
-  border: "1px solid #475569",
-  borderRadius: 10,
-  fontSize: 17,
 }
 
 const card: React.CSSProperties = {

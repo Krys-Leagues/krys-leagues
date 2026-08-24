@@ -54,6 +54,15 @@ type Result = {
   is_draw: boolean | null
 }
 
+type ScheduledMatch = {
+  id: string
+  league_type: string | null
+  division: string | null
+  season_number: number | null
+  player1_id: string | null
+  player2_id: string | null
+}
+
 type StrokeSeasonHistory = {
   season_number: number
   season_id: string
@@ -125,6 +134,7 @@ export default function PublicPlayerProfilePage() {
   const [memberships, setMemberships] = useState<Membership[]>([])
   const [trophies, setTrophies] = useState<Trophy[]>([])
   const [results, setResults] = useState<Result[]>([])
+  const [schedule, setSchedule] = useState<ScheduledMatch[]>([])
   const [strokeHistory, setStrokeHistory] = useState<StrokeSeasonHistory[]>([])
   const [strokeHistoryError, setStrokeHistoryError] = useState("")
   const [matchHistory, setMatchHistory] = useState<MatchSeasonHistory[]>([])
@@ -144,7 +154,7 @@ export default function PublicPlayerProfilePage() {
   const [preferences, setPreferences] = useState<ProfilePreferences>(DEFAULT_PREFERENCES)
   const [hasSession, setHasSession] = useState(false)
   const [canEditProfile, setCanEditProfile] = useState(false)
-  const [openProfileSection, setOpenProfileSection] = useState<"records" | "stats" | "aliases" | "trophies" | null>(null)
+  const [openProfileSection, setOpenProfileSection] = useState<"activity" | "records" | "stats" | "aliases" | "trophies" | null>(null)
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/immutability
@@ -203,6 +213,7 @@ export default function PublicPlayerProfilePage() {
       membershipsResponse,
       trophiesResponse,
       resultsResponse,
+      scheduleResponse,
       strokeHistoryResponse,
       matchHistoryResponse,
       pypHistoryResponse,
@@ -234,6 +245,11 @@ export default function PublicPlayerProfilePage() {
       supabase
         .from("results")
         .select("id, player1, player2, player1_id, player2_id, winner, is_draw")
+        .or(resultIdentityFilter),
+
+      supabase
+        .from("schedule")
+        .select("id, league_type, division, season_number, player1_id, player2_id")
         .or(resultIdentityFilter),
 
       supabase.rpc("get_public_stroke_player_history", {
@@ -285,6 +301,7 @@ export default function PublicPlayerProfilePage() {
     setMemberships(membershipsResponse.data || [])
     setTrophies(trophiesResponse.data || [])
     setResults(resultsResponse.data || [])
+    setSchedule(scheduleResponse.data || [])
     setStrokeHistory(
       (strokeHistoryResponse.data || []) as StrokeSeasonHistory[]
     )
@@ -335,6 +352,10 @@ export default function PublicPlayerProfilePage() {
   const hasCareerParticipation = memberships.length > 0 || results.length > 0 ||
     strokeHistory.length > 0 || matchHistory.length > 0 || pypHistory.length > 0 ||
     pypFixtureHistory.length > 0
+  const scheduledIdentityKeys = new Set(results.map((result) => [result.player1_id, result.player2_id].filter(Boolean).sort().join("|")))
+  const remainingGames = schedule.filter((match) => !scheduledIdentityKeys.has([match.player1_id, match.player2_id].filter(Boolean).sort().join("|")))
+  const latestMembershipSeason = memberships.reduce((latest, membership) => Math.max(latest, membership.season_number ?? 0), 0)
+  const currentMemberships = memberships.filter((membership) => (membership.season_number ?? 0) === latestMembershipSeason)
 
   const statHighlights = [
     trophies.length > 0 ? { kind: "stat" as const, label: "Trophies", value: trophies.length } : null,
@@ -375,7 +396,7 @@ export default function PublicPlayerProfilePage() {
       <main style={page}>
         <div style={container}>
           <Link href="/players" style={backButton}>
-            ← Player Profiles
+            ← Browse Player Profiles
           </Link>
 
           <div style={messageCard}>
@@ -426,7 +447,8 @@ export default function PublicPlayerProfilePage() {
 
         <nav className={styles.profileActions} aria-label="Player profile sections and navigation">
           <Link href="/" style={backButton}>← Krys Leagues</Link>
-          <Link href="/players" style={backButton}>← Player Profiles</Link>
+          <Link href="/players" style={backButton}>← Browse Player Profiles</Link>
+          {canEditProfile && <button type="button" className={styles.profileActionButton} aria-pressed={openProfileSection === "activity"} onClick={() => setOpenProfileSection(current => current === "activity" ? null : "activity")}>My Games &amp; Schedule</button>}
           <button type="button" className={styles.profileActionButton} aria-pressed={openProfileSection === "records"} onClick={() => setOpenProfileSection(current => current === "records" ? null : "records")}>Course Records</button>
           {hasCareerParticipation && <button type="button" className={styles.profileActionButton} aria-pressed={openProfileSection === "stats"} onClick={() => setOpenProfileSection(current => current === "stats" ? null : "stats")}>Player Stats</button>}
           {knownAliases.length > 0 && <button type="button" className={styles.profileActionButton} aria-pressed={openProfileSection === "aliases"} onClick={() => setOpenProfileSection(current => current === "aliases" ? null : "aliases")}>Names / Known As</button>}
@@ -434,6 +456,18 @@ export default function PublicPlayerProfilePage() {
           {!hasSession && <button type="button" className={styles.profileActionButton} onClick={() => void signInWithDiscord()}>Sign in with Discord</button>}
           {canEditProfile && <PlayerProfileEditor playerId={player.id} initial={preferences} isServerBooster={recognition.isServerBooster} hasKrysServerTag={recognition.hasKrysServerTag} profileBadges={recognition.profileBadges} onSaved={setPreferences} />}
         </nav>
+
+        {openProfileSection === "activity" && canEditProfile && <section className={styles.profileSectionPanel} aria-label="My Games and Schedule">
+          <p className={styles.sectionDescription}>Your current activity uses the same league membership, schedule, and results data as Player Dashboard.</p>
+          {currentMemberships.length > 0 || remainingGames.length > 0 ? <>
+            <div style={grid}>
+              <div style={miniCard}><strong>Current league participation</strong><span>{currentMemberships.length}</span></div>
+              <div style={miniCard}><strong>Remaining scheduled games</strong><span>{remainingGames.length}</span></div>
+            </div>
+            {currentMemberships.length > 0 && <section style={card}><h2 style={sectionTitle}>Current Leagues</h2><div style={grid}>{currentMemberships.map(membership => <div key={membership.id} style={miniCard}><strong>{membership.league_type || "League"}</strong><span>{membership.division || "No division listed"}</span><span style={muted}>Season {membership.season_number ?? "not listed"}</span></div>)}</div></section>}
+            {remainingGames.length > 0 && <section style={card}><h2 style={sectionTitle}>Upcoming / Remaining Games</h2><div style={grid}>{remainingGames.map(match => <div key={match.id} style={miniCard}><strong>{match.league_type || "League match"}</strong><span>{match.division || "Division not listed"}</span><span style={muted}>Season {match.season_number ?? "not listed"}</span></div>)}</div></section>}
+          </> : <section style={card}><h2 style={sectionTitle}>Get Started</h2><p style={muted}>You do not have current league participation or scheduled games in the available website data.</p><div style={grid}><Link href="/join" style={backButton}>Join a League</Link><Link href="/tournaments" style={backButton}>Enter a Tournament</Link><Link href="/league-play" style={backButton}>View Open Competitions</Link><Link href="/dashboard" style={backButton}>Open Player Dashboard</Link></div></section>}
+        </section>}
 
         {openProfileSection === "records" && <PlayerCourseRecords playerId={player.id} />}
 

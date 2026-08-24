@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import PlayerAvatar from "@/components/PlayerAvatar"
+import PlayersWelcome from "@/components/PlayersWelcome"
 import {
   loadCanonicalPublicPlayers,
   type CanonicalPublicPlayer,
@@ -52,7 +53,7 @@ export default function PlayerProfilesPage() {
 
         <section style={hero}>
           <p style={eyebrow}>Global Players</p>
-          <h1 style={title}>Player Profiles</h1>
+          <h1 style={title}>Browse Player Profiles</h1>
           <p style={subtitle}>
             Find a Krys Leagues player and view their public profile, league
             history, trophies, and achievements.
@@ -70,6 +71,8 @@ export default function PlayerProfilesPage() {
           </label>
         </section>
 
+        <PlayersWelcome />
+
         {loading ? (
           <div style={messageCard}>Loading player profiles...</div>
         ) : message ? (
@@ -79,7 +82,7 @@ export default function PlayerProfilesPage() {
             {search ? "No players match that search." : "No active players found."}
           </div>
         ) : (
-          <section style={directory} aria-label="Player profiles">
+          <section id="player-directory" style={directory} aria-label="Browse player profiles">
             {filteredPlayers.map((player) => (
               <Link
                 key={player.id}
