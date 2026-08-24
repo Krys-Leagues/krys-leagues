@@ -82,6 +82,20 @@ type MatchSeasonHistory = {
 
 type PypSeasonHistory = MatchSeasonHistory
 
+type KwtHistory = {
+  season_number: number
+  week_number: number
+  historical_player_name: string
+  historical_rank: string | null
+  easy_course_code: string
+  easy_score: number
+  hard_course_code: string
+  hard_score: number
+  total_score: number
+  placement: number | null
+  points: number | null
+}
+
 type CanonicalIdentity = {
   canonical_player_id: string
   canonical_screen_name: string
@@ -130,6 +144,8 @@ export default function PublicPlayerProfilePage() {
   const [pypHistory, setPypHistory] = useState<PypSeasonHistory[]>([])
   const [pypFixtureHistory, setPypFixtureHistory] = useState<PypFixtureHistory[]>([])
   const [pypHistoryError, setPypHistoryError] = useState("")
+  const [kwtHistory, setKwtHistory] = useState<KwtHistory[]>([])
+  const [kwtHistoryError, setKwtHistoryError] = useState("")
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState("")
   const [aliases, setAliases] = useState<string[]>([])
@@ -163,6 +179,7 @@ export default function PublicPlayerProfilePage() {
     setStrokeHistoryError("")
     setMatchHistoryError("")
     setPypHistoryError("")
+    setKwtHistoryError("")
 
     const { data: identityData, error: identityError } = await supabase.rpc(
       "get_public_player_canonical_identity",
@@ -205,6 +222,7 @@ export default function PublicPlayerProfilePage() {
       matchHistoryResponse,
       pypHistoryResponse,
       pypFixtureHistoryResponse,
+      kwtHistoryResponse,
       avatarResponse,
       preferencesResponse,
       sessionResponse,
@@ -245,6 +263,9 @@ export default function PublicPlayerProfilePage() {
       }),
       supabase.rpc("get_public_pyp_player_fixture_history", {
         p_player_id: playerId,
+      }),
+      supabase.rpc("get_public_player_kwt_history", {
+        p_player_id: canonicalId,
       }),
       getCanonicalPlayerAvatar(playerId).catch(() => ({ canonicalPlayerId: playerId, avatarPath: null })),
       supabase.rpc("get_public_player_profile_preferences_v4", { p_player_id: canonicalId }),
@@ -300,6 +321,10 @@ export default function PublicPlayerProfilePage() {
     if (pypFixtureHistoryResponse.error && !pypHistoryResponse.error) {
       setPypHistoryError(`PYP fixture history could not be loaded: ${pypFixtureHistoryResponse.error.message}`)
     }
+    setKwtHistory((kwtHistoryResponse.data || []) as KwtHistory[])
+    if (kwtHistoryResponse.error) {
+      setKwtHistoryError(`KWT history could not be loaded: ${kwtHistoryResponse.error.message}`)
+    }
     setAvatarPath(avatarResponse.avatarPath)
     if (!preferencesResponse.error) {
       const loaded = Array.isArray(preferencesResponse.data) ? preferencesResponse.data[0] : preferencesResponse.data
@@ -329,7 +354,7 @@ export default function PublicPlayerProfilePage() {
 
   const hasCareerParticipation = memberships.length > 0 || results.length > 0 ||
     strokeHistory.length > 0 || matchHistory.length > 0 || pypHistory.length > 0 ||
-    pypFixtureHistory.length > 0
+    pypFixtureHistory.length > 0 || kwtHistory.length > 0
 
   const statHighlights = [
     trophies.length > 0 ? { kind: "stat" as const, label: "Trophies", value: trophies.length } : null,
@@ -560,6 +585,31 @@ export default function PublicPlayerProfilePage() {
                   </p>)}
                 </details>
               })}
+            </div>
+          )}
+        </section>}
+
+        {(kwtHistory.length > 0 || kwtHistoryError) && <section style={card}>
+          <h2 style={sectionTitle}>Historical KWT Scores</h2>
+          {kwtHistoryError ? (
+            <p style={historyError}>{kwtHistoryError}</p>
+          ) : (
+            <div style={tableWrap}>
+              <table style={table}>
+                <thead><tr>
+                  <th style={th}>Season</th><th style={th}>Week</th><th style={th}>Historical rank</th>
+                  <th style={th}>Easy</th><th style={th}>Hard</th><th style={th}>Total</th>
+                  <th style={th}>Place</th><th style={th}>Points</th>
+                </tr></thead>
+                <tbody>{kwtHistory.map((history) => <tr key={`${history.season_number}-${history.week_number}-${history.easy_course_code}-${history.hard_course_code}`}>
+                  <td style={td}>{history.season_number}</td><td style={td}>{history.week_number}</td>
+                  <td style={td}>{history.historical_rank || "Unknown"}</td>
+                  <td style={td}>{history.easy_course_code}: {history.easy_score}</td>
+                  <td style={td}>{history.hard_course_code}: {history.hard_score}</td>
+                  <td style={td}><strong>{history.total_score}</strong></td>
+                  <td style={td}>{history.placement ?? "—"}</td><td style={td}>{history.points ?? "—"}</td>
+                </tr>)}</tbody>
+              </table>
             </div>
           )}
         </section>}

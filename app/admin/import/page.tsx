@@ -21,7 +21,7 @@ const cards = [
     title: "KWT",
     description:
       "Import Krys Weekend Tourney scores and statistics.",
-    href: "/admin/import/kwt",
+    href: "/admin/kwt-import",
     color: "bg-green-600",
   },
   {
