@@ -160,7 +160,7 @@ begin
     ) then
       raise exception 'KWT source SHA conflicts with the existing reviewed source fingerprints';
     end if;
-    historical_kwt_import_id:=v_import.id;idempotent:=true;select count(*)::integer into scorecard_count from public.historical_kwt_scorecards where historical_kwt_import_id=v_import.id;score_count:=scorecard_count*2;return next;return;
+    historical_kwt_import_id:=v_import.id;idempotent:=true;select count(*)::integer into scorecard_count from public.historical_kwt_scorecards as score where score.historical_kwt_import_id = v_import.id;score_count:=scorecard_count*2;return next;return;
   end if;
   insert into public.historical_kwt_imports(source_filename,source_sha256,parser_version,row_count,committed_by) values(btrim(p_source_filename),lower(btrim(p_source_sha256)),btrim(p_parser_version),jsonb_array_length(p_rows),v_user) returning * into v_import;
   for v_row in select value from jsonb_array_elements(p_rows) loop
@@ -187,7 +187,8 @@ create or replace function public.get_public_player_kwt_history(p_player_id uuid
 returns table(season_number integer,week_number integer,historical_player_name text,historical_rank text,easy_course_code text,easy_score integer,hard_course_code text,hard_score integer,total_score integer,placement integer,points integer)
 language sql stable security definer set search_path to '' as $function$
   select score.season_number,score.week_number,score.historical_player_name,score.historical_rank,score.easy_course_code,score.easy_score,score.hard_course_code,score.hard_score,score.total_score,score.placement,score.points
-  from public.historical_kwt_scorecards score where score.canonical_player_id=public.resolve_canonical_player_id(p_player_id) order by score.season_number desc,score.week_number desc;
+  from public.historical_kwt_scorecards score where public.resolve_canonical_player_id(score.canonical_player_id)
+    = public.resolve_canonical_player_id(p_player_id) order by score.season_number desc,score.week_number desc;
 $function$;
 revoke all on function public.get_public_player_kwt_history(uuid) from public;
 grant execute on function public.get_public_player_kwt_history(uuid) to anon,authenticated;
