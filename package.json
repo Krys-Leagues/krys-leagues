@@ -9,6 +9,10 @@
     "lint": "eslint",
     "test:match-preview": "node --experimental-strip-types --test lib/importer/adapters/matchAdapter.test.ts",
     "test:stroke-history-preview": "node --experimental-strip-types --test lib/importer/adapters/historicalStrokeParser.test.ts",
+    "test:competition-preview": "node --experimental-strip-types --test lib/importer/adapters/competitionPreview.test.ts lib/importer/adapters/kwtLibraryPreview.test.ts lib/importer/adapters/kwtDiscordEvidence.test.ts lib/importer/adapters/kwtDiscordStaging.test.ts lib/importer/adapters/kwtDiscordWeekReview.test.ts lib/importer/adapters/kwtDiscordReconciliation.test.ts",
+    "test:climbers": "node --experimental-strip-types --test tests/all-time/climbers.test.ts",
+    "test:discord-departure": "node --experimental-strip-types --test lib/discordDeparture.test.ts",
+    "test:kwt-import": "node --experimental-strip-types --test lib/importer/adapters/kwtAdapter.test.ts",
     "test:trophy-import": "node --experimental-strip-types --test lib/trophies/trophyImport.test.ts lib/trophies/trophyMedia.test.ts lib/trophies/pendingTrophyAssignments.test.ts",
     "test:all-time": "node --experimental-strip-types --test tests/all-time/*.test.ts"
   },

@@ -13,9 +13,10 @@ type Props = {
   onSelect: (player: ExistingPlayerSearchResult) => void
   onCancel: () => void
   selectLabel?: string
+  usePageScroll?: boolean
 }
 
-export default function ExistingPlayerPicker({ historicalDisplayName, onSelect, onCancel, selectLabel = "Link this player" }: Props) {
+export default function ExistingPlayerPicker({ historicalDisplayName, onSelect, onCancel, selectLabel = "Link this player", usePageScroll = false }: Props) {
   const [query, setQuery] = useState("")
   const [players, setPlayers] = useState<PlayerRecord[]>([])
   const [aliases, setAliases] = useState<PlayerIdentityAlias[]>([])
@@ -48,7 +49,7 @@ export default function ExistingPlayerPicker({ historicalDisplayName, onSelect, 
     {loading && <div className="mt-3 text-zinc-400">Loading existing global players…</div>}
     {error && <div role="alert" className="mt-3 text-red-300">{error}</div>}
     {!loading && query.trim() && results.length === 0 && <div className="mt-3 text-zinc-400">No existing player matched. Create or edit identities in the global Players tools.</div>}
-    <div className="mt-3 max-h-80 space-y-2 overflow-y-auto">
+    <div className={`mt-3 space-y-2 ${usePageScroll ? "" : "max-h-80 overflow-y-auto"}`}>
       {results.map((player) => <div key={player.id} className="rounded border border-zinc-700 bg-zinc-900 p-3">
         <div className="font-bold">{player.screen_name} {!player.active && <span className="text-xs text-amber-300">inactive</span>}</div>
         <div className="font-mono text-xs text-zinc-500">{player.id}</div>
