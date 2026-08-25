@@ -1,6 +1,6 @@
 import test from "node:test"
 import assert from "node:assert/strict"
-import { classifyMonthlyPeriod, previewMonthlyWebsiteCsvRows, previewMonthlyWebsiteViews } from "./monthlyWebsiteAdapter.ts"
+import { classifyMonthlyPeriod, monthlyIdentityBlocksCommit, previewMonthlyWebsiteCsvRows, previewMonthlyWebsiteViews } from "./monthlyWebsiteAdapter.ts"
 
 const view = {
   period: "2026 August",
@@ -66,4 +66,10 @@ test("Monthly adapter blocks the active period using a finalization cutoff", () 
 test("Monthly period classification does not depend on a hard-coded month", () => {
   assert.equal(classifyMonthlyPeriod(2026, 9, "2026 August").importable, false)
   assert.equal(classifyMonthlyPeriod(2026, 9, "2026 September").importable, true)
+})
+
+test("Monthly identities only block commit when scored observations need review", () => {
+  assert.equal(monthlyIdentityBlocksCommit(24, false), true)
+  assert.equal(monthlyIdentityBlocksCommit(0, false), false)
+  assert.equal(monthlyIdentityBlocksCommit(0, true), false)
 })

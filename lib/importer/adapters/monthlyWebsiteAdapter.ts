@@ -119,6 +119,10 @@ export function classifyMonthlyPeriod(year: number, month: number, finalizedThro
   }
 }
 
+export function monthlyIdentityBlocksCommit(scoredObservations: number, hasCanonicalPlayer: boolean) {
+  return scoredObservations > 0 && !hasCanonicalPlayer
+}
+
 function fingerprint(row: Omit<MonthlyWebsiteObservation, "sourceFingerprint" | "issues" | "sourceRow" | "periodStatus" | "importable" | "periodBlockReason">) {
   return [
     "monthly-website", row.period, row.periodId, row.division, row.historicalPlayerName,
