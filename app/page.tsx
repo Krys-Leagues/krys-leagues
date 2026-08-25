@@ -20,24 +20,16 @@ export default function HomePage() {
           </p>
 
           <div style={buttonGrid}>
-            <Link href="/join" style={primaryButton}>
-              Join Leagues
+            <Link href="/players" style={primaryButton}>
+              Player Profiles
             </Link>
 
-            <Link href="/dashboard" style={button}>
-              Player Dashboard
+            <Link href="/join" style={button}>
+              Join Leagues
             </Link>
 
             <Link href="/league-play" style={button}>
               League Play
-            </Link>
-
-            <Link href="/admin/stroke/standings" style={button}>
-              Standings
-            </Link>
-
-            <Link href="/players" style={button}>
-              Player Profiles
             </Link>
 
             <Link href="/kwt" style={button}>
@@ -51,16 +43,12 @@ export default function HomePage() {
   Bracket Tournaments
 </Link>
 
-<Link href="/leaderboards" style={button}>
+<Link href="/records" style={button}>
   Overall Leaderboards
 </Link>
 
 <Link href="/invitationals" style={button}>
   Invitationals
-</Link>
-
-<Link href="/records" style={button}>
-  League Records
 </Link>
 
             <Link href="/champions" style={button}>
