@@ -88,7 +88,6 @@ type KwtHistory = {
   season_number: number
   week_number: number
   historical_player_name: string
-  historical_rank: string | null
   easy_course_code: string
   easy_score: number
   hard_course_code: string
@@ -601,24 +600,20 @@ export default function PublicPlayerProfilePage() {
         </section>}
 
         {(kwtHistory.length > 0 || kwtHistoryError) && <section style={card}>
-          <h2 style={sectionTitle}>Historical KWT Scores</h2>
+          <h2 style={sectionTitle}>KWT Score History</h2>
           {kwtHistoryError ? (
             <p style={historyError}>{kwtHistoryError}</p>
           ) : (
-            <div style={tableWrap}>
-              <table style={table}>
+            <div className={styles.kwtHistoryTableWrap}>
+              <table className={styles.kwtHistoryTable}>
                 <thead><tr>
-                  <th style={th}>Season</th><th style={th}>Week</th><th style={th}>Historical rank</th>
-                  <th style={th}>Easy</th><th style={th}>Hard</th><th style={th}>Total</th>
-                  <th style={th}>Place</th><th style={th}>Points</th>
+                  <th>Season</th><th>Week</th><th>Easy</th><th>Hard</th><th>Total</th><th>Place</th>
                 </tr></thead>
                 <tbody>{kwtHistory.map((history) => <tr key={`${history.season_number}-${history.week_number}-${history.easy_course_code}-${history.hard_course_code}`}>
-                  <td style={td}>{history.season_number}</td><td style={td}>{history.week_number}</td>
-                  <td style={td}>{history.historical_rank || "Unknown"}</td>
-                  <td style={td}>{history.easy_course_code}: {history.easy_score}</td>
-                  <td style={td}>{history.hard_course_code}: {history.hard_score}</td>
-                  <td style={td}><strong>{history.total_score}</strong></td>
-                  <td style={td}>{history.placement ?? "—"}</td><td style={td}>{history.points ?? "—"}</td>
+                  <td>{history.season_number}</td><td>{history.week_number}</td>
+                  <td><span className={styles.kwtCourseCode}>{history.easy_course_code}</span><strong className={styles.kwtEasyScore}>{history.easy_score}</strong></td>
+                  <td><span className={styles.kwtCourseCode}>{history.hard_course_code}</span><strong className={styles.kwtHardScore}>{history.hard_score}</strong></td>
+                  <td><strong>{history.total_score}</strong></td><td>{history.placement ?? "—"}</td>
                 </tr>)}</tbody>
               </table>
             </div>
