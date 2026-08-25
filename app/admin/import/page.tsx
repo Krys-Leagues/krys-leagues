@@ -25,9 +25,9 @@ const cards = [
     color: "bg-green-600",
   },
   {
-    title: "Monthly Ladder",
+    title: "Historical Monthly",
     description:
-      "Import Monthly Ladder standings and promotions.",
+      "Review recovered Monthly website scores, identities, and source validation.",
     href: "/admin/import/monthly",
     color: "bg-orange-600",
   },

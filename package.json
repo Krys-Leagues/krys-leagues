@@ -13,6 +13,7 @@
     "test:climbers": "node --experimental-strip-types --test tests/all-time/climbers.test.ts",
     "test:discord-departure": "node --experimental-strip-types --test lib/discordDeparture.test.ts",
     "test:kwt-import": "node --experimental-strip-types --test lib/importer/adapters/kwtAdapter.test.ts",
+    "test:monthly-import": "node --experimental-strip-types --test lib/importer/adapters/monthlyWebsiteAdapter.test.ts",
     "test:trophy-import": "node --experimental-strip-types --test lib/trophies/trophyImport.test.ts lib/trophies/trophyMedia.test.ts lib/trophies/pendingTrophyAssignments.test.ts",
     "test:all-time": "node --experimental-strip-types --test tests/all-time/*.test.ts"
   },
