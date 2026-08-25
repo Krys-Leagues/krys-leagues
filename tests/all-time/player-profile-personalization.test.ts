@@ -45,6 +45,21 @@ test("glass presets and blue panel glow are profile-wide and curated", () => {
   assert.match(read("components/PlayerProfileEditor.tsx"), /\["clear","frosted","dark"\]/)
 })
 
+test("only the v6 no-row marker activates the clear frosted fallback", () => {
+  const presentation = read("lib/playerProfilePresentation.ts")
+  const page = read("app/players/[id]/page.tsx")
+  const fallback = profilePresentationStyle(DEFAULT_PROFILE_PRESENTATION, true) as Record<string,string>
+  const savedClear = profilePresentationStyle({ ...DEFAULT_PROFILE_PRESENTATION, glass_style: "clear" }, false) as Record<string,string>
+  assert.match(presentation, /useDefaultFrostedGlass = false/)
+  assert.match(presentation, /blur\(12px\) saturate\(120%\)/)
+  assert.equal(fallback["--profile-panel-blur"], "blur(12px) saturate(120%)")
+  assert.equal(savedClear["--profile-panel-blur"], "none")
+  assert.match(page, /get_public_player_profile_preferences_v6/)
+  assert.match(page, /preferences\.has_saved_preferences === false/)
+  assert.match(page, /has_saved_preferences: loaded\.has_saved_preferences === true/)
+  assert.match(page, /has_saved_preferences: null/)
+})
+
 test("migration is additive, constrained, idempotent, and does not grant eligibility", () => {
   const sql = read("player_profile_showcase_preferences.sql")
   assert.match(sql, /add column if not exists show_featured_trophy/)
@@ -52,4 +67,31 @@ test("migration is additive, constrained, idempotent, and does not grant eligibi
   assert.match(sql, /glass_style in \('clear', 'frosted', 'dark'\)/)
   assert.doesNotMatch(sql, /update public\.players|is_server_booster\s*=|has_krys_server_tag\s*=|profile_badges\s*=/)
   assert.doesNotMatch(sql, /disable row level security|drop policy|create policy/i)
+})
+
+test("saved-preferences reader exposes row existence without changing profile values", () => {
+  const sql = read("player_profile_preferences_saved_marker.sql")
+  assert.match(sql, /get_public_player_profile_preferences_v6/)
+  assert.match(sql, /has_saved_preferences boolean/)
+  assert.match(sql, /pref\.player_id is not null/)
+  for (const field of [
+    "background_key",
+    "background_id",
+    "background_path",
+    "background_display_name",
+    "name_effect",
+    "background_color",
+    "glow_color",
+    "text_color",
+    "about_me",
+    "show_featured_trophy",
+    "show_career_highlights",
+    "show_recognition_box",
+    "show_avatar_glow",
+    "avatar_glow_color",
+    "avatar_glow_strength",
+    "glass_style",
+    "blue_panel_glow",
+  ]) assert.match(sql, new RegExp(`\\b${field}\\b`))
+  assert.doesNotMatch(sql, /\b(insert into|update|delete from)\s+public\.player_profile_preferences\b/i)
 })

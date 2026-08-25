@@ -6,7 +6,7 @@ import { useParams, useRouter } from "next/navigation"
 import { createDiscordAuthCallbackUrl } from "@/lib/authReturnTo"
 import { supabase } from "@/lib/supabase"
 import PlayerProfileHero, { PlayerProfileRecognition } from "@/components/PlayerProfileHero"
-import PlayerProfileEditor, { type ProfilePreferences } from "@/components/PlayerProfileEditor"
+import PlayerProfileEditor, { type ProfilePreferences as SavedProfilePreferences } from "@/components/PlayerProfileEditor"
 import { getCanonicalPlayerAvatar } from "@/lib/playerAvatars"
 import { DEFAULT_PLAYER_PROFILE_BACKGROUND_KEY, getPlayerProfileBackground } from "@/lib/playerProfileBackgrounds"
 import { profileBackgroundPublicUrl } from "@/lib/profileBackgrounds"
@@ -42,7 +42,9 @@ type Trophy = {
   created_at: string
 }
 
-const DEFAULT_PREFERENCES: ProfilePreferences = { background_key: DEFAULT_PLAYER_PROFILE_BACKGROUND_KEY, background_id: null, background_path: null, background_display_name: null, name_effect: "auto", background_color: "#07111f", glow_color: "#ff2bd6", text_color: "#f8fafc", about_me: null, ...DEFAULT_PROFILE_PRESENTATION }
+type ProfilePreferences = SavedProfilePreferences & { has_saved_preferences: boolean | null }
+
+const DEFAULT_PREFERENCES: ProfilePreferences = { background_key: DEFAULT_PLAYER_PROFILE_BACKGROUND_KEY, background_id: null, background_path: null, background_display_name: null, name_effect: "auto", background_color: "#07111f", glow_color: "#ff2bd6", text_color: "#f8fafc", about_me: null, has_saved_preferences: null, ...DEFAULT_PROFILE_PRESENTATION }
 
 type Result = {
   id: string
@@ -269,10 +271,7 @@ export default function PublicPlayerProfilePage() {
         p_player_id: canonicalId,
       }),
       getCanonicalPlayerAvatar(playerId).catch(() => ({ canonicalPlayerId: playerId, avatarPath: null })),
-      (async () => {
-        const v5 = await supabase.rpc("get_public_player_profile_preferences_v5", { p_player_id: canonicalId })
-        return v5.error ? supabase.rpc("get_public_player_profile_preferences_v4", { p_player_id: canonicalId }) : v5
-      })(),
+      supabase.rpc("get_public_player_profile_preferences_v6", { p_player_id: canonicalId }),
       supabase.auth.getSession(),
     ])
 
@@ -332,7 +331,7 @@ export default function PublicPlayerProfilePage() {
     setAvatarPath(avatarResponse.avatarPath)
     if (!preferencesResponse.error) {
       const loaded = Array.isArray(preferencesResponse.data) ? preferencesResponse.data[0] : preferencesResponse.data
-      if (loaded) setPreferences({ ...DEFAULT_PREFERENCES, ...loaded, ...normalizeProfilePresentation({ ...loaded, avatar_glow_color: loaded.avatar_glow_color || loaded.glow_color }) } as ProfilePreferences)
+      if (loaded) setPreferences({ ...DEFAULT_PREFERENCES, ...loaded, has_saved_preferences: loaded.has_saved_preferences === true, ...normalizeProfilePresentation({ ...loaded, avatar_glow_color: loaded.avatar_glow_color || loaded.glow_color }) } as ProfilePreferences)
     }
     const session = sessionResponse.data.session
     setHasSession(Boolean(session))
@@ -411,7 +410,7 @@ export default function PublicPlayerProfilePage() {
   }
 
   return (
-    <main className={styles.page} data-glass-style={preferences.glass_style} data-blue-panel-glow={preferences.blue_panel_glow} style={{ "--profile-bg": preferences.background_color, "--profile-text": preferences.text_color, "--profile-background-image": `url("${profileBackgroundImage}")`, ...profilePresentationStyle(preferences) } as React.CSSProperties}>
+    <main className={styles.page} data-glass-style={preferences.glass_style} data-blue-panel-glow={preferences.blue_panel_glow} style={{ "--profile-bg": preferences.background_color, "--profile-text": preferences.text_color, "--profile-background-image": `url("${profileBackgroundImage}")`, ...profilePresentationStyle(preferences, preferences.has_saved_preferences === false) } as React.CSSProperties}>
       <div style={container} className={styles.profilePageContainer}>
         <PlayerProfileHero
           screenName={player.screen_name}
@@ -456,7 +455,7 @@ export default function PublicPlayerProfilePage() {
           {knownAliases.length > 0 && <button type="button" className={styles.profileActionButton} aria-pressed={openProfileSection === "aliases"} onClick={() => setOpenProfileSection(current => current === "aliases" ? null : "aliases")}>Names / Known As</button>}
           {trophies.length > 0 && <button type="button" className={styles.profileActionButton} aria-pressed={openProfileSection === "trophies"} onClick={() => setOpenProfileSection(current => current === "trophies" ? null : "trophies")}>Trophies &amp; Achievements</button>}
           {!hasSession && <button type="button" className={styles.profileActionButton} onClick={() => void signInWithDiscord()}>Sign in with Discord</button>}
-          {canEditProfile && <PlayerProfileEditor playerId={player.id} initial={preferences} isServerBooster={recognition.isServerBooster} hasKrysServerTag={recognition.hasKrysServerTag} profileBadges={recognition.profileBadges} onSaved={setPreferences} />}
+          {canEditProfile && <PlayerProfileEditor playerId={player.id} initial={preferences} isServerBooster={recognition.isServerBooster} hasKrysServerTag={recognition.hasKrysServerTag} profileBadges={recognition.profileBadges} onSaved={(saved) => setPreferences(current => ({ ...current, ...saved }))} />}
         </nav>
 
         {openProfileSection === "records" && <PlayerCourseRecords playerId={player.id} />}

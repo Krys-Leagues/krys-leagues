@@ -37,8 +37,10 @@ export function normalizeProfilePresentation(value: Partial<ProfilePresentationP
   }
 }
 
-export function profilePresentationStyle(preferences: ProfilePresentationPreferences): React.CSSProperties {
-  const glass = preferences.glass_style === "frosted"
+export function profilePresentationStyle(preferences: ProfilePresentationPreferences, useDefaultFrostedGlass = false): React.CSSProperties {
+  const glass = useDefaultFrostedGlass
+    ? { background: "linear-gradient(135deg,#ffffff18,#02111d24 52%,#38bdf815)", blur: "blur(12px) saturate(120%)" }
+    : preferences.glass_style === "frosted"
     ? { background: "linear-gradient(135deg,#02111d94,#06132688 52%,#1e10267d)", blur: "blur(10px) saturate(115%)" }
     : preferences.glass_style === "dark"
       ? { background: "linear-gradient(135deg,#020817e8,#030b18e3 52%,#130817df)", blur: "blur(4px)" }
