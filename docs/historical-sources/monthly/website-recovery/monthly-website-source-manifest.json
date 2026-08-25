@@ -42,6 +42,11 @@
     "periodCount": 32,
     "divisionViews": 246
   },
+  "finalization": {
+    "finalizedThrough": "2026 July",
+    "activePeriodPolicy": "Periods after finalizedThrough remain CURRENT / INCOMPLETE / NOT IMPORTABLE until the source manifest is explicitly advanced after final standings are published.",
+    "currentPeriodReason": "August 2026 is the active Monthly and is not finished; its scores, points, placements, totals, HN1, and standings are not final historical results."
+  },
   "rawRenderedRows": 7285,
   "scoreObservations": 6182,
   "missingScoreObservations": 1103,

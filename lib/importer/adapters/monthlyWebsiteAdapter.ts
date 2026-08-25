@@ -55,6 +55,14 @@ export type MonthlyWebsiteObservation = {
   sourceUrl: string
   sourceFingerprint: string
   issues: string[]
+  periodStatus: "completed" | "current_incomplete"
+  importable: boolean
+  periodBlockReason: string | null
+}
+
+export type MonthlyWebsitePreviewOptions = {
+  /** The latest period the source owner has explicitly finalized. */
+  finalizedThrough?: string
 }
 
 export type MonthlyWebsitePreview = {
@@ -67,6 +75,12 @@ export type MonthlyWebsitePreview = {
     conflictingRows: number
     negativeScores: number
     totalMismatches: number
+    completedTotalRows: number
+    completedScoreRows: number
+    completedMissingScoreRows: number
+    currentIncompleteRows: number
+    currentIncompleteScoreRows: number
+    currentIncompleteMissingScoreRows: number
   }
 }
 
@@ -78,7 +92,7 @@ const months = new Map([
   ["September", 9], ["October", 10], ["November", 11], ["December", 12],
 ])
 
-function parsePeriod(period: string) {
+export function parseMonthlyPeriod(period: string) {
   const match = period.trim().match(/^(\d{4})\s+([A-Za-z]+)$/)
   const month = match ? months.get(match[2]) ?? null : null
   const year = match ? Number(match[1]) : null
@@ -86,7 +100,26 @@ function parsePeriod(period: string) {
   return { year, month }
 }
 
-function fingerprint(row: Omit<MonthlyWebsiteObservation, "sourceFingerprint" | "issues" | "sourceRow">) {
+function periodNumber(year: number, month: number) {
+  return year * 12 + month
+}
+
+function finalizedPeriodNumber(finalizedThrough: string | undefined) {
+  if (!finalizedThrough) return Number.POSITIVE_INFINITY
+  const { year, month } = parseMonthlyPeriod(finalizedThrough)
+  return periodNumber(year, month)
+}
+
+export function classifyMonthlyPeriod(year: number, month: number, finalizedThrough?: string) {
+  const importable = periodNumber(year, month) <= finalizedPeriodNumber(finalizedThrough)
+  return {
+    periodStatus: importable ? "completed" as const : "current_incomplete" as const,
+    importable,
+    periodBlockReason: importable ? null : "CURRENT / INCOMPLETE / NOT IMPORTABLE: this Monthly period has not been explicitly finalized by the source owner.",
+  }
+}
+
+function fingerprint(row: Omit<MonthlyWebsiteObservation, "sourceFingerprint" | "issues" | "sourceRow" | "periodStatus" | "importable" | "periodBlockReason">) {
   return [
     "monthly-website", row.period, row.periodId, row.division, row.historicalPlayerName,
     row.sourcePlayerId, row.courseName, row.difficulty, row.score, row.holeInOnes,
@@ -98,12 +131,13 @@ function leaderMap(leaders: MonthlyWebsiteLeader[]) {
   return new Map(leaders.map(leader => [leader.historicalPlayerName, leader]))
 }
 
-export function previewMonthlyWebsiteViews(views: MonthlyWebsiteDivisionView[]): MonthlyWebsitePreview {
+export function previewMonthlyWebsiteViews(views: MonthlyWebsiteDivisionView[], options: MonthlyWebsitePreviewOptions = {}): MonthlyWebsitePreview {
   const rows: MonthlyWebsiteObservation[] = []
   let sourceRow = 0
   for (const view of views) {
     if (!view.division.trim()) throw new Error("Monthly division is required")
-    const { year, month } = parsePeriod(view.period)
+    const { year, month } = parseMonthlyPeriod(view.period)
+    const periodState = classifyMonthlyPeriod(year, month, options.finalizedThrough)
     const leaders = leaderMap(view.leaders)
     for (const course of view.courses) {
       if (!course.course.trim()) throw new Error("Monthly course name is required")
@@ -130,9 +164,9 @@ export function previewMonthlyWebsiteViews(views: MonthlyWebsiteDivisionView[]):
           overallHn1: leader?.overallHn1 ?? null,
           overallPoints: leader?.overallPoints ?? null,
           sourceUrl: view.sourceUrl,
-        } satisfies Omit<MonthlyWebsiteObservation, "sourceFingerprint" | "issues" | "sourceRow">
+        } satisfies Omit<MonthlyWebsiteObservation, "sourceFingerprint" | "issues" | "sourceRow" | "periodStatus" | "importable" | "periodBlockReason">
         const issues = source.score === null ? ["Score is missing from the authoritative rendered row."] : []
-        rows.push({ ...base, sourceRow: ++sourceRow, sourceFingerprint: fingerprint(base), issues })
+        rows.push({ ...base, sourceRow: ++sourceRow, sourceFingerprint: fingerprint(base), issues, ...periodState })
       }
     }
   }
@@ -160,6 +194,12 @@ export function previewMonthlyWebsiteViews(views: MonthlyWebsiteDivisionView[]):
       conflictingRows,
       negativeScores: rows.filter(row => row.score !== null && row.score < 0).length,
       totalMismatches,
+      completedTotalRows: rows.filter(row => row.periodStatus === "completed").length,
+      completedScoreRows: rows.filter(row => row.periodStatus === "completed" && row.score !== null).length,
+      completedMissingScoreRows: rows.filter(row => row.periodStatus === "completed" && row.score === null).length,
+      currentIncompleteRows: rows.filter(row => row.periodStatus === "current_incomplete").length,
+      currentIncompleteScoreRows: rows.filter(row => row.periodStatus === "current_incomplete" && row.score !== null).length,
+      currentIncompleteMissingScoreRows: rows.filter(row => row.periodStatus === "current_incomplete" && row.score === null).length,
     },
   }
 }
@@ -189,11 +229,17 @@ function summarizeMonthlyRows(rows: MonthlyWebsiteObservation[], totalMismatches
       conflictingRows: [...observations.values()].filter(scores => scores.size > 1).length,
       negativeScores: rows.filter(row => row.score !== null && row.score < 0).length,
       totalMismatches,
+      completedTotalRows: rows.filter(row => row.periodStatus === "completed").length,
+      completedScoreRows: rows.filter(row => row.periodStatus === "completed" && row.score !== null).length,
+      completedMissingScoreRows: rows.filter(row => row.periodStatus === "completed" && row.score === null).length,
+      currentIncompleteRows: rows.filter(row => row.periodStatus === "current_incomplete").length,
+      currentIncompleteScoreRows: rows.filter(row => row.periodStatus === "current_incomplete" && row.score !== null).length,
+      currentIncompleteMissingScoreRows: rows.filter(row => row.periodStatus === "current_incomplete" && row.score === null).length,
     },
   }
 }
 
-export function previewMonthlyWebsiteCsvRows(sourceRows: MonthlyWebsiteCsvRow[]): MonthlyWebsitePreview {
+export function previewMonthlyWebsiteCsvRows(sourceRows: MonthlyWebsiteCsvRow[], options: MonthlyWebsitePreviewOptions = {}): MonthlyWebsitePreview {
   const rows: MonthlyWebsiteObservation[] = sourceRows.map((source, index) => {
     const base = {
       period: source.period?.trim() ?? "",
@@ -215,14 +261,17 @@ export function previewMonthlyWebsiteCsvRows(sourceRows: MonthlyWebsiteCsvRow[])
       overallHn1: csvInteger(source.overall_hole_in_ones),
       overallPoints: csvInteger(source.overall_points),
       sourceUrl: source.source_url?.trim() ?? "",
-    } satisfies Omit<MonthlyWebsiteObservation, "sourceFingerprint" | "issues" | "sourceRow">
+    } satisfies Omit<MonthlyWebsiteObservation, "sourceFingerprint" | "issues" | "sourceRow" | "periodStatus" | "importable" | "periodBlockReason">
     const issues: string[] = []
     if (!base.period || base.year === 0 || base.month === 0) issues.push("Period is missing or invalid.")
     if (!base.division) issues.push("Division is missing.")
     if (!base.historicalPlayerName.trim()) issues.push("Historical player name is missing.")
     if (!base.courseName) issues.push("Course name is missing.")
     if (base.score === null) issues.push("Score is missing from the authoritative rendered row.")
-    return { ...base, sourceRow: csvInteger(source.source_row) ?? index + 1, sourceFingerprint: fingerprint(base), issues }
+    const periodState = base.year > 0 && base.month > 0
+      ? classifyMonthlyPeriod(base.year, base.month, options.finalizedThrough)
+      : { periodStatus: "completed" as const, importable: false, periodBlockReason: null }
+    return { ...base, sourceRow: csvInteger(source.source_row) ?? index + 1, sourceFingerprint: fingerprint(base), issues, ...periodState }
   })
 
   const byPlayerPeriod = new Map<string, MonthlyWebsiteObservation[]>()

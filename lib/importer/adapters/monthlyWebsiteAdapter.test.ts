@@ -1,6 +1,6 @@
 import test from "node:test"
 import assert from "node:assert/strict"
-import { previewMonthlyWebsiteCsvRows, previewMonthlyWebsiteViews } from "./monthlyWebsiteAdapter.ts"
+import { classifyMonthlyPeriod, previewMonthlyWebsiteCsvRows, previewMonthlyWebsiteViews } from "./monthlyWebsiteAdapter.ts"
 
 const view = {
   period: "2026 August",
@@ -46,4 +46,24 @@ test("Monthly CSV adapter preserves the recovered source counts and blocks blank
   assert.equal(preview.summary.missingScoreRows, 1)
   assert.equal(preview.summary.negativeScores, 1)
   assert.equal(preview.summary.totalMismatches, 0)
+})
+
+test("Monthly adapter blocks the active period using a finalization cutoff", () => {
+  const preview = previewMonthlyWebsiteCsvRows([
+    { source_row: "1", period: "2026 July", year: "2026", month: "7", period_id: "441", division: "Elite", historical_player_name: "Finished", source_player_id: "1", course_name: "Course", difficulty: "easy", score: "-10", source_url: "https://example.test/monthly" },
+    { source_row: "2", period: "2026 August", year: "2026", month: "8", period_id: "461", division: "Elite", historical_player_name: "Current", source_player_id: "2", course_name: "Course", difficulty: "easy", score: "-11", source_url: "https://example.test/monthly" },
+    { source_row: "3", period: "2027 January", year: "2027", month: "1", period_id: "500", division: "Elite", historical_player_name: "Future", source_player_id: "3", course_name: "Course", difficulty: "easy", score: "-12", source_url: "https://example.test/monthly" },
+  ], { finalizedThrough: "2026 July" })
+  assert.equal(preview.rows[0].importable, true)
+  assert.equal(preview.rows[1].periodStatus, "current_incomplete")
+  assert.equal(preview.rows[1].importable, false)
+  assert.match(preview.rows[1].periodBlockReason ?? "", /CURRENT \/ INCOMPLETE \/ NOT IMPORTABLE/)
+  assert.equal(preview.rows[2].importable, false)
+  assert.equal(preview.summary.completedScoreRows, 1)
+  assert.equal(preview.summary.currentIncompleteScoreRows, 2)
+})
+
+test("Monthly period classification does not depend on a hard-coded month", () => {
+  assert.equal(classifyMonthlyPeriod(2026, 9, "2026 August").importable, false)
+  assert.equal(classifyMonthlyPeriod(2026, 9, "2026 September").importable, true)
 })
