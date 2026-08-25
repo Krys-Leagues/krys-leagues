@@ -32,6 +32,12 @@ const cards = [
     color: "bg-orange-600",
   },
   {
+    title: "Historical Pro",
+    description: "Review recovered Pro scorecards, Global Player identities, source conflicts, and opponent evidence.",
+    href: "/admin/import/pro",
+    color: "bg-cyan-700",
+  },
+  {
     title: "Trophies",
     description:
       "Import historical trophies and awards and connect them to player profiles.",
