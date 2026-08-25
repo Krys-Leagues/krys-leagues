@@ -1,5 +1,3 @@
-import { redirect } from "next/navigation"
+import PublicSingleRecordsPage from "@/components/records/PublicSingleRecordsPage"
 
-export default function LegacySingleRecordsRedirect() {
-  redirect("/records")
-}
+export default PublicSingleRecordsPage

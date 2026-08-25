@@ -6,11 +6,85 @@ import { PublicRecordsHero, PublicRecordsShell, publicRecordsStyles as styles } 
 import { canonicalPlayerName, type PublicCourse, type PublicSingleRecord } from "@/lib/all-time/public-records"
 
 type RankedSingleRecord = PublicSingleRecord & { rank: number | null }
+type CourseBoard = { course: PublicCourse; records: RankedSingleRecord[] }
 
 export default function PublicSingleRecordsPage() {
-  const [courses,setCourses]=useState<PublicCourse[]>([]), [courseId,setCourseId]=useState(""), [records,setRecords]=useState<RankedSingleRecord[]>([]), [loading,setLoading]=useState(true), [error,setError]=useState("")
-  useEffect(()=>{let cancelled=false;void (async()=>{try{const response=await fetch("/api/records/public?view=courses"),payload=await response.json() as {courses?:PublicCourse[];error?:string};if(!response.ok)throw new Error(payload.error);if(cancelled)return;const rows=payload.courses??[];setCourses(rows);setCourseId(rows[0]?.id??"");if(!rows.length)setLoading(false)}catch(caught){if(!cancelled){setError(caught instanceof Error?caught.message:"Courses could not be loaded.");setLoading(false)}}})();return()=>{cancelled=true}},[])
-  useEffect(()=>{if(!courseId)return;let cancelled=false;void (async()=>{setLoading(true);setError("");try{const response=await fetch(`/api/records/public?view=single&courseId=${encodeURIComponent(courseId)}`),payload=await response.json() as {records?:RankedSingleRecord[];error?:string};if(!response.ok)throw new Error(payload.error);if(!cancelled)setRecords(payload.records??[])}catch(caught){if(!cancelled){setError(caught instanceof Error?caught.message:"Records could not be loaded.");setRecords([])}}finally{if(!cancelled)setLoading(false)}})();return()=>{cancelled=true}},[courseId])
-  const course=courses.find(item=>item.id===courseId), ranked=records
-  return <PublicRecordsShell><nav className={styles.nav}><Link href="/records" className={styles.button}>Single Course</Link><Link href="/records/combined" className={styles.button}>Combined Map</Link></nav><PublicRecordsHero title="Single Course Records" description="Easy and Hard are independent courses. Lower scores lead, and ties share the same rank."/><section className={`${styles.glass} ${styles.pad}`}><div className={styles.toolbar}><div><h2 className={styles.heading}>Course leaderboard</h2><p className={styles.copy}>Select one active course.</p></div><label className={styles.selectWrap}>Course<select className={styles.select} value={courseId} onChange={event=>setCourseId(event.target.value)}>{courses.map(item=><option value={item.id} key={item.id}>{item.display_name} ({item.code})</option>)}</select></label></div>{course&&<><div className={styles.courseMeta}><div><h3 className={styles.heading}>{course.display_name}</h3><span className={course.difficulty==="Easy"?styles.easy:styles.hard}>{course.difficulty} · {ranked.length} records</span></div><span className={styles.badge}>{course.code}</span></div><div className={styles.list}>{ranked.map(record=>{const name=canonicalPlayerName(record);return <div className={styles.row} key={record.id}><div className={styles.rank}>#{record.rank}</div><div><Link className={styles.player} href={`/players/${record.player_id}`}>{name}</Link>{name!==record.historical_player_name&&<div className={styles.historical}>Historical source: {record.historical_player_name}</div>}</div><div className={`${styles.score} ${course.difficulty==="Easy"?styles.easy:styles.hard}`}>{record.score}</div></div>})}</div></>}{loading&&<div className={styles.empty}>Loading records…</div>}{!loading&&!error&&ranked.length===0&&<div className={styles.empty}>No records are available for this course yet.</div>}{error&&<div role="alert" className={styles.empty}>{error}</div>}</section></PublicRecordsShell>
+  const [boards, setBoards] = useState<CourseBoard[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
+
+  useEffect(() => {
+    let cancelled = false
+    void (async () => {
+      try {
+        const catalogResponse = await fetch("/api/records/public?view=courses")
+        const catalogPayload = await catalogResponse.json() as { courses?: PublicCourse[]; error?: string }
+        if (!catalogResponse.ok) throw new Error(catalogPayload.error)
+
+        const catalog = catalogPayload.courses ?? []
+        const loadedBoards = await Promise.all(catalog.map(async (course) => {
+          const response = await fetch(`/api/records/public?view=single&courseId=${encodeURIComponent(course.id)}`)
+          const payload = await response.json() as { records?: RankedSingleRecord[]; error?: string }
+          if (!response.ok) throw new Error(payload.error)
+          return { course, records: payload.records ?? [] }
+        }))
+
+        if (!cancelled) setBoards(loadedBoards)
+      } catch (caught) {
+        if (!cancelled) setError(caught instanceof Error ? caught.message : "Course records could not be loaded.")
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    })()
+    return () => { cancelled = true }
+  }, [])
+
+  const renderDifficulty = (difficulty: PublicCourse["difficulty"]) => (
+    <section className={`${styles.glass} ${styles.pad} ${styles.difficultyPanel}`} aria-labelledby={`${difficulty.toLowerCase()}-courses-heading`}>
+      <h2 id={`${difficulty.toLowerCase()}-courses-heading`} className={styles.difficultyTitle}>{difficulty} Courses</h2>
+      <div className={styles.courseBoards}>
+        {boards.filter(({ course }) => course.difficulty === difficulty).map(({ course, records }) => (
+          <section className={styles.courseBoard} key={course.id} aria-labelledby={`course-${course.id}`}>
+            <header className={styles.courseBoardHeader}>
+              <h3 id={`course-${course.id}`} className={styles.courseTitle}>{course.display_name}</h3>
+              <span className={styles.badge}>{records.length} records</span>
+            </header>
+            <div className={styles.courseRecordList}>
+              {records.map((record) => (
+                <div className={styles.courseRecordRow} key={record.id}>
+                  <span className={styles.courseRank}>#{record.rank}</span>
+                  <Link className={styles.coursePlayer} href={`/players/${record.player_id}`}>
+                    {canonicalPlayerName(record)}
+                  </Link>
+                  <span className={`${styles.courseScore} ${difficulty === "Easy" ? styles.easy : styles.hard}`}>
+                    {record.score}
+                  </span>
+                </div>
+              ))}
+              {!loading && records.length === 0 && <div className={styles.empty}>No records are available for this course yet.</div>}
+            </div>
+          </section>
+        ))}
+      </div>
+    </section>
+  )
+
+  return (
+    <PublicRecordsShell>
+      <nav className={styles.nav}>
+        <Link href="/records" className={styles.button}>← Course Records</Link>
+        <Link href="/records/combined" className={styles.button}>Combined Records</Link>
+      </nav>
+      <PublicRecordsHero
+        title="Single Course Records"
+        description="Easy and Hard are separate official course leaderboards. Lower scores lead, and ties share the same rank."
+      />
+      {error && <div role="alert" className={styles.empty}>{error}</div>}
+      {loading && <div className={styles.empty}>Loading course records…</div>}
+      <div className={styles.difficultyPanels}>
+        {renderDifficulty("Easy")}
+        {renderDifficulty("Hard")}
+      </div>
+    </PublicRecordsShell>
+  )
 }
