@@ -19,3 +19,10 @@ export function rankByCombinedTotal<T extends { combined_score: number }>(rows: 
   const ranks = denseRanks(sorted.map((row) => ({ score: row.combined_score })))
   return sorted.map((row, index) => ({ ...row, rank: ranks[index] }))
 }
+
+export function personalCombinedFallbackKey(rows: Array<{ key: string; rank: number | null }>) {
+  if (rows.some((row) => row.rank !== null && row.rank <= 3)) return null
+  return [...rows]
+    .filter((row) => row.rank !== null)
+    .sort((a, b) => (a.rank! - b.rank!) || a.key.localeCompare(b.key))[0]?.key ?? null
+}

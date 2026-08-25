@@ -2,7 +2,7 @@ import assert from "node:assert/strict"
 import { readFileSync } from "node:fs"
 import test from "node:test"
 
-import { rankByCombinedTotal, rankByScore } from "../../lib/all-time/public-records.ts"
+import { personalCombinedFallbackKey, rankByCombinedTotal, rankByScore } from "../../lib/all-time/public-records.ts"
 
 const read = (path: string) => readFileSync(path, "utf8")
 
@@ -40,16 +40,24 @@ test("Combined rank is dense-ranked from total and never imported rank", () => {
   assert.doesNotMatch(page, /source_rank|imported_rank/)
 })
 
+test("Personal Combined fallback is purple only without a podium finish", () => {
+  assert.equal(personalCombinedFallbackKey([{ key: "map-a", rank: 4 }, { key: "map-b", rank: 6 }]), "map-a")
+  assert.equal(personalCombinedFallbackKey([{ key: "map-a", rank: 4 }, { key: "map-b", rank: 2 }]), null)
+  assert.equal(personalCombinedFallbackKey([{ key: "map-a", rank: null }]), null)
+})
+
 test("active course filtering excludes SBE while retaining GLE and GLH", () => {
   const catalog = [{ code: "SBE", active: false }, { code: "GLE", active: true }, { code: "GLH", active: true }]
   assert.deepEqual(catalog.filter(course => course.active).map(course => course.code), ["GLE", "GLH"])
   assert.match(read("app/api/records/public/route.ts"), /\.eq\("active", true\)/)
 })
 
-test("Player Profile exposes all four showcase categories together without category controls", () => {
+test("Player Profile separates Easy/Hard from the paired Combined showcase", () => {
   const profile = read("components/records/PlayerCourseRecords.tsx"), styles = read("components/records/PublicRecordsUI.module.css"), api = read("app/api/records/public/route.ts")
-  assert.match(profile, /\["Easy", "Hard", "Combined Easy", "Combined Hard"\]/)
-  assert.match(profile, /Promise\.all\(CATEGORIES\.map/)
+  assert.match(profile, /\["Easy", "Hard"\]/)
+  assert.match(profile, /category=Combined/)
+  assert.match(profile, /profileCombinedRow/)
+  assert.match(profile, /personalCombinedFallbackKey/)
   assert.doesNotMatch(profile, /profileTabs|aria-pressed|setCategory|<button/)
   assert.match(styles, /width:min\(100%,900px\)/)
   assert.match(styles, /grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/)
@@ -60,7 +68,8 @@ test("Player Profile exposes all four showcase categories together without categ
   assert.match(styles, /\.profileScore\{color:#fff/)
   assert.match(styles, /grid-template-columns:35px minmax\(0,1fr\) auto/)
   assert.match(api, /rankByCombinedTotal/)
-  assert.match(api, /difficulty === "Easy" \? own\.easy_score : own\.hard_score/)
+  assert.match(api, /easyScore: own\.easy_score, hardScore: own\.hard_score, totalScore: own\.combined_score/)
+  assert.match(styles, /profileFallbackRank\{color:#c084fc\}/)
   assert.doesNotMatch(profile, /NOT LINKED|identity review|source_rank/i)
 })
 
@@ -70,7 +79,7 @@ test("Player Profile uses white numeric ranks without medals, podium colors, or 
   assert.match(profile, /`#\$\{rank\}`/)
   assert.doesNotMatch(profile, /profilePodium|bestCurrentRank|Best current rank|profileBestCurrent/)
   assert.doesNotMatch(styles, /profilePodium|profileBestCurrent|profileBestLabel|#fde68a|#e2e8f0|#fdba74|#a78bfa/)
-  assert.match(profile, /className=\{styles\.profileScore\}/)
+  assert.match(profile, /styles\.profileScore/)
 })
 
 test("the real player profile route renders the redesigned All-Time component", () => {
@@ -80,8 +89,19 @@ test("the real player profile route renders the redesigned All-Time component", 
   assert.match(route, /openProfileSection === "records" && <PlayerCourseRecords playerId=\{player\.id\} \/>/)
   assert.match(profile, />All-Time Records<\/h2>/)
   assert.match(profile, /CATEGORIES\.map\(\(category\) =>/)
-  for (const category of ["Easy", "Hard", "Combined Easy", "Combined Hard"]) assert.match(profile, new RegExp(`"${category}"`))
+  for (const category of ["Easy", "Hard"]) assert.match(profile, new RegExp(`"${category}"`))
+  assert.match(profile, /Combined leaderboard/)
   assert.doesNotMatch(profile, /All-Time individual and combined-map performances|profileTabs|aria-pressed|<button/)
   assert.match(profile, /<RankMark rank=\{row\.rank\} \/>/)
   assert.doesNotMatch(profile, /profileBestCurrent|Best current rank/)
+})
+
+test("KWT profile history is compact and does not expose unreliable rank or points", () => {
+  const profile = read("app/players/[id]/page.tsx")
+  const kwtStart = profile.indexOf("KWT Score History")
+  const kwtBlock = profile.slice(kwtStart, kwtStart + 1800)
+  assert.ok(kwtStart >= 0)
+  assert.doesNotMatch(kwtBlock, /Historical KWT Scores|Historical rank|history\.points|history\.historical_rank/)
+  assert.match(kwtBlock, /kwtEasyScore/)
+  assert.match(kwtBlock, /kwtHardScore/)
 })

@@ -46,11 +46,11 @@ export async function GET(request: Request) {
     }
     if (view === "profile") {
       const playerId = params.get("playerId"), category = params.get("category")
-      if (!playerId || !["Easy", "Combined Easy", "Hard", "Combined Hard"].includes(category || "")) return Response.json({ error: "Valid playerId and category are required." }, { status: 400 })
+      if (!playerId || !["Easy", "Hard", "Combined"].includes(category || "")) return Response.json({ error: "Valid playerId and category are required." }, { status: 400 })
       const { data: catalog, error: catalogError } = await catalogQuery().order("display_name")
       if (catalogError) throw catalogError
-      const courses = (catalog ?? []) as PublicCourse[], combined = category!.startsWith("Combined"), difficulty = category!.endsWith("Easy") ? "Easy" : "Hard"
-      const rows: Array<{ key: string; rank: number | null; course: string; score: number }> = []
+      const courses = (catalog ?? []) as PublicCourse[], combined = category === "Combined", difficulty = category === "Easy" ? "Easy" : "Hard"
+      const rows: Array<{ key: string; rank: number | null; course: string; score: number } | { key: string; rank: number | null; course: string; easyScore: number; hardScore: number; totalScore: number }> = []
       if (!combined) {
         const results = await Promise.all(courses.filter(course => course.difficulty === difficulty).map(async course => ({ course, result: await supabase.from("all_time_best_records").select("id, course_id, player_id, score, historical_player_name, player:players(screen_name)").eq("course_id", course.id) })))
         for (const { course, result } of results) { if (result.error) throw result.error; const own = rankByScore((result.data ?? []) as PublicSingleRecord[]).find(row => row.player_id === playerId); if (own) rows.push({ key: course.id, rank: own.rank, course: course.base_map, score: own.score }) }
@@ -62,7 +62,7 @@ export async function GET(request: Request) {
           const legacy = await supabase.from("combined_course_records").select("id, player_id, player_name, course_name, easy_score, hard_score, combined_score, player:players(screen_name)").eq("course_name", baseMap)
           return { baseMap, rows: legacy.data?.map(row => ({ id: row.id, base_map: row.course_name, player_id: row.player_id, easy_score: row.easy_score, hard_score: row.hard_score, combined_score: row.combined_score, historical_player_name: row.player_name, player: row.player })) as PublicCombinedRecord[] | undefined, error: legacy.error }
         }))
-        for (const { baseMap, rows: mapRows, error } of results) { if (error) throw error; const own = rankByCombinedTotal(mapRows ?? []).find(row => row.player_id === playerId); if (own) rows.push({ key: baseMap, rank: own.rank, course: baseMap, score: difficulty === "Easy" ? own.easy_score : own.hard_score }) }
+        for (const { baseMap, rows: mapRows, error } of results) { if (error) throw error; const own = rankByCombinedTotal(mapRows ?? []).find(row => row.player_id === playerId); if (own) rows.push({ key: baseMap, rank: own.rank, course: baseMap, easyScore: own.easy_score, hardScore: own.hard_score, totalScore: own.combined_score }) }
       }
       return Response.json({ rows: rows.sort((a, b) => (a.rank ?? 9999) - (b.rank ?? 9999) || a.course.localeCompare(b.course)) }, { headers: { "Cache-Control": "public, max-age=30, s-maxage=120" } })
     }
