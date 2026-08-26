@@ -41,6 +41,20 @@ export async function GET(request: Request) {
     )
   }
 
+  // A site admin is already authorized for every admin route. Do not make
+  // that decision depend on the optional Solo-admin RPC being available.
+  if (authorized) {
+    return Response.json(
+      {
+        authorized: true,
+        siteAdmin: true,
+        soloAdmin: false,
+        reason: null,
+      },
+      { status: 200, headers: { "Cache-Control": "no-store" } }
+    )
+  }
+
   const { data: soloAuthorized, error: soloAuthorizationError } = await supabase.rpc(
     "is_current_user_solo_admin"
   )

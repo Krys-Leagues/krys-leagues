@@ -50,3 +50,11 @@ test("the independently protected admin authorization endpoint remains reachable
   assert.ok(endpointExemption >= 0)
   assert.ok(genericApiGate > endpointExemption)
 })
+
+test("site-admin authorization does not depend on the Solo-admin RPC", async () => {
+  const endpoint = await readFile("app/api/auth/admin-authorization/route.ts", "utf8")
+  const siteAdminCheck = endpoint.indexOf("if (authorized)")
+  const soloRpc = endpoint.indexOf('"is_current_user_solo_admin"')
+  assert.ok(siteAdminCheck >= 0)
+  assert.ok(soloRpc > siteAdminCheck)
+})
