@@ -109,6 +109,103 @@
   color: #f8fafc;
 }
 
+.statsSummaryPanel,
+.statsSection {
+  margin-top: 14px;
+  padding: clamp(14px, 2vw, 22px);
+  border: 1px solid #ffffff24;
+  border-radius: 14px;
+  background: #02061726;
+}
+
+.statsSummaryNote {
+  margin: 0;
+  color: #cbd5e1;
+  line-height: 1.5;
+}
+
+.statsSummaryGrid,
+.statsGrid,
+.statsParticipationGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.statCard {
+  display: grid;
+  min-height: 68px;
+  align-content: center;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid #ffffff24;
+  border-radius: 12px;
+  background: #02061752;
+}
+
+.statCard span {
+  color: #cbd5e1;
+  font-size: .78rem;
+  font-weight: 800;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.statCard strong {
+  color: #f8fafc;
+  font-size: 1.35rem;
+}
+
+.statsSectionToggle {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #f8fafc;
+  font: inherit;
+  font-size: 1.15rem;
+  font-weight: 900;
+  text-align: left;
+  cursor: pointer;
+}
+
+.statsSectionToggle span:last-child {
+  color: #cbd5e1;
+  font-size: .8rem;
+  font-weight: 700;
+  text-align: right;
+}
+
+.statsSectionBody {
+  margin-top: 14px;
+  overflow-x: auto;
+}
+
+.kwtMapViewControl {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 18px 0 12px;
+  color: #e2e8f0;
+  font-weight: 800;
+}
+
+.kwtMapViewControl select {
+  min-width: min(100%, 260px);
+  padding: 8px 10px;
+  border: 1px solid #ffffff38;
+  border-radius: 8px;
+  background: #020617b8;
+  color: #f8fafc;
+  font: inherit;
+}
+
 .trophyCasePanel {
   border-color: #ffffff20;
   background: #02061714;
@@ -284,7 +381,7 @@
 .kwtHistoryTable td {
   padding: 7px 9px;
   border-bottom: 1px solid #334155;
-  text-align: left;
+  text-align: center;
   white-space: nowrap;
 }
 
@@ -293,10 +390,6 @@
   font-size: .72rem;
   letter-spacing: .08em;
   text-transform: uppercase;
-}
-
-.kwtHistoryTable td:nth-child(n + 3) {
-  text-align: right;
 }
 
 .kwtCourseCode {

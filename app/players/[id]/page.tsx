@@ -11,6 +11,7 @@ import { getCanonicalPlayerAvatar } from "@/lib/playerAvatars"
 import { DEFAULT_PLAYER_PROFILE_BACKGROUND_KEY, getPlayerProfileBackground } from "@/lib/playerProfileBackgrounds"
 import { profileBackgroundPublicUrl } from "@/lib/profileBackgrounds"
 import { DEFAULT_PROFILE_PRESENTATION, normalizeProfilePresentation, profilePresentationStyle } from "@/lib/playerProfilePresentation"
+import type { PublicCourse } from "@/lib/all-time/public-records"
 import styles from "./page.module.css"
 import TrophyMedia from "@/components/TrophyMedia"
 import PlayerCourseRecords from "@/components/records/PlayerCourseRecords"
@@ -131,6 +132,28 @@ type PypFixtureHistory = {
   outcome: "W" | "L" | "D"
 }
 
+type StatsSectionKey = "kwt" | "stroke" | "match" | "pyp" | "doubles" | "pro" | "solo" | "monthly"
+
+function average(values: number[]) {
+  return values.length > 0 ? values.reduce((total, value) => total + value, 0) / values.length : null
+}
+
+function formatAverage(value: number | null) {
+  return value === null ? "—" : value.toFixed(2)
+}
+
+function competitionKey(value: string | null) {
+  return (value || "other").trim().toLowerCase().replace(/[\s_]+/g, "-")
+}
+
+function competitionLabel(value: string) {
+  return value === "kwt" ? "KWT" : value === "pyp" ? "PYP" : value.split("-").map(part => part ? part[0].toUpperCase() + part.slice(1) : part).join(" ")
+}
+
+function mapNameForKwtCourse(courseCode: string | null, courseMap: Map<string, string>) {
+  return courseMap.get((courseCode || "").trim().toUpperCase()) || null
+}
+
 export default function PublicPlayerProfilePage() {
   const params = useParams()
   const router = useRouter()
@@ -162,6 +185,9 @@ export default function PublicPlayerProfilePage() {
   const [hasSession, setHasSession] = useState(false)
   const [canEditProfile, setCanEditProfile] = useState(false)
   const [openProfileSection, setOpenProfileSection] = useState<"records" | "stats" | "aliases" | "trophies" | null>(null)
+  const [openStatsSection, setOpenStatsSection] = useState<StatsSectionKey | null>(null)
+  const [kwtMapFilter, setKwtMapFilter] = useState("")
+  const [kwtCourseCatalog, setKwtCourseCatalog] = useState<Array<Pick<PublicCourse, "code" | "base_map">>>([])
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/immutability
@@ -226,6 +252,7 @@ export default function PublicPlayerProfilePage() {
       pypHistoryResponse,
       pypFixtureHistoryResponse,
       kwtHistoryResponse,
+      kwtCourseCatalogResponse,
       avatarResponse,
       preferencesResponse,
       sessionResponse,
@@ -270,6 +297,13 @@ export default function PublicPlayerProfilePage() {
       supabase.rpc("get_public_player_kwt_history", {
         p_player_id: canonicalId,
       }),
+      fetch("/api/records/public?view=courses")
+        .then(async response => {
+          if (!response.ok) return []
+          const payload = await response.json() as { courses?: Array<Pick<PublicCourse, "code" | "base_map">> }
+          return payload.courses || []
+        })
+        .catch(() => []),
       getCanonicalPlayerAvatar(playerId).catch(() => ({ canonicalPlayerId: playerId, avatarPath: null })),
       supabase.rpc("get_public_player_profile_preferences_v6", { p_player_id: canonicalId }),
       supabase.auth.getSession(),
@@ -325,6 +359,7 @@ export default function PublicPlayerProfilePage() {
       setPypHistoryError(`PYP fixture history could not be loaded: ${pypFixtureHistoryResponse.error.message}`)
     }
     setKwtHistory((kwtHistoryResponse.data || []) as KwtHistory[])
+    setKwtCourseCatalog(kwtCourseCatalogResponse)
     if (kwtHistoryResponse.error) {
       setKwtHistoryError(`KWT history could not be loaded: ${kwtHistoryResponse.error.message}`)
     }
@@ -354,6 +389,41 @@ export default function PublicPlayerProfilePage() {
       },
     })
   }
+
+  const orderedKwtHistory = [...kwtHistory].sort((left, right) => left.season_number - right.season_number || left.week_number - right.week_number)
+  const kwtCourseMap = new Map(kwtCourseCatalog.map(course => [course.code.trim().toUpperCase(), course.base_map]))
+  const kwtMapOptions = Array.from(new Set(orderedKwtHistory.flatMap(history => [
+    mapNameForKwtCourse(history.easy_course_code, kwtCourseMap),
+    mapNameForKwtCourse(history.hard_course_code, kwtCourseMap),
+  ]).filter((map): map is string => Boolean(map)))).sort((left, right) => left.localeCompare(right))
+  const filteredKwtHistory = kwtMapFilter
+    ? orderedKwtHistory.filter(history => mapNameForKwtCourse(history.easy_course_code, kwtCourseMap) === kwtMapFilter || mapNameForKwtCourse(history.hard_course_code, kwtCourseMap) === kwtMapFilter)
+    : orderedKwtHistory
+  const kwtEasyScores = orderedKwtHistory.map(history => history.easy_score)
+  const kwtHardScores = orderedKwtHistory.map(history => history.hard_score)
+  const kwtCombinedScores = orderedKwtHistory.map(history => history.total_score)
+  const kwtPlacements = orderedKwtHistory.map(history => history.placement).filter((placement): placement is number => placement !== null)
+  const membershipTypes = Array.from(new Set(memberships.map(membership => competitionKey(membership.league_type))))
+  const simpleCompetitionTypes = ["doubles", "pro", "solo", "monthly"].filter(type => membershipTypes.includes(type))
+  const hasStrokeSection = strokeHistory.length > 0 || Boolean(strokeHistoryError) || membershipTypes.includes("stroke")
+  const hasMatchSection = matchHistory.length > 0 || Boolean(matchHistoryError) || membershipTypes.includes("match")
+  const hasPypSection = pypHistory.length > 0 || Boolean(pypHistoryError) || membershipTypes.includes("pyp")
+  const careerRecordKeys = new Set([
+    ...memberships.map(membership => `${competitionKey(membership.league_type)}:${membership.season_number ?? "unknown"}`),
+    ...strokeHistory.map(history => `stroke:${history.season_number}`),
+    ...matchHistory.map(history => `match:${history.season_number}`),
+    ...pypHistory.map(history => `pyp:${history.season_number}`),
+    ...orderedKwtHistory.map(history => `kwt:${history.season_number}:${history.week_number}`),
+  ])
+  const recordedWins = strokeHistory.reduce((total, history) => total + history.wins, 0)
+    + matchHistory.reduce((total, history) => total + history.wins, 0)
+    + pypHistory.reduce((total, history) => total + history.wins, 0)
+  const matchWins = matchHistory.reduce((total, history) => total + history.wins, 0)
+  const matchLosses = matchHistory.reduce((total, history) => total + history.losses, 0)
+  const matchDraws = matchHistory.reduce((total, history) => total + history.ties, 0)
+  const matchPlayed = matchWins + matchLosses + matchDraws
+  const matchWinPercentage = matchPlayed > 0 ? matchWins / matchPlayed * 100 : null
+  const careerSectionCount = [orderedKwtHistory.length > 0, hasStrokeSection, hasMatchSection, hasPypSection, simpleCompetitionTypes.length > 0].filter(Boolean).length
 
   const hasCareerParticipation = memberships.length > 0 || results.length > 0 ||
     strokeHistory.length > 0 || matchHistory.length > 0 || pypHistory.length > 0 ||
@@ -461,163 +531,94 @@ export default function PublicPlayerProfilePage() {
         {openProfileSection === "records" && <PlayerCourseRecords playerId={player.id} />}
 
         {openProfileSection === "stats" && hasCareerParticipation && <section className={styles.profileSectionPanel} id="player-stats-panel" aria-label="Player Stats">
-          <p className={styles.sectionDescription}>Career statistics and performance overview</p>
-        {memberships.length > 0 && <section style={card}>
-          <h2 style={sectionTitle}>League History</h2>
+          <p className={styles.sectionDescription}>Overall career summary with separate, expandable competition statistics</p>
 
-            <div style={grid}>
-              {memberships.map((membership) => (
-                <div key={membership.id} style={miniCard}>
-                  <strong>
-                    {membership.league_type || "League"}
-                  </strong>
-
-                  <span>
-                    {membership.division || "No division"}
-                  </span>
-
-                  <span style={muted}>
-                    Season {membership.season_number ?? "?"}
-                  </span>
-                </div>
-              ))}
+          <section className={styles.statsSummaryPanel} aria-label="Overall Career Summary">
+            <h2 style={sectionTitle}>Overall Career Summary</h2>
+            <p className={styles.statsSummaryNote}>Cross-competition score averages are intentionally not combined because each format uses different scoring rules.</p>
+            <div className={styles.statsSummaryGrid}>
+              <CareerStat label="Competition sections" value={careerSectionCount} />
+              <CareerStat label="Verified seasons / events" value={careerRecordKeys.size} />
+              <CareerStat label="Recorded wins" value={recordedWins} />
+              <CareerStat label="Trophies & awards" value={trophies.length} />
             </div>
-        </section>}
+          </section>
 
-        {(strokeHistory.length > 0 || strokeHistoryError) && <section style={card}>
-          <h2 style={sectionTitle}>Stroke Season History</h2>
+          <div className={styles.statsSectionList}>
+            {(orderedKwtHistory.length > 0 || kwtHistoryError) && <section className={styles.statsSection}>
+              <button type="button" className={styles.statsSectionToggle} aria-expanded={openStatsSection === "kwt"} onClick={() => setOpenStatsSection(current => current === "kwt" ? null : "kwt")}>
+                <span>KWT</span><span>{orderedKwtHistory.length ? `${orderedKwtHistory.length} events / weeks` : "Unavailable"}</span>
+              </button>
+              {openStatsSection === "kwt" && <div className={styles.statsSectionBody}>
+                {kwtHistoryError ? <p style={historyError}>{kwtHistoryError}</p> : <>
+                  <h3 style={sectionTitle}>KWT Score History</h3>
+                  <div className={styles.statsGrid}>
+                    <CareerStat label="Events / weeks played" value={orderedKwtHistory.length} />
+                    <CareerStat label="Average Easy" value={formatAverage(average(kwtEasyScores))} />
+                    <CareerStat label="Average Hard" value={formatAverage(average(kwtHardScores))} />
+                    <CareerStat label="Average Combined" value={formatAverage(average(kwtCombinedScores))} />
+                    <CareerStat label="Best Easy" value={kwtEasyScores.length ? Math.min(...kwtEasyScores) : "—"} />
+                    <CareerStat label="Best Hard" value={kwtHardScores.length ? Math.min(...kwtHardScores) : "—"} />
+                    <CareerStat label="Best Combined" value={kwtCombinedScores.length ? Math.min(...kwtCombinedScores) : "—"} />
+                    <CareerStat label="Average placement" value={formatAverage(average(kwtPlacements))} />
+                    <CareerStat label="Best placement" value={kwtPlacements.length ? Math.min(...kwtPlacements) : "—"} />
+                  </div>
+                  <div className={styles.kwtMapViewControl}>
+                    <label htmlFor="kwt-map-filter">View KWT results by map</label>
+                    <select id="kwt-map-filter" value={kwtMapFilter} onChange={event => setKwtMapFilter(event.target.value)}>
+                      <option value="">All maps · chronological</option>
+                      {kwtMapOptions.map(map => <option key={map} value={map}>{map}</option>)}
+                    </select>
+                  </div>
+                  <div className={styles.kwtHistoryTableWrap}>
+                    <table className={styles.kwtHistoryTable}>
+                      <thead><tr><th>Season</th><th>Week</th><th>Easy</th><th>Hard</th><th>Total</th><th>Place</th></tr></thead>
+                      <tbody>{filteredKwtHistory.map(history => <tr key={`${history.season_number}-${history.week_number}-${history.easy_course_code}-${history.hard_course_code}`}>
+                        <td>{history.season_number}</td><td>{history.week_number}</td>
+                        <td><span className={styles.kwtCourseCode}>{history.easy_course_code}</span><strong className={styles.kwtEasyScore}>{history.easy_score}</strong></td>
+                        <td><span className={styles.kwtCourseCode}>{history.hard_course_code}</span><strong className={styles.kwtHardScore}>{history.hard_score}</strong></td>
+                        <td><strong>{history.total_score}</strong></td><td>{history.placement ?? "—"}</td>
+                      </tr>)}</tbody>
+                    </table>
+                  </div>
+                </>}
+              </div>}
+            </section>}
 
-          {strokeHistoryError ? (
-            <p style={historyError}>{strokeHistoryError}</p>
-          ) : (
-            <div style={tableWrap}>
-              <table style={table}>
-                <thead>
-                  <tr>
-                    <th style={th}>Season</th>
-                    <th style={th}>Division</th>
-                    <th style={th}>Final Rank</th>
-                    <th style={th}>Points</th>
-                    <th style={th}>Wins</th>
-                    <th style={th}>Losses</th>
-                    <th style={th}>Ties</th>
-                    <th style={th}>Strokes</th>
-                    <th style={th}>Completed Games</th>
-                  </tr>
-                </thead>
+            {hasStrokeSection && <section className={styles.statsSection}>
+              <button type="button" className={styles.statsSectionToggle} aria-expanded={openStatsSection === "stroke"} onClick={() => setOpenStatsSection(current => current === "stroke" ? null : "stroke")}>
+                <span>Stroke</span><span>{strokeHistory.length ? `${strokeHistory.length} season records` : "Participation recorded"}</span>
+              </button>
+              {openStatsSection === "stroke" && <div className={styles.statsSectionBody}>
+                {strokeHistoryError ? <p style={historyError}>{strokeHistoryError}</p> : strokeHistory.length ? <div style={tableWrap}><table style={table}><thead><tr><th style={th}>Season</th><th style={th}>Division</th><th style={th}>Final Rank</th><th style={th}>Points</th><th style={th}>Wins</th><th style={th}>Losses</th><th style={th}>Ties</th><th style={th}>Strokes</th><th style={th}>Completed Games</th></tr></thead><tbody>{strokeHistory.map(history => <tr key={history.season_id}><td style={td}>{history.season_number}</td><td style={td}>Stroke D{history.division_number}</td><td style={td}>{history.division_rank}</td><td style={td}>{history.points}</td><td style={td}>{history.wins}</td><td style={td}>{history.losses}</td><td style={td}>{history.ties}</td><td style={td}>{history.strokes}</td><td style={td}>{history.completed_game_count}</td></tr>)}</tbody></table></div> : <ParticipationRows memberships={memberships} type="stroke" />}
+              </div>}
+            </section>}
 
-                <tbody>
-                  {strokeHistory.map((history) => (
-                    <tr key={history.season_id}>
-                      <td style={td}>{history.season_number}</td>
-                      <td style={td}>Stroke D{history.division_number}</td>
-                      <td style={td}>{history.division_rank}</td>
-                      <td style={td}>{history.points}</td>
-                      <td style={td}>{history.wins}</td>
-                      <td style={td}>{history.losses}</td>
-                      <td style={td}>{history.ties}</td>
-                      <td style={td}>{history.strokes}</td>
-                      <td style={td}>{history.completed_game_count}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </section>}
+            {hasMatchSection && <section className={styles.statsSection}>
+              <button type="button" className={styles.statsSectionToggle} aria-expanded={openStatsSection === "match"} onClick={() => setOpenStatsSection(current => current === "match" ? null : "match")}>
+                <span>Match</span><span>{matchHistory.length ? `${matchHistory.length} season records` : "Participation recorded"}</span>
+              </button>
+              {openStatsSection === "match" && <div className={styles.statsSectionBody}>
+                {matchHistoryError ? <p style={historyError}>{matchHistoryError}</p> : matchHistory.length ? <><div className={styles.statsGrid}><CareerStat label="Matches played" value={matchHistory.reduce((total, history) => total + history.completed_game_count, 0)} /><CareerStat label="Wins" value={matchWins} /><CareerStat label="Losses" value={matchLosses} /><CareerStat label="Draws" value={matchDraws} /><CareerStat label="Win percentage" value={formatAverage(matchWinPercentage)} /><CareerStat label="Holes won" value={matchHistory.reduce((total, history) => total + history.holes_won, 0)} /></div><div style={tableWrap}><table style={table}><thead><tr><th style={th}>Season</th><th style={th}>Division</th><th style={th}>Final Rank</th><th style={th}>Played</th><th style={th}>Wins</th><th style={th}>Draws</th><th style={th}>Losses</th><th style={th}>Points</th><th style={th}>Holes Won</th></tr></thead><tbody>{matchHistory.map(history => <tr key={history.season_id}><td style={td}>{history.season_number}</td><td style={td}>Match D{history.division_number}</td><td style={td}>{history.division_rank}</td><td style={td}>{history.completed_game_count}</td><td style={td}>{history.wins}</td><td style={td}>{history.ties}</td><td style={td}>{history.losses}</td><td style={td}>{history.points}</td><td style={td}>{history.holes_won}</td></tr>)}</tbody></table></div></> : <ParticipationRows memberships={memberships} type="match" />}
+              </div>}
+            </section>}
 
-        {(matchHistory.length > 0 || matchHistoryError) && <section style={card}>
-          <h2 style={sectionTitle}>Match Season History</h2>
+            {hasPypSection && <section className={styles.statsSection}>
+              <button type="button" className={styles.statsSectionToggle} aria-expanded={openStatsSection === "pyp"} onClick={() => setOpenStatsSection(current => current === "pyp" ? null : "pyp")}>
+                <span>PYP</span><span>{pypHistory.length ? `${pypHistory.length} season records` : "Participation recorded"}</span>
+              </button>
+              {openStatsSection === "pyp" && <div className={styles.statsSectionBody}>
+                {pypHistoryError ? <p style={historyError}>{pypHistoryError}</p> : pypHistory.length ? <><div className={styles.statsGrid}><CareerStat label="Seasons played" value={pypHistory.length} /><CareerStat label="Wins" value={pypHistory.reduce((total, history) => total + history.wins, 0)} /><CareerStat label="Losses" value={pypHistory.reduce((total, history) => total + history.losses, 0)} /><CareerStat label="Draws" value={pypHistory.reduce((total, history) => total + history.ties, 0)} /><CareerStat label="Holes won" value={pypHistory.reduce((total, history) => total + history.holes_won, 0)} /></div><div style={tableWrap}><table style={table}><thead><tr><th style={th}>Season</th><th style={th}>Division</th><th style={th}>Final Rank</th><th style={th}>Played</th><th style={th}>Wins</th><th style={th}>Draws</th><th style={th}>Losses</th><th style={th}>Points</th><th style={th}>Holes Won</th></tr></thead><tbody>{pypHistory.map(history => <tr key={history.season_id}><td style={td}>{history.season_number}</td><td style={td}>PYP D{history.division_number}</td><td style={td}>{history.division_rank}</td><td style={td}>{history.completed_game_count}</td><td style={td}>{history.wins}</td><td style={td}>{history.ties}</td><td style={td}>{history.losses}</td><td style={td}>{history.points}</td><td style={td}>{history.holes_won}</td></tr>)}</tbody></table></div>{pypHistory.map(history => { const fixtures = pypFixtureHistory.filter(fixture => fixture.season_id === history.season_id); return fixtures.length ? <details key={`fixtures-${history.season_id}`} style={historyDetails}><summary>Season {history.season_number} fixture details</summary>{fixtures.map(fixture => <p key={`${fixture.season_id}-${fixture.game_number}`} style={muted}>Round {fixture.game_number} · {fixture.player_role.toUpperCase()} vs {fixture.opponent_screen_name} · {fixture.course1_name}{fixture.course1_difficulty ? ` (${fixture.course1_difficulty})` : ""}: {fixture.player_screen_name} {fixture.course1_player_hw} – {fixture.opponent_screen_name} {fixture.course1_opponent_hw} · {fixture.course2_name}{fixture.course2_difficulty ? ` (${fixture.course2_difficulty})` : ""}: {fixture.player_screen_name} {fixture.course2_player_hw} – {fixture.opponent_screen_name} {fixture.course2_opponent_hw} · Combined {fixture.player_total_hw}–{fixture.opponent_total_hw} · {fixture.outcome}</p>)}</details> : null })}</> : <ParticipationRows memberships={memberships} type="pyp" />}
+              </div>}
+            </section>}
 
-          {matchHistoryError ? (
-            <p style={historyError}>{matchHistoryError}</p>
-          ) : (
-            <div style={tableWrap}>
-              <table style={table}>
-                <thead>
-                  <tr>
-                    <th style={th}>Season</th><th style={th}>Division</th><th style={th}>Final Rank</th>
-                    <th style={th}>Played</th><th style={th}>Wins</th><th style={th}>Draws</th>
-                    <th style={th}>Losses</th><th style={th}>Points</th><th style={th}>HW</th>
-                    <th style={th}>Completed Games</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {matchHistory.map((history) => (
-                    <tr key={history.season_id}>
-                      <td style={td}>{history.season_number}</td><td style={td}>Match D{history.division_number}</td>
-                      <td style={td}>{history.division_rank}</td><td style={td}>{history.completed_game_count}</td>
-                      <td style={td}>{history.wins}</td><td style={td}>{history.ties}</td><td style={td}>{history.losses}</td>
-                      <td style={td}>{history.points}</td><td style={td}>{history.holes_won}</td>
-                      <td style={td}>{history.completed_game_count}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </section>}
-
-        {(pypHistory.length > 0 || pypHistoryError) && <section style={card}>
-          <h2 style={sectionTitle}>PYP Season History</h2>
-
-          {pypHistoryError ? (
-            <p style={historyError}>{pypHistoryError}</p>
-          ) : (
-            <div style={tableWrap}>
-              <table style={table}>
-                <thead>
-                  <tr>
-                    <th style={th}>Season</th><th style={th}>Division</th><th style={th}>Final Rank</th>
-                    <th style={th}>Played</th><th style={th}>Wins</th><th style={th}>Draws</th>
-                    <th style={th}>Losses</th><th style={th}>Points</th><th style={th}>Holes Won</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pypHistory.map((history) => (
-                    <tr key={history.season_id}>
-                      <td style={td}>{history.season_number}</td><td style={td}>PYP D{history.division_number}</td>
-                      <td style={td}>{history.division_rank}</td><td style={td}>{history.completed_game_count}</td>
-                      <td style={td}>{history.wins}</td><td style={td}>{history.ties}</td><td style={td}>{history.losses}</td>
-                      <td style={td}>{history.points}</td><td style={td}>{history.holes_won}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {pypHistory.map((history) => {
-                const fixtures = pypFixtureHistory.filter((fixture) => fixture.season_id === history.season_id)
-                if (fixtures.length === 0) return null
-                return <details key={`fixtures-${history.season_id}`} style={historyDetails}>
-                  <summary>Season {history.season_number} fixture details</summary>
-                  {fixtures.map((fixture) => <p key={`${fixture.season_id}-${fixture.game_number}`} style={muted}>
-                    Round {fixture.game_number} · {fixture.player_role.toUpperCase()} vs {fixture.opponent_screen_name} · {fixture.course1_name}{fixture.course1_difficulty ? ` (${fixture.course1_difficulty})` : ""}: {fixture.player_screen_name} {fixture.course1_player_hw} – {fixture.opponent_screen_name} {fixture.course1_opponent_hw} · {fixture.course2_name}{fixture.course2_difficulty ? ` (${fixture.course2_difficulty})` : ""}: {fixture.player_screen_name} {fixture.course2_player_hw} – {fixture.opponent_screen_name} {fixture.course2_opponent_hw} · Combined {fixture.player_total_hw}–{fixture.opponent_total_hw} · {fixture.outcome}
-                  </p>)}
-                </details>
-              })}
-            </div>
-          )}
-        </section>}
-
-        {(kwtHistory.length > 0 || kwtHistoryError) && <section style={card}>
-          <h2 style={sectionTitle}>KWT Score History</h2>
-          {kwtHistoryError ? (
-            <p style={historyError}>{kwtHistoryError}</p>
-          ) : (
-            <div className={styles.kwtHistoryTableWrap}>
-              <table className={styles.kwtHistoryTable}>
-                <thead><tr>
-                  <th>Season</th><th>Week</th><th>Easy</th><th>Hard</th><th>Total</th><th>Place</th>
-                </tr></thead>
-                <tbody>{kwtHistory.map((history) => <tr key={`${history.season_number}-${history.week_number}-${history.easy_course_code}-${history.hard_course_code}`}>
-                  <td>{history.season_number}</td><td>{history.week_number}</td>
-                  <td><span className={styles.kwtCourseCode}>{history.easy_course_code}</span><strong className={styles.kwtEasyScore}>{history.easy_score}</strong></td>
-                  <td><span className={styles.kwtCourseCode}>{history.hard_course_code}</span><strong className={styles.kwtHardScore}>{history.hard_score}</strong></td>
-                  <td><strong>{history.total_score}</strong></td><td>{history.placement ?? "—"}</td>
-                </tr>)}</tbody>
-              </table>
-            </div>
-          )}
-        </section>}
+            {simpleCompetitionTypes.map(type => <section className={styles.statsSection} key={type}>
+              <button type="button" className={styles.statsSectionToggle} aria-expanded={openStatsSection === type} onClick={() => setOpenStatsSection(current => current === type ? null : type as StatsSectionKey)}>
+                <span>{competitionLabel(type)}</span><span>Participation recorded</span>
+              </button>
+              {openStatsSection === type && <div className={styles.statsSectionBody}><p style={muted}>Only authoritative participation records are available for this competition in the public profile reader. Detailed score history is not fabricated here.</p><ParticipationRows memberships={memberships} type={type} /></div>}
+            </section>)}
+          </div>
         </section>}
 
         {openProfileSection === "aliases" && knownAliases.length > 0 && <section className={styles.profileSectionPanel} id="names-known-as-panel" aria-label="Names / Known As">
@@ -662,6 +663,17 @@ export default function PublicPlayerProfilePage() {
   )
 }
 
+function CareerStat({ label, value }: { label: string; value: string | number }) {
+  return <div className={styles.statCard}><span>{label}</span><strong>{value}</strong></div>
+}
+
+function ParticipationRows({ memberships, type }: { memberships: Membership[]; type: string }) {
+  const rows = memberships.filter(membership => competitionKey(membership.league_type) === type)
+  return rows.length > 0
+    ? <div className={styles.statsParticipationGrid}>{rows.map(membership => <div key={membership.id} className={styles.statCard}><strong>{membership.division || "Division not listed"}</strong><span>Season {membership.season_number ?? "?"}</span></div>)}</div>
+    : <p style={muted}>No detailed {competitionLabel(type)} history is available for this profile.</p>
+}
+
 const page: React.CSSProperties = {
   minHeight: "100vh",
   background:
@@ -692,32 +704,8 @@ const backButton: React.CSSProperties = {
   backdropFilter: "blur(7px)",
 }
 
-const card: React.CSSProperties = {
-  padding: 24,
-  background: "#0f172aa6",
-  border: "1px solid #334155",
-  borderRadius: 18,
-  marginBottom: 20,
-}
-
 const sectionTitle: React.CSSProperties = {
   marginTop: 0,
-}
-
-const grid: React.CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-  gap: 14,
-}
-
-const miniCard: React.CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  gap: 8,
-  padding: 16,
-  background: "#020617b8",
-  border: "1px solid #334155",
-  borderRadius: 12,
 }
 
 const trophyTitle: React.CSSProperties = {
