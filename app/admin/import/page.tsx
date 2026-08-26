@@ -38,6 +38,12 @@ const cards = [
     color: "bg-cyan-700",
   },
   {
+    title: "Historical Stroke V2",
+    description: "Review preserved era-aware Stroke Seasons 1–61 evidence and Global Player identities.",
+    href: "/admin/import/stroke-v2",
+    color: "bg-emerald-700",
+  },
+  {
     title: "Trophies",
     description:
       "Import historical trophies and awards and connect them to player profiles.",

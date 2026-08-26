@@ -14,9 +14,10 @@ type Props = {
   onCancel: () => void
   selectLabel?: string
   usePageScroll?: boolean
+  allowedPlayerIds?: string[]
 }
 
-export default function ExistingPlayerPicker({ historicalDisplayName, onSelect, onCancel, selectLabel = "Link this player", usePageScroll = false }: Props) {
+export default function ExistingPlayerPicker({ historicalDisplayName, onSelect, onCancel, selectLabel = "Link this player", usePageScroll = false, allowedPlayerIds }: Props) {
   const [query, setQuery] = useState("")
   const [players, setPlayers] = useState<PlayerRecord[]>([])
   const [aliases, setAliases] = useState<PlayerIdentityAlias[]>([])
@@ -40,7 +41,10 @@ export default function ExistingPlayerPicker({ historicalDisplayName, onSelect, 
     return () => { cancelled = true }
   }, [])
 
-  const results = useMemo(() => searchExistingPlayers(players, aliases, query), [aliases, players, query])
+  const results = useMemo(() => {
+    const allowed = allowedPlayerIds ? new Set(allowedPlayerIds) : null
+    return searchExistingPlayers(players, aliases, query).filter((player) => !allowed || allowed.has(player.id))
+  }, [aliases, allowedPlayerIds, players, query])
 
   return <div role="dialog" aria-label={`Find existing player for ${historicalDisplayName}`} className="mt-3 rounded-lg border border-blue-700 bg-zinc-950 p-4">
     <div className="font-bold text-blue-200">Find / Link Existing Player</div>
