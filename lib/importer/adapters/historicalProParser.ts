@@ -228,6 +228,25 @@ function parseCsv<T extends Record<string, string | undefined>>(value: string) {
   return parsed.data
 }
 
+function scoreEntryIsBlankOrDash(value: string) {
+  const fields = value.split(";").map((field) => field.trim()).filter(Boolean)
+  if (fields.length < 2) return false
+  return fields.every((field) => {
+    const separator = field.indexOf("=")
+    if (separator < 0) return false
+    const score = field.slice(separator + 1).trim()
+    return score === "" || score === "-"
+  })
+}
+
+function normalizePairingState(row: PairingCsvRow) {
+  const sourceState = row.pairing_state ?? ""
+  if (sourceState === "PARTIAL — NEEDS REVIEW" && scoreEntryIsBlankOrDash(row.player_a_score_entry_text ?? "") && scoreEntryIsBlankOrDash(row.player_b_score_entry_text ?? "")) {
+    return "SOURCE COLOR CONFIRMED — SCHEDULED / UNPLAYED"
+  }
+  return sourceState
+}
+
 function parseSeasonPairings(value: string) {
   if (!value.trim()) return []
   return parseCsv<PairingCsvRow>(value).flatMap((row): HistoricalProSeasonPairing[] => {
@@ -251,7 +270,7 @@ function parseSeasonPairings(value: string) {
       playerBScoreEntryText: row.player_b_score_entry_text ?? "",
       effectiveTextColor: row.effective_text_color ?? "",
       userEnteredTextColor: row.user_entered_text_color ?? "",
-      pairingState: row.pairing_state ?? "",
+      pairingState: normalizePairingState(row),
       evidenceType: row.evidence_type ?? "",
       sourceWorkbook: row.source_workbook ?? "",
       sourceTab: row.source_tab ?? "",

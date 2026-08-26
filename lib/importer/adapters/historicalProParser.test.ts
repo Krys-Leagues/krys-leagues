@@ -52,12 +52,39 @@ test("Season identity scope includes only completed Seasons 1-12 and preserves p
   assert.equal(preview.seasonHistoricalNames.length, 34)
   assert.equal(preview.pairingSummary.sourceColorConfirmed, 327)
   assert.equal(preview.pairingSummary.played, 240)
-  assert.equal(preview.pairingSummary.scheduledUnplayed, 0)
-  assert.equal(preview.pairingSummary.partialScoreReview, 87)
+  assert.equal(preview.pairingSummary.scheduledUnplayed, 86)
+  assert.equal(preview.pairingSummary.partialScoreReview, 1)
   assert.equal(preview.pairingSummary.manualReview, 15)
   assert.equal(preview.pairingSummary.evidenceArtifactPresent, true)
   assert.equal(preview.seasonHistoricalNames.includes("SARAHLYNN727"), true)
   assert.equal(preview.seasonHistoricalNames.includes("BYE"), false)
+})
+
+test("blank or dash-only paired score cells are scheduled, while a one-sided score remains partial", () => {
+  const preview = evidence()
+  const scheduled = preview.seasonPairings.filter((pairing) => pairing.pairingState === "SOURCE COLOR CONFIRMED — SCHEDULED / UNPLAYED")
+  const partial = preview.seasonPairings.filter((pairing) => pairing.pairingState === "PARTIAL — NEEDS REVIEW")
+  assert.equal(scheduled.length, 86)
+  assert.equal(partial.length, 1)
+  assert.equal(partial[0].seasonNumber, 6)
+  assert.match(partial[0].playerAScoreEntryText + partial[0].playerBScoreEntryText, /Easy=-14; Hard=-3/)
+})
+
+test("numeric zero remains score evidence rather than an unplayed marker", () => {
+  const preview = parseHistoricalProRecovery(
+    "period_type,period_number,period_label,division,historical_player_name,game_number,map_course_code,easy_score,hard_score,combined_total,p,w,l,d,pts,strokes,published_rank,source_era,source_workbook,source_tab,source_page,source_row,source_cells,source_url,raw_source_data,review_status\n",
+    "period_type,period_number,period_label,status,source_workbook,source_tab,notes\n",
+    "conflict_key,period,division,historical_player_name,game_number,review_status\n",
+    "period_type,period_number,period_label,status,notes\n",
+    null,
+    null,
+    [
+      "period_type,season_number,division,game_number,player_a_exact_name,player_b_exact_name,player_a_source_row,player_b_source_row,player_a_source_cells,player_b_source_cells,player_a_score_entry_text,player_b_score_entry_text,effective_text_color,user_entered_text_color,pairing_state,evidence_type,source_workbook,source_tab,source_tab_id,source_range,source_url,provenance",
+      "season,1,Division 1,1,ALPHA,BETA,4,5,I4:J4,I5:J5,Easy=0; Hard=0,Easy=0; Hard=0,{},{},PARTIAL — NEEDS REVIEW,SOURCE COLOR CONFIRMED,BOOK,TAB,1,B4:Z4; B5:Z5,https://example.test,source",
+    ].join("\n"),
+  )
+  assert.equal(preview.pairingSummary.scheduledUnplayed, 0)
+  assert.equal(preview.pairingSummary.partialScoreReview, 1)
 })
 
 test("Historical Pro score text keeps signs and blocks incomplete scorecards", () => {
