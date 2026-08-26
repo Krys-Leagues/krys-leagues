@@ -53,21 +53,24 @@ test("Season identity scope includes only completed Seasons 1-12 and preserves p
   assert.equal(preview.pairingSummary.sourceColorConfirmed, 327)
   assert.equal(preview.pairingSummary.played, 240)
   assert.equal(preview.pairingSummary.scheduledUnplayed, 86)
-  assert.equal(preview.pairingSummary.partialScoreReview, 1)
+  assert.equal(preview.pairingSummary.proxyRounds, 1)
+  assert.equal(preview.pairingSummary.partialScoreReview, 0)
   assert.equal(preview.pairingSummary.manualReview, 15)
   assert.equal(preview.pairingSummary.evidenceArtifactPresent, true)
   assert.equal(preview.seasonHistoricalNames.includes("SARAHLYNN727"), true)
   assert.equal(preview.seasonHistoricalNames.includes("BYE"), false)
 })
 
-test("blank or dash-only paired score cells are scheduled, while a one-sided score remains partial", () => {
+test("blank or dash-only paired score cells are scheduled, while a one-sided complete score is a proxy round", () => {
   const preview = evidence()
   const scheduled = preview.seasonPairings.filter((pairing) => pairing.pairingState === "SOURCE COLOR CONFIRMED — SCHEDULED / UNPLAYED")
-  const partial = preview.seasonPairings.filter((pairing) => pairing.pairingState === "PARTIAL — NEEDS REVIEW")
+  const proxy = preview.seasonPairings.filter((pairing) => pairing.gameState === "PROXY ROUND — OPPONENT DID NOT PLAY")
   assert.equal(scheduled.length, 86)
-  assert.equal(partial.length, 1)
-  assert.equal(partial[0].seasonNumber, 6)
-  assert.match(partial[0].playerAScoreEntryText + partial[0].playerBScoreEntryText, /Easy=-14; Hard=-3/)
+  assert.equal(proxy.length, 1)
+  assert.equal(proxy[0].seasonNumber, 6)
+  assert.equal(proxy[0].proxyWinnerExactName, "WAREY84")
+  assert.equal(proxy[0].proxyLoserExactName, "SARAHLYNN727")
+  assert.match(proxy[0].playerAScoreEntryText + proxy[0].playerBScoreEntryText, /Easy=-14; Hard=-3/)
 })
 
 test("numeric zero remains score evidence rather than an unplayed marker", () => {
@@ -83,8 +86,9 @@ test("numeric zero remains score evidence rather than an unplayed marker", () =>
       "season,1,Division 1,1,ALPHA,BETA,4,5,I4:J4,I5:J5,Easy=0; Hard=0,Easy=0; Hard=0,{},{},PARTIAL — NEEDS REVIEW,SOURCE COLOR CONFIRMED,BOOK,TAB,1,B4:Z4; B5:Z5,https://example.test,source",
     ].join("\n"),
   )
-  assert.equal(preview.pairingSummary.scheduledUnplayed, 0)
-  assert.equal(preview.pairingSummary.partialScoreReview, 1)
+  assert.equal(preview.pairingSummary.played, 1)
+  assert.equal(preview.pairingSummary.proxyRounds, 0)
+  assert.equal(preview.pairingSummary.partialScoreReview, 0)
 })
 
 test("Historical Pro score text keeps signs and blocks incomplete scorecards", () => {
