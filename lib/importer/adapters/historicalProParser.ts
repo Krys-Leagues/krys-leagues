@@ -1,6 +1,6 @@
 import Papa from "papaparse"
 
-export const HISTORICAL_PRO_PARSER_VERSION = "historical-pro-v2"
+export const HISTORICAL_PRO_PARSER_VERSION = "historical-pro-v3-game-state-precedence"
 
 export type HistoricalProReviewStatus = "READY" | "MISSING SCORE" | "SOURCE CONFLICT" | "SCHEDULED / UNPLAYED" | "PROXY ROUND — OPPONENT DID NOT PLAY"
 export type HistoricalProGameState = "PLAYED" | "SCHEDULED / UNPLAYED" | "PROXY ROUND — OPPONENT DID NOT PLAY" | "PARTIAL / INCOMPLETE" | "UNKNOWN / NEEDS REVIEW"
@@ -8,6 +8,7 @@ export type HistoricalProPeriodStatus = "COMPLETED" | "CURRENT / INCOMPLETE / NO
 export type HistoricalProPairingState =
   | "SOURCE COLOR CONFIRMED — PLAYED"
   | "SOURCE COLOR CONFIRMED — SCHEDULED / UNPLAYED"
+  | "PROXY ROUND — OPPONENT DID NOT PLAY"
   | "ADMIN CONFIRMED"
   | "UNKNOWN"
 
@@ -275,8 +276,9 @@ function proxyPlayers(playerAName: string, playerBName: string, playerAText: str
     : { winner: playerBName, loser: playerAName }
 }
 
-function normalizePairingState(row: PairingCsvRow) {
+function normalizePairingState(row: PairingCsvRow, gameState: HistoricalProGameState) {
   const sourceState = row.pairing_state ?? ""
+  if (gameState === "PROXY ROUND — OPPONENT DID NOT PLAY") return "PROXY ROUND — OPPONENT DID NOT PLAY"
   if (sourceState === "PARTIAL — NEEDS REVIEW" && scoreEntryIsBlankOrDash(row.player_a_score_entry_text ?? "") && scoreEntryIsBlankOrDash(row.player_b_score_entry_text ?? "")) {
     return "SOURCE COLOR CONFIRMED — SCHEDULED / UNPLAYED"
   }
@@ -293,8 +295,8 @@ function parseSeasonPairings(value: string) {
     if (!playerAExactName) return []
     const playerAScoreEntryText = row.player_a_score_entry_text ?? ""
     const playerBScoreEntryText = row.player_b_score_entry_text ?? ""
-    const pairingState = normalizePairingState(row)
     const gameState = pairingGameState(playerAScoreEntryText, playerBScoreEntryText)
+    const pairingState = normalizePairingState(row, gameState)
     const proxy = proxyPlayers(playerAExactName, row.player_b_exact_name ?? "", playerAScoreEntryText, playerBScoreEntryText, gameState)
     return [{
       periodType: "season",

@@ -70,7 +70,21 @@ test("blank or dash-only paired score cells are scheduled, while a one-sided com
   assert.equal(proxy[0].seasonNumber, 6)
   assert.equal(proxy[0].proxyWinnerExactName, "WAREY84")
   assert.equal(proxy[0].proxyLoserExactName, "SARAHLYNN727")
+  assert.equal(proxy[0].pairingState, "PROXY ROUND — OPPONENT DID NOT PLAY")
   assert.match(proxy[0].playerAScoreEntryText + proxy[0].playerBScoreEntryText, /Easy=-14; Hard=-3/)
+})
+
+test("source-proven proxy classification overrides a stale partial pairing label", () => {
+  const preview = evidence()
+  const proxy = preview.seasonPairings.find((pairing) => pairing.seasonNumber === 6 && pairing.playerAExactName === "WAREY84" && pairing.playerBExactName === "SARAHLYNN727")
+  assert.ok(proxy)
+  assert.equal(proxy.gameState, "PROXY ROUND — OPPONENT DID NOT PLAY")
+  assert.equal(proxy.pairingState, "PROXY ROUND — OPPONENT DID NOT PLAY")
+  assert.equal(proxy.proxyWinnerExactName, "WAREY84")
+  assert.equal(proxy.proxyLoserExactName, "SARAHLYNN727")
+  assert.equal(proxy.playerAScoreEntryText, "Easy=-14; Hard=-3")
+  assert.equal(proxy.playerBScoreEntryText, "Easy=; Hard=")
+  assert.equal(preview.pairingSummary.partialScoreReview, 0)
 })
 
 test("numeric zero remains score evidence rather than an unplayed marker", () => {

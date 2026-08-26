@@ -4,14 +4,14 @@ import { useEffect, useMemo, useState } from "react"
 
 import ExistingPlayerPicker from "@/app/admin/import/csv/components/ExistingPlayerPicker"
 import type { ExistingPlayerSearchResult } from "@/lib/importer/historicalMatchIdentity"
-import { historicalProSeasonIdentityBlockers, historicalProSeasonReadyRows, type HistoricalProIdentityReview, type HistoricalProPreview, type HistoricalProSeasonPairing, type HistoricalProSourceRow } from "@/lib/importer/adapters/historicalProParser"
+import { HISTORICAL_PRO_PARSER_VERSION, historicalProSeasonIdentityBlockers, historicalProSeasonReadyRows, type HistoricalProIdentityReview, type HistoricalProPreview, type HistoricalProSeasonPairing, type HistoricalProSourceRow } from "@/lib/importer/adapters/historicalProParser"
 import { supabase } from "@/lib/supabase"
 
 type ManualDecision = ExistingPlayerSearchResult
 type PartialPairingDecisionState = "PLAYED" | "SCHEDULED / UNPLAYED" | "PARTIAL / INCOMPLETE" | "UNKNOWN / NEEDS LATER REVIEW"
 type PartialPairingDecision = { state: PartialPairingDecisionState; savedAt: string }
 
-const PRO_REVIEW_DRAFT_SCHEMA = "historical-pro-review-v2-partial-pairings"
+const PRO_REVIEW_DRAFT_SCHEMA = "historical-pro-review-v3-classified-pairings"
 
 function pairingKey(pairing: HistoricalProSeasonPairing) {
   return [pairing.seasonNumber, pairing.division, pairing.gameNumber, pairing.playerAExactName, pairing.playerBExactName, pairing.playerASourceRow, pairing.playerBSourceRow, pairing.playerASourceCells, pairing.playerBSourceCells, pairing.sourceWorkbook, pairing.sourceTab, pairing.sourceRange].join("|")
@@ -55,10 +55,12 @@ export default function HistoricalProImporterPage() {
           setPreview(body.preview)
           setReviews(body.identityReviews)
           try {
-            const saved = JSON.parse(localStorage.getItem(`historical-pro-review:${body.preview.sourceSha256 ?? "unknown"}`) ?? "null") as { schema?: string; sourceSha256?: string | null; pairingDecisions?: Record<string, PartialPairingDecision> } | null
-            if (saved?.schema === PRO_REVIEW_DRAFT_SCHEMA && saved.sourceSha256 === body.preview.sourceSha256 && saved.pairingDecisions) {
-              setPairingDecisions(saved.pairingDecisions)
-              setPairingDrafts(Object.fromEntries(Object.entries(saved.pairingDecisions).map(([key, decision]) => [key, decision.state])))
+            const saved = JSON.parse(localStorage.getItem(`historical-pro-review:${body.preview.sourceSha256 ?? "unknown"}`) ?? "null") as { schema?: string; parserVersion?: string; sourceSha256?: string | null; pairingDecisions?: Record<string, PartialPairingDecision> } | null
+            const currentPartialPairingKeys = new Set(body.preview.seasonPairings.filter((pairing) => pairing.evidenceType === "SOURCE COLOR CONFIRMED" && pairing.gameState === "PARTIAL / INCOMPLETE").map(pairingKey))
+            const currentPairingDecisions = Object.fromEntries(Object.entries(saved?.pairingDecisions ?? {}).filter(([key, decision]) => currentPartialPairingKeys.has(key) && Boolean(decision?.state) && Boolean(decision?.savedAt)))
+            if (saved?.schema === PRO_REVIEW_DRAFT_SCHEMA && saved.parserVersion === body.preview.parserVersion && body.preview.parserVersion === HISTORICAL_PRO_PARSER_VERSION && saved.sourceSha256 === body.preview.sourceSha256) {
+              setPairingDecisions(currentPairingDecisions)
+              setPairingDrafts(Object.fromEntries(Object.entries(currentPairingDecisions).map(([key, decision]) => [key, decision.state])))
             }
           } catch {
             // A malformed local draft must not prevent the protected preview from loading.
@@ -74,7 +76,7 @@ export default function HistoricalProImporterPage() {
 
   useEffect(() => {
     if (!preview?.sourceSha256) return
-    localStorage.setItem(`historical-pro-review:${preview.sourceSha256}`, JSON.stringify({ schema: PRO_REVIEW_DRAFT_SCHEMA, sourceSha256: preview.sourceSha256, pairingDecisions, exportedAt: new Date().toISOString() }))
+    localStorage.setItem(`historical-pro-review:${preview.sourceSha256}`, JSON.stringify({ schema: PRO_REVIEW_DRAFT_SCHEMA, parserVersion: preview.parserVersion, sourceSha256: preview.sourceSha256, pairingDecisions, exportedAt: new Date().toISOString() }))
   }, [pairingDecisions, preview])
 
   const effectiveReviews = useMemo(() => reviews.map((review) => {
@@ -104,7 +106,7 @@ export default function HistoricalProImporterPage() {
   function exportPairingDraft() {
     const sourceSha256 = preview?.sourceSha256
     if (!sourceSha256) return
-    const draft = { schema: PRO_REVIEW_DRAFT_SCHEMA, sourceSha256, pairingDecisions, exportedAt: new Date().toISOString() }
+    const draft = { schema: PRO_REVIEW_DRAFT_SCHEMA, parserVersion: preview?.parserVersion, sourceSha256, pairingDecisions, exportedAt: new Date().toISOString() }
     const blob = new Blob([JSON.stringify(draft, null, 2)], { type: "application/json" })
     const url = URL.createObjectURL(blob)
     const anchor = document.createElement("a")
