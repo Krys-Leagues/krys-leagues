@@ -2,10 +2,15 @@
 
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
+import { createDiscordAuthCallbackUrl } from "@/lib/authReturnTo"
 import { supabase } from "@/lib/supabase"
-import { loadCanonicalPublicPlayers, type CanonicalPublicPlayer } from "@/lib/publicPlayers"
 
-type Player = CanonicalPublicPlayer
+type Player = {
+  id: string
+  screen_name: string
+  status: string | null
+  active: boolean | null
+}
 
 type Membership = {
   id: string
@@ -17,112 +22,159 @@ type Membership = {
 
 type ScheduledMatch = {
   id: string
+  league_type: string | null
+  division: string | null
+  season_number: number | null
+  game: string | number | null
+  course: string | null
   player1_id: string | null
   player2_id: string | null
 }
 
 type Result = {
   id: string
+  league_type: string | null
+  division: string | null
+  season_number: number | null
   player1_id: string | null
   player2_id: string | null
 }
 
+function leagueKey(value: string | null) {
+  return (value || "").trim().toLowerCase().replace(/[\s_]+/g, "-")
+}
+
+function seasonKey(leagueType: string | null, seasonNumber: number | null) {
+  return `${leagueKey(leagueType)}:${seasonNumber ?? ""}`
+}
+
+function samePair(firstPlayer1: string | null, firstPlayer2: string | null, secondPlayer1: string | null, secondPlayer2: string | null) {
+  return (firstPlayer1 === secondPlayer1 && firstPlayer2 === secondPlayer2)
+    || (firstPlayer1 === secondPlayer2 && firstPlayer2 === secondPlayer1)
+}
+
 export default function PlayerDashboardPage() {
-  const [players, setPlayers] = useState<Player[]>([])
+  const [player, setPlayer] = useState<Player | null>(null)
+  const [identityIds, setIdentityIds] = useState<string[]>([])
   const [memberships, setMemberships] = useState<Membership[]>([])
   const [schedule, setSchedule] = useState<ScheduledMatch[]>([])
   const [results, setResults] = useState<Result[]>([])
-  const [selectedPlayerId, setSelectedPlayerId] = useState("")
+  const [activeSeasonKeys, setActiveSeasonKeys] = useState<Set<string>>(new Set())
+  const [opponentNames, setOpponentNames] = useState<Map<string, string>>(new Map())
   const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    loadData()
-  }, [])
+  const [authRequired, setAuthRequired] = useState(false)
+  const [message, setMessage] = useState("")
 
   async function loadData() {
     setLoading(true)
+    setMessage("")
+    setAuthRequired(false)
 
-    const [
-      playersResponse,
-      membershipsResponse,
-      scheduleResponse,
-      resultsResponse,
-    ] = await Promise.all([
-      loadCanonicalPublicPlayers(),
-
-      supabase
-        .from("player_league_memberships")
-        .select("id, player_id, league_type, division, season_number"),
-
-      supabase
-        .from("schedule")
-        .select("id, player1_id, player2_id"),
-
-      supabase
-        .from("results")
-        .select("id, player1_id, player2_id"),
-    ])
-
-    const loadedPlayers = playersResponse.data || []
-
-    setPlayers(loadedPlayers)
-    setMemberships(membershipsResponse.data || [])
-    setSchedule(scheduleResponse.data || [])
-    setResults(resultsResponse.data || [])
-
-    if (loadedPlayers.length > 0) {
-      setSelectedPlayerId(loadedPlayers[0].id)
+    const { data: sessionData } = await supabase.auth.getSession()
+    if (!sessionData.session) {
+      setAuthRequired(true)
+      setLoading(false)
+      return
     }
 
+    const { data: canonicalId, error: canonicalError } = await supabase.rpc("current_user_canonical_player_id")
+    if (canonicalError || typeof canonicalId !== "string" || !canonicalId) {
+      setMessage(canonicalError?.message || "Your player identity is not linked yet.")
+      setLoading(false)
+      return
+    }
+
+    const [playerResponse, identityResponse, activeSeasonsResponse] = await Promise.all([
+      supabase.from("players").select("id, screen_name, status, active").eq("id", canonicalId).maybeSingle(),
+      supabase.rpc("get_public_player_canonical_identity", { p_player_id: canonicalId }),
+      supabase.from("seasons").select("league_type, season_number, is_active").eq("is_active", true),
+    ])
+
+    if (playerResponse.error || identityResponse.error || activeSeasonsResponse.error || !playerResponse.data) {
+      setMessage(playerResponse.error?.message || identityResponse.error?.message || activeSeasonsResponse.error?.message || "Your player dashboard could not be loaded.")
+      setLoading(false)
+      return
+    }
+
+    const identity = (Array.isArray(identityResponse.data) ? identityResponse.data[0] : identityResponse.data) as { identity_player_ids?: string[] | null } | null
+    const loadedIdentityIds = identity?.identity_player_ids?.length ? Array.from(new Set(identity.identity_player_ids)) : [canonicalId]
+    const loadedActiveSeasonKeys = new Set((activeSeasonsResponse.data || []).map((season) => seasonKey(season.league_type, season.season_number)))
+    const [membershipsResponse, scheduleResponse, resultsResponse] = await Promise.all([
+      supabase.from("player_league_memberships").select("id, player_id, league_type, division, season_number").in("player_id", loadedIdentityIds),
+      supabase.from("schedule").select("id, league_type, division, season_number, game, course, player1_id, player2_id").order("game", { ascending: true }),
+      supabase.from("results").select("id, league_type, division, season_number, player1_id, player2_id"),
+    ])
+
+    if (membershipsResponse.error || scheduleResponse.error || resultsResponse.error) {
+      setMessage(membershipsResponse.error?.message || scheduleResponse.error?.message || resultsResponse.error?.message || "Your current league data could not be loaded.")
+      setLoading(false)
+      return
+    }
+
+    const loadedSchedule = (scheduleResponse.data || []) as ScheduledMatch[]
+    const sourceOpponentIds = loadedSchedule.flatMap((match) => [match.player1_id, match.player2_id]
+      .filter((id): id is string => Boolean(id))
+      .filter((id) => !loadedIdentityIds.includes(id)))
+    const displayResponse = sourceOpponentIds.length
+      ? await Promise.all(Array.from(new Set(sourceOpponentIds)).map(async (sourcePlayerId) => {
+        const { data: identityData } = await supabase.rpc("get_public_player_canonical_identity", { p_player_id: sourcePlayerId })
+        const resolved = (Array.isArray(identityData) ? identityData[0] : identityData) as { canonical_player_id?: string } | null
+        const resolvedId = resolved?.canonical_player_id
+        if (typeof resolvedId !== "string") return null
+        const { data: currentPlayer } = await supabase.from("players").select("id, screen_name, status, active").eq("id", resolvedId).maybeSingle()
+        return currentPlayer?.active === true && !["merged", "retired", "archived"].includes((currentPlayer.status || "").trim().toLowerCase())
+          ? { sourcePlayerId, screenName: currentPlayer.screen_name }
+          : null
+      }))
+      : []
+
+    setPlayer(playerResponse.data as Player)
+    setIdentityIds(loadedIdentityIds)
+    setActiveSeasonKeys(loadedActiveSeasonKeys)
+    setMemberships((membershipsResponse.data || []) as Membership[])
+    setSchedule(loadedSchedule)
+    setResults((resultsResponse.data || []) as Result[])
+    setOpponentNames(new Map(displayResponse.filter((display): display is { sourcePlayerId: string; screenName: string } => Boolean(display)).map((display) => [display.sourcePlayerId, display.screenName])))
     setLoading(false)
   }
 
-  const selectedPlayer = useMemo(
-    () => players.find((player) => player.id === selectedPlayerId),
-    [players, selectedPlayerId]
-  )
-
-  const selectedIdentityIds = useMemo(
-    () => new Set(selectedPlayer?.identity_player_ids || []),
-    [selectedPlayer],
-  )
+  useEffect(() => {
+    // The dashboard synchronizes its reader state with the authenticated session on mount.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void loadData()
+  }, [])
 
   const playerMemberships = useMemo(
-    () =>
-      memberships.filter(
-          (membership) => selectedIdentityIds.has(membership.player_id)
-      ),
-    [memberships, selectedIdentityIds]
+    () => memberships.filter((membership) => identityIds.includes(membership.player_id) && activeSeasonKeys.has(seasonKey(membership.league_type, membership.season_number))),
+    [activeSeasonKeys, identityIds, memberships]
   )
 
   const scheduledMatches = useMemo(
-    () =>
-      schedule.filter(
-        (match) =>
-          selectedIdentityIds.has(match.player1_id || "") ||
-          selectedIdentityIds.has(match.player2_id || "")
-      ),
-    [schedule, selectedIdentityIds]
+    () => schedule.filter((match) => activeSeasonKeys.has(seasonKey(match.league_type, match.season_number)) && (identityIds.includes(match.player1_id || "") || identityIds.includes(match.player2_id || ""))),
+    [activeSeasonKeys, identityIds, schedule]
   )
 
   const completedMatches = useMemo(
-    () =>
-      results.filter(
-        (result) =>
-          selectedIdentityIds.has(result.player1_id || "") ||
-          selectedIdentityIds.has(result.player2_id || "")
-      ),
-    [results, selectedIdentityIds]
+    () => results.filter((result) => activeSeasonKeys.has(seasonKey(result.league_type, result.season_number)) && (identityIds.includes(result.player1_id || "") || identityIds.includes(result.player2_id || ""))),
+    [activeSeasonKeys, identityIds, results]
   )
 
-  const matchesLeft = Math.max(
-    scheduledMatches.length - completedMatches.length,
-    0
-  )
+  function hasResultFor(match: ScheduledMatch) {
+    return completedMatches.some((result) => result.league_type === match.league_type && result.division === match.division && result.season_number === match.season_number && samePair(result.player1_id, result.player2_id, match.player1_id, match.player2_id))
+  }
+
+  const matchesLeft = scheduledMatches.filter((match) => !hasResultFor(match)).length
 
   const status =
-    selectedPlayer?.status ||
-    (selectedPlayer?.active === false ? "inactive" : "active")
+    player?.status ||
+    (player?.active === false ? "inactive" : "active")
+
+  async function signInWithDiscord() {
+    await supabase.auth.signInWithOAuth({
+      provider: "discord",
+      options: { redirectTo: createDiscordAuthCallbackUrl("player", "/player-dashboard") },
+    })
+  }
 
   return (
     <main style={page}>
@@ -135,34 +187,29 @@ export default function PlayerDashboardPage() {
 
         <section style={headerCard}>
           <h1 style={title}>Player Dashboard</h1>
-
-          <p style={subtitle}>
-            Choose a player to see their leagues, matches, and progress.
-          </p>
-
-          <label style={label}>Player</label>
-
-          <select
-            value={selectedPlayerId}
-            onChange={(event) => setSelectedPlayerId(event.target.value)}
-            style={select}
-          >
-            {players.map((player) => (
-              <option key={player.id} value={player.id}>
-                {player.screen_name}
-              </option>
-            ))}
-          </select>
+          <p style={subtitle}>Your current league participation.</p>
         </section>
 
         {loading ? (
           <div style={card}>Loading dashboard...</div>
-        ) : !selectedPlayer ? (
-          <div style={card}>No player selected.</div>
+        ) : authRequired ? (
+          <section style={card}>
+            <h2>Sign in to open your dashboard</h2>
+            <button type="button" onClick={() => void signInWithDiscord()} style={actionButton}>Sign in with Discord</button>
+          </section>
+        ) : message ? (
+          <div style={card}>{message}</div>
+        ) : !player ? (
+          <div style={card}>Your player profile is unavailable.</div>
+        ) : playerMemberships.length === 0 ? (
+          <section style={card}>
+            <h2>No current league participation</h2>
+            <Link href="/join" style={joinButton}>Join Leagues</Link>
+          </section>
         ) : (
           <>
             <section style={card}>
-              <h2 style={playerName}>{selectedPlayer.screen_name}</h2>
+              <h2 style={playerName}>{player.screen_name}</h2>
 
               <div style={statsGrid}>
                 <div style={statBox}>
@@ -190,24 +237,34 @@ export default function PlayerDashboardPage() {
             <section style={card}>
               <h2>Current Leagues</h2>
 
-              {playerMemberships.length === 0 ? (
-                <p style={muted}>No league memberships found.</p>
-              ) : (
-                <div style={leagueGrid}>
-                  {playerMemberships.map((membership) => (
-                    <div key={membership.id} style={leagueCard}>
-                      <strong>{membership.league_type || "League"}</strong>
-
-                      <span>{membership.division || "No division"}</span>
-
-                      <span style={muted}>
-                        Season {membership.season_number ?? "?"}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <div style={leagueGrid}>
+                {playerMemberships.map((membership) => (
+                  <div key={membership.id} style={leagueCard}>
+                    <strong>{membership.league_type || "League"}</strong>
+                    <span>{membership.division || "No division"}</span>
+                    <span style={muted}>Season {membership.season_number ?? "?"}</span>
+                  </div>
+                ))}
+              </div>
             </section>
+
+            {scheduledMatches.length > 0 && <section style={card}>
+              <h2>Scheduled games</h2>
+              <div style={leagueGrid}>
+                {scheduledMatches.map((match) => {
+                  const opponentId = identityIds.includes(match.player1_id || "") ? match.player2_id : match.player1_id
+                  const opponentName = opponentId ? opponentNames.get(opponentId) : null
+                  return <div key={match.id} style={leagueCard}>
+                    <strong>{match.league_type || "League"}{match.division ? ` · ${match.division}` : ""}</strong>
+                    {opponentName && <span>Opponent: {opponentName}</span>}
+                    {match.game !== null && match.game !== undefined && <span>Game {match.game}</span>}
+                    {match.course && <span>Course: {match.course}</span>}
+                    <span style={muted}>{hasResultFor(match) ? "Result recorded" : "Not yet recorded"}</span>
+                  </div>
+                })}
+              </div>
+            </section>
+            }
 
             <section style={actionGrid}>
               <Link href="/matches" style={actionButton}>
@@ -215,7 +272,7 @@ export default function PlayerDashboardPage() {
               </Link>
 
               <Link
-                href={`/players/${selectedPlayer.id}`}
+                href={`/players/${player.id}`}
                 style={actionButton}
               >
                 Player Profile
@@ -283,22 +340,6 @@ const subtitle: React.CSSProperties = {
   lineHeight: 1.5,
 }
 
-const label: React.CSSProperties = {
-  display: "block",
-  margin: "18px 0 8px",
-  fontWeight: 700,
-}
-
-const select: React.CSSProperties = {
-  width: "100%",
-  padding: 12,
-  background: "#0f172a",
-  color: "white",
-  border: "1px solid #475569",
-  borderRadius: 10,
-  fontSize: 17,
-}
-
 const card: React.CSSProperties = {
   padding: 24,
   background: "#0f172a",
@@ -364,4 +405,16 @@ const actionButton: React.CSSProperties = {
   textDecoration: "none",
   textAlign: "center",
   fontWeight: 800,
+}
+
+const joinButton: React.CSSProperties = {
+  display: "inline-block",
+  marginTop: 16,
+  padding: "14px 20px",
+  background: "#0891b2",
+  border: "1px solid #67e8f9",
+  borderRadius: 12,
+  color: "white",
+  textDecoration: "none",
+  fontWeight: 900,
 }

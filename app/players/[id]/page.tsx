@@ -520,6 +520,7 @@ export default function PublicPlayerProfilePage() {
         <nav className={styles.profileActions} aria-label="Player profile sections and navigation">
           <Link href="/" style={backButton}>← Krys Leagues</Link>
           <Link href="/players" style={backButton}>← Player Profiles</Link>
+          {canEditProfile && <Link href="/player-dashboard" className={styles.profileActionButton}>Player Dashboard</Link>}
           <button type="button" className={styles.profileActionButton} aria-pressed={openProfileSection === "records"} onClick={() => setOpenProfileSection(current => current === "records" ? null : "records")}>Course Records</button>
           {hasCareerParticipation && <button type="button" className={styles.profileActionButton} aria-pressed={openProfileSection === "stats"} onClick={() => setOpenProfileSection(current => current === "stats" ? null : "stats")}>Player Stats</button>}
           {knownAliases.length > 0 && <button type="button" className={styles.profileActionButton} aria-pressed={openProfileSection === "aliases"} onClick={() => setOpenProfileSection(current => current === "aliases" ? null : "aliases")}>Names / Known As</button>}
