@@ -6,11 +6,12 @@ import { personalCombinedFallbackKey, rankByCombinedTotal, rankByScore } from ".
 
 const read = (path: string) => readFileSync(path, "utf8")
 
-test("public Records directly renders Single and contains no Admin importer links", () => {
+test("public Records is a hub for Single and Combined without Admin importer links", () => {
   const page = read("app/records/page.tsx")
-  assert.match(page, /PublicSingleRecordsPage/)
+  assert.match(page, /href="\/records\/single"/)
+  assert.match(page, /href="\/records\/combined"/)
   assert.doesNotMatch(page, /admin\/records|Import CSV|identity review/i)
-  assert.match(read("app/records/single/page.tsx"), /redirect\("\/records"\)/)
+  assert.match(read("app/records/single/page.tsx"), /PublicSingleRecordsPage/)
 })
 
 test("public Single uses active UUID-scoped courses and difficulty score colors", () => {
@@ -18,7 +19,9 @@ test("public Single uses active UUID-scoped courses and difficulty score colors"
   const api = read("app/api/records/public/route.ts")
   assert.match(api, /\.eq\("active", true\)/)
   assert.match(api, /\.eq\("course_id", course\.id\)/)
-  assert.match(page, /styles\.easy:styles\.hard/)
+  assert.match(page, /difficulty === "Easy" \? styles\.easy : styles\.hard/)
+  assert.match(page, /renderDifficulty\("Easy"\)/)
+  assert.match(page, /renderDifficulty\("Hard"\)/)
   assert.match(page, /`\/players\/\$\{record\.player_id\}`/)
   assert.doesNotMatch(page, /single_course_records|NOT LINKED|identity diagnostics/i)
 })
@@ -78,7 +81,9 @@ test("Player Profile uses white numeric ranks without medals, podium colors, or 
   assert.doesNotMatch(profile, /<svg|profileMedal|Gold, rank|Silver, rank|Bronze, rank/)
   assert.match(profile, /`#\$\{rank\}`/)
   assert.doesNotMatch(profile, /profilePodium|bestCurrentRank|Best current rank|profileBestCurrent/)
-  assert.doesNotMatch(styles, /profilePodium|profileBestCurrent|profileBestLabel|#fde68a|#e2e8f0|#fdba74|#a78bfa/)
+  assert.match(styles, /\.profileRankNumber\{color:#fff/)
+  assert.match(styles, /\.rank\{color:#f8fafc\}/)
+  assert.doesNotMatch(styles, /profilePodium|profileBestCurrent|profileBestLabel/)
   assert.match(profile, /styles\.profileScore/)
 })
 
