@@ -50,9 +50,12 @@ test("Season identity scope includes only completed Seasons 1-12 and preserves p
   assert.equal(preview.seasonRows.every((row) => row.periodType === "season" && row.periodNumber >= 1 && row.periodNumber <= 12), true)
   assert.equal(preview.seasonPairings.length, 342)
   assert.equal(preview.seasonHistoricalNames.length, 34)
-  assert.equal(preview.pairingSummary.sourceColorConfirmed, 327)
+  assert.equal(preview.pairingSummary.artifactPairings, 342)
+  assert.equal(preview.pairingSummary.actualPairings, 339)
+  assert.equal(preview.pairingSummary.byeNoGame, 3)
+  assert.equal(preview.pairingSummary.sourceColorConfirmed, 324)
   assert.equal(preview.pairingSummary.played, 240)
-  assert.equal(preview.pairingSummary.scheduledUnplayed, 86)
+  assert.equal(preview.pairingSummary.scheduledUnplayed, 83)
   assert.equal(preview.pairingSummary.proxyRounds, 1)
   assert.equal(preview.pairingSummary.partialScoreReview, 0)
   assert.equal(preview.pairingSummary.manualReview, 15)
@@ -65,13 +68,30 @@ test("blank or dash-only paired score cells are scheduled, while a one-sided com
   const preview = evidence()
   const scheduled = preview.seasonPairings.filter((pairing) => pairing.pairingState === "SOURCE COLOR CONFIRMED — SCHEDULED / UNPLAYED")
   const proxy = preview.seasonPairings.filter((pairing) => pairing.gameState === "PROXY ROUND — OPPONENT DID NOT PLAY")
-  assert.equal(scheduled.length, 86)
+  assert.equal(scheduled.length, 83)
   assert.equal(proxy.length, 1)
   assert.equal(proxy[0].seasonNumber, 6)
   assert.equal(proxy[0].proxyWinnerExactName, "WAREY84")
   assert.equal(proxy[0].proxyLoserExactName, "SARAHLYNN727")
   assert.equal(proxy[0].pairingState, "PROXY ROUND — OPPONENT DID NOT PLAY")
   assert.match(proxy[0].playerAScoreEntryText + proxy[0].playerBScoreEntryText, /Easy=-14; Hard=-3/)
+})
+
+test("BYE evidence is preserved as no game and excluded from actual review counts", () => {
+  const preview = evidence()
+  const byes = preview.seasonPairings.filter((pairing) => pairing.isBye)
+  assert.equal(byes.length, 3)
+  assert.deepEqual(byes.map((pairing) => [pairing.seasonNumber, pairing.division, pairing.gameNumber, pairing.playerAExactName, pairing.playerBExactName]).sort(), [
+    [3, "Division 3", 1, "GUYB", "BYE"],
+    [3, "Division 3", 2, "EARTHLING", "BYE"],
+    [3, "Division 3", 3, "KD", "BYE"],
+  ])
+  assert.equal(byes.every((pairing) => pairing.gameState === "BYE / NO GAME" && pairing.pairingState === "BYE / NO GAME"), true)
+  assert.equal(byes.every((pairing) => pairing.playerBExactName === "BYE"), true)
+  assert.equal(preview.seasonPairings.filter((pairing) => pairing.pairingState === "AMBIGUOUS / NEEDS REVIEW").length, 15)
+  assert.equal(preview.seasonPairings.filter((pairing) => pairing.isBye && pairing.pairingState === "AMBIGUOUS / NEEDS REVIEW").length, 0)
+  assert.equal(preview.seasonRows.filter((row) => row.historicalPlayerName === "BYE").every((row) => row.gameState === "BYE / NO GAME" && row.reviewStatus === "BYE / NO GAME" && !row.importable), true)
+  assert.equal(preview.seasonHistoricalNames.includes("BYE"), false)
 })
 
 test("source-proven proxy classification overrides a stale partial pairing label", () => {

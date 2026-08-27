@@ -16,6 +16,9 @@ test("Historical Pro exposes all partial pairing records for review", () => {
   assert.match(page, /currentPartialPairingKeys/)
   assert.match(page, /UNKNOWN \/ NEEDS LATER REVIEW/)
   assert.match(page, /Items marked UNKNOWN \/ NEEDS LATER REVIEW remain excluded/)
+  assert.match(page, /BYE — NO GAME/)
+  assert.match(page, /actualPairings/)
+  assert.match(page, /byeNoGame/)
 })
 
 test("Historical Pro partial review preserves source values and evidence", () => {

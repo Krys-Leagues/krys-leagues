@@ -2,13 +2,14 @@ import Papa from "papaparse"
 
 export const HISTORICAL_PRO_PARSER_VERSION = "historical-pro-v3-game-state-precedence"
 
-export type HistoricalProReviewStatus = "READY" | "MISSING SCORE" | "SOURCE CONFLICT" | "SCHEDULED / UNPLAYED" | "PROXY ROUND — OPPONENT DID NOT PLAY"
-export type HistoricalProGameState = "PLAYED" | "SCHEDULED / UNPLAYED" | "PROXY ROUND — OPPONENT DID NOT PLAY" | "PARTIAL / INCOMPLETE" | "UNKNOWN / NEEDS REVIEW"
+export type HistoricalProReviewStatus = "READY" | "MISSING SCORE" | "SOURCE CONFLICT" | "SCHEDULED / UNPLAYED" | "PROXY ROUND — OPPONENT DID NOT PLAY" | "BYE / NO GAME"
+export type HistoricalProGameState = "PLAYED" | "SCHEDULED / UNPLAYED" | "PROXY ROUND — OPPONENT DID NOT PLAY" | "PARTIAL / INCOMPLETE" | "UNKNOWN / NEEDS REVIEW" | "BYE / NO GAME"
 export type HistoricalProPeriodStatus = "COMPLETED" | "CURRENT / INCOMPLETE / NOT IMPORTABLE"
 export type HistoricalProPairingState =
   | "SOURCE COLOR CONFIRMED — PLAYED"
   | "SOURCE COLOR CONFIRMED — SCHEDULED / UNPLAYED"
   | "PROXY ROUND — OPPONENT DID NOT PLAY"
+  | "BYE / NO GAME"
   | "ADMIN CONFIRMED"
   | "UNKNOWN"
 
@@ -72,6 +73,7 @@ export type HistoricalProSeasonPairing = {
   userEnteredTextColor: string
   pairingState: string
   gameState: HistoricalProGameState
+  isBye: boolean
   proxyWinnerExactName: string | null
   proxyLoserExactName: string | null
   evidenceType: string
@@ -96,6 +98,9 @@ export type HistoricalProPlayerPeriod = {
 }
 
 export type HistoricalProPairingSummary = {
+  artifactPairings: number
+  actualPairings: number
+  byeNoGame: number
   sourceColorConfirmed: number
   played: number
   scheduledUnplayed: number
@@ -155,6 +160,10 @@ type PairingCsvRow = Record<string, string | undefined>
 
 const NON_PLAYER_SEASON_NAMES = new Set(["BYE"])
 
+function isByeName(value: string | null | undefined) {
+  return NON_PLAYER_SEASON_NAMES.has((value ?? "").trim().toLocaleUpperCase())
+}
+
 function text(value: string | undefined) {
   const trimmed = (value ?? "").trim()
   return trimmed || null
@@ -195,14 +204,16 @@ function parseScoreRow(row: ScoreCsvRow): HistoricalProSourceRow | null {
   const gameNumber = integer(row.game_number)
   const periodType = row.period_type === "season" || row.period_type === "week" ? row.period_type : null
   if (periodNumber === null || gameNumber === null || !periodType || ![1, 2, 3].includes(gameNumber)) return null
-  const reviewStatus = row.review_status === "MISSING SCORE" || row.review_status === "SOURCE CONFLICT" ? row.review_status : "READY"
-  const importable = reviewStatus === "READY" && !(periodType === "season" && periodNumber === 13) && !(periodType === "week" && periodNumber === 107)
+  const historicalPlayerName = row.historical_player_name ?? ""
+  const bye = periodType === "season" && isByeName(historicalPlayerName)
+  const reviewStatus = bye ? "BYE / NO GAME" : row.review_status === "MISSING SCORE" || row.review_status === "SOURCE CONFLICT" ? row.review_status : "READY"
+  const importable = !bye && reviewStatus === "READY" && !(periodType === "season" && periodNumber === 13) && !(periodType === "week" && periodNumber === 107)
   return {
     periodType,
     periodNumber,
     periodLabel: (row.period_label ?? "").trim(),
     division: (row.division ?? "").trim(),
-    historicalPlayerName: row.historical_player_name ?? "",
+    historicalPlayerName,
     gameNumber: gameNumber as 1 | 2 | 3,
     mapCourseCode: text(row.map_course_code),
     easyScore: score(row.easy_score),
@@ -224,7 +235,7 @@ function parseScoreRow(row: ScoreCsvRow): HistoricalProSourceRow | null {
     sourceUrl: (row.source_url ?? "").trim(),
     rawSourceData: row.raw_source_data ?? "",
     reviewStatus,
-    gameState: reviewStatus === "SOURCE CONFLICT" ? "UNKNOWN / NEEDS REVIEW" : reviewStatus === "MISSING SCORE" ? "PARTIAL / INCOMPLETE" : "PLAYED",
+    gameState: bye ? "BYE / NO GAME" : reviewStatus === "SOURCE CONFLICT" ? "UNKNOWN / NEEDS REVIEW" : reviewStatus === "MISSING SCORE" ? "PARTIAL / INCOMPLETE" : "PLAYED",
     sourceFingerprint: stableFingerprint(row),
     importable,
   }
@@ -278,6 +289,7 @@ function proxyPlayers(playerAName: string, playerBName: string, playerAText: str
 
 function normalizePairingState(row: PairingCsvRow, gameState: HistoricalProGameState) {
   const sourceState = row.pairing_state ?? ""
+  if (gameState === "BYE / NO GAME") return "BYE / NO GAME"
   if (gameState === "PROXY ROUND — OPPONENT DID NOT PLAY") return "PROXY ROUND — OPPONENT DID NOT PLAY"
   if (sourceState === "PARTIAL — NEEDS REVIEW" && scoreEntryIsBlankOrDash(row.player_a_score_entry_text ?? "") && scoreEntryIsBlankOrDash(row.player_b_score_entry_text ?? "")) {
     return "SOURCE COLOR CONFIRMED — SCHEDULED / UNPLAYED"
@@ -293,18 +305,20 @@ function parseSeasonPairings(value: string) {
     if (row.period_type !== "season" || seasonNumber === null || seasonNumber < 1 || seasonNumber > 12 || !gameNumber || ![1, 2, 3].includes(gameNumber)) return []
     const playerAExactName = row.player_a_exact_name ?? ""
     if (!playerAExactName) return []
+    const playerBExactName = row.player_b_exact_name ?? ""
     const playerAScoreEntryText = row.player_a_score_entry_text ?? ""
     const playerBScoreEntryText = row.player_b_score_entry_text ?? ""
-    const gameState = pairingGameState(playerAScoreEntryText, playerBScoreEntryText)
+    const bye = isByeName(playerAExactName) || isByeName(playerBExactName)
+    const gameState = bye ? "BYE / NO GAME" : pairingGameState(playerAScoreEntryText, playerBScoreEntryText)
     const pairingState = normalizePairingState(row, gameState)
-    const proxy = proxyPlayers(playerAExactName, row.player_b_exact_name ?? "", playerAScoreEntryText, playerBScoreEntryText, gameState)
+    const proxy = proxyPlayers(playerAExactName, playerBExactName, playerAScoreEntryText, playerBScoreEntryText, gameState)
     return [{
       periodType: "season",
       seasonNumber,
       division: row.division ?? "",
       gameNumber: gameNumber as 1 | 2 | 3,
       playerAExactName,
-      playerBExactName: row.player_b_exact_name ?? "",
+      playerBExactName,
       playerASourceRow: row.player_a_source_row ?? "",
       playerBSourceRow: row.player_b_source_row ?? "",
       playerASourceCells: row.player_a_source_cells ?? "",
@@ -315,6 +329,7 @@ function parseSeasonPairings(value: string) {
       userEnteredTextColor: row.user_entered_text_color ?? "",
       pairingState,
       gameState,
+      isBye: bye,
       proxyWinnerExactName: proxy.winner,
       proxyLoserExactName: proxy.loser,
       evidenceType: row.evidence_type ?? "",
@@ -329,8 +344,12 @@ function parseSeasonPairings(value: string) {
 }
 
 function summarizeSeasonPairings(pairings: HistoricalProSeasonPairing[]): HistoricalProPairingSummary {
-  const sourceConfirmed = pairings.filter((pairing) => pairing.evidenceType === "SOURCE COLOR CONFIRMED" && pairing.playerBExactName)
+  const actualPairings = pairings.filter((pairing) => !pairing.isBye)
+  const sourceConfirmed = actualPairings.filter((pairing) => pairing.evidenceType === "SOURCE COLOR CONFIRMED" && pairing.playerBExactName)
   return {
+    artifactPairings: pairings.length,
+    actualPairings: actualPairings.length,
+    byeNoGame: pairings.filter((pairing) => pairing.isBye).length,
     sourceColorConfirmed: sourceConfirmed.length,
     played: sourceConfirmed.filter((pairing) => pairing.gameState === "PLAYED").length,
     scheduledUnplayed: sourceConfirmed.filter((pairing) => pairing.gameState === "SCHEDULED / UNPLAYED").length,
@@ -350,6 +369,7 @@ function applyPairingGameStates(rows: HistoricalProSourceRow[], pairings: Histor
   return rows.map((row) => {
     const pairing = findPairingForRow(row, pairings)
     if (!pairing) return row
+    if (pairing.gameState === "BYE / NO GAME") return { ...row, reviewStatus: "BYE / NO GAME" as const, gameState: pairing.gameState, importable: false }
     if (pairing.gameState === "SCHEDULED / UNPLAYED") return { ...row, reviewStatus: "SCHEDULED / UNPLAYED" as const, gameState: pairing.gameState, importable: false }
     if (pairing.gameState === "PROXY ROUND — OPPONENT DID NOT PLAY") {
       const completedScore = row.easyScore !== null && row.hardScore !== null
