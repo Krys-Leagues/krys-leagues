@@ -32,6 +32,12 @@ const cards = [
     color: "bg-orange-600",
   },
   {
+    title: "Historical PYP",
+    description: "Review recovered Pick Your Poison results, identities, and source validation.",
+    href: "/admin/import/pyp",
+    color: "bg-fuchsia-700",
+  },
+  {
     title: "Historical Pro",
     description: "Review recovered Pro scorecards, Global Player identities, source conflicts, and opponent evidence.",
     href: "/admin/import/pro",
