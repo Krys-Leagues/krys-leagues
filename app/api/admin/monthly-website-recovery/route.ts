@@ -53,7 +53,7 @@ function canonicalId(playerId: string, links: LinkRow[]) {
 
 function publicMatch(name: string, match: PlayerMatch | undefined) {
   const legacyMergedPlaceholder = isMonthlyLegacyMergedPlaceholder(name)
-  const resolved = !legacyMergedPlaceholder && Boolean(match?.playerId && match.autoLinkEligible && match.confidence === 100)
+  const resolved = Boolean(match?.playerId && match.autoLinkEligible && match.confidence === 100 && (!legacyMergedPlaceholder || match.evidence === "historical_alias"))
   return {
     key: normalizeIdentity(name),
     historicalName: name,
