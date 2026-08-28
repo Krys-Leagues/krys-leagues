@@ -5,6 +5,7 @@ import Papa from "papaparse"
 
 import { authorizedAdminClient, loadIdentityDirectory } from "@/app/api/admin/records/arizona-modern/_shared"
 import { previewMonthlyWebsiteCsvRows, type MonthlyWebsiteObservation } from "@/lib/importer/adapters/monthlyWebsiteAdapter"
+import { validateMonthlyWebsiteIdentities } from "@/lib/importer/monthlyWebsiteIdentityValidation"
 
 function jsonError(message: string, status: number, correlationId?: string) {
   return Response.json({ error: message, correlationId }, { status, headers: { "Cache-Control": "no-store" } })
@@ -108,16 +109,18 @@ export async function POST(request: Request) {
     const validSourceRows = preview.rows.filter((row) => row.importable && row.score !== null && row.issues.length === 0)
     const directory = await loadIdentityDirectory(authorization.supabase!)
     const names = [...new Set(validSourceRows.map((row) => row.historicalPlayerName))]
-    const identityByName = new Map(directory.matchNames(names).map((match) => [match.importedName, match]))
-    const canonicalByName = new Map<string, string>()
-    for (const name of names) {
-      const match = identityByName.get(name)
-      if (!match?.autoLinkEligible || !match.playerId) return jsonError(`Monthly identity review is incomplete for ${name}.`, 409, correlationId)
-      const canonicalId = directory.canonicalId(match.playerId)
-      const canonicalPlayer = directory.rawPlayers.find((player) => player.id === canonicalId && directory.canonicalId(player.id) === canonicalId)
-      if (!canonicalPlayer) return jsonError(`Monthly identity review selected a non-canonical player for ${name}.`, 409, correlationId)
-      canonicalByName.set(name, canonicalId)
+    const identityValidation = validateMonthlyWebsiteIdentities(names, directory)
+    const firstIdentityFailure = identityValidation.failures[0]
+    if (firstIdentityFailure) {
+      return jsonError(
+        firstIdentityFailure.reason === "non_canonical"
+          ? `Monthly identity review selected a non-canonical player for ${firstIdentityFailure.historicalName}.`
+          : `Monthly identity review is incomplete for ${firstIdentityFailure.historicalName}.`,
+        409,
+        correlationId,
+      )
     }
+    const canonicalByName = identityValidation.canonicalByName
 
     const incomingRows = body.p_rows.filter(isRecord)
     if (incomingRows.length !== body.p_rows.length) return jsonError("Every reviewed Monthly row must be an object.", 400, correlationId)

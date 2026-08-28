@@ -1,6 +1,9 @@
 import test from "node:test"
 import assert from "node:assert/strict"
 import { classifyMonthlyPeriod, isMonthlyLegacyMergedPlaceholder, monthlyIdentityBlocksCommit, previewMonthlyWebsiteCsvRows, previewMonthlyWebsiteViews, retainCurrentMonthlyReviewDecisions } from "./monthlyWebsiteAdapter.ts"
+import { resolveIdentity } from "../../identity/resolveIdentity.ts"
+import { matchPlayers } from "../matchPlayers.ts"
+import { validateMonthlyWebsiteIdentities } from "../monthlyWebsiteIdentityValidation.ts"
 
 const view = {
   period: "2026 August",
@@ -93,4 +96,39 @@ test("legacy merged Monthly labels remain unresolved evidence even when an alias
   assert.equal(isMonthlyLegacyMergedPlaceholder("Merged into 8189"), true)
   assert.equal(isMonthlyLegacyMergedPlaceholder("Merged into 8648"), true)
   assert.equal(isMonthlyLegacyMergedPlaceholder("A real player"), false)
+})
+
+test("Monthly identity validation accepts only an explicitly saved exact historical alias", () => {
+  const player = {
+    id: "player-julian",
+    screenName: "Julian",
+    discordName: null,
+    discordId: null,
+    active: true,
+  }
+  const alias = {
+    playerId: player.id,
+    aliasName: "𝙹𝚞𝚕𝚒𝚊𝚗",
+    normalizedAlias: "",
+    source: "historical_alias" as const,
+    verified: true,
+    active: true,
+  }
+
+  assert.equal(resolveIdentity({ importedName: alias.aliasName, players: [player], aliases: [] }).status, "unmatched")
+  const match = resolveIdentity({ importedName: alias.aliasName, players: [player], aliases: [alias] })
+  assert.equal(match.status, "alias")
+  assert.equal(match.playerId, player.id)
+  assert.equal(match.autoLinkEligible, true)
+  const directoryMatch = matchPlayers([alias.aliasName], [{ id: player.id, screen_name: player.screenName, discord_name: player.discordName, discord_username: null, discord_id: player.discordId, active: player.active }], [alias])
+  assert.equal(directoryMatch[0].autoLinkEligible, true)
+  assert.equal(directoryMatch[0].playerId, player.id)
+
+  const validation = validateMonthlyWebsiteIdentities([alias.aliasName], {
+    rawPlayers: [player],
+    canonicalId: (playerId) => playerId,
+    matchNames: () => [{ importedName: alias.aliasName, playerId: player.id, matchedName: player.screenName, confidence: 100, status: "exact", evidence: "historical_alias", autoLinkEligible: true, autoLinkReason: "verified historical alias" }],
+  })
+  assert.equal(validation.ready, true)
+  assert.equal(validation.canonicalByName.get(alias.aliasName), player.id)
 })

@@ -7,6 +7,7 @@ import { authorizedAdminClient } from "@/app/api/admin/records/arizona-modern/_s
 import { isMonthlyLegacyMergedPlaceholder, previewMonthlyWebsiteCsvRows } from "@/lib/importer/adapters/monthlyWebsiteAdapter"
 import { matchPlayers, type PlayerMatch } from "@/lib/importer/matchPlayers"
 import { normalizeIdentity } from "@/lib/identity/normalizeIdentity"
+import { validateMonthlyWebsiteIdentities } from "@/lib/importer/monthlyWebsiteIdentityValidation"
 
 type Manifest = {
   normalizedCsvSha256: string
@@ -115,6 +116,12 @@ export async function GET(request: Request) {
     const identityAliases = aliases.map(alias => ({ id: alias.id, playerId: alias.player_id, aliasName: alias.alias, normalizedAlias: alias.normalized_alias, source: "historical_alias" as const, active: true, verified: alias.verified }))
     const matchResults = matchPlayers(historicalNames, playerRecords, identityAliases, links.map(link => ({ historicalPlayerId: link.historical_player_id, canonicalPlayerId: link.canonical_player_id })))
     const identityCandidates = historicalNames.map((name, index) => publicMatch(name, matchResults[index]))
+    const validSourceRows = preview.rows.filter(row => row.importable && row.score !== null && row.issues.length === 0)
+    const serverIdentityValidation = validateMonthlyWebsiteIdentities([...new Set(validSourceRows.map(row => row.historicalPlayerName))], {
+      rawPlayers: allPlayers,
+      canonicalId: (playerId) => canonicalId(playerId, links),
+      matchNames: (names) => matchPlayers(names, allPlayers, identityAliases, links.map(link => ({ historicalPlayerId: link.historical_player_id, canonicalPlayerId: link.canonical_player_id }))),
+    })
     const scoreRowsResult = await readExistingScores(supabase)
     const existingScores = scoreRowsResult.error ? [] : scoreRowsResult.rows
     const sourceRows = preview.rows.filter(row => row.importable && row.score !== null && row.issues.length === 0)
@@ -155,7 +162,7 @@ export async function GET(request: Request) {
           missingScoreRows: periodRows.filter(row => row.score === null).length,
         }
       })
-    return Response.json({ parserVersion: "historical-monthly-website-v2-period-gated", sourceFile: "monthly-website-score-observations.csv", sourceSha256, manifest, validation: preview.summary, rows: preview.rows, periods, identityCandidates, players, aliases, links, existingImport: importsResult.error ? null : ((importsResult.data ?? []) as ExistingImportRow[]).find(row => row.source_sha256 === sourceSha256) ?? null, existingScoreCount: scoreRowsResult.error ? null : existingScores.length, productionOverlap }, { headers: { "Cache-Control": "no-store" } })
+    return Response.json({ parserVersion: "historical-monthly-website-v2-period-gated", sourceFile: "monthly-website-score-observations.csv", sourceSha256, manifest, validation: preview.summary, rows: preview.rows, periods, identityCandidates, identityValidation: { ready: serverIdentityValidation.ready, unresolvedNames: serverIdentityValidation.failures.map(failure => failure.historicalName), scoredRows: validSourceRows.length }, players, aliases, links, existingImport: importsResult.error ? null : ((importsResult.data ?? []) as ExistingImportRow[]).find(row => row.source_sha256 === sourceSha256) ?? null, existingScoreCount: scoreRowsResult.error ? null : existingScores.length, productionOverlap }, { headers: { "Cache-Control": "no-store" } })
   } catch {
     return jsonError("The preserved Monthly source could not be loaded or validated.", 500)
   }
