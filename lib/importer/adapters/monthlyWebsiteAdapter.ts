@@ -123,6 +123,47 @@ export function monthlyIdentityBlocksCommit(scoredObservations: number, hasCanon
   return scoredObservations > 0 && !hasCanonicalPlayer
 }
 
+export function isMonthlyLegacyMergedPlaceholder(name: string) {
+  return /^merged\s+into\s+\d+$/i.test(name.trim())
+}
+
+export type MonthlyReviewDecision = {
+  playerId: string
+  playerName: string
+  source: "manual"
+}
+
+export type MonthlyIdentityReviewCandidate = {
+  key: string
+  status: "resolved" | "ambiguous" | "unresolved"
+  playerId: string | null
+}
+
+/**
+ * Browser drafts are only a cache. Keep a saved decision only when the
+ * current protected identity payload independently confirms that same player.
+ * This prevents an obsolete source/parser decision from hiding a name that
+ * now requires review.
+ */
+export function retainCurrentMonthlyReviewDecisions(
+  saved: unknown,
+  candidates: MonthlyIdentityReviewCandidate[],
+) {
+  const resolved = new Map(
+    candidates
+      .filter((candidate) => candidate.status === "resolved" && candidate.playerId)
+      .map((candidate) => [candidate.key, candidate.playerId as string]),
+  )
+  const savedEntries = saved && typeof saved === "object" && !Array.isArray(saved)
+    ? Object.entries(saved as Record<string, MonthlyReviewDecision>)
+    : []
+  return Object.fromEntries(
+    savedEntries.filter(([key, decision]) =>
+      typeof decision?.playerId === "string" && resolved.get(key) === decision.playerId,
+    ),
+  ) as Record<string, MonthlyReviewDecision>
+}
+
 function fingerprint(row: Omit<MonthlyWebsiteObservation, "sourceFingerprint" | "issues" | "sourceRow" | "periodStatus" | "importable" | "periodBlockReason">) {
   return [
     "monthly-website", row.period, row.periodId, row.division, row.historicalPlayerName,

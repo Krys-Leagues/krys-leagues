@@ -4,7 +4,7 @@ import { join } from "node:path"
 import type { SupabaseClient } from "@supabase/supabase-js"
 import Papa from "papaparse"
 import { authorizedAdminClient } from "@/app/api/admin/records/arizona-modern/_shared"
-import { previewMonthlyWebsiteCsvRows } from "@/lib/importer/adapters/monthlyWebsiteAdapter"
+import { isMonthlyLegacyMergedPlaceholder, previewMonthlyWebsiteCsvRows } from "@/lib/importer/adapters/monthlyWebsiteAdapter"
 import { matchPlayers, type PlayerMatch } from "@/lib/importer/matchPlayers"
 import { normalizeIdentity } from "@/lib/identity/normalizeIdentity"
 
@@ -51,13 +51,16 @@ function canonicalId(playerId: string, links: LinkRow[]) {
 }
 
 function publicMatch(name: string, match: PlayerMatch | undefined) {
-  const resolved = Boolean(match?.playerId && match.autoLinkEligible && match.confidence === 100)
+  const legacyMergedPlaceholder = isMonthlyLegacyMergedPlaceholder(name)
+  const resolved = !legacyMergedPlaceholder && Boolean(match?.playerId && match.autoLinkEligible && match.confidence === 100)
   return {
     key: normalizeIdentity(name),
     historicalName: name,
-    status: resolved ? "resolved" as const : match?.status === "close" || match?.status === "exact" ? "ambiguous" as const : "unresolved" as const,
+    status: resolved ? "resolved" as const : legacyMergedPlaceholder ? "unresolved" as const : match?.status === "close" || match?.status === "exact" ? "ambiguous" as const : "unresolved" as const,
     playerId: resolved ? match?.playerId ?? null : null,
     playerName: resolved ? match?.matchedName ?? null : null,
+    suggestedPlayerId: resolved || legacyMergedPlaceholder ? null : match?.playerId ?? null,
+    suggestedPlayerName: resolved || legacyMergedPlaceholder ? null : match?.matchedName ?? null,
     confidence: match?.confidence ?? 0,
     evidence: match?.evidence ?? "none",
   }

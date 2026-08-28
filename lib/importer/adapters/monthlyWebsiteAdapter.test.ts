@@ -1,6 +1,6 @@
 import test from "node:test"
 import assert from "node:assert/strict"
-import { classifyMonthlyPeriod, monthlyIdentityBlocksCommit, previewMonthlyWebsiteCsvRows, previewMonthlyWebsiteViews } from "./monthlyWebsiteAdapter.ts"
+import { classifyMonthlyPeriod, isMonthlyLegacyMergedPlaceholder, monthlyIdentityBlocksCommit, previewMonthlyWebsiteCsvRows, previewMonthlyWebsiteViews, retainCurrentMonthlyReviewDecisions } from "./monthlyWebsiteAdapter.ts"
 
 const view = {
   period: "2026 August",
@@ -72,4 +72,25 @@ test("Monthly identities only block commit when scored observations need review"
   assert.equal(monthlyIdentityBlocksCommit(24, false), true)
   assert.equal(monthlyIdentityBlocksCommit(0, false), false)
   assert.equal(monthlyIdentityBlocksCommit(0, true), false)
+})
+
+test("stale Monthly review drafts cannot hide names unresolved by the current identity payload", () => {
+  const saved = {
+    unresolved: { playerId: "player-1", playerName: "Old Match", source: "manual" as const },
+    resolved: { playerId: "player-2", playerName: "Current Match", source: "manual" as const },
+    mismatched: { playerId: "player-9", playerName: "Wrong Match", source: "manual" as const },
+  }
+  const retained = retainCurrentMonthlyReviewDecisions(saved, [
+    { key: "unresolved", status: "unresolved", playerId: null },
+    { key: "resolved", status: "resolved", playerId: "player-2" },
+    { key: "mismatched", status: "resolved", playerId: "player-8" },
+  ])
+  assert.deepEqual(retained, { resolved: saved.resolved })
+  assert.deepEqual(retainCurrentMonthlyReviewDecisions(null, []), {})
+})
+
+test("legacy merged Monthly labels remain unresolved evidence even when an alias exists", () => {
+  assert.equal(isMonthlyLegacyMergedPlaceholder("Merged into 8189"), true)
+  assert.equal(isMonthlyLegacyMergedPlaceholder("Merged into 8648"), true)
+  assert.equal(isMonthlyLegacyMergedPlaceholder("A real player"), false)
 })
