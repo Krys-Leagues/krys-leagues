@@ -30,19 +30,25 @@ export async function proxy(request: NextRequest) {
 
     let permissions: AdminPermissions | null = null
     let resolutionFailed = false
-    const [{ data: siteAdmin, error: siteAdminError }, { data: soloAdmin, error: soloAdminError }] = await Promise.all([
-      session.supabase.rpc("is_current_user_site_admin"),
-      session.supabase.rpc("is_current_user_solo_admin"),
-    ])
-    if (siteAdminError || soloAdminError) {
+    const { data: siteAdmin, error: siteAdminError } = await session.supabase.rpc("is_current_user_site_admin")
+    if (siteAdminError) {
       resolutionFailed = true
       console.error("Server admin authorization failed", {
         pathname,
         siteAdminCode: siteAdminError?.code,
-        soloAdminCode: soloAdminError?.code,
       })
+    } else if (Boolean(siteAdmin)) {
+      permissions = { siteAdmin: true, soloAdmin: false }
     } else {
-      permissions = { siteAdmin: Boolean(siteAdmin), soloAdmin: Boolean(soloAdmin) }
+      const { data: soloAdmin, error: soloAdminError } = await session.supabase.rpc("is_current_user_solo_admin")
+      if (soloAdminError) {
+        resolutionFailed = true
+        console.error("Server admin authorization failed", {
+          pathname,
+        })
+      } else {
+        permissions = { siteAdmin: false, soloAdmin: Boolean(soloAdmin) }
+      }
     }
 
     const decision = decideAdminGate({ pathname, authenticated: true, permissions, resolutionFailed })
