@@ -36,6 +36,18 @@ function reviewKey(sourceSha256: string) {
   return `historical-monthly-website-review:${sourceSha256}`
 }
 
+async function readMonthlyReviewPayload() {
+  const { data } = await supabase.auth.getSession()
+  const token = data.session?.access_token
+  if (!token) throw new Error("An authenticated site-admin session is required.")
+  const response = await fetch("/api/admin/monthly-website-recovery", { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" })
+  const next = await response.json() as Payload & { error?: string }
+  if (!response.ok) throw new Error(next.error || "The preserved Monthly source could not be loaded.")
+  let saved: Record<string, Decision> = {}
+  try { saved = JSON.parse(localStorage.getItem(reviewKey(next.sourceSha256)) || "{}") as Record<string, Decision> } catch { saved = {} }
+  return { payload: next, saved }
+}
+
 function canonicalPlayer(playerId: string, players: Player[], links: Link[]) {
   const direct = new Map(links.map(link => [link.historical_player_id, link.canonical_player_id]))
   const visited = new Set<string>()
@@ -65,15 +77,8 @@ export default function MonthlyWebsiteImporter() {
     let cancelled = false
     async function load() {
       try {
-        const { data } = await supabase.auth.getSession()
-        const token = data.session?.access_token
-        if (!token) throw new Error("An authenticated site-admin session is required.")
-        const response = await fetch("/api/admin/monthly-website-recovery", { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" })
-        const next = await response.json() as Payload & { error?: string }
-        if (!response.ok) throw new Error(next.error || "The preserved Monthly source could not be loaded.")
-        let saved: Record<string, Decision> = {}
-        try { saved = JSON.parse(localStorage.getItem(reviewKey(next.sourceSha256)) || "{}") as Record<string, Decision> } catch { saved = {} }
-        if (!cancelled) { setPayload(next); setDecisions(retainCurrentMonthlyReviewDecisions(saved, next.identityCandidates)) }
+        const loaded = await readMonthlyReviewPayload()
+        if (!cancelled) { setPayload(loaded.payload); setDecisions(retainCurrentMonthlyReviewDecisions(loaded.saved, loaded.payload.identityCandidates)) }
       } catch (error) {
         if (!cancelled) setMessage(error instanceof Error ? error.message : "The Monthly source could not be loaded.")
       } finally {
@@ -132,10 +137,21 @@ export default function MonthlyWebsiteImporter() {
       })
       const result = await response.json() as { error?: string }
       if (!response.ok) throw new Error(result.error || "The identity confirmation could not be saved.")
-      setDecisions(current => ({ ...current, [key]: { ...canonical, source: "manual" } }))
-      setQueryByName(current => ({ ...current, [key]: "" }))
+      const scrollY = window.scrollY
+      const refreshed = await readMonthlyReviewPayload()
+      const refreshedDecisions = retainCurrentMonthlyReviewDecisions(
+        { ...refreshed.saved, [key]: { ...canonical, source: "manual" } },
+        refreshed.payload.identityCandidates,
+      )
+      setPayload(refreshed.payload)
+      setDecisions(refreshedDecisions)
+      setQueryByName(current => {
+        const next = { ...current }
+        delete next[key]
+        return next
+      })
       setMessage(`${names.find(person => person.key === key)?.name ?? key} is saved to the shared Global Player identity memory.`)
-      window.location.reload()
+      window.requestAnimationFrame(() => window.scrollTo({ top: scrollY, behavior: "auto" }))
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "The identity confirmation could not be saved.")
     }
