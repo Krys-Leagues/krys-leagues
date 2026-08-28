@@ -100,6 +100,25 @@ type KwtHistory = {
   points: number | null
 }
 
+type MonthlyHistory = {
+  canonicalPlayerId: string
+  playerName: string
+  year: number
+  month: number
+  division: string
+  courseName: string
+  difficulty: "easy" | "hard"
+  score: number
+  holeInOnes: number | null
+  coursePlacement: number | null
+  coursePoints: number | null
+  overallPlacement: number | null
+  coursesPlayed: number | null
+  totalStrokes: number | null
+  overallHoleInOnes: number | null
+  overallPoints: number | null
+}
+
 type CanonicalIdentity = {
   canonical_player_id: string
   canonical_screen_name: string
@@ -133,6 +152,8 @@ type PypFixtureHistory = {
 }
 
 type StatsSectionKey = "kwt" | "stroke" | "match" | "pyp" | "doubles" | "pro" | "solo" | "monthly"
+
+const monthNames = ["", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 
 function average(values: number[]) {
   return values.length > 0 ? values.reduce((total, value) => total + value, 0) / values.length : null
@@ -172,6 +193,8 @@ export default function PublicPlayerProfilePage() {
   const [pypHistoryError, setPypHistoryError] = useState("")
   const [kwtHistory, setKwtHistory] = useState<KwtHistory[]>([])
   const [kwtHistoryError, setKwtHistoryError] = useState("")
+  const [monthlyHistory, setMonthlyHistory] = useState<MonthlyHistory[]>([])
+  const [monthlyHistoryError, setMonthlyHistoryError] = useState("")
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState("")
   const [aliases, setAliases] = useState<string[]>([])
@@ -209,6 +232,7 @@ export default function PublicPlayerProfilePage() {
     setMatchHistoryError("")
     setPypHistoryError("")
     setKwtHistoryError("")
+    setMonthlyHistoryError("")
 
     const { data: identityData, error: identityError } = await supabase.rpc(
       "get_public_player_canonical_identity",
@@ -253,6 +277,7 @@ export default function PublicPlayerProfilePage() {
       pypFixtureHistoryResponse,
       kwtHistoryResponse,
       kwtCourseCatalogResponse,
+      monthlyHistoryResponse,
       avatarResponse,
       preferencesResponse,
       sessionResponse,
@@ -304,6 +329,12 @@ export default function PublicPlayerProfilePage() {
           return payload.courses || []
         })
         .catch(() => []),
+      fetch(`/api/monthlies/public?playerId=${encodeURIComponent(canonicalId)}`, { cache: "no-store" })
+        .then(async response => {
+          const payload = await response.json() as { rows?: MonthlyHistory[]; error?: string }
+          return { rows: payload.rows || [], error: response.ok ? null : payload.error || "Monthly history could not be loaded." }
+        })
+        .catch(caught => ({ rows: [] as MonthlyHistory[], error: caught instanceof Error ? caught.message : "Monthly history could not be loaded." })),
       getCanonicalPlayerAvatar(playerId).catch(() => ({ canonicalPlayerId: playerId, avatarPath: null })),
       supabase.rpc("get_public_player_profile_preferences_v6", { p_player_id: canonicalId }),
       supabase.auth.getSession(),
@@ -363,6 +394,10 @@ export default function PublicPlayerProfilePage() {
     if (kwtHistoryResponse.error) {
       setKwtHistoryError(`KWT history could not be loaded: ${kwtHistoryResponse.error.message}`)
     }
+    setMonthlyHistory(monthlyHistoryResponse.rows)
+    if (monthlyHistoryResponse.error) {
+      setMonthlyHistoryError(`Monthly history could not be loaded: ${monthlyHistoryResponse.error}`)
+    }
     setAvatarPath(avatarResponse.avatarPath)
     if (!preferencesResponse.error) {
       const loaded = Array.isArray(preferencesResponse.data) ? preferencesResponse.data[0] : preferencesResponse.data
@@ -404,7 +439,8 @@ export default function PublicPlayerProfilePage() {
   const kwtCombinedScores = orderedKwtHistory.map(history => history.total_score)
   const kwtPlacements = orderedKwtHistory.map(history => history.placement).filter((placement): placement is number => placement !== null)
   const membershipTypes = Array.from(new Set(memberships.map(membership => competitionKey(membership.league_type))))
-  const simpleCompetitionTypes = ["doubles", "pro", "solo", "monthly"].filter(type => membershipTypes.includes(type))
+  const simpleCompetitionTypes = ["doubles", "pro", "solo"].filter(type => membershipTypes.includes(type))
+  const hasMonthlySection = monthlyHistory.length > 0 || Boolean(monthlyHistoryError) || membershipTypes.includes("monthly")
   const hasStrokeSection = strokeHistory.length > 0 || Boolean(strokeHistoryError) || membershipTypes.includes("stroke")
   const hasMatchSection = matchHistory.length > 0 || Boolean(matchHistoryError) || membershipTypes.includes("match")
   const hasPypSection = pypHistory.length > 0 || Boolean(pypHistoryError) || membershipTypes.includes("pyp")
@@ -414,6 +450,7 @@ export default function PublicPlayerProfilePage() {
     ...matchHistory.map(history => `match:${history.season_number}`),
     ...pypHistory.map(history => `pyp:${history.season_number}`),
     ...orderedKwtHistory.map(history => `kwt:${history.season_number}:${history.week_number}`),
+    ...monthlyHistory.map(history => `monthly:${history.year}-${history.month}:${history.division}`),
   ])
   const recordedWins = strokeHistory.reduce((total, history) => total + history.wins, 0)
     + matchHistory.reduce((total, history) => total + history.wins, 0)
@@ -423,11 +460,11 @@ export default function PublicPlayerProfilePage() {
   const matchDraws = matchHistory.reduce((total, history) => total + history.ties, 0)
   const matchPlayed = matchWins + matchLosses + matchDraws
   const matchWinPercentage = matchPlayed > 0 ? matchWins / matchPlayed * 100 : null
-  const careerSectionCount = [orderedKwtHistory.length > 0, hasStrokeSection, hasMatchSection, hasPypSection, simpleCompetitionTypes.length > 0].filter(Boolean).length
+  const careerSectionCount = [orderedKwtHistory.length > 0, hasStrokeSection, hasMatchSection, hasPypSection, hasMonthlySection, simpleCompetitionTypes.filter(type => type !== "monthly").length > 0].filter(Boolean).length
 
   const hasCareerParticipation = memberships.length > 0 || results.length > 0 ||
     strokeHistory.length > 0 || matchHistory.length > 0 || pypHistory.length > 0 ||
-    pypFixtureHistory.length > 0 || kwtHistory.length > 0
+    pypFixtureHistory.length > 0 || kwtHistory.length > 0 || monthlyHistory.length > 0
 
   const statHighlights = [
     trophies.length > 0 ? { kind: "stat" as const, label: "Trophies", value: trophies.length } : null,
@@ -610,6 +647,24 @@ export default function PublicPlayerProfilePage() {
               </button>
               {openStatsSection === "pyp" && <div className={styles.statsSectionBody}>
                 {pypHistoryError ? <p style={historyError}>{pypHistoryError}</p> : pypHistory.length ? <><div className={styles.statsGrid}><CareerStat label="Seasons played" value={pypHistory.length} /><CareerStat label="Wins" value={pypHistory.reduce((total, history) => total + history.wins, 0)} /><CareerStat label="Losses" value={pypHistory.reduce((total, history) => total + history.losses, 0)} /><CareerStat label="Draws" value={pypHistory.reduce((total, history) => total + history.ties, 0)} /><CareerStat label="Holes won" value={pypHistory.reduce((total, history) => total + history.holes_won, 0)} /></div><div style={tableWrap}><table style={table}><thead><tr><th style={th}>Season</th><th style={th}>Division</th><th style={th}>Final Rank</th><th style={th}>Played</th><th style={th}>Wins</th><th style={th}>Draws</th><th style={th}>Losses</th><th style={th}>Points</th><th style={th}>Holes Won</th></tr></thead><tbody>{pypHistory.map(history => <tr key={history.season_id}><td style={td}>{history.season_number}</td><td style={td}>PYP D{history.division_number}</td><td style={td}>{history.division_rank}</td><td style={td}>{history.completed_game_count}</td><td style={td}>{history.wins}</td><td style={td}>{history.ties}</td><td style={td}>{history.losses}</td><td style={td}>{history.points}</td><td style={td}>{history.holes_won}</td></tr>)}</tbody></table></div>{pypHistory.map(history => { const fixtures = pypFixtureHistory.filter(fixture => fixture.season_id === history.season_id); return fixtures.length ? <details key={`fixtures-${history.season_id}`} style={historyDetails}><summary>Season {history.season_number} fixture details</summary>{fixtures.map(fixture => <p key={`${fixture.season_id}-${fixture.game_number}`} style={muted}>Round {fixture.game_number} · {fixture.player_role.toUpperCase()} vs {fixture.opponent_screen_name} · {fixture.course1_name}{fixture.course1_difficulty ? ` (${fixture.course1_difficulty})` : ""}: {fixture.player_screen_name} {fixture.course1_player_hw} – {fixture.opponent_screen_name} {fixture.course1_opponent_hw} · {fixture.course2_name}{fixture.course2_difficulty ? ` (${fixture.course2_difficulty})` : ""}: {fixture.player_screen_name} {fixture.course2_player_hw} – {fixture.opponent_screen_name} {fixture.course2_opponent_hw} · Combined {fixture.player_total_hw}–{fixture.opponent_total_hw} · {fixture.outcome}</p>)}</details> : null })}</> : <ParticipationRows memberships={memberships} type="pyp" />}
+              </div>}
+            </section>}
+
+            {hasMonthlySection && <section className={styles.statsSection}>
+              <button type="button" className={styles.statsSectionToggle} aria-expanded={openStatsSection === "monthly"} onClick={() => setOpenStatsSection(current => current === "monthly" ? null : "monthly")}>
+                <span>Monthly</span><span>{monthlyHistory.length ? `${new Set(monthlyHistory.map(history => `${history.year}-${history.month}`)).size} periods` : "Participation recorded"}</span>
+              </button>
+              {openStatsSection === "monthly" && <div className={styles.statsSectionBody}>
+                {monthlyHistoryError ? <p style={historyError}>{monthlyHistoryError}</p> : monthlyHistory.length ? <>
+                  <div className={styles.statsGrid}>
+                    <CareerStat label="Scored observations" value={monthlyHistory.length} />
+                    <CareerStat label="Periods" value={new Set(monthlyHistory.map(history => `${history.year}-${history.month}`)).size} />
+                    <CareerStat label="Overall points" value={monthlyHistory.reduce((total, history) => total + (history.overallPoints ?? 0), 0)} />
+                    <CareerStat label="Hole-in-ones" value={monthlyHistory.reduce((total, history) => total + (history.overallHoleInOnes ?? 0), 0)} />
+                  </div>
+                  <div style={tableWrap}><table style={table}><thead><tr><th style={th}>Month / Year</th><th style={th}>Division</th><th style={th}>Overall Place</th><th style={th}>Courses Played</th><th style={th}>Total Strokes</th><th style={th}>Hole-in-ones</th><th style={th}>Overall Points</th></tr></thead><tbody>{Array.from(new Map(monthlyHistory.map(history => [`${history.year}-${history.month}-${history.division}`, history])).values()).map(history => <tr key={`${history.year}-${history.month}-${history.division}`}><td style={td}>{monthNames[history.month] || history.month} {history.year}</td><td style={td}>{history.division}</td><td style={td}>{history.overallPlacement ?? "—"}</td><td style={td}>{history.coursesPlayed ?? "—"}</td><td style={td}>{history.totalStrokes ?? "—"}</td><td style={td}>{history.overallHoleInOnes ?? "—"}</td><td style={td}>{history.overallPoints ?? "—"}</td></tr>)}</tbody></table></div>
+                  <details style={historyDetails}><summary>Course-level Monthly scores</summary><div style={tableWrap}><table style={table}><thead><tr><th style={th}>Month / Year</th><th style={th}>Division</th><th style={th}>Course</th><th style={th}>Difficulty</th><th style={th}>Score</th><th style={th}>Course Place</th><th style={th}>Course Points</th><th style={th}>Hole-in-ones</th></tr></thead><tbody>{monthlyHistory.map((history, index) => <tr key={`${history.year}-${history.month}-${history.division}-${history.courseName}-${history.difficulty}-${index}`}><td style={td}>{monthNames[history.month] || history.month} {history.year}</td><td style={td}>{history.division}</td><td style={td}>{history.courseName}</td><td style={td}>{history.difficulty}</td><td style={td}>{history.score}</td><td style={td}>{history.coursePlacement ?? "—"}</td><td style={td}>{history.coursePoints ?? "—"}</td><td style={td}>{history.holeInOnes ?? "—"}</td></tr>)}</tbody></table></div></details>
+                </> : <ParticipationRows memberships={memberships} type="monthly" />}
               </div>}
             </section>}
 
