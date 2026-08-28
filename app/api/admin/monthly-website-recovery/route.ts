@@ -51,9 +51,10 @@ function canonicalId(playerId: string, links: LinkRow[]) {
   return current
 }
 
-function publicMatch(name: string, match: PlayerMatch | undefined) {
+function publicMatch(name: string, match: PlayerMatch | undefined, hasScoredRows: boolean) {
   const legacyMergedPlaceholder = isMonthlyLegacyMergedPlaceholder(name)
-  const resolved = Boolean(match?.playerId && match.autoLinkEligible && match.confidence === 100 && (!legacyMergedPlaceholder || match.evidence === "historical_alias"))
+  const numericLegacyTargetWithoutScores = legacyMergedPlaceholder && !hasScoredRows && match?.matchedName === name.replace(/^Merged into /, "")
+  const resolved = Boolean(match?.playerId && match.autoLinkEligible && match.confidence === 100 && (!legacyMergedPlaceholder || (match.evidence === "historical_alias" && !numericLegacyTargetWithoutScores)))
   return {
     key: normalizeIdentity(name),
     historicalName: name,
@@ -115,8 +116,9 @@ export async function GET(request: Request) {
     const playerRecords = players.map(player => ({ ...player }))
     const identityAliases = aliases.map(alias => ({ id: alias.id, playerId: alias.player_id, aliasName: alias.alias, normalizedAlias: alias.normalized_alias, source: "historical_alias" as const, active: true, verified: alias.verified }))
     const matchResults = matchPlayers(historicalNames, playerRecords, identityAliases, links.map(link => ({ historicalPlayerId: link.historical_player_id, canonicalPlayerId: link.canonical_player_id })))
-    const identityCandidates = historicalNames.map((name, index) => publicMatch(name, matchResults[index]))
     const validSourceRows = preview.rows.filter(row => row.importable && row.score !== null && row.issues.length === 0)
+    const scoredNames = new Set(validSourceRows.map(row => row.historicalPlayerName))
+    const identityCandidates = historicalNames.map((name, index) => publicMatch(name, matchResults[index], scoredNames.has(name)))
     const serverIdentityValidation = validateMonthlyWebsiteIdentities([...new Set(validSourceRows.map(row => row.historicalPlayerName))], {
       rawPlayers: allPlayers,
       canonicalId: (playerId) => canonicalId(playerId, links),
