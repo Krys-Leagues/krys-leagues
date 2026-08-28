@@ -161,7 +161,8 @@ export async function GET(request: Request) {
           reason: period.periodBlockReason,
           rows: periodRows.length,
           scoredRows: periodRows.filter(row => row.score !== null).length,
-          missingScoreRows: periodRows.filter(row => row.score === null).length,
+          noSubmissionRows: periodRows.filter(row => row.scoreState === "NO SUBMISSION").length,
+          malformedRows: periodRows.filter(row => row.scoreState === "MALFORMED / RECOVERY PROBLEM").length,
         }
       })
     return Response.json({ parserVersion: "historical-monthly-website-v2-period-gated", sourceFile: "monthly-website-score-observations.csv", sourceSha256, manifest, validation: preview.summary, rows: preview.rows, periods, identityCandidates, identityValidation: { ready: serverIdentityValidation.ready, unresolvedNames: serverIdentityValidation.failures.map(failure => failure.historicalName), scoredRows: validSourceRows.length }, players, aliases, links, existingImport: importsResult.error ? null : ((importsResult.data ?? []) as ExistingImportRow[]).find(row => row.source_sha256 === sourceSha256) ?? null, existingScoreCount: scoreRowsResult.error ? null : existingScores.length, productionOverlap }, { headers: { "Cache-Control": "no-store" } })

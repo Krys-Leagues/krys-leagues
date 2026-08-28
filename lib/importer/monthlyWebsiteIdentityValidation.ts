@@ -1,6 +1,6 @@
 import type { PlayerMatch } from "./matchPlayers"
 
-type MonthlyIdentityDirectory = {
+export type MonthlyIdentityDirectory = {
   rawPlayers: Array<{ id: string }>
   canonicalId: (playerId: string) => string
   matchNames: (names: string[]) => PlayerMatch[]
