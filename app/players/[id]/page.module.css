@@ -186,6 +186,129 @@
   overflow-x: auto;
 }
 
+.monthlyHistoryList {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.monthlyPeriodCard {
+  overflow: hidden;
+  border: 1px solid #ffffff24;
+  border-radius: 14px;
+  background: #02061752;
+}
+
+.monthlyPeriodHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 16px;
+}
+
+.monthlyPeriodTitle {
+  margin: 0;
+  font-size: 1.18rem;
+}
+
+.monthlyPeriodDivision {
+  margin: 5px 0 0;
+  color: #7dd3fc;
+  font-size: .82rem;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.monthlyPeriodSummary {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px 14px;
+  color: #cbd5e1;
+  font-size: .82rem;
+}
+
+.monthlyPeriodSummary span {
+  display: grid;
+  gap: 2px;
+  text-align: right;
+}
+
+.monthlyPeriodSummary strong {
+  color: #f8fafc;
+  font-size: 1.05rem;
+}
+
+.monthlyCourseDetails {
+  border-top: 1px solid #ffffff1f;
+}
+
+.monthlyCourseDetails summary {
+  padding: 12px 16px;
+  color: #bae6fd;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.monthlyCourseGroups {
+  display: grid;
+  gap: 12px;
+  padding: 0 16px 16px;
+}
+
+.monthlyCourseGroup {
+  padding: 12px;
+  border: 1px solid #ffffff1c;
+  border-radius: 11px;
+  background: #02061752;
+}
+
+.monthlyCourseGroup h5 {
+  margin: 0 0 10px;
+  color: #e0f2fe;
+  font-size: 1rem;
+}
+
+.monthlyDifficultyCards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.monthlyDifficultyCard {
+  display: grid;
+  gap: 4px;
+  padding: 11px;
+  border-left: 3px solid #4ade80;
+  border-radius: 8px;
+  background: #052e1b66;
+  color: #d1fae5;
+  font-size: .84rem;
+}
+
+.monthlyDifficultyCard strong {
+  color: #86efac;
+  font-size: .75rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.monthlyDifficultyCard b {
+  color: #f8fafc;
+}
+
+.monthlyHardCard {
+  border-left-color: #fb7185;
+  background: #4c051966;
+  color: #fecdd3;
+}
+
+.monthlyHardCard strong {
+  color: #fda4af;
+}
+
 .kwtMapViewControl {
   display: flex;
   flex-wrap: wrap;
@@ -418,5 +541,9 @@
   .featuredTrophy { grid-template-columns: 1fr; justify-items: center; text-align: center; }
   .highlightGrid { grid-template-columns: 1fr 1fr; }
   .trophyGrid { grid-template-columns: 1fr; }
+  .monthlyPeriodHeader { display: grid; }
+  .monthlyPeriodSummary { justify-content: flex-start; }
+  .monthlyPeriodSummary span { text-align: left; }
+  .monthlyDifficultyCards { grid-template-columns: 1fr; }
   .trophyMedia { height: clamp(280px, 92vw, 380px); }
 }

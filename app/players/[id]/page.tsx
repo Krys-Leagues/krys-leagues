@@ -15,6 +15,7 @@ import type { PublicCourse } from "@/lib/all-time/public-records"
 import styles from "./page.module.css"
 import TrophyMedia from "@/components/TrophyMedia"
 import PlayerCourseRecords from "@/components/records/PlayerCourseRecords"
+import { calculateMonthlyCareerStats, monthlyCourseMapName, uniqueMonthlyPeriodRecords, type MonthlyPresentationRow } from "@/lib/monthlyPresentation"
 
 type Player = {
   id: string
@@ -100,24 +101,7 @@ type KwtHistory = {
   points: number | null
 }
 
-type MonthlyHistory = {
-  canonicalPlayerId: string
-  playerName: string
-  year: number
-  month: number
-  division: string
-  courseName: string
-  difficulty: "easy" | "hard"
-  score: number
-  holeInOnes: number | null
-  coursePlacement: number | null
-  coursePoints: number | null
-  overallPlacement: number | null
-  coursesPlayed: number | null
-  totalStrokes: number | null
-  overallHoleInOnes: number | null
-  overallPoints: number | null
-}
+type MonthlyHistory = MonthlyPresentationRow
 
 type CanonicalIdentity = {
   canonical_player_id: string
@@ -161,6 +145,12 @@ function average(values: number[]) {
 
 function formatAverage(value: number | null) {
   return value === null ? "—" : value.toFixed(2)
+}
+
+function formatPlacement(value: number | null) {
+  if (value === null) return "—"
+  const suffix = value % 100 >= 11 && value % 100 <= 13 ? "th" : ({ 1: "st", 2: "nd", 3: "rd" } as Record<number, string>)[value % 10] || "th"
+  return `${value}${suffix}`
 }
 
 function competitionKey(value: string | null) {
@@ -438,6 +428,8 @@ export default function PublicPlayerProfilePage() {
   const kwtHardScores = orderedKwtHistory.map(history => history.hard_score)
   const kwtCombinedScores = orderedKwtHistory.map(history => history.total_score)
   const kwtPlacements = orderedKwtHistory.map(history => history.placement).filter((placement): placement is number => placement !== null)
+  const monthlyPeriodRecords = uniqueMonthlyPeriodRecords(monthlyHistory)
+  const monthlyCareerStats = calculateMonthlyCareerStats(monthlyHistory)
   const membershipTypes = Array.from(new Set(memberships.map(membership => competitionKey(membership.league_type))))
   const simpleCompetitionTypes = ["doubles", "pro", "solo"].filter(type => membershipTypes.includes(type))
   const hasMonthlySection = monthlyHistory.length > 0 || Boolean(monthlyHistoryError) || membershipTypes.includes("monthly")
@@ -652,18 +644,29 @@ export default function PublicPlayerProfilePage() {
 
             {hasMonthlySection && <section className={styles.statsSection}>
               <button type="button" className={styles.statsSectionToggle} aria-expanded={openStatsSection === "monthly"} onClick={() => setOpenStatsSection(current => current === "monthly" ? null : "monthly")}>
-                <span>Monthly</span><span>{monthlyHistory.length ? `${new Set(monthlyHistory.map(history => `${history.year}-${history.month}`)).size} periods` : "Participation recorded"}</span>
+                <span>Monthly Stats</span><span>{monthlyHistory.length ? `${monthlyPeriodRecords.length} period records` : "Participation recorded"}</span>
               </button>
               {openStatsSection === "monthly" && <div className={styles.statsSectionBody}>
                 {monthlyHistoryError ? <p style={historyError}>{monthlyHistoryError}</p> : monthlyHistory.length ? <>
+                  <p className={styles.sectionDescription}>Career statistics from authoritative scored Monthly observations only. No-submission course slots are not counted.</p>
                   <div className={styles.statsGrid}>
-                    <CareerStat label="Scored observations" value={monthlyHistory.length} />
-                    <CareerStat label="Periods" value={new Set(monthlyHistory.map(history => `${history.year}-${history.month}`)).size} />
-                    <CareerStat label="Overall points" value={monthlyHistory.reduce((total, history) => total + (history.overallPoints ?? 0), 0)} />
-                    <CareerStat label="Hole-in-ones" value={monthlyHistory.reduce((total, history) => total + (history.overallHoleInOnes ?? 0), 0)} />
+                    <CareerStat label="Monthly Events Played" value={monthlyCareerStats.eventsPlayed} />
+                    <CareerStat label="Total Scored Courses" value={monthlyCareerStats.scoredCourses} />
+                    <CareerStat label="Average Course Score" value={formatAverage(monthlyCareerStats.averageCourseScore)} />
+                    <CareerStat label="Best Course Score" value={monthlyCareerStats.bestCourseScore ?? "—"} />
+                    <CareerStat label="Total Hole-in-Ones" value={monthlyCareerStats.totalHoleInOnes ?? "—"} />
+                    <CareerStat label="Average Hole-in-Ones / Scored Course" value={formatAverage(monthlyCareerStats.averageHoleInOnes)} />
+                    <CareerStat label="Best Overall Monthly Finish" value={formatPlacement(monthlyCareerStats.bestOverallFinish)} />
+                    <CareerStat label="Monthly Wins" value={monthlyCareerStats.wins} />
+                    <CareerStat label="Monthly Top-3 Finishes" value={monthlyCareerStats.topThreeFinishes} />
+                    <CareerStat label="Total Monthly Points" value={monthlyCareerStats.totalPoints ?? "—"} />
+                    <CareerStat label="Average Monthly Points" value={formatAverage(monthlyCareerStats.averagePoints)} />
+                    <CareerStat label="Best Monthly Total Strokes" value={monthlyCareerStats.bestTotalStrokes ?? "—"} />
+                    <CareerStat label="Average Monthly Total Strokes" value={formatAverage(monthlyCareerStats.averageTotalStrokes)} />
                   </div>
-                  <div style={tableWrap}><table style={table}><thead><tr><th style={th}>Month / Year</th><th style={th}>Division</th><th style={th}>Overall Place</th><th style={th}>Courses Played</th><th style={th}>Total Strokes</th><th style={th}>Hole-in-ones</th><th style={th}>Overall Points</th></tr></thead><tbody>{Array.from(new Map(monthlyHistory.map(history => [`${history.year}-${history.month}-${history.division}`, history])).values()).map(history => <tr key={`${history.year}-${history.month}-${history.division}`}><td style={td}>{monthNames[history.month] || history.month} {history.year}</td><td style={td}>{history.division}</td><td style={td}>{history.overallPlacement ?? "—"}</td><td style={td}>{history.coursesPlayed ?? "—"}</td><td style={td}>{history.totalStrokes ?? "—"}</td><td style={td}>{history.overallHoleInOnes ?? "—"}</td><td style={td}>{history.overallPoints ?? "—"}</td></tr>)}</tbody></table></div>
-                  <details style={historyDetails}><summary>Course-level Monthly scores</summary><div style={tableWrap}><table style={table}><thead><tr><th style={th}>Month / Year</th><th style={th}>Division</th><th style={th}>Course</th><th style={th}>Difficulty</th><th style={th}>Score</th><th style={th}>Course Place</th><th style={th}>Course Points</th><th style={th}>Hole-in-ones</th></tr></thead><tbody>{monthlyHistory.map((history, index) => <tr key={`${history.year}-${history.month}-${history.division}-${history.courseName}-${history.difficulty}-${index}`}><td style={td}>{monthNames[history.month] || history.month} {history.year}</td><td style={td}>{history.division}</td><td style={td}>{history.courseName}</td><td style={td}>{history.difficulty}</td><td style={td}>{history.score}</td><td style={td}>{history.coursePlacement ?? "—"}</td><td style={td}>{history.coursePoints ?? "—"}</td><td style={td}>{history.holeInOnes ?? "—"}</td></tr>)}</tbody></table></div></details>
+                  <div className={styles.monthlyHistoryList}>
+                    {monthlyPeriodRecords.map(period => <MonthlyPeriodCard key={`${period.year}-${period.month}-${period.division}`} period={period} rows={monthlyHistory.filter(row => row.year === period.year && row.month === period.month && row.division === period.division)} />)}
+                  </div>
                 </> : <ParticipationRows memberships={memberships} type="monthly" />}
               </div>}
             </section>}
@@ -728,6 +731,50 @@ function ParticipationRows({ memberships, type }: { memberships: Membership[]; t
   return rows.length > 0
     ? <div className={styles.statsParticipationGrid}>{rows.map(membership => <div key={membership.id} className={styles.statCard}><strong>{membership.division || "Division not listed"}</strong><span>Season {membership.season_number ?? "?"}</span></div>)}</div>
     : <p style={muted}>No detailed {competitionLabel(type)} history is available for this profile.</p>
+}
+
+function MonthlyPeriodCard({ period, rows }: { period: MonthlyHistory; rows: MonthlyHistory[] }) {
+  const courseGroups = Array.from(rows.reduce((groups, row) => {
+    const name = monthlyCourseMapName(row.courseName)
+    const group = groups.get(name) || { name, easy: [] as MonthlyHistory[], hard: [] as MonthlyHistory[] }
+    group[row.difficulty].push(row)
+    groups.set(name, group)
+    return groups
+  }, new Map<string, { name: string; easy: MonthlyHistory[]; hard: MonthlyHistory[] }>()).values())
+    .sort((left, right) => left.name.localeCompare(right.name))
+
+  return <article className={styles.monthlyPeriodCard}>
+    <div className={styles.monthlyPeriodHeader}>
+      <div>
+        <h4 className={styles.monthlyPeriodTitle}>{monthNames[period.month] || period.month} {period.year}</h4>
+        <p className={styles.monthlyPeriodDivision}>{period.division}</p>
+      </div>
+      <div className={styles.monthlyPeriodSummary}>
+        <span><strong>{formatPlacement(period.overallPlacement)}</strong> Overall Place</span>
+        <span><strong>{period.coursesPlayed ?? "—"}</strong> Courses Played</span>
+        <span><strong>{period.totalStrokes ?? "—"}</strong> Total Strokes</span>
+        <span><strong>{period.overallHoleInOnes ?? "—"}</strong> Hole-in-Ones</span>
+        <span><strong>{period.overallPoints ?? "—"}</strong> Overall Points</span>
+      </div>
+    </div>
+    <details className={styles.monthlyCourseDetails}>
+      <summary>View Course Scores</summary>
+      <div className={styles.monthlyCourseGroups}>
+        {courseGroups.map(group => <section key={group.name} className={styles.monthlyCourseGroup}>
+          <h5>{group.name}</h5>
+          <div className={styles.monthlyDifficultyCards}>
+            {(["easy", "hard"] as const).map(difficulty => group[difficulty].map(row => <div key={`${row.courseName}-${difficulty}`} className={`${styles.monthlyDifficultyCard} ${difficulty === "hard" ? styles.monthlyHardCard : styles.monthlyEasyCard}`}>
+              <strong>{difficulty}</strong>
+              <span>Score <b>{row.score}</b></span>
+              <span>HIO <b>{row.holeInOnes ?? "—"}</b></span>
+              <span>Place <b>{formatPlacement(row.coursePlacement)}</b></span>
+              <span>Points <b>{row.coursePoints ?? "—"}</b></span>
+            </div>))}
+          </div>
+        </section>)}
+      </div>
+    </details>
+  </article>
 }
 
 const page: React.CSSProperties = {

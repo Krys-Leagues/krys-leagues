@@ -2,34 +2,33 @@
 
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
+import styles from "./page.module.css"
+import { monthlyCourseMapName, type MonthlyPresentationRow } from "@/lib/monthlyPresentation"
 
-type MonthlyRow = {
-  canonicalPlayerId: string
-  playerName: string
+type MonthlyRow = MonthlyPresentationRow
+
+type PeriodOption = {
+  year: number
+  month: number
+  divisions: string[]
+}
+
+type Selection = {
   year: number
   month: number
   division: string
-  courseName: string
-  difficulty: "easy" | "hard"
-  score: number
-  holeInOnes: number | null
-  coursePlacement: number | null
-  coursePoints: number | null
-  overallPlacement: number | null
-  coursesPlayed: number | null
-  totalStrokes: number | null
-  overallHoleInOnes: number | null
-  overallPoints: number | null
+}
+
+type MonthlyPayload = {
+  rows?: MonthlyRow[]
+  availablePeriods?: PeriodOption[]
+  selected?: Selection
+  error?: string
 }
 
 const monthNames = ["", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 
-function periodKey(row: Pick<MonthlyRow, "year" | "month">) {
-  return `${row.year}-${String(row.month).padStart(2, "0")}`
-}
-
-function periodLabel(key: string) {
-  const [year, month] = key.split("-").map(Number)
+function periodLabel(year: number, month: number) {
   return `${monthNames[month] || "Unknown month"} ${year}`
 }
 
@@ -37,94 +36,169 @@ function displayValue(value: number | null) {
   return value === null ? "—" : value
 }
 
+function placementLabel(value: number | null) {
+  if (value === null) return "—"
+  const suffix = value % 100 >= 11 && value % 100 <= 13 ? "th" : ({ 1: "st", 2: "nd", 3: "rd" } as Record<number, string>)[value % 10] || "th"
+  return `${value}${suffix}`
+}
+
+function sameSelection(left: Selection | null, right: Selection | null) {
+  return Boolean(left && right && left.year === right.year && left.month === right.month && left.division === right.division)
+}
+
 export default function MonthliesPage() {
   const [rows, setRows] = useState<MonthlyRow[]>([])
-  const [selectedYear, setSelectedYear] = useState("")
-  const [selectedMonth, setSelectedMonth] = useState("")
-  const [selectedDivision, setSelectedDivision] = useState("")
+  const [periodOptions, setPeriodOptions] = useState<PeriodOption[]>([])
+  const [selection, setSelection] = useState<Selection | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
 
   useEffect(() => {
+    const controller = new AbortController()
     let active = true
-    fetch("/api/monthlies/public", { cache: "no-store" })
+    const params = new URLSearchParams()
+    if (selection) {
+      params.set("year", String(selection.year))
+      params.set("month", String(selection.month))
+      if (selection.division) params.set("division", selection.division)
+    }
+
+    fetch(`/api/monthlies/public${params.size ? `?${params.toString()}` : ""}`, { cache: "no-store", signal: controller.signal })
       .then(async response => {
-        const payload = await response.json() as { rows?: MonthlyRow[]; error?: string }
+        const payload = await response.json() as MonthlyPayload
         if (!response.ok) throw new Error(payload.error || "Monthly history could not be loaded.")
-        if (active) setRows(payload.rows || [])
+        if (!active) return
+        setRows(payload.rows || [])
+        setPeriodOptions(payload.availablePeriods || [])
+        if (payload.selected && !sameSelection(selection, payload.selected)) {
+          setLoading(true)
+          setSelection(payload.selected)
+        }
+        setError("")
       })
       .catch(caught => {
-        if (active) setError(caught instanceof Error ? caught.message : "Monthly history could not be loaded.")
+        if (active && !(caught instanceof DOMException && caught.name === "AbortError")) setError(caught instanceof Error ? caught.message : "Monthly history could not be loaded.")
       })
       .finally(() => {
         if (active) setLoading(false)
       })
-    return () => { active = false }
-  }, [])
 
-  const years = useMemo(() => Array.from(new Set(rows.map(row => row.year))).sort((left, right) => right - left), [rows])
-  const months = useMemo(() => Array.from(new Set(rows.filter(row => !selectedYear || row.year === Number(selectedYear)).map(row => row.month))).sort((left, right) => left - right), [rows, selectedYear])
-  const divisions = useMemo(() => Array.from(new Set(rows.filter(row => (!selectedYear || row.year === Number(selectedYear)) && (!selectedMonth || row.month === Number(selectedMonth))).map(row => row.division))).sort((left, right) => left.localeCompare(right)), [rows, selectedMonth, selectedYear])
+    return () => {
+      active = false
+      controller.abort()
+    }
+  }, [selection])
 
-  useEffect(() => {
-    if (selectedYear && !years.includes(Number(selectedYear))) setSelectedYear("")
-    if (selectedMonth && !months.includes(Number(selectedMonth))) setSelectedMonth("")
-    if (selectedDivision && !divisions.includes(selectedDivision)) setSelectedDivision("")
-  }, [divisions, months, selectedDivision, selectedMonth, selectedYear, years])
+  const yearOptions = useMemo(() => Array.from(new Set(periodOptions.map(period => period.year))).sort((left, right) => right - left), [periodOptions])
+  const monthOptions = useMemo(() => Array.from(new Set(periodOptions.filter(period => !selection || period.year === selection.year).map(period => period.month))).sort((left, right) => left - right), [periodOptions, selection])
+  const divisionOptions = useMemo(() => {
+    const period = periodOptions.find(option => option.year === selection?.year && option.month === selection?.month)
+    return period?.divisions || []
+  }, [periodOptions, selection])
+  const sortedPeriods = useMemo(() => [...periodOptions].sort((left, right) => right.year - left.year || right.month - left.month), [periodOptions])
+  const currentPeriodIndex = sortedPeriods.findIndex(period => period.year === selection?.year && period.month === selection?.month)
 
-  const filteredRows = rows.filter(row =>
-    (!selectedYear || row.year === Number(selectedYear)) &&
-    (!selectedMonth || row.month === Number(selectedMonth)) &&
-    (!selectedDivision || row.division === selectedDivision)
-  )
-  const periodCount = new Set(filteredRows.map(periodKey)).size
-  const summaryRows = Array.from(new Map(filteredRows.map(row => [`${row.canonicalPlayerId}:${row.division}:${periodKey(row)}`, row])).values())
-    .sort((left, right) => (left.overallPlacement ?? Number.MAX_SAFE_INTEGER) - (right.overallPlacement ?? Number.MAX_SAFE_INTEGER) || left.playerName.localeCompare(right.playerName))
+  const summaryRows = useMemo(() => Array.from(new Map(rows.map(row => [row.canonicalPlayerId, row])).values())
+    .sort((left, right) => (left.overallPlacement ?? Number.MAX_SAFE_INTEGER) - (right.overallPlacement ?? Number.MAX_SAFE_INTEGER) || left.playerName.localeCompare(right.playerName)), [rows])
+
+  const courseGroups = useMemo(() => {
+    const groups = new Map<string, { name: string; easy: MonthlyRow[]; hard: MonthlyRow[] }>()
+    for (const row of rows) {
+      const name = monthlyCourseMapName(row.courseName)
+      const group = groups.get(name) || { name, easy: [], hard: [] }
+      group[row.difficulty].push(row)
+      groups.set(name, group)
+    }
+    return Array.from(groups.values()).sort((left, right) => left.name.localeCompare(right.name))
+  }, [rows])
+
+  function updateSelection(field: keyof Selection, value: string) {
+    if (!selection) return
+    const numericValue = field === "year" || field === "month" ? Number(value) : value
+    setLoading(true)
+    setSelection({ ...selection, [field]: numericValue } as Selection)
+  }
+
+  function movePeriod(offset: number) {
+    const period = sortedPeriods[currentPeriodIndex + offset]
+    if (!period) return
+    setLoading(true)
+    setSelection({ year: period.year, month: period.month, division: period.divisions[0] || "" })
+  }
 
   return (
-    <main style={page}>
-      <div style={container}>
-        <Link href="/" style={backButton}>← Krys Leagues</Link>
+    <main className={styles.page}>
+      <div className={styles.container}>
+        <Link href="/" className={styles.backLink}>← Krys Leagues</Link>
 
-        <section style={hero}>
-          <p style={eyebrow}>Public results</p>
-          <h1 style={title}>📅 Monthly Results</h1>
-          <p style={subtitle}>Browse completed historical Monthly results by year, month, and division. Names shown here are current canonical Global Player names; current and incomplete periods are excluded.</p>
-          <div style={summaryGrid}>
-            <Summary label="Historical periods" value={new Set(rows.map(periodKey)).size} />
-            <Summary label="Scored observations" value={rows.length.toLocaleString()} />
-            <Summary label="Shown periods" value={periodCount} />
+        <section className={styles.hero}>
+          <p className={styles.eyebrow}>Krys Leagues · Monthly</p>
+          <div className={styles.periodHeading}>
+            <div>
+              <h1 className={styles.title}>{selection ? `${periodLabel(selection.year, selection.month).toUpperCase()} MONTHLY RESULTS` : "MONTHLY RESULTS"}</h1>
+              {selection?.division && <p className={styles.divisionTitle}>{selection.division}</p>}
+            </div>
+            <p className={styles.periodHint}>Completed historical results</p>
+          </div>
+          <p className={styles.subtitle}>Browse one completed month and division at a time. Player names are current canonical Global Player names; current and incomplete periods are excluded.</p>
+
+          <div className={styles.controls} aria-label="Monthly result filters">
+            <label className={styles.filter}>Year
+              <select className={styles.select} value={selection?.year || ""} onChange={event => updateSelection("year", event.target.value)} disabled={!selection}>
+                {yearOptions.map(year => <option key={year} value={year}>{year}</option>)}
+              </select>
+            </label>
+            <label className={styles.filter}>Month
+              <select className={styles.select} value={selection?.month || ""} onChange={event => updateSelection("month", event.target.value)} disabled={!selection}>
+                {monthOptions.map(month => <option key={month} value={month}>{monthNames[month]}</option>)}
+              </select>
+            </label>
+            <label className={styles.filter}>Division
+              <select className={styles.select} value={selection?.division || ""} onChange={event => updateSelection("division", event.target.value)} disabled={!selection}>
+                {divisionOptions.map(division => <option key={division} value={division}>{division}</option>)}
+              </select>
+            </label>
+          </div>
+
+          <div className={styles.periodNav} aria-label="Monthly period navigation">
+            <button type="button" className={styles.navButton} onClick={() => movePeriod(1)} disabled={currentPeriodIndex < 0 || currentPeriodIndex >= sortedPeriods.length - 1}>← Previous Month</button>
+            <span className={styles.periodHint}>{selection ? periodLabel(selection.year, selection.month) : "Loading completed periods…"}</span>
+            <button type="button" className={styles.navButton} onClick={() => movePeriod(-1)} disabled={currentPeriodIndex <= 0}>Next Month →</button>
           </div>
         </section>
 
-        {loading && <section style={card}><p>Loading completed Monthly results...</p></section>}
-        {error && <section style={errorCard}><p>{error}</p></section>}
-        {!loading && !error && rows.length === 0 && <section style={card}><p>No completed historical Monthly results are available yet.</p></section>}
+        {loading && <section className={styles.status}>Loading the selected Monthly results…</section>}
+        {error && <section className={`${styles.status} ${styles.error}`} role="alert">{error}</section>}
+        {!loading && !error && rows.length === 0 && <section className={styles.status}>No completed results are available for this selection.</section>}
 
         {!loading && !error && rows.length > 0 && <>
-          <section style={card} aria-label="Monthly result filters">
-            <div style={filterGrid}>
-              <Filter label="Year" value={selectedYear} onChange={setSelectedYear} options={years.map(year => [String(year), String(year)])} />
-              <Filter label="Month" value={selectedMonth} onChange={setSelectedMonth} options={months.map(month => [String(month), monthNames[month]])} />
-              <Filter label="Division" value={selectedDivision} onChange={setSelectedDivision} options={divisions.map(division => [division, division])} />
+          <section className={styles.section} aria-label="Monthly overall standings">
+            <div className={styles.sectionHeader}>
+              <div><p className={styles.eyebrow}>Overall standings</p><h2 className={styles.sectionTitle}>{selection ? periodLabel(selection.year, selection.month) : "Monthly results"}</h2></div>
+              <span className={styles.sectionMeta}>{summaryRows.length} players</span>
             </div>
-          </section>
-
-          <section style={card} aria-label="Monthly overall standings">
-            <div style={sectionHeading}><div><p style={eyebrow}>Overall standings / summary</p><h2 style={sectionTitle}>{selectedYear || selectedMonth || selectedDivision ? "Filtered Monthly results" : "All completed Monthly results"}</h2></div><span style={count}>{summaryRows.length} player/division entries</span></div>
-            <div style={tableWrap}>
-              <table style={table}><thead><tr><th>Player</th><th>Division</th><th>Period</th><th>Overall place</th><th>Courses played</th><th>Total strokes</th><th>Hole-in-ones</th><th>Overall points</th></tr></thead>
-                <tbody>{summaryRows.map(row => <tr key={`${row.canonicalPlayerId}-${row.division}-${periodKey(row)}`}><td><Link href={`/players/${row.canonicalPlayerId}`} style={playerLink}>{row.playerName}</Link></td><td>{row.division}</td><td>{periodLabel(periodKey(row))}</td><td>{displayValue(row.overallPlacement)}</td><td>{displayValue(row.coursesPlayed)}</td><td>{displayValue(row.totalStrokes)}</td><td>{displayValue(row.overallHoleInOnes)}</td><td>{displayValue(row.overallPoints)}</td></tr>)}</tbody>
+            <div className={styles.tableWrap}>
+              <table className={styles.table}>
+                <thead><tr><th>Place</th><th>Player</th><th>Courses Played</th><th>Total Strokes</th><th>Hole-in-Ones</th><th>Overall Points</th></tr></thead>
+                <tbody>{summaryRows.map(row => <tr key={row.canonicalPlayerId}>
+                  <td className={styles.place}>{placementLabel(row.overallPlacement)}</td>
+                  <td><Link href={`/players/${row.canonicalPlayerId}`} className={styles.playerLink}>{row.playerName}</Link></td>
+                  <td>{displayValue(row.coursesPlayed)}</td><td>{displayValue(row.totalStrokes)}</td><td>{displayValue(row.overallHoleInOnes)}</td><td>{displayValue(row.overallPoints)}</td>
+                </tr>)}</tbody>
               </table>
             </div>
           </section>
 
-          <section style={card} aria-label="Monthly course results">
-            <div style={sectionHeading}><div><p style={eyebrow}>Course results</p><h2 style={sectionTitle}>Scores and course placements</h2></div><span style={count}>{filteredRows.length} scored observations</span></div>
-            <div style={tableWrap}>
-              <table style={table}><thead><tr><th>Player</th><th>Period</th><th>Division</th><th>Course</th><th>Difficulty</th><th>Score</th><th>Hole-in-ones</th><th>Course place</th><th>Course points</th></tr></thead>
-                <tbody>{filteredRows.map((row, index) => <tr key={`${row.canonicalPlayerId}-${periodKey(row)}-${row.division}-${row.courseName}-${row.difficulty}-${index}`}><td><Link href={`/players/${row.canonicalPlayerId}`} style={playerLink}>{row.playerName}</Link></td><td>{periodLabel(periodKey(row))}</td><td>{row.division}</td><td>{row.courseName}</td><td style={{ color: row.difficulty === "easy" ? "#86efac" : "#fca5a5", fontWeight: 700 }}>{row.difficulty}</td><td><strong>{row.score}</strong></td><td>{displayValue(row.holeInOnes)}</td><td>{displayValue(row.coursePlacement)}</td><td>{displayValue(row.coursePoints)}</td></tr>)}</tbody>
-              </table>
+          <section className={styles.section} aria-label="Monthly course results">
+            <div className={styles.sectionHeader}><div><p className={styles.eyebrow}>Course results</p><h2 className={styles.sectionTitle}>Maps and course placements</h2></div><span className={styles.sectionMeta}>{courseGroups.length} maps</span></div>
+            <div className={styles.courseGrid}>
+              {courseGroups.map(group => <article key={group.name} className={styles.courseCard}>
+                <h3 className={styles.courseTitle}>{group.name}</h3>
+                <div className={styles.difficultyGrid}>
+                  <DifficultyTable difficulty="easy" rows={group.easy} />
+                  <DifficultyTable difficulty="hard" rows={group.hard} />
+                </div>
+              </article>)}
             </div>
           </section>
         </>}
@@ -133,31 +207,18 @@ export default function MonthliesPage() {
   )
 }
 
-function Filter({ label, value, onChange, options }: { label: string; value: string; onChange: (value: string) => void; options: Array<[string, string]> }) {
-  return <label style={filterLabel}>{label}<select value={value} onChange={event => onChange(event.target.value)} style={select}><option value="">All</option>{options.map(([optionValue, optionLabel]) => <option key={optionValue} value={optionValue}>{optionLabel}</option>)}</select></label>
+function DifficultyTable({ difficulty, rows }: { difficulty: "easy" | "hard"; rows: MonthlyRow[] }) {
+  return <div className={`${styles.difficultyPanel} ${difficulty === "hard" ? styles.hard : ""}`}>
+    <h4 className={styles.difficultyHeading}>{difficulty}</h4>
+    {rows.length === 0 ? <p className={styles.emptyCourse}>No submitted scores</p> : <div className={styles.tableWrap}>
+      <table className={styles.table}>
+        <thead><tr><th>Place</th><th>Player</th><th>Score</th><th>HIO</th><th>Points</th></tr></thead>
+        <tbody>{rows.slice().sort((left, right) => (left.coursePlacement ?? Number.MAX_SAFE_INTEGER) - (right.coursePlacement ?? Number.MAX_SAFE_INTEGER) || left.playerName.localeCompare(right.playerName)).map((row, index) => <tr key={`${row.canonicalPlayerId}-${row.courseName}-${row.difficulty}-${index}`}>
+          <td className={styles.place}>{placementLabel(row.coursePlacement)}</td>
+          <td><Link href={`/players/${row.canonicalPlayerId}`} className={styles.playerLink}>{row.playerName}</Link></td>
+          <td><strong>{row.score}</strong></td><td>{displayValue(row.holeInOnes)}</td><td>{displayValue(row.coursePoints)}</td>
+        </tr>)}</tbody>
+      </table>
+    </div>}
+  </div>
 }
-
-function Summary({ label, value }: { label: string; value: string | number }) {
-  return <div style={summaryCard}><span>{label}</span><strong>{value}</strong></div>
-}
-
-const page: React.CSSProperties = { minHeight: "100vh", background: "radial-gradient(circle at top, #172554 0%, #020617 48%, #000000 100%)", color: "white", padding: "30px 18px" }
-const container: React.CSSProperties = { width: "100%", maxWidth: 1500, margin: "0 auto" }
-const backButton: React.CSSProperties = { display: "inline-block", marginBottom: 18, padding: "10px 16px", background: "#1e293b", border: "1px solid #475569", borderRadius: 10, color: "white", textDecoration: "none", fontWeight: 700 }
-const hero: React.CSSProperties = { padding: 26, background: "rgba(2, 6, 23, 0.9)", border: "1px solid #334155", borderRadius: 20, marginBottom: 20 }
-const eyebrow: React.CSSProperties = { margin: "0 0 8px", color: "#93c5fd", fontSize: 13, fontWeight: 800, letterSpacing: ".1em", textTransform: "uppercase" }
-const title: React.CSSProperties = { margin: 0, fontSize: 42 }
-const sectionTitle: React.CSSProperties = { margin: 0, fontSize: 28 }
-const subtitle: React.CSSProperties = { color: "#cbd5e1", fontSize: 18, lineHeight: 1.5, maxWidth: 1000 }
-const summaryGrid: React.CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: 14, marginTop: 22, maxWidth: 720 }
-const summaryCard: React.CSSProperties = { display: "grid", gap: 6, padding: 16, background: "#0f172a", border: "1px solid #334155", borderRadius: 12 }
-const card: React.CSSProperties = { background: "#0f172a", border: "1px solid #334155", borderRadius: 16, padding: 24, marginBottom: 20 }
-const errorCard: React.CSSProperties = { ...card, color: "#fecaca" }
-const filterGrid: React.CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: 16 }
-const filterLabel: React.CSSProperties = { display: "grid", gap: 6, color: "#cbd5e1", fontWeight: 700 }
-const select: React.CSSProperties = { minWidth: 160, padding: "10px 12px", background: "#020617", border: "1px solid #475569", borderRadius: 8, color: "white" }
-const sectionHeading: React.CSSProperties = { display: "flex", justifyContent: "space-between", alignItems: "end", gap: 18, flexWrap: "wrap", marginBottom: 18 }
-const count: React.CSSProperties = { color: "#cbd5e1", fontSize: 14 }
-const tableWrap: React.CSSProperties = { overflowX: "auto" }
-const table: React.CSSProperties = { width: "100%", minWidth: 1050, borderCollapse: "collapse" }
-const playerLink: React.CSSProperties = { color: "#bfdbfe", fontWeight: 800, textDecoration: "none" }
