@@ -84,7 +84,7 @@ export default function NormalRecordsEntryPage() {
   }
 
   return <AdminRecordsShell>
-    <nav className={styles.nav}><a href="/admin/records" className={styles.button}>← Records hub</a><a href="/admin/records/history" className={styles.button}>Records history</a><a href="/admin/records/climbers" className={styles.button}>Climbers</a></nav>
+    <nav className={styles.nav}><a href="/admin/records" className={styles.button}>← Records hub</a><a href="/admin/records/backfill" className={styles.button}>Late / Backfill</a><a href="/admin/records/history" className={styles.button}>Records history</a><a href="/admin/records/climbers" className={styles.button}>Climbers</a></nav>
     <AdminRecordsHero title="Normal All-Time Entry" description="Enter a source attempt once. The protected workflow preserves history, never worsens a record, and calculates Climbers from actual players passed." />
     <AdminGlassCard>
       <div className="grid gap-5 md:grid-cols-3">

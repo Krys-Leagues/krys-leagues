@@ -6,6 +6,7 @@ export default function RecordsAdminPage() {
     <AdminRecordsHero title="Records Control Center" description="Enter new All-Time scores, review history, correct source attempts, and administer Climbers from one protected workspace." />
     <div className={styles.actionGrid}>
       <AdminActionCard href="/admin/records/entry" title="Normal All-Time Entry" description="Save a Full Card or Quick Score without ever moving an existing record backward." accent="#fbbf24" icon={<RecordsIcon kind="entry" />} />
+      <AdminActionCard href="/admin/records/backfill" title="Late / Backdated Submission" description="Preview and save a legitimate older submission with its authoritative original chronology." accent="#f97316" icon={<RecordsIcon kind="backfill" />} />
       <AdminActionCard href="/admin/records/history" title="Records History & Corrections" description="Review source attempts and make audited, concurrency-protected corrections or voids." accent="#fb7185" icon={<RecordsIcon kind="history" />} />
       <AdminActionCard href="/admin/records/climbers" title="Climbers" description="Review PB events, people passed, season standings, and finalization state." accent="#a3e635" icon={<RecordsIcon kind="climbers" />} />
       <AdminActionCard href="/admin/records/single" title="Single Course Records" description="Explore each active Easy or Hard course as its own ranked leaderboard." accent="#22d3ee" icon={<RecordsIcon kind="single" />} />

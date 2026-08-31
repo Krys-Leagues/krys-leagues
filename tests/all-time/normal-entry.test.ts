@@ -8,11 +8,27 @@ test("normal All-Time admin surfaces keep entry, history, and Climbers separate"
   const hub = read("app/admin/records/page.tsx")
   assert.match(hub, /\/admin\/records\/entry/)
   assert.match(hub, /\/admin\/records\/history/)
+  assert.match(hub, /\/admin\/records\/backfill/)
   assert.match(hub, /\/admin\/records\/climbers/)
   assert.match(read("app/admin/records/entry/page.tsx"), /record_all_time_normal_entry/)
   assert.match(read("app/admin/records/history/page.tsx"), /correct_all_time_record_entry/)
   assert.match(read("app/admin/records/history/page.tsx"), /void_all_time_record_entry/)
+  assert.match(read("app/admin/records/backfill/page.tsx"), /preview_all_time_late_backfill_entry/)
+  assert.match(read("app/admin/records/backfill/page.tsx"), /record_all_time_late_backfill_entry/)
+  assert.match(read("app/admin/records/backfill/page.tsx"), /confirmation_token/)
   assert.match(read("app/admin/records/climbers/page.tsx"), /finalize_climbers_season/)
+})
+
+test("late/backdated entry keeps authoritative chronology separate and never creates a season", () => {
+  const page = read("app/admin/records/backfill/page.tsx")
+  assert.match(page, /Aug 15–Aug 28, 2026/)
+  assert.match(page, /Exact original timestamp/)
+  assert.match(page, /Date known \+ source-backed order/)
+  assert.match(page, /No Climbers season is created by this page/)
+  assert.match(page, /reviewed the canonical player, authoritative chronology/)
+  assert.match(page, /request\.fingerprint !== previewFingerprint/)
+  assert.match(read("app/admin/records/history/page.tsx"), /correct_all_time_late_backfill_entry/)
+  assert.match(read("app/admin/records/history/page.tsx"), /void_all_time_late_backfill_entry/)
 })
 
 test("normal entry preview protects lower-is-better records and describes Climbers", () => {

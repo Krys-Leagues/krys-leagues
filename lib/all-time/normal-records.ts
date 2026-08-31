@@ -51,6 +51,7 @@ export async function sha256Hex(value: string): Promise<string> {
 export function entryTypeLabel(entryType: string | null | undefined): string {
   if (entryType === "full_card") return "Full Card"
   if (entryType === "quick_score") return "Quick Score"
+  if (entryType === "late_backfill") return "Late / Backdated Submission"
   if (entryType === "authoritative_league_source") return "Authoritative League Source"
   return "Historical Import"
 }
