@@ -26,6 +26,8 @@ test("Historical PYP exposes a protected Match-style review route", () => {
   assert.match(reviewRoute, /historical_pyp_observations/)
   assert.match(page, /PRODUCTION-ONLY/)
   assert.match(page, /TRUE CONFLICT/)
+  assert.match(page, /PREFLIGHT_CLASSIFICATIONS\.map/)
+  assert.match(page, /preflightSourceCount/)
   assert.match(page, /Commit Historical PYP/)
   assert.match(page, /Unknown\/nonblocking opponent rows/)
   assert.match(page, /I explicitly confirm this reviewed PYP preview is ready/)
