@@ -12,19 +12,14 @@ export default function PYPPage() {
           <h1 style={title}>🚀 PYP</h1>
 
           <p style={subtitle}>
-            View PYP standings, matches, records, and player progression.
+            View PYP standings, historical results, records, and player progression.
           </p>
         </section>
 
         <div style={grid}>
-          <Link href="/matches" style={card}>
-            <h2>📅 Matches & Results</h2>
-            <p>View schedules, scores, and completed PYP matches.</p>
-          </Link>
-
          <Link href="/pyp-standings" style={card}>
   <h2>📊 Public Standings</h2>
-  <p>View live PYP standings by division and season.</p>
+  <p>View current and recovered historical PYP standings by division and season.</p>
 </Link>
           <Link href="/players" style={card}>
             <h2>👤 Player Profiles</h2>

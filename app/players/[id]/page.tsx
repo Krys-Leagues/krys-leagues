@@ -264,6 +264,7 @@ export default function PublicPlayerProfilePage() {
       strokeHistoryResponse,
       matchHistoryResponse,
       pypHistoryResponse,
+      pypHistoricalHistoryResponse,
       pypFixtureHistoryResponse,
       kwtHistoryResponse,
       kwtCourseCatalogResponse,
@@ -304,6 +305,9 @@ export default function PublicPlayerProfilePage() {
         p_player_id: playerId,
       }),
       supabase.rpc("get_public_pyp_player_history", {
+        p_player_id: playerId,
+      }),
+      supabase.rpc("get_public_historical_pyp_player_history", {
         p_player_id: playerId,
       }),
       supabase.rpc("get_public_pyp_player_fixture_history", {
@@ -371,8 +375,12 @@ export default function PublicPlayerProfilePage() {
     if (matchHistoryResponse.error) {
       setMatchHistoryError(`Match season history could not be loaded: ${matchHistoryResponse.error.message}`)
     }
-    setPypHistory((pypHistoryResponse.data || []) as PypSeasonHistory[])
-    if (pypHistoryResponse.error) {
+    const combinedPypHistory = [
+      ...((pypHistoryResponse.data || []) as PypSeasonHistory[]),
+      ...((pypHistoricalHistoryResponse.data || []) as PypSeasonHistory[]),
+    ].sort((left, right) => right.season_number - left.season_number || left.division_number - right.division_number)
+    setPypHistory(combinedPypHistory)
+    if (pypHistoryResponse.error && pypHistoricalHistoryResponse.error) {
       setPypHistoryError(`PYP season history could not be loaded: ${pypHistoryResponse.error.message}`)
     }
     setPypFixtureHistory((pypFixtureHistoryResponse.data || []) as PypFixtureHistory[])

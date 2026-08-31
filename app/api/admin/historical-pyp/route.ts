@@ -4,6 +4,7 @@ import path from "node:path"
 
 import { authorizedAdminClient, loadIdentityDirectory } from "@/app/api/admin/records/arizona-modern/_shared"
 import { historicalPypPreviewFingerprint, parseHistoricalPypPackage } from "@/lib/importer/adapters/historicalPypParser"
+import { classifyHistoricalPypPreflight } from "@/lib/importer/historicalPypPreflight"
 
 export const runtime = "nodejs"
 
@@ -40,6 +41,37 @@ export async function GET(request: Request) {
       matchedSource: match.evidence,
       confidence: match.confidence,
     }))
+    const identityByName = new Map(identityReviews.map((review) => [review.historicalPlayerName, review]))
+    const preflightSourceRows = preview.rows.map((row) => ({
+      ...row,
+      canonicalPlayerId: identityByName.get(row.historicalPlayerName)?.canonicalPlayerId ?? null,
+      canonicalOpponentPlayerId: null,
+      identityStatus: identityByName.get(row.historicalPlayerName)?.status ?? "unresolved" as const,
+    }))
+    const productionResult = await authorization.supabase!.from("historical_pyp_observations").select("source_fingerprint, season_number, division, game_number, historical_player_name, canonical_player_id, course_1_holes_won, course_2_holes_won, total_holes_won, wins, losses, draws, points, published_placement, source_state, opponent_historical_player_name, opponent_canonical_player_id")
+    const productionPreflight = productionResult.error
+      ? { status: /relation .* does not exist|could not find the table/i.test(productionResult.error.message) ? "SCHEMA_NOT_INSTALLED" as const : "UNAVAILABLE" as const, message: productionResult.error.message, sourceRowCount: preview.rows.length, productionRowCount: null, summary: [], conflicts: [] }
+      : (() => {
+        const result = classifyHistoricalPypPreflight(preflightSourceRows, productionResult.data || [])
+        return {
+          status: "READY" as const,
+          message: null,
+          sourceRowCount: result.sourceRowCount,
+          productionRowCount: result.productionRowCount,
+          summary: result.summary,
+          conflicts: result.conflicts.map((item) => ({
+            seasonNumber: item.seasonNumber,
+            division: item.division,
+            sourceState: item.sourceState,
+            identityStatus: item.identityStatus,
+            sourceFingerprint: item.sourceFingerprint,
+            productionFingerprint: item.productionFingerprint,
+            conflictFields: item.conflictFields,
+            source: item.source,
+            production: item.production,
+          })),
+        }
+      })()
     const canonicalPlayerIds = directory.rawPlayers.filter((player) => directory.canonicalId(player.id) === player.id).map((player) => player.id)
     return Response.json({
       preview,
@@ -49,6 +81,7 @@ export async function GET(request: Request) {
       sourceShaMatches: !expectedSourceSha256 || expectedSourceSha256 === sourceSha256,
       identityReviews,
       canonicalPlayerIds,
+      productionPreflight,
     }, { headers: { "Cache-Control": "no-store" } })
   } catch (error) {
     console.error("Historical PYP review load failed", error)

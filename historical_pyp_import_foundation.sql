@@ -290,4 +290,135 @@ $function$;
 revoke all on function public.commit_historical_pyp_preview(text, text, text, text, jsonb) from public, anon, authenticated;
 grant execute on function public.commit_historical_pyp_preview(text, text, text, text, jsonb) to authenticated;
 
+-- Public historical reads are deliberately separate from managed/current PYP
+-- scorecards. They expose canonical player identities and current display names,
+-- never the administrative historical aliases or source provenance.
+create or replace function public.list_public_historical_pyp_seasons()
+returns table(
+  season_id uuid,
+  season_number integer,
+  division_count integer
+)
+language sql
+stable
+security definer
+set search_path to ''
+as $function$
+  select
+    md5('historical-pyp-season:' || observation.season_number::text)::uuid,
+    observation.season_number,
+    count(distinct observation.division)::integer
+  from public.historical_pyp_observations as observation
+  group by observation.season_number
+  order by observation.season_number desc;
+$function$;
+
+revoke all on function public.list_public_historical_pyp_seasons() from public, anon, authenticated;
+grant execute on function public.list_public_historical_pyp_seasons() to anon, authenticated;
+
+create or replace function public.get_public_historical_pyp_final_scorecard(
+  p_season_id uuid
+)
+returns table(
+  season_id uuid,
+  season_number integer,
+  division_number integer,
+  division_rank integer,
+  player_id uuid,
+  player_screen_name text,
+  completed_game_count integer,
+  wins integer,
+  losses integer,
+  ties integer,
+  points integer,
+  holes_won integer
+)
+language sql
+stable
+security definer
+set search_path to ''
+as $function$
+  with grouped as (
+    select
+      observation.season_number,
+      observation.division::integer as division_number,
+      public.resolve_canonical_player_id(observation.canonical_player_id) as player_id,
+      max(nullif(regexp_replace(coalesce(observation.published_placement, ''), '[^0-9]', '', 'g'), '')::integer) as division_rank,
+      count(*) filter (where observation.source_state = 'PLAYED')::integer as completed_game_count,
+      coalesce(sum(observation.wins), 0)::integer as wins,
+      coalesce(sum(observation.losses), 0)::integer as losses,
+      coalesce(sum(observation.draws), 0)::integer as ties,
+      max(observation.points)::integer as points,
+      coalesce(sum(observation.total_holes_won), 0)::integer as holes_won
+    from public.historical_pyp_observations as observation
+    where md5('historical-pyp-season:' || observation.season_number::text)::uuid = p_season_id
+    group by observation.season_number, observation.division::integer,
+      public.resolve_canonical_player_id(observation.canonical_player_id)
+  )
+  select
+    md5('historical-pyp-season:' || grouped.season_number::text)::uuid,
+    grouped.season_number,
+    grouped.division_number,
+    grouped.division_rank,
+    grouped.player_id,
+    player.screen_name,
+    grouped.completed_game_count,
+    grouped.wins,
+    grouped.losses,
+    grouped.ties,
+    grouped.points,
+    grouped.holes_won
+  from grouped
+  join public.players as player on player.id = grouped.player_id
+  order by grouped.division_number, grouped.division_rank nulls last, player.screen_name, player.id;
+$function$;
+
+revoke all on function public.get_public_historical_pyp_final_scorecard(uuid) from public, anon, authenticated;
+grant execute on function public.get_public_historical_pyp_final_scorecard(uuid) to anon, authenticated;
+
+create or replace function public.get_public_historical_pyp_player_history(
+  p_player_id uuid
+)
+returns table(
+  season_number integer,
+  season_id uuid,
+  player_screen_name text,
+  division_number integer,
+  division_rank integer,
+  completed_game_count integer,
+  wins integer,
+  losses integer,
+  ties integer,
+  points integer,
+  holes_won integer
+)
+language sql
+stable
+security definer
+set search_path to ''
+as $function$
+  select
+    observation.season_number,
+    md5('historical-pyp-season:' || observation.season_number::text)::uuid,
+    player.screen_name,
+    observation.division::integer,
+    max(nullif(regexp_replace(coalesce(observation.published_placement, ''), '[^0-9]', '', 'g'), '')::integer),
+    count(*) filter (where observation.source_state = 'PLAYED')::integer,
+    coalesce(sum(observation.wins), 0)::integer,
+    coalesce(sum(observation.losses), 0)::integer,
+    coalesce(sum(observation.draws), 0)::integer,
+    max(observation.points)::integer,
+    coalesce(sum(observation.total_holes_won), 0)::integer
+  from public.historical_pyp_observations as observation
+  join public.players as player
+    on player.id = public.resolve_canonical_player_id(observation.canonical_player_id)
+  where public.resolve_canonical_player_id(observation.canonical_player_id)
+      = public.resolve_canonical_player_id(p_player_id)
+  group by observation.season_number, observation.division::integer, player.screen_name
+  order by observation.season_number desc, observation.division::integer;
+$function$;
+
+revoke all on function public.get_public_historical_pyp_player_history(uuid) from public, anon, authenticated;
+grant execute on function public.get_public_historical_pyp_player_history(uuid) to anon, authenticated;
+
 commit;
