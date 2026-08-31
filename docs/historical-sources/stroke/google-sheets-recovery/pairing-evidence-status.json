@@ -1,0 +1,35 @@
+{
+  "evidenceRule": "Only matching font/text colors on the actual score-entry cells within the same season, division, and course are evidence. Row background colors and standings cells are excluded.",
+  "fontColorAccessible": true,
+  "historicalSeasonsWithObservedFontColor": "3-8 and 30-61, with incomplete/ambiguous groups retained for review",
+  "seasonsWithoutUsableFontColor": "1-2 and 9-29",
+  "authoritativePairingCounts": {
+    "confirmedColorPairings": 1312,
+    "played": 1168,
+    "scheduledUnplayed": 144,
+    "ambiguousColorGroups": 13,
+    "ambiguousSourceSideRows": 44,
+    "partialStateGroups": 48,
+    "partialSourceSideRows": 96,
+    "unknownRows": 2976,
+    "rawRowLevelRecords": 5740,
+    "deduplicatedEndpointRecords": 4380
+  },
+  "deduplicationRule": "Season | Division | Game/Course | sorted(Player A source cell, Player B source cell) | exact font color | Workbook | Tab | Source range | Source SHA; endpoint sorting collapses only mirrored A/B representations of the same source evidence.",
+  "rowLevelArtifact": "historical-stroke-pairings.csv",
+  "rowLevelArtifactRows": 5740,
+  "reconstructedArtifactCounts": {
+    "exactColorPairings": 1312,
+    "played": 1168,
+    "scheduledUnplayed": 144,
+    "ambiguousColorGroups": 13,
+    "partialStateGroups": 48,
+    "unknownRows": 2976,
+    "rawRowLevelRecords": 5740,
+    "deduplicatedEndpointRecords": 4380
+  },
+  "reconciliationStatus": "AUTHORITATIVE — approved reconciliation from the preserved row-level evidence; no pairing was silently selected or imported",
+  "playedStateValues": ["SOURCE COLOR CONFIRMED — PLAYED", "SOURCE COLOR CONFIRMED — SCHEDULED / UNPLAYED", "PARTIAL — NEEDS REVIEW"],
+  "identityStatus": "NOT_RUN",
+  "productionImportStatus": "NOT_IMPORTED"
+}

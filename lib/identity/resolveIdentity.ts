@@ -44,6 +44,36 @@ export function resolveIdentity({
   const maximumCandidates =
     options?.maximumCandidates ?? 5
 
+  const exactRawVerifiedAliases = aliases.filter(
+    (alias) =>
+      alias.active &&
+      alias.verified === true &&
+      alias.aliasName === importedName
+  )
+  const exactRawAliasPlayers = exactRawVerifiedAliases
+    .map((alias) => players.find((player) => player.id === alias.playerId))
+    .filter((player): player is IdentityPlayer => Boolean(player))
+  const exactRawAliasPlayer = uniqueCanonicalPlayers(
+    players,
+    exactRawAliasPlayers
+  )
+
+  if (exactRawAliasPlayer) {
+    const canonicalId = canonicalPlayerId(exactRawAliasPlayer)
+    return {
+      importedName,
+      normalizedName,
+      status: "alias",
+      playerId: canonicalId,
+      screenName: exactRawAliasPlayer.screenName,
+      confidence: 100,
+      matchedSource: "historical_alias",
+      candidates: [],
+      autoLinkEligible: true,
+      autoLinkReason: "verified historical alias",
+    }
+  }
+
   if (!normalizedName) {
     return {
       importedName,

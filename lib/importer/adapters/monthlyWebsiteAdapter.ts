@@ -44,6 +44,8 @@ export type MonthlyWebsiteObservation = {
   courseName: string
   difficulty: "easy" | "hard"
   score: number | null
+  rawScoreToken: string
+  scoreState: "SCORED OBSERVATION" | "NO SUBMISSION" | "MALFORMED / RECOVERY PROBLEM"
   holeInOnes: number | null
   coursePlacement: number | null
   coursePoints: number | null
@@ -70,6 +72,8 @@ export type MonthlyWebsitePreview = {
   summary: {
     totalRows: number
     scoreRows: number
+    noSubmissionRows: number
+    malformedRows: number
     missingScoreRows: number
     duplicateRows: number
     conflictingRows: number
@@ -77,9 +81,13 @@ export type MonthlyWebsitePreview = {
     totalMismatches: number
     completedTotalRows: number
     completedScoreRows: number
+    completedNoSubmissionRows: number
+    completedMalformedRows: number
     completedMissingScoreRows: number
     currentIncompleteRows: number
     currentIncompleteScoreRows: number
+    currentIncompleteNoSubmissionRows: number
+    currentIncompleteMalformedRows: number
     currentIncompleteMissingScoreRows: number
   }
 }
@@ -123,10 +131,51 @@ export function monthlyIdentityBlocksCommit(scoredObservations: number, hasCanon
   return scoredObservations > 0 && !hasCanonicalPlayer
 }
 
+export function isMonthlyLegacyMergedPlaceholder(name: string) {
+  return /^merged\s+into\s+\d+$/i.test(name.trim())
+}
+
+export type MonthlyReviewDecision = {
+  playerId: string
+  playerName: string
+  source: "manual"
+}
+
+export type MonthlyIdentityReviewCandidate = {
+  key: string
+  status: "resolved" | "ambiguous" | "unresolved"
+  playerId: string | null
+}
+
+/**
+ * Browser drafts are only a cache. Keep a saved decision only when the
+ * current protected identity payload independently confirms that same player.
+ * This prevents an obsolete source/parser decision from hiding a name that
+ * now requires review.
+ */
+export function retainCurrentMonthlyReviewDecisions(
+  saved: unknown,
+  candidates: MonthlyIdentityReviewCandidate[],
+) {
+  const resolved = new Map(
+    candidates
+      .filter((candidate) => candidate.status === "resolved" && candidate.playerId)
+      .map((candidate) => [candidate.key, candidate.playerId as string]),
+  )
+  const savedEntries = saved && typeof saved === "object" && !Array.isArray(saved)
+    ? Object.entries(saved as Record<string, MonthlyReviewDecision>)
+    : []
+  return Object.fromEntries(
+    savedEntries.filter(([key, decision]) =>
+      typeof decision?.playerId === "string" && resolved.get(key) === decision.playerId,
+    ),
+  ) as Record<string, MonthlyReviewDecision>
+}
+
 function fingerprint(row: Omit<MonthlyWebsiteObservation, "sourceFingerprint" | "issues" | "sourceRow" | "periodStatus" | "importable" | "periodBlockReason">) {
   return [
     "monthly-website", row.period, row.periodId, row.division, row.historicalPlayerName,
-    row.sourcePlayerId, row.courseName, row.difficulty, row.score, row.holeInOnes,
+    row.sourcePlayerId, row.courseName, row.difficulty, row.score, row.rawScoreToken, row.holeInOnes,
     row.coursePlacement, row.coursePoints,
   ].map(value => String(value ?? "∅")).join("\u001f")
 }
@@ -159,6 +208,8 @@ export function previewMonthlyWebsiteViews(views: MonthlyWebsiteDivisionView[], 
           courseName: course.course,
           difficulty: course.difficulty,
           score: source.score,
+          rawScoreToken: source.score === null ? "" : String(source.score),
+          scoreState: source.score === null ? "NO SUBMISSION" as const : "SCORED OBSERVATION" as const,
           holeInOnes: source.holeInOnes,
           coursePlacement: source.placement,
           coursePoints: source.points,
@@ -169,7 +220,7 @@ export function previewMonthlyWebsiteViews(views: MonthlyWebsiteDivisionView[], 
           overallPoints: leader?.overallPoints ?? null,
           sourceUrl: view.sourceUrl,
         } satisfies Omit<MonthlyWebsiteObservation, "sourceFingerprint" | "issues" | "sourceRow" | "periodStatus" | "importable" | "periodBlockReason">
-        const issues = source.score === null ? ["Score is missing from the authoritative rendered row."] : []
+        const issues: string[] = []
         rows.push({ ...base, sourceRow: ++sourceRow, sourceFingerprint: fingerprint(base), issues, ...periodState })
       }
     }
@@ -193,17 +244,23 @@ export function previewMonthlyWebsiteViews(views: MonthlyWebsiteDivisionView[], 
     summary: {
       totalRows: rows.length,
       scoreRows: rows.filter(row => row.score !== null).length,
-      missingScoreRows: rows.filter(row => row.score === null).length,
+      noSubmissionRows: rows.filter(row => row.scoreState === "NO SUBMISSION").length,
+      malformedRows: rows.filter(row => row.scoreState === "MALFORMED / RECOVERY PROBLEM").length,
+      missingScoreRows: rows.filter(row => row.scoreState === "NO SUBMISSION").length,
       duplicateRows,
       conflictingRows,
       negativeScores: rows.filter(row => row.score !== null && row.score < 0).length,
       totalMismatches,
       completedTotalRows: rows.filter(row => row.periodStatus === "completed").length,
       completedScoreRows: rows.filter(row => row.periodStatus === "completed" && row.score !== null).length,
-      completedMissingScoreRows: rows.filter(row => row.periodStatus === "completed" && row.score === null).length,
+      completedNoSubmissionRows: rows.filter(row => row.periodStatus === "completed" && row.scoreState === "NO SUBMISSION").length,
+      completedMalformedRows: rows.filter(row => row.periodStatus === "completed" && row.scoreState === "MALFORMED / RECOVERY PROBLEM").length,
+      completedMissingScoreRows: rows.filter(row => row.periodStatus === "completed" && row.scoreState === "NO SUBMISSION").length,
       currentIncompleteRows: rows.filter(row => row.periodStatus === "current_incomplete").length,
       currentIncompleteScoreRows: rows.filter(row => row.periodStatus === "current_incomplete" && row.score !== null).length,
-      currentIncompleteMissingScoreRows: rows.filter(row => row.periodStatus === "current_incomplete" && row.score === null).length,
+      currentIncompleteNoSubmissionRows: rows.filter(row => row.periodStatus === "current_incomplete" && row.scoreState === "NO SUBMISSION").length,
+      currentIncompleteMalformedRows: rows.filter(row => row.periodStatus === "current_incomplete" && row.scoreState === "MALFORMED / RECOVERY PROBLEM").length,
+      currentIncompleteMissingScoreRows: rows.filter(row => row.periodStatus === "current_incomplete" && row.scoreState === "NO SUBMISSION").length,
     },
   }
 }
@@ -228,17 +285,23 @@ function summarizeMonthlyRows(rows: MonthlyWebsiteObservation[], totalMismatches
     summary: {
       totalRows: rows.length,
       scoreRows: rows.filter(row => row.score !== null).length,
-      missingScoreRows: rows.filter(row => row.score === null).length,
+      noSubmissionRows: rows.filter(row => row.scoreState === "NO SUBMISSION").length,
+      malformedRows: rows.filter(row => row.scoreState === "MALFORMED / RECOVERY PROBLEM").length,
+      missingScoreRows: rows.filter(row => row.scoreState === "NO SUBMISSION").length,
       duplicateRows: rows.filter(row => (fingerprints.get(row.sourceFingerprint) ?? 0) > 1).length,
       conflictingRows: [...observations.values()].filter(scores => scores.size > 1).length,
       negativeScores: rows.filter(row => row.score !== null && row.score < 0).length,
       totalMismatches,
       completedTotalRows: rows.filter(row => row.periodStatus === "completed").length,
       completedScoreRows: rows.filter(row => row.periodStatus === "completed" && row.score !== null).length,
-      completedMissingScoreRows: rows.filter(row => row.periodStatus === "completed" && row.score === null).length,
+      completedNoSubmissionRows: rows.filter(row => row.periodStatus === "completed" && row.scoreState === "NO SUBMISSION").length,
+      completedMalformedRows: rows.filter(row => row.periodStatus === "completed" && row.scoreState === "MALFORMED / RECOVERY PROBLEM").length,
+      completedMissingScoreRows: rows.filter(row => row.periodStatus === "completed" && row.scoreState === "NO SUBMISSION").length,
       currentIncompleteRows: rows.filter(row => row.periodStatus === "current_incomplete").length,
       currentIncompleteScoreRows: rows.filter(row => row.periodStatus === "current_incomplete" && row.score !== null).length,
-      currentIncompleteMissingScoreRows: rows.filter(row => row.periodStatus === "current_incomplete" && row.score === null).length,
+      currentIncompleteNoSubmissionRows: rows.filter(row => row.periodStatus === "current_incomplete" && row.scoreState === "NO SUBMISSION").length,
+      currentIncompleteMalformedRows: rows.filter(row => row.periodStatus === "current_incomplete" && row.scoreState === "MALFORMED / RECOVERY PROBLEM").length,
+      currentIncompleteMissingScoreRows: rows.filter(row => row.periodStatus === "current_incomplete" && row.scoreState === "NO SUBMISSION").length,
     },
   }
 }
@@ -255,7 +318,13 @@ export function previewMonthlyWebsiteCsvRows(sourceRows: MonthlyWebsiteCsvRow[],
       sourcePlayerId: source.source_player_id?.trim() || null,
       courseName: source.course_name?.trim() ?? "",
       difficulty: source.difficulty === "hard" ? "hard" as const : "easy" as const,
+      rawScoreToken: source.score?.trim() ?? "",
       score: csvInteger(source.score),
+      scoreState: csvInteger(source.score) !== null
+        ? "SCORED OBSERVATION" as const
+        : (source.score?.trim() ?? "") === "" || (source.score?.trim() ?? "-") === "-"
+          ? "NO SUBMISSION" as const
+          : "MALFORMED / RECOVERY PROBLEM" as const,
       holeInOnes: csvInteger(source.hole_in_ones),
       coursePlacement: csvInteger(source.course_placement),
       coursePoints: csvInteger(source.course_points),
@@ -271,7 +340,7 @@ export function previewMonthlyWebsiteCsvRows(sourceRows: MonthlyWebsiteCsvRow[],
     if (!base.division) issues.push("Division is missing.")
     if (!base.historicalPlayerName.trim()) issues.push("Historical player name is missing.")
     if (!base.courseName) issues.push("Course name is missing.")
-    if (base.score === null) issues.push("Score is missing from the authoritative rendered row.")
+    if (base.scoreState === "MALFORMED / RECOVERY PROBLEM") issues.push(`The source score token "${base.rawScoreToken}" could not be interpreted.`)
     const periodState = base.year > 0 && base.month > 0
       ? classifyMonthlyPeriod(base.year, base.month, options.finalizedThrough)
       : { periodStatus: "completed" as const, importable: false, periodBlockReason: null }

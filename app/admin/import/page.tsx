@@ -33,8 +33,7 @@ const cards = [
   },
   {
     title: "Historical PYP",
-    description:
-      "Review recovered Pick Your Poison results, identities, and source validation.",
+    description: "Review recovered Pick Your Poison results, identities, and source validation.",
     href: "/admin/import/pyp",
     color: "bg-fuchsia-700",
   },
@@ -43,6 +42,12 @@ const cards = [
     description: "Review recovered Pro scorecards, Global Player identities, source conflicts, and opponent evidence.",
     href: "/admin/import/pro",
     color: "bg-cyan-700",
+  },
+  {
+    title: "Historical Stroke V2",
+    description: "Review preserved era-aware Stroke Seasons 1–61 evidence and Global Player identities.",
+    href: "/admin/import/stroke-v2",
+    color: "bg-emerald-700",
   },
   {
     title: "Trophies",

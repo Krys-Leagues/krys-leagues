@@ -50,3 +50,22 @@ test("the independently protected admin authorization endpoint remains reachable
   assert.ok(endpointExemption >= 0)
   assert.ok(genericApiGate > endpointExemption)
 })
+
+test("site-admin authorization does not depend on the Solo-admin RPC", async () => {
+  const endpoint = await readFile("app/api/auth/admin-authorization/route.ts", "utf8")
+  const siteAdminCheck = endpoint.indexOf("if (authorized)")
+  const soloRpc = endpoint.indexOf('"is_current_user_solo_admin"')
+  assert.ok(siteAdminCheck >= 0)
+  assert.ok(soloRpc > siteAdminCheck)
+})
+
+test("proxy authorizes site admins before consulting optional Solo-admin state", async () => {
+  const proxy = await readFile("proxy.ts", "utf8")
+  const siteAdminRpc = proxy.indexOf('rpc("is_current_user_site_admin")')
+  const siteAdminBranch = proxy.indexOf("else if (Boolean(siteAdmin))")
+  const soloRpc = proxy.indexOf('rpc("is_current_user_solo_admin")')
+  assert.ok(siteAdminRpc >= 0)
+  assert.ok(siteAdminBranch > siteAdminRpc)
+  assert.ok(soloRpc > siteAdminBranch)
+  assert.doesNotMatch(proxy, /Promise\.all\(\[\s*\n?\s*session\.supabase\.rpc\("is_current_user_site_admin"\)/)
+})
