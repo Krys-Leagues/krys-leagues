@@ -28,6 +28,8 @@ test("preview computes every card player from a pre-card snapshot and never requ
   assert.match(sql, /jsonb_array_length\(hole_strokes\)<>18/)
   assert.match(sql, /if v_course\.par is null then raise exception/)
   assert.match(sql, /'hole_par_stats_available',v_hole_stats/)
+  assert.match(sql, /update late_card_input set player_id=[^;]+where player_id is not null/)
+  assert.match(sql, /update late_card_input set total_strokes=[^;]+where total_strokes is null/)
 })
 
 test("batch replay groups observations by card and applies PB changes after all card effects", () => {
