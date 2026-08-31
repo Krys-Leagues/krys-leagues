@@ -3,8 +3,11 @@ import { AdminActionCard, AdminRecordsHero, AdminRecordsShell, RecordsIcon, admi
 export default function RecordsAdminPage() {
   return <AdminRecordsShell>
     <nav className={styles.nav}><a href="/admin" className={styles.button}>← Admin home</a></nav>
-    <AdminRecordsHero title="Records Control Center" description="Manage individual leaderboards, combined results, and historical All-Time imports from one focused workspace." />
+    <AdminRecordsHero title="Records Control Center" description="Enter new All-Time scores, review history, correct source attempts, and administer Climbers from one protected workspace." />
     <div className={styles.actionGrid}>
+      <AdminActionCard href="/admin/records/entry" title="Normal All-Time Entry" description="Save a Full Card or Quick Score without ever moving an existing record backward." accent="#fbbf24" icon={<RecordsIcon kind="entry" />} />
+      <AdminActionCard href="/admin/records/history" title="Records History & Corrections" description="Review source attempts and make audited, concurrency-protected corrections or voids." accent="#fb7185" icon={<RecordsIcon kind="history" />} />
+      <AdminActionCard href="/admin/records/climbers" title="Climbers" description="Review PB events, people passed, season standings, and finalization state." accent="#a3e635" icon={<RecordsIcon kind="climbers" />} />
       <AdminActionCard href="/admin/records/single" title="Single Course Records" description="Explore each active Easy or Hard course as its own ranked leaderboard." accent="#22d3ee" icon={<RecordsIcon kind="single" />} />
       <AdminActionCard href="/admin/records/combined" title="Combined Records" description="Review the existing Easy + Hard combined record workspace." accent="#a78bfa" icon={<RecordsIcon kind="combined" />} />
       <AdminActionCard href="/admin/records/all-time" title="Historical All-Time Import" description="Preview, identity-review, and import one approved course CSV at a time." accent="#34d399" icon={<RecordsIcon kind="import" />} />

@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js"
-import { rankByCombinedTotal, rankByScore, type PublicCombinedRecord, type PublicCourse, type PublicSingleRecord } from "@/lib/all-time/public-records"
+import { detailedCardStats, rankByCombinedTotal, rankByScore, type PublicCombinedRecord, type PublicCourse, type PublicSingleRecord } from "@/lib/all-time/public-records"
 
 function publicRecordsClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -23,9 +23,16 @@ export async function GET(request: Request) {
       const { data: course, error: courseError } = await catalogQuery().eq("id", courseId).maybeSingle()
       if (courseError) throw courseError
       if (!course) return Response.json({ error: "Active course not found." }, { status: 404 })
-      const { data, error } = await supabase.from("all_time_best_records").select("id, course_id, player_id, score, historical_player_name, player:players(screen_name)").eq("course_id", course.id)
+      const { data, error } = await supabase.from("all_time_best_records").select("id, course_id, player_id, score, historical_player_name, best_observation_id, player:players(screen_name)").eq("course_id", course.id)
       if (error) throw error
-      return Response.json({ course, records: rankByScore((data ?? []) as PublicSingleRecord[]) }, { headers: { "Cache-Control": "public, max-age=30, s-maxage=120" } })
+      const records = (data ?? []) as Array<PublicSingleRecord & { best_observation_id: string }>
+      const observationIds = records.map((record) => record.best_observation_id).filter(Boolean)
+      const observations = observationIds.length ? await supabase.from("all_time_record_observations").select("id,hole_strokes").in("id", observationIds) : { data: [], error: null }
+      if (observations.error) throw observations.error
+      const cards = new Map((observations.data ?? []).map((observation) => [observation.id, observation.hole_strokes as number[] | null]))
+      const coursePars = await supabase.from("all_time_courses").select("hole_pars").eq("id", course.id).maybeSingle()
+      const publicRecords = records.map((record) => ({ ...record, detailed_stats: detailedCardStats(cards.get(record.best_observation_id), coursePars.error ? null : coursePars.data?.hole_pars as number[] | null) }))
+      return Response.json({ course, records: rankByScore(publicRecords) }, { headers: { "Cache-Control": "public, max-age=30, s-maxage=120" } })
     }
     if (view === "combined") {
       const baseMap = params.get("baseMap")

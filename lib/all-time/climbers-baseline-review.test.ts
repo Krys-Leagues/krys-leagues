@@ -34,3 +34,18 @@ test("review UI persists through the protected verified-alias RPC and not browse
   assert.doesNotMatch(source, /localStorage|sessionStorage/)
   assert.doesNotMatch(source, /create_player|insert\(/i)
 })
+
+test("final baseline migration contains every verified source mapping and remains gated", async () => {
+  const { readFile } = await import("node:fs/promises")
+  const sql = await readFile(new URL("../../climbers_existing_baseline_2026_08_14.sql", import.meta.url), "utf8")
+  const mappingSection = sql.match(/with resolved\(source_name,canonical_player_id\) as \(([\s\S]*?)\)\s*update/)?.[1] ?? ""
+  const mappingCount = [...mappingSection.matchAll(/\('[^']+',\s*'[^']+'::uuid\)/g)].length
+  assert.equal(mappingCount, 79)
+  for (const row of CLIMBERS_BASELINE_REVIEW_ROWS) assert.match(mappingSection, new RegExp(`\\('${row.sourceName.replace(/[.*+?^${}()|[\\]\\]/g, "\\\\$&")}',`))
+  assert.match(sql, /identity_status<>'resolved'/)
+  assert.match(sql, /applied_at is not null/)
+  assert.match(sql, /combined_points = ytd_points \+ period_points/)
+  assert.match(sql, /cutoff_at timestamptz not null/)
+  assert.match(mappingSection, /\('METUM','ba5a3695-4e76-4820-a489-5eac43aec5cc'::uuid\)/)
+  assert.doesNotMatch(mappingSection, /ba5a3695-4e76-4820-a489-5eac88d42b23/)
+})
