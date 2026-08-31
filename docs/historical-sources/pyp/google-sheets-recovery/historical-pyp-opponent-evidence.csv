@@ -1,0 +1,68 @@
+season,division,game,player_a_exact,player_b_exact,source_range,player_a_cell,player_b_cell,evidence_state,source_url
+1,ELITE,1,#REF!,#REF!,A4:I4,A4,C4,UNUSABLE #REF!,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=A4:C4
+1,ELITE,2,#REF!,#REF!,A4:I4,D4,F4,UNUSABLE #REF!,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=D4:F4
+1,ELITE,3,#REF!,#REF!,A4:I4,G4,I4,UNUSABLE #REF!,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=G4:I4
+1,ELITE,1,#REF!,#REF!,A5:I5,A5,C5,UNUSABLE #REF!,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=A5:C5
+1,ELITE,2,#REF!,#REF!,A5:I5,D5,F5,UNUSABLE #REF!,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=D5:F5
+1,ELITE,3,#REF!,#REF!,A5:I5,G5,I5,UNUSABLE #REF!,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=G5:I5
+1,1,1,DERBY DAZ,BIGJA,A10:I10,A10,C10,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=A10:C10
+1,1,2,YODA,DERBY DAZ,A10:I10,D10,F10,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=D10:F10
+1,1,3,DERBY DAZ,CHIPNPUTT,A10:I10,G10,I10,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=G10:I10
+1,1,1,CHIPNPUTT,YODA,A11:I11,A11,C11,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=A11:C11
+1,1,2,BIGJA,CHIPNPUTT,A11:I11,D11,F11,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=D11:F11
+1,1,3,BIGJA,YODA,A11:I11,G11,I11,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=G11:I11
+1,2,1,PAULV-PPP,GIO,A16:I16,A16,C16,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=A16:C16
+1,2,2,SPICY,PAULV-PPP,A16:I16,D16,F16,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=D16:F16
+1,2,3,PAULV-PPP,KD,A16:I16,G16,I16,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=G16:I16
+1,2,1,KD,SPICY,A17:I17,A17,C17,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=A17:C17
+1,2,2,GIO,KD,A17:I17,D17,F17,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=D17:F17
+1,2,3,GIO,SPICY,A17:I17,G17,I17,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=G17:I17
+1,3,1,ADAMANN,SJ,A22:I22,A22,C22,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=A22:C22
+1,3,2,WENDYW,ADAMANN,A22:I22,D22,F22,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=D22:F22
+1,3,3,ADAMANN,DICKFOR24-7,A22:I22,G22,I22,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=G22:I22
+1,3,1,DICKFOR24-7,WENDYW,A23:I23,A23,C23,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=A23:C23
+1,3,2,SJ,DICKFOR24-7,A23:I23,D23,F23,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=D23:F23
+1,3,3,SJ,WENDYW,A23:I23,G23,I23,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=G23:I23
+1,4,1,,,A28:I28,A28,C28,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=A28:C28
+1,4,2,,,A28:I28,D28,F28,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=D28:F28
+1,4,3,,,A28:I28,G28,I28,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=G28:I28
+1,4,1,,,A29:I29,A29,C29,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=A29:C29
+1,4,2,,,A29:I29,D29,F29,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=D29:F29
+1,4,3,,,A29:I29,G29,I29,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=G29:I29
+1,5,1,,,A34:I34,A34,C34,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=A34:C34
+1,5,2,,,A34:I34,D34,F34,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=D34:F34
+1,5,3,,,A34:I34,G34,I34,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=G34:I34
+1,5,1,,,A35:I35,A35,C35,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=A35:C35
+1,5,2,,,A35:I35,D35,F35,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=D35:F35
+1,5,3,,,A35:I35,G35,I35,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=G35:I35
+1,6,1,,,A40:I40,A40,C40,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=A40:C40
+1,6,2,,,A40:I40,D40,F40,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=D40:F40
+1,6,3,,,A40:I40,G40,I40,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=G40:I40
+1,6,1,,,A41:I41,A41,C41,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=A41:C41
+1,6,2,,,A41:I41,D41,F41,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=D41:F41
+1,6,3,,,A41:I41,G41,I41,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=G41:I41
+1,7,1,,,A46:I46,A46,C46,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=A46:C46
+1,7,2,,,A46:I46,D46,F46,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=D46:F46
+1,7,3,,,A46:I46,G46,I46,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=G46:I46
+1,7,1,,,A47:I47,A47,C47,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=A47:C47
+1,7,2,,,A47:I47,D47,F47,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=D47:F47
+1,7,3,,,A47:I47,G47,I47,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=G47:I47
+1,8,1,,,A52:I52,A52,C52,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=A52:C52
+1,8,2,,,A52:I52,D52,F52,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=D52:F52
+1,8,3,,,A52:I52,G52,I52,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=G52:I52
+1,8,1,,,A53:I53,A53,C53,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=A53:C53
+1,8,2,,,A53:I53,D53,F53,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=D53:F53
+1,8,3,,,A53:I53,G53,I53,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=G53:I53
+1,8,1,1,2,A59:I59,A59,C59,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=A59:C59
+1,8,2,4,1,A59:I59,D59,F59,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=D59:F59
+1,8,3,1,3,A59:I59,G59,I59,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=G59:I59
+1,8,1,3,4,A60:I60,A60,C60,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=A60:C60
+1,8,2,2,3,A60:I60,D60,F60,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=D60:F60
+1,8,3,2,4,A60:I60,G60,I60,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=G60:I60
+1,8,1,1,2,A67:I67,A67,C67,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=A67:C67
+1,8,2,4,1,A67:I67,D67,F67,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=D67:F67
+1,8,3,1,3,A67:I67,G67,I67,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=G67:I67
+1,8,1,3,4,A68:I68,A68,C68,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=A68:C68
+1,8,2,2,3,A68:I68,D68,F68,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=D68:F68
+1,8,3,2,4,A68:I68,G68,I68,EXPLICIT VS PAIRING,https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit#gid=534490246&range=G68:I68
+
