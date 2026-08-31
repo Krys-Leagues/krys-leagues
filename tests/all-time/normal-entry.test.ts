@@ -15,6 +15,12 @@ test("normal All-Time admin surfaces keep entry, history, and Climbers separate"
   assert.match(read("app/admin/records/history/page.tsx"), /void_all_time_record_entry/)
   assert.match(read("app/admin/records/backfill/page.tsx"), /preview_all_time_late_backfill_entry/)
   assert.match(read("app/admin/records/backfill/page.tsx"), /record_all_time_late_backfill_entry/)
+  assert.match(read("app/admin/records/backfill/page.tsx"), /preview_all_time_late_backfill_batch/)
+  assert.match(read("app/admin/records/backfill/page.tsx"), /record_all_time_late_backfill_batch/)
+  assert.match(read("app/admin/records/backfill/page.tsx"), /MULTI-PLAYER SCORECARD/)
+  assert.match(read("app/admin/records/backfill/page.tsx"), /ADD PLAYER/)
+  assert.match(read("app/admin/records/backfill/page.tsx"), /data-hole-index/)
+  assert.match(read("app/admin/records/backfill/page.tsx"), /same_card_snapshot/)
   assert.match(read("app/admin/records/backfill/page.tsx"), /confirmation_token/)
   assert.match(read("app/admin/records/climbers/page.tsx"), /finalize_climbers_season/)
 })
@@ -28,7 +34,20 @@ test("late/backdated entry keeps authoritative chronology separate and never cre
   assert.match(page, /reviewed the canonical player, authoritative chronology/)
   assert.match(page, /request\.fingerprint !== previewFingerprint/)
   assert.match(read("app/admin/records/history/page.tsx"), /correct_all_time_late_backfill_entry/)
+  assert.match(read("app/admin/records/history/page.tsx"), /correct_all_time_late_backfill_batch_entry/)
+  assert.match(read("app/admin/records/history/page.tsx"), /card_batch_id/)
   assert.match(read("app/admin/records/history/page.tsx"), /void_all_time_late_backfill_entry/)
+})
+
+test("batch backfill UI preserves raw cards and explicit chronology safeguards", () => {
+  const page = read("app/admin/records/backfill/page.tsx")
+  assert.match(page, /Exact original timestamp/)
+  assert.match(page, /Date known \+ source-backed order/)
+  assert.match(page, /raw card cannot be saved safely yet/)
+  assert.match(page, /No exact time is inferred/)
+  assert.match(page, /Drafts exist only in this browser session/)
+  assert.match(page, /CONFIRM AND SAVE ENTIRE CARD/)
+  assert.match(page, /A canonical Global Player can appear only once/)
 })
 
 test("normal entry preview protects lower-is-better records and describes Climbers", () => {
