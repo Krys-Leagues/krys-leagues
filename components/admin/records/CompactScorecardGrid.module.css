@@ -1,0 +1,28 @@
+.grid { display:grid; gap:16px; margin-top:18px; }
+.legend { display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px 18px; color:#94a3b8; font-size:13px; font-weight:750; }
+.half { min-width:0; overflow:hidden; border:1px solid rgba(125,211,252,.2); border-radius:15px; background:rgba(2,6,23,.48); }
+.halfTitle { margin:0; padding:10px 12px; color:#67e8f9; font-size:12px; letter-spacing:.16em; }
+.scroll { overflow-x:auto; }
+.table { width:100%; min-width:900px; border-collapse:collapse; table-layout:fixed; font-size:12px; }
+.table th, .table td { border-top:1px solid rgba(255,255,255,.1); padding:5px; text-align:center; vertical-align:middle; }
+.table thead th { border-top:0; background:rgba(15,23,42,.9); color:#cbd5e1; font-size:11px; letter-spacing:.07em; }
+.playerHeading, .playerCell { width:210px; text-align:left !important; }
+.playerCell { background:rgba(15,23,42,.42); }
+.playerNumber { display:inline-block; width:25px; color:#67e8f9; font-weight:900; }
+.playerInput { width:calc(100% - 31px); min-height:34px; border:1px solid rgba(125,211,252,.27); border-radius:8px; background:rgba(2,6,23,.9); color:white; padding:6px 7px; font:inherit; font-weight:750; }
+.input { box-sizing:border-box; width:42px; height:38px; border:1px solid rgba(125,211,252,.25); border-radius:8px; background:rgba(2,6,23,.9); color:white; padding:4px; font:inherit; font-size:15px; font-weight:900; text-align:center; }
+.input:focus, .playerInput:focus { outline:2px solid rgba(34,211,238,.75); outline-offset:1px; border-color:#67e8f9; }
+.par { display:block; min-height:13px; margin-top:2px; color:#64748b; font-size:10px; }
+.totalHeading, .totalCell { width:108px; }
+.totalCell { color:#7dd3fc; }
+.totalCell strong, .totalCell span { display:block; }
+.totalCell strong { font-size:18px; }
+.totalCell span { color:#94a3b8; font-size:10px; font-weight:750; white-space:nowrap; }
+.remove { display:block; margin:4px 0 0 31px; padding:0; border:0; background:none; color:#cbd5e1; font:inherit; font-size:11px; text-decoration:underline; cursor:pointer; }
+.remove:disabled { cursor:not-allowed; opacity:.5; }
+
+@media (max-width: 800px) {
+  .table { min-width:820px; }
+  .playerHeading, .playerCell { width:175px; }
+  .input { width:38px; height:36px; }
+}
