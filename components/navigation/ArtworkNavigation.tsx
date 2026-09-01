@@ -10,7 +10,7 @@ export function ArtworkNavigation({ definition }: { definition: ArtworkPageDefin
   }
 
   return (
-    <main className="artwork-navigation">
+    <main className="artwork-navigation" data-approved-artwork-page={definition.id}>
       <h1 className="sr-only">{definition.title}</h1>
       <div
         className="artwork-navigation__frame"

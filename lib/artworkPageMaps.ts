@@ -1,6 +1,7 @@
 import type { ArtworkPageDefinition, ArtworkTarget } from "./artworkNavigation"
 
 export const mainHubArtwork: ArtworkPageDefinition = {
+  id: "main-hub",
   title: "Krys Leagues Main Hub",
   imageSrc: "/main-hub-approved.jpg",
   imageAlt: "Krys Leagues main hub with nine navigation panels and an Admin Login panel",
@@ -19,7 +20,7 @@ export const mainHubArtwork: ArtworkPageDefinition = {
   ],
 }
 
-const cardTargets: ArtworkTarget[] = [
+export const leaguePlayDestinations: ArtworkTarget[] = [
   { id: "stroke-play", label: "Stroke Play", href: "/stroke", x: 2.9, y: 39.0, width: 30.1, height: 18.6 },
   { id: "match-play", label: "Match Play", href: "/match-play", x: 35.0, y: 39.0, width: 30.2, height: 18.6 },
   { id: "doubles", label: "Doubles", href: "/doubles", x: 67.0, y: 39.0, width: 30.2, height: 18.6 },
@@ -32,12 +33,12 @@ const actionRows = [
   { prefix: "stroke", x: 3.7, y: 58.1, labels: [["Schedules", "/matches?league=stroke"], ["Standings", "/standings"], ["Results", "/matches?league=stroke"], ["Records", "/records"]] },
   { prefix: "match", x: 35.8, y: 58.1, labels: [["Schedules", "/matches?league=match"], ["Standings", "/match-standings"], ["Results", "/matches?league=match"], ["Records", "/records"]] },
   { prefix: "doubles", x: 67.8, y: 58.1, labels: [["Schedules", "/matches?league=doubles"], ["Standings", "/doubles-standings"], ["Results", "/matches?league=doubles"], ["Records", "/records"]] },
-  { prefix: "amateur-pro", x: 3.7, y: 89.6, labels: [["Standings", "/amateur-pro-standings"], ["Records", "/records"]] },
+  { prefix: "amateur-pro", x: 3.7, y: 89.6, labels: [["Schedules", "/matches"], ["Standings", "/amateur-pro-standings"], ["Results", "/matches"], ["Records", "/records"]] },
   { prefix: "skins", x: 35.8, y: 89.6, labels: [["League", "/skins"], ["Standings", "/skins-standings"], ["Results", "/skins"]] },
-  { prefix: "pyp", x: 67.8, y: 89.6, labels: [["Standings", "/pyp-standings"]] },
+  { prefix: "pyp", x: 67.8, y: 89.6, labels: [["Schedules", "/matches?league=pyp"], ["Standings", "/pyp-standings"], ["Results", "/matches?league=pyp"], ["Records", "/records"]] },
 ] as const
 
-const actionTargets: ArtworkTarget[] = actionRows.flatMap((row) =>
+export const leaguePlayActionTargets: ArtworkTarget[] = actionRows.flatMap((row) =>
   row.labels.map(([label, href], index) => ({
     id: `${row.prefix}-${label.toLowerCase()}`,
     label: `${row.prefix} ${label}`,
@@ -50,13 +51,14 @@ const actionTargets: ArtworkTarget[] = actionRows.flatMap((row) =>
 )
 
 export const leaguePlayArtwork: ArtworkPageDefinition = {
+  id: "league-play",
   title: "Krys Leagues League Play",
-  imageSrc: "/league-play-approved.png",
+  imageSrc: "/approved-pages/league-play-approved.png",
   imageAlt: "Krys Leagues League Play with six league cards and supported actions",
   aspectRatio: "1664 / 938",
   targets: [
     { id: "back-to-krys-leagues", label: "Back to Krys Leagues", href: "/", x: 1.2, y: 1.4, width: 17.1, height: 7.9 },
-    ...cardTargets,
-    ...actionTargets,
+    ...leaguePlayDestinations,
+    ...leaguePlayActionTargets,
   ],
 }
