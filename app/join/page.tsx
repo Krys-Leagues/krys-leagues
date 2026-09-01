@@ -111,6 +111,25 @@ export default function JoinPage() {
   return (
     <main style={{ minHeight: "100vh", background: "black", color: "white", padding: 24 }}>
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+        <Link
+          href="/"
+          aria-label="Back to Krys Leagues"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            marginBottom: 18,
+            padding: "10px 16px",
+            background: "#1e293b",
+            border: "1px solid #475569",
+            borderRadius: 10,
+            color: "white",
+            textDecoration: "none",
+            fontWeight: 700,
+          }}
+        >
+          ← Krys Leagues
+        </Link>
+
         <h1>Join Krys’ Leagues</h1>
 
         <p style={{ fontSize: 18, color: "#ccc", lineHeight: 1.6 }}>

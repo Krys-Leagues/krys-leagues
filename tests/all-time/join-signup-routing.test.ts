@@ -4,6 +4,12 @@ import test from "node:test"
 
 const read = (path: string) => readFileSync(path, "utf8")
 
+test("Join Leagues provides a visible keyboard-accessible route back to the approved Main Hub", () => {
+  const join = read("app/join/page.tsx")
+
+  assert.match(join, /<Link[\s\S]*?href="\/"[\s\S]*?aria-label="Back to Krys Leagues"[\s\S]*?>[\s\S]*?← Krys Leagues[\s\S]*?<\/Link>/)
+})
+
 test("every visible Join Leagues card maps to its intended registration experience", () => {
   const join = read("app/join/page.tsx")
   const links = [...join.matchAll(/title: "([^"]+)",[\s\S]*?link: "(\/register\?league=[^"]+)"/g)].map((match) => [match[1], match[2]])
