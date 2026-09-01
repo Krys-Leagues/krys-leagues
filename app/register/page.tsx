@@ -8,13 +8,13 @@ import { createDiscordAuthCallbackUrl } from "@/lib/authReturnTo";
 import { getAuthenticatedDiscordId } from "@/lib/discordPlayerLogin";
 import { supabase } from "@/lib/supabase";
 
-const LEAGUES: Record<string, { title: string; subtitle: string; image: string; ageNote: string }> = {
+const LEAGUES: Record<string, { title: string; subtitle: string; image: string | null; ageNote: string }> = {
   match: { title: "Match League Registration", subtitle: "Head-to-head leagues are 18+.", image: "/league-media/match.png", ageNote: "18+ only" },
   stroke: { title: "Stroke League Registration", subtitle: "Stroke play league signup.", image: "/league-media/stroke-preview.png", ageNote: "18+ only" },
   pyp: { title: "Pick Your Poison Registration", subtitle: "Home and away course-pick strategy league.", image: "/league-media/pyp-preview.png", ageNote: "18+ only" },
   pro: { title: "Pro League Registration", subtitle: "Top competitive divisions and advanced play.", image: "/league-media/pro-preview.png", ageNote: "18+ only" },
   doubles: { title: "Doubles League Registration", subtitle: "Team-based league play.", image: "/league-media/doubles-preview.png", ageNote: "18+ only" },
-  cups: { title: "Bracket / Cup Registration", subtitle: "Spicy, Krys, and Champion cup tracking.", image: "/league-media/match.png", ageNote: "Admins assign tiers" },
+  cups: { title: "Bracket / Cup Registration", subtitle: "Spicy, Krys, and Champion cup tracking.", image: null, ageNote: "Admins assign tiers" },
   community: { title: "Community Registration", subtitle: "Records, leaderboards, scoreboards, and community events.", image: "/league-media/stroke-preview.png", ageNote: "All skill levels" },
 };
 
@@ -112,9 +112,34 @@ function RegisterContent() {
         ← Back to League Selection
       </Link>
 
-      {/* Existing registration artwork supports dynamically configured image paths. */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={league.image} alt={league.title} style={{ width: "100%", maxHeight: 620, objectFit: "contain", display: "block", background: "black" }} />
+      {leagueKey === "cups" ? (
+        <section
+          aria-labelledby="bracket-cup-registration-heading"
+          data-registration-experience="bracket-cup"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 28,
+            minHeight: 280,
+            padding: "40px clamp(24px, 8vw, 120px)",
+            color: "white",
+            background: "radial-gradient(circle at 18% 20%, #6d28d9 0%, #241044 42%, #05020c 100%)",
+            borderBottom: "1px solid #7c3aed",
+          }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/league-media/BIG LOGO TRANSPARENT.png" alt="" aria-hidden="true" style={{ width: 150, height: 150, objectFit: "contain" }} />
+          <div>
+            <p style={{ margin: 0, color: "#d8b4fe", fontWeight: 800, letterSpacing: "0.14em" }}>BRACKET / CUP PLAY</p>
+            <h1 id="bracket-cup-registration-heading" style={{ margin: "10px 0 8px", fontSize: "clamp(30px, 5vw, 52px)" }}>Bracket / Cup Registration</h1>
+            <p style={{ margin: 0, color: "#f3e8ff", fontSize: 18 }}>Spicy, Krys, and Champion cup tracking.</p>
+          </div>
+        </section>
+      ) : (
+        /* Existing registration artwork supports dynamically configured image paths. */
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={league.image || ""} alt={league.title} style={{ width: "100%", maxHeight: 620, objectFit: "contain", display: "block", background: "black" }} />
+      )}
 
       <section style={{ maxWidth: 720, padding: 24 }}>
         <h1 style={{ marginBottom: 8 }}>{league.title}</h1>
