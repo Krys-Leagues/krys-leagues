@@ -23,3 +23,22 @@ test("All-Time batch page keeps the protected batch RPCs", () => {
   assert.match(page, /record_all_time_late_backfill_batch/)
   assert.match(page, /p_confirmation_token/)
 })
+
+test("scorecard rows expose immediate read-only PB pre-checks without using save RPCs", () => {
+  const page = read("app/admin/records/backfill/page.tsx")
+  const grid = read("components/admin/records/CompactScorecardGrid.tsx")
+  const entry = read("app/admin/records/entry/page.tsx")
+
+  assert.match(page, /from\("all_time_best_records"\)/)
+  assert.match(page, /Current PB lookup failed; no write occurred/)
+  assert.match(grid, /CURRENT ALL-TIME PB/)
+  assert.match(grid, /NEED TO BEAT/)
+  assert.match(grid, /PB AT TIME OF SUBMISSION/)
+  assert.match(grid, /HISTORICAL PB PENDING DATE\/ORDER/)
+  assert.match(grid, /HISTORICAL PB PENDING FULL REPLAY PREVIEW/)
+  assert.match(page, /preview_all_time_late_backfill_entry/)
+  assert.match(page, /kind: "historical-pb-precheck"/)
+  assert.match(grid, /Final score \(optional\)/)
+  assert.match(entry, /CURRENT ALL-TIME PB/)
+  assert.match(entry, /Read-only lookup\. Selecting a player or course never creates an observation/)
+})

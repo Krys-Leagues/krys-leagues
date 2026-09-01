@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { AdminGlassCard, AdminRecordsHero, AdminRecordsShell, adminRecordsStyles as styles } from "@/components/admin/records/AdminRecordsUI"
 import { classifyRecord, climbersPoints, deriveFullCardStats, sha256Hex, type FullCardStats, type NormalEntryType } from "@/lib/all-time/normal-records"
+import { compareRelativeScoreToPb, formatPb } from "@/lib/all-time/pb-precheck"
 import { supabase } from "@/lib/supabase"
 
 type Course = { id: string; code: string; display_name: string; difficulty: "Easy" | "Hard"; par: number | null; hole_pars: number[] | null }
@@ -16,7 +17,7 @@ export default function NormalRecordsEntryPage() {
   const [courseId, setCourseId] = useState(""), [playerId, setPlayerId] = useState(""), [entryType, setEntryType] = useState<NormalEntryType>("quick_score")
   const [scoreText, setScoreText] = useState(""), [holes, setHoles] = useState<string[]>(Array(18).fill(""))
   const [source, setSource] = useState(""), [reference, setReference] = useState(""), [notes, setNotes] = useState("")
-  const [best, setBest] = useState<Best | null>(null), [courseBests, setCourseBests] = useState<Best[]>([])
+  const [best, setBest] = useState<Best | null>(null), [courseBests, setCourseBests] = useState<Best[]>([]), [bestLoading, setBestLoading] = useState(false)
   const [loading, setLoading] = useState(true), [busy, setBusy] = useState(false), [message, setMessage] = useState(""), [error, setError] = useState(""), [activeSeason, setActiveSeason] = useState(false)
   const [saved, setSaved] = useState<Record<string, unknown> | null>(null)
 
@@ -53,15 +54,18 @@ export default function NormalRecordsEntryPage() {
 
   useEffect(() => {
     if (!courseId || !playerId) return
+    let cancelled = false
     void (async () => {
-      setError(""); setBest(null); setCourseBests([])
+      setError(""); setBest(null); setCourseBests([]); setBestLoading(true)
       const [bestResult, allResult] = await Promise.all([
         supabase.from("all_time_best_records").select("player_id,score").eq("course_id", courseId).eq("player_id", playerId).maybeSingle(),
         supabase.from("all_time_best_records").select("player_id,score").eq("course_id", courseId),
       ])
+      if (cancelled) return
       if (bestResult.error || allResult.error) setError(bestResult.error?.message || allResult.error?.message || "Current All-Time records could not be loaded.")
-      setBest((bestResult.data as Best | null) ?? null); setCourseBests((allResult.data ?? []) as Best[])
+      setBest((bestResult.data as Best | null) ?? null); setCourseBests((allResult.data ?? []) as Best[]); setBestLoading(false)
     })()
+    return () => { cancelled = true }
   }, [courseId, playerId])
 
   const previewText = useMemo(() => {
@@ -93,10 +97,11 @@ export default function NormalRecordsEntryPage() {
         <label className={styles.field}>Entry method<select className={styles.select} value={entryType} onChange={(event) => setEntryType(event.target.value as NormalEntryType)}><option value="quick_score">Quick Final Score</option><option value="full_card" disabled={holePars.length !== 18}>Full Card{holePars.length !== 18 ? " (needs hole pars)" : ""}</option></select></label>
       </div>
       {course && <p className={styles.sectionKicker}>Selected {course.difficulty} · catalog par {course.par ?? "not loaded"}. Full Card requires 18 authoritative hole pars; Quick Score never invents hole data.</p>}
+      {course && player && <div className="mt-4 rounded-xl border border-amber-300/30 bg-amber-950/20 p-3" aria-live="polite"><strong className="block text-sm text-amber-100">{bestLoading ? "PB LOOKUP PENDING" : `CURRENT ALL-TIME PB: ${formatPb(best?.score ?? null)}`}</strong>{!bestLoading && best && <span className="block text-xs text-amber-50">NEED TO BEAT: {formatPb(best.score)}</span>}{submittedScore !== null && !bestLoading && <span className="mt-2 block text-xs font-bold text-amber-100">{compareRelativeScoreToPb(submittedScore, best?.score ?? null)}</span>}<span className="mt-1 block text-xs text-slate-300">Read-only lookup. Selecting a player or course never creates an observation, season, or Climbers event.</span></div>}
       {entryType === "quick_score" ? <label className={styles.field}>Score relative to par<input className={styles.input} inputMode="numeric" value={scoreText} onChange={(event) => setScoreText(event.target.value)} placeholder="-25, 0, or +5" /></label> : <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-6">{holes.map((value, index) => <label className={styles.field} key={index}>Hole {index + 1}<input className={styles.input} inputMode="numeric" value={value} onChange={(event) => setHoles((current) => current.map((item, hole) => hole === index ? event.target.value : item))} placeholder={String(holePars[index] ?? "par")}/></label>)}</div>}
       {fullStats && <p className={styles.sectionKicker}>Derived card: {fullStats.totalStrokes} strokes · {fullStats.scoreRelativeToPar} relative · HN1 {fullStats.hn1Count} · birdies {fullStats.birdies} · eagles {fullStats.eagles} · pars {fullStats.pars} · bogeys {fullStats.bogeys}</p>}
       <div className="grid gap-4 md:grid-cols-3"><label className={styles.field}>Source / league<input className={styles.input} value={source} onChange={(event) => setSource(event.target.value)} /></label><label className={styles.field}>Reference<input className={styles.input} value={reference} onChange={(event) => setReference(event.target.value)} /></label><label className={styles.field}>Notes<input className={styles.input} value={notes} onChange={(event) => setNotes(event.target.value)} /></label></div>
     </AdminGlassCard>
-    <AdminGlassCard><h2 className={styles.sectionHeading}>Protected preview</h2><p className={styles.sectionKicker}>{player?.screen_name ?? "Player"} · {course?.display_name ?? "Course"} · {course?.difficulty ?? "Difficulty"}</p><div className={styles.recordRow}><span>Current PB</span><strong>{best?.score ?? "First score"}</strong><span>Submitted</span><strong>{submittedScore ?? "—"}</strong><span>{classification ?? "—"}</span></div><p role="status" className={styles.sectionKicker}>{previewText}</p><button className={styles.button} disabled={busy || loading || !classification || submittedScore === null || (entryType === "full_card" && !fullStats)} onClick={() => void save()}>{busy ? "Saving…" : "Save entry"}</button>{message && <p role="status" className={styles.sectionKicker}>{message}</p>}{error && <p role="alert" className={styles.empty}>{error}</p>}{saved && <pre className="mt-4 overflow-auto rounded bg-black/20 p-3 text-xs">{JSON.stringify(saved, null, 2)}</pre>}</AdminGlassCard>
+    <AdminGlassCard><h2 className={styles.sectionHeading}>Protected preview</h2><p className={styles.sectionKicker}>{player?.screen_name ?? "Player"} · {course?.display_name ?? "Course"} · {course?.difficulty ?? "Difficulty"}</p><div className={styles.recordRow}><span>Current PB</span><strong>{best?.score ?? "First score"}</strong><span>Submitted</span><strong>{submittedScore ?? "—"}</strong><span>{classification ?? "—"}</span></div><p role="status" className={styles.sectionKicker}>{previewText}</p><button className={styles.button} disabled={busy || loading || bestLoading || !classification || submittedScore === null || (entryType === "full_card" && !fullStats)} onClick={() => void save()}>{busy ? "Saving…" : "Save entry"}</button>{message && <p role="status" className={styles.sectionKicker}>{message}</p>}{error && <p role="alert" className={styles.empty}>{error}</p>}{saved && <pre className="mt-4 overflow-auto rounded bg-black/20 p-3 text-xs">{JSON.stringify(saved, null, 2)}</pre>}</AdminGlassCard>
   </AdminRecordsShell>
 }

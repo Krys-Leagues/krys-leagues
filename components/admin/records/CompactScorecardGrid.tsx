@@ -1,7 +1,8 @@
 import { calculateCardTotals } from "@/lib/all-time/late-backfill-batch"
+import { compareRelativeScoreToPb, formatHistoricalPb, formatPb, parseOptionalRelativeScore } from "@/lib/all-time/pb-precheck"
 import styles from "./CompactScorecardGrid.module.css"
 
-export type CompactScorecardPlayerRow = { id: string; playerId: string; holes: string[] }
+export type CompactScorecardPlayerRow = { id: string; playerId: string; holes: string[]; scoreOverride: string }
 export type CompactScorecardPlayer = { id: string; screen_name: string }
 export type CompactScorecardCourse = { par: number | null; hole_pars: number[] | null }
 
@@ -13,6 +14,12 @@ type Props = {
   onPlayerChange: (rowId: string, playerId: string) => void
   onRemovePlayer: (rowId: string) => void
   onHoleChange: (rowId: string, holeIndex: number, value: string) => void
+  onScoreOverrideChange: (rowId: string, value: string) => void
+  currentBestByPlayer: Map<string, number>
+  historicalBestByPlayer: Map<string, number | null>
+  pbLoading: boolean
+  isBackdated: boolean
+  chronologyResolved: boolean
 }
 
 const holes = Array.from({ length: 18 }, (_, index) => index)
@@ -47,7 +54,7 @@ function formatTotal(row: CompactScorecardPlayerRow, course: CompactScorecardCou
   }
 }
 
-export function CompactScorecardGrid({ rows, players, course, disabled, onPlayerChange, onRemovePlayer, onHoleChange }: Props) {
+export function CompactScorecardGrid({ rows, players, course, disabled, onPlayerChange, onRemovePlayer, onHoleChange, onScoreOverrideChange, currentBestByPlayer, historicalBestByPlayer, pbLoading, isBackdated, chronologyResolved }: Props) {
   const playerMap = new Map(players.map((player) => [player.id, player]))
   const playerListId = "canonical-player-list"
 
@@ -68,6 +75,14 @@ export function CompactScorecardGrid({ rows, players, course, disabled, onPlayer
               <th scope="row" className={styles.playerCell}>
                 <span className={styles.playerNumber}>P{playerIndex + 1}</span>
                 <input id={`player-${row.id}`} className={styles.playerInput} list={playerListId} disabled={disabled} value={player ? playerLabel(player) : ""} onChange={(event) => { const selected = players.find((item) => playerLabel(item) === event.target.value); onPlayerChange(row.id, selected?.id ?? "") }} placeholder="Search player" aria-label={`Player ${playerIndex + 1}`} />
+                {player && <div className={styles.pbBox} aria-live="polite">
+                  <strong>{isBackdated ? (historicalBestByPlayer.has(player.id) ? `PB AT TIME OF SUBMISSION: ${formatHistoricalPb(historicalBestByPlayer.get(player.id) ?? null)}` : chronologyResolved ? "HISTORICAL PB PENDING FULL REPLAY PREVIEW" : "HISTORICAL PB PENDING DATE/ORDER") : pbLoading ? "PB LOOKUP PENDING" : `CURRENT ALL-TIME PB: ${formatPb(currentBestByPlayer.get(player.id) ?? null)}`}</strong>
+                  {!isBackdated && currentBestByPlayer.has(player.id) && <span>NEED TO BEAT: {formatPb(currentBestByPlayer.get(player.id))}</span>}
+                  <label className={styles.prescreen}>Final score (optional)
+                    <input className={styles.prescreenInput} type="number" inputMode="numeric" value={row.scoreOverride} disabled={disabled} onChange={(event) => onScoreOverrideChange(row.id, event.target.value)} />
+                  </label>
+                  {parseOptionalRelativeScore(row.scoreOverride) !== null && (isBackdated ? (historicalBestByPlayer.has(player.id) ? <span>{compareRelativeScoreToPb(parseOptionalRelativeScore(row.scoreOverride)!, historicalBestByPlayer.get(player.id) ?? null)}</span> : <span>Historical comparison waits for protected replay preview.</span>) : pbLoading ? <span>Current comparison waits for PB lookup.</span> : <span>{compareRelativeScoreToPb(parseOptionalRelativeScore(row.scoreOverride)!, currentBestByPlayer.get(player.id) ?? null)}</span>)}
+                </div>}
                 {rows.length > 1 && <button type="button" className={styles.remove} disabled={disabled} onClick={() => onRemovePlayer(row.id)}>Remove</button>}
               </th>
               {holes.slice(start, start + 9).map((holeIndex) => <td key={holeIndex}><input className={styles.input} type="number" min={1} step={1} inputMode="numeric" data-player-index={playerIndex} data-hole-index={holeIndex} disabled={disabled} value={row.holes[holeIndex]} onChange={(event) => onHoleChange(row.id, holeIndex, event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === "Tab" && !event.shiftKey && holeIndex === start + 8) { event.preventDefault(); focusCell(playerIndex, holeIndex) } else if (event.key === "Tab" && event.shiftKey && holeIndex === start) { event.preventDefault(); focusPreviousCell(playerIndex, holeIndex) } }} aria-label={`${player ? player.screen_name : `Player ${playerIndex + 1}`} hole ${holeIndex + 1}`} />{course?.hole_pars?.length === 18 && <small className={styles.par}>{course.hole_pars[holeIndex]}</small>}</td>)}

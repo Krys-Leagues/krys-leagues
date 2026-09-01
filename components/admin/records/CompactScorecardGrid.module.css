@@ -10,6 +10,11 @@
 .playerCell { background:rgba(15,23,42,.42); }
 .playerNumber { display:inline-block; width:25px; color:#67e8f9; font-weight:900; }
 .playerInput { width:calc(100% - 31px); min-height:34px; border:1px solid rgba(125,211,252,.27); border-radius:8px; background:rgba(2,6,23,.9); color:white; padding:6px 7px; font:inherit; font-weight:750; }
+.pbBox { display:grid; gap:3px; margin-top:6px; padding:6px; border:1px solid rgba(251,191,36,.35); border-radius:8px; background:rgba(120,53,15,.18); color:#fde68a; font-size:10px; line-height:1.25; }
+.pbBox strong { font-size:10px; letter-spacing:.03em; }
+.pbBox span { color:#fef3c7; }
+.prescreen { display:grid; gap:2px; margin-top:2px; color:#cbd5e1; font-size:10px; font-weight:700; }
+.prescreenInput { width:100%; min-height:27px; border:1px solid rgba(125,211,252,.25); border-radius:6px; background:rgba(2,6,23,.9); color:white; padding:3px 5px; font:inherit; text-align:center; }
 .input { box-sizing:border-box; width:42px; height:38px; border:1px solid rgba(125,211,252,.25); border-radius:8px; background:rgba(2,6,23,.9); color:white; padding:4px; font:inherit; font-size:15px; font-weight:900; text-align:center; }
 .input:focus, .playerInput:focus { outline:2px solid rgba(34,211,238,.75); outline-offset:1px; border-color:#67e8f9; }
 .par { display:block; min-height:13px; margin-top:2px; color:#64748b; font-size:10px; }
