@@ -5,6 +5,7 @@ import { getFeatureRoute } from "@/lib/featureVisibility/server"
 import { refreshSupabaseSession } from "@/lib/supabase/proxy"
 import { getSiteAccessMode } from "@/lib/siteAccess/config"
 import { decideSiteAccessGate, safePrelaunchNext, testingAccessRedirect, type CurrentSiteAccess } from "@/lib/siteAccess/core"
+import { canonicalRedirectUrl } from "@/lib/canonicalHost"
 
 function withSessionCookies(source: NextResponse, target: NextResponse) {
   source.cookies.getAll().forEach((cookie) => target.cookies.set(cookie))
@@ -12,6 +13,9 @@ function withSessionCookies(source: NextResponse, target: NextResponse) {
 }
 
 export async function proxy(request: NextRequest) {
+  const canonicalRedirect = canonicalRedirectUrl(request.url)
+  if (canonicalRedirect) return NextResponse.redirect(canonicalRedirect, 308)
+
   const session = await refreshSupabaseSession(request)
   const mode = getSiteAccessMode()
   const pathname = request.nextUrl.pathname
