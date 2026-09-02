@@ -1,21 +1,19 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useMemo, useState } from "react"
+import { Suspense, useEffect, useMemo, useState } from "react"
+import { useSearchParams } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import { historicalPlayerName, loadCanonicalPlayerDisplays, type CanonicalPlayerDisplay } from "@/lib/canonicalPlayerDisplay"
 import TrophyMedia from "@/components/TrophyMedia"
-
-type Player = {
-  id: string
-  screen_name: string
-}
+import { filterTrophiesForScope } from "@/lib/championScope"
 
 type Trophy = {
   id: string
   player_id: string | null
   player_name: string | null
   trophy_title: string | null
+  league_type: string | null
   placement: string | null
   event_name: string | null
   division: string | null
@@ -40,6 +38,16 @@ type TrophyGroup = {
 type HallCategory = "league" | "monthly" | "bracket" | "krysCup" | "spicyCup" | "other"
 
 export default function ChampionsPage() {
+  return (
+    <Suspense fallback={<main style={page}><div style={container}><div style={messageCard}>Loading Hall of Champions...</div></div></main>}>
+      <ChampionsContent />
+    </Suspense>
+  )
+}
+
+function ChampionsContent() {
+  const searchParams = useSearchParams()
+  const kwtOnly = searchParams.get("league")?.trim().toLowerCase() === "kwt"
   const [players, setPlayers] = useState<CanonicalPlayerDisplay[]>([])
   const [trophies, setTrophies] = useState<Trophy[]>([])
   const [loading, setLoading] = useState(true)
@@ -47,19 +55,22 @@ export default function ChampionsPage() {
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/immutability
-    loadChampions()
-  }, [])
+    loadChampions(kwtOnly)
+  }, [kwtOnly])
 
-  async function loadChampions() {
+  async function loadChampions(onlyKwt: boolean) {
     setLoading(true)
     setMessage("")
 
-    const trophiesResponse = await supabase
+    let trophiesQuery = supabase
         .from("player_trophies")
         .select(
-          "id, player_id, player_name, trophy_title, placement, event_name, division, season, week, image_url"
+          "id, player_id, player_name, trophy_title, placement, event_name, league_type, division, season, week, image_url"
         )
         .order("season", { ascending: false })
+    if (onlyKwt) trophiesQuery = trophiesQuery.eq("league_type", "kwt")
+
+    const trophiesResponse = await trophiesQuery
 
     const firstError = trophiesResponse.error
 
@@ -69,7 +80,7 @@ export default function ChampionsPage() {
       return
     }
 
-    const loadedTrophies = trophiesResponse.data || []
+    const loadedTrophies = filterTrophiesForScope(trophiesResponse.data || [], onlyKwt ? "kwt" : "all")
     const playerResponse = await loadCanonicalPlayerDisplays(
       loadedTrophies.map((trophy) => trophy.player_id).filter((id): id is string => Boolean(id)),
     )
@@ -139,8 +150,8 @@ export default function ChampionsPage() {
     <main style={page}>
       <div style={container}>
         <div style={topBar}>
-          <Link href="/" style={backButton}>
-            ← Krys Leagues
+          <Link href={kwtOnly ? "/kwt" : "/"} style={backButton}>
+            {kwtOnly ? "← KWT" : "← Krys Leagues"}
           </Link>
 
           <Link href="/records" style={backButton}>
@@ -153,12 +164,12 @@ export default function ChampionsPage() {
         </div>
 
         <section style={hero}>
-          <h1 style={title}>🏆 Hall of Champions</h1>
+          <h1 style={title}>{kwtOnly ? "🏆 KWT Hall of Champions" : "🏆 Hall of Champions"}</h1>
 
           <p style={subtitle}>
-            Celebrating league champions, tournament winners, cup
-            achievements, and the greatest accomplishments in Krys
-            Leagues.
+            {kwtOnly
+              ? "KWT champions and recorded weekly tournament awards."
+              : "Celebrating league champions, tournament winners, cup achievements, and the greatest accomplishments in Krys Leagues."}
           </p>
         </section>
                 {loading ? (
@@ -169,7 +180,7 @@ export default function ChampionsPage() {
           <div style={errorCard}>{message}</div>
         ) : (
           <>
-            <section style={featuredCard}>
+            {!kwtOnly && <section style={featuredCard}>
               <div style={cupGrid}>
                 <div style={cupCard}>
                  <h2 style={featuredTitle}>
@@ -252,7 +263,7 @@ export default function ChampionsPage() {
                   )}
                 </div>
               </div>
-            </section>
+            </section>}
 
             <RecentTrophyGroups groups={recentTrophyGroups} />
             {championEntries.length > 0 && <HallCategoryArchives entries={championEntries} />}
