@@ -55,7 +55,6 @@ test("normal entry preview protects lower-is-better records and describes Climbe
   const page = read("app/admin/records/entry/page.tsx")
   assert.match(page, /CURRENT ALL-TIME PB/)
   assert.match(page, /NEED TO BEAT/)
-  assert.match(page, /PB AT TIME OF SUBMISSION/)
   assert.match(page, /BETTER — passes/)
   assert.match(page, /FIRST — establishes a PB/)
   assert.match(page, /EQUAL — tie does not change the PB/)
@@ -63,6 +62,8 @@ test("normal entry preview protects lower-is-better records and describes Climbe
   assert.match(page, /from\("climbers_seasons"\)/)
   assert.match(page, /no active season \(0 points\)/)
   assert.match(page, /entryKeyRef/)
+  assert.doesNotMatch(page, /preview_all_time_late_backfill/)
+  assert.doesNotMatch(page, /HISTORICAL PB PENDING DATE\/ORDER/)
 })
 
 test("final intake is one-player, authoritative-par, and session-based", () => {
@@ -73,12 +74,14 @@ test("final intake is one-player, authoritative-par, and session-based", () => {
   assert.match(page, /data-normal-hole-index/)
   assert.match(page, /focusAfterHole/)
   assert.match(page, /nextHoleAfterCompleteInput/)
-  assert.match(page, /type="datetime-local"/)
-  assert.match(page, /normalizeLocalDateTimeInput/)
   assert.match(page, /onWheel=/)
   assert.match(page, /ADD AGAIN/)
   assert.match(page, /ADD &amp; FINISH/)
   assert.match(page, /SESSION ENTRIES/)
+  assert.match(page, /CURRENT PERIOD — DEFAULT/)
+  assert.match(page, /PREVIOUS PERIOD/)
+  assert.doesNotMatch(page, /Chronology evidence|datetime-local|Authoritative submitted date\/time|HISTORICAL PB PENDING DATE\/ORDER/)
+  assert.match(page, /Previous Period saves are handled in the protected Late \/ Backfill tools/)
   assert.doesNotMatch(page, /ADD PLAYER|PREVIEW ENTIRE CARD|FRONT 9|BACK 9|P1|P2|P3/)
 })
 

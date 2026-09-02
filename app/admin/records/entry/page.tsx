@@ -3,11 +3,9 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { AdminGlassCard, AdminRecordsHero, AdminRecordsShell, adminRecordsStyles as styles } from "@/components/admin/records/AdminRecordsUI"
 import scorecardStyles from "@/components/admin/records/NormalScorecard.module.css"
-import { classifyRecord, climbersPoints, deriveFullCardStats, sha256Hex, type FullCardStats, type NormalEntryType, type RecordClassification } from "@/lib/all-time/normal-records"
-import { compareRelativeScoreToPb, formatHistoricalPb, formatPb } from "@/lib/all-time/pb-precheck"
-import { normalizeLocalDateTimeInput } from "@/lib/all-time/authoritative-date-time"
+import { classifyRecord, climbersPoints, deriveFullCardStats, sha256Hex, type FullCardStats, type NormalEntryType } from "@/lib/all-time/normal-records"
+import { compareRelativeScoreToPb, formatPb } from "@/lib/all-time/pb-precheck"
 import { nextHoleAfterCompleteInput, parsePositiveHoleScore, sanitizeHoleScoreInput } from "@/lib/all-time/score-input"
-import type { BackfillPrecision } from "@/lib/all-time/late-backfill"
 import { supabase } from "@/lib/supabase"
 
 type Period = "current" | "previous"
@@ -15,7 +13,6 @@ type Course = { id: string; code: string; display_name: string; difficulty: "Eas
 type Player = { id: string; screen_name: string }
 type Best = { player_id: string; score: number }
 type Season = { id: string; starts_at: string; ends_at: string; status: string }
-type LatePreview = { action: string; confirmation_token?: string; player_name?: string; old_pb_score?: number | null; submitted_score?: number; classification?: RecordClassification; new_pb_score?: number | null; passed_player_ids?: string[]; climbers_points?: number; target_season_label?: string; target_season_id?: string | null; ordering_status?: string; ordering_issue?: string | null }
 type SessionEntry = { player: string; course: string; score: number; hio: number | null; classification: string; points: number; period: string; status: string }
 
 const emptyHoles = () => Array.from({ length: 18 }, () => "")
@@ -34,10 +31,9 @@ export default function NormalRecordsEntryPage() {
   const [period, setPeriod] = useState<Period>("current"), [courseId, setCourseId] = useState(""), [playerId, setPlayerId] = useState(""), [playerSearch, setPlayerSearch] = useState(""), [entryType, setEntryType] = useState<NormalEntryType>("full_card")
   const [scoreText, setScoreText] = useState(""), [holes, setHoles] = useState<string[]>(emptyHoles)
   const [source, setSource] = useState(""), [reference, setReference] = useState(""), [notes, setNotes] = useState("")
-  const [precision, setPrecision] = useState<BackfillPrecision>("exact"), [timestamp, setTimestamp] = useState(""), [date, setDate] = useState(""), [order, setOrder] = useState("")
-  const [best, setBest] = useState<Best | null>(null), [courseBests, setCourseBests] = useState<Best[]>([]), [bestLoading, setBestLoading] = useState(false), [historicalPb, setHistoricalPb] = useState<number | null | undefined>(undefined)
-  const [season, setSeason] = useState<Season | null>(null), [loading, setLoading] = useState(true), [busy, setBusy] = useState(false), [message, setMessage] = useState(""), [error, setError] = useState(""), [confirmed, setConfirmed] = useState(false), [previewFingerprint, setPreviewFingerprint] = useState(""), [latePreview, setLatePreview] = useState<LatePreview | null>(null), [sessionEntries, setSessionEntries] = useState<SessionEntry[]>([]), [finished, setFinished] = useState(false)
-  const nextActionRef = useRef<HTMLButtonElement>(null), entryKeyRef = useRef(crypto.randomUUID()), batchIdRef = useRef(crypto.randomUUID())
+  const [best, setBest] = useState<Best | null>(null), [courseBests, setCourseBests] = useState<Best[]>([]), [bestLoading, setBestLoading] = useState(false)
+  const [season, setSeason] = useState<Season | null>(null), [loading, setLoading] = useState(true), [busy, setBusy] = useState(false), [message, setMessage] = useState(""), [error, setError] = useState(""), [confirmed, setConfirmed] = useState(false), [previewFingerprint, setPreviewFingerprint] = useState(""), [sessionEntries, setSessionEntries] = useState<SessionEntry[]>([]), [finished, setFinished] = useState(false)
+  const nextActionRef = useRef<HTMLButtonElement>(null), entryKeyRef = useRef(crypto.randomUUID())
 
   useEffect(() => {
     void (async () => {
@@ -59,15 +55,12 @@ export default function NormalRecordsEntryPage() {
   const parsedHoles = holes.map(parsePositiveHoleScore)
   const fullStats: FullCardStats | null = entryType === "full_card" && parsedHoles.every((value): value is number => value !== null) && holePars.length === 18 ? (() => { const result = deriveFullCardStats(parsedHoles, holePars); return "error" in result ? null : result })() : null
   const submittedScore = entryType === "full_card" ? fullStats?.scoreRelativeToPar ?? null : parseScore(scoreText)
-  const normalizedTimestamp = precision === "exact" ? normalizeLocalDateTimeInput(timestamp) : null
-  const chronologyResolved = period === "current" || (precision === "exact" ? Boolean(normalizedTimestamp) : Boolean(/^\d{4}-\d{2}-\d{2}$/.test(date) && /^\d+$/.test(order) && Number(order) > 0))
-  const relevantPb = period === "previous" ? historicalPb : best?.score ?? null
+  const relevantPb = best?.score ?? null
   const classification = submittedScore !== null && relevantPb !== undefined ? classifyRecord(relevantPb, submittedScore) : null
   const peoplePassed = season && classification === "BETTER" && submittedScore !== null ? courseBests.filter((item) => item.player_id !== playerId && item.score > submittedScore).length : 0
   const localPoints = classification ? climbersPoints(classification, peoplePassed) : 0
-  const serverPoints = period === "previous" ? latePreview?.climbers_points ?? null : null
-  const points = serverPoints ?? localPoints
-  const targetPeriod = period === "current" ? season ? `${new Date(season.starts_at).toLocaleDateString()}–${new Date(season.ends_at).toLocaleDateString()}` : "Current period · no active season (0 points)" : latePreview?.target_season_label ?? "Previous period · protected chronology required"
+  const points = localPoints
+  const targetPeriod = period === "current" ? season ? `${new Date(season.starts_at).toLocaleDateString()}–${new Date(season.ends_at).toLocaleDateString()}` : "Current period · no active season (0 points)" : "Previous period · use Late / Backfill tools"
   const needsPar = entryType === "full_card" && !validHolePars(course)
 
   useEffect(() => {
@@ -86,19 +79,6 @@ export default function NormalRecordsEntryPage() {
     return () => { cancelled = true }
   }, [courseId, playerId])
 
-  useEffect(() => {
-    if (period !== "previous" || !courseId || !playerId || submittedScore === null || !source.trim() || !chronologyResolved) return
-    let cancelled = false
-    void (async () => {
-      const fingerprint = await sha256Hex(JSON.stringify({ kind: "historical-pb-precheck", courseId, playerId, score: submittedScore, precision, timestamp: normalizedTimestamp, date: precision === "date_ordered" ? date : null, order: precision === "date_ordered" ? Number(order) : null, source: source.trim(), reference: reference.trim(), notes: notes.trim() }))
-      const result = await supabase.rpc("preview_all_time_late_backfill_entry", { p_course_id: courseId, p_player_id: playerId, p_entry_key: entryKeyRef.current, p_fingerprint: fingerprint, p_score: submittedScore, p_authoritative_submitted_at: normalizedTimestamp, p_authoritative_submitted_date: precision === "date_ordered" ? date : null, p_authoritative_submission_order: precision === "date_ordered" ? Number(order) : null, p_authoritative_time_precision: precision, p_source_label: source.trim(), p_provenance_reference: reference.trim() || null, p_notes: notes.trim() || null })
-      if (cancelled) return
-      if (result.error) { setHistoricalPb(undefined); return }
-      setHistoricalPb((result.data as LatePreview).old_pb_score ?? null)
-    })()
-    return () => { cancelled = true }
-  }, [courseId, playerId, date, entryType, holes, notes, normalizedTimestamp, order, period, precision, reference, scoreText, source, submittedScore, chronologyResolved])
-
   function focusAfterHole(index: number, value: string) {
     const nextIndex = nextHoleAfterCompleteInput(value, index)
     const next = nextIndex === null ? null : document.querySelector<HTMLInputElement>(`[data-normal-hole-index="${nextIndex}"]`)
@@ -112,44 +92,31 @@ export default function NormalRecordsEntryPage() {
     if (parsePositiveHoleScore(sanitized) !== null) focusAfterHole(index, sanitized)
   }
 
-  function invalidatePreview() { setHistoricalPb(undefined); setLatePreview(null); setPreviewFingerprint(""); setConfirmed(false) }
+  function invalidatePreview() { setPreviewFingerprint(""); setConfirmed(false) }
 
   function validateEntry() {
     if (!course || !player) return "Select one Easy/Hard course and one canonical Global Player."
     if (!source.trim()) return "Enter a source or provenance label."
     if (submittedScore === null) return entryType === "full_card" ? "Enter all 18 positive hole scores." : "Enter a valid integer score relative to par."
     if (entryType === "full_card" && (!validHolePars(course) || !fullStats)) return "This course needs 18 authoritative positive hole pars before a full card can be saved."
-    if (period === "previous" && !chronologyResolved) return precision === "exact" ? "Previous-period entries require an authoritative timestamp with timezone." : "Previous-period entries require a source-backed date and positive order."
-    if (period === "previous" && historicalPb === undefined) return "Historical PB is still pending protected chronology review."
-    if (period === "previous" && !latePreview) return "Run the protected preview before saving this previous-period entry."
+    if (period === "previous") return "Previous Period saves are handled in the protected Late / Backfill tools. This intake is for current-period entries."
     if (!classification) return "Complete the protected preview before saving."
     return null
   }
 
   async function fingerprintForEntry() {
-    const authority = period === "previous" ? { precision, timestamp: normalizedTimestamp, date: precision === "date_ordered" ? date : null, order: precision === "date_ordered" ? Number(order) : null } : null
-    return sha256Hex(JSON.stringify({ period, courseId, playerId, entryType, score: submittedScore, holes: entryType === "full_card" ? parsedHoles : null, source: source.trim(), reference: reference.trim(), notes: notes.trim(), authority }))
+    return sha256Hex(JSON.stringify({ period, courseId, playerId, entryType, score: submittedScore, holes: entryType === "full_card" ? parsedHoles : null, source: source.trim(), reference: reference.trim(), notes: notes.trim() }))
   }
 
   async function previewEntry() {
     const problem = validateEntryForPreview(); if (problem) { setError(problem); return }
     const selectedCourse = course, selectedPlayer = player, score = submittedScore
     if (!selectedCourse || !selectedPlayer || score === null) { setError("Complete the player, course, and score before previewing."); return }
-    setBusy(true); setError(""); setMessage(""); setConfirmed(false); setLatePreview(null)
+    setBusy(true); setError(""); setMessage(""); setConfirmed(false)
     try {
       const fingerprint = await fingerprintForEntry()
-      if (period === "current") { setPreviewFingerprint(fingerprint); setMessage("Protected preview ready. Review the PB, Climbers effect, and score statistics before confirming."); return }
-      if (entryType === "quick_score") {
-        const result = await supabase.rpc("preview_all_time_late_backfill_entry", { p_course_id: selectedCourse.id, p_player_id: selectedPlayer.id, p_entry_key: entryKeyRef.current, p_fingerprint: fingerprint, p_score: score, p_authoritative_submitted_at: normalizedTimestamp, p_authoritative_submitted_date: precision === "date_ordered" ? date : null, p_authoritative_submission_order: precision === "date_ordered" ? Number(order) : null, p_authoritative_time_precision: precision, p_source_label: source.trim(), p_provenance_reference: reference.trim() || null, p_notes: notes.trim() || null })
-        if (result.error) throw result.error
-        setLatePreview(result.data as LatePreview); setPreviewFingerprint(fingerprint)
-      } else {
-        const rowFingerprint = await sha256Hex(JSON.stringify({ batch: batchIdRef.current, playerId: selectedPlayer.id, holes: parsedHoles }))
-        const result = await supabase.rpc("preview_all_time_late_backfill_batch", { p_card_batch_id: batchIdRef.current, p_batch_fingerprint: fingerprint, p_course_id: selectedCourse.id, p_players: [{ player_id: selectedPlayer.id, hole_strokes: parsedHoles, entry_key: entryKeyRef.current, fingerprint: rowFingerprint }], p_authoritative_submitted_at: normalizedTimestamp, p_authoritative_submitted_date: precision === "date_ordered" ? date : null, p_authoritative_submission_order: precision === "date_ordered" ? Number(order) : null, p_authoritative_time_precision: precision, p_source_label: source.trim(), p_provenance_reference: reference.trim() || null, p_notes: notes.trim() || null })
-        if (result.error) throw result.error
-        const batch = result.data as { players?: LatePreview[] } & LatePreview
-        setLatePreview({ ...(batch.players?.[0] ?? {}), ...batch })
-      }
+      if (period === "previous") { setError("Previous Period saves are handled in the protected Late / Backfill tools. This intake is for current-period entries."); return }
+      setPreviewFingerprint(fingerprint)
       setMessage("Protected preview ready. Review it and explicitly confirm this one-player entry.")
     } catch (caught) { setError(errorMessage(caught, "The protected preview could not be loaded.")) } finally { setBusy(false) }
   }
@@ -159,11 +126,11 @@ export default function NormalRecordsEntryPage() {
     if (!source.trim()) return "Enter a source or provenance label."
     if (entryType === "full_card" && (!validHolePars(course) || !fullStats)) return "Enter all 18 positive hole scores; authoritative 18-hole pars are required."
     if (entryType === "quick_score" && submittedScore === null) return "Enter a valid integer score relative to par."
-    if (period === "previous" && !chronologyResolved) return precision === "exact" ? "Previous-period entries require an authoritative timestamp with timezone." : "Previous-period entries require a source-backed date and positive order."
+    if (period === "previous") return "Previous Period saves are handled in the protected Late / Backfill tools. This intake is for current-period entries."
     return null
   }
 
-  function resetEntry() { setCourseId(""); setPlayerId(""); setPlayerSearch(""); setScoreText(""); setHoles(emptyHoles()); setSource(""); setReference(""); setNotes(""); setTimestamp(""); setDate(""); setOrder(""); setConfirmed(false); setLatePreview(null); setPreviewFingerprint(""); entryKeyRef.current = crypto.randomUUID(); batchIdRef.current = crypto.randomUUID() }
+  function resetEntry() { setCourseId(""); setPlayerId(""); setPlayerSearch(""); setScoreText(""); setHoles(emptyHoles()); setSource(""); setReference(""); setNotes(""); setConfirmed(false); setPreviewFingerprint(""); entryKeyRef.current = crypto.randomUUID() }
 
   async function saveEntry(finish: boolean) {
     const problem = validateEntry(); if (problem) { setError(problem); return }
@@ -173,26 +140,18 @@ export default function NormalRecordsEntryPage() {
     setBusy(true); setError(""); setMessage("")
     try {
       const fingerprint = await fingerprintForEntry(); if (fingerprint !== previewFingerprint) throw new Error("The entry changed after preview; run a fresh protected preview.")
-      let result: { data: unknown; error: { message: string } | null }
-      if (period === "current") {
-        result = await supabase.rpc("record_all_time_normal_entry", { p_course_id: selectedCourse.id, p_player_id: selectedPlayer.id, p_entry_key: entryKeyRef.current, p_fingerprint: fingerprint, p_score: score, p_hole_strokes: entryType === "full_card" ? parsedHoles : null, p_entry_type: entryType, p_source_label: source.trim(), p_provenance_reference: reference.trim() || null, p_notes: notes.trim() || null })
-      } else if (entryType === "quick_score") {
-        result = await supabase.rpc("record_all_time_late_backfill_entry", { p_course_id: selectedCourse.id, p_player_id: selectedPlayer.id, p_entry_key: entryKeyRef.current, p_fingerprint: fingerprint, p_score: score, p_authoritative_submitted_at: normalizedTimestamp, p_authoritative_submitted_date: precision === "date_ordered" ? date : null, p_authoritative_submission_order: precision === "date_ordered" ? Number(order) : null, p_authoritative_time_precision: precision, p_source_label: source.trim(), p_provenance_reference: reference.trim() || null, p_notes: notes.trim() || null, p_confirmation_token: latePreview?.confirmation_token })
-      } else {
-        const rowFingerprint = await sha256Hex(JSON.stringify({ batch: batchIdRef.current, playerId: player.id, holes: parsedHoles }))
-        result = await supabase.rpc("record_all_time_late_backfill_batch", { p_card_batch_id: batchIdRef.current, p_batch_fingerprint: fingerprint, p_course_id: selectedCourse.id, p_players: [{ player_id: selectedPlayer.id, hole_strokes: parsedHoles, entry_key: entryKeyRef.current, fingerprint: rowFingerprint }], p_authoritative_submitted_at: normalizedTimestamp, p_authoritative_submitted_date: precision === "date_ordered" ? date : null, p_authoritative_submission_order: precision === "date_ordered" ? Number(order) : null, p_authoritative_time_precision: precision, p_source_label: source.trim(), p_provenance_reference: reference.trim() || null, p_notes: notes.trim() || null, p_confirmation_token: latePreview?.confirmation_token })
-      }
+      if (period === "previous") throw new Error("Previous Period saves are handled in the protected Late / Backfill tools. This intake is for current-period entries.")
+      const result = await supabase.rpc("record_all_time_normal_entry", { p_course_id: selectedCourse.id, p_player_id: selectedPlayer.id, p_entry_key: entryKeyRef.current, p_fingerprint: fingerprint, p_score: score, p_hole_strokes: entryType === "full_card" ? parsedHoles : null, p_entry_type: entryType, p_source_label: source.trim(), p_provenance_reference: reference.trim() || null, p_notes: notes.trim() || null })
       if (result.error) throw result.error
-      const savedPoints = period === "previous" ? latePreview?.climbers_points ?? 0 : points
-      setSessionEntries((current) => [...current, { player: selectedPlayer.screen_name, course: `${selectedCourse.display_name} · ${selectedCourse.difficulty}`, score, hio: stats?.hn1Count ?? null, classification: latePreview?.classification ?? classification ?? "—", points: savedPoints, period: targetPeriod, status: "SAVED" }])
+      setSessionEntries((current) => [...current, { player: selectedPlayer.screen_name, course: `${selectedCourse.display_name} · ${selectedCourse.difficulty}`, score, hio: stats?.hn1Count ?? null, classification: classification ?? "—", points, period: targetPeriod, status: "SAVED" }])
       setMessage(finish ? "Entry saved. Intake session finished." : "Entry saved. Add another player from any course or submitted card.")
       if (finish) setFinished(true)
       else resetEntry()
     } catch (caught) { setError(errorMessage(caught, "The protected All-Time entry could not be saved.")) } finally { setBusy(false) }
   }
 
-  const previewReady = Boolean(previewFingerprint && submittedScore !== null && (period === "current" || latePreview?.confirmation_token))
-  const previewText = !classification || submittedScore === null ? "Enter the score to calculate the protected result." : classification === "FIRST" ? "FIRST — establishes a PB — 0 Climbers points." : classification === "EQUAL" ? "EQUAL — tie does not change the PB — 0 Climbers points." : classification === "WORSE" ? `WORSE — ${period === "previous" ? "historical" : "current"} PB remains unchanged — 0 Climbers points.` : points ? `BETTER — passes ${points} canonical player${points === 1 ? "" : "s"} — ${points} Climbers point${points === 1 ? "" : "s"}.` : "BETTER — PB improves but no canonical players are passed — 0 Climbers points."
+  const previewReady = Boolean(previewFingerprint && submittedScore !== null && period === "current")
+  const previewText = period === "previous" ? "Previous Period saves are handled in the protected Late / Backfill tools. This intake is for current-period entries." : !classification || submittedScore === null ? "Enter the score to calculate the protected result." : classification === "FIRST" ? "FIRST — establishes a PB — 0 Climbers points." : classification === "EQUAL" ? "EQUAL — tie does not change the PB — 0 Climbers points." : classification === "WORSE" ? "WORSE — current PB remains unchanged — 0 Climbers points." : points ? `BETTER — passes ${points} canonical player${points === 1 ? "" : "s"} — ${points} Climbers point${points === 1 ? "" : "s"}.` : "BETTER — PB improves but no canonical players are passed — 0 Climbers points."
 
   if (finished) return <AdminRecordsShell><nav className={styles.nav}><a href="/admin/records" className={styles.button}>← Records hub</a><a href="/admin/records/history" className={styles.button}>Records history</a></nav><AdminRecordsHero title="Intake session finished" description="The saved entries below were added during this admin intake session." /><SessionLog entries={sessionEntries} /></AdminRecordsShell>
   return <AdminRecordsShell>
@@ -206,9 +165,8 @@ export default function NormalRecordsEntryPage() {
         <label className={styles.field}>Canonical Global Player<select className={styles.select} value={playerId} onChange={(event) => { setPlayerId(event.target.value); setBest(null); setCourseBests([]); invalidatePreview() }} aria-label="Canonical Global Player"><option value="">Choose one player</option>{filteredPlayers.map((item) => <option key={item.id} value={item.id}>{item.screen_name}</option>)}</select></label>
       </div>
       <div className="mt-5 grid gap-4 md:grid-cols-3"><label className={styles.field}>Entry method<select className={styles.select} value={entryType} onChange={(event) => { setEntryType(event.target.value as NormalEntryType); invalidatePreview() }}><option value="full_card">18-hole scorecard</option><option value="quick_score">Quick Score</option></select></label><label className={styles.field}>Source / provenance<input className={styles.input} value={source} onChange={(event) => { setSource(event.target.value); invalidatePreview() }} /></label><label className={styles.field}>Reference<input className={styles.input} value={reference} onChange={(event) => { setReference(event.target.value); invalidatePreview() }} placeholder="URL, message, or source row" /></label><label className={`${styles.field} md:col-span-3`}>Notes<textarea className={styles.textarea} value={notes} onChange={(event) => { setNotes(event.target.value); invalidatePreview() }} /></label></div>
-      {period === "previous" && <div className="mt-5 grid gap-4 md:grid-cols-3"><label className={styles.field}>Chronology evidence<select className={styles.select} value={precision} onChange={(event) => { setPrecision(event.target.value as BackfillPrecision); invalidatePreview() }}><option value="exact">Exact original timestamp</option><option value="date_ordered">Date + source-backed order</option></select></label>{precision === "exact" ? <label className={styles.field}>Authoritative submitted date/time<input className={styles.input} type="datetime-local" step="60" value={timestamp} onChange={(event) => { setTimestamp(event.target.value); invalidatePreview() }} aria-label="Authoritative submitted date and time" /></label> : <><label className={styles.field}>Authoritative submitted date<input className={styles.input} type="date" value={date} onChange={(event) => { setDate(event.target.value); invalidatePreview() }} /></label><label className={styles.field}>Authoritative order<input className={styles.input} inputMode="numeric" value={order} onChange={(event) => { setOrder(event.target.value.replace(/[^0-9]/g, "")); invalidatePreview() }} /></label></>}<p className={styles.sectionKicker}>Select the original local date/time normally; it is normalized to the protected timestamp. No exact time is invented when date-only evidence is used.</p></div>}
       {course && <p className={styles.sectionKicker}>Selected {course.difficulty} · authoritative total par: {course.par ?? "not loaded"}. Selecting data is read-only and never creates an observation, PB, season, or Climbers event.</p>}
-      {course && player && <div className="mt-4 rounded-xl border border-amber-300/30 bg-amber-950/20 p-3" aria-live="polite"><strong className="block text-sm text-amber-100">{bestLoading ? "PB LOOKUP PENDING" : period === "previous" ? historicalPb === undefined ? "HISTORICAL PB PENDING DATE/ORDER" : `PB AT TIME OF SUBMISSION: ${formatHistoricalPb(historicalPb)}` : `CURRENT ALL-TIME PB: ${formatPb(best?.score ?? null)}`}</strong>{period === "current" && best && <span className="block text-xs text-amber-50">NEED TO BEAT: {formatPb(best.score)}</span>}{submittedScore !== null && period === "current" && !bestLoading && <span className="mt-2 block text-xs font-bold text-amber-100">{compareRelativeScoreToPb(submittedScore, best?.score ?? null)}</span>}{submittedScore !== null && period === "previous" && historicalPb !== undefined && <span className="mt-2 block text-xs font-bold text-amber-100">{compareRelativeScoreToPb(submittedScore, historicalPb)}</span>}<span className="mt-1 block text-xs text-slate-300">Read-only lookup. Selecting a player or course never creates an observation, season, or Climbers event.</span></div>}
+      {course && player && <div className="mt-4 rounded-xl border border-amber-300/30 bg-amber-950/20 p-3" aria-live="polite"><strong className="block text-sm text-amber-100">{bestLoading ? "PB LOOKUP PENDING" : `CURRENT ALL-TIME PB: ${formatPb(best?.score ?? null)}`}</strong>{best && <span className="block text-xs text-amber-50">NEED TO BEAT: {formatPb(best.score)}</span>}{submittedScore !== null && !bestLoading && <span className="mt-2 block text-xs font-bold text-amber-100">{compareRelativeScoreToPb(submittedScore, best?.score ?? null)}</span>}{period === "previous" && <span className="mt-2 block text-xs text-amber-100">Current PB shown for reference only; use Late / Backfill tools for previous-period saves.</span>}<span className="mt-1 block text-xs text-slate-300">Read-only lookup. Selecting a player or course never creates an observation, season, or Climbers event.</span></div>}
     </AdminGlassCard>
     <AdminGlassCard>
       <div className="flex flex-wrap items-end justify-between gap-3"><div><h2 className={styles.sectionHeading}>{entryType === "full_card" ? "18-hole scorecard" : "Quick Score"}</h2><p className={styles.sectionKicker}>{entryType === "full_card" ? "HOLE · PAR · SCORE — all 18 holes stay in one compact row." : "Enter the final relative score without transcribing hole data."}</p></div>{entryType === "full_card" && course && !validHolePars(course) && <span className="text-sm font-bold text-amber-200">Authoritative pars unavailable — save blocked</span>}</div>
@@ -216,7 +174,7 @@ export default function NormalRecordsEntryPage() {
       {needsPar && <p role="alert" className={`${styles.notice} mt-4`}>This course cannot save a full card until its authoritative total par and all 18 positive hole pars are available.</p>}
       {fullStats && <div className="mt-5 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4 md:grid-cols-8">{[["Strokes", fullStats.totalStrokes], ["Relative", fullStats.scoreRelativeToPar], ["HIO", fullStats.hn1Count], ["Pars", fullStats.pars], ["Birdies", fullStats.birdies], ["Bogeys", fullStats.bogeys], ["Eagles+", fullStats.eagles], ["Other", fullStats.otherHoles]].map(([label, value]) => <div className="rounded-lg border border-sky-300/20 bg-slate-950/40 p-2 text-center" key={label}><span className="block text-xs text-slate-400">{label}</span><strong>{value}</strong></div>)}</div>}
     </AdminGlassCard>
-    <AdminGlassCard><h2 className={styles.sectionHeading}>Protected preview</h2><div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><div><span className="block text-xs text-slate-400">Player</span><strong>{player?.screen_name ?? "—"}</strong></div><div><span className="block text-xs text-slate-400">Course</span><strong>{course ? `${course.display_name} · ${course.difficulty}` : "—"}</strong></div><div><span className="block text-xs text-slate-400">Submitted score</span><strong>{submittedScore ?? "—"}</strong></div><div><span className="block text-xs text-slate-400">Classification</span><strong>{latePreview?.classification ?? classification ?? "—"}</strong></div><div><span className="block text-xs text-slate-400">New PB</span><strong>{formatPb(latePreview?.new_pb_score ?? (classification === "FIRST" || classification === "BETTER" ? submittedScore : best?.score ?? null))}</strong></div><div><span className="block text-xs text-slate-400">Climbers</span><strong>{points} points</strong></div><div><span className="block text-xs text-slate-400">Target period</span><strong>{latePreview?.target_season_label ?? targetPeriod}</strong></div><div><span className="block text-xs text-slate-400">Status</span><strong>{previewReady ? "READY TO REVIEW" : "DRAFT"}</strong></div></div><p role="status" className={styles.sectionKicker}>{previewText}</p>{period === "previous" && latePreview?.ordering_status === "review_required" && <p role="alert" className={styles.notice}>{latePreview.ordering_issue ?? "Chronology requires review; saving is blocked."}</p>}<button className={`${styles.buttonPrimary} mt-4`} disabled={busy || loading || bestLoading || Boolean(validateEntryForPreview())} onClick={() => void previewEntry()}>{busy ? "Preparing…" : "Preview protected entry"}</button>{previewReady && <label className="mt-4 flex items-start gap-3 text-sm text-slate-200"><input type="checkbox" checked={confirmed} onChange={(event) => setConfirmed(event.target.checked)} /><span>I reviewed the player, course, score, PB effect, Climbers effect, period, and provenance, and confirm this one-player entry.</span></label>}<div className="mt-4 flex flex-wrap gap-3"><button ref={nextActionRef} className={styles.buttonSuccess} disabled={busy || !previewReady || !confirmed} onClick={() => void saveEntry(false)}>ADD AGAIN</button><button className={styles.buttonPrimary} disabled={busy || !previewReady || !confirmed} onClick={() => void saveEntry(true)}>ADD &amp; FINISH</button></div>{message && <p role="status" className={styles.sectionKicker}>{message}</p>}{error && <p role="alert" className={styles.empty}>{error}</p>}</AdminGlassCard>
+      <AdminGlassCard><h2 className={styles.sectionHeading}>Protected preview</h2><div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><div><span className="block text-xs text-slate-400">Player</span><strong>{player?.screen_name ?? "—"}</strong></div><div><span className="block text-xs text-slate-400">Course</span><strong>{course ? `${course.display_name} · ${course.difficulty}` : "—"}</strong></div><div><span className="block text-xs text-slate-400">Submitted score</span><strong>{submittedScore ?? "—"}</strong></div><div><span className="block text-xs text-slate-400">Classification</span><strong>{classification ?? "—"}</strong></div><div><span className="block text-xs text-slate-400">New PB</span><strong>{formatPb(classification === "FIRST" || classification === "BETTER" ? submittedScore : best?.score ?? null)}</strong></div><div><span className="block text-xs text-slate-400">Climbers</span><strong>{points} points</strong></div><div><span className="block text-xs text-slate-400">Target period</span><strong>{targetPeriod}</strong></div><div><span className="block text-xs text-slate-400">Status</span><strong>{previewReady ? "READY TO REVIEW" : "DRAFT"}</strong></div></div><p role="status" className={styles.sectionKicker}>{previewText}</p><button className={`${styles.buttonPrimary} mt-4`} disabled={busy || loading || bestLoading || Boolean(validateEntryForPreview())} onClick={() => void previewEntry()}>{busy ? "Preparing…" : "Preview protected entry"}</button>{previewReady && <label className="mt-4 flex items-start gap-3 text-sm text-slate-200"><input type="checkbox" checked={confirmed} onChange={(event) => setConfirmed(event.target.checked)} /><span>I reviewed the player, course, score, PB effect, Climbers effect, period, and provenance, and confirm this one-player entry.</span></label>}<div className="mt-4 flex flex-wrap gap-3"><button ref={nextActionRef} className={styles.buttonSuccess} disabled={busy || !previewReady || !confirmed} onClick={() => void saveEntry(false)}>ADD AGAIN</button><button className={styles.buttonPrimary} disabled={busy || !previewReady || !confirmed} onClick={() => void saveEntry(true)}>ADD &amp; FINISH</button></div>{message && <p role="status" className={styles.sectionKicker}>{message}</p>}{error && <p role="alert" className={styles.empty}>{error}</p>}</AdminGlassCard>
     <SessionLog entries={sessionEntries} />
   </AdminRecordsShell>
 }
