@@ -62,6 +62,8 @@ test("normal entry preview protects lower-is-better records and describes Climbe
   assert.match(page, /from\("climbers_seasons"\)/)
   assert.match(page, /no active season \(0 points\)/)
   assert.match(page, /entryKeyRef/)
+  assert.match(page, /preview_all_time_verified_period_entry/)
+  assert.match(page, /record_all_time_verified_period_entry/)
   assert.doesNotMatch(page, /preview_all_time_late_backfill/)
   assert.doesNotMatch(page, /HISTORICAL PB PENDING DATE\/ORDER/)
 })
@@ -81,7 +83,7 @@ test("final intake is one-player, authoritative-par, and session-based", () => {
   assert.match(page, /CURRENT PERIOD — DEFAULT/)
   assert.match(page, /PREVIOUS PERIOD/)
   assert.doesNotMatch(page, /Chronology evidence|datetime-local|Authoritative submitted date\/time|HISTORICAL PB PENDING DATE\/ORDER/)
-  assert.match(page, /Previous Period saves are handled in the protected Late \/ Backfill tools/)
+  assert.match(page, /pending deterministic period replay/)
   assert.doesNotMatch(page, /ADD PLAYER|PREVIEW ENTIRE CARD|FRONT 9|BACK 9|P1|P2|P3/)
 })
 
