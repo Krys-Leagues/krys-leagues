@@ -41,7 +41,7 @@ alter table public.all_time_record_observations
 
 create index if not exists all_time_observations_verified_period_idx
   on public.all_time_record_observations(verified_period_id,recorded_at,id)
-  where entry_type='verified_period' and voided_at is null;
+  where entry_type = 'verified_period' and voided_at is null;
 
 create table if not exists public.all_time_verified_period_audit (
   id uuid primary key default gen_random_uuid(),
@@ -58,7 +58,7 @@ create table if not exists public.all_time_verified_period_audit (
   current_pb_score integer,
   submitted_score integer not null,
   new_pb_score integer,
-  climbers_points integer not null default 0 check (climbers_points=0),
+  climbers_points integer not null default 0 check (climbers_points = 0),
   climbers_status text not null check (climbers_status in ('pending_period_replay','voided')),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -70,7 +70,7 @@ create index if not exists all_time_verified_period_audit_period_idx
 create or replace function public.sync_all_time_verified_period_audit()
 returns trigger language plpgsql security definer set search_path to '' as $function$
 begin
-  if old.entry_type='verified_period' then
+  if old.entry_type = 'verified_period' then
     update public.all_time_verified_period_audit
     set submitted_score=new.score,
         new_pb_score=null,
@@ -101,54 +101,70 @@ begin
     raise exception 'Administrator authorization is required' using errcode='42501';
   end if;
   if p_period_id is null or p_entry_key is null or p_fingerprint is null
-     or lower(p_fingerprint)!~'^[0-9a-f]{64}$' then
+     or lower(p_fingerprint) !~ '^[0-9a-f]{64}$' then
     raise exception 'Period, entry idempotency key, and fingerprint are required';
   end if;
-  if nullif(btrim(p_source_label),'') is null then raise exception 'A source or provenance label is required'; end if;
-  if p_entry_type not in ('full_card','quick_score') then raise exception 'Unsupported verified All-Time entry type'; end if;
+  if nullif(btrim(p_source_label), '') is null then raise exception 'A source or provenance label is required'; end if;
+  if p_entry_type not in ('full_card', 'quick_score') then raise exception 'Unsupported verified All-Time entry type'; end if;
   select * into v_period from public.climbers_seasons
-  where id=p_period_id and status<>'finalized' and ends_at<=clock_timestamp();
+  where id = p_period_id and status <> 'finalized' and ends_at <= clock_timestamp();
   if not found then raise exception 'The selected Climbers period is unavailable or finalized'; end if;
-  select * into v_course from public.all_time_courses where id=p_course_id and active and difficulty in ('Easy','Hard');
+  select * into v_course from public.all_time_courses where id = p_course_id and active and difficulty in ('Easy', 'Hard');
   if not found then raise exception 'The selected Easy/Hard course is unavailable'; end if;
-  select * into v_player from public.players where id=public.resolve_canonical_player_id(p_player_id) and active;
+  select * into v_player from public.players where id = public.resolve_canonical_player_id(p_player_id) and active;
   if not found then raise exception 'The selected canonical player is unavailable'; end if;
-  if p_score is null and p_entry_type='quick_score' then raise exception 'Quick Score requires a score relative to par'; end if;
-  if p_entry_type='full_card' then
-    if p_hole_strokes is null or jsonb_typeof(p_hole_strokes)<>'array' or jsonb_array_length(p_hole_strokes)<>18
-       or v_course.par is null or v_course.hole_pars is null or jsonb_typeof(v_course.hole_pars)<>'array'
-       or jsonb_array_length(v_course.hole_pars)<>18 then
+  if p_score is null and p_entry_type = 'quick_score' then raise exception 'Quick Score requires a score relative to par'; end if;
+  if p_entry_type = 'full_card' then
+    if p_hole_strokes is null or jsonb_typeof(p_hole_strokes) <> 'array' or jsonb_array_length(p_hole_strokes) <> 18
+       or v_course.par is null or v_course.hole_pars is null or jsonb_typeof(v_course.hole_pars) <> 'array'
+       or jsonb_array_length(v_course.hole_pars) <> 18 then
       raise exception 'Full-card entry requires 18 hole scores and 18 authoritative hole pars';
     end if;
-    if exists(select 1 from jsonb_array_elements(p_hole_strokes) value
-      where jsonb_typeof(value)<>'number' or value::text !~ '^[0-9]+$' or value::text::integer<1>) then
+    if exists (
+      select 1
+      from jsonb_array_elements(p_hole_strokes) as hole(value)
+      where jsonb_typeof(hole.value) <> 'number'
+         or cast(hole.value as text) !~ '^[0-9]+$'
+         or cast(cast(hole.value as text) as integer) < 1
+    ) then
       raise exception 'Hole scores must be positive whole numbers';
     end if;
-    if exists(select 1 from jsonb_array_elements(v_course.hole_pars) value
-      where jsonb_typeof(value)<>'number' or value::text !~ '^[0-9]+$' or value::text::integer<1>) then
+    if exists (
+      select 1
+      from jsonb_array_elements(v_course.hole_pars) as hole(value)
+      where jsonb_typeof(hole.value) <> 'number'
+         or cast(hole.value as text) !~ '^[0-9]+$'
+         or cast(cast(hole.value as text) as integer) < 1
+    ) then
       raise exception 'Course hole pars must be positive whole numbers';
     end if;
-    if (select sum(value::text::integer) from jsonb_array_elements(v_course.hole_pars))<>v_course.par then
+    if (
+      select sum(cast(cast(hole.value as text) as integer))
+      from jsonb_array_elements(v_course.hole_pars) as hole(value)
+    ) <> v_course.par then
       raise exception 'Course hole pars must total the authoritative course par';
     end if;
-    v_score:=(select sum(value::text::integer) from jsonb_array_elements(p_hole_strokes))-v_course.par;
+    v_score := (
+      select sum(cast(cast(hole.value as text) as integer))
+      from jsonb_array_elements(p_hole_strokes) as hole(value)
+    ) - v_course.par;
   end if;
-  if exists(select 1 from public.all_time_record_observations where entry_key=p_entry_key) then
-    if exists(select 1 from public.all_time_record_observations where entry_key=p_entry_key and fingerprint<>lower(p_fingerprint)) then
+  if exists (select 1 from public.all_time_record_observations where entry_key = p_entry_key) then
+    if exists (select 1 from public.all_time_record_observations where entry_key = p_entry_key and fingerprint <> lower(p_fingerprint)) then
       raise exception 'This idempotency key is already bound to a different entry';
     end if;
     return jsonb_build_object('action','already_saved','fingerprint',lower(p_fingerprint));
   end if;
-  if exists(select 1 from public.all_time_record_observations where fingerprint=lower(p_fingerprint)) then
+  if exists (select 1 from public.all_time_record_observations where fingerprint = lower(p_fingerprint)) then
     return jsonb_build_object('action','already_saved','fingerprint',lower(p_fingerprint));
   end if;
   select min(o.score) into v_current_pb
   from public.all_time_record_observations o
-  where o.course_id=p_course_id and o.player_id=v_player.id and o.identity_status='resolved' and o.voided_at is null;
+  where o.course_id = p_course_id and o.player_id = v_player.id and o.identity_status = 'resolved' and o.voided_at is null;
   if v_current_pb is null then v_classification:='FIRST';
   elsif v_score<v_current_pb then v_classification:='BETTER';
-  elsif v_score=v_current_pb then v_classification:='EQUAL';
-  else v_classification:='WORSE'; end if;
+  elsif v_score = v_current_pb then v_classification := 'EQUAL';
+  else v_classification := 'WORSE'; end if;
   v_token:=md5(concat_ws('|',p_period_id::text,p_entry_key::text,lower(p_fingerprint),p_course_id::text,
     v_player.id::text,v_score::text,coalesce(v_current_pb::text,'FIRST'),v_classification));
   return jsonb_build_object(
@@ -179,11 +195,11 @@ begin
     raise exception 'Administrator authorization is required' using errcode='42501';
   end if;
   v_preview:=public.preview_all_time_verified_period_entry(p_period_id,p_course_id,p_player_id,p_entry_key,p_fingerprint,p_score,p_hole_strokes,p_entry_type,p_source_label,p_provenance_reference,p_notes);
-  if v_preview->>'action'='already_saved' then return v_preview; end if;
-  if p_confirmation_token is null or p_confirmation_token<>v_preview->>'confirmation_token' then
+  if v_preview->>'action' = 'already_saved' then return v_preview; end if;
+  if p_confirmation_token is null or p_confirmation_token <> v_preview->>'confirmation_token' then
     raise exception 'The preview changed or was not explicitly confirmed; review again before saving';
   end if;
-  v_recorded_at:=clock_timestamp();
+  v_recorded_at := clock_timestamp();
   insert into public.all_time_record_observations(
     batch_id,course_id,player_id,identity_status,historical_player_name,score,source_course_name,source_row,
     fingerprint,observed_at,metadata,entry_type,hole_strokes,source_label,provenance_reference,notes,recorded_by,
