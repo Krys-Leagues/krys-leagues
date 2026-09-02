@@ -162,7 +162,8 @@ export default function MonthliesPage() {
                 <option value="">Select year</option>
                 {yearOptions.map(year => <option key={year} value={year}>{year}</option>)}
               </select>
-              <span aria-hidden="true" className={styles.artworkSelectedValue}>{selection.year}</span>
+              <span aria-hidden="true" className={styles.yearValueMask} />
+              <span aria-hidden="true" className={`${styles.artworkSelectedValue} ${styles.yearSelectedValue}`}>{selection.year}</span>
             </label>
             <label className={styles.controlHitbox} style={artworkTargetStyle(monthlyArtworkOverlayTargets[1])}>
               <span className={styles.srOnly}>Month</span>

@@ -72,6 +72,23 @@
   pointer-events: none;
 }
 
+.yearValueMask {
+  position: absolute;
+  top: 20%;
+  left: 27%;
+  width: 23%;
+  height: 62%;
+  border-radius: .6em;
+  background: linear-gradient(135deg, rgba(1, 3, 16, .98), rgba(3, 6, 24, .98));
+  pointer-events: none;
+  z-index: 1;
+}
+
+.yearSelectedValue {
+  padding-left: 28%;
+  z-index: 2;
+}
+
 .artworkSelectedValueLong {
   font-size: clamp(8px, 1.8vw, 29px);
 }
