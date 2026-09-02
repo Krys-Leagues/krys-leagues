@@ -1,4 +1,4 @@
-import type { ArtworkPageDefinition, ArtworkTarget } from "./artworkNavigation"
+import type { ArtworkHitbox, ArtworkPageDefinition, ArtworkTarget } from "./artworkNavigation"
 
 export const mainHubArtwork: ArtworkPageDefinition = {
   id: "main-hub",
@@ -90,5 +90,24 @@ export const kwtArtwork: ArtworkPageDefinition = {
   targets: [
     { id: "past-champions", label: "Past Champions", href: "/champions?league=kwt", x: 10.9, y: 56.1, width: 80.9, height: 15.2 },
     { id: "records", label: "Records", href: "/records", x: 10.9, y: 72.7, width: 80.9, height: 15.8 },
+  ],
+}
+
+export const monthlyArtworkOverlayTargets: readonly ArtworkHitbox[] = [
+  { id: "year", x: 6.1, y: 67.0, width: 27.8, height: 8.8 },
+  { id: "month", x: 35.7, y: 67.0, width: 27.8, height: 8.8 },
+  { id: "division", x: 64.7, y: 67.0, width: 28.8, height: 8.8 },
+  { id: "previous-month", x: 4.3, y: 82.5, width: 19.7, height: 9.2 },
+  { id: "next-month", x: 75.3, y: 82.5, width: 19.7, height: 9.2 },
+]
+
+export const monthlyArtwork: ArtworkPageDefinition = {
+  id: "monthly-results",
+  title: "Krys Leagues Monthly Results",
+  imageSrc: "/approved-pages/monthly-results-approved.jpg",
+  imageAlt: "Krys Leagues Monthly Results with Year, Month, Division, Previous Month, and Next Month controls",
+  aspectRatio: "1629 / 965",
+  targets: [
+    { id: "back-to-krys-leagues", label: "Back to Krys Leagues", href: "/", x: 1.7, y: 3.3, width: 15.8, height: 7.8 },
   ],
 }

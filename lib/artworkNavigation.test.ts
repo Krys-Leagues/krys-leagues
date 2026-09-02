@@ -1,7 +1,7 @@
 import test from "node:test"
 import assert from "node:assert/strict"
-import { artworkTargetStyle, validateArtworkTargets } from "./artworkNavigation.ts"
-import { joinArtwork, kwtArtwork, leaguePlayActionTargets, leaguePlayArtwork, leaguePlayDestinations, mainHubArtwork } from "./artworkPageMaps.ts"
+import { artworkTargetStyle, validateArtworkHitboxes, validateArtworkTargets } from "./artworkNavigation.ts"
+import { joinArtwork, kwtArtwork, leaguePlayActionTargets, leaguePlayArtwork, leaguePlayDestinations, mainHubArtwork, monthlyArtwork, monthlyArtworkOverlayTargets } from "./artworkPageMaps.ts"
 import { readFileSync } from "node:fs"
 
 const read = (path: string) => readFileSync(path, "utf8")
@@ -11,6 +11,8 @@ test("approved artwork maps are valid and non-overlapping", () => {
   assert.deepEqual(validateArtworkTargets(leaguePlayArtwork.targets), [])
   assert.deepEqual(validateArtworkTargets(joinArtwork.targets), [])
   assert.deepEqual(validateArtworkTargets(kwtArtwork.targets), [])
+  assert.deepEqual(validateArtworkTargets(monthlyArtwork.targets), [])
+  assert.deepEqual(validateArtworkHitboxes(monthlyArtworkOverlayTargets), [])
 })
 
 test("active Main Hub route is artwork-only and keeps the approved destinations", () => {
@@ -117,6 +119,17 @@ test("KWT artwork scopes the real public destinations", () => {
   assert.equal(kwtArtwork.targets.find((target) => target.id === "past-champions")?.href, "/champions?league=kwt")
   assert.equal(kwtArtwork.targets.find((target) => target.id === "records")?.href, "/records")
   assert.equal(kwtArtwork.targets.some((target) => target.href.startsWith("/admin")), false)
+})
+
+test("Monthly Results uses the approved artwork and non-overlapping filter controls", () => {
+  const page = read("app/monthlies/page.tsx")
+  assert.equal(monthlyArtwork.imageSrc, "/approved-pages/monthly-results-approved.jpg")
+  assert.equal(monthlyArtwork.aspectRatio, "1629 / 965")
+  assert.match(page, /ArtworkNavigation/)
+  assert.match(page, /monthlyArtwork/)
+  assert.match(page, /data-monthly-results=\"expanded\"/)
+  assert.equal(monthlyArtwork.targets.find(target => target.id === "back-to-krys-leagues")?.href, "/")
+  assert.deepEqual(validateArtworkHitboxes(monthlyArtworkOverlayTargets), [])
 })
 
 test("percentage mapping is responsive and deterministic", () => {

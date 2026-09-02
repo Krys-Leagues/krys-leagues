@@ -98,36 +98,38 @@ export async function GET(request: Request) {
     const requestedYear = positiveInteger(searchParams.get("year"))
     const requestedMonth = positiveInteger(searchParams.get("month"))
     const requestedDivision = searchParams.get("division")?.trim() || ""
-    const latest = availablePeriods[0]
-    const selectedPeriod = playerId ? null : availablePeriods.find(period =>
-      period.year === (requestedYear || latest?.year) && period.month === (requestedMonth || latest?.month)
-    ) || (requestedYear ? availablePeriods.find(period => period.year === requestedYear) : null) || latest
+    const metadataOnly = searchParams.get("metadataOnly") === "true"
+    const selectedPeriod = playerId || !requestedYear || !requestedMonth ? null : availablePeriods.find(period =>
+      period.year === requestedYear && period.month === requestedMonth
+    ) || null
     const selectedDivision = selectedPeriod && !playerId
-      ? selectedPeriod.divisions.find(division => division === requestedDivision) || selectedPeriod.divisions[0] || ""
+      ? selectedPeriod.divisions.find(division => division === requestedDivision) || ""
       : ""
 
-    for (let offset = 0; ; offset += pageSize) {
-      let query = supabase
-        .from("historical_monthly_score_observations")
-        .select("canonical_player_id, period_year, period_month, division, course_name, difficulty, score, hole_in_ones, course_placement, course_points, overall_placement, courses_played, total_strokes, overall_hole_in_ones, overall_points, player:players(screen_name)")
-        .order("period_year", { ascending: false })
-        .order("period_month", { ascending: false })
-        .order("division")
-        .order("course_name")
-        .order("difficulty")
-        .range(offset, offset + pageSize - 1)
+    if (!metadataOnly && (playerId || (selectedPeriod && selectedDivision))) {
+      for (let offset = 0; ; offset += pageSize) {
+        let query = supabase
+          .from("historical_monthly_score_observations")
+          .select("canonical_player_id, period_year, period_month, division, course_name, difficulty, score, hole_in_ones, course_placement, course_points, overall_placement, courses_played, total_strokes, overall_hole_in_ones, overall_points, player:players(screen_name)")
+          .order("period_year", { ascending: false })
+          .order("period_month", { ascending: false })
+          .order("division")
+          .order("course_name")
+          .order("difficulty")
+          .range(offset, offset + pageSize - 1)
 
-      if (playerId) {
-        query = query.eq("canonical_player_id", playerId)
-      } else if (selectedPeriod) {
-        query = query.eq("period_year", selectedPeriod.year).eq("period_month", selectedPeriod.month).eq("division", selectedDivision)
+        if (playerId) {
+          query = query.eq("canonical_player_id", playerId)
+        } else if (selectedPeriod && selectedDivision) {
+          query = query.eq("period_year", selectedPeriod.year).eq("period_month", selectedPeriod.month).eq("division", selectedDivision)
+        }
+
+        const { data, error } = await query
+        if (error) throw error
+        const page = (data ?? []) as MonthlyObservationRow[]
+        rows.push(...page)
+        if (page.length < pageSize) break
       }
-
-      const { data, error } = await query
-      if (error) throw error
-      const page = (data ?? []) as MonthlyObservationRow[]
-      rows.push(...page)
-      if (page.length < pageSize) break
     }
 
     return Response.json({
