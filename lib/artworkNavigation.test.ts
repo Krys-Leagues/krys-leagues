@@ -79,6 +79,16 @@ test("main hub has exactly the approved destinations", () => {
   assert.equal(mainHubArtwork.targets.some((target) => ["/dashboard", "/standings"].includes(target.href)), false)
 })
 
+test("Main Hub Overall Leaderboards opens the current page, not the legacy hub", () => {
+  const target = mainHubArtwork.targets.find((item) => item.id === "overall-leaderboards")
+  const page = read("app/leaderboards/page.tsx")
+
+  assert.equal(target?.href, "/leaderboards")
+  assert.match(page, /Overall Leaderboards/)
+  assert.match(page, /href="\/"/)
+  assert.doesNotMatch(page, /Player Dashboard|Season 59|Active Players|Active Leagues|Matches Remaining|Matches Completed|League Records/i)
+})
+
 test("back and league targets use explicit routes", () => {
   assert.equal(leaguePlayArtwork.targets.find((target) => target.id === "back-to-krys-leagues")?.href, "/")
   assert.equal(leaguePlayArtwork.targets.find((target) => target.id === "stroke-play")?.href, "/stroke")
