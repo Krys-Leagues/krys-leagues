@@ -7,15 +7,16 @@ import { useSearchParams } from "next/navigation";
 import { createDiscordAuthCallbackUrl } from "@/lib/authReturnTo";
 import { getAuthenticatedDiscordId } from "@/lib/discordPlayerLogin";
 import { supabase } from "@/lib/supabase";
+import { isDuplicateWaitlistError, waitlistDuplicateMessage, waitlistSuccessMessage } from "@/lib/waitlistMessages";
 
-const LEAGUES: Record<string, { title: string; subtitle: string; image: string | null; ageNote: string }> = {
-  match: { title: "Match League Registration", subtitle: "Head-to-head leagues are 18+.", image: "/league-media/match.png", ageNote: "18+ only" },
-  stroke: { title: "Stroke League Registration", subtitle: "Stroke play league signup.", image: "/league-media/stroke-preview.png", ageNote: "18+ only" },
-  pyp: { title: "Pick Your Poison Registration", subtitle: "Home and away course-pick strategy league.", image: "/league-media/pyp-preview.png", ageNote: "18+ only" },
-  pro: { title: "Pro League Registration", subtitle: "Top competitive divisions and advanced play.", image: "/league-media/pro-preview.png", ageNote: "18+ only" },
-  doubles: { title: "Doubles League Registration", subtitle: "Team-based league play.", image: "/league-media/doubles-preview.png", ageNote: "18+ only" },
-  cups: { title: "Bracket / Cup Registration", subtitle: "Spicy, Krys, and Champion cup tracking.", image: null, ageNote: "Admins assign tiers" },
-  community: { title: "Community Registration", subtitle: "Records, leaderboards, scoreboards, and community events.", image: "/league-media/stroke-preview.png", ageNote: "All skill levels" },
+const LEAGUES: Record<string, { title: string; waitlistLabel: string; subtitle: string; image: string | null; ageNote: string }> = {
+  match: { title: "Match League Registration", waitlistLabel: "Match", subtitle: "Head-to-head leagues are 18+.", image: "/league-media/match.png", ageNote: "18+ only" },
+  stroke: { title: "Stroke League Registration", waitlistLabel: "Stroke", subtitle: "Stroke play league signup.", image: "/league-media/stroke-preview.png", ageNote: "18+ only" },
+  pyp: { title: "Pick Your Poison Registration", waitlistLabel: "Pick Your Poison", subtitle: "Home and away course-pick strategy league.", image: "/league-media/pyp-preview.png", ageNote: "18+ only" },
+  pro: { title: "Pro League Registration", waitlistLabel: "Pro", subtitle: "Top competitive divisions and advanced play.", image: "/league-media/pro-preview.png", ageNote: "18+ only" },
+  doubles: { title: "Doubles League Registration", waitlistLabel: "Doubles", subtitle: "Team-based league play.", image: "/league-media/doubles-preview.png", ageNote: "18+ only" },
+  cups: { title: "Bracket / Cup Registration", waitlistLabel: "Bracket / Cup", subtitle: "Spicy, Krys, and Champion cup tracking.", image: null, ageNote: "Admins assign tiers" },
+  community: { title: "Community Registration", waitlistLabel: "Community", subtitle: "Records, leaderboards, scoreboards, and community events.", image: "/league-media/stroke-preview.png", ageNote: "All skill levels" },
 };
 
 function RegisterContent() {
@@ -64,6 +65,17 @@ function RegisterContent() {
     const discordId = getAuthenticatedDiscordId(user);
     if (!discordId) return setStatus("Discord identity could not be verified. Please sign out and sign in with Discord again.");
 
+    const { data: existing, error: existingError } = await supabase
+      .from("player_waitlist")
+      .select("id")
+      .eq("discord_id", discordId)
+      .eq("league_type", leagueKey)
+      .in("status", ["waiting", "pending"])
+      .limit(1);
+
+    if (existingError) return setStatus(`Error: ${existingError.message || "We couldn't check your existing waitlist registration."}`);
+    if (existing?.length) return setStatus(waitlistDuplicateMessage(league.waitlistLabel));
+
     const { error } = await supabase.from("player_waitlist").insert({
       screen_name: screenName.trim(),
       league_type: leagueKey,
@@ -73,9 +85,12 @@ function RegisterContent() {
       status: "waiting",
     });
 
-    if (error) return setStatus(`Error: ${error.message}`);
+    if (error) {
+      if (isDuplicateWaitlistError(error)) return setStatus(waitlistDuplicateMessage(league.waitlistLabel));
+      return setStatus(`Error: ${error.message || "We couldn't save your waitlist registration."}`);
+    }
 
-    setStatus("Registration saved! You are on the admin waitlist.");
+    setStatus(waitlistSuccessMessage(league.waitlistLabel).join("\n"));
     setScreenName("");
     setNotes("");
   }
@@ -165,7 +180,7 @@ function RegisterContent() {
           </>
         )}
 
-        {status && <p style={{ marginTop: 20, color: "#facc15", fontWeight: "bold" }}>{status}</p>}
+        {status && <p role={status.startsWith("Error:") ? "alert" : "status"} style={{ marginTop: 20, color: status.startsWith("Error:") ? "#f87171" : "#facc15", fontWeight: "bold", whiteSpace: "pre-line" }}>{status}</p>}
       </section>
     </main>
   );

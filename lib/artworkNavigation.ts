@@ -8,7 +8,7 @@ export type ArtworkTarget = {
   height: number
 }
 
-export type ArtworkPageId = "main-hub" | "league-play"
+export type ArtworkPageId = "main-hub" | "league-play" | "join-leagues" | "kwt-hub"
 
 export type ArtworkPageDefinition = {
   id: ArtworkPageId

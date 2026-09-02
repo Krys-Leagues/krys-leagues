@@ -1,9 +1,10 @@
 import Image from "next/image"
 import Link from "next/link"
+import type { ReactNode } from "react"
 import type { ArtworkPageDefinition } from "@/lib/artworkNavigation"
 import { artworkTargetStyle, validateArtworkTargets } from "@/lib/artworkNavigation"
 
-export function ArtworkNavigation({ definition }: { definition: ArtworkPageDefinition }) {
+export function ArtworkNavigation({ definition, overlay }: { definition: ArtworkPageDefinition; overlay?: ReactNode }) {
   const errors = validateArtworkTargets(definition.targets)
   if (errors.length > 0) {
     throw new Error(`Invalid artwork navigation map for ${definition.title}: ${errors.join("; ")}`)
@@ -26,6 +27,7 @@ export function ArtworkNavigation({ definition }: { definition: ArtworkPageDefin
           sizes="(max-width: 1664px) 100vw, 1664px"
           draggable={false}
         />
+        {overlay ? <div className="artwork-navigation__overlay">{overlay}</div> : null}
         <nav aria-label={`${definition.title} navigation`} className="artwork-navigation__targets">
           {definition.targets.map((target) => (
             <Link

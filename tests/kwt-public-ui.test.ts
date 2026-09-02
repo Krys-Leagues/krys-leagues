@@ -6,14 +6,16 @@ const read = (path: string) => readFileSync(path, "utf8")
 
 test("KWT hub uses the approved artwork and preserves public card destinations", () => {
   const page = read("app/kwt/page.tsx")
-  assert.match(page, /kwt-hub-approved\.jpg/)
+  const map = read("lib/artworkPageMaps.ts")
+  assert.match(map, /kwt-hub-approved\.jpg/)
+  assert.match(page, /ArtworkNavigation/)
+  assert.match(page, /kwtArtwork/)
   assert.match(page, /href="\/"/)
-  assert.match(page, /href="\/champions\?league=kwt"/)
-  assert.match(page, /href="\/records"/)
-  assert.match(page, /Current Tournament/)
-  assert.match(page, /Upcoming Events/)
-  assert.match(page, /Past Champions/)
-  assert.match(page, /Records/)
+  assert.match(map, /href: "\/champions\?league=kwt"/)
+  assert.match(map, /href: "\/records"/)
+  for (const label of ["Current Tournament", "Upcoming Events", "Past Champions", "Records"]) {
+    assert.match(map, new RegExp(label))
+  }
 })
 
 test("KWT Past Champions scopes the Hall while the default Hall remains full", () => {

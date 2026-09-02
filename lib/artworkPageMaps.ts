@@ -62,3 +62,33 @@ export const leaguePlayArtwork: ArtworkPageDefinition = {
     ...leaguePlayActionTargets,
   ],
 }
+
+export const joinArtwork: ArtworkPageDefinition = {
+  id: "join-leagues",
+  title: "Join Krys' Leagues",
+  imageSrc: "/approved-pages/join-leagues-approved.jpg",
+  imageAlt: "Join Krys' Leagues with seven league registration choices and a Discord sign-in panel",
+  aspectRatio: "1200 / 1307",
+  targets: [
+    { id: "back-to-krys-leagues", label: "Back to Krys Leagues", href: "/", x: 2.1, y: 2.6, width: 18.4, height: 4.9 },
+    { id: "match-play-league", label: "Join Match Play League", href: "/register?league=match", x: 4.6, y: 46.3, width: 9.2, height: 4.5 },
+    { id: "stroke-league", label: "Join Stroke League", href: "/register?league=stroke", x: 37.4, y: 46.3, width: 8.5, height: 4.5 },
+    { id: "pick-your-poison", label: "Join Pick Your Poison", href: "/register?league=pyp", x: 69.0, y: 46.3, width: 8.5, height: 4.5 },
+    { id: "doubles-league", label: "Join Doubles League", href: "/register?league=doubles", x: 4.6, y: 70.8, width: 9.2, height: 4.3 },
+    { id: "pro-league", label: "Join Pro League", href: "/register?league=pro", x: 37.4, y: 70.8, width: 8.5, height: 4.3 },
+    { id: "bracket-cup-players", label: "Join Bracket / Cup Players", href: "/register?league=cups", x: 69.0, y: 70.8, width: 8.5, height: 4.3 },
+    { id: "community-records-leaderboards", label: "Join Community, Records, and Leaderboards", href: "/register?league=community", x: 3.8, y: 90.6, width: 8.5, height: 4.0 },
+  ],
+}
+
+export const kwtArtwork: ArtworkPageDefinition = {
+  id: "kwt-hub",
+  title: "KWT · Krys Weekly Tournament",
+  imageSrc: "/approved-pages/kwt-hub-approved.jpg",
+  imageAlt: "KWT Krys Weekly Tournament hub with Current Tournament, Upcoming Events, Past Champions, and Records cards",
+  aspectRatio: "1150 / 1356",
+  targets: [
+    { id: "past-champions", label: "Past Champions", href: "/champions?league=kwt", x: 10.9, y: 56.1, width: 80.9, height: 15.2 },
+    { id: "records", label: "Records", href: "/records", x: 10.9, y: 72.7, width: 80.9, height: 15.8 },
+  ],
+}

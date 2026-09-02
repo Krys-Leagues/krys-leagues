@@ -1,7 +1,7 @@
 import test from "node:test"
 import assert from "node:assert/strict"
 import { artworkTargetStyle, validateArtworkTargets } from "./artworkNavigation.ts"
-import { leaguePlayActionTargets, leaguePlayArtwork, leaguePlayDestinations, mainHubArtwork } from "./artworkPageMaps.ts"
+import { joinArtwork, kwtArtwork, leaguePlayActionTargets, leaguePlayArtwork, leaguePlayDestinations, mainHubArtwork } from "./artworkPageMaps.ts"
 import { readFileSync } from "node:fs"
 
 const read = (path: string) => readFileSync(path, "utf8")
@@ -9,6 +9,8 @@ const read = (path: string) => readFileSync(path, "utf8")
 test("approved artwork maps are valid and non-overlapping", () => {
   assert.deepEqual(validateArtworkTargets(mainHubArtwork.targets), [])
   assert.deepEqual(validateArtworkTargets(leaguePlayArtwork.targets), [])
+  assert.deepEqual(validateArtworkTargets(joinArtwork.targets), [])
+  assert.deepEqual(validateArtworkTargets(kwtArtwork.targets), [])
 })
 
 test("active Main Hub route is artwork-only and keeps the approved destinations", () => {
@@ -81,6 +83,30 @@ test("back and league targets use explicit routes", () => {
   assert.equal(leaguePlayArtwork.targets.find((target) => target.id === "back-to-krys-leagues")?.href, "/")
   assert.equal(leaguePlayArtwork.targets.find((target) => target.id === "stroke-play")?.href, "/stroke")
   assert.equal(mainHubArtwork.targets.find((target) => target.id === "kwt")?.href, "/kwt")
+})
+
+test("Join artwork keeps all seven corrected registration destinations", () => {
+  assert.equal(joinArtwork.imageSrc, "/approved-pages/join-leagues-approved.jpg")
+  assert.equal(joinArtwork.targets.find((target) => target.id === "back-to-krys-leagues")?.href, "/")
+  assert.deepEqual(joinArtwork.targets.filter((target) => target.id !== "back-to-krys-leagues").map(({ label, href }) => [label, href]), [
+    ["Join Match Play League", "/register?league=match"],
+    ["Join Stroke League", "/register?league=stroke"],
+    ["Join Pick Your Poison", "/register?league=pyp"],
+    ["Join Doubles League", "/register?league=doubles"],
+    ["Join Pro League", "/register?league=pro"],
+    ["Join Bracket / Cup Players", "/register?league=cups"],
+    ["Join Community, Records, and Leaderboards", "/register?league=community"],
+  ])
+})
+
+test("KWT artwork scopes the real public destinations", () => {
+  const page = read("app/kwt/page.tsx")
+  assert.equal(kwtArtwork.imageSrc, "/approved-pages/kwt-hub-approved.jpg")
+  assert.match(page, /ArtworkNavigation/)
+  assert.match(page, /kwtArtwork/)
+  assert.equal(kwtArtwork.targets.find((target) => target.id === "past-champions")?.href, "/champions?league=kwt")
+  assert.equal(kwtArtwork.targets.find((target) => target.id === "records")?.href, "/records")
+  assert.equal(kwtArtwork.targets.some((target) => target.href.startsWith("/admin")), false)
 })
 
 test("percentage mapping is responsive and deterministic", () => {

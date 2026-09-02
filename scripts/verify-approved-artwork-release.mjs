@@ -19,10 +19,17 @@ const requireSource = (relativePath, fragments) => {
 
 requireSource("app/page.tsx", ["ArtworkNavigation", "mainHubArtwork"])
 requireSource("app/league-play/page.tsx", ["ArtworkNavigation", "leaguePlayArtwork"])
-requireSource("lib/artworkPageMaps.ts", ['id: "main-hub"', 'id: "league-play"'])
-requireSource("components/navigation/ArtworkNavigation.tsx", ["data-approved-artwork-page={definition.id}"])
+requireSource("app/join/page.tsx", ["ArtworkNavigation", "joinArtwork"])
+requireSource("app/kwt/page.tsx", ["ArtworkNavigation", "kwtArtwork"])
+requireSource("lib/artworkPageMaps.ts", ['id: "main-hub"', 'id: "league-play"', 'id: "join-leagues"', 'id: "kwt-hub"'])
+requireSource("components/navigation/ArtworkNavigation.tsx", ["data-approved-artwork-page={definition.id}", "artwork-navigation__overlay"])
 
-for (const asset of ["public/main-hub-approved.jpg", "public/approved-pages/league-play-approved.png"]) {
+for (const asset of [
+  "public/main-hub-approved.jpg",
+  "public/approved-pages/league-play-approved.png",
+  "public/approved-pages/join-leagues-approved.jpg",
+  "public/approved-pages/kwt-hub-approved.jpg",
+]) {
   if (!existsSync(resolve(root, asset))) errors.push(`Required approved artwork asset is missing: ${asset}`)
 }
 
@@ -42,4 +49,4 @@ if (errors.length > 0) {
 }
 
 const head = execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim()
-console.log(`READY: approved Main Hub and League Play markers present; HEAD ${head} descends from Production ${productionCommit}.`)
+console.log(`READY: approved Main Hub, League Play, Join, and KWT markers present; HEAD ${head} descends from Production ${productionCommit}.`)
