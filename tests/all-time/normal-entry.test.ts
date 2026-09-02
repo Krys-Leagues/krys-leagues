@@ -53,13 +53,30 @@ test("batch backfill UI preserves raw cards and explicit chronology safeguards",
 
 test("normal entry preview protects lower-is-better records and describes Climbers", () => {
   const page = read("app/admin/records/entry/page.tsx")
-  assert.match(page, /Current PB/)
-  assert.match(page, /New PB — passes/)
-  assert.match(page, /does not improve the record/)
-  assert.match(page, /First score — establishes PB/)
+  assert.match(page, /CURRENT ALL-TIME PB/)
+  assert.match(page, /NEED TO BEAT/)
+  assert.match(page, /PB AT TIME OF SUBMISSION/)
+  assert.match(page, /BETTER — passes/)
+  assert.match(page, /FIRST — establishes a PB/)
+  assert.match(page, /EQUAL — tie does not change the PB/)
+  assert.match(page, /WORSE —/)
   assert.match(page, /from\("climbers_seasons"\)/)
-  assert.match(page, /no active Climbers season — earns 0 Climbers points/)
-  assert.match(page, /entryKey/)
+  assert.match(page, /no active season \(0 points\)/)
+  assert.match(page, /entryKeyRef/)
+})
+
+test("final intake is one-player, authoritative-par, and session-based", () => {
+  const page = read("app/admin/records/entry/page.tsx")
+  assert.match(page, /data-testid="normal-one-player-scorecard"/)
+  assert.match(page, /<th scope="row">PAR<\/th>/)
+  assert.match(page, /<th scope="row">SCORE<\/th>/)
+  assert.match(page, /data-normal-hole-index/)
+  assert.match(page, /setTimeout/)
+  assert.match(page, /onWheel=/)
+  assert.match(page, /ADD AGAIN/)
+  assert.match(page, /ADD &amp; FINISH/)
+  assert.match(page, /SESSION ENTRIES/)
+  assert.doesNotMatch(page, /ADD PLAYER|PREVIEW ENTIRE CARD|FRONT 9|BACK 9|P1|P2|P3/)
 })
 
 test("public records only expose detailed card statistics when holes and pars exist", () => {
