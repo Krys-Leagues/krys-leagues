@@ -16,7 +16,8 @@ test("release guard requires approved artwork and Production ancestry", () => {
   assert.match(script, /monthlyArtwork/)
   assert.match(script, /join-leagues-approved\.jpg/)
   assert.match(script, /kwt-hub-approved\.jpg/)
-  assert.match(script, /monthly-results-approved\.jpg/)
+  assert.match(script, /monthly-results-approved\.png/)
+  assert.doesNotMatch(script, /monthly-results-approved\.jpg/)
   assert.match(script, /merge-base.*--is-ancestor/)
 })
 

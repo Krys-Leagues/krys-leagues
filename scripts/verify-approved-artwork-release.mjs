@@ -48,7 +48,7 @@ requireSource("app/league-play/page.tsx", ["ArtworkNavigation", "leaguePlayArtwo
 requireSource("app/join/page.tsx", ["ArtworkNavigation", "joinArtwork"])
 requireSource("app/kwt/page.tsx", ["ArtworkNavigation", "kwtArtwork"])
 requireSource("app/monthlies/page.tsx", ["ArtworkNavigation", "monthlyArtwork"])
-requireSource("lib/artworkPageMaps.ts", ['id: "main-hub"', 'id: "league-play"', 'id: "join-leagues"', 'id: "kwt-hub"', 'id: "monthly-results"', "monthly-results-approved.jpg"])
+requireSource("lib/artworkPageMaps.ts", ['id: "main-hub"', 'id: "league-play"', 'id: "join-leagues"', 'id: "kwt-hub"', 'id: "monthly-results"', "monthly-results-approved.png"])
 requireSource("components/navigation/ArtworkNavigation.tsx", ["data-approved-artwork-page={definition.id}", "artwork-navigation__overlay"])
 
 for (const asset of [
@@ -56,7 +56,7 @@ for (const asset of [
   "public/approved-pages/league-play-approved.png",
   "public/approved-pages/join-leagues-approved.jpg",
   "public/approved-pages/kwt-hub-approved.jpg",
-  "public/approved-pages/monthly-results-approved.jpg",
+  "public/approved-pages/monthly-results-approved.png",
 ]) {
   if (!existsSync(resolve(root, asset))) errors.push(`Required approved artwork asset is missing: ${asset}`)
 }

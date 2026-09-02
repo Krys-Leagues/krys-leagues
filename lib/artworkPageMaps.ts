@@ -94,20 +94,20 @@ export const kwtArtwork: ArtworkPageDefinition = {
 }
 
 export const monthlyArtworkOverlayTargets: readonly ArtworkHitbox[] = [
-  { id: "year", x: 6.1, y: 67.0, width: 27.8, height: 8.8 },
-  { id: "month", x: 35.7, y: 67.0, width: 27.8, height: 8.8 },
-  { id: "division", x: 64.7, y: 67.0, width: 28.8, height: 8.8 },
-  { id: "previous-month", x: 4.3, y: 82.5, width: 19.7, height: 9.2 },
-  { id: "next-month", x: 75.3, y: 82.5, width: 19.7, height: 9.2 },
+  { id: "year", x: 4.2, y: 66.8, width: 27.3, height: 12.1 },
+  { id: "month", x: 31.5, y: 66.8, width: 31.5, height: 12.1 },
+  { id: "division", x: 63.0, y: 66.8, width: 33.0, height: 12.1 },
+  { id: "previous-month", x: 2.5, y: 82.0, width: 25.3, height: 10.3 },
+  { id: "next-month", x: 73.0, y: 82.0, width: 22.6, height: 10.3 },
 ]
 
 export const monthlyArtwork: ArtworkPageDefinition = {
   id: "monthly-results",
   title: "Krys Leagues Monthly Results",
-  imageSrc: "/approved-pages/monthly-results-approved.jpg",
+  imageSrc: "/approved-pages/monthly-results-approved.png",
   imageAlt: "Krys Leagues Monthly Results with Year, Month, Division, Previous Month, and Next Month controls",
-  aspectRatio: "1629 / 965",
+  aspectRatio: "1629 / 966",
   targets: [
-    { id: "back-to-krys-leagues", label: "Back to Krys Leagues", href: "/", x: 1.7, y: 3.3, width: 15.8, height: 7.8 },
+    { id: "back-to-krys-leagues", label: "Back to Krys Leagues", href: "/", x: 1.6, y: 2.6, width: 16.8, height: 8.0 },
   ],
 }

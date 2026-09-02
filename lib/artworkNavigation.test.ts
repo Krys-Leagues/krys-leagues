@@ -123,8 +123,8 @@ test("KWT artwork scopes the real public destinations", () => {
 
 test("Monthly Results uses the approved artwork and non-overlapping filter controls", () => {
   const page = read("app/monthlies/page.tsx")
-  assert.equal(monthlyArtwork.imageSrc, "/approved-pages/monthly-results-approved.jpg")
-  assert.equal(monthlyArtwork.aspectRatio, "1629 / 965")
+  assert.equal(monthlyArtwork.imageSrc, "/approved-pages/monthly-results-approved.png")
+  assert.equal(monthlyArtwork.aspectRatio, "1629 / 966")
   assert.match(page, /ArtworkNavigation/)
   assert.match(page, /monthlyArtwork/)
   assert.match(page, /data-monthly-results=\"expanded\"/)
