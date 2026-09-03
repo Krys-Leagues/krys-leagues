@@ -102,6 +102,17 @@ test("normal entry uses one accessible canonical player combobox", () => {
   assert.doesNotMatch(page, /Canonical Global Player<select/)
 })
 
+test("normal entry uses one accessible canonical course combobox and clears it on Add Again", () => {
+  const page = read("app/admin/records/entry/page.tsx")
+  assert.match(page, /id="normal-canonical-course"/)
+  assert.match(page, /Search courses or codes/)
+  assert.match(page, /filterCanonicalCourses/)
+  assert.match(page, /formatCanonicalCourse/)
+  assert.match(page, /setCourseSearch\(formatCanonicalCourse\(selectedCourse\)\)/)
+  assert.match(page, /setCourseId\(""\); setCourseSearch\(""\)/)
+  assert.doesNotMatch(page, /Course<select/)
+})
+
 test("public records only expose detailed card statistics when holes and pars exist", () => {
   const route = read("app/api/records/public/route.ts")
   assert.match(route, /best_observation_id/)
