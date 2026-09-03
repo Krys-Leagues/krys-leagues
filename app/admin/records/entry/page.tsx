@@ -6,6 +6,7 @@ import scorecardStyles from "@/components/admin/records/NormalScorecard.module.c
 import { classifyRecord, climbersPoints, deriveFullCardStats, sha256Hex, type FullCardStats, type NormalEntryType, type RecordClassification } from "@/lib/all-time/normal-records"
 import { compareRelativeScoreToPb, formatPb } from "@/lib/all-time/pb-precheck"
 import { formatClimbersPeriodLabel } from "@/lib/all-time/period-display"
+import { filterCanonicalPlayers } from "@/lib/all-time/player-picker"
 import { nextHoleAfterCompleteInput, parsePositiveHoleScore, sanitizeHoleScoreInput } from "@/lib/all-time/score-input"
 import { supabase } from "@/lib/supabase"
 
@@ -31,11 +32,11 @@ function validHolePars(course: Course | null): course is Course & { par: number;
 
 export default function NormalRecordsEntryPage() {
   const [courses, setCourses] = useState<Course[]>([]), [players, setPlayers] = useState<Player[]>([])
-  const [period, setPeriod] = useState<Period>("current"), [courseId, setCourseId] = useState(""), [playerId, setPlayerId] = useState(""), [playerSearch, setPlayerSearch] = useState(""), [entryType, setEntryType] = useState<NormalEntryType>("full_card")
+  const [period, setPeriod] = useState<Period>("current"), [courseId, setCourseId] = useState(""), [playerId, setPlayerId] = useState(""), [playerSearch, setPlayerSearch] = useState(""), [playerPickerOpen, setPlayerPickerOpen] = useState(false), [highlightedPlayerIndex, setHighlightedPlayerIndex] = useState(0), [entryType, setEntryType] = useState<NormalEntryType>("full_card")
   const [scoreText, setScoreText] = useState(""), [holes, setHoles] = useState<string[]>(emptyHoles)
   const [best, setBest] = useState<Best | null>(null), [courseBests, setCourseBests] = useState<Best[]>([]), [bestLoading, setBestLoading] = useState(false)
   const [season, setSeason] = useState<Season | null>(null), [previousSeason, setPreviousSeason] = useState<Season | null>(null), [loading, setLoading] = useState(true), [busy, setBusy] = useState(false), [periodPreviewLoading, setPeriodPreviewLoading] = useState(false), [message, setMessage] = useState(""), [error, setError] = useState(""), [previewFingerprint, setPreviewFingerprint] = useState(""), [periodPreview, setPeriodPreview] = useState<VerifiedPeriodPreview | null>(null), [sessionEntries, setSessionEntries] = useState<SessionEntry[]>([]), [finished, setFinished] = useState(false)
-  const nextActionRef = useRef<HTMLButtonElement>(null), entryKeyRef = useRef(crypto.randomUUID())
+  const nextActionRef = useRef<HTMLButtonElement>(null), entryKeyRef = useRef(crypto.randomUUID()), playerPickerInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     void (async () => {
@@ -55,7 +56,7 @@ export default function NormalRecordsEntryPage() {
 
   const course = courses.find((item) => item.id === courseId) ?? null
   const player = players.find((item) => item.id === playerId) ?? null
-  const filteredPlayers = useMemo(() => { const query = playerSearch.trim().toLowerCase(); return query ? players.filter((item) => item.screen_name.toLowerCase().includes(query)) : players }, [playerSearch, players])
+  const filteredPlayers = useMemo(() => filterCanonicalPlayers(players, playerSearch), [playerSearch, players])
   const holePars = validHolePars(course) ? course.hole_pars : []
   const parsedHoles = useMemo(() => holes.map(parsePositiveHoleScore), [holes])
   const fullStats: FullCardStats | null = entryType === "full_card" && parsedHoles.every((value): value is number => value !== null) && holePars.length === 18 ? (() => { const result = deriveFullCardStats(parsedHoles, holePars); return "error" in result ? null : result })() : null
@@ -146,6 +147,54 @@ export default function NormalRecordsEntryPage() {
     if (parsePositiveHoleScore(sanitized) !== null) focusAfterHole(index, sanitized)
   }
 
+  function clearPlayerSelection() {
+    setPlayerId("")
+    setBest(null)
+    setCourseBests([])
+    invalidatePreview()
+  }
+
+  function updatePlayerSearch(value: string) {
+    setPlayerSearch(value)
+    setPlayerPickerOpen(true)
+    setHighlightedPlayerIndex(0)
+    if (playerId) clearPlayerSelection()
+  }
+
+  function selectPlayer(selectedPlayer: Player) {
+    setPlayerId(selectedPlayer.id)
+    setPlayerSearch(selectedPlayer.screen_name)
+    setPlayerPickerOpen(false)
+    setHighlightedPlayerIndex(0)
+    setBest(null)
+    setCourseBests([])
+    invalidatePreview()
+  }
+
+  function handlePlayerPickerKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (event.key === "Escape") {
+      event.preventDefault()
+      setPlayerPickerOpen(false)
+      return
+    }
+    if (event.key === "ArrowDown") {
+      event.preventDefault()
+      setPlayerPickerOpen(true)
+      setHighlightedPlayerIndex((current) => filteredPlayers.length ? (current + 1) % filteredPlayers.length : 0)
+      return
+    }
+    if (event.key === "ArrowUp") {
+      event.preventDefault()
+      setPlayerPickerOpen(true)
+      setHighlightedPlayerIndex((current) => filteredPlayers.length ? (current - 1 + filteredPlayers.length) % filteredPlayers.length : 0)
+      return
+    }
+    if (event.key === "Enter" && playerPickerOpen && filteredPlayers[highlightedPlayerIndex]) {
+      event.preventDefault()
+      selectPlayer(filteredPlayers[highlightedPlayerIndex])
+    }
+  }
+
   function invalidatePreview() { setPeriodPreview(null); setPreviewFingerprint(""); setPeriodPreviewLoading(false) }
 
   function validateEntry() {
@@ -192,8 +241,7 @@ export default function NormalRecordsEntryPage() {
       <div className="grid gap-5 md:grid-cols-4">
         <label className={styles.field}>Climbers period<select className={styles.select} value={period} onChange={(event) => { setPeriod(event.target.value as Period); invalidatePreview() }}><option value="current">CURRENT PERIOD — DEFAULT</option><option value="previous">PREVIOUS PERIOD</option></select></label>
         <label className={styles.field}>Course<select className={styles.select} value={courseId} onChange={(event) => { setCourseId(event.target.value); setBest(null); setCourseBests([]); setHoles(emptyHoles()); setScoreText(""); invalidatePreview() }}><option value="">Choose an Easy/Hard course</option>{courses.map((item) => <option key={item.id} value={item.id}>{item.display_name} · {item.difficulty} · {item.code}</option>)}</select></label>
-        <label className={styles.field}>Search Global Players<input className={styles.input} value={playerSearch} onChange={(event) => setPlayerSearch(event.target.value)} placeholder="Filter canonical players" aria-label="Search canonical Global Players" /></label>
-        <label className={styles.field}>Canonical Global Player<select className={styles.select} value={playerId} onChange={(event) => { setPlayerId(event.target.value); setBest(null); setCourseBests([]); invalidatePreview() }} aria-label="Canonical Global Player"><option value="">Choose one player</option>{filteredPlayers.map((item) => <option key={item.id} value={item.id}>{item.screen_name}</option>)}</select></label>
+        <label className={`${styles.field} relative`} htmlFor="normal-canonical-player">Canonical Global Player<div className="relative"><input ref={playerPickerInputRef} id="normal-canonical-player" className={styles.input} value={playerSearch} onChange={(event) => updatePlayerSearch(event.target.value)} onFocus={() => setPlayerPickerOpen(true)} onKeyDown={handlePlayerPickerKeyDown} placeholder="Search canonical players" aria-label="Canonical Global Player" role="combobox" aria-autocomplete="list" aria-controls="normal-canonical-player-options" aria-expanded={playerPickerOpen && Boolean(playerSearch.trim())} aria-activedescendant={playerPickerOpen && filteredPlayers[highlightedPlayerIndex] ? `normal-canonical-player-option-${filteredPlayers[highlightedPlayerIndex].id}` : undefined} autoComplete="off" />{playerPickerOpen && playerSearch.trim() && <div id="normal-canonical-player-options" className="absolute z-20 mt-2 max-h-72 w-full overflow-y-auto rounded-xl border border-sky-300/30 bg-slate-950 p-2 shadow-2xl" role="listbox" aria-label="Matching canonical Global Players">{filteredPlayers.length ? filteredPlayers.map((item, index) => <button id={`normal-canonical-player-option-${item.id}`} key={item.id} type="button" role="option" aria-selected={playerId === item.id || index === highlightedPlayerIndex} className={`block w-full rounded-lg px-3 py-2 text-left text-sm ${index === highlightedPlayerIndex ? "bg-sky-900/60 text-white" : "text-slate-200 hover:bg-slate-800"}`} onMouseDown={(event) => event.preventDefault()} onClick={() => selectPlayer(item)}>{item.screen_name}</button>) : <p className="px-3 py-2 text-sm text-slate-400">No matching canonical Global Players.</p>}</div>}</div></label>
       </div>
       <div className="mt-5 grid gap-4 md:grid-cols-3"><label className={styles.field}>Entry method<select className={styles.select} value={entryType} onChange={(event) => { setEntryType(event.target.value as NormalEntryType); invalidatePreview() }}><option value="full_card">18-hole scorecard</option><option value="quick_score">Quick Score</option></select></label><p className={`${styles.sectionKicker} md:col-span-2 self-end`}>Admin-verified entries are recorded with the authenticated admin, save time, selected period, canonical player, course, and scorecard details automatically.</p></div>
       {course && <p className={styles.sectionKicker}>Selected {course.difficulty} · authoritative total par: {course.par ?? "not loaded"}. Selecting data is read-only and never creates an observation, PB, season, or Climbers event.</p>}

@@ -92,6 +92,16 @@ test("final intake is one-player, authoritative-par, and session-based", () => {
   assert.doesNotMatch(page, /ADD PLAYER|PREVIEW ENTIRE CARD|FRONT 9|BACK 9|P1|P2|P3/)
 })
 
+test("normal entry uses one accessible canonical player combobox", () => {
+  const page = read("app/admin/records/entry/page.tsx")
+  assert.match(page, /role="combobox"/)
+  assert.match(page, /role="listbox"/)
+  assert.match(page, /role="option"/)
+  assert.match(page, /selectedPlayer\.id/)
+  assert.doesNotMatch(page, /Search Global Players/)
+  assert.doesNotMatch(page, /Canonical Global Player<select/)
+})
+
 test("public records only expose detailed card statistics when holes and pars exist", () => {
   const route = read("app/api/records/public/route.ts")
   assert.match(route, /best_observation_id/)
