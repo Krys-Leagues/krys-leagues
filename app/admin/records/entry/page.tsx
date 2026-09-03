@@ -5,6 +5,7 @@ import { AdminGlassCard, AdminRecordsHero, AdminRecordsShell, adminRecordsStyles
 import scorecardStyles from "@/components/admin/records/NormalScorecard.module.css"
 import { classifyRecord, climbersPoints, deriveFullCardStats, sha256Hex, type FullCardStats, type NormalEntryType, type RecordClassification } from "@/lib/all-time/normal-records"
 import { compareRelativeScoreToPb, formatPb } from "@/lib/all-time/pb-precheck"
+import { formatClimbersPeriodLabel } from "@/lib/all-time/period-display"
 import { nextHoleAfterCompleteInput, parsePositiveHoleScore, sanitizeHoleScoreInput } from "@/lib/all-time/score-input"
 import { supabase } from "@/lib/supabase"
 
@@ -12,11 +13,12 @@ type Period = "current" | "previous"
 type Course = { id: string; code: string; display_name: string; difficulty: "Easy" | "Hard"; par: number | null; hole_pars: number[] | null }
 type Player = { id: string; screen_name: string }
 type Best = { player_id: string; score: number }
-type Season = { id: string; starts_at: string; ends_at: string; status: string }
+type Season = { id: string; label: string; starts_at: string; ends_at: string; status: string }
 type VerifiedPeriodPreview = { confirmation_token?: string; all_time_classification?: RecordClassification; current_pb_score?: number | null; new_pb_score?: number | null; climbers_points?: number; climbers_status?: string; target_period_label?: string }
 type SessionEntry = { player: string; course: string; score: number; hio: number | null; classification: string; points: number; period: string; status: string }
 
 const emptyHoles = () => Array.from({ length: 18 }, () => "")
+const ADMIN_VERIFIED_SOURCE = "Admin-verified submitted scorecard"
 const parseScore = (value: string) => /^-?\d+$/.test(value.trim()) ? Number(value) : null
 const errorMessage = (caught: unknown, fallback: string) => caught instanceof Error ? caught.message : caught && typeof caught === "object" && "message" in caught ? String(caught.message) : fallback
 
@@ -31,9 +33,8 @@ export default function NormalRecordsEntryPage() {
   const [courses, setCourses] = useState<Course[]>([]), [players, setPlayers] = useState<Player[]>([])
   const [period, setPeriod] = useState<Period>("current"), [courseId, setCourseId] = useState(""), [playerId, setPlayerId] = useState(""), [playerSearch, setPlayerSearch] = useState(""), [entryType, setEntryType] = useState<NormalEntryType>("full_card")
   const [scoreText, setScoreText] = useState(""), [holes, setHoles] = useState<string[]>(emptyHoles)
-  const [source, setSource] = useState(""), [reference, setReference] = useState(""), [notes, setNotes] = useState("")
   const [best, setBest] = useState<Best | null>(null), [courseBests, setCourseBests] = useState<Best[]>([]), [bestLoading, setBestLoading] = useState(false)
-  const [season, setSeason] = useState<Season | null>(null), [previousSeason, setPreviousSeason] = useState<Season | null>(null), [loading, setLoading] = useState(true), [busy, setBusy] = useState(false), [message, setMessage] = useState(""), [error, setError] = useState(""), [confirmed, setConfirmed] = useState(false), [previewFingerprint, setPreviewFingerprint] = useState(""), [periodPreview, setPeriodPreview] = useState<VerifiedPeriodPreview | null>(null), [sessionEntries, setSessionEntries] = useState<SessionEntry[]>([]), [finished, setFinished] = useState(false)
+  const [season, setSeason] = useState<Season | null>(null), [previousSeason, setPreviousSeason] = useState<Season | null>(null), [loading, setLoading] = useState(true), [busy, setBusy] = useState(false), [periodPreviewLoading, setPeriodPreviewLoading] = useState(false), [message, setMessage] = useState(""), [error, setError] = useState(""), [previewFingerprint, setPreviewFingerprint] = useState(""), [periodPreview, setPeriodPreview] = useState<VerifiedPeriodPreview | null>(null), [sessionEntries, setSessionEntries] = useState<SessionEntry[]>([]), [finished, setFinished] = useState(false)
   const nextActionRef = useRef<HTMLButtonElement>(null), entryKeyRef = useRef(crypto.randomUUID())
 
   useEffect(() => {
@@ -41,7 +42,7 @@ export default function NormalRecordsEntryPage() {
       const [courseResult, playerResult, seasonResult] = await Promise.all([
         supabase.from("all_time_courses").select("id,code,display_name,difficulty,par,hole_pars").eq("active", true).in("difficulty", ["Easy", "Hard"]).order("display_name"),
         supabase.from("players").select("id,screen_name").eq("active", true).order("screen_name"),
-        supabase.from("climbers_seasons").select("id,starts_at,ends_at,status").in("status", ["active", "awaiting_finalization"]).order("starts_at", { ascending: false }),
+        supabase.from("climbers_seasons").select("id,label,starts_at,ends_at,status").in("status", ["active", "awaiting_finalization"]).order("starts_at", { ascending: false }),
       ])
       const queryError = courseResult.error || playerResult.error
       if (queryError) setError(queryError.message)
@@ -56,7 +57,7 @@ export default function NormalRecordsEntryPage() {
   const player = players.find((item) => item.id === playerId) ?? null
   const filteredPlayers = useMemo(() => { const query = playerSearch.trim().toLowerCase(); return query ? players.filter((item) => item.screen_name.toLowerCase().includes(query)) : players }, [playerSearch, players])
   const holePars = validHolePars(course) ? course.hole_pars : []
-  const parsedHoles = holes.map(parsePositiveHoleScore)
+  const parsedHoles = useMemo(() => holes.map(parsePositiveHoleScore), [holes])
   const fullStats: FullCardStats | null = entryType === "full_card" && parsedHoles.every((value): value is number => value !== null) && holePars.length === 18 ? (() => { const result = deriveFullCardStats(parsedHoles, holePars); return "error" in result ? null : result })() : null
   const submittedScore = entryType === "full_card" ? fullStats?.scoreRelativeToPar ?? null : parseScore(scoreText)
   const relevantPb = best?.score ?? null
@@ -64,8 +65,10 @@ export default function NormalRecordsEntryPage() {
   const peoplePassed = season && classification === "BETTER" && submittedScore !== null ? courseBests.filter((item) => item.player_id !== playerId && item.score > submittedScore).length : 0
   const localPoints = classification ? climbersPoints(classification, peoplePassed) : 0
   const points = period === "previous" ? periodPreview?.climbers_points ?? 0 : localPoints
-  const targetPeriod = period === "current" ? season ? `${new Date(season.starts_at).toLocaleDateString()}–${new Date(season.ends_at).toLocaleDateString()}` : "Current period · no active season (0 points)" : previousSeason ? `${new Date(previousSeason.starts_at).toLocaleDateString()}–${new Date(previousSeason.ends_at).toLocaleDateString()}` : "Previous period · unavailable"
+  const targetPeriod = period === "current" ? season ? formatClimbersPeriodLabel(season) : "Current period · no active season (0 points)" : previousSeason ? formatClimbersPeriodLabel(previousSeason) : "Previous period · unavailable"
   const needsPar = entryType === "full_card" && !validHolePars(course)
+  const entryFingerprintPayload = JSON.stringify({ period, courseId, playerId, entryType, score: submittedScore, holes: entryType === "full_card" ? parsedHoles : null, source: ADMIN_VERIFIED_SOURCE, provenance_reference: null, notes: null })
+  const entryIsComplete = Boolean(course && player && submittedScore !== null && (entryType === "quick_score" || fullStats))
 
   useEffect(() => {
     if (!courseId || !playerId) return
@@ -83,6 +86,53 @@ export default function NormalRecordsEntryPage() {
     return () => { cancelled = true }
   }, [courseId, playerId])
 
+  useEffect(() => {
+    const selectedCourse = course
+    const selectedPlayer = player
+    if (!entryIsComplete || !selectedCourse || !selectedPlayer) return
+    let cancelled = false
+    void (async () => {
+      try {
+        const fingerprint = await sha256Hex(entryFingerprintPayload)
+        if (cancelled) return
+        if (period === "current") {
+          setPreviewFingerprint(fingerprint)
+          setError("")
+          return
+        }
+        if (!previousSeason) throw new Error("No previous Climbers period is available for this entry.")
+        setPeriodPreviewLoading(true)
+        const result = await supabase.rpc("preview_all_time_verified_period_entry", {
+          p_period_id: previousSeason.id,
+          p_course_id: selectedCourse.id,
+          p_player_id: selectedPlayer.id,
+          p_entry_key: entryKeyRef.current,
+          p_fingerprint: fingerprint,
+          p_score: submittedScore,
+          p_hole_strokes: entryType === "full_card" ? parsedHoles : null,
+          p_entry_type: entryType,
+          p_source_label: ADMIN_VERIFIED_SOURCE,
+          p_provenance_reference: null,
+          p_notes: null,
+        })
+        if (result.error) throw result.error
+        if (cancelled) return
+        setPeriodPreview(result.data as VerifiedPeriodPreview)
+        setPreviewFingerprint(fingerprint)
+        setError("")
+      } catch (caught) {
+        if (!cancelled) {
+          setPeriodPreview(null)
+          setPreviewFingerprint("")
+          setError(errorMessage(caught, "The protected period preview could not be loaded."))
+        }
+      } finally {
+        if (!cancelled) setPeriodPreviewLoading(false)
+      }
+    })()
+    return () => { cancelled = true }
+  }, [course, player, period, entryType, submittedScore, entryFingerprintPayload, previousSeason, parsedHoles, entryIsComplete])
+
   function focusAfterHole(index: number, value: string) {
     const nextIndex = nextHoleAfterCompleteInput(value, index)
     const next = nextIndex === null ? null : document.querySelector<HTMLInputElement>(`[data-normal-hole-index="${nextIndex}"]`)
@@ -96,11 +146,10 @@ export default function NormalRecordsEntryPage() {
     if (parsePositiveHoleScore(sanitized) !== null) focusAfterHole(index, sanitized)
   }
 
-  function invalidatePreview() { setPeriodPreview(null); setPreviewFingerprint(""); setConfirmed(false) }
+  function invalidatePreview() { setPeriodPreview(null); setPreviewFingerprint(""); setPeriodPreviewLoading(false) }
 
   function validateEntry() {
     if (!course || !player) return "Select one Easy/Hard course and one canonical Global Player."
-    if (!source.trim()) return "Enter a source or provenance label."
     if (submittedScore === null) return entryType === "full_card" ? "Enter all 18 positive hole scores." : "Enter a valid integer score relative to par."
     if (entryType === "full_card" && (!validHolePars(course) || !fullStats)) return "This course needs 18 authoritative positive hole pars before a full card can be saved."
     if (period === "previous" && !periodPreview?.confirmation_token) return "Preview the verified Previous Period entry before saving."
@@ -109,51 +158,21 @@ export default function NormalRecordsEntryPage() {
   }
 
   async function fingerprintForEntry() {
-    return sha256Hex(JSON.stringify({ period, courseId, playerId, entryType, score: submittedScore, holes: entryType === "full_card" ? parsedHoles : null, source: source.trim(), reference: reference.trim(), notes: notes.trim() }))
+    return sha256Hex(entryFingerprintPayload)
   }
 
-  async function previewEntry() {
-    const problem = validateEntryForPreview(); if (problem) { setError(problem); return }
-    const selectedCourse = course, selectedPlayer = player, score = submittedScore
-    if (!selectedCourse || !selectedPlayer || score === null) { setError("Complete the player, course, and score before previewing."); return }
-    setBusy(true); setError(""); setMessage(""); setConfirmed(false)
-    try {
-      const fingerprint = await fingerprintForEntry()
-      if (period === "current") {
-        setPreviewFingerprint(fingerprint)
-      } else {
-        if (!previousSeason) throw new Error("No previous Climbers period is available for this entry.")
-        const result = await supabase.rpc("preview_all_time_verified_period_entry", { p_period_id: previousSeason.id, p_course_id: selectedCourse.id, p_player_id: selectedPlayer.id, p_entry_key: entryKeyRef.current, p_fingerprint: fingerprint, p_score: score, p_hole_strokes: entryType === "full_card" ? parsedHoles : null, p_entry_type: entryType, p_source_label: source.trim(), p_provenance_reference: reference.trim() || null, p_notes: notes.trim() || null })
-        if (result.error) throw result.error
-        setPeriodPreview(result.data as VerifiedPeriodPreview)
-        setPreviewFingerprint(fingerprint)
-      }
-      setMessage("Protected preview ready. Review it and explicitly confirm this one-player entry.")
-    } catch (caught) { setError(errorMessage(caught, "The protected preview could not be loaded.")) } finally { setBusy(false) }
-  }
-
-  function validateEntryForPreview() {
-    if (!course || !player) return "Select one Easy/Hard course and one canonical Global Player."
-    if (!source.trim()) return "Enter a source or provenance label."
-    if (entryType === "full_card" && (!validHolePars(course) || !fullStats)) return "Enter all 18 positive hole scores; authoritative 18-hole pars are required."
-    if (entryType === "quick_score" && submittedScore === null) return "Enter a valid integer score relative to par."
-    if (period === "previous" && !previousSeason) return "No previous Climbers period is available."
-    return null
-  }
-
-  function resetEntry() { setCourseId(""); setPlayerId(""); setPlayerSearch(""); setScoreText(""); setHoles(emptyHoles()); setSource(""); setReference(""); setNotes(""); setConfirmed(false); setPeriodPreview(null); setPreviewFingerprint(""); entryKeyRef.current = crypto.randomUUID() }
+  function resetEntry() { setCourseId(""); setPlayerId(""); setPlayerSearch(""); setScoreText(""); setHoles(emptyHoles()); setPeriodPreview(null); setPreviewFingerprint(""); entryKeyRef.current = crypto.randomUUID() }
 
   async function saveEntry(finish: boolean) {
     const problem = validateEntry(); if (problem) { setError(problem); return }
-    if (!confirmed) { setError("Review the protected preview and check the confirmation box before saving."); return }
     const selectedCourse = course, selectedPlayer = player, score = submittedScore, stats = fullStats
     if (!selectedCourse || !selectedPlayer || score === null || (entryType === "full_card" && !stats)) { setError("Complete the protected preview before saving."); return }
     setBusy(true); setError(""); setMessage("")
     try {
       const fingerprint = await fingerprintForEntry(); if (fingerprint !== previewFingerprint) throw new Error("The entry changed after preview; run a fresh protected preview.")
       const result = period === "previous"
-        ? await supabase.rpc("record_all_time_verified_period_entry", { p_period_id: previousSeason?.id, p_course_id: selectedCourse.id, p_player_id: selectedPlayer.id, p_entry_key: entryKeyRef.current, p_fingerprint: fingerprint, p_score: score, p_hole_strokes: entryType === "full_card" ? parsedHoles : null, p_entry_type: entryType, p_source_label: source.trim(), p_provenance_reference: reference.trim() || null, p_notes: notes.trim() || null, p_confirmation_token: periodPreview?.confirmation_token })
-        : await supabase.rpc("record_all_time_normal_entry", { p_course_id: selectedCourse.id, p_player_id: selectedPlayer.id, p_entry_key: entryKeyRef.current, p_fingerprint: fingerprint, p_score: score, p_hole_strokes: entryType === "full_card" ? parsedHoles : null, p_entry_type: entryType, p_source_label: source.trim(), p_provenance_reference: reference.trim() || null, p_notes: notes.trim() || null })
+        ? await supabase.rpc("record_all_time_verified_period_entry", { p_period_id: previousSeason?.id, p_course_id: selectedCourse.id, p_player_id: selectedPlayer.id, p_entry_key: entryKeyRef.current, p_fingerprint: fingerprint, p_score: score, p_hole_strokes: entryType === "full_card" ? parsedHoles : null, p_entry_type: entryType, p_source_label: ADMIN_VERIFIED_SOURCE, p_provenance_reference: null, p_notes: null, p_confirmation_token: periodPreview?.confirmation_token })
+        : await supabase.rpc("record_all_time_normal_entry", { p_course_id: selectedCourse.id, p_player_id: selectedPlayer.id, p_entry_key: entryKeyRef.current, p_fingerprint: fingerprint, p_score: score, p_hole_strokes: entryType === "full_card" ? parsedHoles : null, p_entry_type: entryType, p_source_label: ADMIN_VERIFIED_SOURCE, p_provenance_reference: null, p_notes: null })
       if (result.error) throw result.error
       setSessionEntries((current) => [...current, { player: selectedPlayer.screen_name, course: `${selectedCourse.display_name} · ${selectedCourse.difficulty}`, score, hio: stats?.hn1Count ?? null, classification: periodPreview?.all_time_classification ?? classification ?? "—", points: period === "previous" ? 0 : points, period: periodPreview?.target_period_label ?? targetPeriod, status: period === "previous" ? "SAVED · CLIMBERS PENDING" : "SAVED" }])
       setMessage(finish ? "Entry saved. Intake session finished." : "Entry saved. Add another player from any course or submitted card.")
@@ -176,7 +195,7 @@ export default function NormalRecordsEntryPage() {
         <label className={styles.field}>Search Global Players<input className={styles.input} value={playerSearch} onChange={(event) => setPlayerSearch(event.target.value)} placeholder="Filter canonical players" aria-label="Search canonical Global Players" /></label>
         <label className={styles.field}>Canonical Global Player<select className={styles.select} value={playerId} onChange={(event) => { setPlayerId(event.target.value); setBest(null); setCourseBests([]); invalidatePreview() }} aria-label="Canonical Global Player"><option value="">Choose one player</option>{filteredPlayers.map((item) => <option key={item.id} value={item.id}>{item.screen_name}</option>)}</select></label>
       </div>
-      <div className="mt-5 grid gap-4 md:grid-cols-3"><label className={styles.field}>Entry method<select className={styles.select} value={entryType} onChange={(event) => { setEntryType(event.target.value as NormalEntryType); invalidatePreview() }}><option value="full_card">18-hole scorecard</option><option value="quick_score">Quick Score</option></select></label><label className={styles.field}>Source / provenance<input className={styles.input} value={source} onChange={(event) => { setSource(event.target.value); invalidatePreview() }} /></label><label className={styles.field}>Reference<input className={styles.input} value={reference} onChange={(event) => { setReference(event.target.value); invalidatePreview() }} placeholder="URL, message, or source row" /></label><label className={`${styles.field} md:col-span-3`}>Notes<textarea className={styles.textarea} value={notes} onChange={(event) => { setNotes(event.target.value); invalidatePreview() }} /></label></div>
+      <div className="mt-5 grid gap-4 md:grid-cols-3"><label className={styles.field}>Entry method<select className={styles.select} value={entryType} onChange={(event) => { setEntryType(event.target.value as NormalEntryType); invalidatePreview() }}><option value="full_card">18-hole scorecard</option><option value="quick_score">Quick Score</option></select></label><p className={`${styles.sectionKicker} md:col-span-2 self-end`}>Admin-verified entries are recorded with the authenticated admin, save time, selected period, canonical player, course, and scorecard details automatically.</p></div>
       {course && <p className={styles.sectionKicker}>Selected {course.difficulty} · authoritative total par: {course.par ?? "not loaded"}. Selecting data is read-only and never creates an observation, PB, season, or Climbers event.</p>}
       {course && player && <div className="mt-4 rounded-xl border border-amber-300/30 bg-amber-950/20 p-3" aria-live="polite"><strong className="block text-sm text-amber-100">{bestLoading ? "PB LOOKUP PENDING" : `CURRENT ALL-TIME PB: ${formatPb(best?.score ?? null)}`}</strong>{best && <span className="block text-xs text-amber-50">NEED TO BEAT: {formatPb(best.score)}</span>}{submittedScore !== null && !bestLoading && <span className="mt-2 block text-xs font-bold text-amber-100">{compareRelativeScoreToPb(submittedScore, best?.score ?? null)}</span>}{period === "previous" && <span className="mt-2 block text-xs text-amber-100">The selected Climbers period is authoritative. All-Time PB changes save now; Climbers points remain pending deterministic period replay.</span>}<span className="mt-1 block text-xs text-slate-300">Read-only lookup. Selecting a player or course never creates an observation, season, or Climbers event.</span></div>}
     </AdminGlassCard>
@@ -186,7 +205,7 @@ export default function NormalRecordsEntryPage() {
       {needsPar && <p role="alert" className={`${styles.notice} mt-4`}>This course cannot save a full card until its authoritative total par and all 18 positive hole pars are available.</p>}
       {fullStats && <div className="mt-5 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4 md:grid-cols-8">{[["Strokes", fullStats.totalStrokes], ["Relative", fullStats.scoreRelativeToPar], ["HIO", fullStats.hn1Count], ["Pars", fullStats.pars], ["Birdies", fullStats.birdies], ["Bogeys", fullStats.bogeys], ["Eagles+", fullStats.eagles], ["Other", fullStats.otherHoles]].map(([label, value]) => <div className="rounded-lg border border-sky-300/20 bg-slate-950/40 p-2 text-center" key={label}><span className="block text-xs text-slate-400">{label}</span><strong>{value}</strong></div>)}</div>}
     </AdminGlassCard>
-      <AdminGlassCard><h2 className={styles.sectionHeading}>Protected preview</h2><div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><div><span className="block text-xs text-slate-400">Player</span><strong>{player?.screen_name ?? "—"}</strong></div><div><span className="block text-xs text-slate-400">Course</span><strong>{course ? `${course.display_name} · ${course.difficulty}` : "—"}</strong></div><div><span className="block text-xs text-slate-400">Submitted score</span><strong>{submittedScore ?? "—"}</strong></div><div><span className="block text-xs text-slate-400">Classification</span><strong>{periodPreview?.all_time_classification ?? classification ?? "—"}</strong></div><div><span className="block text-xs text-slate-400">New PB</span><strong>{formatPb(periodPreview?.new_pb_score ?? (classification === "FIRST" || classification === "BETTER" ? submittedScore : best?.score ?? null))}</strong></div><div><span className="block text-xs text-slate-400">Climbers</span><strong>{period === "previous" ? "0 points · pending replay" : `${points} points`}</strong></div><div><span className="block text-xs text-slate-400">Target period</span><strong>{periodPreview?.target_period_label ?? targetPeriod}</strong></div><div><span className="block text-xs text-slate-400">Status</span><strong>{previewReady ? "READY TO REVIEW" : "DRAFT"}</strong></div></div><p role="status" className={styles.sectionKicker}>{previewText}</p><button className={`${styles.buttonPrimary} mt-4`} disabled={busy || loading || bestLoading || Boolean(validateEntryForPreview())} onClick={() => void previewEntry()}>{busy ? "Preparing…" : "Preview protected entry"}</button>{previewReady && <label className="mt-4 flex items-start gap-3 text-sm text-slate-200"><input type="checkbox" checked={confirmed} onChange={(event) => setConfirmed(event.target.checked)} /><span>I reviewed the player, course, score, PB effect, Climbers effect, period, and provenance, and confirm this one-player entry.</span></label>}<div className="mt-4 flex flex-wrap gap-3"><button ref={nextActionRef} className={styles.buttonSuccess} disabled={busy || !previewReady || !confirmed} onClick={() => void saveEntry(false)}>ADD AGAIN</button><button className={styles.buttonPrimary} disabled={busy || !previewReady || !confirmed} onClick={() => void saveEntry(true)}>ADD &amp; FINISH</button></div>{message && <p role="status" className={styles.sectionKicker}>{message}</p>}{error && <p role="alert" className={styles.empty}>{error}</p>}</AdminGlassCard>
+      <AdminGlassCard><h2 className={styles.sectionHeading}>Protected preview</h2><div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><div><span className="block text-xs text-slate-400">Player</span><strong>{player?.screen_name ?? "—"}</strong></div><div><span className="block text-xs text-slate-400">Course</span><strong>{course ? `${course.display_name} · ${course.difficulty}` : "—"}</strong></div><div><span className="block text-xs text-slate-400">Submitted score</span><strong>{submittedScore ?? "—"}</strong></div><div><span className="block text-xs text-slate-400">Classification</span><strong>{periodPreview?.all_time_classification ?? classification ?? "—"}</strong></div><div><span className="block text-xs text-slate-400">New PB</span><strong>{formatPb(periodPreview?.new_pb_score ?? (classification === "FIRST" || classification === "BETTER" ? submittedScore : best?.score ?? null))}</strong></div><div><span className="block text-xs text-slate-400">Climbers</span><strong>{period === "previous" ? "0 points · pending replay" : `${points} points`}</strong></div><div><span className="block text-xs text-slate-400">Target period</span><strong>{periodPreview?.target_period_label ?? targetPeriod}</strong></div><div><span className="block text-xs text-slate-400">Status</span><strong>{previewReady ? "READY TO SAVE" : "DRAFT"}</strong></div></div><p role="status" className={styles.sectionKicker}>{previewText}</p><p className={styles.sectionKicker}>Protected preview is prepared automatically. Saving remains authorized by the protected database RPC.</p><div className="mt-4 flex flex-wrap gap-3"><button ref={nextActionRef} className={styles.buttonSuccess} disabled={busy || loading || bestLoading || periodPreviewLoading || !previewReady} onClick={() => void saveEntry(false)}>ADD AGAIN</button><button className={styles.buttonPrimary} disabled={busy || loading || bestLoading || periodPreviewLoading || !previewReady} onClick={() => void saveEntry(true)}>ADD &amp; FINISH</button></div>{message && <p role="status" className={styles.sectionKicker}>{message}</p>}{error && <p role="alert" className={styles.empty}>{error}</p>}</AdminGlassCard>
     <SessionLog entries={sessionEntries} />
   </AdminRecordsShell>
 }
