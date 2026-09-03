@@ -10,14 +10,14 @@ begin;
 do $guard$
 declare
   v_now timestamptz := clock_timestamp();
-  v_admin_count bigint;
-  v_created_by uuid;
+  v_created_by uuid := '0d93ca19-289a-4929-a093-c7556e6d51ed'::uuid;
 begin
   perform pg_advisory_xact_lock(hashtext('krys-leagues:initial-climbers-periods:v1'));
 
   if to_regclass('public.climbers_seasons') is null
-     or to_regclass('public.site_admin_users') is null then
-    raise exception 'Required Climbers and site-admin tables are missing';
+     or to_regclass('public.site_admin_users') is null
+     or to_regclass('auth.users') is null then
+    raise exception 'Required Climbers, site-admin, and auth tables are missing';
   end if;
 
   if v_now < timestamptz '2026-08-29 00:00:00+00'
@@ -25,22 +25,20 @@ begin
     raise exception 'This initial-period migration is only valid while the approved Aug 29–Sep 11, 2026 period is current';
   end if;
 
-  select count(*)
-  into v_admin_count
-  from public.site_admin_users;
-
-  if v_admin_count <> 1 then
-    raise exception 'Exactly one site-admin user is required to assign created_by deterministically; found %', v_admin_count;
+  if not exists (
+    select 1
+    from auth.users as auth_user
+    where auth_user.id = v_created_by
+  ) then
+    raise exception 'The approved created_by UUID does not exist in auth.users: %', v_created_by;
   end if;
 
-  select site_admin.user_id
-  into v_created_by
-  from public.site_admin_users as site_admin
-  order by site_admin.created_at asc, site_admin.user_id asc
-  limit 1;
-
-  if v_created_by is null then
-    raise exception 'The deterministic site-admin creator UUID could not be selected';
+  if not exists (
+    select 1
+    from public.site_admin_users as site_admin
+    where site_admin.user_id = v_created_by
+  ) then
+    raise exception 'The approved created_by UUID is not a site admin: %', v_created_by;
   end if;
 
   if exists (
