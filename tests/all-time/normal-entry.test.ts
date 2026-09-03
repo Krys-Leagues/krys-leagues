@@ -102,14 +102,18 @@ test("normal entry uses one accessible canonical player combobox", () => {
   assert.doesNotMatch(page, /Canonical Global Player<select/)
 })
 
-test("normal entry uses one accessible canonical course combobox and clears it on Add Again", () => {
+test("normal entry uses one accessible canonical course combobox and keeps it on Add Again", () => {
   const page = read("app/admin/records/entry/page.tsx")
   assert.match(page, /id="normal-canonical-course"/)
   assert.match(page, /Search courses or codes/)
   assert.match(page, /filterCanonicalCourses/)
   assert.match(page, /formatCanonicalCourse/)
   assert.match(page, /setCourseSearch\(formatCanonicalCourse\(selectedCourse\)\)/)
-  assert.match(page, /setCourseId\(""\); setCourseSearch\(""\)/)
+  assert.match(page, /function resetEntry\(keepCourse: boolean\)/)
+  assert.match(page, /else resetEntry\(true\)/)
+  assert.match(page, /if \(!keepCourse\) \{[\s\S]*setCourseId\(""\)[\s\S]*setCourseSearch\(""\)/)
+  assert.match(page, /setPlayerId\(""\)[\s\S]*setPlayerSearch\(""\)[\s\S]*setHoles\(emptyHoles\(\)\)/)
+  assert.match(page, /const holePars = validHolePars\(course\) \? course\.hole_pars : \[\]/)
   assert.doesNotMatch(page, /Course<select/)
 })
 

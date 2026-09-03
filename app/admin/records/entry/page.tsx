@@ -263,7 +263,24 @@ export default function NormalRecordsEntryPage() {
     return sha256Hex(entryFingerprintPayload)
   }
 
-  function resetEntry() { setCourseId(""); setCourseSearch(""); setCoursePickerOpen(false); setPlayerId(""); setPlayerSearch(""); setPlayerPickerOpen(false); setScoreText(""); setHoles(emptyHoles()); setPeriodPreview(null); setPreviewFingerprint(""); entryKeyRef.current = crypto.randomUUID() }
+  function resetEntry(keepCourse: boolean) {
+    if (!keepCourse) {
+      setCourseId("")
+      setCourseSearch("")
+      setCoursePickerOpen(false)
+    }
+    setPlayerId("")
+    setPlayerSearch("")
+    setPlayerPickerOpen(false)
+    setBest(null)
+    setCourseBests([])
+    setScoreText("")
+    setHoles(emptyHoles())
+    setPeriodPreview(null)
+    setPeriodPreviewLoading(false)
+    setPreviewFingerprint("")
+    entryKeyRef.current = crypto.randomUUID()
+  }
 
   async function saveEntry(finish: boolean) {
     const problem = validateEntry(); if (problem) { setError(problem); return }
@@ -279,7 +296,7 @@ export default function NormalRecordsEntryPage() {
       setSessionEntries((current) => [...current, { player: selectedPlayer.screen_name, course: `${selectedCourse.display_name} · ${selectedCourse.difficulty}`, score, hio: stats?.hn1Count ?? null, classification: periodPreview?.all_time_classification ?? classification ?? "—", points: period === "previous" ? 0 : points, period: periodPreview?.target_period_label ?? targetPeriod, status: period === "previous" ? "SAVED · CLIMBERS PENDING" : "SAVED" }])
       setMessage(finish ? "Entry saved. Intake session finished." : "Entry saved. Add another player from any course or submitted card.")
       if (finish) setFinished(true)
-      else resetEntry()
+      else resetEntry(true)
     } catch (caught) { setError(errorMessage(caught, "The protected All-Time entry could not be saved.")) } finally { setBusy(false) }
   }
 
