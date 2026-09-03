@@ -171,8 +171,19 @@ declare
   v_zero_count integer := 0;
   v_target_count integer;
   v_target_audit_count integer;
+  v_target_distinct_observation_count integer;
+  v_target_distinct_sequence_count integer;
+  v_target_min_sequence integer;
+  v_target_max_sequence integer;
   v_missing_sequence_count integer;
   v_blocker_count integer;
+  v_effect_count integer;
+  v_effect_distinct_observation_count integer;
+  v_effect_distinct_sequence_count integer;
+  v_effect_min_sequence integer;
+  v_effect_max_sequence integer;
+  v_existing_event public.climbers_events%rowtype;
+  v_event_created boolean;
 begin
   if p_actor_id is null
      or not exists (
@@ -234,6 +245,26 @@ begin
     and observation.voided_at is null
     and audit.posting_sequence is null;
 
+  select
+    count(*)::integer,
+    count(distinct audit.observation_id)::integer,
+    count(distinct audit.posting_sequence)::integer,
+    min(audit.posting_sequence)::integer,
+    max(audit.posting_sequence)::integer
+    into
+      v_target_audit_count,
+      v_target_distinct_observation_count,
+      v_target_distinct_sequence_count,
+      v_target_min_sequence,
+      v_target_max_sequence
+  from public.all_time_verified_period_audit as audit
+  join public.all_time_record_observations as observation
+    on observation.id = audit.observation_id
+  where audit.verified_period_id = p_period_id
+    and observation.verified_period_id = p_period_id
+    and observation.entry_type = 'verified_period'
+    and observation.voided_at is null;
+
   if v_target_count = 0 then
     return jsonb_build_object(
       'action', 'nothing_to_replay',
@@ -245,8 +276,17 @@ begin
   end if;
 
   if v_target_count <> v_target_audit_count
-     or v_missing_sequence_count <> 0 then
-    raise exception 'Every verified-period observation needs exactly one immutable posting sequence and audit row';
+     or v_target_audit_count <> v_target_distinct_observation_count
+     or v_target_audit_count <> v_target_distinct_sequence_count
+     or v_missing_sequence_count <> 0
+     or v_target_min_sequence <> 1
+     or v_target_max_sequence <> v_target_count then
+    raise exception 'Verified-period replay target cardinality is invalid: rows %, distinct observations %, distinct sequences %, sequence range %..%',
+      v_target_audit_count,
+      v_target_distinct_observation_count,
+      v_target_distinct_sequence_count,
+      v_target_min_sequence,
+      v_target_max_sequence;
   end if;
 
   create temp table verified_period_replay_pb (
@@ -463,6 +503,33 @@ begin
     into v_replayed_count, v_total_points
   from verified_period_replay_effects;
 
+  select
+    count(*)::integer,
+    count(distinct observation_id)::integer,
+    count(distinct posting_sequence)::integer,
+    min(posting_sequence)::integer,
+    max(posting_sequence)::integer
+    into
+      v_effect_count,
+      v_effect_distinct_observation_count,
+      v_effect_distinct_sequence_count,
+      v_effect_min_sequence,
+      v_effect_max_sequence
+  from verified_period_replay_effects;
+
+  if v_effect_count <> v_target_count
+     or v_effect_count <> v_effect_distinct_observation_count
+     or v_effect_count <> v_effect_distinct_sequence_count
+     or v_effect_min_sequence <> 1
+     or v_effect_max_sequence <> v_effect_count then
+    raise exception 'Verified-period replay effect cardinality is invalid: rows %, distinct observations %, distinct sequences %, sequence range %..%',
+      v_effect_count,
+      v_effect_distinct_observation_count,
+      v_effect_distinct_sequence_count,
+      v_effect_min_sequence,
+      v_effect_max_sequence;
+  end if;
+
   if v_period.starts_at = timestamptz '2026-08-15T00:00:00Z'
      and v_period.ends_at = timestamptz '2026-08-29T00:00:00Z'
      and (
@@ -517,19 +584,17 @@ begin
     from verified_period_replay_effects
     order by posting_sequence
   loop
-    select event.id
-      into v_event_id
+    v_event_id := null;
+    v_event_created := false;
+
+    select event.*
+      into v_existing_event
     from public.climbers_events as event
     where event.observation_id = v_row.observation_id
     for update;
 
-    if v_event_id is not null and exists (
-      select 1
-      from public.climbers_events as event
-      where event.id = v_event_id
-        and event.season_id <> p_period_id
-    ) then
-      raise exception 'Observation already belongs to a different Climbers period event';
+    if found then
+      v_event_id := v_existing_event.id;
     end if;
 
     if v_row.classification in ('FIRST','BETTER') then
@@ -572,32 +637,69 @@ begin
         from public.all_time_courses as course
         join public.all_time_record_observations as observation
           on observation.id = v_row.observation_id
+        on conflict (observation_id) do nothing
         returning id into v_event_id;
-      else
-        update public.climbers_events as event
-        set season_id = p_period_id,
-            player_id = v_row.player_id,
-            course_id = v_row.course_id,
-            old_pb_score = v_row.old_pb_score,
-            new_pb_score = v_row.new_pb_score,
-            points = v_row.climbers_points,
-            calculation_version = 'climbers-verified-period-posting-v1',
-            effective_at = null,
-            effective_date = v_period.starts_at::date,
-            effective_order = v_row.posting_sequence,
-            effective_time_precision = 'date_ordered',
-            voided_at = null,
-            voided_by = null,
-            void_reason = null
-        where event.id = v_event_id;
+        if found then
+          v_event_created := true;
+        else
+          select event.*
+            into v_existing_event
+          from public.climbers_events as event
+          where event.observation_id = v_row.observation_id
+          for update;
+
+          if not found then
+            raise exception 'Event insert conflicted but the existing observation event could not be read';
+          end if;
+
+          v_event_id := v_existing_event.id;
+        end if;
       end if;
 
-      delete from public.climbers_event_passes
-      where event_id = v_event_id;
-
-      insert into public.climbers_event_passes(event_id, passed_player_id)
-      select v_event_id, passed_player_id
-      from unnest(v_row.passed_player_ids) as passed(passed_player_id);
+      if not v_event_created then
+        if v_existing_event.season_id is distinct from p_period_id
+           or v_existing_event.player_id is distinct from v_row.player_id
+           or v_existing_event.course_id is distinct from v_row.course_id
+           or v_existing_event.difficulty is distinct from v_row.difficulty
+           or v_existing_event.old_pb_score is distinct from v_row.old_pb_score
+           or v_existing_event.new_pb_score is distinct from v_row.new_pb_score
+           or v_existing_event.points is distinct from v_row.climbers_points
+           or v_existing_event.calculation_version is distinct from 'climbers-verified-period-posting-v1'
+           or v_existing_event.source_label is distinct from v_row.source_label
+           or v_existing_event.provenance_reference is distinct from v_row.provenance_reference
+           or v_existing_event.effective_at is not null
+           or v_existing_event.effective_date is distinct from v_period.starts_at::date
+           or v_existing_event.effective_order is distinct from v_row.posting_sequence
+           or v_existing_event.effective_time_precision is distinct from 'date_ordered'
+           or v_existing_event.voided_at is not null
+           or (
+             select count(*)
+             from public.climbers_event_passes as pass
+             where pass.event_id = v_event_id
+           ) <> coalesce(array_length(v_row.passed_player_ids, 1), 0)
+           or exists (
+             select 1
+             from public.climbers_event_passes as pass
+             where pass.event_id = v_event_id
+               and not (pass.passed_player_id = any(v_row.passed_player_ids))
+           )
+           or exists (
+             select 1
+             from unnest(v_row.passed_player_ids) as expected(passed_player_id)
+             where not exists (
+               select 1
+               from public.climbers_event_passes as pass
+               where pass.event_id = v_event_id
+                 and pass.passed_player_id = expected.passed_player_id
+             )
+           ) then
+          raise exception 'Existing Climbers event conflicts with verified-period replay for observation %', v_row.observation_id;
+        end if;
+      else
+        insert into public.climbers_event_passes(event_id, passed_player_id)
+        select v_event_id, passed_player_id
+        from unnest(v_row.passed_player_ids) as passed(passed_player_id);
+      end if;
 
       update public.all_time_verified_period_audit as audit
       set all_time_classification = v_row.classification,
@@ -613,15 +715,11 @@ begin
       v_event_count := v_event_count + 1;
     else
       if v_event_id is not null then
-        update public.climbers_events as event
-        set points = 0,
-            voided_at = clock_timestamp(),
-            voided_by = p_actor_id,
-            void_reason = 'Verified-period replay: entry did not establish a PB'
-        where event.id = v_event_id;
-
-        delete from public.climbers_event_passes
-        where event_id = v_event_id;
+        if v_existing_event.season_id is distinct from p_period_id
+           or v_existing_event.points is distinct from 0
+           or v_existing_event.voided_at is null then
+          raise exception 'Existing Climbers event conflicts with zero-effect verified-period replay for observation %', v_row.observation_id;
+        end if;
       end if;
 
       update public.all_time_verified_period_audit as audit

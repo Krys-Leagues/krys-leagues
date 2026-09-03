@@ -27,12 +27,23 @@ test("replay uses the preserved PB state and current Climbers pass semantics", (
 
 test("replay is idempotent and never changes Current Period scoring", () => {
   assert.match(sql, /where event\.observation_id = v_row\.observation_id/i)
+  assert.match(sql, /on conflict \(observation_id\) do nothing/i)
+  assert.match(sql, /Existing Climbers event conflicts with verified-period replay/i)
+  assert.match(sql, /Existing Climbers event conflicts with zero-effect verified-period replay/i)
   assert.match(sql, /if v_event_id is null then/i)
-  assert.match(sql, /delete from public\.climbers_event_passes/i)
   assert.match(sql, /climbers_status = 'replayed'/i)
   assert.match(sql, /pending_period_replay/i)
   assert.doesNotMatch(sql, /ensure_active_climbers_season/i)
   assert.doesNotMatch(sql, /record_all_time_normal_entry/i)
+})
+
+test("replay rejects duplicate observations or posting sequences before event writes", () => {
+  assert.match(sql, /count\(distinct audit\.observation_id\)/i)
+  assert.match(sql, /count\(distinct audit\.posting_sequence\)/i)
+  assert.match(sql, /count\(distinct observation_id\)/i)
+  assert.match(sql, /count\(distinct posting_sequence\)/i)
+  assert.match(sql, /Verified-period replay target cardinality is invalid/i)
+  assert.match(sql, /Verified-period replay effect cardinality is invalid/i)
 })
 
 test("approved twelve-entry replay is guarded to the verified 281-point result", () => {
