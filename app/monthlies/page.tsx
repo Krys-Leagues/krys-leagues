@@ -171,7 +171,8 @@ export default function MonthliesPage() {
                 <option value="">Select month</option>
                 {monthOptions.map(month => <option key={month} value={month}>{monthNames[month]}</option>)}
               </select>
-              <span aria-hidden="true" className={styles.artworkSelectedValue}>{selection.month ? monthNames[selection.month] : ""}</span>
+              <span aria-hidden="true" className={`${styles.artworkValueMask} ${styles.monthValueMask}`} />
+              <span aria-hidden="true" className={`${styles.artworkSelectedValue} ${styles.yearSelectedValue}`}>{selection.month ? monthNames[selection.month] : ""}</span>
             </label>
             <label className={styles.controlHitbox} style={artworkTargetStyle(monthlyArtworkOverlayTargets[2])}>
               <span className={styles.srOnly}>Division</span>
@@ -179,7 +180,8 @@ export default function MonthliesPage() {
                 <option value="">Select division</option>
                 {divisionOptions.map(division => <option key={division} value={division}>{division}</option>)}
               </select>
-              <span aria-hidden="true" className={`${styles.artworkSelectedValue} ${selection.division.length > 14 ? styles.artworkSelectedValueLong : ""}`}>{selection.division}</span>
+              <span aria-hidden="true" className={`${styles.artworkValueMask} ${styles.divisionValueMask}`} />
+              <span aria-hidden="true" className={`${styles.artworkSelectedValue} ${styles.yearSelectedValue} ${selection.division.length > 14 ? styles.artworkSelectedValueLong : ""}`}>{selection.division}</span>
             </label>
             <button type="button" aria-label="Previous Month" className={styles.controlHitbox} style={artworkTargetStyle(monthlyArtworkOverlayTargets[3])} onClick={() => movePeriod(1)} disabled={selection.month === "" || currentPeriodIndex < 0 || currentPeriodIndex >= sortedPeriods.length - 1} />
             <button type="button" aria-label="Next Month" className={styles.controlHitbox} style={artworkTargetStyle(monthlyArtworkOverlayTargets[4])} onClick={() => movePeriod(-1)} disabled={selection.month === "" || currentPeriodIndex <= 0} />
