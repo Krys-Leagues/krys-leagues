@@ -1,0 +1,168 @@
+Skip to Main Content
+Kry's Monthlies
+Search
+0 results
+Install App
+About
+nobody
+	
+2024 October
+85/78 players
+COMPLETED
+	
+Overall Leaders - 2024 October
+Pos	Player	League	Courses
+Played	Total
+Strokes	HN1's	Points
+1	yankeedude1123	Elite	8	-184	22	1,592
+2	Alisha0068	Amateur 2	8	-107	8	1,578
+3	El Jorge	Elite	8	-182	15	1,555
+4	MrDachshund81	Pro 3	8	-161	8	1,538
+5	ARTSY	Amateur 3	8	-110	6	1,536
+6	Danielaoculus	Pro 2	8	-142	12	1,522
+7	Mully	Pro 1	8	-158	10	1,520
+8	CRAZYHORSE	Pro 1	8	-145	10	1,510
+9	leanin2it	Master	8	-186	19	1,509
+10	Princess_Bankshot	Master	8	-182	16	1,486
+1 - 10
+Master Leaders
+League
+- Select -
+Master
+Elite
+Pro 1
+Pro 2
+Pro 3
+Semi Pro 1
+Beginner
+Welcome
+Pos	Player	Courses
+Played	Total
+Strokes	HN1's	Points
+1
+	leanin2it	8	-186	19	1,509
+2
+	Princess_Bankshot	8	-182	16	1,486
+3
+	TrickyDicky	8	-185	16	1,476
+4
+	Derby_Daz	8	-175	20	1,440
+5
+	stewiestewie	8	-168	12	1,312
+6
+	Neo Impossible	8	-168	13	1,283
+7
+	deebee	8	-154	10	1,120
+8
+	Slappy	8	-150	12	1,102
+9
+	AmberWave	4	-81	4	544
+1 - 9
+ Players at risk of relegation
+  Point change since last report.
+ Seagull Stacks
+#	Player	Score	HN1	Points
+1	leanin2it	-24	3	203
+1	Princess_Bankshot	-24	3	203
+3	TrickyDicky	-24	2	182
+4	stewiestewie	-21	2	172
+4	Derby_Daz	-21	2	172
+6	Slappy	-21	1	151
+7	deebee	-20	1	141
+8	Neo Impossible	-19	1	131
+	AmberWave			
+ Seagull Stacks - Hard
+#	Player	Score	HN1	Points
+1	TrickyDicky	-19	0	200
+2	Derby_Daz	-17	2	192
+3	Princess_Bankshot	-17	1	181
+4	Neo Impossible	-16	1	171
+5	leanin2it	-16	0	160
+6	stewiestewie	-14	0	150
+6	deebee	-14	0	150
+8	Slappy	-13	1	131
+	AmberWave			
+ Arizona Modern
+#	Player	Score	HN1	Points
+1	TrickyDicky	-31	5	205
+2	Princess_Bankshot	-29	3	193
+2	leanin2it	-29	3	193
+4	Derby_Daz	-27	4	174
+5	stewiestewie	-27	1	161
+5	Slappy	-27	1	161
+5	Neo Impossible	-27	1	161
+8	AmberWave	-26	1	131
+9	deebee	-24	0	120
+ Arizona Modern Hard
+#	Player	Score	HN1	Points
+1	leanin2it	-27	2	202
+2	Neo Impossible	-25	3	193
+3	TrickyDicky	-24	1	181
+4	Princess_Bankshot	-22	2	172
+5	Derby_Daz	-22	1	161
+6	deebee	-21	0	150
+7	stewiestewie	-20	2	142
+8	AmberWave	-20	1	131
+9	Slappy	-19	1	121
+ Labyrinth
+#	Player	Score	HN1	Points
+1	stewiestewie	-27	4	204
+2	TrickyDicky	-26	4	194
+3	Princess_Bankshot	-26	1	181
+4	Derby_Daz	-25	3	173
+5	leanin2it	-25	2	162
+6	Slappy	-24	2	152
+7	deebee	-23	4	144
+8	Neo Impossible	-23	1	131
+	AmberWave			
+ Labyrinth - Hard
+#	Player	Score	HN1	Points
+1	Derby_Daz	-23	4	204
+2	leanin2it	-22	4	194
+3	stewiestewie	-21	2	182
+3	Princess_Bankshot	-21	2	182
+5	deebee	-19	3	163
+6	TrickyDicky	-19	1	151
+7	Neo Impossible	-17	3	143
+8	Slappy	-14	4	134
+	AmberWave			
+ Mars Gardens
+#	Player	Score	HN1	Points
+1	leanin2it	-25	4	204
+2	TrickyDicky	-25	3	193
+3	Neo Impossible	-24	3	183
+4	Derby_Daz	-22	3	173
+4	Princess_Bankshot	-22	3	173
+6	stewiestewie	-22	1	151
+7	AmberWave	-21	1	141
+8	deebee	-20	2	132
+9	Slappy	-19	1	121
+ Mars Gardens - Hard
+#	Player	Score	HN1	Points
+1	Princess_Bankshot	-21	1	201
+2	Derby_Daz	-18	1	191
+2	leanin2it	-18	1	191
+4	TrickyDicky	-17	0	170
+4	Neo Impossible	-17	0	170
+6	stewiestewie	-16	0	150
+7	AmberWave	-14	1	141
+8	Slappy	-13	1	131
+9	deebee	-13	0	120
+2024 October Courses
+
+
+SSE - Seagull Stacks
+SSH - Seagull Stacks - Hard
+
+
+AME - Arizona Modern
+AMH - Arizona Modern Hard
+
+
+LBE - Labyrinth
+LBH - Labyrinth - Hard
+
+
+MGE - Mars Gardens
+MGH - Mars Gardens - Hard
+Release 1.2 Built with  using Oracle APEX

@@ -1,0 +1,215 @@
+{
+  "generated_at": "2026-09-08T12:14:14.754Z",
+  "identity_directory_csv_sha256": "5f26bb2871bd794b58c5276de6be2e04c61796416c59242d9670017b3a60a33c",
+  "directory_rows": {
+    "PLAYER": 419,
+    "ALIAS": 305,
+    "MAPPED": 13
+  },
+  "combined_scored_names": 192,
+  "new_amateur_scored_names": 21,
+  "combined_status_counts": {
+    "EXACT": 66,
+    "EXISTING_ALIAS_MAPPED": 118,
+    "AMBIGUOUS": 4,
+    "UNRESOLVED": 4
+  },
+  "new_amateur_status_counts": {
+    "EXACT": 8,
+    "EXISTING_ALIAS_MAPPED": 5,
+    "AMBIGUOUS": 4,
+    "UNRESOLVED": 4
+  },
+  "new_amateur_blocked_scored_observations": 46,
+  "new_amateur_rows": [
+    {
+      "source_name": "BEVE3630",
+      "status": "EXISTING_ALIAS_MAPPED",
+      "matched_name": "EVE",
+      "player_id": "813739b5-3023-4640-ab59-2958f83f27cd",
+      "evidence": "historical_alias",
+      "confidence": "100",
+      "scored_observations": "2"
+    },
+    {
+      "source_name": "CATHY G",
+      "status": "EXACT",
+      "matched_name": "CATHYG",
+      "player_id": "fd74c52c-dd6e-4f64-8a55-81294a886360",
+      "evidence": "screen_name",
+      "confidence": "100",
+      "scored_observations": "15"
+    },
+    {
+      "source_name": "CHERIE_ROSE",
+      "status": "EXISTING_ALIAS_MAPPED",
+      "matched_name": "CHERIE_ROSE",
+      "player_id": "b507c445-6824-47ff-868c-5ce8a394a83a",
+      "evidence": "historical_alias",
+      "confidence": "100",
+      "scored_observations": "62"
+    },
+    {
+      "source_name": "Camdawg15",
+      "status": "UNRESOLVED",
+      "matched_name": "",
+      "player_id": "",
+      "evidence": "none",
+      "confidence": "0",
+      "scored_observations": "5"
+    },
+    {
+      "source_name": "GHINI",
+      "status": "UNRESOLVED",
+      "matched_name": "",
+      "player_id": "",
+      "evidence": "none",
+      "confidence": "0",
+      "scored_observations": "11"
+    },
+    {
+      "source_name": "HARLEY",
+      "status": "AMBIGUOUS",
+      "matched_name": "Warey84",
+      "player_id": "e093fb15-b91d-4fc1-9c9f-3fa9b6b94058",
+      "evidence": "historical_alias",
+      "confidence": "67",
+      "scored_observations": "1"
+    },
+    {
+      "source_name": "Jaynice",
+      "status": "EXACT",
+      "matched_name": "JAYNICE",
+      "player_id": "f036158a-65e4-4ae6-8e52-5cd7786aa05a",
+      "evidence": "screen_name",
+      "confidence": "100",
+      "scored_observations": "16"
+    },
+    {
+      "source_name": "Jesshsp",
+      "status": "UNRESOLVED",
+      "matched_name": "",
+      "player_id": "",
+      "evidence": "none",
+      "confidence": "0",
+      "scored_observations": "3"
+    },
+    {
+      "source_name": "Ladyrider60",
+      "status": "EXACT",
+      "matched_name": "Ladyrider60",
+      "player_id": "45b94717-0376-4c69-a4ef-9375343a687c",
+      "evidence": "screen_name",
+      "confidence": "100",
+      "scored_observations": "5"
+    },
+    {
+      "source_name": "MOENSHINER",
+      "status": "EXISTING_ALIAS_MAPPED",
+      "matched_name": "MOENSHINER",
+      "player_id": "7a5a13bb-fbe6-42ee-9d7e-65149ac16209",
+      "evidence": "historical_alias",
+      "confidence": "100",
+      "scored_observations": "18"
+    },
+    {
+      "source_name": "Mark1703",
+      "status": "AMBIGUOUS",
+      "matched_name": "MA",
+      "player_id": "dca96a7d-d4f6-47e1-b76d-476a90a44cc1",
+      "evidence": "screen_name",
+      "confidence": "88",
+      "scored_observations": "3"
+    },
+    {
+      "source_name": "Merged into 7231",
+      "status": "AMBIGUOUS",
+      "matched_name": "8189",
+      "player_id": "27f87a3a-4f4b-4abc-9ede-91373c66a107",
+      "evidence": "historical_alias",
+      "confidence": "71",
+      "scored_observations": "8"
+    },
+    {
+      "source_name": "ROSE.M1231",
+      "status": "EXACT",
+      "matched_name": "ROSE.M1231",
+      "player_id": "8b7583e1-5434-4fd1-825c-6e8ec03c4f2e",
+      "evidence": "screen_name",
+      "confidence": "100",
+      "scored_observations": "7"
+    },
+    {
+      "source_name": "SubZero",
+      "status": "AMBIGUOUS",
+      "matched_name": "zero",
+      "player_id": "4039ec08-e301-4b02-ab0b-aab987426491",
+      "evidence": "screen_name",
+      "confidence": "86",
+      "scored_observations": "8"
+    },
+    {
+      "source_name": "TENBEERS",
+      "status": "UNRESOLVED",
+      "matched_name": "",
+      "player_id": "",
+      "evidence": "none",
+      "confidence": "0",
+      "scored_observations": "7"
+    },
+    {
+      "source_name": "ThePrankser15",
+      "status": "EXACT",
+      "matched_name": "ThePrankser15",
+      "player_id": "ab407333-f315-4a88-944b-b21a75e60b52",
+      "evidence": "screen_name",
+      "confidence": "100",
+      "scored_observations": "15"
+    },
+    {
+      "source_name": "beezy1",
+      "status": "EXACT",
+      "matched_name": "beezy1",
+      "player_id": "9bb58e2f-fe54-45fa-ac87-5bce8709f5e2",
+      "evidence": "screen_name",
+      "confidence": "100",
+      "scored_observations": "20"
+    },
+    {
+      "source_name": "crispynut",
+      "status": "EXACT",
+      "matched_name": "CRISPYNUT",
+      "player_id": "771e909b-de1d-446e-bc8d-bbbd5165c82f",
+      "evidence": "screen_name",
+      "confidence": "100",
+      "scored_observations": "9"
+    },
+    {
+      "source_name": "kenmorefield",
+      "status": "EXISTING_ALIAS_MAPPED",
+      "matched_name": "kenmorefield",
+      "player_id": "06bdb19f-1387-405a-b937-b3740bcfe007",
+      "evidence": "historical_alias",
+      "confidence": "100",
+      "scored_observations": "8"
+    },
+    {
+      "source_name": "kimcat",
+      "status": "EXISTING_ALIAS_MAPPED",
+      "matched_name": "kimcat",
+      "player_id": "c0d63290-8833-4712-82df-ad310c052278",
+      "evidence": "historical_alias",
+      "confidence": "100",
+      "scored_observations": "8"
+    },
+    {
+      "source_name": "mamabear2002",
+      "status": "EXACT",
+      "matched_name": "MAMABEAR2002",
+      "player_id": "3b311000-2abf-46e6-9b37-5d662161b198",
+      "evidence": "screen_name",
+      "confidence": "100",
+      "scored_observations": "11"
+    }
+  ]
+}

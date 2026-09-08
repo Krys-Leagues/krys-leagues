@@ -1,0 +1,166 @@
+Skip to Main Content
+Kry's Monthlies
+Search
+0 results
+Install App
+About
+nobody
+	
+2025 July
+107/87 players
+COMPLETED
+	
+Overall Leaders - 2025 July
+Pos	Player	League	Courses
+Played	Total
+Strokes	HN1's	Points
+1	GuyB22	Semi Pro 2	8	-131	10	1,600
+2	Raccoons Whisker	Amateur 2	8	-85	8	1,588
+3	Zanetti	Pro 3	8	-196	30	1,580
+4	Merged into 8648	Pro 2	8	-175	18	1,578
+5	Blutes87	Pro 1	8	-181	20	1,570
+6	𝙹𝚞𝚕𝚒𝚊𝚗	Pro 3	8	-192	25	1,565
+7	Merged into 8708	Beginner	8	-50	8	1,548
+8	Sandtrap	Semi Pro 2	8	-112	11	1,531
+9	INDY	Master	8	-195	22	1,522
+10	KillERBee	Amateur 1	8	-65	7	1,517
+1 - 10
+Semi Pro 1 Leaders
+League
+- Select -
+Master
+Elite
+Pro 1
+Pro 2
+Pro 3
+Semi Pro 1
+Beginner
+Welcome
+Pos	Player	Courses
+Played	Total
+Strokes	HN1's	Points
+1
+	Jennem	8	-94	10	1,420
+2
+	SerenityMoon	8	-98	7	1,417
+3
+	peach🌻	8	-89	11	1,411
+4
+	BERT	6	-86	9	1,109
+5
+	Chelle💯	6	-65	5	1,065
+6
+	Andrew_Holmes	4	-57	7	757
+7
+	BadWolff🐺	4	-39	4	674
+	Chachi Mendelo	0			
+	Awkward3Sauce	0			
+1 - 9
+ Players at risk of relegation
+  Point change since last report.
+ Bogey's Bonanza
+#	Player	Score	HN1	Points
+1	BERT	-22	3	203
+2	Jennem	-21	2	192
+3	peach🌻	-17	1	181
+4	SerenityMoon	-10	1	171
+	Chachi Mendelo			
+	Andrew_Holmes			
+	Chelle💯			
+	Awkward3Sauce			
+	BadWolff🐺			
+ Bogey's Bonanza Hard
+#	Player	Score	HN1	Points
+1	SerenityMoon	-18	2	202
+2	BERT	-16	1	191
+3	peach🌻	-12	0	180
+3	Jennem	-12	0	180
+	Chachi Mendelo			
+	Andrew_Holmes			
+	Chelle💯			
+	Awkward3Sauce			
+	BadWolff🐺			
+ Upside Town
+#	Player	Score	HN1	Points
+1	Chelle💯	-18	1	201
+2	BadWolff🐺	-18	0	190
+3	Andrew_Holmes	-17	3	183
+4	SerenityMoon	-17	0	170
+5	peach🌻	-15	2	162
+6	Jennem	-11	1	151
+	Chachi Mendelo			
+	BERT			
+	Awkward3Sauce			
+ Upside Town - Hard
+#	Player	Score	HN1	Points
+1	Andrew_Holmes	-13	1	201
+2	SerenityMoon	-11	0	190
+3	peach🌻	-8	1	181
+4	Jennem	-5	2	172
+5	BadWolff🐺	-4	0	160
+6	Chelle💯	-1	1	151
+	Chachi Mendelo			
+	BERT			
+	Awkward3Sauce			
+ Journey to the Center of the Earth
+#	Player	Score	HN1	Points
+1	peach🌻	-17	2	202
+2	Jennem	-15	3	193
+3	Chelle💯	-15	1	181
+4	BERT	-14	2	172
+5	SerenityMoon	-10	1	161
+	Chachi Mendelo			
+	Andrew_Holmes			
+	Awkward3Sauce			
+	BadWolff🐺			
+ Center of the Earth - Hard
+#	Player	Score	HN1	Points
+1	SerenityMoon	-15	1	201
+2	Chelle💯	-13	0	190
+3	BERT	-8	0	180
+3	Jennem	-8	0	180
+5	peach🌻	0	0	160
+	Chachi Mendelo			
+	Andrew_Holmes			
+	BadWolff🐺			
+	Awkward3Sauce			
+ Crystal Lair
+#	Player	Score	HN1	Points
+1	peach🌻	-20	4	204
+2	Jennem	-19	2	192
+3	Andrew_Holmes	-15	2	182
+3	BERT	-15	2	182
+5	SerenityMoon	-14	2	162
+6	BadWolff🐺	-8	2	152
+7	Chelle💯	-5	0	140
+	Chachi Mendelo			
+	Awkward3Sauce			
+ Crystal Lair - Hard
+#	Player	Score	HN1	Points
+1	Chelle💯	-13	2	202
+2	Andrew_Holmes	-12	1	191
+3	BERT	-11	1	181
+4	BadWolff🐺	-9	2	172
+5	Jennem	-3	0	160
+5	SerenityMoon	-3	0	160
+7	peach🌻	0	1	141
+	Chachi Mendelo			
+	Awkward3Sauce			
+2025 July Courses
+
+
+BBE - Bogey's Bonanza
+BBH - Bogey's Bonanza Hard
+
+
+UTE - Upside Town
+UTH - Upside Town - Hard
+
+
+JCE - Journey to the Center of the Earth
+JCH - Center of the Earth - Hard
+
+
+CLE - Crystal Lair
+CLH - Crystal Lair - Hard
+Release 1.2 Built with  using Oracle APEX

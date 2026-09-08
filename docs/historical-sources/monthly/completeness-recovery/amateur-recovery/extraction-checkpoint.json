@@ -1,0 +1,25 @@
+{
+    "captureDate":  "2026-09-08T07:46:18.1215141-04:00",
+    "status":  "RUNNING",
+    "completed":  [
+                      "221+26",
+                      "241+27",
+                      "261+26",
+                      "261+27",
+                      "281+26",
+                      "301+26",
+                      "301+27"
+                  ],
+    "periods":  0,
+    "counts":  {
+                   "periods":  0,
+                   "combinations":  7,
+                   "populated":  7,
+                   "empty":  0,
+                   "observations":  384,
+                   "scored":  272,
+                   "unplayed":  112,
+                   "negative":  203,
+                   "malformed":  0
+               }
+}

@@ -1,0 +1,60 @@
+{
+  "generated_at": "2026-09-08T12:33:54.382Z",
+  "directory_snapshot": "Supabase Snippet Untitled query - 2026-09-08T071036.443.csv",
+  "scope": "new Amateur scored names only",
+  "new_amateur_names": 21,
+  "original_matcher_counts": {
+    "EXACT": 8,
+    "EXISTING_ALIAS_MAPPED": 5,
+    "REVIEWED_MAPPED": 0,
+    "AMBIGUOUS": 4,
+    "UNRESOLVED": 4
+  },
+  "after_review_counts": {
+    "EXACT": 8,
+    "EXISTING_ALIAS_MAPPED": 5,
+    "REVIEWED_MAPPED": 1,
+    "AMBIGUOUS": 3,
+    "UNRESOLVED": 4
+  },
+  "reviewed_source_name": "Merged into 7231",
+  "reviewed_source_player_id": "7988",
+  "merge_target_source_id": "7231",
+  "historical_target_name": "WendyW(Wyndemere2020)",
+  "canonical_public_player_id": "7befb54f-6eec-4c7c-9881-c75d1acfb8d8",
+  "reviewed_observations": 8,
+  "remaining_ambiguous_names": [
+    {
+      "name": "HARLEY",
+      "scored_observations": 1
+    },
+    {
+      "name": "Mark1703",
+      "scored_observations": 3
+    },
+    {
+      "name": "SubZero",
+      "scored_observations": 8
+    }
+  ],
+  "remaining_unresolved_names": [
+    {
+      "name": "Camdawg15",
+      "scored_observations": 5
+    },
+    {
+      "name": "GHINI",
+      "scored_observations": 11
+    },
+    {
+      "name": "Jesshsp",
+      "scored_observations": 3
+    },
+    {
+      "name": "TENBEERS",
+      "scored_observations": 7
+    }
+  ],
+  "remaining_blocked_scored_observations": 38,
+  "decision_policy": "Local provenance overlay only; no Global Players write and no source-name replacement."
+}

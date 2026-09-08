@@ -1,0 +1,119 @@
+Skip to Main Content
+Kry's Monthlies
+Search
+0 results
+Install App
+About
+nobody
+	
+2025 December
+91/80 players
+COMPLETED
+	
+Overall Leaders - 2025 December
+Pos	Player	League	Courses
+Played	Total
+Strokes	HN1's	Points
+1	yankeedude1123	Elite	8	-194	26	1,596
+2	INDY	Master	8	-216	31	1,591
+3	Matt916	Pro 3	8	-182	17	1,587
+4	The Real JB	Semi Pro 3	8	-121	15	1,575
+5	SMILEROBIN	Amateur 2	8	-50	8	1,568
+6	IMJOMAMA	Amateur 1	8	-65	7	1,567
+7	Zanetti	Master	8	-208	35	1,565
+8	plucky✌	Semi Pro 2	8	-125	14	1,534
+9	l7jazz	Pro 2	8	-143	21	1,521
+10	SlugJug33	Semi Pro 3	8	-106	9	1,509
+1 - 10
+Amateur 1 Leaders
+League
+- Select -
+Master
+Elite
+Pro 1
+Pro 2
+Pro 3
+Semi Pro 1
+Beginner
+Welcome
+26
+Pos	Player	Courses
+Played	Total
+Strokes	HN1's	Points
+1
+	IMJOMAMA	8	-65	7	1,567
+2
+	RICK	7	-2	7	1,307
+3
+	Earthling	4	-37	2	782
+4
+	Sarahlynn727	1	-20	4	204
+1 - 4
+ Players at risk of relegation
+  Point change since last report.
+ Myst
+#	Player	Score	HN1	Points
+1	Earthling	-22	2	202
+2	IMJOMAMA	-13	1	191
+3	RICK	-10	2	182
+	Sarahlynn727			
+ Myst Hard
+#	Player	Score	HN1	Points
+1	IMJOMAMA	-8	1	201
+2	RICK	-7	1	191
+3	Earthling	4	0	180
+	Sarahlynn727			
+ Shangri-La
+#	Player	Score	HN1	Points
+1	Sarahlynn727	-20	4	204
+2	IMJOMAMA	-16	3	193
+3	RICK	-16	1	181
+	Earthling			
+ Shangri-La - Hard
+#	Player	Score	HN1	Points
+1	IMJOMAMA	-5	0	200
+2	RICK	6	0	190
+	Sarahlynn727			
+	Earthling			
+ Venice
+#	Player	Score	HN1	Points
+1	Earthling	-15	0	200
+2	IMJOMAMA	-4	0	190
+2	RICK	-4	0	190
+	Sarahlynn727			
+ Venice - Hard
+#	Player	Score	HN1	Points
+1	Earthling	-4	0	200
+2	IMJOMAMA	-3	0	190
+3	RICK	12	1	181
+	Sarahlynn727			
+ Viva Las Elvis
+#	Player	Score	HN1	Points
+1	IMJOMAMA	-15	2	202
+	RICK			
+	Sarahlynn727			
+	Earthling			
+ Viva Las Elvis - Hard
+#	Player	Score	HN1	Points
+1	IMJOMAMA	-1	0	200
+2	RICK	17	2	192
+	Sarahlynn727			
+	Earthling			
+2025 December Courses
+
+
+MYE - Myst
+MYH - Myst Hard
+
+
+SLE - Shangri-La
+SLH - Shangri-La - Hard
+
+
+VNE - Venice
+VNH - Venice - Hard
+
+
+ELE - Viva Las Elvis
+ELH - Viva Las Elvis - Hard
+Release 1.2 Built with  using Oracle APEX

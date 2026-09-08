@@ -1,0 +1,155 @@
+Skip to Main Content
+Kry's Monthlies
+Search
+0 results
+Install App
+About
+nobody
+	
+2025 May
+105/92 players
+COMPLETED
+	
+Overall Leaders - 2025 May
+Pos	Player	League	Courses
+Played	Total
+Strokes	HN1's	Points
+1	TILTBOMB	Beginner	8	-106	15	1,615
+2	Blutes87	Pro 3	8	-150	18	1,598
+3	POLANECE	Elite	8	-169	28	1,578
+4	Sj_76	Amateur 1	8	-119	14	1,574
+5	StevieWonderful	Semi Pro 2	8	-106	20	1,570
+6	MAMAGOATZ	Amateur 2	8	-75	11	1,551
+7	Chelle💯	Semi Pro 3	8	-113	18	1,548
+8	KillERBee	Amateur 3	8	-36	13	1,543
+9	musical_atv 🎻	Amateur 2	8	-66	11	1,531
+9	Sandtrap	Amateur 1	8	-112	11	1,531
+1 - 10
+Semi Pro 2 Leaders
+League
+- Select -
+Master
+Elite
+Pro 1
+Pro 2
+Pro 3
+Semi Pro 1
+Beginner
+Welcome
+114
+Pos	Player	Courses
+Played	Total
+Strokes	HN1's	Points
+1
+	StevieWonderful	8	-106	20	1,570
+2
+	Alyssa38	8	-94	12	1,492
+3
+	Kd	8	-84	11	1,481
+4
+	fake4real	8	-80	13	1,453
+	SNOWBALL	0			
+	JIMMY_BUCKETS	0			
+	RYANL503	0			
+	onesilygrl	0			
+1 - 8
+ Players at risk of relegation
+  Point change since last report.
+ Original Gothic
+#	Player	Score	HN1	Points
+1	StevieWonderful	-19	3	203
+2	Alyssa38	-17	1	191
+3	Kd	-14	2	182
+4	fake4real	-11	2	172
+	JIMMY_BUCKETS			
+	RYANL503			
+	SNOWBALL			
+	onesilygrl			
+ Original Gothic Hard
+#	Player	Score	HN1	Points
+1	StevieWonderful	-11	1	201
+2	Kd	-10	0	190
+3	fake4real	-8	0	180
+4	Alyssa38	-6	0	170
+	JIMMY_BUCKETS			
+	RYANL503			
+	SNOWBALL			
+	onesilygrl			
+ Labyrinth
+#	Player	Score	HN1	Points
+1	StevieWonderful	-21	2	202
+2	Kd	-17	2	192
+3	Alyssa38	-16	1	181
+3	fake4real	-16	1	181
+	RYANL503			
+	SNOWBALL			
+	JIMMY_BUCKETS			
+	onesilygrl			
+ Labyrinth - Hard
+#	Player	Score	HN1	Points
+1	fake4real	-11	2	202
+1	StevieWonderful	-11	2	202
+3	Alyssa38	-8	0	180
+4	Kd	-2	0	170
+	RYANL503			
+	SNOWBALL			
+	JIMMY_BUCKETS			
+	onesilygrl			
+ Meow Wolf
+#	Player	Score	HN1	Points
+1	Alyssa38	-18	2	202
+2	StevieWonderful	-17	4	194
+3	fake4real	-16	2	182
+4	Kd	-15	2	172
+	JIMMY_BUCKETS			
+	SNOWBALL			
+	RYANL503			
+	onesilygrl			
+ Meow Wolf - Hard
+#	Player	Score	HN1	Points
+1	Alyssa38	-15	4	204
+2	StevieWonderful	-14	4	194
+3	Kd	-7	2	182
+4	fake4real	-2	4	174
+	SNOWBALL			
+	JIMMY_BUCKETS			
+	RYANL503			
+	onesilygrl			
+ Raptor Cliff's
+#	Player	Score	HN1	Points
+1	StevieWonderful	-15	3	203
+2	Kd	-13	2	192
+3	Alyssa38	-12	3	183
+4	fake4real	-12	1	171
+	RYANL503			
+	SNOWBALL			
+	JIMMY_BUCKETS			
+	onesilygrl			
+ Raptor Cliff's - Hard
+#	Player	Score	HN1	Points
+1	Kd	-6	1	201
+2	fake4real	-4	1	191
+3	Alyssa38	-2	1	181
+4	StevieWonderful	2	1	171
+	RYANL503			
+	JIMMY_BUCKETS			
+	SNOWBALL			
+	onesilygrl			
+2025 May Courses
+
+
+OGE - Original Gothic
+OGH - Original Gothic Hard
+
+
+LBE - Labyrinth
+LBH - Labyrinth - Hard
+
+
+MWE - Meow Wolf
+MWH - Meow Wolf - Hard
+
+
+RCE - Raptor Cliff's
+RCH - Raptor Cliff's - Hard
+Release 1.2 Built with  using Oracle APEX

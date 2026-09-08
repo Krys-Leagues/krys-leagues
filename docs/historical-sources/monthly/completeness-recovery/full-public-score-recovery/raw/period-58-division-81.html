@@ -1,0 +1,1190 @@
+<html class="page-1 app-MONTHLY" lang="en" style="--js-sticky-top: 48px;"><head>
+  <meta http-equiv="x-ua-compatible" content="IE=edge">
+  <meta charset="utf-8">
+  <title>Kry's Monthly</title>
+  <base href="/ords/">
+<link rel="stylesheet" href="/i/26.1.4/app_ui/css/Core.min.css?v=26.1.4" type="text/css">
+<link rel="stylesheet" href="/i/26.1.4/app_ui/css/Theme-Standard.min.css?v=26.1.4" type="text/css">
+
+  <link rel="stylesheet" href="/i/26.1.4/libraries/font-apex/2.5.1/css/font-apex.min.css?v=26.1.4" type="text/css">
+<link rel="stylesheet" href="/i/26.1.4/themes/theme_42/24.2/css/Core.min.css?v=26.1.4" type="text/css">
+
+  
+  <link rel="stylesheet" href="r/wmgt/500/files/theme/42/v65/156967727056451135.css" type="text/css">
+
+  <link rel="stylesheet" href="r/wmgt/500/files/static/v14/css/global.min.css" type="text/css">
+
+  <style nonce="AwAglAC1DNPMTkGvW_6U9g">
+:root {
+    --ut-report-cell-padding-y:.2rem;
+    --ut-report-cell-padding-x:.4rem;
+    --ut-tabs-item-font-size: 1rem;
+    --ut-tabs-item-active-background-color: #a1d1fd;
+    --a-resultsitem-description-text-color: var(--ut-body-text-color);
+}
+.courses {
+    --ut-region-header-padding-y: 0.3rem;
+}
+
+#leagueResult {
+--ut-report-header-cell-padding-x: .3rem;
+}
+
+.t-Tabs-item.is-active {
+    --ut-tabs-item-font-size: 1rem;
+}
+.t-ResultsRegion {
+    position: absolute;
+    top: 12px;
+    background-color:var(--ut-header-background-color);
+}
+
+td[headers="POS"] {position: relative; left: -2px;}
+.movement {position: absolute; right: 0;}
+.movement.up {color: green;}
+.movement.down {color: red;}
+
+[headers="PREPARED_MONTHLY_DATE"] h1 {
+    margin-top: 0px;
+}
+h1.statusINPROGRESS {
+    margin-bottom: 0px;
+}
+
+#POS, td[headers="POS"],
+#COURSES, td[headers="COURSES"],
+#SCORES, td[headers="SCORES"],
+#POINTS, td[headers="POINTS"]
+{
+    --ut-report-cell-padding-x: .3rem;
+    --ut-report-header-cell-padding-x: .2rem;
+}
+
+td[headers="COURSES"],td[headers="SCORE"], td[headers="SCORES"], td[headers="HN1"], td[headers="HN1S"], td[headers="POINTS"] {
+    font-family: Menlo,Consolas,monospace;
+}
+
+@media (max-width: 639px) {
+  #COURSES, td[headers="COURSES"]
+   {
+       display: none;
+   }
+   .movement {right: -1px;}
+
+}
+
+
+#PREPARED_MONTHLY_DATE {text-align: center;}
+.courseIcon {
+width: 240px;
+height: 240px;
+}
+
+.nextCourses .courseLink {
+        box-shadow: var(--ut-cardlist-box-shadow,var(--ut-component-box-shadow));
+}
+.nextCourses .course {
+    transition: transform .2s ease;
+}
+.nextCourses .course:hover {
+    transform: translateY(-0.5rem);
+}
+.nextCourses .course a {
+    color: var(--ut-component-text-title-color);
+}
+
+
+.nextCourses {text-align: center;}
+.nextCourses .name {font-weight: 700; font-size: 1.1em;}
+.nextCourses .info.TBD {display: none;}
+
+/* credit: 
+https://www.youtube.com/watch?v=ezP4kbOvs_E
+*/
+@property --angle {
+    syntax: "<angle>";
+    initial-value: 0deg;
+    inherits: false;
+}
+.wm-animate-border::after,.wm-animate-border::before {
+    content: '';
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+    z-index: -1;
+    padding: 3px;
+    background-image: conic-gradient(from var(--angle), transparent 70%, #309fdb, #13b6cf, #2ebfbc, #3caf85, #81bb5f, #ddde53, #fbce4a, #ed813e);
+    border-radius: 10px;
+    animation: 4s spin linear infinite;
+}
+.wm-animate-border::before {
+    filter: blur(1.5rem);
+    opacity: 0.5;
+}
+
+@keyframes spin{
+    from {
+        --angle: 0deg;
+    }
+    to {
+        --angle: 360deg;
+    }
+}
+
+.relegation {
+  background-color: #ffcccc; /* Light red background */
+  font-weight: bold;         /* Bold text */
+}
+
+.legend-square {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.relegation-square {
+  background-color: #ffcccc; /* Same color as the relegation rows */
+  border: 1px solid darkred;
+}
+
+#leagueLeaders .legend {
+    position: absolute;
+    bottom: 0;
+    left: 13px;
+}
+
+.legend .movement {
+    position: static;
+}
+
+@media (max-width: 844px) {
+  #leagueResult ul {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    gap: 6px;
+    padding-bottom: 8px;
+    scrollbar-width: none; /* hide scrollbar on Firefox */
+  }
+
+    #leagueResult ul::-webkit-scrollbar {
+    display: none; /* hide scrollbar on Chrome/Safari */
+  }
+  #leagueResult ul li {
+    flex: 0 0 auto; /* prevent shrinking */
+    white-space: nowrap;
+  }
+
+}
+
+
+.below-mark-toggle td {
+  text-align: center;
+  padding: 4px 8px;
+  cursor: pointer;
+  color: #888;
+  font-size: 0.82em;
+  font-style: italic;
+  border-top: 1px dashed #ccc;
+  user-select: none;
+}
+.below-mark-toggle td:hover {
+  color: #444;
+  background: rgba(0,0,0,0.03);
+}
+
+#leagueResult,
+#leagueLeaders,
+.scoreRegion,
+.nextCourses .course,
+.monthlyHero {
+  border-radius: 8px;
+}
+
+.monthlyHero {
+  position: relative;
+  isolation: isolate;
+  min-height: 4.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: clamp(.45rem, 1vw, .75rem) clamp(.85rem, 2vw, 1.5rem);
+  color: #fff;
+  background:
+    linear-gradient(135deg, rgba(8, 17, 31, .95), rgba(9, 63, 87, .84)),
+    url("https://objectstorage.us-ashburn-1.oraclecloud.com/n/idw1nygcxpvm/b/wmgt-assets/o/elven_FULL.jpg") center / cover;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .20);
+}
+
+.monthlyHero__content {
+  width: min(100%, 64rem);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: clamp(.55rem, 1.5vw, 1.15rem);
+}
+
+.monthlyHero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(90deg, rgba(8, 17, 31, .92), rgba(8, 17, 31, .25)),
+    radial-gradient(circle at 78% 30%, rgba(250, 204, 21, .34), transparent 16rem);
+}
+
+.statusINPROGRESS {
+    --km-eyebrow-color: var(--a-palette-info-contrast);
+    --km-eyebrow-background-color: var(--a-palette-info);
+}
+.statusDONE {
+    --km-eyebrow-color: var(--a-palette-success-contrast);
+    --km-eyebrow-background-color: var(--a-palette-success);
+}
+.statusPENDING {
+    --km-eyebrow-color: var(--a-palette-warning-contrast);
+    --km-eyebrow-background-color: var(--a-palette-warning);
+}
+
+.monthlyHero__eyebrow,
+.homeSection__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  border: 1px solid rgba(255, 255, 255, .24);
+  border-radius: 999px;
+  padding: .2rem .55rem;
+  color: var(--km-eyebrow-color, rgba(255, 255, 255, .82));
+  background: var(--km-eyebrow-background-color, rgba(255, 255, 255, .10));
+  font-size: .66rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.monthlyHero__title {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(1.35rem, 2.8vw, 2.35rem);
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-wrap: balance;
+}
+
+.monthlyHero__logo {
+  display: inline-block;
+  width: clamp(2.25rem, 4vw, 3.25rem);
+  height: auto;
+  margin-inline-end: clamp(.45rem, 1vw, .7rem);
+  vertical-align: middle;
+  object-fit: contain;
+}
+
+
+.monthlyHero__meta {
+  display: flex;
+  justify-content: flex-end;
+  gap: .75rem;
+  flex-wrap: wrap;
+  color: rgba(255, 255, 255, .82);
+  font-size: .82rem;
+  font-weight: 700;
+}
+
+.monthlyHero .t-Button {
+  --a-button-background-color: rgba(255,255,255,.16);
+  --a-button-text-color: #fff;
+  --a-button-border-color: rgba(255,255,255,.32);
+  backdrop-filter: blur(14px);
+}
+
+.nextCourses {
+  gap: 1rem;
+}
+
+.nextCourses .course {
+  position: relative;
+  overflow: hidden;
+  min-height: 17rem;
+  display: flex;
+  align-items: end;
+  padding: 0;
+  background: #07111f;
+  box-shadow: 0 18px 45px rgba(8, 17, 31, .18);
+}
+
+.nextCourses .course::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(8, 17, 31, .04), rgba(8, 17, 31, .82));
+}
+
+.courseIcon {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.02);
+  transition: transform .4s ease, filter .4s ease;
+}
+
+.nextCourses .course:hover .courseIcon {
+  transform: scale(1.08);
+  filter: saturate(1.12) contrast(1.05);
+}
+
+.nextCourses .name {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  padding: 5.5rem 1rem 1rem;
+  color: #fff;
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  text-shadow: 0 2px 16px rgba(0, 0, 0, .55);
+}
+
+#leagueLeaders,
+.scoreRegion {
+  overflow: hidden;
+  background: rgba(255, 255, 255, .93);
+  border: 1px solid rgba(15, 23, 42, .08);
+  box-shadow: 0 16px 42px rgba(15, 23, 42, .12);
+}
+
+#leagueLeaders .t-Region-header {
+  background: linear-gradient(135deg, #101827, #164e63);
+  label {
+  color: #fff;
+  }
+  .t-Form-labelContainer {
+    margin-right: 1rem;
+  }
+}
+
+#leagueResult .t-Tabs {
+  gap: .35rem;
+}
+
+#leagueResult .t-Tabs-link {
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+#leagueResult .t-Tabs-item.is-active .t-Tabs-link {
+  background: #101827;
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(8, 17, 31, .22);
+}
+
+@media (max-width: 639px) {
+  .monthlyHero {
+    min-height: auto;
+    padding: .65rem .75rem;
+  }
+
+  .monthlyHero__content {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    gap: .5rem;
+  }
+
+  .monthlyHero__title {
+    font-size: clamp(1.3rem, 7vw, 1.75rem);
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .monthlyHero__logo {
+    width: 2rem;
+    margin-inline-end: .4rem;
+  }
+
+  .monthlyHero__meta {
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    gap: .5rem;
+    font-size: .75rem;
+    text-align: center;
+  }
+
+  .monthlyHero__eyebrow {
+    flex: 0 0 auto;
+    padding: .15rem .45rem;
+    font-size: .6rem;
+    white-space: nowrap;
+  }
+}
+
+</style>
+
+  <link rel="apple-touch-icon" href="r/wmgt/500/files/static/v14/icons/app-icon-192.png"><link rel="icon" href="r/wmgt/500/files/static/v14/icons/app-icon-32.png">
+  
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Kry's Monthlies">
+<link rel="manifest" href="/ords/r/wmgt/monthly/manifest.json?v=26.1.4-50014915513644&amp;lang=en" crossorigin="use-credentials">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="app-version" content="Release 1.2">
+  <meta name="app-tenant-id" content="">
+  <meta name="app-alias" content="MONTHLY">
+  <meta name="app-page-alias" content="HOME">
+</head>
+<body class="t-PageBody t-PageBody--hideLeft t-PageBody--hideActions t-PageTemplate--standard apex-top-nav apex-icons-fontapex apex-theme-vita-monthly js-ready js-HeaderExpanded t-PageBody--topNav a-pwaInstall--available" id="t_PageBody">
+<a href="#main" id="t_Body_skipToContent">Skip to Main Content</a>
+<form role="none" action="wwv_flow.accept?p_context=monthly/home/102232022648389" method="post" name="wwv_flow" id="wwvFlowForm" data-oj-binding-provider="none" novalidate="" autocomplete="off">
+<input type="hidden" name="p_flow_id" value="500" id="pFlowId"><input type="hidden" name="p_flow_step_id" value="1" id="pFlowStepId"><input type="hidden" name="p_instance" value="102232022648389" id="pInstance"><input type="hidden" name="p_page_submission_id" value="MTQ1Nzk3NzU4NDUzMzE2NzY5OTI2MDgxNjAyMzkzMDkyODkyNzMz/W6VVQPzwDsYIIJ4OZ-b8sqDc0nfbmQIZong1sjmEWdY294UB8UaMgm9IXpcOG5KcxXfacgRRKMTR1smvLqfhfw" id="pPageSubmissionId"><input type="hidden" name="p_request" value="" id="pRequest"><input type="hidden" name="p_reload_on_submit" value="S" id="pReloadOnSubmit"><input type="hidden" value="monthly/home/102232022648389" id="pContext"><input type="hidden" value="145797758453316769926081602393092892733" id="pSalt">
+<header class="t-Header" id="t_Header" role="banner">
+  
+  <div class="t-Header-branding">
+    <div class="t-Header-controls">
+      <button class="t-Button t-Button--icon t-Button--header t-Button--headerTree t-Button--megaMenuToggle" aria-label="Main Navigation" title="Main Navigation" id="t_Button_navControl" type="button" data-menu="t_MenuNav" aria-haspopup="menu" aria-expanded="false" style="display: inline-block;"><span class="t-Header-controlsIcon" aria-hidden="true"></span></button>
+    </div>
+    <div class="t-Header-logo">
+      <a href="/ords/r/wmgt/monthly/home" class="t-Header-logo-link"><span class="apex-logo-text">Kry's Monthlies</span></a>
+      
+    </div>
+    <div class="t-Header-navBar">
+      <div class="t-Header-navBar--start"><div class="t-ResultsRegion u-colors js-apex-region" id="R60029690277545826" role="region" aria-label="Search Results">
+  <div class="t-ResultsRegion-search"></div>
+  <div class="t-Form-fieldContainer t-Form-fieldContainer--hiddenLabel rel-col t-Form-fieldContainer--stretchInputs apex-item-wrapper apex-item-wrapper--text-field apex-item-wrapper--has-icon" id="P1_SEARCH_CONTAINER" data-otel-label="P1_SEARCH"><div class="t-Form-labelContainer t-Form-labelContainer--hiddenLabel col col-null">
+<label for="P1_SEARCH" id="P1_SEARCH_LABEL" class="t-Form-label u-VisuallyHidden">Search</label>
+</div><div class="t-Form-inputContainer col col-null"><div class="t-Form-itemWrapper"><input type="search" id="P1_SEARCH" name="P1_SEARCH" aria-controls="R60029690277545826" class="text_field apex-item-text apex-item-has-icon" value="" data-enter-submit="false" data-is-page-item-type="true"><span class="apex-item-icon fa fa-search" aria-hidden="true"></span></div><span id="P1_SEARCH_error_placeholder" class="a-Form-error" data-template-id="2040785906935475274_ET"></span></div></div><div class="a-SearchResults" id="R60029690277545826_search" role="region" aria-label="Results"><div class="a-SearchResults-count u-vh" aria-live="polite">0 results</div><ol class="a-SearchResults-list"></ol></div>
+
+  
+</div>
+</div>
+      <div class="t-Header-navBar--center"><ul class="t-NavigationBar " id="27746371095624317"><li class="t-NavigationBar-item a-pwaInstall">
+  <a class="t-Button t-Button--icon t-Button--header t-Button--navBar" href="#action$a-pwa-install" title="" target="" data-otel-label="" aria-roledescription="action link" style="">
+    <span class="t-Icon fa fa-cloud-download" aria-hidden="true" #image_attr#=""></span><span class="t-Button-label">Install App</span><span class="t-Button-badge"></span>
+  </a>
+</li><li class="t-NavigationBar-item icon-only">
+  <button class="t-Button t-Button--icon t-Button t-Button--header t-Button--navBar" type="button" id="L27891822619625231" data-menu="menu_L27891822619625231" title="" aria-haspopup="menu" aria-expanded="false">
+      <span class="t-Icon fa fa-question-circle-o" aria-hidden="true" #image_attr#=""></span><span class="t-Button-label">About</span><span class="t-Button-badge"></span><span class="a-Icon icon-down-arrow" aria-hidden="true"></span>
+  </button></li><li class="t-NavigationBar-item has-username">
+  <button class="t-Button t-Button--icon t-Button t-Button--header t-Button--navBar" type="button" id="L27893465793625234" data-menu="menu_L27893465793625234" title="" aria-haspopup="menu" aria-expanded="false">
+      <span class="t-Icon fa fa-user" aria-hidden="true" #image_attr#=""></span><span class="t-Button-label">nobody</span><span class="t-Button-badge"></span><span class="a-Icon icon-down-arrow" aria-hidden="true"></span>
+  </button></li></ul></div>
+      <div class="t-Header-navBar--end"></div>
+    </div>
+  </div>
+  <div class="t-Header-nav"></div>
+</header>
+<div class="t-Body">
+  
+  <div class="t-Body-main">
+    <div class="t-Body-title" id="t_Body_title"></div>
+    <div class="t-Body-content" id="t_Body_content"><div id="t_Body_content_offset"></div>
+      <main id="main" class="t-Body-mainContent">
+        <span id="APEX_SUCCESS_MESSAGE" data-template-id="4072355960268175073_S" class="apex-page-success u-hidden js-auto-dismiss"></span><span id="APEX_ERROR_MESSAGE" data-template-id="4072355960268175073_E" class="apex-page-error u-hidden"></span>
+        <div class="t-Body-fullContent"></div>
+        <div class="t-Body-contentInner"><div class="container">
+<div class="row ">
+<div class="col col-3  col-start"><span class="apex-grid-nbsp">&nbsp;</span></div><div class="col col-6 col-lg-12 col-md-12 col-sm-12 "><div id="R28434828662245948" class="margin-top-none margin-bottom-none js-apex-region"><input type="hidden" name="P1_LEAGUE_NAME" id="P1_LEAGUE_NAME" data-type="VARCHAR2" value="Beginner"><input type="hidden" name="P1_PREPARED_MONTHLY" id="P1_PREPARED_MONTHLY" data-type="VARCHAR2" value="2024 December"><input type="hidden" data-for="P1_PREPARED_MONTHLY" value="ptGUe8nfgas-yPmbEXaZ7niWPiDUF2vsSR1fk3wr1RstG22j_1Z7EehDcfc2GaD6wrjIuzKzIMkYeYZMoy5ZrQ"><input type="hidden" name="P1_HIGHLIGHT_PLAYER_ID" id="P1_HIGHLIGHT_PLAYER_ID" data-type="VARCHAR2" value=""><input type="hidden" name="P1_MOVEMENTICON" id="P1_MOVEMENTICON" data-type="VARCHAR2" value="fa-caret-square-o-"><div id="report_28434828662245948_catch"><div class="t-Report t-Report--stretch t-Report--staticRowColors t-Report--rowHighlightOff t-Report--noBorders" id="report_R28434828662245948" data-region-id="R28434828662245948">
+  <div class="t-Report-wrap">
+    <table class="t-Report-pagination" role="presentation"><tbody><tr><td></td></tr></tbody></table>
+    <div class="t-Report-tableWrap">
+    <table class="t-Report-report" id="report_table_R28434828662245948" aria-label="Montly Navigation">
+<tbody><tr><td class="t-Report-cell" align="right" headers="PREVIOUS_MONTHLY_ID"><a href="/ords/r/wmgt/monthly/home?g_currently_month_id=57&amp;clear=1&amp;cs=1uwzAceDjhjojRNe0ViVjTC6Vi5AKwfJ0DfqzRD6q48z0Sk9UYZO3fLp8PpOV6Wxmnn3IZGByJJ26gbcfp4Lesg" title="Previous" class="t-Button t-Button--noLabel t-Button--icon"><span aria-hidden="true" class="t-Icon fa fa-chevron-left"></span></a></td><td class="t-Report-cell" align="center" headers="PREPARED_MONTHLY_DATE"><section class="monthlyHero statusDONE">
+  <div class="monthlyHero__content">
+    <h1 class="monthlyHero__title">
+        <img class="monthlyHero__logo" src="r/wmgt/500/files/static/v14/icons/app-icon-144-rounded.png">2024 December</h1>
+    <div class="monthlyHero__meta">
+<span>102/84 players</span>      <div class="monthlyHero__eyebrow">Completed
+ <span class="fa fa-lock-check margin-left-sm" title="Completed" aria-hidden="true"></span>      </div>
+    </div>
+  </div>
+</section>
+</td><td class="t-Report-cell" align="right" headers="NEXT_MONTHLY_ID"><a href="/ords/r/wmgt/monthly/home?g_currently_month_id=81&amp;clear=1&amp;cs=1jLfJKrqxhnGsLsh8w88j54tzf5Lt-t7dLo_1la-e__S8-baD5zcdBGMCzV-pgF8a26UOKadYDDVn8U0VbK48FA" title="Next" class="t-Button t-Button--noLabel t-Button--icon"><span aria-hidden="true" class="t-Icon fa fa-chevron-right"></span></a></td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="t-Report-links"></div>
+    <table class="t-Report-pagination t-Report-pagination--bottom" role="presentation"></table>
+  </div>
+</div></div></div></div>
+</div><div class="row ">
+<div class="col col-3  col-start"><span class="apex-grid-nbsp">&nbsp;</span></div><div class="col col-6 col-lg-12 col-md-12 col-sm-12 "><div class="t-HeroRegion js-apex-region" id="R30002633910902041" role="region" aria-labelledby="R30002633910902041_heading">
+  <div class="t-HeroRegion-top">
+    <div class="t-HeroRegion-wrap">
+      <div class="t-HeroRegion-col t-HeroRegion-col--beforeIcon"></div>
+      <div class="t-HeroRegion-col t-HeroRegion-col--left"><span class="t-HeroRegion-icon t-Icon fa fa-trophy"></span></div>
+      <div class="t-HeroRegion-col t-HeroRegion-col--content">
+        <h1 id="R30002633910902041_heading" class="t-HeroRegion-title" data-apex-heading="">Overall Leaders - 2024 December</h1>
+        <div id="report_30002633910902041_catch"><div class="t-Report t-Report--stretch t-Report--staticRowColors t-Report--rowHighlightOff" id="report_R30002633910902041" data-region-id="R30002633910902041">
+  <div class="t-Report-wrap">
+    <table class="t-Report-pagination" role="presentation"><tbody><tr><td></td></tr></tbody></table>
+    <div class="t-Report-tableWrap">
+    <table class="t-Report-report" id="report_table_R30002633910902041" aria-label="Overall Leaders - 2024 December">
+<thead><tr><th class="t-Report-colHead" align="center" id="POS">Pos</th><th class="t-Report-colHead" align="left" id="PLAYER_NAME">Player</th><th class="t-Report-colHead" align="left" id="LEAGUE_NAME">League</th><th class="t-Report-colHead" align="center" id="COURSES">Courses<br>Played</th><th class="t-Report-colHead" align="center" id="SCORES">Total<br>Strokes</th><th class="t-Report-colHead" align="right" id="HN1S">HN1's</th><th class="t-Report-colHead" align="right" id="POINTS">Points</th></tr></thead>
+<tbody>
+<tr><td class="t-Report-cell" align="center" headers="POS">1</td><td class="t-Report-cell" headers="PLAYER_NAME"><span class="playerHighlight " data-id="7768">LuckyOrSucky</span></td><td class="t-Report-cell" headers="LEAGUE_NAME">Pro 2</td><td class="t-Report-cell" align="center" headers="COURSES">8</td><td class="t-Report-cell" align="right" headers="SCORES">-155</td><td class="t-Report-cell" align="right" headers="HN1S">21</td><td class="t-Report-cell" align="right" headers="POINTS">1,601</td></tr>
+<tr><td class="t-Report-cell" align="center" headers="POS">2</td><td class="t-Report-cell" headers="PLAYER_NAME"><span class="playerHighlight " data-id="3184">Merged into 8648</span></td><td class="t-Report-cell" headers="LEAGUE_NAME">Amateur 2</td><td class="t-Report-cell" align="center" headers="COURSES">8</td><td class="t-Report-cell" align="right" headers="SCORES">-127</td><td class="t-Report-cell" align="right" headers="HN1S">13</td><td class="t-Report-cell" align="right" headers="POINTS">1,563</td></tr>
+<tr><td class="t-Report-cell" align="center" headers="POS">3</td><td class="t-Report-cell" headers="PLAYER_NAME"><span class="playerHighlight " data-id="54">Derby_Daz</span></td><td class="t-Report-cell" headers="LEAGUE_NAME">Elite</td><td class="t-Report-cell" align="center" headers="COURSES">8</td><td class="t-Report-cell" align="right" headers="SCORES">-177</td><td class="t-Report-cell" align="right" headers="HN1S">27</td><td class="t-Report-cell" align="right" headers="POINTS">1,537</td></tr>
+<tr><td class="t-Report-cell" align="center" headers="POS">4</td><td class="t-Report-cell" headers="PLAYER_NAME"><span class="playerHighlight " data-id="4645">Gobson</span></td><td class="t-Report-cell" headers="LEAGUE_NAME">Pro 1</td><td class="t-Report-cell" align="center" headers="COURSES">8</td><td class="t-Report-cell" align="right" headers="SCORES">-162</td><td class="t-Report-cell" align="right" headers="HN1S">19</td><td class="t-Report-cell" align="right" headers="POINTS">1,509</td></tr>
+<tr><td class="t-Report-cell" align="center" headers="POS">5</td><td class="t-Report-cell" headers="PLAYER_NAME"><span class="playerHighlight " data-id="7177">Maximus</span></td><td class="t-Report-cell" headers="LEAGUE_NAME">Elite</td><td class="t-Report-cell" align="center" headers="COURSES">8</td><td class="t-Report-cell" align="right" headers="SCORES">-172</td><td class="t-Report-cell" align="right" headers="HN1S">22</td><td class="t-Report-cell" align="right" headers="POINTS">1,492</td></tr>
+<tr><td class="t-Report-cell" align="center" headers="POS">6</td><td class="t-Report-cell" headers="PLAYER_NAME"><span class="playerHighlight " data-id="7848">DaisyShaw</span></td><td class="t-Report-cell" headers="LEAGUE_NAME">Pro 3</td><td class="t-Report-cell" align="center" headers="COURSES">8</td><td class="t-Report-cell" align="right" headers="SCORES">-143</td><td class="t-Report-cell" align="right" headers="HN1S">14</td><td class="t-Report-cell" align="right" headers="POINTS">1,484</td></tr>
+<tr><td class="t-Report-cell" align="center" headers="POS">7</td><td class="t-Report-cell" headers="PLAYER_NAME"><span class="playerHighlight " data-id="7552">IMJOMAMA</span></td><td class="t-Report-cell" headers="LEAGUE_NAME">Amateur 3</td><td class="t-Report-cell" align="center" headers="COURSES">8</td><td class="t-Report-cell" align="right" headers="SCORES">-51</td><td class="t-Report-cell" align="right" headers="HN1S">6</td><td class="t-Report-cell" align="right" headers="POINTS">1,476</td></tr>
+<tr><td class="t-Report-cell" align="center" headers="POS">8</td><td class="t-Report-cell" headers="PLAYER_NAME"><span class="playerHighlight " data-id="4927">yankeedude1123</span></td><td class="t-Report-cell" headers="LEAGUE_NAME">Master</td><td class="t-Report-cell" align="center" headers="COURSES">8</td><td class="t-Report-cell" align="right" headers="SCORES">-187</td><td class="t-Report-cell" align="right" headers="HN1S">30</td><td class="t-Report-cell" align="right" headers="POINTS">1,470</td></tr>
+<tr><td class="t-Report-cell" align="center" headers="POS">9</td><td class="t-Report-cell" headers="PLAYER_NAME"><span class="playerHighlight " data-id="5425">MrDachshund81</span></td><td class="t-Report-cell" headers="LEAGUE_NAME">Pro 1</td><td class="t-Report-cell" align="center" headers="COURSES">8</td><td class="t-Report-cell" align="right" headers="SCORES">-150</td><td class="t-Report-cell" align="right" headers="HN1S">19</td><td class="t-Report-cell" align="right" headers="POINTS">1,469</td></tr>
+<tr><td class="t-Report-cell" align="center" headers="POS">10</td><td class="t-Report-cell" headers="PLAYER_NAME"><span class="playerHighlight " data-id="7165">Spicy - DawnSophia</span></td><td class="t-Report-cell" headers="LEAGUE_NAME">Pro 2</td><td class="t-Report-cell" align="center" headers="COURSES">8</td><td class="t-Report-cell" align="right" headers="SCORES">-127</td><td class="t-Report-cell" align="right" headers="HN1S">15</td><td class="t-Report-cell" align="right" headers="POINTS">1,455</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="t-Report-links"></div>
+    <table class="t-Report-pagination t-Report-pagination--bottom" role="presentation"><tbody><tr><td colspan="10" align="right"><table role="presentation"><tbody><tr><td class="pagination"></td><td class="pagination"></td><td nowrap="nowrap" class="pagination"><span class="t-Report-paginationText">1 - 10</span></td><td class="pagination"></td><td class="pagination"></td></tr></tbody></table></td></tr></tbody></table>
+  </div>
+</div></div>
+      </div>
+      <div class="t-HeroRegion-col t-HeroRegion-col--right"><div class="t-HeroRegion-form"></div><div class="t-HeroRegion-buttons"></div></div>
+    </div>
+  </div>
+  <div class="t-HeroRegion-bottom"></div>
+</div>
+</div>
+</div><div class="row ">
+<div class="col col-12 apex-col-auto hidden-lg-down col-start col-end"><div id="leagueResult" class="margin-top-md margin-bottom-md"><input type="hidden" name="P1_E1_COURSE_ID" id="P1_E1_COURSE_ID" data-type="VARCHAR2" value="6"><input type="hidden" data-for="P1_E1_COURSE_ID" value="myAUBagov2CSD-paTo8w6O3SOvDeOqAnP1T1kGV3J8JIDbZg3m2kBQljutgj1xhcgHybIyI_LxnimRUZtAAC5A"><input type="hidden" name="P1_E2_COURSE_ID" id="P1_E2_COURSE_ID" data-type="VARCHAR2" value="241"><input type="hidden" data-for="P1_E2_COURSE_ID" value="ZKTkWrRdtMHH6R3TTaohISy3RPt787qvps7iCrAcFR0i6fYRXiXO5HlGcDy1oNvnaGv5rNtgmpZ_ohdGaobFiQ"><input type="hidden" name="P1_E3_COURSE_ID" id="P1_E3_COURSE_ID" data-type="VARCHAR2" value="463"><input type="hidden" data-for="P1_E3_COURSE_ID" value="Ap4CsLC8qpoLOW_qDzFMaGm93sDO-gHeFGJYbpMs2fHKkM5GnJJ8pxqlRLrX4XUXzBfU_CyfOpwPxQIqidBkQA"><input type="hidden" name="P1_E4_COURSE_ID" id="P1_E4_COURSE_ID" data-type="VARCHAR2" value="483"><input type="hidden" data-for="P1_E4_COURSE_ID" value="uHx7C36pex2fLr6mc09YcygttvtSAkvyQtDoAuRy9xK386rlmQKBnu2VGk77P3xHUL0tWk--YJMP5YMCZ1Twvg"><input type="hidden" name="P1_E1_COURSE" id="P1_E1_COURSE" data-type="VARCHAR2" value="Cherry Blossom"><input type="hidden" data-for="P1_E1_COURSE" value="fa52_LXMNmKx5mer5LqyBNR_QRD1MaVixVxwY11jwHaSY-sskPRcQD2YtZ-qrQf0gsM_41uSwegmHQdhutR_CA"><input type="hidden" name="P1_E2_COURSE" id="P1_E2_COURSE" data-type="VARCHAR2" value="Myst"><input type="hidden" data-for="P1_E2_COURSE" value="4RH7TQQeZhFjDTf7y8Ou15Y65T2MaYNFOew2IBr6CPLpyT7--G9-2YfM2y_zmhdreIpmjJrOTqEpHN5svr8BMg"><input type="hidden" name="P1_E3_COURSE" id="P1_E3_COURSE" data-type="VARCHAR2" value="8-Bit Lair"><input type="hidden" data-for="P1_E3_COURSE" value="TjRgLUPkYjRRo8vwfRog1qg68L1AtPF17I9g1b3fi181s6PVgH-F-lF_kkdR9v9c1BFoAvWQnjuxX9cyFGLZJw"><input type="hidden" name="P1_E4_COURSE" id="P1_E4_COURSE" data-type="VARCHAR2" value="Holiday Hideaway"><input type="hidden" data-for="P1_E4_COURSE" value="58ZuiKpkXHVpGeBdelqBo2Ft760bv4iRQZ5EmJtHZfRPgDUM-jfeQo-sTzOo3nN04qnCVkKbm08tV35lcv1UTw"><input type="hidden" name="P1_E1_COURSE_E" id="P1_E1_COURSE_E" data-type="VARCHAR2" value="CherryBlossom_Origami"><input type="hidden" data-for="P1_E1_COURSE_E" value="QQLdjOKHEl75402ieJgL8MnFNpff0smrkR3Q_w_YzdX36Zhk5PNSmv3OlOFS88QeQFeir6u9tTSsiFgvCSlNWw"><input type="hidden" name="P1_E2_COURSE_E" id="P1_E2_COURSE_E" data-type="VARCHAR2" value="Myst_Book"><input type="hidden" data-for="P1_E2_COURSE_E" value="VxlpdICq_cloQd36ZJpDxk0dQ0Xm3NXdD2aCfh6zJm1iDsN2aFlLrPEzyJsc2CVrseW4R2VpdzxTX90FtGUq2w"><input type="hidden" name="P1_E3_COURSE_E" id="P1_E3_COURSE_E" data-type="VARCHAR2" value="8bitdisco"><input type="hidden" data-for="P1_E3_COURSE_E" value="sqj-8TWaJ3ABCVHYrOD8fsQY4VYDlREjw7DXQ6_cKddiiHRZabGMgZcuDnj390GqTljxxy27W66fZKF7fkm7ZA"><input type="hidden" name="P1_E4_COURSE_E" id="P1_E4_COURSE_E" data-type="VARCHAR2" value="gingerbread_man"><input type="hidden" data-for="P1_E4_COURSE_E" value="hCiPCNM_2RwqS68i5YiNnMwyWRD8bdSTXmWZp--BDIRdw-duvOjKzgnH84tlOzZMVTfxkR8_soDtHIYngJEnXA"><input type="hidden" name="P1_H1_COURSE_ID" id="P1_H1_COURSE_ID" data-type="VARCHAR2" value="201"><input type="hidden" data-for="P1_H1_COURSE_ID" value="-N2rj149wUfrVqdoPIyeQgi58EipiYILcm1HzEN0s1DzKW9-qi5EhC8IFC0xjZVoYPl_elz1OZRHEbMFGImg_w"><input type="hidden" name="P1_H2_COURSE_ID" id="P1_H2_COURSE_ID" data-type="VARCHAR2" value="261"><input type="hidden" data-for="P1_H2_COURSE_ID" value="dHWxz0RbpaDsFTD0haRwLSxX80MOGg_1oDTCj0QJu2OFTTCiAgt82zatbJKYqUf70J_B77fwXvoNgk9-hdyX2g"><input type="hidden" name="P1_H3_COURSE_ID" id="P1_H3_COURSE_ID" data-type="VARCHAR2" value="464"><input type="hidden" data-for="P1_H3_COURSE_ID" value="gtaaf3M6RZj6S086bNvvh7feQfAEx-n-aRvkFDCQmwqOcajLMmM1pVzLAzbIJwXwPu-S_AKUx0yZ2t-WMWhMyw"><input type="hidden" name="P1_H4_COURSE_ID" id="P1_H4_COURSE_ID" data-type="VARCHAR2" value="484"><input type="hidden" data-for="P1_H4_COURSE_ID" value="IOMt6USdB2mdqsxj2pzEC10EEbSUHkvL7lxD_jCLWM1gpNaKQjGrFmCBs7ExZg4e2_8g8N3pjlPgsCkbFLhd6w"><input type="hidden" name="P1_H1_COURSE" id="P1_H1_COURSE" data-type="VARCHAR2" value="Cherry Blossom Hard"><input type="hidden" data-for="P1_H1_COURSE" value="srvU8InCE-hWME7VR2QzhTyC1kEnFDsSdksNRklG_egCI6KtujQZk3ZhY1GJ-cRVq4QDFh9hS_JNkXoeIHZJog"><input type="hidden" name="P1_H2_COURSE" id="P1_H2_COURSE" data-type="VARCHAR2" value="Myst Hard"><input type="hidden" data-for="P1_H2_COURSE" value="htu24XF6rbefbq-PONgahA6-kOS_eTdjgffwzMw2mMmTkCjVRu5HmhSLniGQMfZeq1wPJkY4pApgn4eH2FA2Lw"><input type="hidden" name="P1_H3_COURSE" id="P1_H3_COURSE" data-type="VARCHAR2" value="8-Bit Lair - Hard"><input type="hidden" data-for="P1_H3_COURSE" value="rUSjxnIkRm6H11WJl_k595SvW-6UFBNb0B4IWW8YlvUNxrmbsBkmyvq9NMSOLx1k0tzuwdygNpE12nbRTDeYZQ"><input type="hidden" name="P1_H4_COURSE" id="P1_H4_COURSE" data-type="VARCHAR2" value="Holiday Hideaway - Hard"><input type="hidden" data-for="P1_H4_COURSE" value="oxKMRhWsDt7XYKBriwkR4lNCiTORCXEBg_hV8EY5qlF1oaM4USkpbRvW3-PSlTi3MT4lD7zJL1CunidU4D7xFg"><input type="hidden" name="P1_H1_COURSE_E" id="P1_H1_COURSE_E" data-type="VARCHAR2" value="CherryBlossom_Origami"><input type="hidden" data-for="P1_H1_COURSE_E" value="OstMKm2XwicWOUNRGSCcLMqv3Jb0Khp7pgL2AUMvWpOe595CdiE6hsFY3DQXHlW8eZBwThSYgAKpbu8ztcks0g"><input type="hidden" name="P1_H2_COURSE_E" id="P1_H2_COURSE_E" data-type="VARCHAR2" value="Myst_Book"><input type="hidden" data-for="P1_H2_COURSE_E" value="3giEZvNtcKr7PvvIKtX0V1rdcfA8WTVhXJCIHY08Z2dPpWb6TOYe-YV9RZf6KL16Aph_ZHS45PUZllzoqPKKqQ"><input type="hidden" name="P1_H3_COURSE_E" id="P1_H3_COURSE_E" data-type="VARCHAR2" value="8bitdisco"><input type="hidden" data-for="P1_H3_COURSE_E" value="hXflpZdQCSgsRrkgiplv26uG5-TcKmk7eKo8Q7LRc7Gg_4iS3mPzGZIC3zF1XXVI-eTwqYHU-xNbgnZBcUOtsQ"><input type="hidden" name="P1_H4_COURSE_E" id="P1_H4_COURSE_E" data-type="VARCHAR2" value="gingerbread_man"><input type="hidden" data-for="P1_H4_COURSE_E" value="4v4Dv_XH7JOjA7bjYCggMeQy0fyfP_3C-o31eqttLZgodnD1o60GmcPxLFul0NsJpxcn9270YHDd10oaNmgtgA"><ul class="t-Tabs t-Tabs--large t-Tabs--pill t-Tabs--inlineIcons t-Tabs--fillLabels"><li class="t-Tabs-item " id="">
+  <a href="javascript:apex.page.submit({set: {'P1_LEAGUE_ID': 21}})" class="t-Tabs-link " data-otel-label="">
+    <span class="t-Icon " aria-hidden="true"></span>
+    <span class="t-Tabs-label">Master</span>
+  </a>
+</li><li class="t-Tabs-item " id="">
+  <a href="javascript:apex.page.submit({set: {'P1_LEAGUE_ID': 22}})" class="t-Tabs-link " data-otel-label="">
+    <span class="t-Icon " aria-hidden="true"></span>
+    <span class="t-Tabs-label">Elite</span>
+  </a>
+</li><li class="t-Tabs-item " id="">
+  <a href="javascript:apex.page.submit({set: {'P1_LEAGUE_ID': 23}})" class="t-Tabs-link " data-otel-label="">
+    <span class="t-Icon " aria-hidden="true"></span>
+    <span class="t-Tabs-label">Pro 1</span>
+  </a>
+</li><li class="t-Tabs-item " id="">
+  <a href="javascript:apex.page.submit({set: {'P1_LEAGUE_ID': 24}})" class="t-Tabs-link " data-otel-label="">
+    <span class="t-Icon " aria-hidden="true"></span>
+    <span class="t-Tabs-label">Pro 2</span>
+  </a>
+</li><li class="t-Tabs-item " id="">
+  <a href="javascript:apex.page.submit({set: {'P1_LEAGUE_ID': 25}})" class="t-Tabs-link " data-otel-label="">
+    <span class="t-Icon " aria-hidden="true"></span>
+    <span class="t-Tabs-label">Pro 3</span>
+  </a>
+</li><li class="t-Tabs-item " id="">
+  <a href="javascript:apex.page.submit({set: {'P1_LEAGUE_ID': 113}})" class="t-Tabs-link " data-otel-label="">
+    <span class="t-Icon " aria-hidden="true"></span>
+    <span class="t-Tabs-label">Semi Pro 1</span>
+  </a>
+</li><li class="t-Tabs-item is-active " aria-current="page" id="">
+  <a href="javascript:apex.page.submit({set: {'P1_LEAGUE_ID': 81}})" class="t-Tabs-link " data-otel-label="">
+    <span class="t-Icon fa fa-dot-circle-o" aria-hidden="true"></span>
+    <span class="t-Tabs-label">Beginner</span>
+  </a>
+</li><li class="t-Tabs-item " id="">
+  <a href="javascript:apex.page.submit({set: {'P1_LEAGUE_ID': 62}})" class="t-Tabs-link " data-otel-label="">
+    <span class="t-Icon " aria-hidden="true"></span>
+    <span class="t-Tabs-label">Welcome</span>
+  </a>
+</li></ul></div></div>
+</div><div class="row ">
+<div class="col col-3  col-start"><div id="R14460057168485704" class=""></div></div><div class="col col-5 col-xs-12 col-sm-12 col-md-12 col-lg-12 "><div id="R14460114851485705" class=""><div class="container">
+<div class="row ">
+<div class="col col-12 apex-col-auto col-start col-end"><div class="t-Region t-Region--noPadding t-Region--accent9 t-Region--noBorder t-Region--scrollBody margin-top-none margin-bottom-md js-apex-region" id="leagueLeaders" role="region" aria-label=" Beginner Leaders  ">
+ <div class="t-Region-header">
+  <div class="t-Region-headerItems t-Region-headerItems--title">
+    <span class="t-Region-headerIcon"><span class="t-Icon " aria-hidden="true"></span></span>
+    <h2 class="t-Region-title" id="leagueLeaders_heading" data-apex-heading=""><span class="t-Badge t-Badge--outline t-Badge--lg"><span class="t-Badge-value">Beginner Leaders</span></span></h2>
+  </div>
+  <div class="t-Region-headerItems t-Region-headerItems--buttons"><div class="t-Form-fieldContainer rel-col t-Form-fieldContainer--stretchInputs t-Form-fieldContainer--large margin-right-md t-Form-fieldContainer--noPadding apex-item-wrapper apex-item-wrapper--has-initial-value apex-item-wrapper--select-list" id="P1_LEAGUE_ID_CONTAINER" data-otel-label="P1_LEAGUE_ID"><div class="t-Form-labelContainer col col-null">
+<label for="P1_LEAGUE_ID" id="P1_LEAGUE_ID_LABEL" class="t-Form-label">League</label>
+</div>
+<div class="t-Form-inputContainer col col-null"><div class="t-Form-itemWrapper"><select id="P1_LEAGUE_ID" name="P1_LEAGUE_ID" class="selectlist apex-item-select" data-native-menu="false" size="1" data-action="a-submit?request=P1_LEAGUE_ID"><option value="">- Select -</option>
+<option value="21">Master</option>
+<option value="22">Elite</option>
+<option value="23">Pro 1</option>
+<option value="24">Pro 2</option>
+<option value="25">Pro 3</option>
+<option value="113">Semi Pro 1</option>
+<option value="81" selected="selected">Beginner</option>
+<option value="62">Welcome</option>
+</select></div><span id="P1_LEAGUE_ID_error_placeholder" class="a-Form-error" data-template-id="2318601014859922299_ET"></span></div></div><span class="js-maximizeButtonContainer"></span></div>
+ </div>
+ <div class="t-Region-bodyWrap">
+   <div class="t-Region-buttons t-Region-buttons--top">
+    <div class="t-Region-buttons-left"></div>
+    <div class="t-Region-buttons-right"></div>
+   </div>
+   <div class="t-Region-body">
+     <div class="t-Region-orderBy"></div>
+     <div id="report_28324030460245902_catch"><span class="nodatafound"></span>
+</div><!-- Legend for the relegation highlight -->
+<div class="legend">
+  <span class="legend-square relegation-square"></span> Players at risk of relegation<br>
+  <span class="movement up"><span class="fa fa-caret-square-o-up" aria-hidden="true"></span></span> 
+  <span class="movement down"><span class="fa fa-caret-square-o-down" aria-hidden="true"></span></span> Point change since last report.
+</div>
+     
+   </div>
+   <div class="t-Region-buttons t-Region-buttons--bottom">
+    <div class="t-Region-buttons-left"></div>
+    <div class="t-Region-buttons-right"></div>
+   </div>
+ </div>
+</div>
+</div>
+</div>
+</div></div></div><div class="col col-4 apex-col-auto col-end"><div id="R14460271904485706" class=""></div></div>
+</div><div class="row ">
+<div class="col col-3 apex-col-auto col-sm-12 col-md-6 col-lg-12 courses col-start"><div id="R30000144032902016" class=""><div class="container">
+<div class="row ">
+<div class="col col-12 apex-col-auto col-lg-12 col-start col-end"><div class="t-Region scoreRegion t-Region--noPadding t-Region--accent1 t-Region--scrollBody margin-right-none js-apex-region" id="R28068552205398028" role="region" aria-label=" Cherry Blossom">
+ <div class="t-Region-header">
+  <div class="t-Region-headerItems t-Region-headerItems--title">
+    <span class="t-Region-headerIcon"><span class="t-Icon " aria-hidden="true"></span></span>
+    <h2 class="t-Region-title" id="R28068552205398028_heading" data-apex-heading=""><img src="https://objectstorage.us-ashburn-1.oraclecloud.com/n/idw1nygcxpvm/b/wmgt-assets/o/CherryBlossom_Origami.webp" title="CherryBlossom_Origami" class="tooltip" style="width: 2rem"> Cherry Blossom</h2>
+  </div>
+  <div class="t-Region-headerItems t-Region-headerItems--buttons"><span class="js-maximizeButtonContainer"></span></div>
+ </div>
+ <div class="t-Region-bodyWrap">
+   <div class="t-Region-buttons t-Region-buttons--top">
+    <div class="t-Region-buttons-left"></div>
+    <div class="t-Region-buttons-right"></div>
+   </div>
+   <div class="t-Region-body">
+     <div class="t-Region-orderBy"></div>
+     <div id="report_28068552205398028_catch"><span class="nodatafound"></span>
+</div>
+     
+   </div>
+   <div class="t-Region-buttons t-Region-buttons--bottom">
+    <div class="t-Region-buttons-left"></div>
+    <div class="t-Region-buttons-right"></div>
+   </div>
+ </div>
+</div>
+</div>
+</div><div class="row ">
+<div class="col col-12 apex-col-auto col-lg-12 col-start col-end"><div class="t-Region scoreRegion t-Region--noPadding t-Region--accent5 t-Region--scrollBody margin-right-none js-apex-region" id="R56453759181867007" role="region" aria-label="  Cherry Blossom Hard">
+ <div class="t-Region-header">
+  <div class="t-Region-headerItems t-Region-headerItems--title">
+    <span class="t-Region-headerIcon"><span class="t-Icon " aria-hidden="true"></span></span>
+    <h2 class="t-Region-title" id="R56453759181867007_heading" data-apex-heading=""><img src="https://objectstorage.us-ashburn-1.oraclecloud.com/n/idw1nygcxpvm/b/wmgt-assets/o/CherryBlossom_Origami.webp" title="CherryBlossom_Origami" class="tooltip" style="width: 2rem">  Cherry Blossom Hard</h2>
+  </div>
+  <div class="t-Region-headerItems t-Region-headerItems--buttons"><span class="js-maximizeButtonContainer"></span></div>
+ </div>
+ <div class="t-Region-bodyWrap">
+   <div class="t-Region-buttons t-Region-buttons--top">
+    <div class="t-Region-buttons-left"></div>
+    <div class="t-Region-buttons-right"></div>
+   </div>
+   <div class="t-Region-body">
+     <div class="t-Region-orderBy"></div>
+     <div id="report_56453759181867007_catch"><span class="nodatafound"></span>
+</div>
+     
+   </div>
+   <div class="t-Region-buttons t-Region-buttons--bottom">
+    <div class="t-Region-buttons-left"></div>
+    <div class="t-Region-buttons-right"></div>
+   </div>
+ </div>
+</div>
+</div>
+</div>
+</div></div></div><div class="col col-3 apex-col-auto col-sm-12 col-md-6 col-lg-12 courses "><div id="R30000290798902017" class=""><div class="container">
+<div class="row ">
+<div class="col col-12 apex-col-auto col-lg-12 col-start col-end"><div class="t-Region scoreRegion t-Region--noPadding t-Region--accent2 t-Region--scrollBody margin-right-none js-apex-region" id="R28324659146245908" role="region" aria-label="  Myst">
+ <div class="t-Region-header">
+  <div class="t-Region-headerItems t-Region-headerItems--title">
+    <span class="t-Region-headerIcon"><span class="t-Icon " aria-hidden="true"></span></span>
+    <h2 class="t-Region-title" id="R28324659146245908_heading" data-apex-heading=""><img src="https://objectstorage.us-ashburn-1.oraclecloud.com/n/idw1nygcxpvm/b/wmgt-assets/o/Myst_Book.webp" title="Myst_Book" class="tooltip" style="width: 2rem">  Myst</h2>
+  </div>
+  <div class="t-Region-headerItems t-Region-headerItems--buttons"><span class="js-maximizeButtonContainer"></span></div>
+ </div>
+ <div class="t-Region-bodyWrap">
+   <div class="t-Region-buttons t-Region-buttons--top">
+    <div class="t-Region-buttons-left"></div>
+    <div class="t-Region-buttons-right"></div>
+   </div>
+   <div class="t-Region-body">
+     <div class="t-Region-orderBy"></div>
+     <div id="report_28324659146245908_catch"><span class="nodatafound"></span>
+</div>
+     
+   </div>
+   <div class="t-Region-buttons t-Region-buttons--bottom">
+    <div class="t-Region-buttons-left"></div>
+    <div class="t-Region-buttons-right"></div>
+   </div>
+ </div>
+</div>
+</div>
+</div><div class="row ">
+<div class="col col-12 apex-col-auto col-lg-12 col-start col-end"><div class="t-Region scoreRegion t-Region--noPadding t-Region--accent6 t-Region--scrollBody margin-right-none js-apex-region" id="R56709866122714887" role="region" aria-label="  Myst Hard">
+ <div class="t-Region-header">
+  <div class="t-Region-headerItems t-Region-headerItems--title">
+    <span class="t-Region-headerIcon"><span class="t-Icon " aria-hidden="true"></span></span>
+    <h2 class="t-Region-title" id="R56709866122714887_heading" data-apex-heading=""><img src="https://objectstorage.us-ashburn-1.oraclecloud.com/n/idw1nygcxpvm/b/wmgt-assets/o/Myst_Book.webp" title="Myst_Book" class="tooltip" style="width: 2rem">  Myst Hard</h2>
+  </div>
+  <div class="t-Region-headerItems t-Region-headerItems--buttons"><span class="js-maximizeButtonContainer"></span></div>
+ </div>
+ <div class="t-Region-bodyWrap">
+   <div class="t-Region-buttons t-Region-buttons--top">
+    <div class="t-Region-buttons-left"></div>
+    <div class="t-Region-buttons-right"></div>
+   </div>
+   <div class="t-Region-body">
+     <div class="t-Region-orderBy"></div>
+     <div id="report_56709866122714887_catch"><span class="nodatafound"></span>
+</div>
+     
+   </div>
+   <div class="t-Region-buttons t-Region-buttons--bottom">
+    <div class="t-Region-buttons-left"></div>
+    <div class="t-Region-buttons-right"></div>
+   </div>
+ </div>
+</div>
+</div>
+</div>
+</div></div></div><div class="col col-3 apex-col-auto col-sm-12 col-md-6 col-lg-12 courses "><div id="R30000307284902018" class=""><div class="container">
+<div class="row ">
+<div class="col col-12 apex-col-auto col-lg-12 col-start col-end"><div class="t-Region scoreRegion t-Region--noPadding t-Region--accent3 t-Region--scrollBody margin-right-none js-apex-region" id="R28325503198245917" role="region" aria-label="  8-Bit Lair">
+ <div class="t-Region-header">
+  <div class="t-Region-headerItems t-Region-headerItems--title">
+    <span class="t-Region-headerIcon"><span class="t-Icon " aria-hidden="true"></span></span>
+    <h2 class="t-Region-title" id="R28325503198245917_heading" data-apex-heading=""><img src="https://objectstorage.us-ashburn-1.oraclecloud.com/n/idw1nygcxpvm/b/wmgt-assets/o/8bitdisco.webp" title="8bitdisco" class="tooltip" style="width: 2rem">  8-Bit Lair</h2>
+  </div>
+  <div class="t-Region-headerItems t-Region-headerItems--buttons"><span class="js-maximizeButtonContainer"></span></div>
+ </div>
+ <div class="t-Region-bodyWrap">
+   <div class="t-Region-buttons t-Region-buttons--top">
+    <div class="t-Region-buttons-left"></div>
+    <div class="t-Region-buttons-right"></div>
+   </div>
+   <div class="t-Region-body">
+     <div class="t-Region-orderBy"></div>
+     <div id="report_28325503198245917_catch"><span class="nodatafound"></span>
+</div>
+     
+   </div>
+   <div class="t-Region-buttons t-Region-buttons--bottom">
+    <div class="t-Region-buttons-left"></div>
+    <div class="t-Region-buttons-right"></div>
+   </div>
+ </div>
+</div>
+</div>
+</div><div class="row ">
+<div class="col col-12 apex-col-auto col-lg-12 col-start col-end"><div class="t-Region scoreRegion t-Region--noPadding t-Region--accent7 t-Region--scrollBody margin-right-none js-apex-region" id="R56710710174714896" role="region" aria-label="  8-Bit Lair - Hard">
+ <div class="t-Region-header">
+  <div class="t-Region-headerItems t-Region-headerItems--title">
+    <span class="t-Region-headerIcon"><span class="t-Icon " aria-hidden="true"></span></span>
+    <h2 class="t-Region-title" id="R56710710174714896_heading" data-apex-heading=""><img src="https://objectstorage.us-ashburn-1.oraclecloud.com/n/idw1nygcxpvm/b/wmgt-assets/o/8bitdisco.webp" title="8bitdisco" class="tooltip" style="width: 2rem">  8-Bit Lair - Hard</h2>
+  </div>
+  <div class="t-Region-headerItems t-Region-headerItems--buttons"><span class="js-maximizeButtonContainer"></span></div>
+ </div>
+ <div class="t-Region-bodyWrap">
+   <div class="t-Region-buttons t-Region-buttons--top">
+    <div class="t-Region-buttons-left"></div>
+    <div class="t-Region-buttons-right"></div>
+   </div>
+   <div class="t-Region-body">
+     <div class="t-Region-orderBy"></div>
+     <div id="report_56710710174714896_catch"><span class="nodatafound"></span>
+</div>
+     
+   </div>
+   <div class="t-Region-buttons t-Region-buttons--bottom">
+    <div class="t-Region-buttons-left"></div>
+    <div class="t-Region-buttons-right"></div>
+   </div>
+ </div>
+</div>
+</div>
+</div>
+</div></div></div><div class="col col-3 apex-col-auto col-sm-12 col-md-6 col-lg-12 courses col-end"><div id="R28068490431398027" class=""><div class="container">
+<div class="row ">
+<div class="col col-12 apex-col-auto col-lg-12 col-start col-end"><div class="t-Region scoreRegion t-Region--noPadding t-Region--accent4 t-Region--scrollBody margin-right-none js-apex-region" id="R28326426873245926" role="region" aria-label="  Holiday Hideaway">
+ <div class="t-Region-header">
+  <div class="t-Region-headerItems t-Region-headerItems--title">
+    <span class="t-Region-headerIcon"><span class="t-Icon " aria-hidden="true"></span></span>
+    <h2 class="t-Region-title" id="R28326426873245926_heading" data-apex-heading=""><img src="https://objectstorage.us-ashburn-1.oraclecloud.com/n/idw1nygcxpvm/b/wmgt-assets/o/gingerbread_man.webp" title="gingerbread_man" class="tooltip" style="width: 2rem">  Holiday Hideaway</h2>
+  </div>
+  <div class="t-Region-headerItems t-Region-headerItems--buttons"><span class="js-maximizeButtonContainer"></span></div>
+ </div>
+ <div class="t-Region-bodyWrap">
+   <div class="t-Region-buttons t-Region-buttons--top">
+    <div class="t-Region-buttons-left"></div>
+    <div class="t-Region-buttons-right"></div>
+   </div>
+   <div class="t-Region-body">
+     <div class="t-Region-orderBy"></div>
+     <div id="report_28326426873245926_catch"><span class="nodatafound"></span>
+</div>
+     
+   </div>
+   <div class="t-Region-buttons t-Region-buttons--bottom">
+    <div class="t-Region-buttons-left"></div>
+    <div class="t-Region-buttons-right"></div>
+   </div>
+ </div>
+</div>
+</div>
+</div><div class="row ">
+<div class="col col-12 apex-col-auto col-lg-12 col-start col-end"><div class="t-Region scoreRegion t-Region--noPadding t-Region--accent8 t-Region--scrollBody margin-right-none js-apex-region" id="R56711633849714905" role="region" aria-label="  Holiday Hideaway - Hard">
+ <div class="t-Region-header">
+  <div class="t-Region-headerItems t-Region-headerItems--title">
+    <span class="t-Region-headerIcon"><span class="t-Icon " aria-hidden="true"></span></span>
+    <h2 class="t-Region-title" id="R56711633849714905_heading" data-apex-heading=""><img src="https://objectstorage.us-ashburn-1.oraclecloud.com/n/idw1nygcxpvm/b/wmgt-assets/o/gingerbread_man.webp" title="gingerbread_man" class="tooltip" style="width: 2rem">  Holiday Hideaway - Hard</h2>
+  </div>
+  <div class="t-Region-headerItems t-Region-headerItems--buttons"><span class="js-maximizeButtonContainer"></span></div>
+ </div>
+ <div class="t-Region-bodyWrap">
+   <div class="t-Region-buttons t-Region-buttons--top">
+    <div class="t-Region-buttons-left"></div>
+    <div class="t-Region-buttons-right"></div>
+   </div>
+   <div class="t-Region-body">
+     <div class="t-Region-orderBy"></div>
+     <div id="report_56711633849714905_catch"><span class="nodatafound"></span>
+</div>
+     
+   </div>
+   <div class="t-Region-buttons t-Region-buttons--bottom">
+    <div class="t-Region-buttons-left"></div>
+    <div class="t-Region-buttons-right"></div>
+   </div>
+ </div>
+</div>
+</div>
+</div>
+</div></div></div>
+</div><div class="row ">
+<div class="col col-3  col-start"><span class="apex-grid-nbsp">&nbsp;</span></div><div class="col col-6 col-lg-12 col-md-12 col-sm-12 "><div id="R27921707427650736" class="js-apex-region"><div id="report_27921707427650736_catch"><div class="t-Report t-Report--stretch t-Report--staticRowColors t-Report--rowHighlightOff t-Report--noBorders" id="report_R27921707427650736" data-region-id="R27921707427650736">
+  <div class="t-Report-wrap">
+    <table class="t-Report-pagination" role="presentation"><tbody><tr><td></td></tr></tbody></table>
+    <div class="t-Report-tableWrap">
+    <table class="t-Report-report" id="report_table_R27921707427650736" aria-label="{Current Courses}">
+<tbody><tr><td colspan="13" id="PREPARED_MONTHLY_DATE" class="apex_report_break"><h1>2024 December Courses</h1></td></tr>
+<tr><td class="t-Report-cell" headers="E_COURSE_000"><div class="row nextCourses">
+    <div class="col course easy">
+        <!-- <a href="#EASY_STATS_URL#"> -->
+            <div class="name">CBE - Cherry Blossom</div>
+        <!-- <div class="score #TBD_CLASS#">Tournament Record #EASY_RECORD#</div> -->
+        <img class="courseIcon #TBD_CLASS#" src="https://objectstorage.us-ashburn-1.oraclecloud.com/n/idw1nygcxpvm/b/wmgt-assets/o/CBE_FULL.jpg" loading="lazy">
+        <!-- <div class="info #E_RECORD# #TBD_CLASS#">How hard is CBE?</div> -->
+        <!-- </a> -->
+    </div>
+    <div class="col course hard">
+        <!-- <a href="#EASY_STATS_URL#"> -->
+            <div class="name">CBH - Cherry Blossom Hard</div>
+        <!-- <div class="score #TBD_CLASS#">Tournament Record #EASY_RECORD#</div> -->
+        <img class="courseIcon #TBD_CLASS#" src="https://objectstorage.us-ashburn-1.oraclecloud.com/n/idw1nygcxpvm/b/wmgt-assets/o/CBH_FULL.jpg" loading="lazy">
+        <!-- <div class="info #H_RECORD# #TBD_CLASS#">How hard is CBH?</div> -->
+        <!-- </a> -->
+    </div>
+    
+</div></td></tr>
+<tr><td class="t-Report-cell" headers="E_COURSE_000"><div class="row nextCourses">
+    <div class="col course easy">
+        <!-- <a href="#EASY_STATS_URL#"> -->
+            <div class="name">MYE - Myst</div>
+        <!-- <div class="score #TBD_CLASS#">Tournament Record #EASY_RECORD#</div> -->
+        <img class="courseIcon #TBD_CLASS#" src="https://objectstorage.us-ashburn-1.oraclecloud.com/n/idw1nygcxpvm/b/wmgt-assets/o/MYE_FULL.jpg" loading="lazy">
+        <!-- <div class="info #E_RECORD# #TBD_CLASS#">How hard is MYE?</div> -->
+        <!-- </a> -->
+    </div>
+    <div class="col course hard">
+        <!-- <a href="#EASY_STATS_URL#"> -->
+            <div class="name">MYH - Myst Hard</div>
+        <!-- <div class="score #TBD_CLASS#">Tournament Record #EASY_RECORD#</div> -->
+        <img class="courseIcon #TBD_CLASS#" src="https://objectstorage.us-ashburn-1.oraclecloud.com/n/idw1nygcxpvm/b/wmgt-assets/o/MYH_FULL.jpg" loading="lazy">
+        <!-- <div class="info #H_RECORD# #TBD_CLASS#">How hard is MYH?</div> -->
+        <!-- </a> -->
+    </div>
+    
+</div></td></tr>
+<tr><td class="t-Report-cell" headers="E_COURSE_000"><div class="row nextCourses">
+    <div class="col course easy">
+        <!-- <a href="#EASY_STATS_URL#"> -->
+            <div class="name">8BE - 8-Bit Lair</div>
+        <!-- <div class="score #TBD_CLASS#">Tournament Record #EASY_RECORD#</div> -->
+        <img class="courseIcon #TBD_CLASS#" src="https://objectstorage.us-ashburn-1.oraclecloud.com/n/idw1nygcxpvm/b/wmgt-assets/o/8BE_FULL.jpg" loading="lazy">
+        <!-- <div class="info #E_RECORD# #TBD_CLASS#">How hard is 8BE?</div> -->
+        <!-- </a> -->
+    </div>
+    <div class="col course hard">
+        <!-- <a href="#EASY_STATS_URL#"> -->
+            <div class="name">8BH - 8-Bit Lair - Hard</div>
+        <!-- <div class="score #TBD_CLASS#">Tournament Record #EASY_RECORD#</div> -->
+        <img class="courseIcon #TBD_CLASS#" src="https://objectstorage.us-ashburn-1.oraclecloud.com/n/idw1nygcxpvm/b/wmgt-assets/o/8BH_FULL.jpg" loading="lazy">
+        <!-- <div class="info #H_RECORD# #TBD_CLASS#">How hard is 8BH?</div> -->
+        <!-- </a> -->
+    </div>
+    
+</div></td></tr>
+<tr><td class="t-Report-cell" headers="E_COURSE_000"><div class="row nextCourses">
+    <div class="col course easy">
+        <!-- <a href="#EASY_STATS_URL#"> -->
+            <div class="name">HHE - Holiday Hideaway</div>
+        <!-- <div class="score #TBD_CLASS#">Tournament Record #EASY_RECORD#</div> -->
+        <img class="courseIcon #TBD_CLASS#" src="https://objectstorage.us-ashburn-1.oraclecloud.com/n/idw1nygcxpvm/b/wmgt-assets/o/HHE_FULL.jpg" loading="lazy">
+        <!-- <div class="info #E_RECORD# #TBD_CLASS#">How hard is HHE?</div> -->
+        <!-- </a> -->
+    </div>
+    <div class="col course hard">
+        <!-- <a href="#EASY_STATS_URL#"> -->
+            <div class="name">HHH - Holiday Hideaway - Hard</div>
+        <!-- <div class="score #TBD_CLASS#">Tournament Record #EASY_RECORD#</div> -->
+        <img class="courseIcon #TBD_CLASS#" src="https://objectstorage.us-ashburn-1.oraclecloud.com/n/idw1nygcxpvm/b/wmgt-assets/o/HHH_FULL.jpg" loading="lazy">
+        <!-- <div class="info #H_RECORD# #TBD_CLASS#">How hard is HHH?</div> -->
+        <!-- </a> -->
+    </div>
+    
+</div></td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="t-Report-links"></div>
+    <table class="t-Report-pagination t-Report-pagination--bottom" role="presentation"></table>
+  </div>
+</div></div></div></div>
+</div>
+</div></div>
+      </main>
+      <footer class="t-Footer" id="t_Footer" role="contentinfo">
+        <div class="t-Footer-body">
+          <div class="t-Footer-content"></div>
+          <div class="t-Footer-apex">
+            <div class="t-Footer-version">Release 1.2</div>
+            <div class="t-Footer-customize"></div>
+            <span class="u-BuiltWithAPEX">Built with <span class="fa fa-heart" role="img" aria-label="love"></span> using <a rel="noopener noreferrer external" href="https://oracleapex.com/" target="_blank" aria-describedby="apex_new_window_txt">Oracle APEX<span id="apex_new_window_txt" aria-hidden="true">(opens in new window)</span></a></span>
+          </div>
+        </div>
+        <div class="t-Footer-top">
+          <a href="#top" class="t-Footer-topButton" id="t_Footer_topButton" title="Start of page" aria-label="Start of page"><span class="a-Icon icon-up-chevron" aria-hidden="true"></span></a>
+        </div>
+      </footer>
+    </div>
+  </div>
+</div>
+<div class="t-Body-inlineDialogs" id="t_Body_inlineDialogs"></div><input type="hidden" id="pPageFormRegionChecksums" value="[]">
+<input type="hidden" id="pPageItemsRowVersion" value=""><input type="hidden" id="pPageItemsProtected" value="UDFfUFJFUEFSRURfTU9OVEhMWTpQMV9FMV9DT1VSU0VfSUQ6UDFfRTJfQ09VUlNF.,X0lEOlAxX0UzX0NPVVJTRV9JRDpQMV9FNF9DT1VSU0VfSUQ6UDFfRTFfQ09VUlNF.,OlAxX0UyX0NPVVJTRTpQMV9FM19DT1VSU0U6UDFfRTRfQ09VUlNFOlAxX0UxX0NP.,VVJTRV9FOlAxX0UyX0NPVVJTRV9FOlAxX0UzX0NPVVJTRV9FOlAxX0U0X0NPVVJT.,RV9FOlAxX0gxX0NPVVJTRV9JRDpQMV9IMl9DT1VSU0VfSUQ6UDFfSDNfQ09VUlNF.,X0lEOlAxX0g0X0NPVVJTRV9JRDpQMV9IMV9DT1VSU0U6UDFfSDJfQ09VUlNFOlAx.,X0gzX0NPVVJTRTpQMV9INF9DT1VSU0U6UDFfSDFfQ09VUlNFX0U6UDFfSDJfQ09V.,UlNFX0U6UDFfSDNfQ09VUlNFX0U6UDFfSDRfQ09VUlNFX0U/DT6JM1a6gY4zNbLtOzhlHws4kxPQltjpJawfFfr04dFb3sI8t1z7-PY_BxEooUzeoZPMliFJRMgAlLka_UburA"></form>
+
+
+<script nonce="AwAglAC1DNPMTkGvW_6U9g">
+var apex_img_dir = "\u002Fi\u002F26.1.4\u002F";
+var apex = {env: {APP_USER: "nobody",APP_ID: "500",APP_PAGE_ID: "1",APP_SESSION: "102232022648389",APP_FILES: "r\u002Fwmgt\u002F500\u002Ffiles\u002Fstatic\u002Fv14\u002F",WORKSPACE_FILES: "r\u002Fwmgt\u002Ffiles\u002Fstatic\u002Fv1\u002F",APEX_VERSION: "26.1.4",APEX_BASE_VERSION: "26.1",COMPATIBILITY_MODE: 26.1,NONCE: "AwAglAC1DNPMTkGvW_6U9g",IS_RUNTIME: true},
+libVersions:{cropperJs:"1.6.2",domPurify:"3.4.13",fontapex:"2.5.1",fullcalendar:"6.1.20",hammer:"2.0.8",jquery:"3.7.1",jqueryUi:"1.14.1",maplibre:"5.6.1",mapboxGlRtlText:"0.3.0",markedJs:"17.0.4",prismJs:"1.30.0",oraclejet:"20.0.5",turndown:"7.2.2",monacoEditor:"0.55.1",lessJs:"4.6.3"}};document.querySelectorAll(".js-hidden").forEach( el => {   el.style.display = "none";   el.classList.remove("js-hidden");});
+</script>
+<script nonce="AwAglAC1DNPMTkGvW_6U9g" src="/i/26.1.4/libraries/apex/minified/desktop_all.min.js?v=26.1.4"></script>
+<script nonce="AwAglAC1DNPMTkGvW_6U9g" src="wwv_flow.js_messages?p_app_id=500&amp;p_lang=en&amp;p_version=26.1.4-50014915513644&amp;p_nls_settings=eyJudW1lcmljQ2hhcmFjdGVycyI6Ii4sIiwiY3VycmVuY3kiOiIkIiwiaXNvQ3VycmVuY3kiOiJBTUVSSUNBIiwiZHVhbEN1cnJlbmN5IjoiJCJ9"></script>
+<script nonce="AwAglAC1DNPMTkGvW_6U9g" src="wwv_flow.js_dialogs?p_app_id=500&amp;p_version=26.1.4-50014915513644"></script>
+
+<script nonce="AwAglAC1DNPMTkGvW_6U9g">
+apex.da.initDaEventList = function(){
+apex.da.gEventList = 
+[{"triggeringElementType":"BUTTON","triggeringButtonId":"B28266543813221019","bindType":"bind","executionType":"IMMEDIATE","bindEventType":"apexafterclosedialog","anyActionsFireOnInit":false,"actionList":[]},{"triggeringElementType":"BUTTON","triggeringButtonId":"B28070630758398049","bindType":"bind","executionType":"IMMEDIATE","bindEventType":"apexafterclosedialog","anyActionsFireOnInit":false,"actionList":[{"eventResult":true,"executeOnPageInit":false,"stopExecutionOnError":true,"affectedElementsType":"REGION","affectedRegionId":"R28068552205398028","affectedRegionId":"R28068552205398028","javascriptFunction":apex.da.refresh,"settings":{"maintainPagination":false},"action":"NATIVE_REFRESH"}]},{"triggeringElementType":"BUTTON","triggeringButtonId":"B28268520200221039","bindType":"bind","executionType":"IMMEDIATE","bindEventType":"apexafterclosedialog","anyActionsFireOnInit":false,"actionList":[]},{"triggeringElementType":"BUTTON","triggeringButtonId":"B28269296737221046","bindType":"bind","executionType":"IMMEDIATE","bindEventType":"apexafterclosedialog","anyActionsFireOnInit":false,"actionList":[]},{"triggeringElementType":"JQUERY_SELECTOR","triggeringElement":".scoreRegion","bindType":"bind","executionType":"IMMEDIATE","bindEventType":"apexafterclosedialog","anyActionsFireOnInit":false,"actionList":[{"eventResult":true,"executeOnPageInit":false,"stopExecutionOnError":true,"javascriptFunction":apex.da.executeJavaScriptCode,"settings":{"javascriptCode":function(){
+console.log(this.triggeringElement)
+apex.region(this.triggeringElement.id).refresh();
+}},"action":"NATIVE_JAVASCRIPT_CODE"},{"eventResult":true,"executeOnPageInit":false,"stopExecutionOnError":true,"affectedElementsType":"REGION","affectedRegionId":"leagueLeaders","affectedRegionId":"leagueLeaders","javascriptFunction":apex.da.refresh,"settings":{"maintainPagination":false},"action":"NATIVE_REFRESH"}]},{"triggeringElementType":"BUTTON","triggeringButtonId":"B28615254731755821","bindType":"bind","executionType":"IMMEDIATE","bindEventType":"apexafterclosedialog","anyActionsFireOnInit":false,"actionList":[{"name":"Submit to reaload","eventResult":true,"executeOnPageInit":false,"stopExecutionOnError":true,"javascriptFunction":apex.da.submitPage,"settings":{"showProcessing":true},"action":"NATIVE_SUBMIT_PAGE"}]},{"triggeringElementType":"REGION","triggeringRegionId":"leagueLeaders","bindType":"bind","executionType":"IMMEDIATE","bindEventType":"apexafterclosedialog","anyActionsFireOnInit":false,"actionList":[{"eventResult":true,"executeOnPageInit":false,"stopExecutionOnError":true,"javascriptFunction":apex.da.submitPage,"settings":{"showProcessing":true},"action":"NATIVE_SUBMIT_PAGE"}]},{"triggeringElementType":"REGION","triggeringRegionId":"leagueLeaders","bindType":"bind","executionType":"IMMEDIATE","bindEventType":"dblclick","anyActionsFireOnInit":true,"actionList":[{"eventResult":true,"executeOnPageInit":true,"stopExecutionOnError":true,"javascriptFunction":apex.da.executeJavaScriptCode,"settings":{"javascriptCode":function(){
+$(this.triggeringElement).toggleClass("wm-animate-border");
+}},"action":"NATIVE_JAVASCRIPT_CODE"}]},{"triggeringElementType":"REGION","triggeringRegionId":"leagueLeaders","bindType":"bind","executionType":"IMMEDIATE","bindEventType":"apexafterrefresh","anyActionsFireOnInit":true,"actionList":[{"eventResult":true,"executeOnPageInit":true,"stopExecutionOnError":true,"javascriptFunction":apex.da.executeJavaScriptCode,"settings":{"javascriptCode":function(){
+$(this.triggeringElement).find(".relegation").parents("tr").addClass("relegation");
+}},"action":"NATIVE_JAVASCRIPT_CODE"}]},{"bindEventType":"ready","anyActionsFireOnInit":false,"actionList":[{"eventResult":true,"stopExecutionOnError":false,"waitForResult":false,"affectedElementsType":"ITEM","affectedElements":"P1_MOVEMENTICON","ajaxIdentifier":"REEgVFlQRX5-MzAwMDEyNDI1MzM5MDIwMjc\u002FjmBQr5zLB82KVQ9CqIM7fogeCAwW2_PaS1vsV95JOaAQTTIXgkEWacjR7KKrIouX11bHDhcfQ6LhBDHIq2mNZQ","javascriptFunction":apex.da.setValue,"settings":{"setType":"JAVASCRIPT_EXPRESSION","javascriptExpression":function(){ return (
+movementIcon
+);},"suppressChangeEvent":false},"action":"NATIVE_SET_VALUE"}]}];
+}
+</script>
+
+<script nonce="AwAglAC1DNPMTkGvW_6U9g" src="/i/26.1.4/libraries/apex/minified/widget.stickyWidget.min.js?v=26.1.4"></script>
+<script nonce="AwAglAC1DNPMTkGvW_6U9g" src="/i/26.1.4/themes/theme_42/24.2/js/theme42.min.js?v=26.1.4"></script>
+
+
+
+<script nonce="AwAglAC1DNPMTkGvW_6U9g">
+var movementIcon = apex.theme.mq("(max-width: 639px)") ? "fa-caret-" : "fa-caret-square-o-";
+
+function highlightPlayers() {
+    document.querySelectorAll('.playerHighlight').forEach(span => {
+    span.addEventListener('mouseover', function() {
+        $("tr.mark").removeClass("mark"); // clear previous highlighted players
+        const playerId = this.getAttribute('data-id');
+        $s("P1_HIGHLIGHT_PLAYER_ID", playerId);
+        document.querySelectorAll(`.playerHighlight[data-id='${playerId}']`).forEach(matchingSpan => {
+            matchingSpan.closest('tr').classList.add('mark');
+        });
+        if (apex.theme.mq('(max-width: 1023px)')) {
+          hidePlayersBelow();
+        }
+    });
+
+    span.addEventListener('mouseout', function() {
+        const playerId = this.getAttribute('data-id');
+        document.querySelectorAll(`.playerHighlight[data-id='${playerId}']`).forEach(matchingSpan => {
+            matchingSpan.closest('tr').classList.remove('mark');
+        });
+        if (apex.theme.mq('(max-width: 1023px)')) {
+          hidePlayersBelow();
+        }
+    });
+});
+}
+
+function highlightPlayer(playerId) {
+    console.log(`playerHighlight[data-id='${playerId}']`);
+    $(`.playerHighlight[data-id='${playerId}']`).closest('tr').addClass('mark');
+}
+
+function hidePlayersBelow() {
+  document.querySelectorAll('.scoreRegion').forEach(function (region) {
+
+    // --- CLEANUP previous run ---
+    region.querySelectorAll('.below-mark-toggle').forEach(function (tr) {
+      tr.remove();
+    });
+    region.querySelectorAll('tr.below-mark-hidden').forEach(function (tr) {
+      tr.style.display = '';
+      tr.classList.remove('below-mark-hidden');
+    });
+    // --- APPLY fresh ---
+    var markRow = region.querySelector('tr.mark');
+    if (!markRow) return;
+
+    var rowsAfter = [];
+    var sibling = markRow.nextElementSibling;
+    while (sibling && sibling.tagName === 'TR') {
+      rowsAfter.push(sibling);
+      sibling = sibling.nextElementSibling;
+    }
+    if (rowsAfter.length === 0) return;
+
+    rowsAfter.forEach(function (tr) {
+      tr.style.display = 'none';
+      tr.classList.add('below-mark-hidden');
+    });
+
+    var toggleTr = document.createElement('tr');
+    toggleTr.className = 'below-mark-toggle';
+    var td = document.createElement('td');
+    td.colSpan = markRow.cells.length;
+
+    var expanded = false;
+
+    function doToggle(e) {
+      e.stopPropagation();
+      expanded = !expanded;
+      rowsAfter.forEach(function (tr) {
+        tr.style.display = expanded ? '' : 'none';
+      });
+      td.textContent = expanded
+        ? '▲ hide ' + rowsAfter.length + ' below you'
+        : '▼ show ' + rowsAfter.length + ' below you';
+    }
+
+    // touchend + preventDefault stops the browser from firing
+    // a synthetic mouseout on the player span after the tap,
+    // which would trigger hidePlayersBelow and nuke all the toggles
+    td.addEventListener('touchend', function (e) {
+      e.preventDefault();
+      doToggle(e);
+    }, { passive: false });
+
+    // click handles desktop
+    td.addEventListener('click', function (e) {
+      doToggle(e);
+    });
+
+    td.textContent = '▼ show ' + rowsAfter.length + ' below you';
+    toggleTr.appendChild(td);
+    markRow.parentNode.insertBefore(toggleTr, rowsAfter[0]);
+  });
+}
+</script>  
+
+
+
+<script nonce="AwAglAC1DNPMTkGvW_6U9g" src="/i/26.1.4/libraries/apex/minified/widget.search.min.js?v=26.1.4"></script>
+<script nonce="AwAglAC1DNPMTkGvW_6U9g" src="/i/26.1.4/libraries/apex/minified/widget.report.min.js?v=26.1.4"></script>
+<script nonce="AwAglAC1DNPMTkGvW_6U9g" src="/i/26.1.4/libraries/apex/minified/widget.apexTabs.min.js?v=26.1.4"></script>
+
+
+<script nonce="AwAglAC1DNPMTkGvW_6U9g">
+apex.jQuery( function() {
+apex.page.init( this, function() {
+try {
+(function(){let regionObj$ = apex.jQuery('#R60029690277545826_search'), options = {"regionId":"60029690277545826","regionDomId":"R60029690277545826","ajaxIdentifier":"UkVHSU9OIFRZUEV-fjYwMDI5NjkwMjc3NTQ1ODI2\u002Fue8A9UyTOoYE5wQCD8VuJrcNw2pUec3Lwbv1c7ZD0matnP_4AZl657nZQyBfLdDGBJ5ePYbuxEyyuYeo6BUR8w","lazyLoading":true,"externalPageItem":"P1_SEARCH","ajaxFetchWhenNoQuery":false,"usesOverallSort":false,"showResultCount":false,"searchAsYouType":true,"minCharacters":0,"resultsPerPage":7}; regionObj$.search( options ); })();
+(function(){apex.widget.report.init("R28434828662245948","UkVHSU9OIFRZUEV-fjI4NDM0ODI4NjYyMjQ1OTQ4\u002FVRbB3Fq6B0nBC6SK36142-3ySUKtl9Ld-WzhbnjUzcgdxyVkSvH0XzXCdxmNsO3OgKqhO78qP0f7uHTkvp7i9A",{"lazyLoading":false,"internalRegionId":"28434828662245948"});})();
+(function(){apex.widget.report.init("R30002633910902041","UkVHSU9OIFRZUEV-fjMwMDAyNjMzOTEwOTAyMDQx\u002FgYtS_BiIOai6dC6Ek_yTnVndaxWZ4S8GmFEFWsLPX-QcbeWqA1DoW33lLM112AOzZdvo-GoEe2xlzsQcTMderg",{"lazyLoading":false,"internalRegionId":"30002633910902041"});})();
+(function(){apex.widget.selectList("#P1_LEAGUE_ID",{"nullValue":"","ajaxIdentifier":"SVRFTSBUWVBFfjUxMjB-MjgwMDkwODgzOTQ1Mzg5MDY\u002F01soZJVtbAqQ0eft5TBSIdTznyloUv8NpU5eOYjGg99SUYeR061XQYjuLEQT48urnkM6I-pOIQbsA2-hDNjGSA"});})();
+(function(){apex.widget.report.init("leagueLeaders","UkVHSU9OIFRZUEV-fjI4MzI0MDMwNDYwMjQ1OTAy\u002F8hhzFLYZUCruNuHRSeCKKrD7BciwcP5HYk9M8-9gg9aM7hNUfIF50XRjtNULe8fTtPNWX8nEyq4uk1HCuN-LOw",{"pageItems":"#P1_LEAGUE_ID,#P1_MOVEMENTICON","lazyLoading":false,"internalRegionId":"28324030460245902"});})();
+(function(){apex.widget.report.init("R28068552205398028","UkVHSU9OIFRZUEV-fjI4MDY4NTUyMjA1Mzk4MDI4\u002FRqMaB_qDDw0dYU6HaHS2T2-bDJsxT10D4nZSTA3_ODBijWR1TAxwbktoYFJxqGB-Pdc3YO9mi2PqMyy5CKT0Cg",{"pageItems":"#P1_E1_COURSE_ID","lazyLoading":false,"internalRegionId":"28068552205398028"});})();
+(function(){apex.widget.report.init("R56453759181867007","UkVHSU9OIFRZUEV-fjU2NDUzNzU5MTgxODY3MDA3\u002Fv7O9uMpFrttAJL0cdfdZot4PWsKz01qGL1H3PAqP6Pb17V5u1tI7SlINm3ZJ3ocxXKG-HjOUn2jKQ8i8gs3xag",{"pageItems":"#P1_H1_COURSE_ID","lazyLoading":false,"internalRegionId":"56453759181867007"});})();
+(function(){apex.widget.report.init("R28324659146245908","UkVHSU9OIFRZUEV-fjI4MzI0NjU5MTQ2MjQ1OTA4\u002FDjHdR-kewYmZWes8gMRqBp9fd6GtriDq1_0SMfqrTuhK2HDshPecsyhL8bolXx4h6i5of4dP129h6quX2qx-UQ",{"pageItems":"#P1_E2_COURSE_ID","lazyLoading":false,"internalRegionId":"28324659146245908"});})();
+(function(){apex.widget.report.init("R56709866122714887","UkVHSU9OIFRZUEV-fjU2NzA5ODY2MTIyNzE0ODg3\u002FBXI7F21GerbllaqFBSKc6UZ-3Xep8_cnmv6BNsIwTBblvb0fVfhXoQJ6LrxOP7o-6WMEKFU5B_2olPQPqQw7Sw",{"pageItems":"#P1_H2_COURSE_ID","lazyLoading":false,"internalRegionId":"56709866122714887"});})();
+(function(){apex.widget.report.init("R28325503198245917","UkVHSU9OIFRZUEV-fjI4MzI1NTAzMTk4MjQ1OTE3\u002FxeNTX75hfasC2h7SIGv55RWKqGc97Vp7pLS1u6gAS8LM9P-S5ZWHS6fDUQcErHEgbeWG82ucw2epM1VU9wHoNg",{"pageItems":"#P1_E3_COURSE_ID","lazyLoading":false,"internalRegionId":"28325503198245917"});})();
+(function(){apex.widget.report.init("R56710710174714896","UkVHSU9OIFRZUEV-fjU2NzEwNzEwMTc0NzE0ODk2\u002FLAKrAf2_tIQAoMGiBl-GDAROv_-v7euZGSMKEwXgxK1yntLZ_OIuv0AR39Q6H_qDwaiL9wVFFBgudJV7PeAqIQ",{"pageItems":"#P1_H3_COURSE_ID","lazyLoading":false,"internalRegionId":"56710710174714896"});})();
+(function(){apex.widget.report.init("R28326426873245926","UkVHSU9OIFRZUEV-fjI4MzI2NDI2ODczMjQ1OTI2\u002FEeH26QyvWVHIEV_iolFIlajIxEpkCNY5lHz5SWhprrvfLv64-y3XJKgRur8hbkVvYmbj4k4WZvoYhxqLz9Hytw",{"pageItems":"#P1_E4_COURSE_ID","lazyLoading":false,"internalRegionId":"28326426873245926"});})();
+(function(){apex.widget.report.init("R56711633849714905","UkVHSU9OIFRZUEV-fjU2NzExNjMzODQ5NzE0OTA1\u002F0DAuSTNSUaQeo6la02LtuVBBwAcZPNk8FySY1sMZvkvnG7tAGPa_A6zcOFSP5_IPoequtfrC60YSeWg-Y9PcOw",{"pageItems":"#P1_H4_COURSE_ID","lazyLoading":false,"internalRegionId":"56711633849714905"});})();
+(function(){apex.widget.report.init("R27921707427650736","UkVHSU9OIFRZUEV-fjI3OTIxNzA3NDI3NjUwNzM2\u002FsWlYAi4lnHrJGzvDNmZp-dl2UxNYWxr1Ehk1f6RVfXxWKTlepQApaJ3B3vw4IDSIqpm6BUZLjgEtq2k0GLfO1w",{"lazyLoading":false,"internalRegionId":"27921707427650736"});})();
+} catch(e) {apex.debug.error(e)};
+apex.item.waitForDelayLoadItems().done(function() {
+try {
+(function(){apex.da.initDaEventList();
+apex.da.init();})();
+apex.theme42.initializePage.noSideCol();
+highlightPlayers();
+
+} finally {
+apex.event.trigger(apex.gPageContext$,'apexreadyend');
+};
+});
+});
+});apex.pwa.publicKey = 'BKVsJFsS9P7xqOTHdsX_UyqpF_AbVLPmdaxU4oOau8cku4BzMREW-YxTUrrzXngeX6c-83YhRr9QC9gSaHhTAKY'
+apex.pwa.init( { serviceWorkerPath:'\u002Fords\u002Fr\u002Fwmgt\u002Fmonthly\u002Fsw.js?v=26.1.4-50014915513644\u0026lang=en' } );
+</script>
+
+
+
+<div id="pushModal" class="u-DisplayNone u-Overlay--glass"></div><div class="t-MegaMenu a-Menu" id="t_MenuNav" style="display:none;" role="menu">
+  <div class="a-Menu-content t-MegaMenu-container">
+    <div class="t-MegaMenu-body">
+    <ul class="t-MegaMenu-list t-MegaMenu-list--top"><li class="t-MegaMenu-item t-MegaMenu-item--top t-MegaMenu-item--hasSub is-active " data-current="true" data-id="" data-shortcut="">
+  <span class="a-Menu-item t-MegaMenu-itemBody ">
+    <span class="t-Icon fa fa-home"></span>
+    <a class="a-Menu-label t-MegaMenu-labelWrap" href="/ords/r/wmgt/monthly/home" target="" data-otel-label="">
+      <span class="t-MegaMenu-label">Home</span>
+      <span class="t-MegaMenu-desc"></span>
+    </a>
+    <span class="t-MegaMenu-badge "></span>
+  </span><ul class="t-MegaMenu-list t-MegaMenu-list--sub"><li class="t-MegaMenu-item " data-current="false" data-id="" data-shortcut="">
+  <span class="a-Menu-item t-MegaMenu-itemBody ">
+    <span class="t-Icon fa fa-search"></span>
+    <a class="a-Menu-label t-MegaMenu-labelWrap" href="/ords/r/wmgt/monthly/search?session=102232022648389" target="" data-otel-label="">
+      <span class="t-MegaMenu-label">Search</span>
+      <span class="t-MegaMenu-desc"></span>
+    </a>
+    <span class="t-MegaMenu-badge "></span>
+  </span>
+</li></ul></li><li class="t-MegaMenu-item t-MegaMenu-item--top t-MegaMenu-item--noSub " data-current="false" data-id="" data-shortcut="">
+  <span class="a-Menu-item t-MegaMenu-itemBody ">
+    <span class="t-Icon fa fa-gear"></span>
+    <a class="a-Menu-label t-MegaMenu-labelWrap" href="/ords/r/wmgt/monthly/montly-admin?session=102232022648389" target="" data-otel-label="">
+      <span class="t-MegaMenu-label">Montly Admin</span>
+      <span class="t-MegaMenu-desc"></span>
+    </a>
+    <span class="t-MegaMenu-badge "></span>
+  </span>
+</li> </ul></div></div></div><div class="t-NavigationBar-menu a-Menu" style="display:none;" id="menu_L27891822619625231" role="menu"><ul><li class="icon-only" data-current="false" data-icon="fa fa-question-circle-o"><a href="#action$a-dialog-open?url=%2Fords%2Fr%2Fwmgt%2Fmonthly%2Fhelp%3Fp10041_page_id%3D1%26cs%3D3npbGTFPA4ZwuVMtJLTgEN5dMaarwAOK3n63Ev1kLyl04BmNLHwWuAL5mt0uut-Jt7dkvNyTGT8PlIn-YPVcuDw%26dialogCs%3D8IyYbz8JPNdxNgOMbJUP7r-6HSKB4j8Ka5GRgJo5cBMhF6ditwHX9rVuqOGcps5CzV61N0rtXsywk7zHwTLVzQ&amp;appId=500&amp;pageId=10041&amp;tmpl=modal-dialog&amp;title=Help&amp;h=auto&amp;w=720&amp;mxw=960&amp;isModal=true&amp;dlgCls=&amp;pageCls=&amp;trgEl=%2327746371095624317" title="" target="" data-otel-label="" aria-roledescription="dialog link">Page Help</a></li><li class="" data-current="false" data-icon=""><a href="separator" title="" target="" data-otel-label="">---</a></li><li class="" data-current="false" data-icon="fa fa-info-circle-o"><a href="/ords/r/wmgt/monthly/about?clear=10040&amp;cs=3jix-2V7FsRu7zIsDGCwACkw-DB4CsgvJW6q5ZKkk2W0Bjid7cUyGV6XQLXXl9bETwgE35sR104CYZOu0D6vtVA" title="" target="" data-otel-label="">About Page</a></li></ul></div><div class="t-NavigationBar-menu a-Menu" style="display:none;" id="menu_L27893465793625234" role="menu"><ul><li class="" data-current="false" data-icon="fa fa-trophy"><a href="/ords/r/wmgt/kwtold/?session=102232022648389" title="" target="" data-otel-label="">KWT</a></li><li class="" data-current="false" data-icon="fa fa-sign-out"><a href="/ords/r/wmgt/monthly/login?clear=10040&amp;cs=3jix-2V7FsRu7zIsDGCwACkw-DB4CsgvJW6q5ZKkk2W0Bjid7cUyGV6XQLXXl9bETwgE35sR104CYZOu0D6vtVA" title="" target="" data-otel-label="">Sign In</a></li></ul></div></body></html>

@@ -1,0 +1,149 @@
+Skip to Main Content
+Kry's Monthlies
+Search
+0 results
+Install App
+About
+nobody
+	
+2025 July
+107/87 players
+COMPLETED
+	
+Overall Leaders - 2025 July
+Pos	Player	League	Courses
+Played	Total
+Strokes	HN1's	Points
+1	GuyB22	Semi Pro 2	8	-131	10	1,600
+2	Raccoons Whisker	Amateur 2	8	-85	8	1,588
+3	Zanetti	Pro 3	8	-196	30	1,580
+4	Merged into 8648	Pro 2	8	-175	18	1,578
+5	Blutes87	Pro 1	8	-181	20	1,570
+6	𝙹𝚞𝚕𝚒𝚊𝚗	Pro 3	8	-192	25	1,565
+7	Merged into 8708	Beginner	8	-50	8	1,548
+8	Sandtrap	Semi Pro 2	8	-112	11	1,531
+9	INDY	Master	8	-195	22	1,522
+10	KillERBee	Amateur 1	8	-65	7	1,517
+1 - 10
+Semi Pro 3 Leaders
+League
+- Select -
+Master
+Elite
+Pro 1
+Pro 2
+Pro 3
+Semi Pro 1
+Beginner
+Welcome
+115
+Pos	Player	Courses
+Played	Total
+Strokes	HN1's	Points
+1
+	MAMAGOATZ	8	-79	7	1,477
+2
+	NuttyGrandpa	8	-80	7	1,447
+3
+	musical_atv 🎻	8	-62	6	1,396
+4
+	plucky✌	6	-33	9	1,119
+5
+	WendyW(Wyndemere2020)	6	-31	4	1,044
+6
+	RYANL503	4	-10	5	665
+7
+	Master_KP	2	-30	2	372
+1 - 7
+ Players at risk of relegation
+  Point change since last report.
+ Bogey's Bonanza
+#	Player	Score	HN1	Points
+1	NuttyGrandpa	-21	2	202
+1	plucky✌	-21	2	202
+3	MAMAGOATZ	-12	0	180
+4	WendyW(Wyndemere2020)	-8	0	170
+5	musical_atv 🎻	-7	0	160
+	Master_KP			
+	RYANL503			
+ Bogey's Bonanza Hard
+#	Player	Score	HN1	Points
+1	musical_atv 🎻	-10	1	201
+2	MAMAGOATZ	-8	1	191
+3	plucky✌	-2	2	182
+4	WendyW(Wyndemere2020)	-1	0	170
+5	NuttyGrandpa	3	0	160
+	Master_KP			
+	RYANL503			
+ Upside Town
+#	Player	Score	HN1	Points
+1	MAMAGOATZ	-17	1	201
+2	plucky✌	-16	2	192
+3	WendyW(Wyndemere2020)	-16	1	181
+4	Master_KP	-15	0	170
+5	NuttyGrandpa	-12	2	162
+6	musical_atv 🎻	-7	1	151
+7	RYANL503	2	0	140
+ Upside Town - Hard
+#	Player	Score	HN1	Points
+1	Master_KP	-15	2	202
+2	plucky✌	-11	2	192
+3	MAMAGOATZ	-9	0	180
+4	NuttyGrandpa	-8	1	171
+5	musical_atv 🎻	-1	1	161
+6	WendyW(Wyndemere2020)	-1	0	150
+7	RYANL503	4	1	141
+ Journey to the Center of the Earth
+#	Player	Score	HN1	Points
+1	WendyW(Wyndemere2020)	-16	3	203
+2	plucky✌	-16	1	191
+2	NuttyGrandpa	-16	1	191
+4	musical_atv 🎻	-15	2	172
+5	MAMAGOATZ	-10	1	161
+	Master_KP			
+	RYANL503			
+ Center of the Earth - Hard
+#	Player	Score	HN1	Points
+1	MAMAGOATZ	-15	1	201
+2	NuttyGrandpa	-10	0	190
+3	musical_atv 🎻	-8	0	180
+4	WendyW(Wyndemere2020)	11	0	170
+5	plucky✌	33	0	160
+	RYANL503			
+	Master_KP			
+ Crystal Lair
+#	Player	Score	HN1	Points
+1	RYANL503	-11	3	203
+2	MAMAGOATZ	-8	2	192
+3	musical_atv 🎻	-7	0	180
+4	NuttyGrandpa	-6	0	170
+	plucky✌			
+	WendyW(Wyndemere2020)			
+	Master_KP			
+ Crystal Lair - Hard
+#	Player	Score	HN1	Points
+1	NuttyGrandpa	-10	1	201
+2	musical_atv 🎻	-7	1	191
+3	RYANL503	-5	1	181
+4	MAMAGOATZ	0	1	171
+	Master_KP			
+	WendyW(Wyndemere2020)			
+	plucky✌			
+2025 July Courses
+
+
+BBE - Bogey's Bonanza
+BBH - Bogey's Bonanza Hard
+
+
+UTE - Upside Town
+UTH - Upside Town - Hard
+
+
+JCE - Journey to the Center of the Earth
+JCH - Center of the Earth - Hard
+
+
+CLE - Crystal Lair
+CLH - Crystal Lair - Hard
+Release 1.2 Built with  using Oracle APEX

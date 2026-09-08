@@ -1,0 +1,196 @@
+Skip to Main Content
+Kry's Monthlies
+Search
+0 results
+Install App
+About
+nobody
+	
+2025 April
+108/90 players
+COMPLETED
+	
+Overall Leaders - 2025 April
+Pos	Player	League	Courses
+Played	Total
+Strokes	HN1's	Points
+1	POLANECE	Pro 1	8	-183	23	1,623
+2	INDY	Pro 2	8	-176	21	1,601
+3	Kd	Beginner	8	-79	12	1,572
+4	Sj_76	Amateur 2	8	-134	14	1,564
+5	Matt916	Elite	8	-179	24	1,544
+6	SKEETER78	Beginner	8	-54	5	1,535
+7	Alyssa38	Amateur 2	8	-112	12	1,522
+8	El Jorge	Master	8	-190	30	1,500
+9	Neo Impossible	Master	8	-189	28	1,488
+10	SHA_HOOF_NA	Amateur 1	8	-110	10	1,480
+1 - 10
+Welcome Leaders
+League
+- Select -
+Master
+Elite
+Pro 1
+Pro 2
+Pro 3
+Semi Pro 1
+Beginner
+Welcome
+Pos	Player	Courses
+Played	Total
+Strokes	HN1's	Points
+1
+	PUTT_FOR_DOH	2	-24	0	400
+	CHIP_PUTTY	0			
+	callmemike	0			
+	RUBBERDUCK	0			
+	ThePrankser15	0			
+	beezy1	0			
+	Nate Porteous	0			
+	BEVE3630	0			
+	Ladyrider60	0			
+	FROGMAN	0			
+	LuckyOrSucky	0			
+	Dandnt65	0			
+	CATHY G	0			
+1 - 13
+ Players at risk of relegation
+  Point change since last report.
+ Sweetopia
+#	Player	Score	HN1	Points
+	Dandnt65			
+	Nate Porteous			
+	beezy1			
+	CHIP_PUTTY			
+	callmemike			
+	Ladyrider60			
+	FROGMAN			
+	LuckyOrSucky			
+	PUTT_FOR_DOH			
+	RUBBERDUCK			
+	CATHY G			
+	ThePrankser15			
+	BEVE3630			
+ Sweetopia - Hard
+#	Player	Score	HN1	Points
+	Dandnt65			
+	beezy1			
+	FROGMAN			
+	BEVE3630			
+	LuckyOrSucky			
+	Ladyrider60			
+	callmemike			
+	CATHY G			
+	Nate Porteous			
+	CHIP_PUTTY			
+	ThePrankser15			
+	PUTT_FOR_DOH			
+	RUBBERDUCK			
+ Laser Lair
+#	Player	Score	HN1	Points
+	Dandnt65			
+	LuckyOrSucky			
+	RUBBERDUCK			
+	Ladyrider60			
+	BEVE3630			
+	beezy1			
+	PUTT_FOR_DOH			
+	CHIP_PUTTY			
+	FROGMAN			
+	ThePrankser15			
+	callmemike			
+	Nate Porteous			
+	CATHY G			
+ Laser Lair - Hard
+#	Player	Score	HN1	Points
+	Dandnt65			
+	beezy1			
+	FROGMAN			
+	RUBBERDUCK			
+	PUTT_FOR_DOH			
+	callmemike			
+	CATHY G			
+	CHIP_PUTTY			
+	Nate Porteous			
+	Ladyrider60			
+	LuckyOrSucky			
+	BEVE3630			
+	ThePrankser15			
+ Widow’s Walkabout
+#	Player	Score	HN1	Points
+	Dandnt65			
+	PUTT_FOR_DOH			
+	CATHY G			
+	FROGMAN			
+	Nate Porteous			
+	CHIP_PUTTY			
+	BEVE3630			
+	Ladyrider60			
+	LuckyOrSucky			
+	ThePrankser15			
+	RUBBERDUCK			
+	beezy1			
+	callmemike			
+ Widow’s Walkabout - Hard
+#	Player	Score	HN1	Points
+	Dandnt65			
+	PUTT_FOR_DOH			
+	LuckyOrSucky			
+	ThePrankser15			
+	BEVE3630			
+	Ladyrider60			
+	Nate Porteous			
+	callmemike			
+	RUBBERDUCK			
+	CATHY G			
+	FROGMAN			
+	CHIP_PUTTY			
+	beezy1			
+ Mount Olympus
+#	Player	Score	HN1	Points
+1	PUTT_FOR_DOH	-17	0	200
+	RUBBERDUCK			
+	CATHY G			
+	ThePrankser15			
+	Ladyrider60			
+	LuckyOrSucky			
+	CHIP_PUTTY			
+	beezy1			
+	BEVE3630			
+	Nate Porteous			
+	callmemike			
+	Dandnt65			
+	FROGMAN			
+ Mount Olympus - Hard
+#	Player	Score	HN1	Points
+1	PUTT_FOR_DOH	-7	0	200
+	RUBBERDUCK			
+	ThePrankser15			
+	Ladyrider60			
+	LuckyOrSucky			
+	callmemike			
+	beezy1			
+	FROGMAN			
+	BEVE3630			
+	CHIP_PUTTY			
+	CATHY G			
+	Dandnt65			
+	Nate Porteous			
+2025 April Courses
+
+
+SWE - Sweetopia
+SWH - Sweetopia - Hard
+
+
+LLE - Laser Lair
+LLH - Laser Lair - Hard
+
+
+WWE - Widow’s Walkabout
+WWH - Widow’s Walkabout - Hard
+
+
+MOE - Mount Olympus
+MOH - Mount Olympus - Hard
+Release 1.2 Built with  using Oracle APEX

@@ -1,6 +1,6 @@
 import test from "node:test"
 import assert from "node:assert/strict"
-import { classifyMonthlyPeriod, isMonthlyLegacyMergedPlaceholder, monthlyIdentityBlocksCommit, previewMonthlyWebsiteCsvRows, previewMonthlyWebsiteViews, retainCurrentMonthlyReviewDecisions } from "./monthlyWebsiteAdapter.ts"
+import { classifyMonthlyPeriod, isMonthlyIdentityReviewObservation, isMonthlyLegacyMergedPlaceholder, monthlyIdentityBlocksCommit, previewMonthlyWebsiteCsvRows, previewMonthlyWebsiteViews, retainCurrentMonthlyReviewDecisions } from "./monthlyWebsiteAdapter.ts"
 import { resolveIdentity } from "../../identity/resolveIdentity.ts"
 import { matchPlayers } from "../matchPlayers.ts"
 import { validateMonthlyWebsiteIdentities } from "../monthlyWebsiteIdentityValidation.ts"
@@ -93,6 +93,19 @@ test("Monthly identities only block commit when scored observations need review"
   assert.equal(monthlyIdentityBlocksCommit(24, false), true)
   assert.equal(monthlyIdentityBlocksCommit(0, false), false)
   assert.equal(monthlyIdentityBlocksCommit(0, true), false)
+})
+
+test("blank-only identities are excluded from the identity-review candidate predicate", () => {
+  const preview = previewMonthlyWebsiteViews([{ ...view, leaders: [{ ...view.leaders[0], historicalPlayerName: "Blank Only", sourcePlayerId: "8189" }], courses: [{ ...view.courses[0], rows: [{ ...view.courses[0].rows[0], historicalPlayerName: "Blank Only", sourcePlayerId: "8189", score: null }] }] }])
+  assert.equal(isMonthlyIdentityReviewObservation(preview.rows[0]), false)
+  assert.equal(preview.rows[0].scoreState, "NO SUBMISSION")
+  assert.equal(preview.rows[0].score, null)
+})
+
+test("identities with numeric zero scores remain identity-review candidates", () => {
+  const preview = previewMonthlyWebsiteViews([{ ...view, courses: [{ ...view.courses[0], rows: [{ ...view.courses[0].rows[0], score: 0 }] }] }])
+  assert.equal(isMonthlyIdentityReviewObservation(preview.rows[0]), true)
+  assert.equal(preview.rows[0].score, 0)
 })
 
 test("stale Monthly review drafts cannot hide names unresolved by the current identity payload", () => {

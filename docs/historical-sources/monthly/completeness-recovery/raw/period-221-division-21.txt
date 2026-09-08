@@ -1,0 +1,177 @@
+Skip to Main Content
+Kry's Monthlies
+Search
+0 results
+Install App
+About
+nobody
+	
+2025 August
+117/96 players
+COMPLETED
+	
+Overall Leaders - 2025 August
+Pos	Player	League	Courses
+Played	Total
+Strokes	HN1's	Points
+1	mini_G	Pro 3	8	-191	24	1,604
+2	𝙹𝚞𝚕𝚒𝚊𝚗	Pro 2	8	-198	28	1,588
+3	Audrey	Amateur 2	8	-40	5	1,575
+4	JUICE_WRLD	Pro 3	8	-184	23	1,573
+4	Zanetti	Pro 2	8	-197	23	1,573
+6	SubZero	Amateur 1	8	-113	11	1,541
+7	ZoeDarlin	Amateur 1	8	-105	10	1,540
+8	Blutes87	Elite	8	-176	15	1,535
+9	GuyB22	Semi Pro 1	8	-121	11	1,511
+10	POLANECE	Master	8	-175	21	1,501
+1 - 10
+Master Leaders
+League
+- Select -
+Master
+Elite
+Pro 1
+Pro 2
+Pro 3
+Semi Pro 1
+Beginner
+Welcome
+Pos	Player	Courses
+Played	Total
+Strokes	HN1's	Points
+1
+	POLANECE	8	-175	21	1,501
+2
+	INDY	8	-176	20	1,480
+3
+	El Jorge	8	-165	17	1,357
+4
+	Mully	8	-158	15	1,345
+5
+	Gobson	8	-156	18	1,318
+6
+	Princess_Bankshot	7	-136	11	1,131
+7
+	l7jazz	8	-116	12	1,072
+8
+	YODA	6	-108	12	942
+9
+	Derby_Daz	5	-93	7	817
+	DaisyShaw	0			
+1 - 10
+ Players at risk of relegation
+  Point change since last report.
+ El Dorado
+#	Player	Score	HN1	Points
+1	POLANECE	-26	3	203
+2	El Jorge	-25	1	191
+3	Derby_Daz	-24	1	181
+4	INDY	-23	1	171
+5	Mully	-23	0	160
+6	Princess_Bankshot	-21	1	151
+7	Gobson	-20	2	142
+8	l7jazz	-19	2	132
+	DaisyShaw			
+	YODA			
+ El Dorado Hard
+#	Player	Score	HN1	Points
+1	POLANECE	-23	2	202
+2	YODA	-21	3	193
+3	El Jorge	-21	1	181
+4	Mully	-20	2	172
+5	Gobson	-17	2	162
+6	INDY	-17	1	151
+7	Derby_Daz	-14	0	140
+8	l7jazz	-11	2	132
+9	Princess_Bankshot	-9	0	120
+	DaisyShaw			
+ Atlantis
+#	Player	Score	HN1	Points
+1	INDY	-27	5	205
+2	Princess_Bankshot	-26	5	195
+3	Mully	-26	4	184
+4	POLANECE	-25	5	175
+5	YODA	-24	5	165
+6	Derby_Daz	-24	3	153
+7	El Jorge	-22	2	142
+8	l7jazz	-19	2	132
+9	Gobson	-18	3	123
+	DaisyShaw			
+ Atlantis Hard
+#	Player	Score	HN1	Points
+1	Gobson	-19	2	202
+2	POLANECE	-18	2	192
+2	Derby_Daz	-18	2	192
+4	YODA	-17	1	171
+5	INDY	-16	1	161
+6	Mully	-14	1	151
+7	Princess_Bankshot	-13	1	141
+8	El Jorge	-12	3	133
+9	l7jazz	-10	2	122
+	DaisyShaw			
+ Alfheim
+#	Player	Score	HN1	Points
+1	INDY	-25	4	204
+2	Mully	-24	4	194
+3	Gobson	-22	4	184
+3	POLANECE	-22	4	184
+5	El Jorge	-22	3	163
+6	Princess_Bankshot	-19	0	150
+7	l7jazz	-16	1	141
+	Derby_Daz			
+	DaisyShaw			
+	YODA			
+ Alfheim Hard
+#	Player	Score	HN1	Points
+1	INDY	-27	5	205
+2	Princess_Bankshot	-24	3	193
+2	POLANECE	-24	3	193
+4	Gobson	-23	4	174
+5	Mully	-20	1	161
+6	El Jorge	-19	3	153
+7	YODA	-17	2	142
+7	l7jazz	-17	2	142
+	Derby_Daz			
+	DaisyShaw			
+ Ice Lair
+#	Player	Score	HN1	Points
+1	INDY	-26	1	201
+2	El Jorge	-24	3	193
+3	Princess_Bankshot	-24	1	181
+4	Gobson	-23	1	171
+5	POLANECE	-20	2	162
+6	Mully	-17	2	152
+7	l7jazz	-17	1	141
+8	YODA	-17	0	130
+	Derby_Daz			
+	DaisyShaw			
+ Ice Lair - Hard
+#	Player	Score	HN1	Points
+1	El Jorge	-20	1	201
+2	POLANECE	-17	0	190
+3	INDY	-15	2	182
+4	Mully	-14	1	171
+5	Gobson	-14	0	160
+6	Derby_Daz	-13	1	151
+7	YODA	-12	1	141
+8	l7jazz	-7	0	130
+	DaisyShaw			
+	Princess_Bankshot			
+2025 August Courses
+
+
+EDE - El Dorado
+EDH - El Dorado Hard
+
+
+ATE - Atlantis
+ATH - Atlantis Hard
+
+
+ALE - Alfheim
+ALH - Alfheim Hard
+
+
+ILE - Ice Lair
+ILH - Ice Lair - Hard
+Release 1.2 Built with  using Oracle APEX

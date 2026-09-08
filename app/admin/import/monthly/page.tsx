@@ -1,6 +1,6 @@
-import MonthlyWebsiteImporter from "./MonthlyWebsiteImporter"
+import RepairedMonthlyPreflight from "./RepairedMonthlyPreflight"
 
 export default function MonthlyImportPage() {
-  return <MonthlyWebsiteImporter />
+  return <RepairedMonthlyPreflight />
 }
 

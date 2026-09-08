@@ -62,6 +62,7 @@ async function loadAvailablePeriods(supabase: ReturnType<typeof publicMonthlyCli
     const { data, error } = await supabase
       .from("historical_monthly_score_observations")
       .select("period_year, period_month, division")
+      .eq("played_state", "PLAYED")
       .order("period_year", { ascending: false })
       .order("period_month", { ascending: false })
       .order("division")
@@ -110,6 +111,7 @@ export async function GET(request: Request) {
       let query = supabase
         .from("historical_monthly_score_observations")
         .select("canonical_player_id, period_year, period_month, division, course_name, difficulty, score, hole_in_ones, course_placement, course_points, overall_placement, courses_played, total_strokes, overall_hole_in_ones, overall_points, player:players(screen_name)")
+        .eq("played_state", "PLAYED")
         .order("period_year", { ascending: false })
         .order("period_month", { ascending: false })
         .order("division")

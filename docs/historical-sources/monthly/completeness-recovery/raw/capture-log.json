@@ -1,0 +1,162 @@
+[
+  {
+    "slug": "period-441-division-25",
+    "status": "OK",
+    "steps": 2,
+    "leaders": 10,
+    "courseRows": 80.0,
+    "tables": 8,
+    "html": 122302,
+    "text": 3008
+  },
+  {
+    "slug": "period-421-division-114",
+    "status": "OK",
+    "steps": 1,
+    "leaders": 6,
+    "courseRows": 48.0,
+    "tables": 8,
+    "html": 108408,
+    "text": 2429
+  },
+  {
+    "slug": "period-401-division-114",
+    "status": "OK",
+    "steps": 1,
+    "leaders": 7,
+    "courseRows": 56.0,
+    "tables": 8,
+    "html": 111686,
+    "text": 2663
+  },
+  {
+    "slug": "period-401-division-115",
+    "status": "OK",
+    "steps": 0,
+    "leaders": 7,
+    "courseRows": 56.0,
+    "tables": 8,
+    "html": 111395,
+    "text": 2479
+  },
+  {
+    "slug": "period-401-division-25",
+    "status": "OK",
+    "steps": 0,
+    "leaders": 12,
+    "courseRows": 96.0,
+    "tables": 8,
+    "html": 129296,
+    "text": 3353
+  },
+  {
+    "slug": "period-381-division-114",
+    "status": "OK",
+    "steps": 1,
+    "leaders": 8,
+    "courseRows": 64.0,
+    "tables": 8,
+    "html": 115656,
+    "text": 2942
+  },
+  {
+    "slug": "period-381-division-62",
+    "status": "OK",
+    "steps": 0,
+    "leaders": 12,
+    "courseRows": 96.0,
+    "tables": 8,
+    "html": 129159,
+    "text": 3399
+  },
+  {
+    "slug": "period-361-division-114",
+    "status": "OK",
+    "steps": 1,
+    "leaders": 7,
+    "courseRows": 56.0,
+    "tables": 8,
+    "html": 112333,
+    "text": 2960
+  },
+  {
+    "slug": "period-361-division-115",
+    "status": "OK",
+    "steps": 0,
+    "leaders": 5,
+    "courseRows": 40.0,
+    "tables": 8,
+    "html": 105052,
+    "text": 2364
+  },
+  {
+    "slug": "period-241-division-81",
+    "status": "OK",
+    "steps": 6,
+    "leaders": 5,
+    "courseRows": 40.0,
+    "tables": 8,
+    "html": 75470,
+    "text": 1135
+  },
+  {
+    "slug": "period-241-division-21",
+    "status": "OK",
+    "steps": 0,
+    "leaders": 10,
+    "courseRows": 80.0,
+    "tables": 8,
+    "html": 122902,
+    "text": 3399
+  },
+  {
+    "slug": "period-221-division-21",
+    "status": "OK",
+    "steps": 1,
+    "leaders": 10,
+    "courseRows": 80.0,
+    "tables": 8,
+    "html": 122348,
+    "text": 3092
+  },
+  {
+    "slug": "period-161-division-21",
+    "status": "OK",
+    "steps": 3,
+    "leaders": 10,
+    "courseRows": 80.0,
+    "tables": 8,
+    "html": 122859,
+    "text": 3428
+  },
+  {
+    "slug": "period-58-division-23",
+    "status": "OK",
+    "steps": 5,
+    "leaders": 10,
+    "courseRows": 80.0,
+    "tables": 8,
+    "html": 122850,
+    "text": 3450
+  },
+  {
+    "slug": "period-57-division-23",
+    "status": "OK",
+    "steps": 1,
+    "leaders": 10,
+    "courseRows": 80.0,
+    "tables": 8,
+    "html": 122833,
+    "text": 3432
+  },
+  {
+    "slug": "period-55-division-25",
+    "status": "OK",
+    "steps": 2,
+    "leaders": 19,
+    "courseRows": 152.0,
+    "tables": 8,
+    "html": 154617,
+    "text": 4943
+  }
+]

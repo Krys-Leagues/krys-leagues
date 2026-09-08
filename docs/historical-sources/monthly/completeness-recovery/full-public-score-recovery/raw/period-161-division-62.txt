@@ -1,0 +1,114 @@
+Skip to Main Content
+Kry's Monthlies
+Search
+0 results
+Install App
+About
+nobody
+	
+2025 May
+105/92 players
+COMPLETED
+	
+Overall Leaders - 2025 May
+Pos	Player	League	Courses
+Played	Total
+Strokes	HN1's	Points
+1	TILTBOMB	Beginner	8	-106	15	1,615
+2	Blutes87	Pro 3	8	-150	18	1,598
+3	POLANECE	Elite	8	-169	28	1,578
+4	Sj_76	Amateur 1	8	-119	14	1,574
+5	StevieWonderful	Semi Pro 2	8	-106	20	1,570
+6	MAMAGOATZ	Amateur 2	8	-75	11	1,551
+7	Chelle💯	Semi Pro 3	8	-113	18	1,548
+8	KillERBee	Amateur 3	8	-36	13	1,543
+9	musical_atv 🎻	Amateur 2	8	-66	11	1,531
+9	Sandtrap	Amateur 1	8	-112	11	1,531
+1 - 10
+Welcome Leaders
+League
+- Select -
+Master
+Elite
+Pro 1
+Pro 2
+Pro 3
+Semi Pro 1
+Beginner
+Welcome
+Pos	Player	Courses
+Played	Total
+Strokes	HN1's	Points
+	MIMIBELL1971	0			
+	GAMINGGRAMMIE	0			
+	Alisha0068	0			
+	Harry Highpants	0			
+1 - 4
+ Players at risk of relegation
+  Point change since last report.
+ Original Gothic
+#	Player	Score	HN1	Points
+	MIMIBELL1971			
+	GAMINGGRAMMIE			
+	Harry Highpants			
+	Alisha0068			
+ Original Gothic Hard
+#	Player	Score	HN1	Points
+	Alisha0068			
+	GAMINGGRAMMIE			
+	MIMIBELL1971			
+	Harry Highpants			
+ Labyrinth
+#	Player	Score	HN1	Points
+	Harry Highpants			
+	MIMIBELL1971			
+	GAMINGGRAMMIE			
+	Alisha0068			
+ Labyrinth - Hard
+#	Player	Score	HN1	Points
+	Alisha0068			
+	Harry Highpants			
+	GAMINGGRAMMIE			
+	MIMIBELL1971			
+ Meow Wolf
+#	Player	Score	HN1	Points
+	Harry Highpants			
+	MIMIBELL1971			
+	GAMINGGRAMMIE			
+	Alisha0068			
+ Meow Wolf - Hard
+#	Player	Score	HN1	Points
+	Harry Highpants			
+	GAMINGGRAMMIE			
+	MIMIBELL1971			
+	Alisha0068			
+ Raptor Cliff's
+#	Player	Score	HN1	Points
+	MIMIBELL1971			
+	Alisha0068			
+	Harry Highpants			
+	GAMINGGRAMMIE			
+ Raptor Cliff's - Hard
+#	Player	Score	HN1	Points
+	Harry Highpants			
+	Alisha0068			
+	GAMINGGRAMMIE			
+	MIMIBELL1971			
+2025 May Courses
+
+
+OGE - Original Gothic
+OGH - Original Gothic Hard
+
+
+LBE - Labyrinth
+LBH - Labyrinth - Hard
+
+
+MWE - Meow Wolf
+MWH - Meow Wolf - Hard
+
+
+RCE - Raptor Cliff's
+RCH - Raptor Cliff's - Hard
+Release 1.2 Built with  using Oracle APEX

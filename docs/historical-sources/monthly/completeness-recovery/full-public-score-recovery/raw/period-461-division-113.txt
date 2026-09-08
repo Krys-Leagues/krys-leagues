@@ -1,0 +1,126 @@
+Skip to Main Content
+Kry's Monthlies
+Search
+0 results
+Install App
+About
+nobody
+	
+2026 August
+60/50 players
+COMPLETED
+	
+Overall Leaders - 2026 August
+Pos	Player	League	Courses
+Played	Total
+Strokes	HN1's	Points
+1	Zanetti	Welcome	8	-180	21	1,621
+2	far canal	Pro 3	8	-149	10	1,600
+3	Earthling	Semi Pro 1	8	-67	12	1,592
+4	POLANECE	Master	8	-184	23	1,533
+5	lynniebodd	Welcome	8	-128	12	1,532
+5	Sj_76	Pro 2	8	-120	12	1,532
+7	Mully	Elite	8	-182	21	1,511
+8	PaulV-PPP 🇨🇦	Pro 1	8	-147	19	1,459
+9	DMD-Enditnow	Pro 2	8	-116	5	1,455
+10	leanin2it	Elite	8	-173	18	1,448
+1 - 10
+Semi Pro 1 Leaders
+League
+- Select -
+Master
+Elite
+Pro 1
+Pro 2
+Pro 3
+Semi Pro 1
+Beginner
+Welcome
+Pos	Player	Courses
+Played	Total
+Strokes	HN1's	Points
+1
+	Earthling	8	-67	12	1,592
+2
+	IMJOMAMA	4	-13	3	763
+3
+	SMILEROBIN	4	-15	3	743
+	Gatorsfan89	0			
+	Maximus_PrimeIV	0			
+1 - 5
+ Players at risk of relegation
+  Point change since last report.
+ Cherry Blossom
+#	Player	Score	HN1	Points
+1	Earthling	-22	4	204
+	IMJOMAMA			
+	SMILEROBIN			
+	Maximus_PrimeIV			
+	Gatorsfan89			
+ Cherry Blossom Hard
+#	Player	Score	HN1	Points
+1	Earthling	-12	0	200
+	IMJOMAMA			
+	SMILEROBIN			
+	Maximus_PrimeIV			
+	Gatorsfan89			
+ Shangri-La
+#	Player	Score	HN1	Points
+1	Earthling	-22	4	204
+2	IMJOMAMA	-15	3	193
+3	SMILEROBIN	-15	2	182
+	Gatorsfan89			
+	Maximus_PrimeIV			
+ Shangri-La - Hard
+#	Player	Score	HN1	Points
+1	IMJOMAMA	-4	0	200
+2	SMILEROBIN	1	1	191
+3	Earthling	21	0	180
+	Maximus_PrimeIV			
+	Gatorsfan89			
+ Ice Lair
+#	Player	Score	HN1	Points
+1	Earthling	-12	0	200
+2	IMJOMAMA	-7	0	190
+3	SMILEROBIN	-5	0	180
+	Gatorsfan89			
+	Maximus_PrimeIV			
+ Ice Lair - Hard
+#	Player	Score	HN1	Points
+1	Earthling	-2	1	201
+2	SMILEROBIN	4	0	190
+3	IMJOMAMA	13	0	180
+	Gatorsfan89			
+	Maximus_PrimeIV			
+ Hollywood
+#	Player	Score	HN1	Points
+1	Earthling	-17	2	202
+	Gatorsfan89			
+	IMJOMAMA			
+	Maximus_PrimeIV			
+	SMILEROBIN			
+ Hollywood - Hard
+#	Player	Score	HN1	Points
+1	Earthling	-1	1	201
+	SMILEROBIN			
+	IMJOMAMA			
+	Maximus_PrimeIV			
+	Gatorsfan89			
+2026 August Courses
+
+
+CBE - Cherry Blossom
+CBH - Cherry Blossom Hard
+
+
+SLE - Shangri-La
+SLH - Shangri-La - Hard
+
+
+ILE - Ice Lair
+ILH - Ice Lair - Hard
+
+
+HWE - Hollywood
+HWH - Hollywood - Hard
+Release 1.2 Built with  using Oracle APEX

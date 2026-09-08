@@ -1,0 +1,168 @@
+Skip to Main Content
+Kry's Monthlies
+Search
+0 results
+Install App
+About
+nobody
+	
+2024 October
+85/78 players
+COMPLETED
+	
+Overall Leaders - 2024 October
+Pos	Player	League	Courses
+Played	Total
+Strokes	HN1's	Points
+1	yankeedude1123	Elite	8	-184	22	1,592
+2	Alisha0068	Amateur 2	8	-107	8	1,578
+3	El Jorge	Elite	8	-182	15	1,555
+4	MrDachshund81	Pro 3	8	-161	8	1,538
+5	ARTSY	Amateur 3	8	-110	6	1,536
+6	Danielaoculus	Pro 2	8	-142	12	1,522
+7	Mully	Pro 1	8	-158	10	1,520
+8	CRAZYHORSE	Pro 1	8	-145	10	1,510
+9	leanin2it	Master	8	-186	19	1,509
+10	Princess_Bankshot	Master	8	-182	16	1,486
+1 - 10
+Pro 2 Leaders
+League
+- Select -
+Master
+Elite
+Pro 1
+Pro 2
+Pro 3
+Semi Pro 1
+Beginner
+Welcome
+Pos	Player	Courses
+Played	Total
+Strokes	HN1's	Points
+1
+	Danielaoculus	8	-142	12	1,522
+2
+	ZONK	8	-127	6	1,396
+3
+	lynniebodd	8	-120	7	1,357
+4
+	DMD-Enditnow	8	-119	12	1,312
+5
+	awesome_kris	8	-113	10	1,310
+6
+	gomarino13	8	-105	6	1,276
+7
+	Spicy - DawnSophia	8	-92	5	1,145
+8
+	D3bb13	8	-74	5	1,105
+9
+	freitag68	6	-92	3	963
+1 - 9
+ Players at risk of relegation
+  Point change since last report.
+ Seagull Stacks
+#	Player	Score	HN1	Points
+1	awesome_kris	-21	1	201
+2	lynniebodd	-20	1	191
+3	Danielaoculus	-19	2	182
+4	ZONK	-19	0	170
+5	freitag68	-18	0	160
+6	DMD-Enditnow	-17	1	151
+7	Spicy - DawnSophia	-17	0	140
+8	D3bb13	-16	0	130
+9	gomarino13	-11	1	121
+ Seagull Stacks - Hard
+#	Player	Score	HN1	Points
+1	ZONK	-13	0	200
+2	Danielaoculus	-12	2	192
+3	DMD-Enditnow	-12	1	181
+4	D3bb13	-12	0	170
+5	gomarino13	-10	0	160
+5	freitag68	-10	0	160
+7	awesome_kris	-8	0	140
+8	lynniebodd	-1	0	130
+9	Spicy - DawnSophia	3	0	120
+ Arizona Modern
+#	Player	Score	HN1	Points
+1	Spicy - DawnSophia	-25	3	203
+2	Danielaoculus	-25	1	191
+3	gomarino13	-23	1	181
+4	lynniebodd	-22	2	172
+4	DMD-Enditnow	-22	2	172
+6	ZONK	-21	1	151
+7	D3bb13	-18	1	141
+8	awesome_kris	-17	0	130
+9	freitag68	-15	1	121
+ Arizona Modern Hard
+#	Player	Score	HN1	Points
+1	freitag68	-23	1	201
+2	Danielaoculus	-16	1	191
+3	awesome_kris	-15	0	180
+4	DMD-Enditnow	-14	2	172
+5	ZONK	-14	0	160
+6	gomarino13	-12	0	150
+6	lynniebodd	-12	0	150
+8	D3bb13	-10	0	130
+9	Spicy - DawnSophia	-8	0	120
+ Labyrinth
+#	Player	Score	HN1	Points
+1	ZONK	-20	3	203
+2	Danielaoculus	-20	1	191
+3	gomarino13	-19	1	181
+4	awesome_kris	-18	3	173
+5	D3bb13	-18	2	162
+6	lynniebodd	-18	1	151
+7	Spicy - DawnSophia	-17	0	140
+8	DMD-Enditnow	-15	1	131
+	freitag68			
+ Labyrinth - Hard
+#	Player	Score	HN1	Points
+1	ZONK	-16	2	202
+2	lynniebodd	-14	2	192
+3	Danielaoculus	-13	2	182
+4	DMD-Enditnow	-12	3	173
+5	awesome_kris	-9	1	161
+6	gomarino13	-8	0	150
+7	Spicy - DawnSophia	-7	2	142
+8	D3bb13	0	2	132
+	freitag68			
+ Mars Gardens
+#	Player	Score	HN1	Points
+1	gomarino13	-21	3	203
+2	Danielaoculus	-21	2	192
+3	lynniebodd	-20	1	181
+4	awesome_kris	-19	4	174
+5	DMD-Enditnow	-19	2	162
+6	freitag68	-18	1	151
+7	Spicy - DawnSophia	-18	0	140
+8	ZONK	-15	0	130
+9	D3bb13	-8	0	120
+ Mars Gardens - Hard
+#	Player	Score	HN1	Points
+1	Danielaoculus	-16	1	201
+2	lynniebodd	-13	0	190
+3	ZONK	-9	0	180
+4	freitag68	-8	0	170
+4	DMD-Enditnow	-8	0	170
+6	awesome_kris	-6	1	151
+7	Spicy - DawnSophia	-3	0	140
+8	gomarino13	-1	0	130
+9	D3bb13	8	0	120
+2024 October Courses
+
+
+SSE - Seagull Stacks
+SSH - Seagull Stacks - Hard
+
+
+AME - Arizona Modern
+AMH - Arizona Modern Hard
+
+
+LBE - Labyrinth
+LBH - Labyrinth - Hard
+
+
+MGE - Mars Gardens
+MGH - Mars Gardens - Hard
+Release 1.2 Built with  using Oracle APEX

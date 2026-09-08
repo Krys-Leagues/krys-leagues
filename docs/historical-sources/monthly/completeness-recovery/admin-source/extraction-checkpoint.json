@@ -1,0 +1,28 @@
+{
+  "captureDate": "2026-09-07",
+  "scope": "finalized historical Monthlies only",
+  "status": "BLOCKED",
+  "blocker": "Authenticated browser exposes a per-player Scores report, but the available browser-control surface provides no safe response-body, cookie, download-path, or DOM-extraction API for exhaustive automation.",
+  "sourceReport": {
+    "pageItemMonthly": "P5_MONTHLY_ID",
+    "pageItemDivision": "P5_LEAGUE_ID",
+    "pageItemPlayer": "P5_PLAYER_ID",
+    "region": "R85296253175858605"
+  },
+  "completedCombinations": [],
+  "completedCombinationKey": "source_player_id + period_id + source_division_id",
+  "counts": {
+    "sourcePlayersChecked": 0,
+    "combinationsChecked": 0,
+    "populatedCombinations": 0,
+    "emptyCombinations": 0,
+    "observations": 0,
+    "scored": 0,
+    "missingScore": 0,
+    "negativeScore": 0,
+    "malformed": 0,
+    "duplicateFingerprints": 0,
+    "conflictingFingerprints": 0
+  },
+  "note": "Zero counts mean extraction has not been completed; they do not assert that the authenticated source contains no data. No source rows or empty-combination claims are manufactured."
+}

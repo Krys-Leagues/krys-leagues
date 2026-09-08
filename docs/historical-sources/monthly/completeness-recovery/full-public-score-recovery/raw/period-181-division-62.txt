@@ -1,0 +1,132 @@
+Skip to Main Content
+Kry's Monthlies
+Search
+0 results
+Install App
+About
+nobody
+	
+2025 June
+106/94 players
+COMPLETED
+	
+Overall Leaders - 2025 June
+Pos	Player	League	Courses
+Played	Total
+Strokes	HN1's	Points
+1	Blutes87	Pro 2	8	-162	13	1,603
+2	4-cough	Pro 3	8	-164	14	1,594
+3	Heisenberg	Beginner	8	-60	3	1,583
+4	KillERBee	Amateur 2	8	-48	7	1,567
+5	steven2018	Pro 1	8	-166	16	1,566
+6	GuyB22	Semi Pro 3	8	-135	7	1,557
+7	Raccoons Whisker	Amateur 3	8	-110	2	1,542
+8	MAMAGOATZ	Amateur 1	8	-85	6	1,526
+8	TILTBOMB	Amateur 3	8	-92	6	1,526
+10	YODA	Pro 1	8	-167	10	1,520
+1 - 10
+Welcome Leaders
+League
+- Select -
+Master
+Elite
+Pro 1
+Pro 2
+Pro 3
+Semi Pro 1
+Beginner
+Welcome
+Pos	Player	Courses
+Played	Total
+Strokes	HN1's	Points
+	MrDachshund81	0			
+	olle	0			
+	JIMMY_BUCKETS	0			
+	Jen	0			
+	SNOWBALL	0			
+	onesilygrl	0			
+1 - 6
+ Players at risk of relegation
+  Point change since last report.
+ Arizona Modern
+#	Player	Score	HN1	Points
+	MrDachshund81			
+	olle			
+	JIMMY_BUCKETS			
+	onesilygrl			
+	SNOWBALL			
+	Jen			
+ Arizona Modern Hard
+#	Player	Score	HN1	Points
+	MrDachshund81			
+	olle			
+	SNOWBALL			
+	onesilygrl			
+	JIMMY_BUCKETS			
+	Jen			
+ Quixote Valley
+#	Player	Score	HN1	Points
+	MrDachshund81			
+	olle			
+	JIMMY_BUCKETS			
+	onesilygrl			
+	SNOWBALL			
+	Jen			
+ Quixote Valley Hard
+#	Player	Score	HN1	Points
+	MrDachshund81			
+	olle			
+	JIMMY_BUCKETS			
+	onesilygrl			
+	SNOWBALL			
+	Jen			
+ Venice
+#	Player	Score	HN1	Points
+	MrDachshund81			
+	olle			
+	SNOWBALL			
+	onesilygrl			
+	JIMMY_BUCKETS			
+	Jen			
+ Venice - Hard
+#	Player	Score	HN1	Points
+	MrDachshund81			
+	olle			
+	JIMMY_BUCKETS			
+	onesilygrl			
+	SNOWBALL			
+	Jen			
+ Mars Gardens
+#	Player	Score	HN1	Points
+	MrDachshund81			
+	olle			
+	SNOWBALL			
+	Jen			
+	JIMMY_BUCKETS			
+	onesilygrl			
+ Mars Gardens - Hard
+#	Player	Score	HN1	Points
+	MrDachshund81			
+	olle			
+	JIMMY_BUCKETS			
+	Jen			
+	SNOWBALL			
+	onesilygrl			
+2025 June Courses
+
+
+AME - Arizona Modern
+AMH - Arizona Modern Hard
+
+
+QVE - Quixote Valley
+QVH - Quixote Valley Hard
+
+
+VNE - Venice
+VNH - Venice - Hard
+
+
+MGE - Mars Gardens
+MGH - Mars Gardens - Hard
+Release 1.2 Built with  using Oracle APEX

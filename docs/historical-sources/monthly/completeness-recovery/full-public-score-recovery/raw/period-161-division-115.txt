@@ -1,0 +1,178 @@
+Skip to Main Content
+Kry's Monthlies
+Search
+0 results
+Install App
+About
+nobody
+	
+2025 May
+105/92 players
+COMPLETED
+	
+Overall Leaders - 2025 May
+Pos	Player	League	Courses
+Played	Total
+Strokes	HN1's	Points
+1	TILTBOMB	Beginner	8	-106	15	1,615
+2	Blutes87	Pro 3	8	-150	18	1,598
+3	POLANECE	Elite	8	-169	28	1,578
+4	Sj_76	Amateur 1	8	-119	14	1,574
+5	StevieWonderful	Semi Pro 2	8	-106	20	1,570
+6	MAMAGOATZ	Amateur 2	8	-75	11	1,551
+7	Chelle💯	Semi Pro 3	8	-113	18	1,548
+8	KillERBee	Amateur 3	8	-36	13	1,543
+9	musical_atv 🎻	Amateur 2	8	-66	11	1,531
+9	Sandtrap	Amateur 1	8	-112	11	1,531
+1 - 10
+Semi Pro 3 Leaders
+League
+- Select -
+Master
+Elite
+Pro 1
+Pro 2
+Pro 3
+Semi Pro 1
+Beginner
+Welcome
+115
+Pos	Player	Courses
+Played	Total
+Strokes	HN1's	Points
+1
+	Chelle💯	8	-113	18	1,548
+2
+	BERT	8	-106	17	1,447
+3
+	Savy	8	-98	13	1,423
+4
+	Andrew_Holmes	8	-86	12	1,342
+5
+	NuttyGrandpa	8	-62	12	1,282
+6
+	plucky✌	6	-76	9	1,059
+7
+	Master_KP	4	-36	4	604
+8
+	freitag68	2	-17	4	364
+9
+	KDK	1	-16	1	141
+	olle	0			
+1 - 10
+ Players at risk of relegation
+  Point change since last report.
+ Original Gothic
+#	Player	Score	HN1	Points
+1	NuttyGrandpa	-19	4	204
+2	Chelle💯	-17	3	193
+3	Andrew_Holmes	-17	2	182
+4	Savy	-16	3	173
+5	Master_KP	-16	2	162
+5	BERT	-16	2	162
+7	KDK	-16	1	141
+8	plucky✌	-15	2	132
+	olle			
+	freitag68			
+ Original Gothic Hard
+#	Player	Score	HN1	Points
+1	Savy	-18	1	201
+2	Chelle💯	-15	1	191
+3	Andrew_Holmes	-14	1	181
+4	BERT	-13	1	171
+4	plucky✌	-13	1	171
+6	NuttyGrandpa	-11	0	150
+7	Master_KP	-5	0	140
+	KDK			
+	olle			
+	freitag68			
+ Labyrinth
+#	Player	Score	HN1	Points
+1	plucky✌	-18	2	202
+1	Chelle💯	-18	2	202
+3	Savy	-18	1	181
+4	BERT	-15	3	173
+5	Andrew_Holmes	-12	2	162
+6	NuttyGrandpa	-12	0	150
+	KDK			
+	Master_KP			
+	olle			
+	freitag68			
+ Labyrinth - Hard
+#	Player	Score	HN1	Points
+1	plucky✌	-15	2	202
+2	BERT	-14	0	190
+3	Chelle💯	-13	3	183
+4	Andrew_Holmes	-11	1	171
+5	Savy	-7	1	161
+6	NuttyGrandpa	-1	2	152
+	Master_KP			
+	KDK			
+	olle			
+	freitag68			
+ Meow Wolf
+#	Player	Score	HN1	Points
+1	Chelle💯	-18	2	202
+2	BERT	-17	4	194
+3	Andrew_Holmes	-17	2	182
+4	NuttyGrandpa	-17	1	171
+5	Savy	-16	2	162
+6	Master_KP	-14	2	152
+	KDK			
+	freitag68			
+	olle			
+	plucky✌			
+ Meow Wolf - Hard
+#	Player	Score	HN1	Points
+1	Chelle💯	-14	3	203
+2	Savy	-12	2	192
+3	BERT	-11	3	183
+4	Andrew_Holmes	-11	2	172
+5	NuttyGrandpa	-1	4	164
+6	Master_KP	-1	0	150
+	KDK			
+	freitag68			
+	olle			
+	plucky✌			
+ Raptor Cliff's
+#	Player	Score	HN1	Points
+1	Chelle💯	-16	3	203
+2	Savy	-15	3	193
+3	freitag68	-15	2	182
+4	BERT	-14	3	173
+5	plucky✌	-12	1	161
+6	Andrew_Holmes	-10	2	152
+7	NuttyGrandpa	-7	0	140
+	olle			
+	KDK			
+	Master_KP			
+ Raptor Cliff's - Hard
+#	Player	Score	HN1	Points
+1	BERT	-6	1	201
+2	plucky✌	-3	1	191
+3	freitag68	-2	2	182
+4	Chelle💯	-2	1	171
+5	Savy	4	0	160
+6	NuttyGrandpa	6	1	151
+7	Andrew_Holmes	6	0	140
+	olle			
+	KDK			
+	Master_KP			
+2025 May Courses
+
+
+OGE - Original Gothic
+OGH - Original Gothic Hard
+
+
+LBE - Labyrinth
+LBH - Labyrinth - Hard
+
+
+MWE - Meow Wolf
+MWH - Meow Wolf - Hard
+
+
+RCE - Raptor Cliff's
+RCH - Raptor Cliff's - Hard
+Release 1.2 Built with  using Oracle APEX

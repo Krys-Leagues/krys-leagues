@@ -1,0 +1,7 @@
+classification	count	definition
+EXACT MATCH	384	Logical key and score semantics agree between old source and fresh public source
+OLD BLANK / NEW SCORED	1	Same logical row; old score blank/unplayed and fresh score numeric
+OLD SCORED / NEW BLANK	0	Same logical row; old score numeric and fresh score blank/unplayed
+SCORE CONFLICT	0	Same logical row with different numeric scores
+OLD ONLY	6900	Logical key exists only in old retained source
+NEW ONLY	15279	Logical key exists only in fresh public source; excludes the one overlapping blank-to-scored row

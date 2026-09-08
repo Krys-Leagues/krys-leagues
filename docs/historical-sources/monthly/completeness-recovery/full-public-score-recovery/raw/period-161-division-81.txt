@@ -1,0 +1,156 @@
+Skip to Main Content
+Kry's Monthlies
+Search
+0 results
+Install App
+About
+nobody
+	
+2025 May
+105/92 players
+COMPLETED
+	
+Overall Leaders - 2025 May
+Pos	Player	League	Courses
+Played	Total
+Strokes	HN1's	Points
+1	TILTBOMB	Beginner	8	-106	15	1,615
+2	Blutes87	Pro 3	8	-150	18	1,598
+3	POLANECE	Elite	8	-169	28	1,578
+4	Sj_76	Amateur 1	8	-119	14	1,574
+5	StevieWonderful	Semi Pro 2	8	-106	20	1,570
+6	MAMAGOATZ	Amateur 2	8	-75	11	1,551
+7	Chelle💯	Semi Pro 3	8	-113	18	1,548
+8	KillERBee	Amateur 3	8	-36	13	1,543
+9	musical_atv 🎻	Amateur 2	8	-66	11	1,531
+9	Sandtrap	Amateur 1	8	-112	11	1,531
+1 - 10
+Beginner Leaders
+League
+- Select -
+Master
+Elite
+Pro 1
+Pro 2
+Pro 3
+Semi Pro 1
+Beginner
+Welcome
+Pos	Player	Courses
+Played	Total
+Strokes	HN1's	Points
+1
+	TILTBOMB	8	-106	15	1,615
+2
+	Raccoons Whisker	8	-87	11	1,521
+3
+	sirtacoman13	8	-4	12	1,402
+4
+	bendybear	8	12	11	1,331
+5
+	KYLE	7	-11	4	1,204
+	ladybugg660	2	0	1	311
+7
+	GALICE1975	1	11	0	170
+	Merged into 8189	0			
+1 - 8
+ Players at risk of relegation
+  Point change since last report.
+ Original Gothic
+#	Player	Score	HN1	Points
+1	TILTBOMB	-20	3	203
+2	KYLE	-17	3	193
+3	Raccoons Whisker	-17	1	181
+4	sirtacoman13	-11	2	172
+5	bendybear	-6	2	162
+	Merged into 8189			
+	ladybugg660			
+	GALICE1975			
+ Original Gothic Hard
+#	Player	Score	HN1	Points
+1	TILTBOMB	-14	1	201
+2	Raccoons Whisker	-10	0	190
+3	KYLE	-3	0	180
+4	sirtacoman13	2	1	171
+5	bendybear	5	0	160
+	ladybugg660			
+	Merged into 8189			
+	GALICE1975			
+ Labyrinth
+#	Player	Score	HN1	Points
+1	TILTBOMB	-15	1	201
+2	Raccoons Whisker	-12	0	190
+3	KYLE	-8	0	180
+4	sirtacoman13	-4	2	172
+5	ladybugg660	2	1	161
+6	bendybear	4	0	150
+	GALICE1975			
+	Merged into 8189			
+ Labyrinth - Hard
+#	Player	Score	HN1	Points
+1	TILTBOMB	-8	1	201
+2	Raccoons Whisker	-5	0	190
+3	sirtacoman13	5	0	180
+4	KYLE	11	0	170
+4	GALICE1975	11	0	170
+6	bendybear	12	2	152
+	Merged into 8189			
+	ladybugg660			
+ Meow Wolf
+#	Player	Score	HN1	Points
+1	TILTBOMB	-15	1	201
+2	Raccoons Whisker	-14	3	193
+3	sirtacoman13	-9	2	182
+4	bendybear	-7	2	172
+5	KYLE	-5	1	161
+6	ladybugg660	-2	0	150
+	Merged into 8189			
+	GALICE1975			
+ Meow Wolf - Hard
+#	Player	Score	HN1	Points
+1	TILTBOMB	-12	4	204
+2	Raccoons Whisker	-11	3	193
+3	bendybear	2	2	182
+4	sirtacoman13	8	3	173
+5	KYLE	14	0	160
+	Merged into 8189			
+	GALICE1975			
+	ladybugg660			
+ Raptor Cliff's
+#	Player	Score	HN1	Points
+1	TILTBOMB	-13	2	202
+2	Raccoons Whisker	-12	2	192
+3	sirtacoman13	-9	1	181
+4	bendybear	-7	1	171
+5	KYLE	-3	0	160
+	ladybugg660			
+	Merged into 8189			
+	GALICE1975			
+ Raptor Cliff's - Hard
+#	Player	Score	HN1	Points
+1	TILTBOMB	-9	2	202
+2	Raccoons Whisker	-6	2	192
+3	bendybear	9	2	182
+4	sirtacoman13	14	1	171
+	KYLE			
+	GALICE1975			
+	Merged into 8189			
+	ladybugg660			
+2025 May Courses
+
+
+OGE - Original Gothic
+OGH - Original Gothic Hard
+
+
+LBE - Labyrinth
+LBH - Labyrinth - Hard
+
+
+MWE - Meow Wolf
+MWH - Meow Wolf - Hard
+
+
+RCE - Raptor Cliff's
+RCH - Raptor Cliff's - Hard
+Release 1.2 Built with  using Oracle APEX

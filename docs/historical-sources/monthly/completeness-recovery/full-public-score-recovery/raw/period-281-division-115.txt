@@ -1,0 +1,138 @@
+Skip to Main Content
+Kry's Monthlies
+Search
+0 results
+Install App
+About
+nobody
+	
+2025 November
+108/88 players
+COMPLETED
+	
+Overall Leaders - 2025 November
+Pos	Player	League	Courses
+Played	Total
+Strokes	HN1's	Points
+1	Zanetti	Master	8	-217	40	1,590
+2	Nic79	Semi Pro 3	8	-119	11	1,581
+3	SlugJug33	Amateur 1	8	-145	13	1,573
+4	Derby_Daz	Elite	8	-195	27	1,567
+5	ZoeDarlin	Semi Pro 1	8	-153	15	1,565
+6	INDY	Master	8	-210	39	1,559
+7	The Real JB	Amateur 1	8	-119	11	1,541
+8	JUICE_WRLD	Pro 3	8	-165	19	1,529
+9	PaulV-PPP 🇨🇦	Pro 2	8	-153	19	1,519
+10	Jennem	Semi Pro 2	8	-101	10	1,490
+1 - 10
+Semi Pro 3 Leaders
+League
+- Select -
+Master
+Elite
+Pro 1
+Pro 2
+Pro 3
+Semi Pro 1
+Beginner
+Welcome
+115
+Pos	Player	Courses
+Played	Total
+Strokes	HN1's	Points
+1
+	Nic79	8	-119	11	1,581
+2
+	KillERBee	8	-54	9	1,469
+3
+	Heisenberg	8	-53	3	1,453
+4
+	Savy	2	-29	1	391
+5
+	WAREY84	2	-26	7	387
+	TommyGunnzFund	0			
+1 - 6
+ Players at risk of relegation
+  Point change since last report.
+ Cherry Blossom
+#	Player	Score	HN1	Points
+1	Nic79	-23	1	201
+2	Savy	-17	0	190
+3	KillERBee	-16	2	182
+4	Heisenberg	-16	0	170
+	TommyGunnzFund			
+	WAREY84			
+ Cherry Blossom Hard
+#	Player	Score	HN1	Points
+1	Savy	-12	1	201
+2	Nic79	-8	0	190
+2	Heisenberg	-8	0	190
+4	KillERBee	-2	0	170
+	TommyGunnzFund			
+	WAREY84			
+ Temple at Zerzura
+#	Player	Score	HN1	Points
+1	Nic79	-17	2	202
+2	Heisenberg	-12	0	190
+3	KillERBee	-5	0	180
+	Savy			
+	WAREY84			
+	TommyGunnzFund			
+ Temple at Zerzura - Hard
+#	Player	Score	HN1	Points
+1	Nic79	-9	1	201
+2	KillERBee	5	0	190
+3	Heisenberg	9	0	180
+	Savy			
+	WAREY84			
+	TommyGunnzFund			
+ 20,000 Leagues Under The Sea
+#	Player	Score	HN1	Points
+1	Nic79	-19	2	202
+2	Heisenberg	-13	1	191
+3	KillERBee	-12	1	181
+	Savy			
+	TommyGunnzFund			
+	WAREY84			
+ 20,000 Leagues Hard
+#	Player	Score	HN1	Points
+1	KillERBee	-15	3	203
+2	Nic79	-13	1	191
+3	Heisenberg	-4	1	181
+	Savy			
+	WAREY84			
+	TommyGunnzFund			
+ Forgotten Fairyland
+#	Player	Score	HN1	Points
+1	WAREY84	-25	4	204
+2	Nic79	-20	3	193
+3	Heisenberg	-17	1	181
+4	KillERBee	-7	3	173
+	TommyGunnzFund			
+	Savy			
+ Forgotten Fairyland - Hard
+#	Player	Score	HN1	Points
+1	Nic79	-10	1	201
+2	KillERBee	-2	0	190
+3	WAREY84	-1	3	183
+4	Heisenberg	8	0	170
+	TommyGunnzFund			
+	Savy			
+2025 November Courses
+
+
+CBE - Cherry Blossom
+CBH - Cherry Blossom Hard
+
+
+ZZE - Temple at Zerzura
+ZZH - Temple at Zerzura - Hard
+
+
+20E - 20,000 Leagues Under The Sea
+20H - 20,000 Leagues Hard
+
+
+FFE - Forgotten Fairyland
+FFH - Forgotten Fairyland - Hard
+Release 1.2 Built with  using Oracle APEX

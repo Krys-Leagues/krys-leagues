@@ -94,6 +94,11 @@ export type MonthlyWebsitePreview = {
 
 export type MonthlyWebsiteCsvRow = Record<string, string>
 
+/** Only valid numeric finalized rows require identity review. */
+export function isMonthlyIdentityReviewObservation(row: MonthlyWebsiteObservation) {
+  return row.importable && row.scoreState === "SCORED OBSERVATION" && row.score !== null && row.issues.length === 0
+}
+
 const months = new Map([
   ["January", 1], ["February", 2], ["March", 3], ["April", 4],
   ["May", 5], ["June", 6], ["July", 7], ["August", 8],

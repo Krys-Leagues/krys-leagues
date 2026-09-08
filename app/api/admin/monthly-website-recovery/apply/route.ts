@@ -1,7 +1,8 @@
 import { randomUUID } from "node:crypto"
 
 import { authorizedAdminClient, loadIdentityDirectory } from "@/app/api/admin/records/arizona-modern/_shared"
-import { MonthlyCommitValidationError, validateMonthlyWebsiteCommitRequest } from "@/lib/importer/monthlyWebsiteCommitValidation"
+import { MonthlyCommitValidationError } from "@/lib/importer/monthlyWebsiteCommitValidation"
+import { validateMonthlyRepairedCommitRequest } from "@/lib/importer/monthlyRepairedCommitValidation"
 
 function jsonError(message: string, status: number, correlationId?: string) {
   return Response.json({ error: message, correlationId }, { status, headers: { "Cache-Control": "no-store" } })
@@ -19,7 +20,7 @@ export async function POST(request: Request) {
     stage = "authorization-passed"
     const directory = await loadIdentityDirectory(authorization.supabase!)
     const body = await request.json()
-    const prepared = await validateMonthlyWebsiteCommitRequest(body, directory)
+    const prepared = await validateMonthlyRepairedCommitRequest(body, authorization.supabase!, directory)
     stage = "validation-passed"
 
     stage = "before-rpc"

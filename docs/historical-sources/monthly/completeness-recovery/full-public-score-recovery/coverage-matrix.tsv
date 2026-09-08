@@ -1,0 +1,322 @@
+period	period_id	status	division	division_id	leader_rows	course_tables	player_counts_per_course	observations	scored	unplayed	classification	raw_json
+2026 August	461	COMPLETED	Master	21	10	8	Cherry Blossom:10;Cherry Blossom Hard:10;Shangri-La:10;Shangri-La - Hard:10;Ice Lair:10;Ice Lair - Hard:10;Hollywood:10;Hollywood - Hard:10	80	79	1	COMPLETE_DATA_RECOVERED	raw/period-461-division-21.json
+2026 August	461	COMPLETED	Elite	22	10	8	Cherry Blossom:10;Cherry Blossom Hard:10;Shangri-La:10;Shangri-La - Hard:10;Ice Lair:10;Ice Lair - Hard:10;Hollywood:10;Hollywood - Hard:10	80	69	11	COMPLETE_DATA_RECOVERED	raw/period-461-division-22.json
+2026 August	461	COMPLETED	Pro 1	23	10	8	Cherry Blossom:10;Cherry Blossom Hard:10;Shangri-La:10;Shangri-La - Hard:10;Ice Lair:10;Ice Lair - Hard:10;Hollywood:10;Hollywood - Hard:10	80	78	2	COMPLETE_DATA_RECOVERED	raw/period-461-division-23.json
+2026 August	461	COMPLETED	Pro 2	24	10	8	Cherry Blossom:10;Cherry Blossom Hard:10;Shangri-La:10;Shangri-La - Hard:10;Ice Lair:10;Ice Lair - Hard:10;Hollywood:10;Hollywood - Hard:10	80	56	24	COMPLETE_DATA_RECOVERED	raw/period-461-division-24.json
+2026 August	461	COMPLETED	Pro 3	25	10	8	Cherry Blossom:10;Cherry Blossom Hard:10;Shangri-La:10;Shangri-La - Hard:10;Ice Lair:10;Ice Lair - Hard:10;Hollywood:10;Hollywood - Hard:10	80	58	22	COMPLETE_DATA_RECOVERED	raw/period-461-division-25.json
+2026 August	461	COMPLETED	Semi Pro 1	113	5	8	Cherry Blossom:5;Cherry Blossom Hard:5;Shangri-La:5;Shangri-La - Hard:5;Ice Lair:5;Ice Lair - Hard:5;Hollywood:5;Hollywood - Hard:5	40	16	24	COMPLETE_DATA_RECOVERED	raw/period-461-division-113.json
+2026 August	461	COMPLETED	Beginner	81	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-461-division-81.json
+2026 August	461	COMPLETED	Welcome	62	5	8	Cherry Blossom:5;Cherry Blossom Hard:5;Shangri-La:5;Shangri-La - Hard:5;Ice Lair:5;Ice Lair - Hard:5;Hollywood:5;Hollywood - Hard:5	40	16	24	COMPLETE_DATA_RECOVERED	raw/period-461-division-62.json
+2026 August	461	COMPLETED	Semi Pro 2	114	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-461-division-114.json
+2026 August	461	COMPLETED	Semi Pro 3	115	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-461-division-115.json
+2026 July	441	COMPLETED	Master	21	10	8	Tourist Trap:10;Tourist Trap Hard:10;Upside Town:10;Upside Town - Hard:10;Gardens of Babylon:10;Gardens of Babylon Hard:10;Mars Gardens:10;Mars Gardens - Hard:10	80	80	0	COMPLETE_DATA_RECOVERED	raw/period-441-division-21.json
+2026 July	441	COMPLETED	Elite	22	10	8	Tourist Trap:10;Tourist Trap Hard:10;Upside Town:10;Upside Town - Hard:10;Gardens of Babylon:10;Gardens of Babylon Hard:10;Mars Gardens:10;Mars Gardens - Hard:10	80	70	10	COMPLETE_DATA_RECOVERED	raw/period-441-division-22.json
+2026 July	441	COMPLETED	Pro 1	23	9	8	Tourist Trap:9;Tourist Trap Hard:9;Upside Town:9;Upside Town - Hard:9;Gardens of Babylon:9;Gardens of Babylon Hard:9;Mars Gardens:9;Mars Gardens - Hard:9	72	72	0	COMPLETE_DATA_RECOVERED	raw/period-441-division-23.json
+2026 July	441	COMPLETED	Pro 2	24	10	8	Tourist Trap:10;Tourist Trap Hard:10;Upside Town:10;Upside Town - Hard:10;Gardens of Babylon:10;Gardens of Babylon Hard:10;Mars Gardens:10;Mars Gardens - Hard:10	80	56	24	COMPLETE_DATA_RECOVERED	raw/period-441-division-24.json
+2026 July	441	COMPLETED	Pro 3	25	10	8	Tourist Trap:10;Tourist Trap Hard:10;Upside Town:10;Upside Town - Hard:10;Gardens of Babylon:10;Gardens of Babylon Hard:10;Mars Gardens:10;Mars Gardens - Hard:10	80	54	26	COMPLETE_DATA_RECOVERED	raw/period-441-division-25.json
+2026 July	441	COMPLETED	Semi Pro 1	113	7	8	Tourist Trap:7;Tourist Trap Hard:7;Upside Town:7;Upside Town - Hard:7;Gardens of Babylon:7;Gardens of Babylon Hard:7;Mars Gardens:7;Mars Gardens - Hard:7	56	51	5	COMPLETE_DATA_RECOVERED	raw/period-441-division-113.json
+2026 July	441	COMPLETED	Beginner	81	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-441-division-81.json
+2026 July	441	COMPLETED	Welcome	62	23	8	Tourist Trap:23;Tourist Trap Hard:23;Upside Town:23;Upside Town - Hard:23;Gardens of Babylon:23;Gardens of Babylon Hard:23;Mars Gardens:23;Mars Gardens - Hard:23	184	10	174	COMPLETE_DATA_RECOVERED	raw/period-441-division-62.json
+2026 July	441	COMPLETED	Semi Pro 2	114	8	8	Tourist Trap:8;Tourist Trap Hard:8;Upside Town:8;Upside Town - Hard:8;Gardens of Babylon:8;Gardens of Babylon Hard:8;Mars Gardens:8;Mars Gardens - Hard:8	64	38	26	COMPLETE_DATA_RECOVERED	raw/period-441-division-114.json
+2026 July	441	COMPLETED	Semi Pro 3	115	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-441-division-115.json
+2026 June	421	COMPLETED	Master	21	10	8	Seagull Stacks:10;Seagull Stacks - Hard:10;Bogey's Bonanza:10;Bogey's Bonanza Hard:10;Journey to the Center of the Earth:10;Center of the Earth - Hard:10;Alfheim:10;Alfheim Hard:10	80	74	6	COMPLETE_DATA_RECOVERED	raw/period-421-division-21.json
+2026 June	421	COMPLETED	Elite	22	10	8	Seagull Stacks:10;Seagull Stacks - Hard:10;Bogey's Bonanza:10;Bogey's Bonanza Hard:10;Journey to the Center of the Earth:10;Center of the Earth - Hard:10;Alfheim:10;Alfheim Hard:10	80	77	3	COMPLETE_DATA_RECOVERED	raw/period-421-division-22.json
+2026 June	421	COMPLETED	Pro 1	23	10	8	Seagull Stacks:10;Seagull Stacks - Hard:10;Bogey's Bonanza:10;Bogey's Bonanza Hard:10;Journey to the Center of the Earth:10;Center of the Earth - Hard:10;Alfheim:10;Alfheim Hard:10	80	72	8	COMPLETE_DATA_RECOVERED	raw/period-421-division-23.json
+2026 June	421	COMPLETED	Pro 2	24	7	8	Seagull Stacks:7;Seagull Stacks - Hard:7;Bogey's Bonanza:7;Bogey's Bonanza Hard:7;Journey to the Center of the Earth:7;Center of the Earth - Hard:7;Alfheim:7;Alfheim Hard:7	56	40	16	COMPLETE_DATA_RECOVERED	raw/period-421-division-24.json
+2026 June	421	COMPLETED	Pro 3	25	7	8	Seagull Stacks:7;Seagull Stacks - Hard:7;Bogey's Bonanza:7;Bogey's Bonanza Hard:7;Journey to the Center of the Earth:7;Center of the Earth - Hard:7;Alfheim:7;Alfheim Hard:7	56	26	30	COMPLETE_DATA_RECOVERED	raw/period-421-division-25.json
+2026 June	421	COMPLETED	Semi Pro 1	113	10	8	Seagull Stacks:10;Seagull Stacks - Hard:10;Bogey's Bonanza:10;Bogey's Bonanza Hard:10;Journey to the Center of the Earth:10;Center of the Earth - Hard:10;Alfheim:10;Alfheim Hard:10	80	67	13	COMPLETE_DATA_RECOVERED	raw/period-421-division-113.json
+2026 June	421	COMPLETED	Beginner	81	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-421-division-81.json
+2026 June	421	COMPLETED	Welcome	62	25	8	Seagull Stacks:25;Seagull Stacks - Hard:25;Bogey's Bonanza:25;Bogey's Bonanza Hard:25;Journey to the Center of the Earth:25;Center of the Earth - Hard:25;Alfheim:25;Alfheim Hard:25	200	15	185	COMPLETE_DATA_RECOVERED	raw/period-421-division-62.json
+2026 June	421	COMPLETED	Semi Pro 2	114	6	8	Seagull Stacks:6;Seagull Stacks - Hard:6;Bogey's Bonanza:6;Bogey's Bonanza Hard:6;Journey to the Center of the Earth:6;Center of the Earth - Hard:6;Alfheim:6;Alfheim Hard:6	48	25	23	COMPLETE_DATA_RECOVERED	raw/period-421-division-114.json
+2026 June	421	COMPLETED	Semi Pro 3	115	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-421-division-115.json
+2026 May	401	COMPLETED	Master	21	10	8	Quixote Valley:10;Quixote Valley Hard:10;Atlantis:10;Atlantis Hard:10;Raptor Cliff's:10;Raptor Cliff's - Hard:10;Tokyo:10;Tokyo - Hard:10	80	80	0	COMPLETE_DATA_RECOVERED	raw/period-401-division-21.json
+2026 May	401	COMPLETED	Elite	22	10	8	Quixote Valley:10;Quixote Valley Hard:10;Atlantis:10;Atlantis Hard:10;Raptor Cliff's:10;Raptor Cliff's - Hard:10;Tokyo:10;Tokyo - Hard:10	80	71	9	COMPLETE_DATA_RECOVERED	raw/period-401-division-22.json
+2026 May	401	COMPLETED	Pro 1	23	10	8	Quixote Valley:10;Quixote Valley Hard:10;Atlantis:10;Atlantis Hard:10;Raptor Cliff's:10;Raptor Cliff's - Hard:10;Tokyo:10;Tokyo - Hard:10	80	60	20	COMPLETE_DATA_RECOVERED	raw/period-401-division-23.json
+2026 May	401	COMPLETED	Pro 2	24	9	8	Quixote Valley:9;Quixote Valley Hard:9;Atlantis:9;Atlantis Hard:9;Raptor Cliff's:9;Raptor Cliff's - Hard:9;Tokyo:9;Tokyo - Hard:9	72	56	16	COMPLETE_DATA_RECOVERED	raw/period-401-division-24.json
+2026 May	401	COMPLETED	Pro 3	25	12	8	Quixote Valley:12;Quixote Valley Hard:12;Atlantis:12;Atlantis Hard:12;Raptor Cliff's:12;Raptor Cliff's - Hard:12;Tokyo:12;Tokyo - Hard:12	96	64	32	COMPLETE_DATA_RECOVERED	raw/period-401-division-25.json
+2026 May	401	COMPLETED	Semi Pro 1	113	10	8	Quixote Valley:10;Quixote Valley Hard:10;Atlantis:10;Atlantis Hard:10;Raptor Cliff's:10;Raptor Cliff's - Hard:10;Tokyo:10;Tokyo - Hard:10	80	62	18	COMPLETE_DATA_RECOVERED	raw/period-401-division-113.json
+2026 May	401	COMPLETED	Beginner	81	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-401-division-81.json
+2026 May	401	COMPLETED	Welcome	62	8	8	Quixote Valley:8;Quixote Valley Hard:8;Atlantis:8;Atlantis Hard:8;Raptor Cliff's:8;Raptor Cliff's - Hard:8;Tokyo:8;Tokyo - Hard:8	64	2	62	COMPLETE_DATA_RECOVERED	raw/period-401-division-62.json
+2026 May	401	COMPLETED	Semi Pro 2	114	7	8	Quixote Valley:7;Quixote Valley Hard:7;Atlantis:7;Atlantis Hard:7;Raptor Cliff's:7;Raptor Cliff's - Hard:7;Tokyo:7;Tokyo - Hard:7	56	28	28	COMPLETE_DATA_RECOVERED	raw/period-401-division-114.json
+2026 May	401	COMPLETED	Semi Pro 3	115	7	8	Quixote Valley:7;Quixote Valley Hard:7;Atlantis:7;Atlantis Hard:7;Raptor Cliff's:7;Raptor Cliff's - Hard:7;Tokyo:7;Tokyo - Hard:7	56	10	46	COMPLETE_DATA_RECOVERED	raw/period-401-division-115.json
+2026 April	381	COMPLETED	Master	21	10	8	Labyrinth:10;Labyrinth - Hard:10;El Dorado:10;El Dorado Hard:10;Wallace & Gromit:10;Wallace & Gromit - Hard:10;8-Bit Lair:10;8-Bit Lair - Hard:10	80	76	4	COMPLETE_DATA_RECOVERED	raw/period-381-division-21.json
+2026 April	381	COMPLETED	Elite	22	10	8	Labyrinth:10;Labyrinth - Hard:10;El Dorado:10;El Dorado Hard:10;Wallace & Gromit:10;Wallace & Gromit - Hard:10;8-Bit Lair:10;8-Bit Lair - Hard:10	80	72	8	COMPLETE_DATA_RECOVERED	raw/period-381-division-22.json
+2026 April	381	COMPLETED	Pro 1	23	10	8	Labyrinth:10;Labyrinth - Hard:10;El Dorado:10;El Dorado Hard:10;Wallace & Gromit:10;Wallace & Gromit - Hard:10;8-Bit Lair:10;8-Bit Lair - Hard:10	80	64	16	COMPLETE_DATA_RECOVERED	raw/period-381-division-23.json
+2026 April	381	COMPLETED	Pro 2	24	10	8	Labyrinth:10;Labyrinth - Hard:10;El Dorado:10;El Dorado Hard:10;Wallace & Gromit:10;Wallace & Gromit - Hard:10;8-Bit Lair:10;8-Bit Lair - Hard:10	80	64	16	COMPLETE_DATA_RECOVERED	raw/period-381-division-24.json
+2026 April	381	COMPLETED	Pro 3	25	12	8	Labyrinth:12;Labyrinth - Hard:12;El Dorado:12;El Dorado Hard:12;Wallace & Gromit:12;Wallace & Gromit - Hard:12;8-Bit Lair:12;8-Bit Lair - Hard:12	96	84	12	COMPLETE_DATA_RECOVERED	raw/period-381-division-25.json
+2026 April	381	COMPLETED	Semi Pro 1	113	10	8	Labyrinth:10;Labyrinth - Hard:10;El Dorado:10;El Dorado Hard:10;Wallace & Gromit:10;Wallace & Gromit - Hard:10;8-Bit Lair:10;8-Bit Lair - Hard:10	80	74	6	COMPLETE_DATA_RECOVERED	raw/period-381-division-113.json
+2026 April	381	COMPLETED	Beginner	81	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-381-division-81.json
+2026 April	381	COMPLETED	Welcome	62	12	8	Labyrinth:12;Labyrinth - Hard:12;El Dorado:12;El Dorado Hard:12;Wallace & Gromit:12;Wallace & Gromit - Hard:12;8-Bit Lair:12;8-Bit Lair - Hard:12	96	27	69	COMPLETE_DATA_RECOVERED	raw/period-381-division-62.json
+2026 April	381	COMPLETED	Semi Pro 2	114	8	8	Labyrinth:8;Labyrinth - Hard:8;El Dorado:8;El Dorado Hard:8;Wallace & Gromit:8;Wallace & Gromit - Hard:8;8-Bit Lair:8;8-Bit Lair - Hard:8	64	54	10	COMPLETE_DATA_RECOVERED	raw/period-381-division-114.json
+2026 April	381	COMPLETED	Semi Pro 3	115	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-381-division-115.json
+2026 March	361	COMPLETED	Master	21	10	8	Arizona Modern:10;Arizona Modern Hard:10;Original Gothic:10;Original Gothic Hard:10;Sweetopia:10;Sweetopia - Hard:10;Laser Lair:10;Laser Lair - Hard:10	80	77	3	COMPLETE_DATA_RECOVERED	raw/period-361-division-21.json
+2026 March	361	COMPLETED	Elite	22	10	8	Arizona Modern:10;Arizona Modern Hard:10;Original Gothic:10;Original Gothic Hard:10;Sweetopia:10;Sweetopia - Hard:10;Laser Lair:10;Laser Lair - Hard:10	80	78	2	COMPLETE_DATA_RECOVERED	raw/period-361-division-22.json
+2026 March	361	COMPLETED	Pro 1	23	10	8	Arizona Modern:10;Arizona Modern Hard:10;Original Gothic:10;Original Gothic Hard:10;Sweetopia:10;Sweetopia - Hard:10;Laser Lair:10;Laser Lair - Hard:10	80	76	4	COMPLETE_DATA_RECOVERED	raw/period-361-division-23.json
+2026 March	361	COMPLETED	Pro 2	24	9	8	Arizona Modern:9;Arizona Modern Hard:9;Original Gothic:9;Original Gothic Hard:9;Sweetopia:9;Sweetopia - Hard:9;Laser Lair:9;Laser Lair - Hard:9	72	71	1	COMPLETE_DATA_RECOVERED	raw/period-361-division-24.json
+2026 March	361	COMPLETED	Pro 3	25	13	8	Arizona Modern:13;Arizona Modern Hard:13;Original Gothic:13;Original Gothic Hard:13;Sweetopia:13;Sweetopia - Hard:13;Laser Lair:13;Laser Lair - Hard:13	104	92	12	COMPLETE_DATA_RECOVERED	raw/period-361-division-25.json
+2026 March	361	COMPLETED	Semi Pro 1	113	10	8	Arizona Modern:10;Arizona Modern Hard:10;Original Gothic:10;Original Gothic Hard:10;Sweetopia:10;Sweetopia - Hard:10;Laser Lair:10;Laser Lair - Hard:10	80	80	0	COMPLETE_DATA_RECOVERED	raw/period-361-division-113.json
+2026 March	361	COMPLETED	Beginner	81	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-361-division-81.json
+2026 March	361	COMPLETED	Welcome	62	2	8	Arizona Modern:2;Arizona Modern Hard:2;Original Gothic:2;Original Gothic Hard:2;Sweetopia:2;Sweetopia - Hard:2;Laser Lair:2;Laser Lair - Hard:2	16	10	6	COMPLETE_DATA_RECOVERED	raw/period-361-division-62.json
+2026 March	361	COMPLETED	Semi Pro 2	114	7	8	Arizona Modern:7;Arizona Modern Hard:7;Original Gothic:7;Original Gothic Hard:7;Sweetopia:7;Sweetopia - Hard:7;Laser Lair:7;Laser Lair - Hard:7	56	56	0	COMPLETE_DATA_RECOVERED	raw/period-361-division-114.json
+2026 March	361	COMPLETED	Semi Pro 3	115	5	8	Arizona Modern:5;Arizona Modern Hard:5;Original Gothic:5;Original Gothic Hard:5;Sweetopia:5;Sweetopia - Hard:5;Laser Lair:5;Laser Lair - Hard:5	40	21	19	COMPLETE_DATA_RECOVERED	raw/period-361-division-115.json
+2026 February	341	COMPLETED	Master	21	10	8	Widow’s Walkabout:10;Widow’s Walkabout - Hard:10;Meow Wolf:10;Meow Wolf - Hard:10;Crystal Lair:10;Crystal Lair - Hard:10;Tiki à Coco:10;Tiki à Coco - Hard:10	80	80	0	COMPLETE_DATA_RECOVERED	raw/period-341-division-21.json
+2026 February	341	COMPLETED	Elite	22	9	8	Widow’s Walkabout:9;Widow’s Walkabout - Hard:9;Meow Wolf:9;Meow Wolf - Hard:9;Crystal Lair:9;Crystal Lair - Hard:9;Tiki à Coco:9;Tiki à Coco - Hard:9	72	70	2	COMPLETE_DATA_RECOVERED	raw/period-341-division-22.json
+2026 February	341	COMPLETED	Pro 1	23	10	8	Widow’s Walkabout:10;Widow’s Walkabout - Hard:10;Meow Wolf:10;Meow Wolf - Hard:10;Crystal Lair:10;Crystal Lair - Hard:10;Tiki à Coco:10;Tiki à Coco - Hard:10	80	59	21	COMPLETE_DATA_RECOVERED	raw/period-341-division-23.json
+2026 February	341	COMPLETED	Pro 2	24	10	8	Widow’s Walkabout:10;Widow’s Walkabout - Hard:10;Meow Wolf:10;Meow Wolf - Hard:10;Crystal Lair:10;Crystal Lair - Hard:10;Tiki à Coco:10;Tiki à Coco - Hard:10	80	64	16	COMPLETE_DATA_RECOVERED	raw/period-341-division-24.json
+2026 February	341	COMPLETED	Pro 3	25	14	8	Widow’s Walkabout:14;Widow’s Walkabout - Hard:14;Meow Wolf:14;Meow Wolf - Hard:14;Crystal Lair:14;Crystal Lair - Hard:14;Tiki à Coco:14;Tiki à Coco - Hard:14	112	86	26	COMPLETE_DATA_RECOVERED	raw/period-341-division-25.json
+2026 February	341	COMPLETED	Semi Pro 1	113	10	8	Widow’s Walkabout:10;Widow’s Walkabout - Hard:10;Meow Wolf:10;Meow Wolf - Hard:10;Crystal Lair:10;Crystal Lair - Hard:10;Tiki à Coco:10;Tiki à Coco - Hard:10	80	69	11	COMPLETE_DATA_RECOVERED	raw/period-341-division-113.json
+2026 February	341	COMPLETED	Beginner	81	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-341-division-81.json
+2026 February	341	COMPLETED	Welcome	62	8	8	Widow’s Walkabout:8;Widow’s Walkabout - Hard:8;Meow Wolf:8;Meow Wolf - Hard:8;Crystal Lair:8;Crystal Lair - Hard:8;Tiki à Coco:8;Tiki à Coco - Hard:8	64	3	61	COMPLETE_DATA_RECOVERED	raw/period-341-division-62.json
+2026 February	341	COMPLETED	Semi Pro 2	114	10	8	Widow’s Walkabout:10;Widow’s Walkabout - Hard:10;Meow Wolf:10;Meow Wolf - Hard:10;Crystal Lair:10;Crystal Lair - Hard:10;Tiki à Coco:10;Tiki à Coco - Hard:10	80	70	10	COMPLETE_DATA_RECOVERED	raw/period-341-division-114.json
+2026 February	341	COMPLETED	Semi Pro 3	115	5	8	Widow’s Walkabout:5;Widow’s Walkabout - Hard:5;Meow Wolf:5;Meow Wolf - Hard:5;Crystal Lair:5;Crystal Lair - Hard:5;Tiki à Coco:5;Tiki à Coco - Hard:5	40	25	15	COMPLETE_DATA_RECOVERED	raw/period-341-division-115.json
+2026 January	321	COMPLETED	Master	21	10	8	Tethys Station:10;Tethys Station - Hard:10;Around The World in 80 Days:10;Around The World - Hard:10;Mount Olympus:10;Mount Olympus - Hard:10;Alice's Adventures in Wonderland:10;Alice's Adventures in Wonderland - Hard:10	80	79	1	COMPLETE_DATA_RECOVERED	raw/period-321-division-21.json
+2026 January	321	COMPLETED	Elite	22	10	8	Tethys Station:10;Tethys Station - Hard:10;Around The World in 80 Days:10;Around The World - Hard:10;Mount Olympus:10;Mount Olympus - Hard:10;Alice's Adventures in Wonderland:10;Alice's Adventures in Wonderland - Hard:10	80	73	7	COMPLETE_DATA_RECOVERED	raw/period-321-division-22.json
+2026 January	321	COMPLETED	Pro 1	23	10	8	Tethys Station:10;Tethys Station - Hard:10;Around The World in 80 Days:10;Around The World - Hard:10;Mount Olympus:10;Mount Olympus - Hard:10;Alice's Adventures in Wonderland:10;Alice's Adventures in Wonderland - Hard:10	80	77	3	COMPLETE_DATA_RECOVERED	raw/period-321-division-23.json
+2026 January	321	COMPLETED	Pro 2	24	10	8	Tethys Station:10;Tethys Station - Hard:10;Around The World in 80 Days:10;Around The World - Hard:10;Mount Olympus:10;Mount Olympus - Hard:10;Alice's Adventures in Wonderland:10;Alice's Adventures in Wonderland - Hard:10	80	71	9	COMPLETE_DATA_RECOVERED	raw/period-321-division-24.json
+2026 January	321	COMPLETED	Pro 3	25	12	8	Tethys Station:12;Tethys Station - Hard:12;Around The World in 80 Days:12;Around The World - Hard:12;Mount Olympus:12;Mount Olympus - Hard:12;Alice's Adventures in Wonderland:12;Alice's Adventures in Wonderland - Hard:12	96	91	5	COMPLETE_DATA_RECOVERED	raw/period-321-division-25.json
+2026 January	321	COMPLETED	Semi Pro 1	113	10	8	Tethys Station:10;Tethys Station - Hard:10;Around The World in 80 Days:10;Around The World - Hard:10;Mount Olympus:10;Mount Olympus - Hard:10;Alice's Adventures in Wonderland:10;Alice's Adventures in Wonderland - Hard:10	80	73	7	COMPLETE_DATA_RECOVERED	raw/period-321-division-113.json
+2026 January	321	COMPLETED	Beginner	81	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-321-division-81.json
+2026 January	321	COMPLETED	Welcome	62	16	8	Tethys Station:16;Tethys Station - Hard:16;Around The World in 80 Days:16;Around The World - Hard:16;Mount Olympus:16;Mount Olympus - Hard:16;Alice's Adventures in Wonderland:16;Alice's Adventures in Wonderland - Hard:16	128	7	121	COMPLETE_DATA_RECOVERED	raw/period-321-division-62.json
+2026 January	321	COMPLETED	Semi Pro 2	114	7	8	Tethys Station:7;Tethys Station - Hard:7;Around The World in 80 Days:7;Around The World - Hard:7;Mount Olympus:7;Mount Olympus - Hard:7;Alice's Adventures in Wonderland:7;Alice's Adventures in Wonderland - Hard:7	56	51	5	COMPLETE_DATA_RECOVERED	raw/period-321-division-114.json
+2026 January	321	COMPLETED	Semi Pro 3	115	9	8	Tethys Station:9;Tethys Station - Hard:9;Around The World in 80 Days:9;Around The World - Hard:9;Mount Olympus:9;Mount Olympus - Hard:9;Alice's Adventures in Wonderland:9;Alice's Adventures in Wonderland - Hard:9	72	47	25	COMPLETE_DATA_RECOVERED	raw/period-321-division-115.json
+2025 December	301	COMPLETED	Master	21	10	8	Myst:10;Myst Hard:10;Shangri-La:10;Shangri-La - Hard:10;Venice:10;Venice - Hard:10;Viva Las Elvis:10;Viva Las Elvis - Hard:10	80	76	4	COMPLETE_DATA_RECOVERED	raw/period-301-division-21.json
+2025 December	301	COMPLETED	Elite	22	10	8	Myst:10;Myst Hard:10;Shangri-La:10;Shangri-La - Hard:10;Venice:10;Venice - Hard:10;Viva Las Elvis:10;Viva Las Elvis - Hard:10	80	70	10	COMPLETE_DATA_RECOVERED	raw/period-301-division-22.json
+2025 December	301	COMPLETED	Pro 1	23	10	8	Myst:10;Myst Hard:10;Shangri-La:10;Shangri-La - Hard:10;Venice:10;Venice - Hard:10;Viva Las Elvis:10;Viva Las Elvis - Hard:10	80	78	2	COMPLETE_DATA_RECOVERED	raw/period-301-division-23.json
+2025 December	301	COMPLETED	Pro 2	24	9	8	Myst:9;Myst Hard:9;Shangri-La:9;Shangri-La - Hard:9;Venice:9;Venice - Hard:9;Viva Las Elvis:9;Viva Las Elvis - Hard:9	72	63	9	COMPLETE_DATA_RECOVERED	raw/period-301-division-24.json
+2025 December	301	COMPLETED	Pro 3	25	12	8	Myst:12;Myst Hard:12;Shangri-La:12;Shangri-La - Hard:12;Venice:12;Venice - Hard:12;Viva Las Elvis:12;Viva Las Elvis - Hard:12	96	83	13	COMPLETE_DATA_RECOVERED	raw/period-301-division-25.json
+2025 December	301	COMPLETED	Semi Pro 1	113	8	8	Myst:8;Myst Hard:8;Shangri-La:8;Shangri-La - Hard:8;Venice:8;Venice - Hard:8;Viva Las Elvis:8;Viva Las Elvis - Hard:8	64	47	17	COMPLETE_DATA_RECOVERED	raw/period-301-division-113.json
+2025 December	301	COMPLETED	Beginner	81	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-301-division-81.json
+2025 December	301	COMPLETED	Welcome	62	10	8	Myst:10;Myst Hard:10;Shangri-La:10;Shangri-La - Hard:10;Venice:10;Venice - Hard:10;Viva Las Elvis:10;Viva Las Elvis - Hard:10	80	0	80	COMPLETE_DATA_RECOVERED	raw/period-301-division-62.json
+2025 December	301	COMPLETED	Semi Pro 2	114	8	8	Myst:8;Myst Hard:8;Shangri-La:8;Shangri-La - Hard:8;Venice:8;Venice - Hard:8;Viva Las Elvis:8;Viva Las Elvis - Hard:8	64	50	14	COMPLETE_DATA_RECOVERED	raw/period-301-division-114.json
+2025 December	301	COMPLETED	Semi Pro 3	115	5	8	Myst:5;Myst Hard:5;Shangri-La:5;Shangri-La - Hard:5;Venice:5;Venice - Hard:5;Viva Las Elvis:5;Viva Las Elvis - Hard:5	40	33	7	COMPLETE_DATA_RECOVERED	raw/period-301-division-115.json
+2025 November	281	COMPLETED	Master	21	10	8	Cherry Blossom:10;Cherry Blossom Hard:10;Temple at Zerzura:10;Temple at Zerzura - Hard:10;20,000 Leagues Under The Sea:10;20,000 Leagues Hard:10;Forgotten Fairyland:10;Forgotten Fairyland - Hard:10	80	80	0	COMPLETE_DATA_RECOVERED	raw/period-281-division-21.json
+2025 November	281	COMPLETED	Elite	22	10	8	Cherry Blossom:10;Cherry Blossom Hard:10;Temple at Zerzura:10;Temple at Zerzura - Hard:10;20,000 Leagues Under The Sea:10;20,000 Leagues Hard:10;Forgotten Fairyland:10;Forgotten Fairyland - Hard:10	80	80	0	COMPLETE_DATA_RECOVERED	raw/period-281-division-22.json
+2025 November	281	COMPLETED	Pro 1	23	10	8	Cherry Blossom:10;Cherry Blossom Hard:10;Temple at Zerzura:10;Temple at Zerzura - Hard:10;20,000 Leagues Under The Sea:10;20,000 Leagues Hard:10;Forgotten Fairyland:10;Forgotten Fairyland - Hard:10	80	78	2	COMPLETE_DATA_RECOVERED	raw/period-281-division-23.json
+2025 November	281	COMPLETED	Pro 2	24	10	8	Cherry Blossom:10;Cherry Blossom Hard:10;Temple at Zerzura:10;Temple at Zerzura - Hard:10;20,000 Leagues Under The Sea:10;20,000 Leagues Hard:10;Forgotten Fairyland:10;Forgotten Fairyland - Hard:10	80	74	6	COMPLETE_DATA_RECOVERED	raw/period-281-division-24.json
+2025 November	281	COMPLETED	Pro 3	25	11	8	Cherry Blossom:11;Cherry Blossom Hard:11;Temple at Zerzura:11;Temple at Zerzura - Hard:11;20,000 Leagues Under The Sea:11;20,000 Leagues Hard:11;Forgotten Fairyland:11;Forgotten Fairyland - Hard:11	88	68	20	COMPLETE_DATA_RECOVERED	raw/period-281-division-25.json
+2025 November	281	COMPLETED	Semi Pro 1	113	10	8	Cherry Blossom:10;Cherry Blossom Hard:10;Temple at Zerzura:10;Temple at Zerzura - Hard:10;20,000 Leagues Under The Sea:10;20,000 Leagues Hard:10;Forgotten Fairyland:10;Forgotten Fairyland - Hard:10	80	64	16	COMPLETE_DATA_RECOVERED	raw/period-281-division-113.json
+2025 November	281	COMPLETED	Beginner	81	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-281-division-81.json
+2025 November	281	COMPLETED	Welcome	62	18	8	Cherry Blossom:18;Cherry Blossom Hard:18;Temple at Zerzura:18;Temple at Zerzura - Hard:18;20,000 Leagues Under The Sea:18;20,000 Leagues Hard:18;Forgotten Fairyland:18;Forgotten Fairyland - Hard:18	144	5	139	COMPLETE_DATA_RECOVERED	raw/period-281-division-62.json
+2025 November	281	COMPLETED	Semi Pro 2	114	10	8	Cherry Blossom:10;Cherry Blossom Hard:10;Temple at Zerzura:10;Temple at Zerzura - Hard:10;20,000 Leagues Under The Sea:10;20,000 Leagues Hard:10;Forgotten Fairyland:10;Forgotten Fairyland - Hard:10	80	57	23	COMPLETE_DATA_RECOVERED	raw/period-281-division-114.json
+2025 November	281	COMPLETED	Semi Pro 3	115	6	8	Cherry Blossom:6;Cherry Blossom Hard:6;Temple at Zerzura:6;Temple at Zerzura - Hard:6;20,000 Leagues Under The Sea:6;20,000 Leagues Hard:6;Forgotten Fairyland:6;Forgotten Fairyland - Hard:6	48	28	20	COMPLETE_DATA_RECOVERED	raw/period-281-division-115.json
+2025 October	261	COMPLETED	Master	21	10	8	Seagull Stacks:10;Seagull Stacks - Hard:10;Wallace & Gromit:10;Wallace & Gromit - Hard:10;8-Bit Lair:10;8-Bit Lair - Hard:10;Raptor Cliff's:10;Raptor Cliff's - Hard:10	80	80	0	COMPLETE_DATA_RECOVERED	raw/period-261-division-21.json
+2025 October	261	COMPLETED	Elite	22	10	8	Seagull Stacks:10;Seagull Stacks - Hard:10;Wallace & Gromit:10;Wallace & Gromit - Hard:10;8-Bit Lair:10;8-Bit Lair - Hard:10;Raptor Cliff's:10;Raptor Cliff's - Hard:10	80	76	4	COMPLETE_DATA_RECOVERED	raw/period-261-division-22.json
+2025 October	261	COMPLETED	Pro 1	23	10	8	Seagull Stacks:10;Seagull Stacks - Hard:10;Wallace & Gromit:10;Wallace & Gromit - Hard:10;8-Bit Lair:10;8-Bit Lair - Hard:10;Raptor Cliff's:10;Raptor Cliff's - Hard:10	80	76	4	COMPLETE_DATA_RECOVERED	raw/period-261-division-23.json
+2025 October	261	COMPLETED	Pro 2	24	10	8	Seagull Stacks:10;Seagull Stacks - Hard:10;Wallace & Gromit:10;Wallace & Gromit - Hard:10;8-Bit Lair:10;8-Bit Lair - Hard:10;Raptor Cliff's:10;Raptor Cliff's - Hard:10	80	49	31	COMPLETE_DATA_RECOVERED	raw/period-261-division-24.json
+2025 October	261	COMPLETED	Pro 3	25	10	8	Seagull Stacks:10;Seagull Stacks - Hard:10;Wallace & Gromit:10;Wallace & Gromit - Hard:10;8-Bit Lair:10;8-Bit Lair - Hard:10;Raptor Cliff's:10;Raptor Cliff's - Hard:10	80	68	12	COMPLETE_DATA_RECOVERED	raw/period-261-division-25.json
+2025 October	261	COMPLETED	Semi Pro 1	113	10	8	Seagull Stacks:10;Seagull Stacks - Hard:10;Wallace & Gromit:10;Wallace & Gromit - Hard:10;8-Bit Lair:10;8-Bit Lair - Hard:10;Raptor Cliff's:10;Raptor Cliff's - Hard:10	80	77	3	COMPLETE_DATA_RECOVERED	raw/period-261-division-113.json
+2025 October	261	COMPLETED	Beginner	81	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-261-division-81.json
+2025 October	261	COMPLETED	Welcome	62	15	8	Seagull Stacks:15;Seagull Stacks - Hard:15;Wallace & Gromit:15;Wallace & Gromit - Hard:15;8-Bit Lair:15;8-Bit Lair - Hard:15;Raptor Cliff's:15;Raptor Cliff's - Hard:15	120	17	103	COMPLETE_DATA_RECOVERED	raw/period-261-division-62.json
+2025 October	261	COMPLETED	Semi Pro 2	114	8	8	Seagull Stacks:8;Seagull Stacks - Hard:8;Wallace & Gromit:8;Wallace & Gromit - Hard:8;8-Bit Lair:8;8-Bit Lair - Hard:8;Raptor Cliff's:8;Raptor Cliff's - Hard:8	64	47	17	COMPLETE_DATA_RECOVERED	raw/period-261-division-114.json
+2025 October	261	COMPLETED	Semi Pro 3	115	8	8	Seagull Stacks:8;Seagull Stacks - Hard:8;Wallace & Gromit:8;Wallace & Gromit - Hard:8;8-Bit Lair:8;8-Bit Lair - Hard:8;Raptor Cliff's:8;Raptor Cliff's - Hard:8	64	54	10	COMPLETE_DATA_RECOVERED	raw/period-261-division-115.json
+2025 September	241	COMPLETED	Master	21	10	8	Tourist Trap:10;Tourist Trap Hard:10;Gardens of Babylon:10;Gardens of Babylon Hard:10;Holiday Hideaway:10;Holiday Hideaway - Hard:10;Tokyo:10;Tokyo - Hard:10	80	78	2	COMPLETE_DATA_RECOVERED	raw/period-241-division-21.json
+2025 September	241	COMPLETED	Elite	22	10	8	Tourist Trap:10;Tourist Trap Hard:10;Gardens of Babylon:10;Gardens of Babylon Hard:10;Holiday Hideaway:10;Holiday Hideaway - Hard:10;Tokyo:10;Tokyo - Hard:10	80	80	0	COMPLETE_DATA_RECOVERED	raw/period-241-division-22.json
+2025 September	241	COMPLETED	Pro 1	23	9	8	Tourist Trap:9;Tourist Trap Hard:9;Gardens of Babylon:9;Gardens of Babylon Hard:9;Holiday Hideaway:9;Holiday Hideaway - Hard:9;Tokyo:9;Tokyo - Hard:9	72	64	8	COMPLETE_DATA_RECOVERED	raw/period-241-division-23.json
+2025 September	241	COMPLETED	Pro 2	24	8	8	Tourist Trap:8;Tourist Trap Hard:8;Gardens of Babylon:8;Gardens of Babylon Hard:8;Holiday Hideaway:8;Holiday Hideaway - Hard:8;Tokyo:8;Tokyo - Hard:8	64	48	16	COMPLETE_DATA_RECOVERED	raw/period-241-division-24.json
+2025 September	241	COMPLETED	Pro 3	25	14	8	Tourist Trap:14;Tourist Trap Hard:14;Gardens of Babylon:14;Gardens of Babylon Hard:14;Holiday Hideaway:14;Holiday Hideaway - Hard:14;Tokyo:14;Tokyo - Hard:14	112	111	1	COMPLETE_DATA_RECOVERED	raw/period-241-division-25.json
+2025 September	241	COMPLETED	Semi Pro 1	113	9	8	Tourist Trap:9;Tourist Trap Hard:9;Gardens of Babylon:9;Gardens of Babylon Hard:9;Holiday Hideaway:9;Holiday Hideaway - Hard:9;Tokyo:9;Tokyo - Hard:9	72	65	7	COMPLETE_DATA_RECOVERED	raw/period-241-division-113.json
+2025 September	241	COMPLETED	Beginner	81	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-241-division-81.json
+2025 September	241	COMPLETED	Welcome	62	31	8	Tourist Trap:25;Tourist Trap Hard:25;Gardens of Babylon:25;Gardens of Babylon Hard:25;Holiday Hideaway:25;Holiday Hideaway - Hard:25;Tokyo:25;Tokyo - Hard:25	200	7	193	COMPLETE_DATA_RECOVERED	raw/period-241-division-62.json
+2025 September	241	COMPLETED	Semi Pro 2	114	8	8	Tourist Trap:8;Tourist Trap Hard:8;Gardens of Babylon:8;Gardens of Babylon Hard:8;Holiday Hideaway:8;Holiday Hideaway - Hard:8;Tokyo:8;Tokyo - Hard:8	64	63	1	COMPLETE_DATA_RECOVERED	raw/period-241-division-114.json
+2025 September	241	COMPLETED	Semi Pro 3	115	8	8	Tourist Trap:8;Tourist Trap Hard:8;Gardens of Babylon:8;Gardens of Babylon Hard:8;Holiday Hideaway:8;Holiday Hideaway - Hard:8;Tokyo:8;Tokyo - Hard:8	64	47	17	COMPLETE_DATA_RECOVERED	raw/period-241-division-115.json
+2025 August	221	COMPLETED	Master	21	10	8	El Dorado:10;El Dorado Hard:10;Atlantis:10;Atlantis Hard:10;Alfheim:10;Alfheim Hard:10;Ice Lair:10;Ice Lair - Hard:10	80	66	14	COMPLETE_DATA_RECOVERED	raw/period-221-division-21.json
+2025 August	221	COMPLETED	Elite	22	10	8	El Dorado:10;El Dorado Hard:10;Atlantis:10;Atlantis Hard:10;Alfheim:10;Alfheim Hard:10;Ice Lair:10;Ice Lair - Hard:10	80	75	5	COMPLETE_DATA_RECOVERED	raw/period-221-division-22.json
+2025 August	221	COMPLETED	Pro 1	23	10	8	El Dorado:10;El Dorado Hard:10;Atlantis:10;Atlantis Hard:10;Alfheim:10;Alfheim Hard:10;Ice Lair:10;Ice Lair - Hard:10	80	57	23	COMPLETE_DATA_RECOVERED	raw/period-221-division-23.json
+2025 August	221	COMPLETED	Pro 2	24	10	8	El Dorado:10;El Dorado Hard:10;Atlantis:10;Atlantis Hard:10;Alfheim:10;Alfheim Hard:10;Ice Lair:10;Ice Lair - Hard:10	80	65	15	COMPLETE_DATA_RECOVERED	raw/period-221-division-24.json
+2025 August	221	COMPLETED	Pro 3	25	19	8	El Dorado:19;El Dorado Hard:19;Atlantis:19;Atlantis Hard:19;Alfheim:19;Alfheim Hard:19;Ice Lair:19;Ice Lair - Hard:19	152	133	19	COMPLETE_DATA_RECOVERED	raw/period-221-division-25.json
+2025 August	221	COMPLETED	Semi Pro 1	113	9	8	El Dorado:9;El Dorado Hard:9;Atlantis:9;Atlantis Hard:9;Alfheim:9;Alfheim Hard:9;Ice Lair:9;Ice Lair - Hard:9	72	63	9	COMPLETE_DATA_RECOVERED	raw/period-221-division-113.json
+2025 August	221	COMPLETED	Beginner	81	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-221-division-81.json
+2025 August	221	COMPLETED	Welcome	62	15	8	El Dorado:15;El Dorado Hard:15;Atlantis:15;Atlantis Hard:15;Alfheim:15;Alfheim Hard:15;Ice Lair:15;Ice Lair - Hard:15	120	2	118	COMPLETE_DATA_RECOVERED	raw/period-221-division-62.json
+2025 August	221	COMPLETED	Semi Pro 2	114	10	8	El Dorado:10;El Dorado Hard:10;Atlantis:10;Atlantis Hard:10;Alfheim:10;Alfheim Hard:10;Ice Lair:10;Ice Lair - Hard:10	80	66	14	COMPLETE_DATA_RECOVERED	raw/period-221-division-114.json
+2025 August	221	COMPLETED	Semi Pro 3	115	10	8	El Dorado:10;El Dorado Hard:10;Atlantis:10;Atlantis Hard:10;Alfheim:10;Alfheim Hard:10;Ice Lair:10;Ice Lair - Hard:10	80	71	9	COMPLETE_DATA_RECOVERED	raw/period-221-division-115.json
+2025 July	201	COMPLETED	Master	21	10	8	Bogey's Bonanza:10;Bogey's Bonanza Hard:10;Upside Town:10;Upside Town - Hard:10;Journey to the Center of the Earth:10;Center of the Earth - Hard:10;Crystal Lair:10;Crystal Lair - Hard:10	80	78	2	COMPLETE_DATA_RECOVERED	raw/period-201-division-21.json
+2025 July	201	COMPLETED	Elite	22	10	8	Bogey's Bonanza:10;Bogey's Bonanza Hard:10;Upside Town:10;Upside Town - Hard:10;Journey to the Center of the Earth:10;Center of the Earth - Hard:10;Crystal Lair:10;Crystal Lair - Hard:10	80	76	4	COMPLETE_DATA_RECOVERED	raw/period-201-division-22.json
+2025 July	201	COMPLETED	Pro 1	23	9	8	Bogey's Bonanza:9;Bogey's Bonanza Hard:9;Upside Town:9;Upside Town - Hard:9;Journey to the Center of the Earth:9;Center of the Earth - Hard:9;Crystal Lair:9;Crystal Lair - Hard:9	72	66	6	COMPLETE_DATA_RECOVERED	raw/period-201-division-23.json
+2025 July	201	COMPLETED	Pro 2	24	10	8	Bogey's Bonanza:10;Bogey's Bonanza Hard:10;Upside Town:10;Upside Town - Hard:10;Journey to the Center of the Earth:10;Center of the Earth - Hard:10;Crystal Lair:10;Crystal Lair - Hard:10	80	72	8	COMPLETE_DATA_RECOVERED	raw/period-201-division-24.json
+2025 July	201	COMPLETED	Pro 3	25	15	8	Bogey's Bonanza:15;Bogey's Bonanza Hard:15;Upside Town:15;Upside Town - Hard:15;Journey to the Center of the Earth:15;Center of the Earth - Hard:15;Crystal Lair:15;Crystal Lair - Hard:15	120	98	22	COMPLETE_DATA_RECOVERED	raw/period-201-division-25.json
+2025 July	201	COMPLETED	Semi Pro 1	113	9	8	Bogey's Bonanza:9;Bogey's Bonanza Hard:9;Upside Town:9;Upside Town - Hard:9;Journey to the Center of the Earth:9;Center of the Earth - Hard:9;Crystal Lair:9;Crystal Lair - Hard:9	72	44	28	COMPLETE_DATA_RECOVERED	raw/period-201-division-113.json
+2025 July	201	COMPLETED	Beginner	81	9	8	Bogey's Bonanza:9;Bogey's Bonanza Hard:9;Upside Town:9;Upside Town - Hard:9;Journey to the Center of the Earth:9;Center of the Earth - Hard:9;Crystal Lair:9;Crystal Lair - Hard:9	72	38	34	COMPLETE_DATA_RECOVERED	raw/period-201-division-81.json
+2025 July	201	COMPLETED	Welcome	62	5	8	Bogey's Bonanza:5;Bogey's Bonanza Hard:5;Upside Town:5;Upside Town - Hard:5;Journey to the Center of the Earth:5;Center of the Earth - Hard:5;Crystal Lair:5;Crystal Lair - Hard:5	40	1	39	COMPLETE_DATA_RECOVERED	raw/period-201-division-62.json
+2025 July	201	COMPLETED	Semi Pro 2	114	5	8	Bogey's Bonanza:5;Bogey's Bonanza Hard:5;Upside Town:5;Upside Town - Hard:5;Journey to the Center of the Earth:5;Center of the Earth - Hard:5;Crystal Lair:5;Crystal Lair - Hard:5	40	32	8	COMPLETE_DATA_RECOVERED	raw/period-201-division-114.json
+2025 July	201	COMPLETED	Semi Pro 3	115	7	8	Bogey's Bonanza:7;Bogey's Bonanza Hard:7;Upside Town:7;Upside Town - Hard:7;Journey to the Center of the Earth:7;Center of the Earth - Hard:7;Crystal Lair:7;Crystal Lair - Hard:7	56	42	14	COMPLETE_DATA_RECOVERED	raw/period-201-division-115.json
+2025 June	181	COMPLETED	Master	21	10	8	Arizona Modern:10;Arizona Modern Hard:10;Quixote Valley:10;Quixote Valley Hard:10;Venice:10;Venice - Hard:10;Mars Gardens:10;Mars Gardens - Hard:10	80	76	4	COMPLETE_DATA_RECOVERED	raw/period-181-division-21.json
+2025 June	181	COMPLETED	Elite	22	10	8	Arizona Modern:10;Arizona Modern Hard:10;Quixote Valley:10;Quixote Valley Hard:10;Venice:10;Venice - Hard:10;Mars Gardens:10;Mars Gardens - Hard:10	80	77	3	COMPLETE_DATA_RECOVERED	raw/period-181-division-22.json
+2025 June	181	COMPLETED	Pro 1	23	10	8	Arizona Modern:10;Arizona Modern Hard:10;Quixote Valley:10;Quixote Valley Hard:10;Venice:10;Venice - Hard:10;Mars Gardens:10;Mars Gardens - Hard:10	80	78	2	COMPLETE_DATA_RECOVERED	raw/period-181-division-23.json
+2025 June	181	COMPLETED	Pro 2	24	10	8	Arizona Modern:10;Arizona Modern Hard:10;Quixote Valley:10;Quixote Valley Hard:10;Venice:10;Venice - Hard:10;Mars Gardens:10;Mars Gardens - Hard:10	80	67	13	COMPLETE_DATA_RECOVERED	raw/period-181-division-24.json
+2025 June	181	COMPLETED	Pro 3	25	12	8	Arizona Modern:12;Arizona Modern Hard:12;Quixote Valley:12;Quixote Valley Hard:12;Venice:12;Venice - Hard:12;Mars Gardens:12;Mars Gardens - Hard:12	96	85	11	COMPLETE_DATA_RECOVERED	raw/period-181-division-25.json
+2025 June	181	COMPLETED	Semi Pro 1	113	8	8	Arizona Modern:8;Arizona Modern Hard:8;Quixote Valley:8;Quixote Valley Hard:8;Venice:8;Venice - Hard:8;Mars Gardens:8;Mars Gardens - Hard:8	64	36	28	COMPLETE_DATA_RECOVERED	raw/period-181-division-113.json
+2025 June	181	COMPLETED	Beginner	81	8	8	Arizona Modern:8;Arizona Modern Hard:8;Quixote Valley:8;Quixote Valley Hard:8;Venice:8;Venice - Hard:8;Mars Gardens:8;Mars Gardens - Hard:8	64	29	35	COMPLETE_DATA_RECOVERED	raw/period-181-division-81.json
+2025 June	181	COMPLETED	Welcome	62	6	8	Arizona Modern:6;Arizona Modern Hard:6;Quixote Valley:6;Quixote Valley Hard:6;Venice:6;Venice - Hard:6;Mars Gardens:6;Mars Gardens - Hard:6	48	0	48	COMPLETE_DATA_RECOVERED	raw/period-181-division-62.json
+2025 June	181	COMPLETED	Semi Pro 2	114	6	8	Arizona Modern:6;Arizona Modern Hard:6;Quixote Valley:6;Quixote Valley Hard:6;Venice:6;Venice - Hard:6;Mars Gardens:6;Mars Gardens - Hard:6	48	32	16	COMPLETE_DATA_RECOVERED	raw/period-181-division-114.json
+2025 June	181	COMPLETED	Semi Pro 3	115	10	8	Arizona Modern:10;Arizona Modern Hard:10;Quixote Valley:10;Quixote Valley Hard:10;Venice:10;Venice - Hard:10;Mars Gardens:10;Mars Gardens - Hard:10	80	51	29	COMPLETE_DATA_RECOVERED	raw/period-181-division-115.json
+2025 May	161	COMPLETED	Master	21	10	8	Original Gothic:10;Original Gothic Hard:10;Labyrinth:10;Labyrinth - Hard:10;Meow Wolf:10;Meow Wolf - Hard:10;Raptor Cliff's:10;Raptor Cliff's - Hard:10	80	74	6	COMPLETE_DATA_RECOVERED	raw/period-161-division-21.json
+2025 May	161	COMPLETED	Elite	22	10	8	Original Gothic:10;Original Gothic Hard:10;Labyrinth:10;Labyrinth - Hard:10;Meow Wolf:10;Meow Wolf - Hard:10;Raptor Cliff's:10;Raptor Cliff's - Hard:10	80	76	4	COMPLETE_DATA_RECOVERED	raw/period-161-division-22.json
+2025 May	161	COMPLETED	Pro 1	23	10	8	Original Gothic:10;Original Gothic Hard:10;Labyrinth:10;Labyrinth - Hard:10;Meow Wolf:10;Meow Wolf - Hard:10;Raptor Cliff's:10;Raptor Cliff's - Hard:10	80	63	17	COMPLETE_DATA_RECOVERED	raw/period-161-division-23.json
+2025 May	161	COMPLETED	Pro 2	24	10	8	Original Gothic:10;Original Gothic Hard:10;Labyrinth:10;Labyrinth - Hard:10;Meow Wolf:10;Meow Wolf - Hard:10;Raptor Cliff's:10;Raptor Cliff's - Hard:10	80	79	1	COMPLETE_DATA_RECOVERED	raw/period-161-division-24.json
+2025 May	161	COMPLETED	Pro 3	25	9	8	Original Gothic:9;Original Gothic Hard:9;Labyrinth:9;Labyrinth - Hard:9;Meow Wolf:9;Meow Wolf - Hard:9;Raptor Cliff's:9;Raptor Cliff's - Hard:9	72	60	12	COMPLETE_DATA_RECOVERED	raw/period-161-division-25.json
+2025 May	161	COMPLETED	Semi Pro 1	113	9	8	Original Gothic:9;Original Gothic Hard:9;Labyrinth:9;Labyrinth - Hard:9;Meow Wolf:9;Meow Wolf - Hard:9;Raptor Cliff's:9;Raptor Cliff's - Hard:9	72	43	29	COMPLETE_DATA_RECOVERED	raw/period-161-division-113.json
+2025 May	161	COMPLETED	Beginner	81	8	8	Original Gothic:8;Original Gothic Hard:8;Labyrinth:8;Labyrinth - Hard:8;Meow Wolf:8;Meow Wolf - Hard:8;Raptor Cliff's:8;Raptor Cliff's - Hard:8	64	42	22	COMPLETE_DATA_RECOVERED	raw/period-161-division-81.json
+2025 May	161	COMPLETED	Welcome	62	4	8	Original Gothic:4;Original Gothic Hard:4;Labyrinth:4;Labyrinth - Hard:4;Meow Wolf:4;Meow Wolf - Hard:4;Raptor Cliff's:4;Raptor Cliff's - Hard:4	32	0	32	COMPLETE_DATA_RECOVERED	raw/period-161-division-62.json
+2025 May	161	COMPLETED	Semi Pro 2	114	8	8	Original Gothic:8;Original Gothic Hard:8;Labyrinth:8;Labyrinth - Hard:8;Meow Wolf:8;Meow Wolf - Hard:8;Raptor Cliff's:8;Raptor Cliff's - Hard:8	64	32	32	COMPLETE_DATA_RECOVERED	raw/period-161-division-114.json
+2025 May	161	COMPLETED	Semi Pro 3	115	10	8	Original Gothic:10;Original Gothic Hard:10;Labyrinth:10;Labyrinth - Hard:10;Meow Wolf:10;Meow Wolf - Hard:10;Raptor Cliff's:10;Raptor Cliff's - Hard:10	80	53	27	COMPLETE_DATA_RECOVERED	raw/period-161-division-115.json
+2025 April	141	COMPLETED	Master	21	10	8	Sweetopia:10;Sweetopia - Hard:10;Laser Lair:10;Laser Lair - Hard:10;Widow’s Walkabout:10;Widow’s Walkabout - Hard:10;Mount Olympus:10;Mount Olympus - Hard:10	80	79	1	COMPLETE_DATA_RECOVERED	raw/period-141-division-21.json
+2025 April	141	COMPLETED	Elite	22	10	8	Sweetopia:10;Sweetopia - Hard:10;Laser Lair:10;Laser Lair - Hard:10;Widow’s Walkabout:10;Widow’s Walkabout - Hard:10;Mount Olympus:10;Mount Olympus - Hard:10	80	68	12	COMPLETE_DATA_RECOVERED	raw/period-141-division-22.json
+2025 April	141	COMPLETED	Pro 1	23	10	8	Sweetopia:10;Sweetopia - Hard:10;Laser Lair:10;Laser Lair - Hard:10;Widow’s Walkabout:10;Widow’s Walkabout - Hard:10;Mount Olympus:10;Mount Olympus - Hard:10	80	76	4	COMPLETE_DATA_RECOVERED	raw/period-141-division-23.json
+2025 April	141	COMPLETED	Pro 2	24	10	8	Sweetopia:10;Sweetopia - Hard:10;Laser Lair:10;Laser Lair - Hard:10;Widow’s Walkabout:10;Widow’s Walkabout - Hard:10;Mount Olympus:10;Mount Olympus - Hard:10	80	78	2	COMPLETE_DATA_RECOVERED	raw/period-141-division-24.json
+2025 April	141	COMPLETED	Pro 3	25	16	8	Sweetopia:16;Sweetopia - Hard:16;Laser Lair:16;Laser Lair - Hard:16;Widow’s Walkabout:16;Widow’s Walkabout - Hard:16;Mount Olympus:16;Mount Olympus - Hard:16	128	99	29	COMPLETE_DATA_RECOVERED	raw/period-141-division-25.json
+2025 April	141	COMPLETED	Semi Pro 1	113	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-141-division-113.json
+2025 April	141	COMPLETED	Beginner	81	10	8	Sweetopia:10;Sweetopia - Hard:10;Laser Lair:10;Laser Lair - Hard:10;Widow’s Walkabout:10;Widow’s Walkabout - Hard:10;Mount Olympus:10;Mount Olympus - Hard:10	80	41	39	COMPLETE_DATA_RECOVERED	raw/period-141-division-81.json
+2025 April	141	COMPLETED	Welcome	62	13	8	Sweetopia:13;Sweetopia - Hard:13;Laser Lair:13;Laser Lair - Hard:13;Widow’s Walkabout:13;Widow’s Walkabout - Hard:13;Mount Olympus:13;Mount Olympus - Hard:13	104	2	102	COMPLETE_DATA_RECOVERED	raw/period-141-division-62.json
+2025 April	141	COMPLETED	Semi Pro 2	114	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-141-division-114.json
+2025 April	141	COMPLETED	Semi Pro 3	115	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-141-division-115.json
+2025 March	121	COMPLETED	Master	21	10	8	Tethys Station:10;Tethys Station - Hard:10;Temple at Zerzura:10;Temple at Zerzura - Hard:10;20,000 Leagues Under The Sea:10;20,000 Leagues Hard:10;Around The World in 80 Days:10;Around The World - Hard:10	80	80	0	COMPLETE_DATA_RECOVERED	raw/period-121-division-21.json
+2025 March	121	COMPLETED	Elite	22	10	8	Tethys Station:10;Tethys Station - Hard:10;Temple at Zerzura:10;Temple at Zerzura - Hard:10;20,000 Leagues Under The Sea:10;20,000 Leagues Hard:10;Around The World in 80 Days:10;Around The World - Hard:10	80	69	11	COMPLETE_DATA_RECOVERED	raw/period-121-division-22.json
+2025 March	121	COMPLETED	Pro 1	23	10	8	Tethys Station:10;Tethys Station - Hard:10;Temple at Zerzura:10;Temple at Zerzura - Hard:10;20,000 Leagues Under The Sea:10;20,000 Leagues Hard:10;Around The World in 80 Days:10;Around The World - Hard:10	80	76	4	COMPLETE_DATA_RECOVERED	raw/period-121-division-23.json
+2025 March	121	COMPLETED	Pro 2	24	10	8	Tethys Station:10;Tethys Station - Hard:10;Temple at Zerzura:10;Temple at Zerzura - Hard:10;20,000 Leagues Under The Sea:10;20,000 Leagues Hard:10;Around The World in 80 Days:10;Around The World - Hard:10	80	78	2	COMPLETE_DATA_RECOVERED	raw/period-121-division-24.json
+2025 March	121	COMPLETED	Pro 3	25	15	8	Tethys Station:15;Tethys Station - Hard:15;Temple at Zerzura:15;Temple at Zerzura - Hard:15;20,000 Leagues Under The Sea:15;20,000 Leagues Hard:15;Around The World in 80 Days:15;Around The World - Hard:15	120	105	15	COMPLETE_DATA_RECOVERED	raw/period-121-division-25.json
+2025 March	121	COMPLETED	Semi Pro 1	113	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-121-division-113.json
+2025 March	121	COMPLETED	Beginner	81	4	8	Tethys Station:4;Tethys Station - Hard:4;Temple at Zerzura:4;Temple at Zerzura - Hard:4;20,000 Leagues Under The Sea:4;20,000 Leagues Hard:4;Around The World in 80 Days:4;Around The World - Hard:4	32	13	19	COMPLETE_DATA_RECOVERED	raw/period-121-division-81.json
+2025 March	121	COMPLETED	Welcome	62	14	8	Tethys Station:14;Tethys Station - Hard:14;Temple at Zerzura:14;Temple at Zerzura - Hard:14;20,000 Leagues Under The Sea:14;20,000 Leagues Hard:14;Around The World in 80 Days:14;Around The World - Hard:14	112	0	112	COMPLETE_DATA_RECOVERED	raw/period-121-division-62.json
+2025 March	121	COMPLETED	Semi Pro 2	114	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-121-division-114.json
+2025 March	121	COMPLETED	Semi Pro 3	115	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-121-division-115.json
+2025 February	101	COMPLETED	Master	21	10	8	Gardens of Babylon:10;Gardens of Babylon Hard:10;El Dorado:10;El Dorado Hard:10;Wallace & Gromit:10;Wallace & Gromit - Hard:10;Viva Las Elvis:10;Viva Las Elvis - Hard:10	80	79	1	COMPLETE_DATA_RECOVERED	raw/period-101-division-21.json
+2025 February	101	COMPLETED	Elite	22	10	8	Gardens of Babylon:10;Gardens of Babylon Hard:10;El Dorado:10;El Dorado Hard:10;Wallace & Gromit:10;Wallace & Gromit - Hard:10;Viva Las Elvis:10;Viva Las Elvis - Hard:10	80	69	11	COMPLETE_DATA_RECOVERED	raw/period-101-division-22.json
+2025 February	101	COMPLETED	Pro 1	23	10	8	Gardens of Babylon:10;Gardens of Babylon Hard:10;El Dorado:10;El Dorado Hard:10;Wallace & Gromit:10;Wallace & Gromit - Hard:10;Viva Las Elvis:10;Viva Las Elvis - Hard:10	80	80	0	COMPLETE_DATA_RECOVERED	raw/period-101-division-23.json
+2025 February	101	COMPLETED	Pro 2	24	10	8	Gardens of Babylon:10;Gardens of Babylon Hard:10;El Dorado:10;El Dorado Hard:10;Wallace & Gromit:10;Wallace & Gromit - Hard:10;Viva Las Elvis:10;Viva Las Elvis - Hard:10	80	72	8	COMPLETE_DATA_RECOVERED	raw/period-101-division-24.json
+2025 February	101	COMPLETED	Pro 3	25	16	8	Gardens of Babylon:16;Gardens of Babylon Hard:16;El Dorado:16;El Dorado Hard:16;Wallace & Gromit:16;Wallace & Gromit - Hard:16;Viva Las Elvis:16;Viva Las Elvis - Hard:16	128	92	36	COMPLETE_DATA_RECOVERED	raw/period-101-division-25.json
+2025 February	101	COMPLETED	Semi Pro 1	113	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-101-division-113.json
+2025 February	101	COMPLETED	Beginner	81	6	8	Gardens of Babylon:6;Gardens of Babylon Hard:6;El Dorado:6;El Dorado Hard:6;Wallace & Gromit:6;Wallace & Gromit - Hard:6;Viva Las Elvis:6;Viva Las Elvis - Hard:6	48	20	28	COMPLETE_DATA_RECOVERED	raw/period-101-division-81.json
+2025 February	101	COMPLETED	Welcome	62	5	8	Gardens of Babylon:5;Gardens of Babylon Hard:5;El Dorado:5;El Dorado Hard:5;Wallace & Gromit:5;Wallace & Gromit - Hard:5;Viva Las Elvis:5;Viva Las Elvis - Hard:5	40	0	40	COMPLETE_DATA_RECOVERED	raw/period-101-division-62.json
+2025 February	101	COMPLETED	Semi Pro 2	114	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-101-division-114.json
+2025 February	101	COMPLETED	Semi Pro 3	115	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-101-division-115.json
+2025 January	81	COMPLETED	Master	21	10	8	Tourist Trap:10;Tourist Trap Hard:10;Upside Town:10;Upside Town - Hard:10;Journey to the Center of the Earth:10;Center of the Earth - Hard:10;Alfheim:10;Alfheim Hard:10	80	80	0	COMPLETE_DATA_RECOVERED	raw/period-81-division-21.json
+2025 January	81	COMPLETED	Elite	22	10	8	Tourist Trap:10;Tourist Trap Hard:10;Upside Town:10;Upside Town - Hard:10;Journey to the Center of the Earth:10;Center of the Earth - Hard:10;Alfheim:10;Alfheim Hard:10	80	75	5	COMPLETE_DATA_RECOVERED	raw/period-81-division-22.json
+2025 January	81	COMPLETED	Pro 1	23	10	8	Tourist Trap:10;Tourist Trap Hard:10;Upside Town:10;Upside Town - Hard:10;Journey to the Center of the Earth:10;Center of the Earth - Hard:10;Alfheim:10;Alfheim Hard:10	80	74	6	COMPLETE_DATA_RECOVERED	raw/period-81-division-23.json
+2025 January	81	COMPLETED	Pro 2	24	9	8	Tourist Trap:9;Tourist Trap Hard:9;Upside Town:9;Upside Town - Hard:9;Journey to the Center of the Earth:9;Center of the Earth - Hard:9;Alfheim:9;Alfheim Hard:9	72	59	13	COMPLETE_DATA_RECOVERED	raw/period-81-division-24.json
+2025 January	81	COMPLETED	Pro 3	25	18	8	Tourist Trap:18;Tourist Trap Hard:18;Upside Town:18;Upside Town - Hard:18;Journey to the Center of the Earth:18;Center of the Earth - Hard:18;Alfheim:18;Alfheim Hard:18	144	126	18	COMPLETE_DATA_RECOVERED	raw/period-81-division-25.json
+2025 January	81	COMPLETED	Semi Pro 1	113	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-81-division-113.json
+2025 January	81	COMPLETED	Beginner	81	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-81-division-81.json
+2025 January	81	COMPLETED	Welcome	62	1	8	Tourist Trap:1;Tourist Trap Hard:1;Upside Town:1;Upside Town - Hard:1;Journey to the Center of the Earth:1;Center of the Earth - Hard:1;Alfheim:1;Alfheim Hard:1	8	0	8	COMPLETE_DATA_RECOVERED	raw/period-81-division-62.json
+2025 January	81	COMPLETED	Semi Pro 2	114	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-81-division-114.json
+2025 January	81	COMPLETED	Semi Pro 3	115	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-81-division-115.json
+2024 December	58	COMPLETED	Master	21	10	8	Cherry Blossom:10;Cherry Blossom Hard:10;Myst:10;Myst Hard:10;8-Bit Lair:10;8-Bit Lair - Hard:10;Holiday Hideaway:10;Holiday Hideaway - Hard:10	80	80	0	COMPLETE_DATA_RECOVERED	raw/period-58-division-21.json
+2024 December	58	COMPLETED	Elite	22	10	8	Cherry Blossom:10;Cherry Blossom Hard:10;Myst:10;Myst Hard:10;8-Bit Lair:10;8-Bit Lair - Hard:10;Holiday Hideaway:10;Holiday Hideaway - Hard:10	80	71	9	COMPLETE_DATA_RECOVERED	raw/period-58-division-22.json
+2024 December	58	COMPLETED	Pro 1	23	10	8	Cherry Blossom:10;Cherry Blossom Hard:10;Myst:10;Myst Hard:10;8-Bit Lair:10;8-Bit Lair - Hard:10;Holiday Hideaway:10;Holiday Hideaway - Hard:10	80	73	7	COMPLETE_DATA_RECOVERED	raw/period-58-division-23.json
+2024 December	58	COMPLETED	Pro 2	24	10	8	Cherry Blossom:10;Cherry Blossom Hard:10;Myst:10;Myst Hard:10;8-Bit Lair:10;8-Bit Lair - Hard:10;Holiday Hideaway:10;Holiday Hideaway - Hard:10	80	58	22	COMPLETE_DATA_RECOVERED	raw/period-58-division-24.json
+2024 December	58	COMPLETED	Pro 3	25	13	8	Cherry Blossom:13;Cherry Blossom Hard:13;Myst:13;Myst Hard:13;8-Bit Lair:13;8-Bit Lair - Hard:13;Holiday Hideaway:13;Holiday Hideaway - Hard:13	104	82	22	COMPLETE_DATA_RECOVERED	raw/period-58-division-25.json
+2024 December	58	COMPLETED	Semi Pro 1	113	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-58-division-113.json
+2024 December	58	COMPLETED	Beginner	81	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-58-division-81.json
+2024 December	58	COMPLETED	Welcome	62	18	8	Cherry Blossom:18;Cherry Blossom Hard:18;Myst:18;Myst Hard:18;8-Bit Lair:18;8-Bit Lair - Hard:18;Holiday Hideaway:18;Holiday Hideaway - Hard:18	144	2	142	COMPLETE_DATA_RECOVERED	raw/period-58-division-62.json
+2024 December	58	COMPLETED	Semi Pro 2	114	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-58-division-114.json
+2024 December	58	COMPLETED	Semi Pro 3	115	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-58-division-115.json
+2024 November	57	COMPLETED	Master	21	10	8	Bogey's Bonanza:10;Bogey's Bonanza Hard:10;Quixote Valley:10;Quixote Valley Hard:10;Atlantis:10;Atlantis Hard:10;Venice:10;Venice - Hard:10	80	80	0	COMPLETE_DATA_RECOVERED	raw/period-57-division-21.json
+2024 November	57	COMPLETED	Elite	22	8	8	Bogey's Bonanza:8;Bogey's Bonanza Hard:8;Quixote Valley:8;Quixote Valley Hard:8;Atlantis:8;Atlantis Hard:8;Venice:8;Venice - Hard:8	64	62	2	COMPLETE_DATA_RECOVERED	raw/period-57-division-22.json
+2024 November	57	COMPLETED	Pro 1	23	10	8	Bogey's Bonanza:10;Bogey's Bonanza Hard:10;Quixote Valley:10;Quixote Valley Hard:10;Atlantis:10;Atlantis Hard:10;Venice:10;Venice - Hard:10	80	78	2	COMPLETE_DATA_RECOVERED	raw/period-57-division-23.json
+2024 November	57	COMPLETED	Pro 2	24	10	8	Bogey's Bonanza:10;Bogey's Bonanza Hard:10;Quixote Valley:10;Quixote Valley Hard:10;Atlantis:10;Atlantis Hard:10;Venice:10;Venice - Hard:10	80	66	14	COMPLETE_DATA_RECOVERED	raw/period-57-division-24.json
+2024 November	57	COMPLETED	Pro 3	25	15	8	Bogey's Bonanza:15;Bogey's Bonanza Hard:15;Quixote Valley:15;Quixote Valley Hard:15;Atlantis:15;Atlantis Hard:15;Venice:15;Venice - Hard:15	120	95	25	COMPLETE_DATA_RECOVERED	raw/period-57-division-25.json
+2024 November	57	COMPLETED	Semi Pro 1	113	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-57-division-113.json
+2024 November	57	COMPLETED	Beginner	81	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-57-division-81.json
+2024 November	57	COMPLETED	Welcome	62	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-57-division-62.json
+2024 November	57	COMPLETED	Semi Pro 2	114	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-57-division-114.json
+2024 November	57	COMPLETED	Semi Pro 3	115	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-57-division-115.json
+2024 October	56	COMPLETED	Master	21	9	8	Seagull Stacks:9;Seagull Stacks - Hard:9;Arizona Modern:9;Arizona Modern Hard:9;Labyrinth:9;Labyrinth - Hard:9;Mars Gardens:9;Mars Gardens - Hard:9	72	68	4	COMPLETE_DATA_RECOVERED	raw/period-56-division-21.json
+2024 October	56	COMPLETED	Elite	22	10	8	Seagull Stacks:10;Seagull Stacks - Hard:10;Arizona Modern:10;Arizona Modern Hard:10;Labyrinth:10;Labyrinth - Hard:10;Mars Gardens:10;Mars Gardens - Hard:10	80	77	3	COMPLETE_DATA_RECOVERED	raw/period-56-division-22.json
+2024 October	56	COMPLETED	Pro 1	23	10	8	Seagull Stacks:10;Seagull Stacks - Hard:10;Arizona Modern:10;Arizona Modern Hard:10;Labyrinth:10;Labyrinth - Hard:10;Mars Gardens:10;Mars Gardens - Hard:10	80	61	19	COMPLETE_DATA_RECOVERED	raw/period-56-division-23.json
+2024 October	56	COMPLETED	Pro 2	24	9	8	Seagull Stacks:9;Seagull Stacks - Hard:9;Arizona Modern:9;Arizona Modern Hard:9;Labyrinth:9;Labyrinth - Hard:9;Mars Gardens:9;Mars Gardens - Hard:9	72	70	2	COMPLETE_DATA_RECOVERED	raw/period-56-division-24.json
+2024 October	56	COMPLETED	Pro 3	25	14	8	Seagull Stacks:14;Seagull Stacks - Hard:14;Arizona Modern:14;Arizona Modern Hard:14;Labyrinth:14;Labyrinth - Hard:14;Mars Gardens:14;Mars Gardens - Hard:14	112	91	21	COMPLETE_DATA_RECOVERED	raw/period-56-division-25.json
+2024 October	56	COMPLETED	Semi Pro 1	113	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-56-division-113.json
+2024 October	56	COMPLETED	Beginner	81	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-56-division-81.json
+2024 October	56	COMPLETED	Welcome	62	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-56-division-62.json
+2024 October	56	COMPLETED	Semi Pro 2	114	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-56-division-114.json
+2024 October	56	COMPLETED	Semi Pro 3	115	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-56-division-115.json
+2024 September	55	COMPLETED	Master	21	10	8	Tethys Station:10;Tethys Station - Hard:10;Sweetopia:10;Sweetopia - Hard:10;Shangri-La:10;Shangri-La - Hard:10;Temple at Zerzura:10;Temple at Zerzura - Hard:10	80	80	0	COMPLETE_DATA_RECOVERED	raw/period-55-division-21.json
+2024 September	55	COMPLETED	Elite	22	10	8	Tethys Station:10;Tethys Station - Hard:10;Sweetopia:10;Sweetopia - Hard:10;Shangri-La:10;Shangri-La - Hard:10;Temple at Zerzura:10;Temple at Zerzura - Hard:10	80	73	7	COMPLETE_DATA_RECOVERED	raw/period-55-division-22.json
+2024 September	55	COMPLETED	Pro 1	23	10	8	Tethys Station:10;Tethys Station - Hard:10;Sweetopia:10;Sweetopia - Hard:10;Shangri-La:10;Shangri-La - Hard:10;Temple at Zerzura:10;Temple at Zerzura - Hard:10	80	78	2	COMPLETE_DATA_RECOVERED	raw/period-55-division-23.json
+2024 September	55	COMPLETED	Pro 2	24	10	8	Tethys Station:10;Tethys Station - Hard:10;Sweetopia:10;Sweetopia - Hard:10;Shangri-La:10;Shangri-La - Hard:10;Temple at Zerzura:10;Temple at Zerzura - Hard:10	80	73	7	COMPLETE_DATA_RECOVERED	raw/period-55-division-24.json
+2024 September	55	COMPLETED	Pro 3	25	19	8	Tethys Station:19;Tethys Station - Hard:19;Sweetopia:19;Sweetopia - Hard:19;Shangri-La:19;Shangri-La - Hard:19;Temple at Zerzura:19;Temple at Zerzura - Hard:19	152	99	53	COMPLETE_DATA_RECOVERED	raw/period-55-division-25.json
+2024 September	55	COMPLETED	Semi Pro 1	113	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-55-division-113.json
+2024 September	55	COMPLETED	Beginner	81	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-55-division-81.json
+2024 September	55	COMPLETED	Welcome	62	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-55-division-62.json
+2024 September	55	COMPLETED	Semi Pro 2	114	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-55-division-114.json
+2024 September	55	COMPLETED	Semi Pro 3	115	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-55-division-115.json
+2024 August	54	COMPLETED	Master	21	10	8	Gardens of Babylon:10;Gardens of Babylon Hard:10;20,000 Leagues Under The Sea:10;20,000 Leagues Hard:10;Widow’s Walkabout:10;Widow’s Walkabout - Hard:10;Wallace & Gromit:10;Wallace & Gromit - Hard:10	80	78	2	COMPLETE_DATA_RECOVERED	raw/period-54-division-21.json
+2024 August	54	COMPLETED	Elite	22	10	8	Gardens of Babylon:10;Gardens of Babylon Hard:10;20,000 Leagues Under The Sea:10;20,000 Leagues Hard:10;Widow’s Walkabout:10;Widow’s Walkabout - Hard:10;Wallace & Gromit:10;Wallace & Gromit - Hard:10	80	80	0	COMPLETE_DATA_RECOVERED	raw/period-54-division-22.json
+2024 August	54	COMPLETED	Pro 1	23	10	8	Gardens of Babylon:10;Gardens of Babylon Hard:10;20,000 Leagues Under The Sea:10;20,000 Leagues Hard:10;Widow’s Walkabout:10;Widow’s Walkabout - Hard:10;Wallace & Gromit:10;Wallace & Gromit - Hard:10	80	69	11	COMPLETE_DATA_RECOVERED	raw/period-54-division-23.json
+2024 August	54	COMPLETED	Pro 2	24	10	8	Gardens of Babylon:10;Gardens of Babylon Hard:10;20,000 Leagues Under The Sea:10;20,000 Leagues Hard:10;Widow’s Walkabout:10;Widow’s Walkabout - Hard:10;Wallace & Gromit:10;Wallace & Gromit - Hard:10	80	72	8	COMPLETE_DATA_RECOVERED	raw/period-54-division-24.json
+2024 August	54	COMPLETED	Pro 3	25	14	8	Gardens of Babylon:14;Gardens of Babylon Hard:14;20,000 Leagues Under The Sea:14;20,000 Leagues Hard:14;Widow’s Walkabout:14;Widow’s Walkabout - Hard:14;Wallace & Gromit:14;Wallace & Gromit - Hard:14	112	79	33	COMPLETE_DATA_RECOVERED	raw/period-54-division-25.json
+2024 August	54	COMPLETED	Semi Pro 1	113	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-54-division-113.json
+2024 August	54	COMPLETED	Beginner	81	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-54-division-81.json
+2024 August	54	COMPLETED	Welcome	62	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-54-division-62.json
+2024 August	54	COMPLETED	Semi Pro 2	114	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-54-division-114.json
+2024 August	54	COMPLETED	Semi Pro 3	115	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-54-division-115.json
+2024 July	53	COMPLETED	Master	21	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-53-division-21.json
+2024 July	53	COMPLETED	Elite	22	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-53-division-22.json
+2024 July	53	COMPLETED	Pro 1	23	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-53-division-23.json
+2024 July	53	COMPLETED	Pro 2	24	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-53-division-24.json
+2024 July	53	COMPLETED	Pro 3	25	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-53-division-25.json
+2024 July	53	COMPLETED	Semi Pro 1	113	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-53-division-113.json
+2024 July	53	COMPLETED	Beginner	81	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-53-division-81.json
+2024 July	53	COMPLETED	Welcome	62	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-53-division-62.json
+2024 July	53	COMPLETED	Semi Pro 2	114	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-53-division-114.json
+2024 July	53	COMPLETED	Semi Pro 3	115	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-53-division-115.json
+2024 June	52	COMPLETED	Master	21	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-52-division-21.json
+2024 June	52	COMPLETED	Elite	22	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-52-division-22.json
+2024 June	52	COMPLETED	Pro 1	23	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-52-division-23.json
+2024 June	52	COMPLETED	Pro 2	24	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-52-division-24.json
+2024 June	52	COMPLETED	Pro 3	25	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-52-division-25.json
+2024 June	52	COMPLETED	Semi Pro 1	113	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-52-division-113.json
+2024 June	52	COMPLETED	Beginner	81	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-52-division-81.json
+2024 June	52	COMPLETED	Welcome	62	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-52-division-62.json
+2024 June	52	COMPLETED	Semi Pro 2	114	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-52-division-114.json
+2024 June	52	COMPLETED	Semi Pro 3	115	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-52-division-115.json
+2024 May	51	COMPLETED	Master	21	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-51-division-21.json
+2024 May	51	COMPLETED	Elite	22	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-51-division-22.json
+2024 May	51	COMPLETED	Pro 1	23	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-51-division-23.json
+2024 May	51	COMPLETED	Pro 2	24	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-51-division-24.json
+2024 May	51	COMPLETED	Pro 3	25	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-51-division-25.json
+2024 May	51	COMPLETED	Semi Pro 1	113	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-51-division-113.json
+2024 May	51	COMPLETED	Beginner	81	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-51-division-81.json
+2024 May	51	COMPLETED	Welcome	62	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-51-division-62.json
+2024 May	51	COMPLETED	Semi Pro 2	114	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-51-division-114.json
+2024 May	51	COMPLETED	Semi Pro 3	115	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-51-division-115.json
+2024 April	50	COMPLETED	Master	21	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-50-division-21.json
+2024 April	50	COMPLETED	Elite	22	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-50-division-22.json
+2024 April	50	COMPLETED	Pro 1	23	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-50-division-23.json
+2024 April	50	COMPLETED	Pro 2	24	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-50-division-24.json
+2024 April	50	COMPLETED	Pro 3	25	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-50-division-25.json
+2024 April	50	COMPLETED	Semi Pro 1	113	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-50-division-113.json
+2024 April	50	COMPLETED	Beginner	81	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-50-division-81.json
+2024 April	50	COMPLETED	Welcome	62	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-50-division-62.json
+2024 April	50	COMPLETED	Semi Pro 2	114	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-50-division-114.json
+2024 April	50	COMPLETED	Semi Pro 3	115	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-50-division-115.json
+2024 March	49	COMPLETED	Master	21	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-49-division-21.json
+2024 March	49	COMPLETED	Elite	22	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-49-division-22.json
+2024 March	49	COMPLETED	Pro 1	23	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-49-division-23.json
+2024 March	49	COMPLETED	Pro 2	24	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-49-division-24.json
+2024 March	49	COMPLETED	Pro 3	25	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-49-division-25.json
+2024 March	49	COMPLETED	Semi Pro 1	113	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-49-division-113.json
+2024 March	49	COMPLETED	Beginner	81	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-49-division-81.json
+2024 March	49	COMPLETED	Welcome	62	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-49-division-62.json
+2024 March	49	COMPLETED	Semi Pro 2	114	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-49-division-114.json
+2024 March	49	COMPLETED	Semi Pro 3	115	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-49-division-115.json
+2024 February	48	COMPLETED	Master	21	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-48-division-21.json
+2024 February	48	COMPLETED	Elite	22	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-48-division-22.json
+2024 February	48	COMPLETED	Pro 1	23	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-48-division-23.json
+2024 February	48	COMPLETED	Pro 2	24	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-48-division-24.json
+2024 February	48	COMPLETED	Pro 3	25	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-48-division-25.json
+2024 February	48	COMPLETED	Semi Pro 1	113	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-48-division-113.json
+2024 February	48	COMPLETED	Beginner	81	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-48-division-81.json
+2024 February	48	COMPLETED	Welcome	62	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-48-division-62.json
+2024 February	48	COMPLETED	Semi Pro 2	114	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-48-division-114.json
+2024 February	48	COMPLETED	Semi Pro 3	115	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-48-division-115.json
+2024 January	47	COMPLETED	Master	21	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-47-division-21.json
+2024 January	47	COMPLETED	Elite	22	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-47-division-22.json
+2024 January	47	COMPLETED	Pro 1	23	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-47-division-23.json
+2024 January	47	COMPLETED	Pro 2	24	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-47-division-24.json
+2024 January	47	COMPLETED	Pro 3	25	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-47-division-25.json
+2024 January	47	COMPLETED	Semi Pro 1	113	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-47-division-113.json
+2024 January	47	COMPLETED	Beginner	81	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-47-division-81.json
+2024 January	47	COMPLETED	Welcome	62	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-47-division-62.json
+2024 January	47	COMPLETED	Semi Pro 2	114	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-47-division-114.json
+2024 January	47	COMPLETED	Semi Pro 3	115	0	0		0	0	0	UNKNOWN_NO_ROWS	raw/period-47-division-115.json
+

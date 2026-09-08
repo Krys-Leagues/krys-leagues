@@ -1,0 +1,168 @@
+Skip to Main Content
+Kry's Monthlies
+Search
+0 results
+Install App
+About
+nobody
+	
+2025 July
+107/87 players
+COMPLETED
+	
+Overall Leaders - 2025 July
+Pos	Player	League	Courses
+Played	Total
+Strokes	HN1's	Points
+1	GuyB22	Semi Pro 2	8	-131	10	1,600
+2	Raccoons Whisker	Amateur 2	8	-85	8	1,588
+3	Zanetti	Pro 3	8	-196	30	1,580
+4	Merged into 8648	Pro 2	8	-175	18	1,578
+5	Blutes87	Pro 1	8	-181	20	1,570
+6	𝙹𝚞𝚕𝚒𝚊𝚗	Pro 3	8	-192	25	1,565
+7	Merged into 8708	Beginner	8	-50	8	1,548
+8	Sandtrap	Semi Pro 2	8	-112	11	1,531
+9	INDY	Master	8	-195	22	1,522
+10	KillERBee	Amateur 1	8	-65	7	1,517
+1 - 10
+Pro 1 Leaders
+League
+- Select -
+Master
+Elite
+Pro 1
+Pro 2
+Pro 3
+Semi Pro 1
+Beginner
+Welcome
+Pos	Player	Courses
+Played	Total
+Strokes	HN1's	Points
+1
+	Blutes87	8	-181	20	1,570
+2
+	gopats37	8	-165	20	1,450
+3
+	PETERK9FLORIDA	8	-167	21	1,411
+4
+	JES_BEACHY	8	-150	18	1,348
+5
+	gomarino13	8	-142	15	1,245
+6
+	icecreamman7450	8	-133	15	1,205
+7
+	deebee	8	-123	9	1,189
+8
+	Drew_0706	7	-131	11	1,141
+9
+	lacey068	3	-48	4	414
+1 - 9
+ Players at risk of relegation
+  Point change since last report.
+ Bogey's Bonanza
+#	Player	Score	HN1	Points
+1	Blutes87	-26	3	203
+2	gomarino13	-23	3	193
+3	gopats37	-23	2	182
+4	JES_BEACHY	-22	3	173
+5	PETERK9FLORIDA	-22	2	162
+6	lacey068	-21	2	152
+7	Drew_0706	-20	1	141
+8	icecreamman7450	-19	2	132
+9	deebee	-17	0	120
+ Bogey's Bonanza Hard
+#	Player	Score	HN1	Points
+1	gopats37	-25	3	203
+2	Blutes87	-21	1	191
+3	PETERK9FLORIDA	-20	3	183
+4	gomarino13	-18	1	171
+5	deebee	-17	1	161
+6	icecreamman7450	-16	2	152
+7	JES_BEACHY	-16	1	141
+8	Drew_0706	-14	1	131
+	lacey068			
+ Upside Town
+#	Player	Score	HN1	Points
+1	Blutes87	-22	2	202
+2	Drew_0706	-22	1	191
+3	gopats37	-21	1	181
+3	PETERK9FLORIDA	-21	1	181
+3	JES_BEACHY	-21	1	181
+6	gomarino13	-20	2	152
+7	deebee	-18	0	140
+8	icecreamman7450	-17	0	130
+9	lacey068	-10	0	120
+ Upside Town - Hard
+#	Player	Score	HN1	Points
+1	PETERK9FLORIDA	-21	1	201
+1	Blutes87	-21	1	201
+3	gopats37	-19	2	182
+4	gomarino13	-16	2	172
+5	deebee	-14	0	160
+6	JES_BEACHY	-13	1	151
+7	icecreamman7450	-12	1	141
+	lacey068			
+	Drew_0706			
+ Journey to the Center of the Earth
+#	Player	Score	HN1	Points
+1	JES_BEACHY	-22	4	204
+2	Blutes87	-22	3	193
+3	PETERK9FLORIDA	-20	4	184
+4	gopats37	-20	3	173
+5	icecreamman7450	-18	3	163
+6	deebee	-18	1	151
+7	lacey068	-17	2	142
+8	Drew_0706	-15	2	132
+9	gomarino13	-13	2	122
+ Center of the Earth - Hard
+#	Player	Score	HN1	Points
+1	Drew_0706	-20	1	201
+2	JES_BEACHY	-19	1	191
+3	Blutes87	-19	0	180
+4	gomarino13	-18	0	170
+5	gopats37	-17	2	162
+6	PETERK9FLORIDA	-17	0	150
+7	icecreamman7450	-11	1	141
+8	deebee	-3	0	130
+	lacey068			
+ Crystal Lair
+#	Player	Score	HN1	Points
+1	gopats37	-24	4	204
+2	Blutes87	-24	3	193
+3	deebee	-23	5	185
+4	icecreamman7450	-23	4	174
+5	Drew_0706	-23	2	162
+6	JES_BEACHY	-22	5	155
+6	PETERK9FLORIDA	-22	5	155
+8	gomarino13	-22	3	133
+	lacey068			
+ Crystal Lair - Hard
+#	Player	Score	HN1	Points
+1	Blutes87	-26	7	207
+2	PETERK9FLORIDA	-24	5	195
+3	Drew_0706	-17	3	183
+4	icecreamman7450	-17	2	172
+5	gopats37	-16	3	163
+6	JES_BEACHY	-15	2	152
+7	deebee	-13	2	142
+8	gomarino13	-12	2	132
+	lacey068			
+2025 July Courses
+
+
+BBE - Bogey's Bonanza
+BBH - Bogey's Bonanza Hard
+
+
+UTE - Upside Town
+UTH - Upside Town - Hard
+
+
+JCE - Journey to the Center of the Earth
+JCH - Center of the Earth - Hard
+
+
+CLE - Crystal Lair
+CLH - Crystal Lair - Hard
+Release 1.2 Built with  using Oracle APEX
