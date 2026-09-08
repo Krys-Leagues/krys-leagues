@@ -1,7 +1,8 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
+import { useSearchParams } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import { formatMajorDate, type MajorEvent } from "@/lib/majors"
 
@@ -13,6 +14,13 @@ const MAJOR_CARD_DISPLAY: Record<string, { name: string; date: string }> = {
 }
 
 export default function MajorsPage() {
+  return <Suspense fallback={<main style={page}><div style={container}>Loading Majors…</div></main>}><MajorsContent /></Suspense>
+}
+
+function MajorsContent() {
+  const searchParams = useSearchParams()
+  const backHref = searchParams.get("from") === "tournaments" ? "/tournaments" : "/"
+  const backLabel = searchParams.get("from") === "tournaments" ? "← Bracket Tournaments" : "← Krys Leagues"
   const [events, setEvents] = useState<MajorEvent[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
@@ -34,7 +42,7 @@ export default function MajorsPage() {
   return (
     <main style={page}>
       <div style={container}>
-        <Link href="/" style={backLink}>← Krys Leagues</Link>
+        <Link href={backHref} style={backLink}>{backLabel}</Link>
         <header style={hero}>
           <p style={eyebrow}>Krys Leagues</p>
           <h1 style={title}>The Four Majors</h1>

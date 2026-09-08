@@ -2,28 +2,52 @@ import assert from "node:assert/strict"
 import { readFileSync } from "node:fs"
 import test from "node:test"
 
+import { filterCanonicalCourses, formatCanonicalCourse } from "../../lib/all-time/player-picker.ts"
 import { personalCombinedFallbackKey, rankByCombinedTotal, rankByScore } from "../../lib/all-time/public-records.ts"
 
 const read = (path: string) => readFileSync(path, "utf8")
 
 test("public Records is a hub for Single and Combined without Admin importer links", () => {
   const page = read("app/records/page.tsx")
-  assert.match(page, /href="\/records\/single"/)
-  assert.match(page, /href="\/records\/combined"/)
+  const artworkMap = read("lib/artworkPageMaps.ts")
+  assert.match(page, /ArtworkNavigation/)
+  assert.match(page, /overallLeaderboardsArtwork/)
+  assert.match(artworkMap, /overall-leaderboards-approved\.jpg/)
   assert.doesNotMatch(page, /admin\/records|Import CSV|identity review/i)
   assert.match(read("app/records/single/page.tsx"), /PublicSingleRecordsPage/)
 })
 
-test("public Single uses active UUID-scoped courses and difficulty score colors", () => {
+test("public Single uses searchable independent Easy and Hard course selectors", () => {
   const page = read("components/records/PublicSingleRecordsPage.tsx")
   const api = read("app/api/records/public/route.ts")
   assert.match(api, /\.eq\("active", true\)/)
   assert.match(api, /\.eq\("course_id", course\.id\)/)
   assert.match(page, /difficulty === "Easy" \? styles\.easy : styles\.hard/)
-  assert.match(page, /renderDifficulty\("Easy"\)/)
-  assert.match(page, /renderDifficulty\("Hard"\)/)
+  assert.match(page, /filterCanonicalCourses/)
+  assert.match(page, /selectedEasyId/)
+  assert.match(page, /selectedHardId/)
+  assert.match(page, /onSelect=\{setSelectedEasyId\}/)
+  assert.match(page, /onSelect=\{setSelectedHardId\}/)
+  assert.match(page, /event\.key === "ArrowDown"/)
+  assert.match(page, /event\.key === "Enter"/)
+  assert.match(page, /event\.key === "Escape"/)
+  assert.match(page, /Search \$\{difficulty\.toLowerCase\(\)\} courses/)
+  assert.doesNotMatch(page, /Promise\.all\(catalog\.map|boards\.filter\(/)
   assert.match(page, /`\/players\/\$\{record\.player_id\}`/)
   assert.doesNotMatch(page, /single_course_records|NOT LINKED|identity diagnostics/i)
+  assert.match(read("components/records/PublicRecordsUI.tsx"), /eyebrow = "Krys Leagues · All-Time Records"/)
+  assert.match(page, /eyebrow="Krys Leagues · All-Time Leaderboards"/)
+  assert.match(page, /title="Single Course Records"/)
+})
+
+test("course selectors filter case-insensitively by their own difficulty and course code", () => {
+  const courses = [
+    { id: "easy-a", code: "GLE", display_name: "Gloop Lair", difficulty: "Easy" as const },
+    { id: "hard-a", code: "SHG", display_name: "Shangri-La", difficulty: "Hard" as const },
+  ]
+  assert.deepEqual(filterCanonicalCourses(courses.filter((course) => course.difficulty === "Easy"), "gle").map((course) => course.id), ["easy-a"])
+  assert.deepEqual(filterCanonicalCourses(courses.filter((course) => course.difficulty === "Hard"), "SHANG").map((course) => course.id), ["hard-a"])
+  assert.equal(formatCanonicalCourse(courses[0]), "Gloop Lair — Easy")
 })
 
 test("20E-sized fixture keeps all 132 rows and dense ranks ties", () => {

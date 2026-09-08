@@ -1,93 +1,168 @@
-import { existsSync, readFileSync } from "node:fs"
 import { execFileSync, spawnSync } from "node:child_process"
-import { fileURLToPath } from "node:url"
-import { dirname, resolve } from "node:path"
 
-const root = resolve(dirname(fileURLToPath(import.meta.url)), "..")
+const root = process.cwd()
 const args = process.argv.slice(2)
-const productionFlag = args.indexOf("--production-commit")
-const productionCommit = productionFlag >= 0 ? args[productionFlag + 1] : process.env.PRODUCTION_COMMIT_SHA
-const canonicalFlag = args.indexOf("--canonical-production-commit")
-const canonicalProductionCommit = canonicalFlag >= 0 ? args[canonicalFlag + 1] : process.env.CANONICAL_PRODUCTION_COMMIT_SHA || "60eb4a1340ac3dbbb79fcd99783313dc483ba990"
-const candidateFlag = args.indexOf("--candidate-commit")
-const candidateCommit = candidateFlag >= 0 ? args[candidateFlag + 1] : null
+const argValue = (name) => {
+  const index = args.indexOf(name)
+  return index >= 0 ? args[index + 1] : undefined
+}
+const productionInput = argValue("--production-commit") || process.env.PRODUCTION_COMMIT_SHA
+const candidateInput = argValue("--candidate-commit") || process.env.CANDIDATE_COMMIT_SHA
 const errors = []
 
-const source = (relativePath) => readFileSync(resolve(root, relativePath), "utf8")
-const gitSource = (commit, relativePath) => execFileSync("git", ["show", `${commit}:${relativePath}`], { cwd: root, encoding: "utf8" })
-const requireSource = (relativePath, fragments) => {
-  const value = source(relativePath)
-  for (const fragment of fragments) {
-    if (!value.includes(fragment)) errors.push(`${relativePath} is missing approved marker ${JSON.stringify(fragment)}`)
+const resolveCommit = (value) => {
+  if (!value || !/^[0-9a-f]{40}$/i.test(value)) return null
+  try {
+    return execFileSync("git", ["rev-parse", "--verify", value + "^{commit}"], {
+      cwd: root,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim()
+  } catch {
+    return null
   }
 }
 
-const legacyHomepageMarkers = [
-  "BIG LOGO TRANSPARENT.png",
-  "Player Profiles",
-  "Join Leagues",
-  "League Play",
-  "KWT",
-  "Monthlies",
-  "Bracket Tournaments",
-  "Overall Leaderboards",
-  "Invitationals",
-  "Hall of Champions",
-  "Admin Login",
-  "const buttonGrid",
+const productionCommit = resolveCommit(productionInput)
+const candidateCommit = resolveCommit(candidateInput)
+
+if (!productionInput) errors.push("Current live Production commit is required.")
+else if (!productionCommit) errors.push("Current live Production commit cannot be resolved: " + productionInput)
+
+if (!candidateInput) errors.push("Exact deployment candidate commit is required.")
+else if (!candidateCommit) errors.push("Exact deployment candidate commit cannot be resolved: " + candidateInput)
+
+if (productionCommit && candidateCommit) {
+  const ancestry = spawnSync("git", ["merge-base", "--is-ancestor", productionCommit, candidateCommit], {
+    cwd: root,
+    stdio: "ignore",
+  })
+  if (ancestry.status !== 0) {
+    errors.push("Candidate " + candidateCommit + " is not descended from current live Production " + productionCommit + ".")
+  }
+}
+
+const sourceAtCandidate = (relativePath) => {
+  if (!candidateCommit) return null
+  try {
+    return execFileSync("git", ["show", candidateCommit + ":" + relativePath], {
+      cwd: root,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    })
+  } catch {
+    return null
+  }
+}
+
+const requireSourceMarkers = (relativePath, markers) => {
+  const source = sourceAtCandidate(relativePath)
+  if (source === null) {
+    errors.push(relativePath + " is unavailable in the exact candidate tree.")
+    return
+  }
+  for (const marker of markers) {
+    if (!source.includes(marker)) errors.push(relativePath + " is missing approved marker " + JSON.stringify(marker) + ".")
+  }
+}
+
+const requiredSources = {
+  "app/page.tsx": ["ArtworkNavigation", "mainHubArtwork"],
+  "app/league-play/page.tsx": ["ArtworkNavigation", "leaguePlayArtwork"],
+  "app/players/page.tsx": ["ArtworkNavigation", "playerProfilesArtwork", "loadCanonicalPublicPlayers", "filteredPlayers"],
+  "app/leaderboards/page.tsx": ['redirect("/records")'],
+  "app/records/page.tsx": ["ArtworkNavigation", "overallLeaderboardsArtwork"],
+  "app/kwt/page.tsx": ["ArtworkNavigation", "kwtArtwork"],
+  "app/kwt/upcoming/page.tsx": ["KWT_WEEKLY_FEATURE_ASSET", "KWT_SEASON_TROPHY_BOARD_ASSET", "Back to KWT"],
+  "app/kwt/records/page.tsx": ["get_public_kwt_course_records", "buildKwtCourseRecords", "Back to KWT"],
+  "app/tournaments/page.tsx": ["ArtworkNavigation", "bracketTournamentsArtwork", "BracketRegistrationOverlay"],
+  "app/tournaments/current/page.tsx": ["CURRENT_TOURNAMENTS", "LiveBracketPreview", "live-preview"],
+  "app/tournaments/history/page.tsx": ["ARCHIVED_TOURNAMENTS", "View Full Bracket", "/tournaments"],
+  "app/tournaments/BracketRegistrationOverlay.tsx": ["bracket_public_content", "target=\"_blank\""],
+  "app/invitationals/page.tsx": ["ArtworkNavigation", "invitationalsArtwork"],
+  "app/champions/page.tsx": ["hallOfChampionsArtworkAsset", "resolveHallScope", "FilteredHallCategory", "Hall of Champions categories"],
+  "app/join/page.tsx": ["ArtworkNavigation", "joinArtwork"],
+  "app/monthlies/page.tsx": ["ArtworkNavigation", "monthlyArtwork", "Monthly result filters"],
+  "app/match-play/page.tsx": ["ArtworkNavigation", "matchPlayArtwork"],
+  "app/pyp/page.tsx": ["ArtworkNavigation", "pypArtwork"],
+  "app/skins/page.tsx": ["ArtworkNavigation", "skinsArtwork"],
+  "app/amateur-pro/page.tsx": ["ArtworkNavigation", "amateurToProArtwork"],
+  "app/doubles/page.tsx": ["ArtworkNavigation", "doublesArtwork"],
+  "app/stroke/page.tsx": ["ArtworkNavigation", "strokeArtwork"],
+  "lib/artworkPageMaps.ts": [
+    'id: "main-hub"',
+    'id: "league-play"',
+    'id: "join-leagues"',
+    'id: "kwt-hub"',
+    'id: "monthly-results"',
+    'id: "bracket-tournaments"',
+    'id: "invitationals"',
+    'id: "match-play"',
+    'id: "overall-leaderboards"',
+    'id: "player-profiles"',
+    'id: "pyp"',
+    'id: "skins"',
+    'id: "amateur-to-pro"',
+    'id: "doubles"',
+    'id: "stroke"',
+    "kwt-hub-approved.png",
+    "monthly-results-approved.png",
+    "bracket-tournaments-approved.png",
+    "hall-of-champions-approved.jpg",
+  ],
+  "components/navigation/ArtworkNavigation.tsx": ["data-approved-artwork-page={definition.id}", "artwork-navigation__overlay"],
+  "app/monthlies/page.module.css": ["min-height: 0", "pointer-events: none", "pointer-events: auto", "top: 16%", "left: 19%", "width: 20%", "height: 68%"],
+}
+
+for (const [relativePath, markers] of Object.entries(requiredSources)) requireSourceMarkers(relativePath, markers)
+
+const legacyChecks = [
+  ["app/page.tsx", ["const buttonGrid", "Season 59"]],
+  ["app/leaderboards/page.tsx", ["Player Dashboard", "const buttonGrid", "Season 59"]],
+  ["app/monthlies/page.tsx", ["monthly-results-approved.jpg", "August 2026 is the active Monthly"]],
+  ["app/kwt/page.tsx", ["kwt-hub-approved.jpg", "weekendMask", "Krys Weekly Tournament"]],
+  ["app/tournaments/page.tsx", ["bracket-tournaments-approved.jpg", "/admin/krys-tourney"]],
+  ["app/join/page.tsx", ["community-records-leaderboards", "/register?league=community"]],
 ]
-const isLegacyHomepage = (homepage) => legacyHomepageMarkers.every((marker) => homepage.includes(marker))
-const isCanonicalHomepage = (homepage) => homepage.includes("ArtworkNavigation") && homepage.includes("mainHubArtwork") && !isLegacyHomepage(homepage)
 
-const candidateHomepage = candidateCommit ? gitSource(candidateCommit, "app/page.tsx") : source("app/page.tsx")
-if (isLegacyHomepage(candidateHomepage)) errors.push("app/page.tsx contains the banned centered legacy homepage/button configuration.")
-if (!isCanonicalHomepage(candidateHomepage)) errors.push("app/page.tsx is not the canonical approved-artwork homepage implementation.")
-
-requireSource("app/page.tsx", ["ArtworkNavigation", "mainHubArtwork"])
-requireSource("app/league-play/page.tsx", ["ArtworkNavigation", "leaguePlayArtwork"])
-requireSource("app/join/page.tsx", ["ArtworkNavigation", "joinArtwork"])
-requireSource("app/kwt/page.tsx", ["ArtworkNavigation", "kwtArtwork"])
-requireSource("lib/artworkPageMaps.ts", ['id: "main-hub"', 'id: "league-play"', 'id: "join-leagues"', 'id: "kwt-hub"'])
-requireSource("components/navigation/ArtworkNavigation.tsx", ["data-approved-artwork-page={definition.id}", "artwork-navigation__overlay"])
+for (const [relativePath, markers] of legacyChecks) {
+  const source = sourceAtCandidate(relativePath)
+  if (source === null) continue
+  for (const marker of markers) {
+    if (source.includes(marker)) errors.push(relativePath + " contains retired public marker " + JSON.stringify(marker) + ".")
+  }
+}
 
 for (const asset of [
   "public/main-hub-approved.jpg",
   "public/approved-pages/league-play-approved.png",
   "public/approved-pages/join-leagues-approved.jpg",
-  "public/approved-pages/kwt-hub-approved.jpg",
+  "public/approved-pages/player-profiles-approved.jpg",
+  "public/approved-pages/overall-leaderboards-approved.jpg",
+  "public/approved-pages/kwt-hub-approved.png",
+  "public/approved-pages/monthly-results-approved.png",
+  "public/approved-pages/bracket-tournaments-approved.png",
+  "public/approved-pages/invitationals-approved.jpg",
+  "public/approved-pages/hall-of-champions-approved.jpg",
+  "public/approved-pages/match-play-approved.jpg",
+  "public/approved-pages/pyp-approved.jpg",
+  "public/approved-pages/skins-approved.jpg",
+  "public/approved-pages/amateur-to-pro-approved.jpg",
+  "public/approved-pages/doubles-approved.jpg",
+  "public/approved-pages/stroke-play-approved.jpg",
 ]) {
-  if (!existsSync(resolve(root, asset))) errors.push(`Required approved artwork asset is missing: ${asset}`)
-}
-
-if (!productionCommit) {
-  errors.push("Production commit ancestry input is required (--production-commit SHA or PRODUCTION_COMMIT_SHA).")
-} else if (!/^[0-9a-f]{40}$/i.test(productionCommit)) {
-  errors.push(`Invalid Production commit SHA: ${productionCommit}`)
-} else {
-  const ancestry = spawnSync("git", ["merge-base", "--is-ancestor", productionCommit, "HEAD"], { cwd: root })
-  if (ancestry.status !== 0) errors.push(`HEAD is not descended from Production commit ${productionCommit}.`)
-}
-
-if (!/^[0-9a-f]{40}$/i.test(canonicalProductionCommit)) {
-  errors.push(`Invalid canonical Production homepage commit: ${canonicalProductionCommit}`)
-} else {
+  if (!candidateCommit) continue
   try {
-    const canonicalHomepage = gitSource(canonicalProductionCommit, "app/page.tsx")
-    if (isLegacyHomepage(canonicalHomepage)) errors.push(`Canonical Production homepage commit ${canonicalProductionCommit} contains the banned legacy homepage.`)
-    if (!isCanonicalHomepage(canonicalHomepage)) errors.push(`Canonical Production homepage commit ${canonicalProductionCommit} is not the approved-artwork homepage.`)
-    if (candidateHomepage !== canonicalHomepage) errors.push(`Release candidate app/page.tsx differs from canonical Production homepage ${canonicalProductionCommit}.`)
-    const canonicalAncestry = spawnSync("git", ["merge-base", "--is-ancestor", canonicalProductionCommit, "HEAD"], { cwd: root })
-    if (canonicalAncestry.status !== 0) errors.push(`HEAD is not based on canonical Production homepage commit ${canonicalProductionCommit}.`)
+    execFileSync("git", ["cat-file", "-e", candidateCommit + ":" + asset], { cwd: root, stdio: "ignore" })
   } catch {
-    errors.push(`Canonical Production homepage commit ${canonicalProductionCommit} is not available locally.`)
+    errors.push("Required approved asset is missing from candidate tree: " + asset + ".")
   }
 }
 
 if (errors.length > 0) {
-  console.error("BLOCKED: approved artwork release guard failed.")
-  for (const error of errors) console.error(`- ${error}`)
+  console.error("BLOCKED: exact-candidate public release guard failed.")
+  for (const error of errors) console.error("- " + error)
   process.exit(1)
 }
 
-const head = execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim()
-console.log(`READY: approved Main Hub, League Play, Join, and KWT markers present; HEAD ${head} descends from Production ${productionCommit}.`)
+console.log("READY: exact candidate " + candidateCommit + " descends from current live Production " + productionCommit + "; approved public route markers and assets passed.")

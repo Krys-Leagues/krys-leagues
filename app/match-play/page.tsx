@@ -1,8 +1,8 @@
 "use client"
 
-import Image from "next/image"
-import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
+import { ArtworkNavigation } from "@/components/navigation/ArtworkNavigation"
+import { matchPlayArtwork } from "@/lib/artworkPageMaps"
 import { supabase } from "@/lib/supabase"
 import { historicalCourseLabel, publicMatchDivisions, type PublicHistoricalMatchCourse, type PublicMatchPayload } from "@/lib/publicMatch"
 import styles from "./match-play.module.css"
@@ -38,14 +38,9 @@ export default function MatchPlayPage() {
   const currentDivisions = publicMatchDivisions(data?.current.standings ?? [])
   const shownCurrentDivision = currentDivisions.includes(currentDivision ?? -1) ? currentDivision : currentDivisions[0] ?? null
 
-  return <main className={styles.page}>
+  return <div className={styles.page}>
+    <ArtworkNavigation definition={matchPlayArtwork} />
     <div className={styles.shell}>
-      <nav className={styles.topNav}><Link href="/league-play">← League Play</Link><div><Link href="/matches">Matches &amp; Results</Link><Link href="/match-standings">Classic standings</Link></div></nav>
-      <header className={styles.hero}>
-        <Image src="/league-media/BIG LOGO TRANSPARENT.png" alt="Krys Leagues logo" width={190} height={190} priority className={styles.logo} />
-        <div><p className={styles.eyebrow}>KRYS LEAGUES</p><h1>MATCH PLAY</h1><p>Head-to-head mini golf. Current competition and frozen league history, together in one place.</p></div>
-      </header>
-
       {loading && <div className={styles.message}>Loading Match Play…</div>}
       {error && <div className={styles.message}>{error}</div>}
       {!loading && !error && <>
@@ -65,7 +60,7 @@ export default function MatchPlayPage() {
         </section>
       </>}
     </div>
-  </main>
+  </div>
 }
 
 function DivisionTabs({ divisions, selected, onSelect }: { divisions: number[]; selected: number | null; onSelect: (division: number) => void }) {

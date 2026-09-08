@@ -1,12 +1,14 @@
 "use client"
 
+import Image from "next/image"
 import Link from "next/link"
 import { Suspense, useEffect, useMemo, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import { historicalPlayerName, loadCanonicalPlayerDisplays, type CanonicalPlayerDisplay } from "@/lib/canonicalPlayerDisplay"
 import TrophyMedia from "@/components/TrophyMedia"
-import { filterTrophiesForScope } from "@/lib/championScope"
+import { filterTrophiesForScope, type ChampionScope } from "@/lib/championScope"
+import { hallOfChampionsArtworkAsset } from "@/lib/artworkPageMaps"
 
 type Trophy = {
   id: string
@@ -35,7 +37,7 @@ type TrophyGroup = {
   firstIndex: number
 }
 
-type HallCategory = "league" | "monthly" | "bracket" | "krysCup" | "spicyCup" | "other"
+type HallCategory = "league" | "monthly" | "bracket" | "championOfChampions" | "krysCup" | "spicyCup" | "other"
 
 export default function ChampionsPage() {
   return (
@@ -47,7 +49,9 @@ export default function ChampionsPage() {
 
 function ChampionsContent() {
   const searchParams = useSearchParams()
-  const kwtOnly = searchParams.get("league")?.trim().toLowerCase() === "kwt"
+  const hallScope = resolveHallScope(searchParams.get("league"), searchParams.get("category"))
+  const filteredHall = hallScope !== "all"
+  const backHref = hallBackHref(hallScope, searchParams.get("from"))
   const [players, setPlayers] = useState<CanonicalPlayerDisplay[]>([])
   const [trophies, setTrophies] = useState<Trophy[]>([])
   const [loading, setLoading] = useState(true)
@@ -55,10 +59,10 @@ function ChampionsContent() {
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/immutability
-    loadChampions(kwtOnly)
-  }, [kwtOnly])
+    loadChampions(hallScope)
+  }, [hallScope])
 
-  async function loadChampions(onlyKwt: boolean) {
+  async function loadChampions(scope: ChampionScope) {
     setLoading(true)
     setMessage("")
 
@@ -68,7 +72,7 @@ function ChampionsContent() {
           "id, player_id, player_name, trophy_title, placement, event_name, league_type, division, season, week, image_url"
         )
         .order("season", { ascending: false })
-    if (onlyKwt) trophiesQuery = trophiesQuery.eq("league_type", "kwt")
+    if (scope === "kwt") trophiesQuery = trophiesQuery.eq("league_type", "kwt")
 
     const trophiesResponse = await trophiesQuery
 
@@ -80,7 +84,7 @@ function ChampionsContent() {
       return
     }
 
-    const loadedTrophies = filterTrophiesForScope(trophiesResponse.data || [], onlyKwt ? "kwt" : "all")
+    const loadedTrophies = filterTrophiesForScope(trophiesResponse.data || [], scope)
     const playerResponse = await loadCanonicalPlayerDisplays(
       loadedTrophies.map((trophy) => trophy.player_id).filter((id): id is string => Boolean(id)),
     )
@@ -148,10 +152,13 @@ function ChampionsContent() {
 
   return (
     <main style={page}>
+      <div style={hallArtworkFrame}>
+        <Image src={hallOfChampionsArtworkAsset} alt="Hall of Champions" width={2064} height={692} priority style={hallArtworkImage} />
+      </div>
       <div style={container}>
         <div style={topBar}>
-          <Link href={kwtOnly ? "/kwt" : "/"} style={backButton}>
-            {kwtOnly ? "← KWT" : "← Krys Leagues"}
+          <Link href={backHref} style={backButton}>
+            {hallScope === "all" ? "← Krys Leagues" : `← ${hallBackLabel(hallScope, searchParams.get("from"))}`}
           </Link>
 
           <Link href="/records" style={backButton}>
@@ -164,12 +171,10 @@ function ChampionsContent() {
         </div>
 
         <section style={hero}>
-          <h1 style={title}>{kwtOnly ? "🏆 KWT Hall of Champions" : "🏆 Hall of Champions"}</h1>
+          <h1 style={title}>{hallTitle(hallScope)}</h1>
 
           <p style={subtitle}>
-            {kwtOnly
-              ? "KWT champions and recorded weekly tournament awards."
-              : "Celebrating league champions, tournament winners, cup achievements, and the greatest accomplishments in Krys Leagues."}
+            {hallDescription(hallScope)}
           </p>
         </section>
                 {loading ? (
@@ -180,9 +185,9 @@ function ChampionsContent() {
           <div style={errorCard}>{message}</div>
         ) : (
           <>
-            {!kwtOnly && <section style={featuredCard}>
+            {showFeaturedCups(hallScope) && <section style={featuredCard}>
               <div style={cupGrid}>
-                <div style={cupCard}>
+                {(hallScope === "all" || hallScope === "champion-of-champions") && <div style={cupCard}>
                  <h2 style={featuredTitle}>
   🏆 Champion of Champions
   <br />
@@ -203,9 +208,9 @@ function ChampionsContent() {
     type="video/mp4"
   />
 </video>
-                </div>
+                </div>}
 
-                <div style={cupCard}>
+                {(hallScope === "all" || hallScope === "krys-cup") && <div style={cupCard}>
                   <h2 style={featuredTitle}>
   🏆 Krys Cup Winner
   <br />
@@ -226,9 +231,9 @@ function ChampionsContent() {
                       type="video/mp4"
                     />
                   </video>
-                </div>
+                </div>}
 
-                <div style={cupCard}>
+                {(hallScope === "all" || hallScope === "spicy-cup") && <div style={cupCard}>
                   <h2 style={featuredTitle}>
   🌶️ Spicy Cup Winner
   <br />
@@ -261,17 +266,87 @@ function ChampionsContent() {
                       )}
                     </p>
                   )}
-                </div>
+                </div>}
               </div>
             </section>}
 
-            <RecentTrophyGroups groups={recentTrophyGroups} />
-            {championEntries.length > 0 && <HallCategoryArchives entries={championEntries} />}
+            {filteredHall ? (
+              <FilteredHallCategory scope={hallScope} entries={championEntries} />
+            ) : (
+              <>
+                {championEntries.length > 0 && <HallCategoryArchives entries={championEntries} />}
+                <RecentTrophyGroups groups={recentTrophyGroups} />
+              </>
+            )}
           </>
         )}
       </div>
     </main>
   )
+}
+
+function FilteredHallCategory({ scope, entries }: { scope: Exclude<ChampionScope, "all">; entries: ChampionEntry[] }) {
+  return (
+    <section style={filteredCategoryCard} data-hall-scope={scope}>
+      <h2 style={categoryTitle}>{hallTitle(scope)}</h2>
+      <p style={sectionDescription}>{hallDescription(scope)}</p>
+      {entries.length > 0 ? <ChampionList entries={entries} /> : <p style={emptyText}>No recorded champions are available for this category yet.</p>}
+    </section>
+  )
+}
+
+function resolveHallScope(leagueParam: string | null, categoryParam: string | null): ChampionScope {
+  if (leagueParam?.trim().toLowerCase() === "kwt") return "kwt"
+
+  const category = categoryParam?.trim().toLowerCase()
+  if (category === "champion-of-champions") return "champion-of-champions"
+  if (category === "krys-cup") return "krys-cup"
+  if (category === "spicy-cup") return "spicy-cup"
+  if (category === "monthly") return "monthly"
+  if (category === "bracket") return "bracket"
+  return "all"
+}
+
+function hallBackHref(scope: ChampionScope, from: string | null) {
+  if (scope === "kwt") return "/kwt"
+  if (from === "invitationals") return "/invitationals"
+  if (from === "monthlies") return "/monthlies"
+  if (from === "tournaments") return "/tournaments"
+  if (from === "champions") return "/champions"
+  return "/"
+}
+
+function hallBackLabel(scope: ChampionScope, from: string | null) {
+  if (scope === "kwt" || from === "kwt") return "KWT"
+  if (from === "invitationals") return "Invitationals"
+  if (from === "monthlies") return "Monthlies"
+  if (from === "tournaments") return "Bracket Tournaments"
+  if (from === "champions") return "Hall of Champions"
+  return "Krys Leagues"
+}
+
+function hallTitle(scope: ChampionScope) {
+  if (scope === "all") return "🏆 Hall of Champions"
+  if (scope === "kwt") return "🏆 KWT Hall of Champions"
+  if (scope === "champion-of-champions") return "🏆 Champion of Champions"
+  if (scope === "krys-cup") return "🏆 Krys Cup"
+  if (scope === "spicy-cup") return "🌶️ Spicy Cup"
+  if (scope === "monthly") return "🏆 Monthly Champions"
+  return "🏆 Bracket Tournament Champions"
+}
+
+function hallDescription(scope: ChampionScope) {
+  if (scope === "kwt") return "KWT champions and recorded weekly tournament awards."
+  if (scope === "champion-of-champions") return "Recorded Champion of Champions winners from the existing Hall data."
+  if (scope === "krys-cup") return "Recorded Krys Cup winners and awards."
+  if (scope === "spicy-cup") return "Amateur Invitational for players who did not advance past Round 2."
+  if (scope === "monthly") return "Recorded Monthly champions from the existing Hall data."
+  if (scope === "bracket") return "Recorded winners from existing bracket tournament trophy data."
+  return "Celebrating league champions, tournament winners, cup achievements, and the greatest accomplishments in Krys Leagues."
+}
+
+function showFeaturedCups(scope: ChampionScope) {
+  return scope === "all" || scope === "champion-of-champions" || scope === "krys-cup" || scope === "spicy-cup"
 }
 
 function RecentTrophyGroups({ groups }: { groups: TrophyGroup[] }) {
@@ -336,6 +411,7 @@ function HallCategoryArchives({ entries }: { entries: ChampionEntry[] }) {
   const leagueEntries = entries.filter((entry) => categoryForEntry(entry) === "league")
   const monthlyEntries = entries.filter((entry) => categoryForEntry(entry) === "monthly")
   const bracketEntries = entries.filter((entry) => categoryForEntry(entry) === "bracket")
+  const championOfChampionsEntries = entries.filter((entry) => categoryForEntry(entry) === "championOfChampions")
   const krysCupEntries = entries.filter((entry) => categoryForEntry(entry) === "krysCup")
   const spicyCupEntries = entries.filter((entry) => categoryForEntry(entry) === "spicyCup")
   const otherEntries = entries.filter((entry) => categoryForEntry(entry) === "other")
@@ -358,6 +434,7 @@ function HallCategoryArchives({ entries }: { entries: ChampionEntry[] }) {
         {leagueEntries.length > 0 && <a href="#hall-category-league" style={categoryLink}>League Champions</a>}
         {monthlyEntries.length > 0 && <a href="#hall-category-monthly" style={categoryLink}>Monthly Champions</a>}
         {bracketEntries.length > 0 && <a href="#hall-category-bracket" style={categoryLink}>Bracket Tournament Champions</a>}
+        {championOfChampionsEntries.length > 0 && <a href="#hall-category-champion-of-champions" style={categoryLink}>Champion of Champions</a>}
         {krysCupEntries.length > 0 && <a href="#hall-category-krys-cup" style={categoryLink}>Krys Cup</a>}
         {spicyCupEntries.length > 0 && <a href="#hall-category-spicy-cup" style={categoryLink}>Spicy Cup</a>}
         {otherEntries.length > 0 && <a href="#hall-category-other" style={categoryLink}>Other Awards</a>}
@@ -398,6 +475,14 @@ function HallCategoryArchives({ entries }: { entries: ChampionEntry[] }) {
           <h3 style={categoryTitle}>Bracket Tournament Champions</h3>
           <p style={sectionDescription}>Recorded winners from existing bracket tournament trophy data.</p>
           <ChampionList entries={bracketEntries} />
+        </section>
+      )}
+
+      {championOfChampionsEntries.length > 0 && (
+        <section id="hall-category-champion-of-champions" style={categorySection}>
+          <h3 style={categoryTitle}>Champion of Champions</h3>
+          <p style={sectionDescription}>Recorded Champion of Champions winners and awards.</p>
+          <ChampionList entries={championOfChampionsEntries} />
         </section>
       )}
 
@@ -481,16 +566,17 @@ function searchableText(entry: ChampionEntry) {
 
 function categoryForEntry(entry: ChampionEntry): HallCategory {
   const text = searchableText(entry)
-  if (text.includes("bracket") || text.includes("tournament")) return "bracket"
+  if (text.includes("champion of champions")) return "championOfChampions"
+  if (text.includes("krys cup")) return "krysCup"
+  if (text.includes("spicy cup")) return "spicyCup"
   if (isMonthlyEntry(entry)) return "monthly"
+  if (text.includes("bracket") || text.includes("tournament")) return "bracket"
   if (
     text.includes("league champion") ||
     text.includes("season champion") ||
     text.includes("division champion") ||
     LEAGUE_FILTERS.some((league) => text.includes(league.toLowerCase()))
   ) return "league"
-  if (text.includes("krys cup")) return "krysCup"
-  if (text.includes("spicy cup")) return "spicyCup"
   return "other"
 }
 
@@ -503,13 +589,15 @@ function hallCategoryHref(category: HallCategory) {
   return category === "league"
     ? "#hall-category-league"
     : category === "monthly"
-      ? "#hall-category-monthly"
+      ? "/champions?category=monthly&from=champions"
       : category === "bracket"
-      ? "#hall-category-bracket"
-        : category === "krysCup"
-          ? "#hall-category-krys-cup"
+        ? "/champions?category=bracket&from=champions"
+        : category === "championOfChampions"
+          ? "/champions?category=champion-of-champions&from=champions"
+          : category === "krysCup"
+          ? "/champions?category=krys-cup&from=champions"
           : category === "spicyCup"
-            ? "#hall-category-spicy-cup"
+            ? "/champions?category=spicy-cup&from=champions"
             : "#hall-category-other"
 }
 
@@ -541,6 +629,23 @@ function trophyRecency(entry: Trophy) {
   const week = Number(entry.week?.match(/\d+/)?.[0] || 0)
   return season * 100000 + week
 }
+
+const hallArtworkFrame: React.CSSProperties = {
+  width: "100%",
+  maxWidth: 1200,
+  margin: "0 auto 18px",
+  overflow: "hidden",
+  border: "1px solid #334155",
+  borderRadius: 20,
+  background: "#020617",
+}
+
+const hallArtworkImage: React.CSSProperties = {
+  display: "block",
+  width: "100%",
+  height: "auto",
+}
+
 
 const page: React.CSSProperties = {
   minHeight: "100vh",
@@ -740,6 +845,10 @@ const sectionDescription: React.CSSProperties = {
 const categoryBrowser: React.CSSProperties = {
   ...card,
   marginTop: 20,
+}
+
+const filteredCategoryCard: React.CSSProperties = {
+  ...categoryBrowser,
 }
 
 const categoryNavigation: React.CSSProperties = {

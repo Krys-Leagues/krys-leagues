@@ -2,17 +2,24 @@
 
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
+import { useRouter } from "next/navigation"
 import PlayerAvatar from "@/components/PlayerAvatar"
+import { ArtworkNavigation } from "@/components/navigation/ArtworkNavigation"
+import { playerProfilesArtwork } from "@/lib/artworkPageMaps"
 import {
   loadCanonicalPublicPlayers,
   type CanonicalPublicPlayer,
 } from "@/lib/publicPlayers"
+import styles from "./page.module.css"
 
 export default function PlayerProfilesPage() {
+  const router = useRouter()
   const [players, setPlayers] = useState<CanonicalPublicPlayer[]>([])
   const [search, setSearch] = useState("")
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState("")
+  const [resultsOpen, setResultsOpen] = useState(false)
+  const [highlightedIndex, setHighlightedIndex] = useState(0)
 
   useEffect(() => {
     let active = true
@@ -43,190 +50,88 @@ export default function PlayerProfilesPage() {
     )
   }, [players, search])
 
-  return (
-    <main style={page}>
-      <div style={container}>
-        <Link href="/" style={backButton}>
-          ← Krys Leagues
-        </Link>
+  function updateSearch(value: string) {
+    setSearch(value)
+    setHighlightedIndex(0)
+    setResultsOpen(true)
+  }
 
-        <section style={hero}>
-          <p style={eyebrow}>Global Players</p>
-          <h1 style={title}>Player Profiles</h1>
-          <p style={subtitle}>
-            Find a Krys Leagues player and view their public profile, league
-            history, trophies, and achievements.
-          </p>
+  function handleSearchKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (event.key === "ArrowDown") {
+      event.preventDefault()
+      setResultsOpen(true)
+      setHighlightedIndex((index) => filteredPlayers.length ? (index + 1) % filteredPlayers.length : 0)
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault()
+      setResultsOpen(true)
+      setHighlightedIndex((index) => filteredPlayers.length ? (index - 1 + filteredPlayers.length) % filteredPlayers.length : 0)
+    } else if (event.key === "Enter") {
+      const player = filteredPlayers[highlightedIndex] || (filteredPlayers.length === 1 ? filteredPlayers[0] : null)
+      if (player) {
+        event.preventDefault()
+        router.push(`/players/${player.id}`)
+        setResultsOpen(false)
+      }
+    } else if (event.key === "Escape") {
+      event.preventDefault()
+      setResultsOpen(false)
+    }
+  }
 
-          <label style={searchLabel}>
-            <span>Search players</span>
-            <input
-              type="search"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search by screen name..."
-              style={searchInput}
-            />
-          </label>
-        </section>
+  const overlay = (
+    <div className={styles.searchOverlay}>
+      <label className={styles.searchRegion}>
+          <span className="sr-only">Search players</span>
+          <input
+            type="search"
+            value={search}
+            onChange={(event) => updateSearch(event.target.value)}
+            onFocus={() => setResultsOpen(true)}
+            onClick={() => setResultsOpen(true)}
+            onKeyDown={handleSearchKeyDown}
+            aria-label="Search players by screen name"
+            role="combobox"
+            aria-autocomplete="list"
+            aria-controls="player-profile-search-results"
+            aria-expanded={resultsOpen}
+            aria-activedescendant={resultsOpen && filteredPlayers[highlightedIndex] ? `player-profile-option-${filteredPlayers[highlightedIndex].id}` : undefined}
+            autoComplete="off"
+            placeholder=""
+            className={styles.searchInput}
+          />
+      </label>
 
-        {loading ? (
-          <div style={messageCard}>Loading player profiles...</div>
-        ) : message ? (
-          <div style={errorCard}>{message}</div>
-        ) : filteredPlayers.length === 0 ? (
-          <div style={messageCard}>
-            {search ? "No players match that search." : "No active players found."}
-          </div>
-        ) : (
-          <section style={directory} aria-label="Player profiles">
-            {filteredPlayers.map((player) => (
+        {resultsOpen ? (
+          <div id="player-profile-search-results" className={styles.results} role="listbox" aria-label="Matching Global Players">
+            {filteredPlayers.length ? filteredPlayers.map((player, index) => (
               <Link
+                id={`player-profile-option-${player.id}`}
                 key={player.id}
                 href={`/players/${player.id}`}
-                style={playerCard}
+                role="option"
+                aria-selected={index === highlightedIndex}
+                className={styles.result}
+                onClick={() => setResultsOpen(false)}
               >
-                <PlayerAvatar
-                  screenName={player.screen_name}
-                  avatarPath={player.avatar_path}
-                  size={76}
-                />
-
-                <span style={playerDetails}>
-                  <strong style={playerName}>{player.screen_name}</strong>
-                  <span style={viewProfile}>View public profile →</span>
-                </span>
+                <PlayerAvatar screenName={player.screen_name} avatarPath={player.avatar_path} size={40} />
+                <span className={styles.resultName}>{player.screen_name}</span>
               </Link>
-            ))}
-          </section>
-        )}
-      </div>
-    </main>
+            )) : (
+              <p className={styles.resultMessage}>{loading ? "Loading player profiles..." : message || "No players match that search."}</p>
+            )}
+          </div>
+        ) : null}
+
+      {message && !search.trim() ? <p className={styles.status} role="alert">{message}</p> : null}
+    </div>
   )
-}
 
-const page: React.CSSProperties = {
-  minHeight: "100vh",
-  padding: "28px 18px",
-  background:
-    "radial-gradient(circle at top, #172554 0%, #020617 48%, #000000 100%)",
-  color: "white",
-}
-
-const container: React.CSSProperties = {
-  width: "100%",
-  maxWidth: 1100,
-  margin: "0 auto",
-}
-
-const backButton: React.CSSProperties = {
-  display: "inline-block",
-  marginBottom: 18,
-  padding: "10px 16px",
-  background: "#1e293b",
-  border: "1px solid #475569",
-  borderRadius: 10,
-  color: "white",
-  textDecoration: "none",
-  fontWeight: 700,
-}
-
-const hero: React.CSSProperties = {
-  padding: "clamp(24px, 5vw, 44px)",
-  marginBottom: 20,
-  border: "1px solid #334155",
-  borderRadius: 20,
-  background: "rgba(2, 6, 23, 0.9)",
-}
-
-const eyebrow: React.CSSProperties = {
-  margin: "0 0 10px",
-  color: "#60a5fa",
-  fontSize: 12,
-  fontWeight: 900,
-  letterSpacing: ".14em",
-  textTransform: "uppercase",
-}
-
-const title: React.CSSProperties = {
-  margin: 0,
-  fontSize: "clamp(36px, 7vw, 56px)",
-}
-
-const subtitle: React.CSSProperties = {
-  maxWidth: 680,
-  margin: "14px 0 24px",
-  color: "#cbd5e1",
-  fontSize: 18,
-  lineHeight: 1.6,
-}
-
-const searchLabel: React.CSSProperties = {
-  display: "flex",
-  maxWidth: 560,
-  flexDirection: "column",
-  gap: 8,
-  fontWeight: 800,
-}
-
-const searchInput: React.CSSProperties = {
-  width: "100%",
-  padding: "13px 15px",
-  border: "1px solid #475569",
-  borderRadius: 11,
-  background: "#0f172a",
-  color: "white",
-  fontSize: 17,
-}
-
-const directory: React.CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-  gap: 14,
-}
-
-const playerCard: React.CSSProperties = {
-  display: "flex",
-  minWidth: 0,
-  alignItems: "center",
-  gap: 16,
-  padding: 18,
-  border: "1px solid #334155",
-  borderRadius: 16,
-  background: "rgba(15, 23, 42, 0.94)",
-  color: "white",
-  textDecoration: "none",
-}
-
-const playerDetails: React.CSSProperties = {
-  display: "flex",
-  minWidth: 0,
-  flexDirection: "column",
-  gap: 7,
-}
-
-const playerName: React.CSSProperties = {
-  overflowWrap: "anywhere",
-  fontSize: 20,
-}
-
-const viewProfile: React.CSSProperties = {
-  color: "#93c5fd",
-  fontSize: 14,
-  fontWeight: 750,
-}
-
-const messageCard: React.CSSProperties = {
-  padding: 28,
-  border: "1px solid #334155",
-  borderRadius: 16,
-  background: "#0f172a",
-  color: "#cbd5e1",
-  textAlign: "center",
-}
-
-const errorCard: React.CSSProperties = {
-  ...messageCard,
-  borderColor: "#991b1b",
-  color: "#fecaca",
+  return (
+    <div className={styles.page}>
+      <Link href="/" className={styles.backButton} aria-label="Back to Krys Leagues">
+        ← Krys Leagues
+      </Link>
+      <ArtworkNavigation definition={playerProfilesArtwork} overlay={overlay} />
+    </div>
+  )
 }

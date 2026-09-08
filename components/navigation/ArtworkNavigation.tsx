@@ -29,18 +29,23 @@ export function ArtworkNavigation({ definition, overlay }: { definition: Artwork
         />
         {overlay ? <div className="artwork-navigation__overlay">{overlay}</div> : null}
         <nav aria-label={`${definition.title} navigation`} className="artwork-navigation__targets">
-          {definition.targets.map((target) => (
-            <Link
-              key={target.id}
-              href={target.href}
-              aria-label={target.label}
-              className="artwork-navigation__target"
-              style={artworkTargetStyle(target)}
-              data-artwork-target-id={target.id}
-            >
-              <span className="sr-only">{target.label}</span>
-            </Link>
-          ))}
+          {definition.targets.map((target) => {
+            const props = {
+              "aria-label": target.label,
+              className: "artwork-navigation__target",
+              style: artworkTargetStyle(target),
+              "data-artwork-target-id": target.id,
+            }
+            return target.external ? (
+              <a key={target.id} href={target.href} target="_blank" rel="noopener noreferrer" {...props}>
+                <span className="sr-only">{target.label}</span>
+              </a>
+            ) : (
+              <Link key={target.id} href={target.href} {...props}>
+                <span className="sr-only">{target.label}</span>
+              </Link>
+            )
+          })}
         </nav>
       </div>
     </main>

@@ -16,13 +16,15 @@ test("Join renders the approved artwork through the shared navigation architectu
   assert.doesNotMatch(page, /optionGrid|optionCard|ambientGlow|JOIN_OPTIONS/)
 })
 
-test("Join keeps live Discord auth and the corrected seven registration routes", () => {
+test("Join keeps live Discord auth, bracket/cup signup, and no community signup hotspot", () => {
   const page = read("app/join/page.tsx")
   const map = read("lib/artworkPageMaps.ts")
   assert.match(page, /supabase\.auth\.getUser/)
   assert.match(page, /signInWithOAuth/)
   assert.match(page, /supabase\.auth\.signOut/)
-  for (const route of ["match", "stroke", "pyp", "doubles", "pro", "cups", "community"]) {
+  for (const route of ["match", "stroke", "pyp", "doubles", "pro", "cups"]) {
     assert.match(map, new RegExp(`/register\\?league=${route}`))
   }
+  assert.doesNotMatch(map, /community-records-leaderboards/)
+  assert.doesNotMatch(map, /register\\?league=community/)
 })

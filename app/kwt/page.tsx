@@ -7,9 +7,7 @@ export default function KWTPage() {
     <ArtworkNavigation
       definition={kwtArtwork}
       overlay={
-        <Link href="/" className="artwork-navigation__back-link" aria-label="Back to Krys Leagues">
-          ← Krys Leagues
-        </Link>
+        <Link href="/" className="artwork-navigation__back-link" aria-label="Back to Krys Leagues">← Krys Leagues</Link>
       }
     />
   )

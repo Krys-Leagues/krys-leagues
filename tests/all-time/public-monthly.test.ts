@@ -19,17 +19,17 @@ test("public Monthly endpoint uses a server-only client and a constrained public
 })
 
 test("public Monthly results use a focused period view with standings and map cards", () => {
-  assert.match(page, /MONTHLY RESULTS/)
-  assert.match(page, />Year/)
-  assert.match(page, />Month/)
-  assert.match(page, />Division/)
+  assert.match(page, /Monthly result filters/)
+  assert.match(page, /aria-label="Year"/)
+  assert.match(page, /aria-label="Month"/)
+  assert.match(page, /aria-label="Division"/)
   assert.match(page, /Overall standings/)
   assert.match(page, /Monthly overall standings/)
   assert.match(page, /Maps and course placements/)
   assert.match(page, /DifficultyTable/)
   assert.match(page, /Previous Month/)
   assert.doesNotMatch(page, /All completed Monthly results/)
-  assert.match(page, /current and incomplete periods are excluded/i)
+  assert.match(page, /No completed results are available for this selection/)
 })
 
 test("Player Profile loads Monthly history through the public canonical-player endpoint", () => {
