@@ -39,6 +39,10 @@ export async function GET(request: Request) {
     return Response.json({
       source: {
         rowCount: packageData.rows.length,
+        sourceFilename: FINAL_REPAIRED_MONTHLY_SOURCE,
+        parserVersion: FINAL_REPAIRED_MONTHLY_PARSER,
+        sourceSha256: packageData.sourceSha256,
+        packageValidationPassed: true,
         parserErrors: 0,
         manifest: {
           import_ready: {
