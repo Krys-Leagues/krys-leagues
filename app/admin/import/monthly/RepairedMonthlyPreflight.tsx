@@ -52,6 +52,17 @@ type Preview = {
     quarantinedRows: number
     blockedReasons: string[]
   }
+  commitGate: {
+    ready: boolean
+    blockingReasons: string[]
+    eligibleSourceRows: number
+    packageRows: number
+    packageValidationPassed: boolean
+    identityBlockedRows: number
+    trueConflictRows: number
+    quarantinedRows: number
+    quarantineRowsExcluded: boolean
+  }
   productionReadError: string | null
 }
 
@@ -95,15 +106,14 @@ export default function RepairedMonthlyPreflight() {
   const finalization = manifest.finalization
   const importReady = manifest.import_ready
   const missingRows = preview.productionOverlap.missingFromProductionRows
-  const canCommit = preview.source.packageValidationPassed
-    && preview.source.rowCount === FINAL_SOURCE_ROWS
+  const canCommit = preview.commitGate.ready
+    && preview.commitGate.packageValidationPassed
+    && preview.commitGate.eligibleSourceRows === FINAL_SOURCE_ROWS
     && importReady.played_scored === FINAL_SOURCE_ROWS
     && preview.source.parserErrors === 0
-    && preview.identity.ambiguous === 0
-    && preview.identity.unresolved === 0
-    && preview.preflight.identityBlockedRows === 0
-    && preview.productionOverlap.trueConflictRows === 0
-    && preview.preflight.ready
+    && preview.commitGate.identityBlockedRows === 0
+    && preview.commitGate.trueConflictRows === 0
+    && preview.commitGate.quarantineRowsExcluded
 
   async function commitMissingRows() {
     const currentPreview = preview
@@ -191,7 +201,7 @@ export default function RepairedMonthlyPreflight() {
       >
         {isCommitting ? "Protected import processing…" : `Commit ${missingRows.toLocaleString()} missing Monthly scores`}
       </button>
-      {!canCommit && <p className="mt-3 text-sm text-red-200">Protected import disabled: all package, identity, and conflict gates must pass for the final 19,015-row package.</p>}
+      {!canCommit && <p className="mt-3 text-sm text-red-200">Protected import disabled: {preview.commitGate.blockingReasons.join("; ") || "all package, identity, and conflict gates must pass for the final 19,015-row package."}</p>}
       {commitError && <p role="alert" className="mt-3 rounded border border-red-700 bg-red-950 p-3 text-red-100">{commitError}</p>}
       {commitResult && <p role="status" className="mt-3 rounded border border-green-700 bg-green-950 p-3 text-green-100">{commitResult}</p>}
     </section>

@@ -49,12 +49,15 @@ test("repaired package does not fabricate pending divisions or unknown 2024 mont
 test("repaired Monthly page uses the repaired finalization gate", () => {
   const page = readFileSync("app/admin/import/monthly/page.tsx", "utf8")
   const preflight = readFileSync("app/admin/import/monthly/RepairedMonthlyPreflight.tsx", "utf8")
+  const previewRoute = readFileSync("app/api/admin/monthly-website-recovery/repaired-preview/route.ts", "utf8")
   assert.match(page, /RepairedMonthlyPreflight/)
   assert.ok(preflight.includes("monthly-website-recovery/repaired-preview"))
   assert.match(preflight, /finalization.currentPeriodReason/)
   assert.doesNotMatch(preflight, /August 2026 is the active Monthly/)
   assert.match(preflight, /Commit .*missing Monthly scores/)
   assert.ok(preflight.includes("/api/admin/monthly-website-recovery/apply"))
+  assert.match(previewRoute, /commitGate/)
+  assert.match(previewRoute, /quarantineRowsExcluded/)
 })
 test("public and Player Profile Monthlies remain wired to scored history", () => {
   const publicRoute = readFileSync("app/api/monthlies/public/route.ts", "utf8")

@@ -25,12 +25,34 @@ export async function GET(request: Request) {
         rows: packageData.rows.filter(row => row.period_id === period.period_id).length,
       }))
     const counts = packageData.manifest.counts
+    const identityBlockedRows = prepared.identity.ambiguous + prepared.identity.unresolved
+    const quarantineBlocksImport = prepared.quarantine.eligibleRows > 0
+    const commitGateBlockingReasons = [
+      prepared.source.eligibleRows !== 19015 ? "Final eligible source row count is not 19,015" : null,
+      prepared.overlap.trueConflictRows > 0 ? "True Production conflicts remain" : null,
+      identityBlockedRows > 0 ? "Required player identities are unresolved" : null,
+      counts.malformed > 0 ? "Malformed rows remain" : null,
+      counts.duplicate_logical_keys > 0 ? "Logical duplicate rows remain" : null,
+      !prepared.overlap.available ? "Production overlap unavailable" : null,
+      quarantineBlocksImport ? "A quarantined row is present in the eligible import payload" : null,
+    ].filter((reason): reason is string => reason !== null)
+    const commitGate = {
+      ready: commitGateBlockingReasons.length === 0,
+      blockingReasons: commitGateBlockingReasons,
+      eligibleSourceRows: prepared.source.eligibleRows,
+      packageRows: prepared.source.totalRows,
+      packageValidationPassed: true,
+      identityBlockedRows,
+      trueConflictRows: prepared.overlap.trueConflictRows,
+      quarantinedRows: prepared.quarantine.packageRows,
+      quarantineRowsExcluded: !quarantineBlocksImport,
+    }
     const preflight = monthlyRepairPreflight({
       overlap: prepared.overlap,
       playedRows: counts.import_ready_numeric_observations,
       blankUnplayedRows: counts.blank_unplayed_evidence,
-      identityBlockedRows: 0,
-      requiredIdentityRows: prepared.identity.ambiguous + prepared.identity.unresolved,
+      identityBlockedRows,
+      requiredIdentityRows: 0,
       quarantinedRows: counts.quarantined_rows,
       malformedRows: counts.malformed,
       logicalDuplicateRows: counts.duplicate_logical_keys,
@@ -76,6 +98,7 @@ export async function GET(request: Request) {
       },
       productionOverlap: prepared.overlap,
       preflight,
+      commitGate,
       productionReadError: null,
     }, { headers: { "Cache-Control": "no-store" } })
   } catch (caught) {

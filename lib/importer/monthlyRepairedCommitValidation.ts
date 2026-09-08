@@ -220,6 +220,7 @@ export async function validateMonthlyRepairedCommitRequest(
     throw new MonthlyCommitValidationError("The request does not match the final repaired Monthly package.", 409)
   }
 
+  const quarantinedPackageRows = packageData.rows.filter(row => row.merge_status === "QUARANTINED_REVIEW")
   const validRows = packageData.rows.filter(row => row.played_state === "PLAYED" && row.merge_status !== "QUARANTINED_REVIEW")
   for (const row of validRows) {
     requiredText(row.repaired_source_fingerprint, "a source fingerprint")
@@ -332,6 +333,10 @@ export async function validateMonthlyRepairedCommitRequest(
     },
     identity: { ...identity, scoredIdentities: names.length, failures: identityValidation.failures },
     overlap,
+    quarantine: {
+      packageRows: quarantinedPackageRows.length,
+      eligibleRows: validRows.filter(row => row.merge_status === "QUARANTINED_REVIEW").length,
+    },
     requestBytes: Buffer.byteLength(JSON.stringify({ ...request, p_rows: expectedRows }), "utf8"),
   }
 }
