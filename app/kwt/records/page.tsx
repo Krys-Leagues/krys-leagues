@@ -34,7 +34,7 @@ export default function KWTRecordsPage() {
 
         <section style={section} aria-labelledby="records-title">
           <h2 id="records-title">KWT Course Records</h2>
-          <p style={sectionCopy}>Best legitimate score on each KWT course, separated by difficulty and the rank held when the score was recorded. More negative scores are better.</p>
+          <p style={sectionCopy}>Best legitimate score on each KWT course, with an Overall record for every run and rank-specific records only where the run&apos;s historical rank is proven. More negative scores are better.</p>
           {loading && <p style={empty}>Loading KWT course records…</p>}
           {!loading && error && <p role="alert" style={empty}>{error}</p>}
           {!loading && !error && courseRecords.length === 0 && <p style={empty}>No KWT course records are currently available.</p>}
@@ -51,21 +51,9 @@ export default function KWTRecordsPage() {
                       <section style={difficultyPanel} key={difficulty} aria-labelledby={`${course.courseCode}-${difficulty}`}>
                         <h4 id={`${course.courseCode}-${difficulty}`}>{difficulty}</h4>
                         <div style={rankList}>
+                          <RecordRow label="Overall" record={course.records[difficulty].overall} />
                           {KWT_RANK_ORDER.map((rank) => {
-                            const record = course.records[difficulty][rank]
-                            return (
-                              <div style={rankRow} key={rank}>
-                                <strong style={rankLabel}>{rank}</strong>
-                                {record ? (
-                                  <div>
-                                    <div style={score}>Record: {record.score}</div>
-                                    <ul style={holders}>
-                                      {record.holders.map((holder) => <li key={holder.playerId}><Link href={`/players/${holder.playerId}`} style={playerLink}>{holder.screenName}</Link></li>)}
-                                    </ul>
-                                  </div>
-                                ) : <span style={notRecorded}>No recorded score</span>}
-                              </div>
-                            )
+                            return <RecordRow key={rank} label={rank} record={course.records[difficulty].ranks[rank]} />
                           })}
                         </div>
                       </section>
@@ -84,6 +72,22 @@ export default function KWTRecordsPage() {
         </section>
       </div>
     </main>
+  )
+}
+
+function RecordRow({ label, record }: { label: string; record?: { score: number; holders: Array<{ playerId: string; screenName: string }> } }) {
+  return (
+    <div style={rankRow}>
+      <strong style={rankLabel}>{label}</strong>
+      {record ? (
+        <div>
+          <div style={score}>Record: {record.score}</div>
+          <ul style={holders}>
+            {record.holders.map((holder) => <li key={holder.playerId}><Link href={`/players/${holder.playerId}`} style={playerLink}>{holder.screenName}</Link></li>)}
+          </ul>
+        </div>
+      ) : <span style={notRecorded}>No recorded score</span>}
+    </div>
   )
 }
 
