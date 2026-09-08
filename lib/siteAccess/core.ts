@@ -13,6 +13,17 @@ export function parseSiteAccessMode(value: string | null | undefined): SiteAcces
   return value?.trim().toLowerCase() === "prelaunch" ? "prelaunch" : "public"
 }
 
+export function shouldBypassPrivateTestingGate(input: {
+  pathname: string
+  vercelEnv?: string | null
+}) {
+  if (input.vercelEnv?.trim().toLowerCase() !== "preview") return false
+  if (input.pathname === "/testing-access" || input.pathname === "/auth/callback") return false
+  if (input.pathname === "/admin" || input.pathname.startsWith("/admin/")) return false
+  if (input.pathname.startsWith("/api/")) return false
+  return true
+}
+
 export function safePrelaunchNext(value: string | null | undefined) {
   if (!value || value.length > MAX_NEXT_LENGTH) return "/"
   if (!value.startsWith("/") || value.startsWith("//") || value.includes("\\")) return "/"

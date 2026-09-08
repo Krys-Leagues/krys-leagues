@@ -6,6 +6,7 @@ import {
   isPrelaunchEntryPath,
   parseSiteAccessMode,
   safePrelaunchNext,
+  shouldBypassPrivateTestingGate,
   siteAccessAllowed,
   testingAccessRedirect,
 } from "./core.ts"
@@ -80,4 +81,15 @@ test("site access decisions contain no email or display-name matching inputs", (
     "canonical_player_id",
     "site_admin",
   ])
+})
+
+
+test("Vercel previews bypass only the top-level private testing gate for public pages", () => {
+  for (const pathname of ["/players", "/kwt", "/records"]) {
+    assert.equal(shouldBypassPrivateTestingGate({ pathname, vercelEnv: "preview" }), true)
+    assert.equal(shouldBypassPrivateTestingGate({ pathname, vercelEnv: "production" }), false)
+  }
+  assert.equal(shouldBypassPrivateTestingGate({ pathname: "/admin/import/monthly", vercelEnv: "preview" }), false)
+  assert.equal(shouldBypassPrivateTestingGate({ pathname: "/api/admin/monthly-website-recovery/apply", vercelEnv: "preview" }), false)
+  assert.equal(shouldBypassPrivateTestingGate({ pathname: "/players", vercelEnv: undefined }), false)
 })

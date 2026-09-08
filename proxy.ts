@@ -4,7 +4,7 @@ import { featureAccessDecision } from "@/lib/featureVisibility/core"
 import { getFeatureRoute } from "@/lib/featureVisibility/server"
 import { refreshSupabaseSession } from "@/lib/supabase/proxy"
 import { getSiteAccessMode } from "@/lib/siteAccess/config"
-import { decideSiteAccessGate, safePrelaunchNext, testingAccessRedirect, type CurrentSiteAccess } from "@/lib/siteAccess/core"
+import { decideSiteAccessGate, safePrelaunchNext, shouldBypassPrivateTestingGate, testingAccessRedirect, type CurrentSiteAccess } from "@/lib/siteAccess/core"
 import { canonicalRedirectUrl } from "@/lib/canonicalHost"
 
 function withSessionCookies(source: NextResponse, target: NextResponse) {
@@ -62,6 +62,7 @@ export async function proxy(request: NextRequest) {
     return withSessionCookies(session.response, NextResponse.redirect(denial))
   }
 
+  const previewPublicBypass = shouldBypassPrivateTestingGate({ pathname, vercelEnv: process.env.VERCEL_ENV })
   let access: CurrentSiteAccess | null = null
   let resolutionFailed = false
   const feature = getFeatureRoute(pathname)
@@ -77,7 +78,7 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  if (mode === "prelaunch") {
+  if (mode === "prelaunch" && !previewPublicBypass) {
     const decision = decideSiteAccessGate({ mode, pathname, access, resolutionFailed })
     if (decision === "continue") {
       const destination = safePrelaunchNext(request.nextUrl.searchParams.get("next"))
@@ -97,7 +98,7 @@ export async function proxy(request: NextRequest) {
       const original = `${request.nextUrl.pathname}${request.nextUrl.search}`
       return withSessionCookies(session.response, NextResponse.redirect(new URL(testingAccessRedirect(original), request.url)))
     }
-  } else if (pathname === "/testing-access") {
+  } else if (!previewPublicBypass && pathname === "/testing-access") {
     return session.response
   }
 
