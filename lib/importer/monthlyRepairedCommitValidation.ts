@@ -170,6 +170,7 @@ async function readProduction(supabase: SupabaseClient, periodIds: number[]) {
 }
 
 function provenanceFor(row: FinalPackageRow) {
+  const reviewedIdentity = REVIEWED_MONTHLY_IDENTITY_OVERRIDES[row.historical_player_name]
   return [{
     sourceKind: row.provenance_sources.trim() || "OTHER_AUTHORITATIVE",
     sourceFingerprint: row.repaired_source_fingerprint,
@@ -179,6 +180,13 @@ function provenanceFor(row: FinalPackageRow) {
     sourceScoreText: row.score_text,
     playedState: "PLAYED",
     rawSha256: row.fresh_raw_sha256.trim() || null,
+    reviewedIdentity: reviewedIdentity ? {
+      historicalSourceName: reviewedIdentity.sourceName,
+      historicalSourcePlayerId: reviewedIdentity.sourcePlayerId,
+      mergeTargetSourceId: reviewedIdentity.mergeTargetSourceId,
+      historicalTargetName: reviewedIdentity.historicalTargetName,
+      canonicalPublicPlayerId: reviewedIdentity.canonicalPlayerId,
+    } : null,
   }]
 }
 
@@ -207,6 +215,10 @@ export async function validateMonthlyRepairedCommitRequest(
     requiredText(row.historical_player_name, "an exact historical player name")
     requiredText(row.course_name, "a course name")
     requiredText(row.source_url, "a source URL")
+    const reviewedIdentity = REVIEWED_MONTHLY_IDENTITY_OVERRIDES[row.historical_player_name]
+    if (reviewedIdentity && row.source_player_id.trim() !== reviewedIdentity.sourcePlayerId) {
+      throw new MonthlyCommitValidationError(`The reviewed Monthly identity source ID does not match ${row.historical_player_name}.`, 409)
+    }
     if (!/^(easy|hard)$/.test(row.difficulty)) throw new MonthlyCommitValidationError("Every final Monthly row requires difficulty easy or hard.", 409)
     if (!/^-?\d+$/.test(row.score_numeric.trim())) throw new MonthlyCommitValidationError("Every final Monthly row requires a numeric score; blanks are evidence-only.", 409)
   }
