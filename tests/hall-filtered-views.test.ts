@@ -53,3 +53,11 @@ test("Spicy Cup keeps the approved qualification wording", () => {
 
   assert.match(page, /Amateur Invitational for players who did not advance past Round 2\./)
 })
+
+
+test("approved Hall artwork is followed directly by Hall content", () => {
+  const page = read("app/champions/page.tsx")
+
+  assert.match(page, /hallOfChampionsArtworkAsset/)
+  assert.doesNotMatch(page, /<section style=\{hero\}>/)
+})

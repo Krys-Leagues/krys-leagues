@@ -170,14 +170,7 @@ function ChampionsContent() {
           </Link>
         </div>
 
-        <section style={hero}>
-          <h1 style={title}>{hallTitle(hallScope)}</h1>
-
-          <p style={subtitle}>
-            {hallDescription(hallScope)}
-          </p>
-        </section>
-                {loading ? (
+        {loading ? (
           <div style={messageCard}>
             Loading Hall of Champions...
           </div>
@@ -679,26 +672,6 @@ const backButton: React.CSSProperties = {
   fontWeight: 700,
 }
 
-const hero: React.CSSProperties = {
-  padding: 26,
-  background: "rgba(2, 6, 23, 0.9)",
-  border: "1px solid #334155",
-  borderRadius: 20,
-  marginBottom: 20,
-}
-
-const title: React.CSSProperties = {
-  margin: 0,
-  fontSize: "clamp(42px, 9vw, 56px)",
-  fontWeight: 800,
-  color: "#FFD700",
-}
-
-const subtitle: React.CSSProperties = {
-  color: "#cbd5e1",
-  fontSize: 18,
-  lineHeight: 1.5,
-}
 
 const featuredCard: React.CSSProperties = {
   padding: 24,
