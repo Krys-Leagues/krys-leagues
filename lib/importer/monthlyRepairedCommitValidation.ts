@@ -6,6 +6,7 @@ import Papa from "papaparse"
 
 import { REVIEWED_MONTHLY_IDENTITY_OVERRIDES, validateMonthlyWebsiteIdentities, type MonthlyIdentityDirectory } from "@/lib/importer/monthlyWebsiteIdentityValidation"
 import { classifyMonthlyProductionOverlap, type MonthlyProductionRow } from "@/lib/importer/monthlyRepairedHistory"
+import { parseOptionalMonthlyInteger, type MonthlySourceMetadataAnomaly } from "@/lib/importer/monthlyMetadata"
 import { MonthlyCommitValidationError, type MonthlyCommitRequest } from "@/lib/importer/monthlyWebsiteCommitValidation"
 
 const packageRoot = join(process.cwd(), "docs", "historical-sources", "monthly", "repaired-history", "amateur-extended")
@@ -169,7 +170,7 @@ async function readProduction(supabase: SupabaseClient, periodIds: number[]) {
   }
 }
 
-function provenanceFor(row: FinalPackageRow) {
+function provenanceFor(row: FinalPackageRow, sourceMetadataAnomalies: MonthlySourceMetadataAnomaly[]) {
   const reviewedIdentity = REVIEWED_MONTHLY_IDENTITY_OVERRIDES[row.historical_player_name]
   return [{
     sourceKind: row.provenance_sources.trim() || "OTHER_AUTHORITATIVE",
@@ -179,6 +180,20 @@ function provenanceFor(row: FinalPackageRow) {
     sourceUrl: row.source_url.trim() || null,
     sourceScoreText: row.score_text,
     playedState: "PLAYED",
+    sourceMetadataHandling: sourceMetadataAnomalies.length
+      ? "OPTIONAL_TYPED_METADATA_NULL_RAW_PRESERVED_SCORE_IMPORT_ALLOWED"
+      : "NONE",
+    sourceMetadataAnomalies,
+    rawAncillaryMetadata: {
+      hole_in_ones: row.hole_in_ones,
+      course_placement: row.course_placement,
+      course_points: row.course_points,
+      overall_placement: row.overall_placement,
+      courses_played: row.courses_played,
+      total_strokes: row.total_strokes,
+      overall_hole_in_ones: row.overall_hole_in_ones,
+      overall_points: row.overall_points,
+    },
     rawSha256: row.fresh_raw_sha256.trim() || null,
     reviewedIdentity: reviewedIdentity ? {
       historicalSourceName: reviewedIdentity.sourceName,
@@ -255,6 +270,7 @@ export async function validateMonthlyRepairedCommitRequest(
     const canonicalPlayerId = identityValidation.canonicalByName.get(row.historical_player_name)!
     const logicalKey = canonicalLogicalKey(row, canonicalPlayerId)
     if (!missingKeys.has(logicalKey)) return null
+    const sourceMetadataAnomalies: MonthlySourceMetadataAnomaly[] = []
     return {
       rowKey: row.repaired_source_fingerprint,
       sourceRow: index + 1,
@@ -270,16 +286,30 @@ export async function validateMonthlyRepairedCommitRequest(
       difficulty: row.difficulty,
       score: Number(row.score_numeric),
       scoreText: row.score_text,
-      holeInOnes: integerValue(row.hole_in_ones, "hole-in-one count"),
-      coursePlacement: integerValue(row.course_placement, "course placement"),
-      coursePoints: integerValue(row.course_points, "course points"),
-      overallPlacement: integerValue(row.overall_placement, "overall placement"),
-      coursesPlayed: integerValue(row.courses_played, "courses played"),
-      totalStrokes: integerValue(row.total_strokes, "total strokes"),
-      overallHn1: integerValue(row.overall_hole_in_ones, "overall hole-in-one count"),
-      overallPoints: integerValue(row.overall_points, "overall points"),
+      holeInOnes: parseOptionalMonthlyInteger(row.hole_in_ones, "hole_in_ones", sourceMetadataAnomalies),
+      coursePlacement: parseOptionalMonthlyInteger(row.course_placement, "course_placement", sourceMetadataAnomalies),
+      coursePoints: parseOptionalMonthlyInteger(row.course_points, "course_points", sourceMetadataAnomalies),
+      overallPlacement: parseOptionalMonthlyInteger(row.overall_placement, "overall_placement", sourceMetadataAnomalies),
+      coursesPlayed: parseOptionalMonthlyInteger(row.courses_played, "courses_played", sourceMetadataAnomalies),
+      totalStrokes: parseOptionalMonthlyInteger(row.total_strokes, "total_strokes", sourceMetadataAnomalies),
+      overallHn1: parseOptionalMonthlyInteger(row.overall_hole_in_ones, "overall_hole_in_ones", sourceMetadataAnomalies),
+      overallPoints: parseOptionalMonthlyInteger(row.overall_points, "overall_points", sourceMetadataAnomalies),
+      sourceMetadataHandling: sourceMetadataAnomalies.length
+        ? "OPTIONAL_TYPED_METADATA_NULL_RAW_PRESERVED_SCORE_IMPORT_ALLOWED"
+        : "NONE",
+      sourceMetadataAnomalies,
+      rawAncillaryMetadata: {
+        hole_in_ones: row.hole_in_ones,
+        course_placement: row.course_placement,
+        course_points: row.course_points,
+        overall_placement: row.overall_placement,
+        courses_played: row.courses_played,
+        total_strokes: row.total_strokes,
+        overall_hole_in_ones: row.overall_hole_in_ones,
+        overall_points: row.overall_points,
+      },
       sourceUrl: row.source_url,
-      provenance: provenanceFor(row),
+      provenance: provenanceFor(row, sourceMetadataAnomalies),
       logicalKey,
     }
   }).filter((row): row is NonNullable<typeof row> => row !== null)
