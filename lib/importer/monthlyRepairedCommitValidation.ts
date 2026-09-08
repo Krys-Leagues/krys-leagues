@@ -4,7 +4,7 @@ import { join } from "node:path"
 import type { SupabaseClient } from "@supabase/supabase-js"
 import Papa from "papaparse"
 
-import { validateMonthlyWebsiteIdentities, type MonthlyIdentityDirectory } from "@/lib/importer/monthlyWebsiteIdentityValidation"
+import { REVIEWED_MONTHLY_IDENTITY_OVERRIDES, validateMonthlyWebsiteIdentities, type MonthlyIdentityDirectory } from "@/lib/importer/monthlyWebsiteIdentityValidation"
 import { classifyMonthlyProductionOverlap, type MonthlyProductionRow } from "@/lib/importer/monthlyRepairedHistory"
 import { MonthlyCommitValidationError, type MonthlyCommitRequest } from "@/lib/importer/monthlyWebsiteCommitValidation"
 
@@ -213,7 +213,7 @@ export async function validateMonthlyRepairedCommitRequest(
   if (validRows.length !== packageData.manifest.counts.import_ready_numeric_observations) throw new MonthlyCommitValidationError("The final package contains an importable-row exclusion that is not represented in its manifest.", 409)
 
   const names = [...new Set(validRows.map(row => row.historical_player_name))]
-  const identityValidation = validateMonthlyWebsiteIdentities(names, directory)
+  const identityValidation = validateMonthlyWebsiteIdentities(names, directory, { reviewedOverrides: REVIEWED_MONTHLY_IDENTITY_OVERRIDES })
   if (identityValidation.failures.length) throw new MonthlyCommitValidationError(`Required Monthly identities are unresolved: ${identityValidation.failures.map(failure => failure.historicalName).join(", ")}`, 409)
   const matches = directory.matchNames(names)
   const identity = {

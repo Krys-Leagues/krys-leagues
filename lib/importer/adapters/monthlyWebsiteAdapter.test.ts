@@ -163,3 +163,27 @@ test("Monthly identity validation accepts only an explicitly saved exact histori
   assert.equal(validation.ready, true)
   assert.equal(validation.canonicalByName.get(alias.aliasName), player.id)
 })
+
+test("Monthly identity validation applies the reviewed Merged into 7231 decision without changing the source label", () => {
+  const canonicalPlayerId = "7befb54f-6eec-4c7c-9881-c75d1acfb8d8"
+  const historicalName = "Merged into 7231"
+  const validation = validateMonthlyWebsiteIdentities([historicalName], {
+    rawPlayers: [{ id: canonicalPlayerId }],
+    canonicalId: (playerId) => playerId,
+    matchNames: () => [{ importedName: historicalName, playerId: null, matchedName: null, confidence: 0, status: "new", evidence: "none", autoLinkEligible: false, autoLinkReason: null }],
+  }, {
+    reviewedOverrides: {
+      [historicalName]: {
+        sourceName: historicalName,
+        sourcePlayerId: "7988",
+        mergeTargetSourceId: "7231",
+        historicalTargetName: "WendyW(Wyndemere2020)",
+        canonicalPlayerId,
+      },
+    },
+  })
+
+  assert.equal(validation.ready, true)
+  assert.equal(validation.canonicalByName.get(historicalName), canonicalPlayerId)
+  assert.equal(historicalName, "Merged into 7231")
+})
