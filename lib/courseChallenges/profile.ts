@@ -1,4 +1,5 @@
 import { getPublicCourseChallenges } from "./catalog"
+import { isProfileDisplayRewardKey } from "./rewards"
 import type { CourseChallengeProfileReward } from "./types"
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -27,5 +28,5 @@ export async function loadCourseChallengeProfile(client: { from: (table: string)
       prestigeRewards: courseRewards.filter((reward) => reward.kind === "badge"),
     }
   })
-  return { selectedRewardKey: selection?.selected_reward_key || null, courses, rewards: filteredRewards, completedLevels: filteredProgress.filter((row: { completed_at: string | null }) => Boolean(row.completed_at)).map((row: { level_number: number }) => row.level_number) }
+  return { selectedRewardKey: selection?.selected_reward_key || null, courses, rewards: filteredRewards, profileRewards: filteredRewards.filter((reward) => isProfileDisplayRewardKey(reward.rewardKey)), completedLevels: filteredProgress.filter((row: { completed_at: string | null }) => Boolean(row.completed_at)).map((row: { level_number: number }) => row.level_number) }
 }

@@ -3,15 +3,38 @@
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { supabase } from "@/lib/supabase"
 import type { CourseChallengeCourse } from "@/lib/courseChallenges/types"
+import CourseChallengesGuide from "./CourseChallengesGuide"
 import styles from "./course-challenges.module.css"
 
+const INTRO_STORAGE_KEY = "course-challenges-intro-dismissed-v1"
+
 export default function CourseChallengesLanding({ courses }: { courses: CourseChallengeCourse[] }) {
+  const [showIntro, setShowIntro] = useState(false)
   const [showRules, setShowRules] = useState(false)
   const [profileMessage, setProfileMessage] = useState("")
   const router = useRouter()
+
+  useEffect(() => {
+    try {
+      // Client storage is intentionally read after hydration so the server and client markup stay stable.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setShowIntro(window.localStorage.getItem(INTRO_STORAGE_KEY) !== "dismissed")
+    } catch {
+      setShowIntro(true)
+    }
+  }, [])
+
+  function dismissIntro() {
+    try {
+      window.localStorage.setItem(INTRO_STORAGE_KEY, "dismissed")
+    } catch {
+      // The guide remains available from Rules / Help if browser storage is unavailable.
+    }
+    setShowIntro(false)
+  }
 
   async function openOwnProfile() {
     setProfileMessage("")
@@ -53,19 +76,12 @@ export default function CourseChallengesLanding({ courses }: { courses: CourseCh
         <button type="button" className={styles.secondaryButton} onClick={() => setShowRules(true)}>Rules / Help</button>
       </div>
     </div>
-    {showRules && <section className={styles.rulesOverlay} role="dialog" aria-modal="true" aria-labelledby="course-challenges-rules-title">
+    {(showIntro || showRules) && <section className={styles.rulesOverlay} role="dialog" aria-modal="true" aria-labelledby="course-challenges-intro-title">
       <div className={styles.rulesCard}>
-        <p className={styles.eyebrow}>BEFORE YOU START</p>
-        <h2 id="course-challenges-rules-title">Course Challenge rules</h2>
-        <ul>
-          <li>Each Level requires one complete Easy Course card and one complete Hard Course card.</li>
-          <li>Solo and Multiplayer Game Mode rounds are allowed. Practice Mode does not qualify.</li>
-          <li>Each difficulty’s requirements must come from the same complete 18-hole scorecard.</li>
-          <li>Your scorecard photo must show the round date and time.</li>
-          <li>We ask for both the scorecard photo and your 18 hole scores so we can check your round right away. That helps unlock your next Level without making you wait for an admin, while keeping Course Challenge results accurate.</li>
-        </ul>
-        <p className={styles.helper}>If you do not see the date and time on your scorecard, tap the three dots in the bottom-right BEFORE taking your picture.</p>
-        <button type="button" className={styles.primaryButton} onClick={() => setShowRules(false)}>Got it</button>
+        <CourseChallengesGuide includeScorecardHelp={showRules} />
+        <div className={styles.buttonRow}>
+          <button type="button" className={styles.primaryButton} onClick={showIntro ? dismissIntro : () => setShowRules(false)}>{showIntro ? "Got it" : "Close"}</button>
+        </div>
       </div>
     </section>}
   </main>
