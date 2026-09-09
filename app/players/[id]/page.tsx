@@ -15,6 +15,8 @@ import type { PublicCourse } from "@/lib/all-time/public-records"
 import styles from "./page.module.css"
 import TrophyMedia from "@/components/TrophyMedia"
 import PlayerCourseRecords from "@/components/records/PlayerCourseRecords"
+import CourseChallengesProfileSummary from "@/components/course-challenges/CourseChallengesProfileSummary"
+import { getPublicCourseChallenges } from "@/lib/courseChallenges/catalog"
 import { calculateMonthlyCareerStats, monthlyCourseMapName, uniqueMonthlyPeriodRecords, type MonthlyPresentationRow } from "@/lib/monthlyPresentation"
 
 type Player = {
@@ -197,7 +199,7 @@ export default function PublicPlayerProfilePage() {
   const [preferences, setPreferences] = useState<ProfilePreferences>(DEFAULT_PREFERENCES)
   const [hasSession, setHasSession] = useState(false)
   const [canEditProfile, setCanEditProfile] = useState(false)
-  const [openProfileSection, setOpenProfileSection] = useState<"records" | "stats" | "aliases" | "trophies" | null>(null)
+  const [openProfileSection, setOpenProfileSection] = useState<"records" | "stats" | "aliases" | "trophies" | "courseChallenges" | null>(null)
   const [openStatsSection, setOpenStatsSection] = useState<StatsSectionKey | null>(null)
   const [kwtMapFilter, setKwtMapFilter] = useState("")
   const [kwtCourseCatalog, setKwtCourseCatalog] = useState<Array<Pick<PublicCourse, "code" | "base_map">>>([])
@@ -562,11 +564,14 @@ export default function PublicPlayerProfilePage() {
           {hasCareerParticipation && <button type="button" className={styles.profileActionButton} aria-pressed={openProfileSection === "stats"} onClick={() => setOpenProfileSection(current => current === "stats" ? null : "stats")}>Player Stats</button>}
           {knownAliases.length > 0 && <button type="button" className={styles.profileActionButton} aria-pressed={openProfileSection === "aliases"} onClick={() => setOpenProfileSection(current => current === "aliases" ? null : "aliases")}>Names / Known As</button>}
           {trophies.length > 0 && <button type="button" className={styles.profileActionButton} aria-pressed={openProfileSection === "trophies"} onClick={() => setOpenProfileSection(current => current === "trophies" ? null : "trophies")}>Trophies &amp; Achievements</button>}
+          <button type="button" className={styles.profileActionButton} aria-pressed={openProfileSection === "courseChallenges"} onClick={() => setOpenProfileSection(current => current === "courseChallenges" ? null : "courseChallenges")}>Course Challenges</button>
           {!hasSession && <button type="button" className={styles.profileActionButton} onClick={() => void signInWithDiscord()}>Sign in with Discord</button>}
           {canEditProfile && <PlayerProfileEditor playerId={player.id} initial={preferences} isServerBooster={recognition.isServerBooster} hasKrysServerTag={recognition.hasKrysServerTag} profileBadges={recognition.profileBadges} onSaved={(saved) => setPreferences(current => ({ ...current, ...saved }))} />}
         </nav>
 
         {openProfileSection === "records" && <PlayerCourseRecords playerId={player.id} />}
+
+        {openProfileSection === "courseChallenges" && <CourseChallengesProfileSummary playerId={player.id} courses={getPublicCourseChallenges()} />}
 
         {openProfileSection === "stats" && hasCareerParticipation && <section className={styles.profileSectionPanel} id="player-stats-panel" aria-label="Player Stats">
           <p className={styles.sectionDescription}>Overall career summary with separate, expandable competition statistics</p>
