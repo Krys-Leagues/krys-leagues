@@ -767,9 +767,15 @@ export default function MatchScheduleReviewPage() {
               <h2>Generated Fixtures</h2>
 
               {fixtures.length === 0 && (
-                <p style={mutedText}>
-                  No real-player fixtures were generated. This is valid when divisions contain fewer than two real players.
-                </p>
+                roster.status === "draft" ? (
+                  <p style={warningText}>
+                    Roster saved but not approved. Approve the roster in Match Setup before generating the schedule.
+                  </p>
+                ) : (
+                  <p style={mutedText}>
+                    No real-player fixtures were generated. This is valid when divisions contain fewer than two real players.
+                  </p>
+                )
               )}
 
               {divisionNumbers.map((divisionNumber) => {
@@ -802,7 +808,11 @@ export default function MatchScheduleReviewPage() {
                     </h3>
 
                     {divisionFixtures.length === 0 ? (
-                      <p style={mutedText}>No real-player fixtures.</p>
+                      <p style={mutedText}>
+                        {roster.status === "draft"
+                          ? "Schedule generation is unavailable until the roster is approved."
+                          : "No real-player fixtures."}
+                      </p>
                     ) : (
                       [1, 2, 3].map((gameNumber) => {
                         const gameFixtures = divisionFixtures.filter(

@@ -1024,6 +1024,9 @@ export default function MatchSetup() {
         {isFinalDivision && (
           <section style={workflowPanel}>
             <h2>Season Workflow</h2>
+            <p style={helperText}>
+              Save Roster &rarr; Review Roster &rarr; Approve Roster &rarr; Generate Schedule &rarr; Review Schedule
+            </p>
 
             <div style={workflowStatusGrid}>
               <div>
