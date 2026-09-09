@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { createDiscordAuthCallbackUrl } from "@/lib/authReturnTo"
 import { supabase } from "@/lib/supabase"
 import { isAceChallengeUnlocked } from "@/lib/courseChallenges/catalog"
+import { calculateCourseChallengeMetrics, validHolePars, validHoleScores } from "@/lib/courseChallenges/evaluation"
 import type { CourseChallengeCourse, CourseChallengeDifficulty, CourseChallengeRequirement } from "@/lib/courseChallenges/types"
 import styles from "./course-challenges.module.css"
 import CourseChallengeRewardSelector from "./CourseChallengeRewardSelector"
@@ -42,16 +43,9 @@ export default function CourseChallengeBook({ course }: { course: CourseChalleng
   const aceUnlocked = isAceChallengeUnlocked(course, completedLevels)
   const ace = course.aceChallenge
 
-  return <main className={styles.page}>
+  return <main className={styles.page} style={{ "--course-background-image": course.backgroundImage ? "url(\"" + course.backgroundImage + "\")" : "none" } as React.CSSProperties}>
     <div className={styles.shell}>
       <Link href="/course-challenges" className={styles.backLink}>← Course Challenges</Link>
-      <header className={styles.courseHero} style={course.backgroundImage ? { backgroundImage: 'url("' + course.backgroundImage + '")' } : undefined}>
-        <div className={styles.courseHeroCopy}>
-          <p className={styles.eyebrow}>COURSE CHALLENGE BOOK</p>
-          <h1>{course.name}</h1>
-          <p>Levels 1–5 are visible together. Each Level has two required sides: Easy Course and Hard Course.</p>
-        </div>
-      </header>
       <div className={styles.book}>
         <details className={styles.rulesHelp}>
           <summary>Rules / Help</summary>
@@ -132,12 +126,12 @@ function SubmissionForm({ course, level, challengeKey, difficulty, pars, onCance
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [scores, setScores] = useState<string[]>(Array.from({ length: 18 }, () => ""))
-  const [finalScore, setFinalScore] = useState("")
+
   const [dragActive, setDragActive] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState("")
   const scoreRefs = useRef<Array<HTMLInputElement | null>>([])
-  const finalScoreRef = useRef<HTMLInputElement | null>(null)
+  const submitButtonRef = useRef<HTMLButtonElement | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const advanceTimers = useRef<Array<number | undefined>>([])
 
@@ -156,7 +150,7 @@ function SubmissionForm({ course, level, challengeKey, difficulty, pars, onCance
   }
 
   function focusNext(index: number) {
-    if (index === 17) finalScoreRef.current?.focus()
+    if (index === 17) submitButtonRef.current?.focus()
     else scoreRefs.current[index + 1]?.focus()
   }
 
@@ -172,6 +166,12 @@ function SubmissionForm({ course, level, challengeKey, difficulty, pars, onCance
     setScores((old) => old.map((current, item) => item === index ? value : current))
     scheduleAdvance(index, value)
   }
+
+  const numericScores = useMemo(() => scores.map((value) => Number(value)), [scores])
+  const calculatedFinalScore = useMemo(() => {
+    if (!pars || !validHolePars(pars) || !validHoleScores(numericScores)) return null
+    return calculateCourseChallengeMetrics(numericScores, pars).relativeToPar
+  }, [numericScores, pars])
 
   function handleScoreKeyDown(index: number, event: React.KeyboardEvent<HTMLInputElement>) {
     if (event.key === "Backspace" && !scores[index] && index > 0) {
@@ -189,9 +189,9 @@ function SubmissionForm({ course, level, challengeKey, difficulty, pars, onCance
     setError("")
     if (!file || !preview) { setError("Add your scorecard photo first."); return }
     if (!pars || pars.length !== 18) { setError("Authoritative pars are unavailable; submission is blocked until the course catalog is available."); return }
-    if (!/^[+-]?\d+$/.test(finalScore.trim())) { setError("Enter the final relative-to-par score shown on the scorecard, such as -7, 0, or +3."); return }
     const numericScores = scores.map((value) => Number(value))
     if (numericScores.some((value) => !Number.isInteger(value) || value < 1)) { setError("Enter a positive whole-number score for all 18 holes."); return }
+    if (!validHoleScores(numericScores) || calculatedFinalScore === null) { setError("Enter a positive whole-number score for all 18 holes."); return }
     setBusy(true)
     try {
       const userResult = await supabase.auth.getUser()
@@ -200,7 +200,7 @@ function SubmissionForm({ course, level, challengeKey, difficulty, pars, onCance
       const storagePath = userResult.data.user.id + "/" + course.slug + "/" + challengeKey + "-" + level + "-" + difficulty + "-" + crypto.randomUUID() + "." + extension
       const upload = await supabase.storage.from("course-challenge-proof").upload(storagePath, file, { contentType: file.type || "image/jpeg", upsert: false })
       if (upload.error) throw new Error("Proof photo upload failed: " + upload.error.message)
-      const response = await fetch("/api/course-challenges/submissions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ courseSlug: course.slug, level, challengeKey, difficulty, proofPhotoPath: storagePath, scores: numericScores, finalScore: Number(finalScore.trim()) }) })
+      const response = await fetch("/api/course-challenges/submissions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ courseSlug: course.slug, level, challengeKey, difficulty, proofPhotoPath: storagePath, scores: numericScores, finalScore: calculatedFinalScore }) })
       const payload = await response.json() as { error?: string; message?: string }
       if (!response.ok) throw new Error(payload.error || "Course Challenge submission failed.")
       onSubmitted(payload.message || "Scorecard received for review.")
@@ -215,9 +215,10 @@ function SubmissionForm({ course, level, challengeKey, difficulty, pars, onCance
       {preview ? <div className={styles.dropPreview}><img className={styles.photoPreview} src={preview} alt="Selected scorecard preview" /><div className={styles.dropPreviewActions}><strong>Scorecard photo selected</strong><button type="button" className={styles.secondaryButton} onClick={(event) => { event.stopPropagation(); fileInputRef.current?.click() }}>Replace / Change</button></div></div> : <><strong>DRAG YOUR SCORECARD HERE</strong><span>or tap to choose a photo</span></>}
     </div>
     <p className={styles.helper}>Recommended: crop the photo so the scorecard fills the image. Cropping is optional.</p>
-    <div className={styles.scoreGrid} aria-label="H1 through H18 score entry">{scores.map((value, index) => <label className={styles.scoreInput} key={index}><span>H{index + 1}</span><input ref={(element) => { scoreRefs.current[index] = element }} inputMode="numeric" min={1} max={99} maxLength={2} value={value} onChange={(event) => changeScore(index, event.target.value)} onKeyDown={(event) => handleScoreKeyDown(index, event)} aria-label={"Hole " + (index + 1) + " score"} /><small>Par {pars?.[index] ?? "—"}</small></label>)}</div>
-    <label className={styles.finalScoreField}>FINAL SCORE SHOWN ON CARD<input ref={finalScoreRef} inputMode="numeric" value={finalScore} onChange={(event) => setFinalScore(event.target.value.replace(/[^0-9+-]/g, "").slice(0, 5))} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); void submit() } }} placeholder="-7, 0, or +3" aria-describedby="final-score-help" /><small id="final-score-help">Enter the relative-to-par score printed on the card. The system independently calculates the result from H1–H18 and authoritative pars.</small></label>
+    <div className={styles.scoreGrid} aria-label="H1 through H18 score entry">{scores.map((value, index) => <label className={styles.scoreInput} key={index}><span className={styles.holeLabel}>H{index + 1} <small>· Par {pars?.[index] ?? "—"}</small></span><input ref={(element) => { scoreRefs.current[index] = element }} inputMode="numeric" min={1} max={99} maxLength={2} value={value} onChange={(event) => changeScore(index, event.target.value)} onKeyDown={(event) => handleScoreKeyDown(index, event)} aria-label={"Hole " + (index + 1) + " score"} /></label>)}</div>
+    <div className={styles.calculatedScore} tabIndex={-1} aria-live="polite" aria-label="Calculated final score"><span>CALCULATED FINAL SCORE</span><strong>{calculatedFinalScore === null ? "—" : calculatedFinalScore > 0 ? "+" + calculatedFinalScore : calculatedFinalScore}</strong><small>Make sure this matches the final score on your scorecard before submitting.</small></div>
     {error && <p className={styles.notice}>{error}</p>}
-    <div className={styles.buttonRow}><button type="button" className={styles.secondaryButton} onClick={onCancel} disabled={busy}>Cancel</button><button type="button" className={styles.submitButton} onClick={() => void submit()} disabled={busy}>{busy ? "Submitting…" : "Submit scorecard"}</button></div>
+    <div className={styles.buttonRow}><button type="button" className={styles.secondaryButton} onClick={onCancel} disabled={busy}>Cancel</button><button ref={submitButtonRef} type="button" className={styles.submitButton} onClick={() => void submit()} disabled={busy}>{busy ? "Submitting…" : "Submit scorecard"}</button></div>
   </section>
 }
+

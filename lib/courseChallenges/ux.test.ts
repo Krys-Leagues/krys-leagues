@@ -34,8 +34,10 @@ test("scorecard hotfix removes manual metadata inputs and supports compact signe
   assert.doesNotMatch(book, /<select/)
   assert.match(book, /maxLength=\{2\}/)
   assert.match(book, /handleScoreKeyDown/)
-  assert.match(book, /finalScore/)
-  assert.match(book, /FINAL SCORE SHOWN ON CARD/)
+  assert.match(book, /calculatedFinalScore/)
+  assert.match(book, /finalScore: calculatedFinalScore/)
+  assert.match(book, /CALCULATED FINAL SCORE/)
+  assert.doesNotMatch(book, /finalScoreField/)
   assert.match(book, /focusNext\(index\)/)
 })
 
@@ -63,4 +65,25 @@ test("approved welcome artwork is first page content and rules do not auto-open"
   assert.ok(landing.indexOf("heroImage") < landing.indexOf("courseList"))
   assert.doesNotMatch(landing, /useEffect/)
   assert.doesNotMatch(landing, /heroCopy/)
+})
+
+test("Tourist Trap book uses full-page scenery and starts with Rules / Help", () => {
+  const book = read("components/course-challenges/CourseChallengeBook.tsx")
+  const styles = read("components/course-challenges/course-challenges.module.css")
+  assert.doesNotMatch(book, /courseHero|COURSE CHALLENGE BOOK|Levels 1–5 are visible together/)
+  assert.match(book, /--course-background-image/)
+  assert.match(book, /<summary>Rules \/ Help<\/summary>/)
+  assert.match(styles, /\.page::before/)
+  assert.match(styles, /var\(--course-background-image\)/)
+})
+
+test("scorecard entry is landscape-shaped and compact with pars beside each hole", () => {
+  const book = read("components/course-challenges/CourseChallengeBook.tsx")
+  const styles = read("components/course-challenges/course-challenges.module.css")
+  assert.ok(book.includes("className={styles.holeLabel}"))
+  assert.ok(book.includes("· Par {pars?.[index]"))
+  assert.ok(styles.includes("aspect-ratio: 3 / 1"))
+  assert.ok(styles.includes("grid-template-columns: repeat(9, minmax(46px, 1fr))"))
+  assert.ok(styles.includes("width: 46px; height: 40px"))
+  assert.ok(styles.includes("grid-template-columns: repeat(6, minmax(46px, 1fr)"))
 })
