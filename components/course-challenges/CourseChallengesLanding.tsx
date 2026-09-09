@@ -2,57 +2,38 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import type { CourseChallengeCourse } from "@/lib/courseChallenges/types"
 import styles from "./course-challenges.module.css"
-
-const RULES_SEEN_KEY = "krys-leagues:course-challenges:rules-seen:v1"
 
 export default function CourseChallengesLanding({ courses }: { courses: CourseChallengeCourse[] }) {
   const [showRules, setShowRules] = useState(false)
 
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
-      if (window.localStorage.getItem(RULES_SEEN_KEY) !== "1") setShowRules(true)
-    }, 0)
-    return () => window.clearTimeout(timer)
-  }, [])
-
-  function dismissRules() {
-    window.localStorage.setItem(RULES_SEEN_KEY, "1")
-    setShowRules(false)
-  }
-
   return <main className={styles.page}>
     <div className={styles.shell}>
       <Link href="/" className={styles.backLink}>← Krys Leagues</Link>
-      <section className={styles.hero} aria-labelledby="course-challenges-title">
-        <Image
-          className={styles.heroImage}
-          src="/course-challenges/course-challenges-welcome-approved.png"
-          alt="Course Challenges welcome artwork"
-          width={1600}
-          height={900}
-          priority
-        />
-        <div className={styles.heroCopy}>
-          <p className={styles.eyebrow}>PLAYER PROFILE · ACHIEVEMENT BOOK</p>
-          <h1 id="course-challenges-title" className={styles.heading}>Course Challenges</h1>
-          <p className={styles.intro}>Complete both sides of the same Level: one complete Easy scorecard and one complete Hard scorecard. Verified pairs unlock the next Level and its rewards.</p>
-          <div className={styles.buttonRow}>
-            <button type="button" className={styles.secondaryButton} onClick={() => setShowRules(true)}>Rules / Help</button>
+      <h1 id="course-challenges-title" className="sr-only">Course Challenges</h1>
+      <Image
+        className={styles.heroImage}
+        src="/course-challenges/course-challenges-welcome-approved.png"
+        alt="Course Challenges welcome artwork"
+        width={1600}
+        height={900}
+        priority
+      />
+      <section className={styles.courseList} aria-label="Available Course Challenges">
+        <h2 className="sr-only">Available courses</h2>
+        {courses.map((course) => <article className={styles.courseCard} key={course.slug}>
+          <div className={styles.courseCardBackdrop} style={course.backgroundImage ? { backgroundImage: `url("${course.backgroundImage}")` } : undefined} aria-hidden="true" />
+          <div className={styles.courseCardContent}>
+            <div><p className={styles.eyebrow}>LAUNCH COURSE</p><h2><Link href={`/course-challenges/${course.slug}`} className={styles.courseNameLink}>{course.name}</Link></h2><p>{course.shortDescription}</p></div>
+            <Link href={`/course-challenges/${course.slug}`} className={`${styles.primaryButton} ${styles.courseCardLink}`}>Open {course.name} Book →</Link>
           </div>
-        </div>
-        <div className={styles.courseList} aria-label="Launch courses">
-          {courses.map((course) => <article className={styles.courseCard} key={course.slug}>
-            <div className={styles.courseCardBackdrop} style={course.backgroundImage ? { backgroundImage: `url("${course.backgroundImage}")` } : undefined} aria-hidden="true" />
-            <div className={styles.courseCardContent}>
-              <div><p className={styles.eyebrow}>LAUNCH COURSE</p><h2><Link href={`/course-challenges/${course.slug}`} className={styles.courseNameLink}>{course.name}</Link></h2><p>{course.shortDescription}</p></div>
-              <Link href={`/course-challenges/${course.slug}`} className={`${styles.primaryButton} ${styles.courseCardLink}`}>Open {course.name} Book →</Link>
-            </div>
-          </article>)}
-        </div>
+        </article>)}
       </section>
+      <div className={styles.buttonRow}>
+        <button type="button" className={styles.secondaryButton} onClick={() => setShowRules(true)}>Rules / Help</button>
+      </div>
     </div>
     {showRules && <section className={styles.rulesOverlay} role="dialog" aria-modal="true" aria-labelledby="course-challenges-rules-title">
       <div className={styles.rulesCard}>
@@ -66,7 +47,7 @@ export default function CourseChallengesLanding({ courses }: { courses: CourseCh
           <li>We ask for both the scorecard photo and your 18 hole scores so we can check your round right away. That helps unlock your next Level without making you wait for an admin, while keeping Course Challenge results accurate.</li>
         </ul>
         <p className={styles.helper}>If you do not see the date and time on your scorecard, tap the three dots in the bottom-right BEFORE taking your picture.</p>
-        <button type="button" className={styles.primaryButton} onClick={dismissRules}>Got it</button>
+        <button type="button" className={styles.primaryButton} onClick={() => setShowRules(false)}>Got it</button>
       </div>
     </section>}
   </main>

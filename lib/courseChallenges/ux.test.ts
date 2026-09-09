@@ -50,3 +50,17 @@ test("fresh and repair SQL preserve private review fallback for missing proof me
   assert.match(repair, /alter column round_time drop not null/)
   assert.match(repair, /alter column game_mode drop not null/)
 })
+
+test("profile Course Challenges navigation opens the dedicated landing route", () => {
+  const profile = read("app/players/[id]/page.tsx")
+  assert.match(profile, /<Link href="\/course-challenges" className=\{styles\.profileActionButton\}>Course Challenges<\/Link>/)
+  assert.match(profile, />Course Challenge Collection<\/button>/)
+  assert.match(profile, /CourseChallengesProfileSummary/)
+})
+
+test("approved welcome artwork is first page content and rules do not auto-open", () => {
+  const landing = read("components/course-challenges/CourseChallengesLanding.tsx")
+  assert.ok(landing.indexOf("heroImage") < landing.indexOf("courseList"))
+  assert.doesNotMatch(landing, /useEffect/)
+  assert.doesNotMatch(landing, /heroCopy/)
+})
