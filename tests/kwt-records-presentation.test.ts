@@ -30,20 +30,21 @@ test("Easy and Hard course codes group into one canonical map", () => {
 
 test("Best Combined keeps event provenance and lower score ordering", () => {
   const records = buildKwtCourseRecords([
-    row({ difficulty: "Combined", score: -55, player_id: "player-a" }),
-    row({ difficulty: "Combined", score: -54, player_id: "player-b", screen_name: "Player B", season_number: 9, week_number: 6 }),
+    row({ difficulty: "Combined", score: -55, player_id: "player-a", scorecard_id: "scorecard-a", event_key: "s9w5-a", easy_round_id: "1", hard_round_id: "2", pairing_evidence_type: "same_scorecard_consecutive_source_rounds" }),
+    row({ difficulty: "Combined", score: -54, player_id: "player-b", screen_name: "Player B", season_number: 9, week_number: 6, scorecard_id: "scorecard-b", event_key: "s9w6-b", easy_round_id: "3", hard_round_id: "4", pairing_evidence_type: "same_scorecard_consecutive_source_rounds" }),
   ])
   assert.equal(records[0].records.Combined.overall?.score, -55)
   assert.deepEqual(records[0].records.Combined.overall?.holders[0], { playerId: "player-a", screenName: "Player A", seasonNumber: 9, weekNumber: 5 })
 })
 
-test("KWT records migration requires same-scorecard Easy/Hard map pairing", () => {
-  const sql = readFileSync("20260909_kwt_course_records_map_and_combined.sql", "utf8")
-  assert.match(sql, /score\.total_score as score/)
+test("KWT records migration requires retained round IDs and strict pairing evidence", () => {
+  const sql = readFileSync("20260909_kwt_course_records_strict_combined_pairing.sql", "utf8")
+  assert.match(sql, /score\.easy_score \+ score\.hard_score/)
   assert.match(sql, /hard\.base_map = easy\.base_map/)
-  assert.match(sql, /score\.season_number/)
-  assert.match(sql, /score\.week_number/)
-  assert.match(sql, /record_scope text/)
+  assert.match(sql, /score\.historical_kwt_import_id/)
+  assert.match(sql, /easy_round_id/)
+  assert.match(sql, /hard_round_id/)
+  assert.match(sql, /same_scorecard_consecutive_source_rounds/)
   assert.doesNotMatch(sql, /update public\.historical_kwt_scorecards|delete from public\.historical_kwt_scorecards/i)
 })
 

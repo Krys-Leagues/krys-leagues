@@ -1,3 +1,5 @@
+import { isStrictKwtCombinedRow } from "./kwtCombinedPairing.ts"
+
 export const KWT_RANK_ORDER = ["Amateur", "Semi-Pro", "Pro", "Elite"] as const
 export const KWT_DIFFICULTY_ORDER = ["Easy", "Hard"] as const
 export const KWT_RECORD_SECTION_ORDER = ["Easy", "Hard", "Combined"] as const
@@ -19,6 +21,11 @@ export type KwtCourseRecordRow = {
   screen_name: string
   season_number?: number | null
   week_number?: number | null
+  scorecard_id?: string | null
+  event_key?: string | null
+  easy_round_id?: string | null
+  hard_round_id?: string | null
+  pairing_evidence_type?: string | null
 }
 
 export type KwtCourseRecord = {
@@ -45,7 +52,7 @@ export function buildKwtCourseRecords(rows: readonly KwtCourseRecordRow[]): KwtC
   const courses = new Map<string, KwtCourseRecord>()
 
   for (const row of rows) {
-    if (!KWT_RECORD_SECTION_ORDER.includes(row.difficulty) || !Number.isFinite(row.score)) continue
+    if (!KWT_RECORD_SECTION_ORDER.includes(row.difficulty) || !Number.isFinite(row.score) || !isStrictKwtCombinedRow(row)) continue
     if (row.record_scope !== "overall" && row.record_scope !== "rank") continue
     if (row.record_scope === "rank" && !KWT_RANK_ORDER.includes(row.historical_rank as KwtRank)) continue
     const baseMap = (row.base_map || row.course_name || row.course_code).trim()

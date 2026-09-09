@@ -1,11 +1,27 @@
 import { createClient } from "@supabase/supabase-js"
 import { detailedCardStats, rankByCombinedTotal, rankByScore, type PublicCombinedRecord, type PublicCourse, type PublicSingleRecord } from "@/lib/all-time/public-records"
 
+type StrictKwtCombinedRow = { scorecard_id: string; base_map: string; player_id: string; screen_name: string; easy_score: number; hard_score: number; combined_score: number; record_scope: "overall" | "rank" }
+
 function publicRecordsClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY
   if (!url || !key) throw new Error("Public Records server access is not configured.")
   return createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } })
+}
+
+function strictKwtPublicRows(rows: StrictKwtCombinedRow[], baseMap: string) {
+  return rows.filter((row) => row.record_scope === "overall" && row.base_map === baseMap).map((row) => ({ id: row.scorecard_id, base_map: row.base_map, player_id: row.player_id, easy_score: row.easy_score, hard_score: row.hard_score, combined_score: row.combined_score, historical_player_name: row.screen_name, player: { screen_name: row.screen_name } })) as PublicCombinedRecord[]
+}
+
+async function loadCombinedRows(supabase: ReturnType<typeof publicRecordsClient>, baseMap: string) {
+  const [{ data: nonKwt, error: nonKwtError }, { data: kwt, error: kwtError }] = await Promise.all([
+    supabase.from("all_time_combined_best_records").select("id, base_map, player_id, easy_score, hard_score, combined_score, historical_player_name, player:players(screen_name)").eq("base_map", baseMap).neq("source_authority", "KWT"),
+    supabase.rpc("get_public_kwt_combined_records"),
+  ])
+  if (nonKwtError) throw nonKwtError
+  if (kwtError) throw kwtError
+  return [...((nonKwt ?? []) as PublicCombinedRecord[]), ...strictKwtPublicRows((kwt ?? []) as StrictKwtCombinedRow[], baseMap)]
 }
 
 export async function GET(request: Request) {
@@ -41,14 +57,7 @@ export async function GET(request: Request) {
       const maps = [...new Set(((catalog ?? []) as PublicCourse[]).map(course => course.base_map))]
       if (!baseMap) return Response.json({ maps }, { headers: { "Cache-Control": "public, max-age=60, s-maxage=300" } })
       if (!maps.includes(baseMap)) return Response.json({ error: "Active map not found." }, { status: 404 })
-      const { data, error } = await supabase.from("all_time_combined_best_records").select("id, base_map, player_id, easy_score, hard_score, combined_score, historical_player_name, player:players(screen_name)").eq("base_map", baseMap)
-      if (error) throw error
-      let combinedRows = (data ?? []) as PublicCombinedRecord[]
-      if (!combinedRows.length) {
-        const { data: legacy, error: legacyError } = await supabase.from("combined_course_records").select("id, player_id, player_name, course_name, easy_score, hard_score, combined_score, player:players(screen_name)").eq("course_name", baseMap)
-        if (legacyError) throw legacyError
-        combinedRows = (legacy ?? []).map(row => ({ id: row.id, base_map: row.course_name, player_id: row.player_id, easy_score: row.easy_score, hard_score: row.hard_score, combined_score: row.combined_score, historical_player_name: row.player_name, player: row.player })) as PublicCombinedRecord[]
-      }
+      const combinedRows = await loadCombinedRows(supabase, baseMap)
       return Response.json({ maps, records: rankByCombinedTotal(combinedRows) }, { headers: { "Cache-Control": "public, max-age=30, s-maxage=120" } })
     }
     if (view === "profile") {
@@ -63,13 +72,8 @@ export async function GET(request: Request) {
         for (const { course, result } of results) { if (result.error) throw result.error; const own = rankByScore((result.data ?? []) as PublicSingleRecord[]).find(row => row.player_id === playerId); if (own) rows.push({ key: course.id, rank: own.rank, course: course.base_map, score: own.score }) }
       } else {
         const maps = [...new Set(courses.map(course => course.base_map))]
-        const results = await Promise.all(maps.map(async baseMap => {
-          const result = await supabase.from("all_time_combined_best_records").select("id, base_map, player_id, easy_score, hard_score, combined_score, historical_player_name, player:players(screen_name)").eq("base_map", baseMap)
-          if (result.error || result.data?.length) return { baseMap, rows: result.data as PublicCombinedRecord[] | null, error: result.error }
-          const legacy = await supabase.from("combined_course_records").select("id, player_id, player_name, course_name, easy_score, hard_score, combined_score, player:players(screen_name)").eq("course_name", baseMap)
-          return { baseMap, rows: legacy.data?.map(row => ({ id: row.id, base_map: row.course_name, player_id: row.player_id, easy_score: row.easy_score, hard_score: row.hard_score, combined_score: row.combined_score, historical_player_name: row.player_name, player: row.player })) as PublicCombinedRecord[] | undefined, error: legacy.error }
-        }))
-        for (const { baseMap, rows: mapRows, error } of results) { if (error) throw error; const own = rankByCombinedTotal(mapRows ?? []).find(row => row.player_id === playerId); if (own) rows.push({ key: baseMap, rank: own.rank, course: baseMap, easyScore: own.easy_score, hardScore: own.hard_score, totalScore: own.combined_score }) }
+        const results = await Promise.all(maps.map(async baseMap => ({ baseMap, rows: await loadCombinedRows(supabase, baseMap) })))
+        for (const { baseMap, rows: mapRows } of results) { const own = rankByCombinedTotal(mapRows).find(row => row.player_id === playerId); if (own) rows.push({ key: baseMap, rank: own.rank, course: baseMap, easyScore: own.easy_score, hardScore: own.hard_score, totalScore: own.combined_score }) }
       }
       return Response.json({ rows: rows.sort((a, b) => (a.rank ?? 9999) - (b.rank ?? 9999) || a.course.localeCompare(b.course)) }, { headers: { "Cache-Control": "public, max-age=30, s-maxage=120" } })
     }
