@@ -2,16 +2,34 @@
 
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { supabase } from "@/lib/supabase"
 import type { CourseChallengeCourse } from "@/lib/courseChallenges/types"
 import styles from "./course-challenges.module.css"
 
 export default function CourseChallengesLanding({ courses }: { courses: CourseChallengeCourse[] }) {
   const [showRules, setShowRules] = useState(false)
+  const [profileMessage, setProfileMessage] = useState("")
+  const router = useRouter()
+
+  async function openOwnProfile() {
+    setProfileMessage("")
+    const { data: canonicalId, error } = await supabase.rpc("current_user_canonical_player_id")
+    if (error || typeof canonicalId !== "string" || !canonicalId) {
+      setProfileMessage("Your canonical player profile could not be resolved. Use Player Profiles to browse safely.")
+      return
+    }
+    router.push("/players/" + encodeURIComponent(canonicalId))
+  }
 
   return <main className={styles.page}>
     <div className={styles.shell}>
-      <Link href="/" className={styles.backLink}>← Krys Leagues</Link>
+      <div className={styles.backLinks}>
+        <Link href="/" className={styles.backLink}>← Krys Leagues</Link>
+        <button type="button" className={styles.backLinkButton} onClick={() => void openOwnProfile()}>← Player Profile</button>
+      </div>
+      {profileMessage && <p className={styles.notice} role="alert">{profileMessage}</p>}
       <h1 id="course-challenges-title" className="sr-only">Course Challenges</h1>
       <Image
         className={styles.heroImage}

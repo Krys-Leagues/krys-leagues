@@ -18,9 +18,12 @@ test("profile summary omits empty sticker placeholder and keeps course name clic
   assert.match(profile, /stickers\.length \?/) 
 })
 
-test("full book conceals unearned reward artwork and preserves Ace lock wording", () => {
+test("full book conceals unearned reward artwork with silhouettes and preserves Ace lock wording", () => {
   const book = read("components/course-challenges/CourseChallengeBook.tsx")
   assert.match(book, /earned && assetPath \? <Image/)
+  assert.match(book, /rewardSilhouette/)
+  assert.match(book, /maskImage/)
+  assert.doesNotMatch(book, /🔒/)
   assert.match(book, /Unlocks after Level \{ace\.unlockAfterLevel\}/)
   assert.match(book, /DRAG YOUR SCORECARD HERE/)
   assert.match(book, /or tap to choose a photo/)
@@ -53,11 +56,21 @@ test("fresh and repair SQL preserve private review fallback for missing proof me
   assert.match(repair, /alter column game_mode drop not null/)
 })
 
-test("profile Course Challenges navigation opens the dedicated landing route", () => {
+test("profile Course Challenges navigation has one entry and preserves the compact summary", () => {
   const profile = read("app/players/[id]/page.tsx")
   assert.match(profile, /<Link href="\/course-challenges" className=\{styles\.profileActionButton\}>Course Challenges<\/Link>/)
-  assert.match(profile, />Course Challenge Collection<\/button>/)
-  assert.match(profile, /CourseChallengesProfileSummary/)
+  assert.doesNotMatch(profile, /Course Challenge Collection/)
+  assert.match(profile, /<CourseChallengesProfileSummary/)
+  assert.match(profile, /href="\/players\?browse=1".*Player Profiles/)
+})
+
+test("welcome page keeps both safe back destinations and canonical Player Profile routing", () => {
+  const landing = read("components/course-challenges/CourseChallengesLanding.tsx")
+  assert.match(landing, /href="\/".*← Krys Leagues/)
+  assert.match(landing, /← Player Profile/)
+  assert.match(landing, /current_user_canonical_player_id/)
+  assert.match(landing, /router\.push\("\/players\/"/)
+  assert.doesNotMatch(landing, /auth\.uid|email|screen_name|display_name/)
 })
 
 test("approved welcome artwork is first page content and rules do not auto-open", () => {

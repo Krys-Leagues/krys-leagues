@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation"
 import PlayerAvatar from "@/components/PlayerAvatar"
 import { ArtworkNavigation } from "@/components/navigation/ArtworkNavigation"
 import { playerProfilesArtwork } from "@/lib/artworkPageMaps"
+import { supabase } from "@/lib/supabase"
+import { ownProfilePath, shouldAutoOpenOwnProfile } from "@/lib/playerProfilesRouting"
 import {
   loadCanonicalPublicPlayers,
   type CanonicalPublicPlayer,
@@ -20,6 +22,21 @@ export default function PlayerProfilesPage() {
   const [message, setMessage] = useState("")
   const [resultsOpen, setResultsOpen] = useState(false)
   const [highlightedIndex, setHighlightedIndex] = useState(0)
+
+  useEffect(() => {
+    if (!shouldAutoOpenOwnProfile(window.location.search)) return
+
+    let active = true
+    void supabase.rpc("current_user_canonical_player_id").then(({ data, error }) => {
+      if (!active || error) return
+      const path = ownProfilePath(typeof data === "string" ? data : null)
+      if (path) router.replace(path)
+    })
+
+    return () => {
+      active = false
+    }
+  }, [router])
 
   useEffect(() => {
     let active = true

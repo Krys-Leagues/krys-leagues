@@ -120,7 +120,8 @@ function RewardStrip({ course, level, rewardKeys }: { course: CourseChallengeCou
 }
 
 function Reward({ label, rewardKey, earned, assetPath }: { label: string; rewardKey: string; earned: boolean; assetPath: string | null }) {
-  return <div className={styles.reward} data-earned={earned} data-reward-key={rewardKey}>{earned && assetPath ? <Image src={assetPath} alt="" width={56} height={56} sizes="56px" /> : <span className={styles.rewardMark} aria-hidden="true">{earned ? "✦" : "🔒"}</span>}<span>{label}</span></div>
+  const silhouetteStyle = assetPath ? { maskImage: "url('" + assetPath + "')", WebkitMaskImage: "url('" + assetPath + "')" } as React.CSSProperties : undefined
+  return <div className={styles.reward} data-earned={earned} data-reward-key={rewardKey}>{earned && assetPath ? <Image src={assetPath} alt="" width={56} height={56} sizes="56px" /> : earned ? <span className={styles.rewardMark} aria-hidden="true">✦</span> : <span className={styles.rewardSilhouette} style={silhouetteStyle} aria-hidden="true" />}<span>{label}</span></div>
 }
 function SubmissionForm({ course, level, challengeKey, difficulty, pars, onCancel, onSubmitted }: { course: CourseChallengeCourse; level: number; challengeKey: "level" | "ace"; difficulty: CourseChallengeDifficulty; pars: number[] | null; onCancel: () => void; onSubmitted: (message: string) => void }) {
   const [file, setFile] = useState<File | null>(null)
