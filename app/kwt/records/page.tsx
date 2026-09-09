@@ -38,6 +38,11 @@ export default function KWTRecordsPage() {
     setActiveOption(0)
   }
 
+  function openCourseList() {
+    if (selected && !selectorOpen) setQuery("")
+    setSelectorOpen(true)
+    setActiveOption(0)
+  }
   function onSelectorKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
     if (event.key === "Escape") {
       setSelectorOpen(false)
@@ -87,13 +92,13 @@ export default function KWTRecordsPage() {
                   aria-autocomplete="list"
                   aria-activedescendant={selectorOpen && filteredCourses[activeOption] ? "kwt-course-option-" + activeOption : undefined}
                   value={query}
-                  onFocus={() => setSelectorOpen(true)}
+                  onFocus={openCourseList}
                   onChange={event => { setQuery(event.target.value); setSelectorOpen(true); setActiveOption(0) }}
                   onKeyDown={onSelectorKeyDown}
                   placeholder="Search map or code"
                   style={selectorInput}
                 />
-                <button type="button" aria-label="Open course list" aria-expanded={selectorOpen} onClick={() => setSelectorOpen(open => !open)} style={selectorToggle}>⌄</button>
+                <button type="button" aria-label="Open course list" aria-expanded={selectorOpen} onClick={openCourseList} style={selectorToggle}>⌄</button>
               </div>
               {selectorOpen && (
                 <div id="kwt-course-options" role="listbox" aria-label="KWT courses" style={courseOptions}>
