@@ -59,5 +59,6 @@ export function evaluateCourseChallengeRequirements(scores: number[], pars: numb
 }
 
 export function comparePhotoTotal(metrics: CourseChallengeMetrics, photoTotal: number | null, photoTotalReadable: boolean) { if (!photoTotalReadable || photoTotal === null || !Number.isInteger(photoTotal)) return "needs_review" as const; return photoTotal === metrics.totalStrokes ? "passed" as const : "needs_review" as const }
+export function compareEnteredFinalScore(metrics: CourseChallengeMetrics, enteredFinalScore: number) { return Number.isInteger(enteredFinalScore) && enteredFinalScore === metrics.relativeToPar ? "passed" as const : "needs_review" as const }
 export function levelIsComplete(easyStatus: string | null | undefined, hardStatus: string | null | undefined) { return easyStatus === "approved" && hardStatus === "approved" }
 export function nextUnlockedLevel(completedLevels: number[]) { const completed = new Set(completedLevels.filter((level) => level >= 1 && level <= 5)); let next = 1; while (completed.has(next) && next < 5) next += 1; return next }

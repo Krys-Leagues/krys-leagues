@@ -13,7 +13,7 @@ export default function CourseChallengesProfileSummary({ playerId, courses }: { 
 
   useEffect(() => {
     let active = true
-    fetch(`/api/course-challenges/profile/${encodeURIComponent(playerId)}`, { cache: "no-store" }).then((response) => response.json() as Promise<Payload>).then((next) => { if (active) setPayload(next) }).catch(() => undefined)
+    fetch("/api/course-challenges/profile/" + encodeURIComponent(playerId), { cache: "no-store" }).then((response) => response.json() as Promise<Payload>).then((next) => { if (active) setPayload(next) }).catch(() => undefined)
     return () => { active = false }
   }, [playerId])
 
@@ -22,7 +22,15 @@ export default function CourseChallengesProfileSummary({ playerId, courses }: { 
     <div><p className={styles.eyebrow}>ACHIEVEMENT BOOK</p><h2 id="course-challenges-profile-heading">Course Challenges</h2><p className={styles.helper}>Only earned Level stickers are shown here. Open a course for the full five-Level book and progress details.</p></div>
     {courses.map((course) => {
       const summary = summaries.get(course.slug)
-      return <div className={styles.profileCourseRow} key={course.slug}><div><strong>{course.name}</strong>{summary?.prestigeRewards.length ? <div className={styles.profileStickers}>{summary.prestigeRewards.map((reward) => <span className={styles.profileSticker} key={reward.rewardKey}>{reward.label}</span>)}</div> : null}</div><div className={styles.profileStickers}>{(summary?.stickers || []).map((sticker) => <span className={styles.profileSticker} key={sticker.rewardKey}>{sticker.label}</span>)}{!summary?.stickers.length && <span className={styles.helper}>No Level stickers earned yet</span>}</div><Link href={`/course-challenges/${course.slug}`} className={styles.backLink}>Open book →</Link></div>
+      const stickers = summary?.stickers || []
+      const prestigeRewards = summary?.prestigeRewards || []
+      return <div className={styles.profileCourseRow} key={course.slug}>
+        <div>
+          <Link href={"/course-challenges/" + course.slug} className={styles.courseNameLink}><strong>{course.name}</strong></Link>
+          {prestigeRewards.length ? <div className={styles.profileStickers}>{prestigeRewards.map((reward) => <span className={styles.profileSticker} key={reward.rewardKey}>{reward.label}</span>)}</div> : null}
+        </div>
+        {stickers.length ? <div className={styles.profileStickers}>{stickers.map((sticker) => <span className={styles.profileSticker} key={sticker.rewardKey}>{sticker.label}</span>)}</div> : null}
+      </div>
     })}
     {payload.error && <p className={styles.notice}>{payload.error}</p>}
     {payload.unavailable && <p className={styles.helper}>Course Challenge progress will appear after the review tables are provisioned.</p>}

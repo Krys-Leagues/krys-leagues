@@ -94,3 +94,22 @@
   .scoreGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .levelTab { min-height: 64px; padding: 8px; }
 }
+.courseNameLink { color: #fff; text-decoration: none; }
+.courseNameLink:hover, .courseNameLink:focus-visible { color: #f9a8d4; text-decoration: underline; text-underline-offset: 5px; }
+.dropZone { position: relative; display: grid; place-items: center; gap: 8px; min-height: 154px; border: 2px dashed #a78bfa99; border-radius: 16px; padding: 20px; background: #02061799; color: #f8fafc; text-align: center; cursor: pointer; transition: border-color .15s ease, background .15s ease; }
+.dropZone:hover, .dropZone:focus-visible, .dropZoneActive { border-color: #f9a8d4; background: #312e81aa; outline: none; }
+.dropZone > strong { font-size: 1.05rem; letter-spacing: .08em; }
+.dropZone > span { color: #cbd5e1; }
+.hiddenFileInput { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+.dropPreview { display: grid; gap: 12px; justify-items: center; width: 100%; }
+.dropPreview .photoPreview { max-height: 220px; }
+.dropPreviewActions { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; }
+.formHelp { border: 1px solid #ffffff20; border-radius: 12px; padding: 11px 14px; background: #02061766; color: #cbd5e1; }
+.formHelp summary { cursor: pointer; color: #fff; font-weight: 900; }
+.formHelp p { margin: 10px 0 0; line-height: 1.5; }
+.finalScoreField { display: grid; gap: 6px; max-width: 360px; color: #f8fafc; font-weight: 900; }
+.finalScoreField input { width: 100%; border: 1px solid #f9a8d466; border-radius: 9px; padding: 9px 11px; background: #020617; color: #fff; font: inherit; }
+.finalScoreField small { color: #cbd5e1; font-weight: 500; line-height: 1.45; }
+.scoreGrid { gap: 7px; }
+.scoreInput { gap: 3px; }
+.scoreInput input { min-height: 38px; padding: 6px 3px; font-size: 1rem; }

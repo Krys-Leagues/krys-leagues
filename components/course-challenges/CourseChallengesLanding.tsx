@@ -47,7 +47,7 @@ export default function CourseChallengesLanding({ courses }: { courses: CourseCh
           {courses.map((course) => <article className={styles.courseCard} key={course.slug}>
             <div className={styles.courseCardBackdrop} style={course.backgroundImage ? { backgroundImage: `url("${course.backgroundImage}")` } : undefined} aria-hidden="true" />
             <div className={styles.courseCardContent}>
-              <div><p className={styles.eyebrow}>LAUNCH COURSE</p><h2>{course.name}</h2><p>{course.shortDescription}</p></div>
+              <div><p className={styles.eyebrow}>LAUNCH COURSE</p><h2><Link href={`/course-challenges/${course.slug}`} className={styles.courseNameLink}>{course.name}</Link></h2><p>{course.shortDescription}</p></div>
               <Link href={`/course-challenges/${course.slug}`} className={`${styles.primaryButton} ${styles.courseCardLink}`}>Open {course.name} Book →</Link>
             </div>
           </article>)}

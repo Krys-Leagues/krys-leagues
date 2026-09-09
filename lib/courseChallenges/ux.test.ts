@@ -1,0 +1,52 @@
+import assert from "node:assert/strict"
+import { readFileSync } from "node:fs"
+import test from "node:test"
+
+const read = (path: string) => readFileSync(new URL("../../" + path, import.meta.url), "utf8")
+
+test("Course Challenges opens on the approved welcome experience and direct course target", () => {
+  const landing = read("components/course-challenges/CourseChallengesLanding.tsx")
+  assert.match(landing, /course-challenges-welcome-approved\.png/)
+  assert.match(landing, /className=\{styles\.courseNameLink\}/)
+  assert.match(landing, /href=\{`\/course-challenges\/\$\{course\.slug\}`\}/)
+})
+
+test("profile summary omits empty sticker placeholder and keeps course name clickable", () => {
+  const profile = read("components/course-challenges/CourseChallengesProfileSummary.tsx")
+  assert.match(profile, /courseNameLink/)
+  assert.doesNotMatch(profile, /No Level stickers earned yet/)
+  assert.match(profile, /stickers\.length \?/) 
+})
+
+test("full book conceals unearned reward artwork and preserves Ace lock wording", () => {
+  const book = read("components/course-challenges/CourseChallengeBook.tsx")
+  assert.match(book, /earned && assetPath \? <Image/)
+  assert.match(book, /Unlocks after Level \{ace\.unlockAfterLevel\}/)
+  assert.match(book, /DRAG YOUR SCORECARD HERE/)
+  assert.match(book, /or tap to choose a photo/)
+  assert.match(book, /Replace \/ Change/)
+})
+
+test("scorecard hotfix removes manual metadata inputs and supports compact signed entry", () => {
+  const book = read("components/course-challenges/CourseChallengeBook.tsx")
+  assert.doesNotMatch(book, /type="date"/)
+  assert.doesNotMatch(book, /type="time"/)
+  assert.doesNotMatch(book, /<select/)
+  assert.match(book, /maxLength=\{2\}/)
+  assert.match(book, /handleScoreKeyDown/)
+  assert.match(book, /finalScore/)
+  assert.match(book, /FINAL SCORE SHOWN ON CARD/)
+  assert.match(book, /focusNext\(index\)/)
+})
+
+test("fresh and repair SQL preserve private review fallback for missing proof metadata", () => {
+  const foundation = read("course_challenges_foundation.sql")
+  const repair = read("course_challenges_tester_ux_hotfix.sql")
+  for (const source of [foundation, repair]) {
+    assert.match(source, /entered_final_score/)
+    assert.match(source, /final_score_check/)
+  }
+  assert.match(repair, /alter column round_date drop not null/)
+  assert.match(repair, /alter column round_time drop not null/)
+  assert.match(repair, /alter column game_mode drop not null/)
+})

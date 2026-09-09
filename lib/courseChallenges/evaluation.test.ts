@@ -2,7 +2,7 @@ import assert from "node:assert/strict"
 import test from "node:test"
 import { getCourseChallenge, isAceChallengeUnlocked } from "./catalog.ts"
 import { aceRewardDefinition, levelRewardDefinitions } from "./rewards.ts"
-import { calculateCourseChallengeMetrics, comparePhotoTotal, evaluateCourseChallengeRequirements, levelIsComplete, nextUnlockedLevel } from "./evaluation.ts"
+import { calculateCourseChallengeMetrics, compareEnteredFinalScore, comparePhotoTotal, evaluateCourseChallengeRequirements, levelIsComplete, nextUnlockedLevel } from "./evaluation.ts"
 
 const tourist = getCourseChallenge("tourist-trap")!
 const cherry = getCourseChallenge("cherry-blossom")!
@@ -98,6 +98,8 @@ test("photo totals and Course Pro/Master rewards remain wired", () => {
   const metrics = calculateCourseChallengeMetrics(touristScores, touristPars)
   assert.equal(comparePhotoTotal(metrics, 64, true), "passed")
   assert.equal(comparePhotoTotal(metrics, 63, true), "needs_review")
+  assert.equal(compareEnteredFinalScore(metrics, metrics.relativeToPar), "passed")
+  assert.equal(compareEnteredFinalScore(metrics, metrics.relativeToPar + 1), "needs_review")
   assert.equal(levelRewardDefinitions(tourist, 3).some((reward) => reward.label === "Course Pro"), true)
   assert.equal(levelRewardDefinitions(tourist, 5).some((reward) => reward.label === "Course Master"), true)
 })

@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { createDiscordAuthCallbackUrl } from "@/lib/authReturnTo"
 import { supabase } from "@/lib/supabase"
 import { isAceChallengeUnlocked } from "@/lib/courseChallenges/catalog"
@@ -126,24 +126,70 @@ function RewardStrip({ course, level, rewardKeys }: { course: CourseChallengeCou
 }
 
 function Reward({ label, rewardKey, earned, assetPath }: { label: string; rewardKey: string; earned: boolean; assetPath: string | null }) {
-  return <div className={styles.reward} data-earned={earned} data-reward-key={rewardKey}>{assetPath && <Image src={assetPath} alt="" width={56} height={56} sizes="56px" />}{!assetPath && <span className={styles.rewardMark} aria-hidden="true">{earned ? "✦" : "?"}</span>}<span>{label}</span></div>
+  return <div className={styles.reward} data-earned={earned} data-reward-key={rewardKey}>{earned && assetPath ? <Image src={assetPath} alt="" width={56} height={56} sizes="56px" /> : <span className={styles.rewardMark} aria-hidden="true">{earned ? "✦" : "🔒"}</span>}<span>{label}</span></div>
 }
-
 function SubmissionForm({ course, level, challengeKey, difficulty, pars, onCancel, onSubmitted }: { course: CourseChallengeCourse; level: number; challengeKey: "level" | "ace"; difficulty: CourseChallengeDifficulty; pars: number[] | null; onCancel: () => void; onSubmitted: (message: string) => void }) {
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [scores, setScores] = useState<string[]>(Array.from({ length: 18 }, () => ""))
-  const [roundDate, setRoundDate] = useState("")
-  const [roundTime, setRoundTime] = useState("")
-  const [gameMode, setGameMode] = useState<"solo" | "multiplayer">("solo")
+  const [finalScore, setFinalScore] = useState("")
+  const [dragActive, setDragActive] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState("")
-  function chooseFile(next: File | null) { setFile(next); setPreview(next ? URL.createObjectURL(next) : null) }
+  const scoreRefs = useRef<Array<HTMLInputElement | null>>([])
+  const finalScoreRef = useRef<HTMLInputElement | null>(null)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const advanceTimers = useRef<Array<number | undefined>>([])
+
+  useEffect(() => () => {
+    advanceTimers.current.forEach((timer) => { if (timer) window.clearTimeout(timer) })
+    if (preview) URL.revokeObjectURL(preview)
+  }, [preview])
+
+  function chooseFile(next: File | null) {
+    if (!next) return
+    if (!next.type.startsWith("image/")) { setError("Choose an image file for the scorecard."); return }
+    if (preview) URL.revokeObjectURL(preview)
+    setFile(next)
+    setPreview(URL.createObjectURL(next))
+    setError("")
+  }
+
+  function focusNext(index: number) {
+    if (index === 17) finalScoreRef.current?.focus()
+    else scoreRefs.current[index + 1]?.focus()
+  }
+
+  function scheduleAdvance(index: number, value: string) {
+    if (advanceTimers.current[index]) window.clearTimeout(advanceTimers.current[index])
+    if (!value) return
+    const delay = value.length >= 2 || value !== "1" ? 180 : 650
+    advanceTimers.current[index] = window.setTimeout(() => focusNext(index), delay)
+  }
+
+  function changeScore(index: number, raw: string) {
+    const value = raw.replace(/[^0-9]/g, "").slice(0, 2)
+    setScores((old) => old.map((current, item) => item === index ? value : current))
+    scheduleAdvance(index, value)
+  }
+
+  function handleScoreKeyDown(index: number, event: React.KeyboardEvent<HTMLInputElement>) {
+    if (event.key === "Backspace" && !scores[index] && index > 0) {
+      event.preventDefault()
+      scoreRefs.current[index - 1]?.focus()
+      return
+    }
+    if (event.key === "Enter" || event.key === "Tab") {
+      event.preventDefault()
+      focusNext(index)
+    }
+  }
+
   async function submit() {
     setError("")
-    if (!file || !preview) { setError("Upload the proof scorecard photo first."); return }
+    if (!file || !preview) { setError("Add your scorecard photo first."); return }
     if (!pars || pars.length !== 18) { setError("Authoritative pars are unavailable; submission is blocked until the course catalog is available."); return }
-    if (!roundDate || !roundTime) { setError("The scorecard round date and time are required."); return }
+    if (!/^[+-]?\d+$/.test(finalScore.trim())) { setError("Enter the final relative-to-par score shown on the scorecard, such as -7, 0, or +3."); return }
     const numericScores = scores.map((value) => Number(value))
     if (numericScores.some((value) => !Number.isInteger(value) || value < 1)) { setError("Enter a positive whole-number score for all 18 holes."); return }
     setBusy(true)
@@ -154,19 +200,23 @@ function SubmissionForm({ course, level, challengeKey, difficulty, pars, onCance
       const storagePath = userResult.data.user.id + "/" + course.slug + "/" + challengeKey + "-" + level + "-" + difficulty + "-" + crypto.randomUUID() + "." + extension
       const upload = await supabase.storage.from("course-challenge-proof").upload(storagePath, file, { contentType: file.type || "image/jpeg", upsert: false })
       if (upload.error) throw new Error("Proof photo upload failed: " + upload.error.message)
-      const response = await fetch("/api/course-challenges/submissions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ courseSlug: course.slug, level, challengeKey, difficulty, proofPhotoPath: storagePath, scores: numericScores, roundDate, roundTime, gameMode }) })
+      const response = await fetch("/api/course-challenges/submissions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ courseSlug: course.slug, level, challengeKey, difficulty, proofPhotoPath: storagePath, scores: numericScores, finalScore: Number(finalScore.trim()) }) })
       const payload = await response.json() as { error?: string; message?: string }
       if (!response.ok) throw new Error(payload.error || "Course Challenge submission failed.")
-      onSubmitted(payload.message || "Submitted for Course Challenge review.")
+      onSubmitted(payload.message || "Scorecard received for review.")
     } catch (caught) { setError(caught instanceof Error ? caught.message : "Course Challenge submission failed.") } finally { setBusy(false) }
   }
+
   return <section className={styles.submissionPanel} aria-label={(challengeKey === "ace" ? "Ace Challenge" : "Level " + level) + " " + difficulty + " scorecard submission"}>
-    <div><p className={styles.eyebrow}>{challengeKey === "ace" ? "ACE CHALLENGE" : "LEVEL " + level} · {difficulty.toUpperCase()}</p><h3>Upload proof, then enter all 18 scores</h3></div>
-    <p className={styles.helper}>Keep the uploaded photo visible while entering scores. The website uses the typed H1–H18 values for calculation and the photo as evidence.</p>
-    <div className={styles.formGrid}><label className={styles.field + " " + styles.fieldWide}>Proof scorecard photo<input type="file" accept="image/*" onChange={(event) => chooseFile(event.target.files?.[0] || null)} /></label>{preview && <img className={styles.photoPreview + " " + styles.fieldWide} src={preview} alt="Uploaded scorecard preview" />}<label className={styles.field}>Round date<input type="date" value={roundDate} onChange={(event) => setRoundDate(event.target.value)} /></label><label className={styles.field}>Round time<input type="time" value={roundTime} onChange={(event) => setRoundTime(event.target.value)} /></label><label className={styles.field}>Game Mode<select value={gameMode} onChange={(event) => setGameMode(event.target.value as "solo" | "multiplayer")}><option value="solo">Solo</option><option value="multiplayer">Multiplayer</option></select></label></div>
-    <p className={styles.helper}>If you do not see the date and time on your scorecard, tap the three dots in the bottom-right BEFORE taking your picture. Practice Mode does not qualify.</p>
-    <div className={styles.scoreGrid} aria-label="H1 through H18 score entry">{scores.map((value, index) => <label className={styles.scoreInput} key={index}><span>H{index + 1}</span><input inputMode="numeric" min={1} max={99} value={value} onChange={(event) => setScores((old) => old.map((current, item) => item === index ? event.target.value.replace(/[^0-9]/g, "") : current))} /><small>Par {pars?.[index] ?? "—"}</small></label>)}</div>
-    <p className={styles.helper}>The final total, relative-to-par result, HIOs, bogeys, pars or better, birdies, eagles, and hole-specific checks all use the authoritative pars shown above.</p>
+    <div><p className={styles.eyebrow}>{challengeKey === "ace" ? "ACE CHALLENGE" : "LEVEL " + level} · {difficulty.toUpperCase()}</p><h3>Upload your scorecard, then enter the scores</h3></div>
+    <details className={styles.formHelp}><summary>Rules / Help</summary><p>Drag your scorecard photo here or tap to choose one. The scorecard numbers and final score should be clearly readable. Recommended: crop the photo so the scorecard fills the image.</p><p>Do not type the date, time, or Game Mode. The submission records its server time, and an admin can review the scorecard photo when date/time or Solo/Multiplayer evidence is unclear. Solo and Multiplayer are eligible; Practice Mode is not.</p></details>
+    <div className={styles.dropZone + (dragActive ? " " + styles.dropZoneActive : "")} role="button" tabIndex={0} onClick={() => fileInputRef.current?.click()} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); fileInputRef.current?.click() } }} onDragEnter={(event) => { event.preventDefault(); setDragActive(true) }} onDragOver={(event) => event.preventDefault()} onDragLeave={() => setDragActive(false)} onDrop={(event) => { event.preventDefault(); setDragActive(false); chooseFile(event.dataTransfer.files?.[0] || null) }}>
+      <input ref={fileInputRef} className={styles.hiddenFileInput} type="file" accept="image/*" onChange={(event) => chooseFile(event.target.files?.[0] || null)} />
+      {preview ? <div className={styles.dropPreview}><img className={styles.photoPreview} src={preview} alt="Selected scorecard preview" /><div className={styles.dropPreviewActions}><strong>Scorecard photo selected</strong><button type="button" className={styles.secondaryButton} onClick={(event) => { event.stopPropagation(); fileInputRef.current?.click() }}>Replace / Change</button></div></div> : <><strong>DRAG YOUR SCORECARD HERE</strong><span>or tap to choose a photo</span></>}
+    </div>
+    <p className={styles.helper}>Recommended: crop the photo so the scorecard fills the image. Cropping is optional.</p>
+    <div className={styles.scoreGrid} aria-label="H1 through H18 score entry">{scores.map((value, index) => <label className={styles.scoreInput} key={index}><span>H{index + 1}</span><input ref={(element) => { scoreRefs.current[index] = element }} inputMode="numeric" min={1} max={99} maxLength={2} value={value} onChange={(event) => changeScore(index, event.target.value)} onKeyDown={(event) => handleScoreKeyDown(index, event)} aria-label={"Hole " + (index + 1) + " score"} /><small>Par {pars?.[index] ?? "—"}</small></label>)}</div>
+    <label className={styles.finalScoreField}>FINAL SCORE SHOWN ON CARD<input ref={finalScoreRef} inputMode="numeric" value={finalScore} onChange={(event) => setFinalScore(event.target.value.replace(/[^0-9+-]/g, "").slice(0, 5))} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); void submit() } }} placeholder="-7, 0, or +3" aria-describedby="final-score-help" /><small id="final-score-help">Enter the relative-to-par score printed on the card. The system independently calculates the result from H1–H18 and authoritative pars.</small></label>
     {error && <p className={styles.notice}>{error}</p>}
     <div className={styles.buttonRow}><button type="button" className={styles.secondaryButton} onClick={onCancel} disabled={busy}>Cancel</button><button type="button" className={styles.submitButton} onClick={() => void submit()} disabled={busy}>{busy ? "Submitting…" : "Submit scorecard"}</button></div>
   </section>

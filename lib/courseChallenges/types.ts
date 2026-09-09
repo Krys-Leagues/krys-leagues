@@ -105,9 +105,10 @@ export type CourseChallengeSubmissionPayload = {
   challengeKey?: "level" | "ace"
   proofPhotoPath: string
   scores: number[]
-  roundDate: string
-  roundTime: string
-  gameMode: "solo" | "multiplayer"
+  finalScore: number
+  roundDate?: string | null
+  roundTime?: string | null
+  gameMode?: "solo" | "multiplayer" | null
 }
 
 export type CourseChallengeProfileReward = {
