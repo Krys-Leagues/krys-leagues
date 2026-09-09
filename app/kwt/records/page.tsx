@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
-import { buildKwtCourseRecords, KWT_DIFFICULTY_ORDER, KWT_RANK_ORDER, type KwtCourseRecord, type KwtCourseRecordEntry, type KwtCourseRecordRow, type KwtRank } from "@/lib/kwtRecords"
+import { buildKwtCourseRecords, matchesKwtCourseQuery, KWT_DIFFICULTY_ORDER, KWT_RANK_ORDER, type KwtCourseRecord, type KwtCourseRecordEntry, type KwtCourseRecordRow, type KwtRank } from "@/lib/kwtRecords"
 import { supabase } from "@/lib/supabase"
 
 export default function KWTRecordsPage() {
@@ -11,13 +11,14 @@ export default function KWTRecordsPage() {
   const [error, setError] = useState("")
   const [query, setQuery] = useState("")
   const [selectedCourse, setSelectedCourse] = useState("")
+  const [selectorOpen, setSelectorOpen] = useState(false)
+  const [activeOption, setActiveOption] = useState(0)
   const courseRecords = useMemo(() => buildKwtCourseRecords(rows), [rows])
-  const filteredCourses = useMemo(() => {
-    const normalized = query.trim().toLowerCase()
-    if (!normalized) return courseRecords
-    return courseRecords.filter((course) => [course.courseName, course.courseCode, ...course.courseCodes].some(value => value.toLowerCase().includes(normalized)))
-  }, [courseRecords, query])
-  const selected = filteredCourses.find(course => course.courseCode.toUpperCase() === selectedCourse) ?? filteredCourses[0]
+  const filteredCourses = useMemo(
+    () => courseRecords.filter(course => matchesKwtCourseQuery(course, query)),
+    [courseRecords, query],
+  )
+  const selected = courseRecords.find(course => course.courseName === selectedCourse) ?? null
 
   useEffect(() => {
     let mounted = true
@@ -30,6 +31,35 @@ export default function KWTRecordsPage() {
     return () => { mounted = false }
   }, [])
 
+  function chooseCourse(course: KwtCourseRecord) {
+    setSelectedCourse(course.courseName)
+    setQuery(course.courseName)
+    setSelectorOpen(false)
+    setActiveOption(0)
+  }
+
+  function onSelectorKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (event.key === "Escape") {
+      setSelectorOpen(false)
+      return
+    }
+    if (event.key === "ArrowDown") {
+      event.preventDefault()
+      setSelectorOpen(true)
+      setActiveOption(index => Math.min(index + 1, Math.max(filteredCourses.length - 1, 0)))
+      return
+    }
+    if (event.key === "ArrowUp") {
+      event.preventDefault()
+      setSelectorOpen(true)
+      setActiveOption(index => Math.max(index - 1, 0))
+      return
+    }
+    if (event.key === "Enter" && selectorOpen && filteredCourses[activeOption]) {
+      event.preventDefault()
+      chooseCourse(filteredCourses[activeOption])
+    }
+  }
 
   return (
     <main style={page}>
@@ -41,26 +71,52 @@ export default function KWTRecordsPage() {
         </header>
 
         <section style={section} aria-labelledby="records-title">
-          <h2 id="records-title" style={srOnly}>KWT Course Records</h2>
+          <h2 id="records-title" style={srOnly}>Select Course</h2>
           {loading && <p style={empty}>Loading KWT course records…</p>}
           {!loading && error && <p role="alert" style={empty}>{error}</p>}
           {!loading && !error && courseRecords.length === 0 && <p style={empty}>No KWT course records are currently available.</p>}
           {!loading && !error && courseRecords.length > 0 && (
             <div>
-              <label style={selectorLabel} htmlFor="kwt-course-search">Select course</label>
-              <input id="kwt-course-search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search course or code" style={selectorInput} list="kwt-course-options" />
-              <datalist id="kwt-course-options">{filteredCourses.map(course => <option key={course.courseCode} value={course.courseName}>{course.courseCodes.join(" / ")}</option>)}</datalist>
-              <div style={courseOptions} role="listbox" aria-label="KWT courses">
-                {filteredCourses.map(course => <button type="button" key={course.courseCode} role="option" aria-selected={selected?.courseCode === course.courseCode} style={selected?.courseCode === course.courseCode ? selectedOption : courseOption} onClick={() => { setSelectedCourse(course.courseCode.toUpperCase()); setQuery(course.courseName) }}>{course.courseName}</button>)}
+              <label style={selectorLabel} htmlFor="kwt-course-search">Select Course</label>
+              <div style={selectorShell}>
+                <input
+                  id="kwt-course-search"
+                  role="combobox"
+                  aria-expanded={selectorOpen}
+                  aria-controls="kwt-course-options"
+                  aria-autocomplete="list"
+                  aria-activedescendant={selectorOpen && filteredCourses[activeOption] ? "kwt-course-option-" + activeOption : undefined}
+                  value={query}
+                  onFocus={() => setSelectorOpen(true)}
+                  onChange={event => { setQuery(event.target.value); setSelectorOpen(true); setActiveOption(0) }}
+                  onKeyDown={onSelectorKeyDown}
+                  placeholder="Search map or code"
+                  style={selectorInput}
+                />
+                <button type="button" aria-label="Open course list" aria-expanded={selectorOpen} onClick={() => setSelectorOpen(open => !open)} style={selectorToggle}>⌄</button>
               </div>
+              {selectorOpen && (
+                <div id="kwt-course-options" role="listbox" aria-label="KWT courses" style={courseOptions}>
+                  {filteredCourses.length > 0 ? filteredCourses.map((course, index) => (
+                    <button
+                      type="button"
+                      id={"kwt-course-option-" + index}
+                      key={course.courseName}
+                      role="option"
+                      aria-selected={selected?.courseName === course.courseName}
+                      style={index === activeOption ? activeOptionStyle : courseOption}
+                      onMouseDown={event => event.preventDefault()}
+                      onClick={() => chooseCourse(course)}
+                    >
+                      {course.courseName}
+                    </button>
+                  )) : <p style={noMatches}>No matching courses.</p>}
+                </div>
+              )}
+              {!selected && !selectorOpen && <p style={selectorHint}>Choose a map to view its records.</p>}
               {selected && <MapBoard course={selected} />}
             </div>
           )}
-        </section>
-
-        <section style={section} aria-labelledby="badges-title">
-          <h2 id="badges-title">KWT Achievements</h2>
-          <p style={empty}>No recorded KWT achievement ownership is available yet. Badge evidence is not inferred from other leagues or player-profile labels.</p>
         </section>
       </div>
     </main>
@@ -72,10 +128,10 @@ function MapBoard({ course }: { course: KwtCourseRecord }) {
     <article style={courseCard}>
       <h3 style={mapTitle}>{course.courseName}</h3>
       <div style={difficultyGrid}>
-        {KWT_DIFFICULTY_ORDER.map((difficulty) => <DifficultyBoard key={difficulty} difficulty={difficulty} records={course.records[difficulty]} />)}
+        {KWT_DIFFICULTY_ORDER.map(difficulty => <DifficultyBoard key={difficulty} difficulty={difficulty} records={course.records[difficulty]} />)}
       </div>
-      <section style={combinedSection} aria-labelledby={`${course.courseCode}-combined`}>
-        <h4 id={`${course.courseCode}-combined`} style={combinedTitle}>Best Combined</h4>
+      <section style={combinedSection} aria-labelledby={course.courseCode + "-combined"}>
+        <h4 id={course.courseCode + "-combined"} style={combinedTitle}>Best Combined</h4>
         <RecordTable records={course.records.Combined} />
       </section>
     </article>
@@ -84,25 +140,25 @@ function MapBoard({ course }: { course: KwtCourseRecord }) {
 
 function DifficultyBoard({ difficulty, records }: { difficulty: "Easy" | "Hard"; records: KwtCourseRecord["records"]["Easy"] }) {
   return (
-    <section style={difficultyPanel} aria-labelledby={`${difficulty.toLowerCase()}-records`}>
-      <h4 id={`${difficulty.toLowerCase()}-records`} style={difficulty === "Easy" ? easyTitle : hardTitle}>{difficulty}</h4>
+    <section style={difficultyPanel} aria-labelledby={difficulty.toLowerCase() + "-records"}>
+      <h4 id={difficulty.toLowerCase() + "-records"} style={difficulty === "Easy" ? easyTitle : hardTitle}>{difficulty}</h4>
       <RecordTable records={records} />
     </section>
   )
 }
 
 function RecordTable({ records }: { records: KwtCourseRecord["records"]["Easy"] }) {
-  const entries = ([{ label: "Overall", rank: null, record: records.overall }, ...KWT_RANK_ORDER.map(rank => ({ label: rank, rank, record: records.ranks[rank] }))] as Array<{ label: string; rank: KwtRank | null; record: KwtCourseRecordEntry | undefined }>).flatMap((entry) => entry.record ? [{ ...entry, record: entry.record }] : [])
+  const entries = ([{ label: "Overall", rank: null, record: records.overall }, ...KWT_RANK_ORDER.map(rank => ({ label: rank, rank, record: records.ranks[rank] }))] as Array<{ label: string; rank: KwtRank | null; record: KwtCourseRecordEntry | undefined }>).flatMap(entry => entry.record ? [{ ...entry, record: entry.record }] : [])
   if (entries.length === 0) return <p style={emptyTable}>No records available.</p>
   return (
     <div style={tableWrap}>
       <table style={recordTable}>
         <thead><tr><th style={tableHeader}>Rank</th><th style={tableHeader}>Season/Week</th><th style={tableHeader}>Score</th><th style={tableHeader}>Player</th></tr></thead>
-        <tbody>{entries.flatMap(entry => entry.record.holders.map(holder => <tr key={`${entry.label}-${holder.playerId}-${holder.seasonNumber ?? ""}-${holder.weekNumber ?? ""}`}>
+        <tbody>{entries.flatMap(entry => entry.record.holders.map(holder => <tr key={entry.label + "-" + holder.playerId + "-" + (holder.seasonNumber ?? "") + "-" + (holder.weekNumber ?? "")}>
           <th scope="row" style={{ ...tableCell, ...rankColor(entry.rank) }}>{entry.label}</th>
           <td style={tableCell}>{provenance(holder.seasonNumber, holder.weekNumber)}</td>
           <td style={{ ...tableCell, ...score }}>{entry.record.score}</td>
-          <td style={tableCell}><Link href={`/players/${holder.playerId}`} style={playerLink}>{holder.screenName}</Link></td>
+          <td style={tableCell}><Link href={"/players/" + holder.playerId} style={playerLink}>{holder.screenName}</Link></td>
         </tr>))}</tbody>
       </table>
     </div>
@@ -110,7 +166,7 @@ function RecordTable({ records }: { records: KwtCourseRecord["records"]["Easy"] 
 }
 
 function provenance(season: number | null, week: number | null): string {
-  return season !== null && week !== null ? `S${season} W${week}` : "—"
+  return season !== null && week !== null ? "S" + season + " W" + week : "—"
 }
 
 function rankColor(rank: KwtRank | null): React.CSSProperties {
@@ -130,12 +186,16 @@ const title: React.CSSProperties = { margin: "6px 0", fontSize: "clamp(2rem, 5vw
 const section: React.CSSProperties = { marginTop: 20, padding: "clamp(16px, 3vw, 28px)", border: "1px solid #54378a", borderRadius: 20, background: "#100d2a" }
 const srOnly: React.CSSProperties = { position: "absolute", width: 1, height: 1, padding: 0, margin: -1, overflow: "hidden", clip: "rect(0, 0, 0, 0)", whiteSpace: "nowrap", border: 0 }
 const selectorLabel: React.CSSProperties = { display: "block", textTransform: "uppercase", letterSpacing: ".12em", color: "#cbd5e1", fontWeight: 900, marginBottom: 8 }
-const selectorInput: React.CSSProperties = { width: "100%", padding: "13px 15px", borderRadius: 12, border: "1px solid #6680a9", background: "#071226", color: "#fff", fontSize: "1rem" }
-const courseOptions: React.CSSProperties = { display: "flex", gap: 8, flexWrap: "wrap", marginTop: 12 }
-const courseOption: React.CSSProperties = { border: "1px solid #385b89", borderRadius: 999, background: "#071226", color: "#dbeafe", padding: "9px 13px", cursor: "pointer" }
-const selectedOption: React.CSSProperties = { ...courseOption, borderColor: "#4de8ff", color: "#fff", boxShadow: "0 0 0 2px #4de8ff33" }
+const selectorShell: React.CSSProperties = { position: "relative" }
+const selectorInput: React.CSSProperties = { width: "100%", padding: "13px 48px 13px 15px", borderRadius: 12, border: "1px solid #6680a9", background: "#071226", color: "#fff", fontSize: "1rem" }
+const selectorToggle: React.CSSProperties = { position: "absolute", right: 4, top: 4, bottom: 4, width: 42, border: 0, borderRadius: 9, background: "#1d3454", color: "#fff", fontSize: "1.3rem", cursor: "pointer" }
+const courseOptions: React.CSSProperties = { maxHeight: 260, overflowY: "auto", display: "flex", flexDirection: "column", gap: 4, marginTop: 6, padding: 6, border: "1px solid #385b89", borderRadius: 12, background: "#071226" }
+const courseOption: React.CSSProperties = { width: "100%", textAlign: "left", border: 0, borderRadius: 8, background: "transparent", color: "#dbeafe", padding: "11px 12px", cursor: "pointer", fontSize: "1rem" }
+const activeOptionStyle: React.CSSProperties = { ...courseOption, background: "#15345a", color: "#fff", outline: "2px solid #4de8ff" }
+const selectorHint: React.CSSProperties = { margin: "12px 0 0", color: "#a6b5cf" }
+const noMatches: React.CSSProperties = { margin: 0, padding: "11px 12px", color: "#a6b5cf" }
 const courseCard: React.CSSProperties = { marginTop: 24, padding: "clamp(14px, 2vw, 22px)", borderRadius: 16, background: "#0d1630", border: "1px solid #2d73aa" }
-const mapTitle: React.CSSProperties = { margin: "0 0 18px", textAlign: "center", fontSize: "clamp(1.7rem, 4vw, 3rem)", letterSpacing: ".04em", textTransform: "uppercase", overflowWrap: "anywhere" }
+const mapTitle: React.CSSProperties = { margin: "0 0 18px", textAlign: "center", fontSize: "clamp(1.7rem, 4vw, 3rem)", letterSpacing: ".04em", textTransform: "uppercase", overflowWrap: "break-word" }
 const difficultyGrid: React.CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 14, marginTop: 14 }
 const difficultyPanel: React.CSSProperties = { padding: 14, borderRadius: 12, background: "#071226", border: "1px solid #385b89" }
 const easyTitle: React.CSSProperties = { color: "#4ade80", textAlign: "center", margin: "0 0 10px", letterSpacing: ".12em" }

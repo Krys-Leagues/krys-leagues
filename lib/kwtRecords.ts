@@ -3,6 +3,25 @@ import { isStrictKwtCombinedRow } from "./kwtCombinedPairing.ts"
 export const KWT_RANK_ORDER = ["Amateur", "Semi-Pro", "Pro", "Elite"] as const
 export const KWT_DIFFICULTY_ORDER = ["Easy", "Hard"] as const
 export const KWT_RECORD_SECTION_ORDER = ["Easy", "Hard", "Combined"] as const
+export function canonicalKwtBaseMap(value: string): string {
+  const normalized = value.trim().replace(/\s+/g, " ").replace(/\s+(Easy|Hard)$/i, "")
+  if (/^20(?:,?000)\b/i.test(normalized)) return "20,000 Leagues Under The Sea"
+  return normalized
+}
+
+export function kwtCourseSearchValues(course: Pick<KwtCourseRecord, "courseName" | "courseCode" | "courseCodes">): string[] {
+  return [...new Set([
+    course.courseName,
+    course.courseCode,
+    ...course.courseCodes,
+    ...course.courseCodes.map(code => code.replace(/[EH]$/i, "")),
+  ])]
+}
+
+export function matchesKwtCourseQuery(course: Pick<KwtCourseRecord, "courseName" | "courseCode" | "courseCodes">, query: string): boolean {
+  const normalized = query.trim().toLowerCase()
+  return !normalized || kwtCourseSearchValues(course).some(value => value.toLowerCase().includes(normalized))
+}
 
 export type KwtRank = (typeof KWT_RANK_ORDER)[number]
 export type KwtDifficulty = (typeof KWT_DIFFICULTY_ORDER)[number]
@@ -55,12 +74,12 @@ export function buildKwtCourseRecords(rows: readonly KwtCourseRecordRow[]): KwtC
     if (!KWT_RECORD_SECTION_ORDER.includes(row.difficulty) || !Number.isFinite(row.score) || !isStrictKwtCombinedRow(row)) continue
     if (row.record_scope !== "overall" && row.record_scope !== "rank") continue
     if (row.record_scope === "rank" && !KWT_RANK_ORDER.includes(row.historical_rank as KwtRank)) continue
-    const baseMap = (row.base_map || row.course_name || row.course_code).trim()
+    const baseMap = canonicalKwtBaseMap(row.base_map || row.course_name || row.course_code)
     const key = baseMap.toUpperCase()
     if (!key || !row.course_name.trim() || !row.player_id || !row.screen_name.trim()) continue
     const course = courses.get(key) ?? {
       courseCode: row.course_code,
-      courseName: row.course_name,
+      courseName: baseMap,
       courseCodes: [],
       records: { Easy: { ranks: {} }, Hard: { ranks: {} }, Combined: { ranks: {} } },
     }

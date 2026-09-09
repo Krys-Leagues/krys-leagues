@@ -42,14 +42,14 @@ test("KWT upcoming content has the approved dates and local navigation", () => {
   for (const date of ["2026-09-11", "2026-09-18", "2026-09-25", "2026-10-02", "2026-10-09", "2026-10-16"]) assert.match(content, new RegExp(date))
 })
 
-test("KWT records use the cleaned player-facing title and a truthful badge state", () => {
+test("KWT records use the cleaned player-facing title and searchable selector", () => {
   const page = read("app/kwt/records/page.tsx")
   assert.match(page, /<h1[^>]*>KWT Records<\/h1>/)
   assert.match(page, /get_public_kwt_course_records/)
   assert.match(page, /buildKwtCourseRecords/)
-  assert.match(page, /KWT Course Records/)
-  assert.match(page, /KWT Achievements/)
-  assert.match(page, /No recorded KWT achievement ownership/)
+  assert.match(page, /Select Course/)
+  assert.match(page, /role="combobox"/)
+  assert.doesNotMatch(page, /KWT Achievements|No recorded KWT achievement ownership|KWT-only course records/)
   assert.doesNotMatch(page, /Best KWT scores|record\.record_kind|combined_score|source_count|badgeLeaders/)
   assert.match(page, /href="\/kwt"/)
   assert.doesNotMatch(page, /href="\/records"/)

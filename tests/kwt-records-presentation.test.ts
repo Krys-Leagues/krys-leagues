@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
 import { readFileSync } from "node:fs"
 import test from "node:test"
-import { buildKwtCourseRecords } from "../lib/kwtRecords.ts"
+import { buildKwtCourseRecords, canonicalKwtBaseMap, matchesKwtCourseQuery } from "../lib/kwtRecords.ts"
 
 const row = (overrides: Partial<Parameters<typeof buildKwtCourseRecords>[0][number]> = {}) => ({
   course_code: "CBE",
@@ -37,6 +37,23 @@ test("Best Combined keeps event provenance and lower score ordering", () => {
   assert.deepEqual(records[0].records.Combined.overall?.holders[0], { playerId: "player-a", screenName: "Player A", seasonNumber: 9, weekNumber: 5 })
 })
 
+test("course variants group under one base map and expose code aliases", () => {
+  const records = buildKwtCourseRecords([
+    row({ course_code: "20E", base_map: "20,000 Leagues", course_name: "20,000 Leagues Easy" }),
+    row({ course_code: "20H", base_map: "20,000 Leagues Under The Sea", course_name: "20,000 Leagues Under The Sea Hard", difficulty: "Hard" }),
+    row({ course_code: "JCE", base_map: "Journey to the Center of the Earth", course_name: "Journey to the Center of the Earth Easy", player_id: "player-b" }),
+    row({ course_code: "JCH", base_map: "Journey to the Center of the Earth", course_name: "Journey to the Center of the Earth Hard", difficulty: "Hard", player_id: "player-c" }),
+  ])
+  assert.equal(records.length, 2)
+  assert.equal(records[0].courseName, "20,000 Leagues Under The Sea")
+  assert.deepEqual(records[0].courseCodes, ["20E", "20H"])
+  assert.equal(records[1].courseName, "Journey to the Center of the Earth")
+  assert.equal(matchesKwtCourseQuery(records[0], "20"), true)
+  assert.equal(matchesKwtCourseQuery(records[1], "JCE"), true)
+  assert.equal(matchesKwtCourseQuery(records[1], "JCH"), true)
+  assert.equal(canonicalKwtBaseMap("20,000 Leagues Under The Sea Hard"), "20,000 Leagues Under The Sea")
+})
+
 test("KWT records migration requires retained round IDs and strict pairing evidence", () => {
   const sql = readFileSync("20260909_kwt_course_records_strict_combined_pairing.sql", "utf8")
   assert.match(sql, /score\.easy_score \+ score\.hard_score/)
@@ -50,8 +67,8 @@ test("KWT records migration requires retained round IDs and strict pairing evide
 
 test("KWT records page exposes one-map selection and hides empty rank rows", () => {
   const page = readFileSync("app/kwt/records/page.tsx", "utf8")
-  assert.match(page, /Search course or code/)
-  assert.match(page, /course\.courseCodes/)
+  assert.match(page, /Search map or code/)
+  assert.match(page, /matchesKwtCourseQuery/)
   assert.match(page, /Best Combined/)
   assert.match(page, /RecordTable records=\{course\.records\.Combined\}/)
   assert.doesNotMatch(page, /No recorded score/)
