@@ -195,7 +195,7 @@ function SubmissionForm({ course, level, challengeKey, difficulty, pars, onCance
   function scheduleAdvance(index: number, value: string) {
     if (advanceTimers.current[index]) window.clearTimeout(advanceTimers.current[index])
     if (!value) return
-    const delay = value.length >= 2 || value !== "1" ? 180 : 650
+    const delay = value.length >= 2 ? 80 : value === "1" ? 240 : 80
     advanceTimers.current[index] = window.setTimeout(() => focusNext(index), delay)
   }
 
@@ -247,7 +247,7 @@ function SubmissionForm({ course, level, challengeKey, difficulty, pars, onCance
 
   return <section className={styles.submissionPanel} aria-label={(challengeKey === "ace" ? "Ace Challenge" : "Level " + level) + " " + difficulty + " scorecard submission"}>
     <div><p className={styles.eyebrow}>{challengeKey === "ace" ? "ACE CHALLENGE" : "LEVEL " + level} · {difficulty.toUpperCase()}</p><h3>Upload your scorecard, then enter the scores</h3></div>
-    <details className={styles.formHelp}><summary>Rules / Help</summary><p>Drag your scorecard photo here or tap to choose one. The scorecard numbers and final score should be clearly readable. Recommended: crop the photo so the scorecard fills the image.</p><p>Do not type the date, time, or Game Mode. The submission records its server time, and an admin can review the scorecard photo when date/time or Solo/Multiplayer evidence is unclear. Solo and Multiplayer are eligible; Practice Mode is not.</p></details>
+    <details className={styles.formHelp}><summary>Rules / Help</summary><p>Drag your scorecard photo here or tap to choose one. The scorecard numbers and final score should be clearly readable. Recommended: crop the photo so the scorecard fills the image.</p><p>Do not type the date, time, or Game Mode. Levels 1–2 accept Solo or Multiplayer; Levels 3–5 and Ace require Multiplayer. Practice Mode never qualifies. An admin verifies the private proof before approval.</p></details>
     <div className={styles.dropZone + (dragActive ? " " + styles.dropZoneActive : "")} role="button" tabIndex={0} onClick={() => fileInputRef.current?.click()} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); fileInputRef.current?.click() } }} onDragEnter={(event) => { event.preventDefault(); setDragActive(true) }} onDragOver={(event) => event.preventDefault()} onDragLeave={() => setDragActive(false)} onDrop={(event) => { event.preventDefault(); setDragActive(false); chooseFile(event.dataTransfer.files?.[0] || null) }}>
       <input ref={fileInputRef} className={styles.hiddenFileInput} type="file" accept="image/*" onChange={(event) => chooseFile(event.target.files?.[0] || null)} />
       {preview ? <div className={styles.dropPreview}><img className={styles.photoPreview} src={preview} alt="Selected scorecard preview" /><div className={styles.dropPreviewActions}><strong>Scorecard photo selected</strong><button type="button" className={styles.secondaryButton} onClick={(event) => { event.stopPropagation(); fileInputRef.current?.click() }}>Replace / Change</button></div></div> : <><strong>DRAG YOUR SCORECARD HERE</strong><span>or tap to choose a photo</span></>}

@@ -33,8 +33,6 @@ export async function POST(request: Request) {
     if (!Number.isInteger(enteredFinalScore)) return Response.json({ error: "Enter the final relative-to-par score shown on the scorecard." }, { status: 400 })
     if (body.roundDate !== undefined && body.roundDate !== null && !isDate(body.roundDate)) return Response.json({ error: "The optional scorecard date could not be understood." }, { status: 400 })
     if (body.roundTime !== undefined && body.roundTime !== null && !isTime(body.roundTime)) return Response.json({ error: "The optional scorecard time could not be understood." }, { status: 400 })
-    if (body.gameMode !== undefined && body.gameMode !== null && body.gameMode !== "solo" && body.gameMode !== "multiplayer") return Response.json({ error: "The optional Game Mode evidence is invalid." }, { status: 400 })
-
     const audience = audienceForCanonicalPlayer(identity.playerId, identity.approvedTester)
     const eligibility = body.roundDate ? eligibleRoundDate(body.roundDate, audience) : { allowed: false as const, reason: "Scorecard date and time require admin review because no automatic image reader is installed." }
     if (body.roundDate && !eligibility.allowed) return Response.json({ error: eligibility.reason }, { status: 409 })
@@ -49,13 +47,53 @@ export async function POST(request: Request) {
     const finalScoreCheck = compareEnteredFinalScore(evaluation.metrics, enteredFinalScore)
     const reviewReasons = [
       !body.roundDate || !body.roundTime ? "Scorecard date/time evidence requires admin review." : null,
-      !body.gameMode ? "Game Mode evidence requires admin review; Solo and Multiplayer are eligible, Practice Mode is not." : null,
+      "Game Mode must be verified by an authorized admin; Practice Mode never qualifies.",
       finalScoreCheck !== "passed" ? "Player-entered final score does not match the system-calculated relative-to-par score." : null,
       evaluation.reason || null,
     ].filter((reason): reason is string => Boolean(reason))
-    const status = evaluation.status === "auto_fail" && finalScoreCheck === "passed" && reviewReasons.length === 0 ? "rejected" : "needs_review"
-    const insert = await service.from("course_challenge_submissions").insert({ player_id: identity.playerId, course_slug: course.slug, challenge_key: challengeKey, level_number: level, difficulty, proof_photo_path: body.proofPhotoPath, round_date: body.roundDate || null, round_time: body.roundTime || null, game_mode: body.gameMode || null, hole_scores: body.scores, calculated_total: evaluation.metrics.totalStrokes, total_par: evaluation.metrics.totalPar, relative_to_par: evaluation.metrics.relativeToPar, entered_final_score: enteredFinalScore, final_score_check: finalScoreCheck, metrics: evaluation.metrics, requirements_evaluation: evaluation.requirements, auto_evaluation_status: evaluation.status, photo_total_check: "needs_review", status, review_reason: reviewReasons.join(" ") || "The evidence photo and challenge requirements require review." }).select("id,status").single()
+    const proofImageSha256 = await proofHash(service, body.proofPhotoPath)
+    const status = "needs_review"
+    const insert = await service.from("course_challenge_submissions").insert({ player_id: identity.playerId, course_slug: course.slug, challenge_key: challengeKey, level_number: level, difficulty, proof_photo_path: body.proofPhotoPath, round_date: body.roundDate || null, round_time: body.roundTime || null, game_mode: null, proof_image_sha256: proofImageSha256, hole_scores: body.scores, calculated_total: evaluation.metrics.totalStrokes, total_par: evaluation.metrics.totalPar, relative_to_par: evaluation.metrics.relativeToPar, entered_final_score: enteredFinalScore, final_score_check: finalScoreCheck, metrics: evaluation.metrics, requirements_evaluation: evaluation.requirements, auto_evaluation_status: evaluation.status, photo_total_check: "needs_review", status, review_reason: reviewReasons.join(" ") || "The evidence photo and challenge requirements require review." }).select("id,status").single()
     if (insert.error) throw insert.error
-    return Response.json({ id: insert.data?.id, status, message: status === "rejected" ? "This card did not meet the currently approved automatic checks." : "Scorecard received. Admin review will verify the photo evidence and any missing proof details before progression." }, { status: 201 })
+    await service.from("course_challenge_submission_review_events").insert({ submission_id: insert.data?.id, action: "submitted", from_status: null, to_status: status, metadata: { source: "player_submission" } })
+    await notifyCourseChallengeReview(service, String(insert.data?.id), course.name, level, difficulty)
+    return Response.json({ id: insert.data?.id, status, message: "Scorecard received. An authorized admin will verify the private proof and Game Mode before progression." }, { status: 201 })
   } catch (caught) { return Response.json({ error: caught instanceof Error ? caught.message : "Course Challenge submission failed." }, { status: 503 }) }
+}
+
+async function proofHash(service: ReturnType<typeof createCourseChallengesServiceClient>, path: string): Promise<string | null> {
+  try {
+    const download = await service.storage.from("course-challenge-proof").download(path)
+    if (download.error || !download.data) return null
+    const digest = await crypto.subtle.digest("SHA-256", await download.data.arrayBuffer())
+    return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("")
+  } catch {
+    return null
+  }
+}
+
+async function notifyCourseChallengeReview(service: ReturnType<typeof createCourseChallengesServiceClient>, submissionId: string, courseName: string, level: number, difficulty: CourseChallengeDifficulty) {
+  try {
+    const webhook = process.env.DISCORD_WEBHOOK_COURSE_CHALLENGE_REVIEW
+    const initial = await service.from("course_challenge_review_notifications").insert({ submission_id: submissionId, notification_kind: "discord_review_needed", status: webhook ? "failed" : "not_configured", error_message: webhook ? null : "DISCORD_WEBHOOK_COURSE_CHALLENGE_REVIEW is not configured." }).select("id").maybeSingle()
+    if (initial.error) {
+      if (initial.error.code === "23505") return
+      return
+    }
+    if (!initial.data?.id || !webhook) return
+    const response = await fetch(webhook, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: "Krys League Bot", content: `COURSE CHALLENGE REVIEW NEEDED\n\n${courseName} • Level ${level} ${difficulty}\nA new scorecard is waiting for review.\n\nOpen Review Desk: https://krysleagues.com/admin/course-challenges/review-desk` }),
+      signal: AbortSignal.timeout(4000),
+    })
+    if (!response.ok) throw new Error("Discord rejected the review notification")
+    await service.from("course_challenge_review_notifications").update({ status: "sent", sent_at: new Date().toISOString(), error_message: null }).eq("id", initial.data.id)
+  } catch (caught) {
+    try {
+      await service.from("course_challenge_review_notifications").update({ status: "failed", error_message: caught instanceof Error ? caught.message : "Discord notification failed." }).eq("submission_id", submissionId).eq("notification_kind", "discord_review_needed")
+    } catch {
+      // Notification failure must never affect the saved submission.
+    }
+  }
 }

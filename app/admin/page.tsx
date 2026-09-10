@@ -41,11 +41,17 @@ export default function Admin() {
 
   useEffect(() => {
     let active = true
-    fetch("/api/admin/course-challenges?summary=1", { cache: "no-store" })
-      .then((response) => response.ok ? response.json() as Promise<{ pendingCount?: number }> : null)
-      .then((payload) => { if (active && payload) setPendingCourseChallengeCount(Number(payload.pendingCount) || 0) })
-      .catch(() => undefined)
-    return () => { active = false }
+    async function loadPending() {
+      try {
+        const response = await fetch("/api/admin/course-challenges?summary=1", { cache: "no-store" })
+        if (!response.ok) return
+        const payload = await response.json() as { pendingCount?: number }
+        if (active) setPendingCourseChallengeCount(Number(payload.pendingCount) || 0)
+      } catch { /* Dashboard remains usable if the review summary is unavailable. */ }
+    }
+    void loadPending()
+    const timer = window.setInterval(() => { void loadPending() }, 20_000)
+    return () => { active = false; window.clearInterval(timer) }
   }, [])
 
   return (
@@ -67,7 +73,7 @@ export default function Admin() {
 
       <section style={section}>
         <h2 style={sectionTitle}>Global Tools</h2>
-        <Link href="/admin/course-challenges" style={card}>
+        <Link href="/admin/course-challenges" style={pendingCourseChallengeCount ? urgentCard : card}>
           <strong style={cardTitle}>{pendingCourseChallengeCount === null ? "COURSE CHALLENGE SUBMISSIONS" : "COURSE CHALLENGE SUBMISSIONS (" + pendingCourseChallengeCount + ")"}</strong>
           <span style={cardText}>Review pending scorecards, proof, requirements, and progression.</span>
         </Link>
@@ -126,6 +132,13 @@ const card: React.CSSProperties = {
   background: "#111",
   color: "white",
   textDecoration: "none",
+}
+
+const urgentCard: React.CSSProperties = {
+  ...card,
+  border: "2px solid #ef4444",
+  background: "#450a0a",
+  boxShadow: "0 0 18px #ef444466",
 }
 
 const cardTitle: React.CSSProperties = {

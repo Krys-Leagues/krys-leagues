@@ -22,7 +22,9 @@ export default function CourseChallengesGuide({ includeScorecardHelp = false }: 
         <li>Each Level has an Easy Course side and a Hard Course side.</li>
         <li>Submit one Easy scorecard and one Hard scorecard for each Level.</li>
         <li>All requirements for one difficulty must come from the same 18-hole scorecard.</li>
-        <li>Solo and Multiplayer Game Mode rounds qualify. Practice Mode does not qualify.</li>
+        <li>Levels 1–2: Solo or Multiplayer Game Mode qualifies.</li>
+        <li>Levels 3–5: Multiplayer Game Mode is required.</li>
+        <li>Ace Challenge: Multiplayer Game Mode is required. Practice Mode does not qualify.</li>
         <li>Upload the scorecard and enter H1–H18. The website checks the Level requirements automatically.</li>
         <li>Verified Easy + verified Hard completes the Level, earns the reward, and unlocks the next Level.</li>
       </ul>
