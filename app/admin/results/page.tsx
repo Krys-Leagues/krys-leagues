@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { supabase } from "@/lib/supabase"
+import { postAdminDataMutation } from "@/lib/adminDataMutations"
 
 type ScheduleMatch = {
   game: string
@@ -330,7 +331,10 @@ export default function ResultsPage() {
       is_draw: isDraw,
     }
 
-    const { error } = await supabase.from("results").insert([resultRow])
+    const { error } = await postAdminDataMutation("/api/admin/results", {
+      action: "insert",
+      result: resultRow,
+    })
 
     setLoading(false)
 

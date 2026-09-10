@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import PlayerAvatar from "@/components/PlayerAvatar"
+import { postAdminDataMutation } from "@/lib/adminDataMutations"
 
 type Player = {
   id: string
@@ -331,13 +332,12 @@ export default function PlayersAdminPage() {
 
     setCreatingPlayer(true)
 
-    const { error } = await supabase.from("players").insert([
-      {
-        screen_name: newPlayerName.trim(),
-        active: true,
-        status: "active",
-      },
-    ])
+    const { error } = await postAdminDataMutation("/api/admin/players", {
+      action: "create",
+      screen_name: newPlayerName.trim(),
+      active: true,
+      status: "active",
+    })
 
     setCreatingPlayer(false)
 
@@ -504,13 +504,12 @@ export default function PlayersAdminPage() {
 
     const shouldBeActive = playerStatus === "active"
 
-    const { error } = await supabase
-      .from("players")
-      .update({
-        status: playerStatus,
-        active: shouldBeActive,
-      })
-      .eq("id", statusPlayer.id)
+    const { error } = await postAdminDataMutation("/api/admin/players", {
+      action: "update_status",
+      player_id: statusPlayer.id,
+      status: playerStatus,
+      active: shouldBeActive,
+    })
 
     setSavingStatus(false)
 
@@ -587,7 +586,11 @@ export default function PlayersAdminPage() {
         }))
 
       if (newPlayers.length > 0) {
-        await supabase.from("players").insert(newPlayers)
+        const { error } = await postAdminDataMutation("/api/admin/players", {
+          action: "create_batch",
+          players: newPlayers,
+        })
+        if (error) throw error
       }
 
       await loadPlayers()

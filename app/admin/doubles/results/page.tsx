@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { supabase } from "@/lib/supabase"
+import { postAdminDataMutation } from "@/lib/adminDataMutations"
 
 const LEAGUE_TYPE = "doubles"
 const DIVISIONS = ["Doubles D1", "Doubles D2", "Doubles D3"]
@@ -154,25 +155,10 @@ export default function DoublesResultsPage() {
       winner,
     }
 
-    const basicPayload = {
-      league_type: LEAGUE_TYPE,
-      division: match.division,
-      season_number: match.season_number,
-      game: match.game,
-      course: match.course,
-      player1: match.player1,
-      player2: match.player2,
-      player1_score: team1Score,
-      player2_score: team2Score,
-      winner,
-    }
-
-    let { error } = await supabase.from("results").insert(fullPayload)
-
-    if (error) {
-      const retry = await supabase.from("results").insert(basicPayload)
-      error = retry.error
-    }
+    const { error } = await postAdminDataMutation("/api/admin/results", {
+      action: "insert",
+      result: fullPayload,
+    })
 
     setSavingKey("")
 

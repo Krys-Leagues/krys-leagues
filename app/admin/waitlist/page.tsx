@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { supabase } from "@/lib/supabase"
+import { postAdminDataMutation } from "@/lib/adminDataMutations"
 
 type WaitlistPlayer = {
   id: string
@@ -86,7 +87,8 @@ export default function WaitlistAdminPage() {
     setSavingId(player.id)
     setErrorMessage("")
 
-    const { error: playerError } = await supabase.from("players").insert({
+    const { error: playerError } = await postAdminDataMutation("/api/admin/players", {
+      action: "create",
       screen_name: player.screen_name,
       league_type: league,
       division,
