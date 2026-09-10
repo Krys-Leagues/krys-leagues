@@ -30,6 +30,10 @@ test("active Main Hub route is artwork-only and keeps the approved destinations"
   assert.equal(mainHubArtwork.id, "main-hub")
   assert.match(page, /ArtworkNavigation/)
   assert.match(page, /mainHubArtwork/)
+  assert.match(page, /KRYS LEAGUES COURSE CHALLENGES/)
+  assert.match(page, /href="\/course-challenges"/)
+  assert.match(page, /href="\/admin"/)
+  assert.match(page, /hiddenTargetIds=\{\["admin-login"\]\}/)
   assert.doesNotMatch(page, /Season 59|Player Dashboard|League Records|card-grid|fallback/i)
   assert.deepEqual(mainHubArtwork.targets.map(({ label, href }) => [label, href]), [
     ["Player Profiles", "/players"],
@@ -43,6 +47,13 @@ test("active Main Hub route is artwork-only and keeps the approved destinations"
     ["Hall of Champions", "/champions"],
     ["Admin Login", "/admin"],
   ])
+})
+
+test("featured Course Challenges hub action precedes the preserved Admin Login action", () => {
+  const page = read("app/page.tsx")
+  assert.ok(page.indexOf("KRYS LEAGUES COURSE CHALLENGES") < page.indexOf("ADMIN LOGIN"))
+  assert.match(read("components/navigation/artwork-navigation.css"), /artwork-navigation__featured-course-link/)
+  assert.match(read("components/navigation/artwork-navigation.css"), /artwork-navigation__after-frame/)
 })
 
 test("active League Play route is artwork-only with exactly six league destinations", () => {

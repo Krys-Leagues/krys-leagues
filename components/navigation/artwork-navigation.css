@@ -14,6 +14,79 @@
   isolation: isolate;
 }
 
+.artwork-navigation__after-frame {
+  width: min(100%, 1280px);
+  margin: clamp(10px, 1.4vw, 20px) auto 0;
+}
+
+.artwork-navigation__main-hub-actions {
+  display: grid;
+  gap: clamp(8px, 1vw, 14px);
+}
+
+.artwork-navigation__featured-course-link,
+.artwork-navigation__admin-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: clamp(48px, 5vw, 72px);
+  box-sizing: border-box;
+  border-radius: 999px;
+  color: #fff;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  line-height: 1.15;
+  text-align: center;
+  text-decoration: none;
+  transition: filter 140ms ease, transform 140ms ease;
+}
+
+.artwork-navigation__featured-course-link {
+  gap: 0.6em;
+  padding: 0.8em 1.2em;
+  border: 2px solid #ff4fbd;
+  background: linear-gradient(100deg, rgba(84, 10, 92, 0.96), rgba(6, 73, 103, 0.96));
+  box-shadow: 0 0 12px rgba(255, 42, 174, 0.8), 0 0 28px rgba(0, 226, 255, 0.34), inset 0 0 18px rgba(255, 255, 255, 0.12);
+  font-size: clamp(15px, 2vw, 28px);
+}
+
+.artwork-navigation__featured-course-link span {
+  color: #ffd75a;
+  font-size: 1.15em;
+  text-shadow: 0 0 12px rgba(255, 215, 90, 0.9);
+}
+
+.artwork-navigation__admin-link {
+  width: min(100%, 300px);
+  min-height: clamp(38px, 3.5vw, 52px);
+  margin-inline: auto;
+  padding: 0.65em 1.2em;
+  border: 1px solid rgba(0, 226, 255, 0.8);
+  background: rgba(4, 18, 37, 0.94);
+  box-shadow: 0 0 12px rgba(0, 226, 255, 0.38), inset 0 0 12px rgba(0, 226, 255, 0.12);
+  font-size: clamp(12px, 1.25vw, 18px);
+}
+
+.artwork-navigation__featured-course-link:hover,
+.artwork-navigation__admin-link:hover {
+  filter: brightness(1.18);
+  transform: translateY(-1px);
+}
+
+.artwork-navigation__featured-course-link:focus-visible,
+.artwork-navigation__admin-link:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+
+.artwork-navigation__main-hub-footer-cover {
+  position: absolute;
+  inset: 90% 0 0;
+  z-index: 3;
+  pointer-events: none;
+  background: #000;
+}
+
 .artwork-navigation__image,
 .artwork-navigation__targets {
   position: absolute;
@@ -182,6 +255,16 @@
 
   .artwork-navigation__frame {
     width: 100%;
+  }
+
+  .artwork-navigation__after-frame {
+    width: calc(100% - 20px);
+  }
+
+  .artwork-navigation__featured-course-link {
+    min-height: 52px;
+    padding-inline: 0.8em;
+    font-size: clamp(13px, 4vw, 18px);
   }
 
   .artwork-navigation__back-link {

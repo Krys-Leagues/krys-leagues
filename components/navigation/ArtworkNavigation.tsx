@@ -4,7 +4,7 @@ import type { ReactNode } from "react"
 import type { ArtworkPageDefinition } from "@/lib/artworkNavigation"
 import { artworkTargetStyle, validateArtworkTargets } from "@/lib/artworkNavigation"
 
-export function ArtworkNavigation({ definition, overlay }: { definition: ArtworkPageDefinition; overlay?: ReactNode }) {
+export function ArtworkNavigation({ definition, overlay, afterFrame, hiddenTargetIds = [] }: { definition: ArtworkPageDefinition; overlay?: ReactNode; afterFrame?: ReactNode; hiddenTargetIds?: readonly string[] }) {
   const errors = validateArtworkTargets(definition.targets)
   if (errors.length > 0) {
     throw new Error(`Invalid artwork navigation map for ${definition.title}: ${errors.join("; ")}`)
@@ -29,7 +29,7 @@ export function ArtworkNavigation({ definition, overlay }: { definition: Artwork
         />
         {overlay ? <div className="artwork-navigation__overlay">{overlay}</div> : null}
         <nav aria-label={`${definition.title} navigation`} className="artwork-navigation__targets">
-          {definition.targets.map((target) => {
+          {definition.targets.filter((target) => !hiddenTargetIds.includes(target.id)).map((target) => {
             const props = {
               "aria-label": target.label,
               className: "artwork-navigation__target",
@@ -48,6 +48,7 @@ export function ArtworkNavigation({ definition, overlay }: { definition: Artwork
           })}
         </nav>
       </div>
+      {afterFrame ? <div className="artwork-navigation__after-frame">{afterFrame}</div> : null}
     </main>
   )
 }
