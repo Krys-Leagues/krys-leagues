@@ -31,6 +31,9 @@ alter table public.course_challenge_submissions
 alter table public.all_time_record_observations
   add column if not exists course_challenge_submission_id uuid references public.course_challenge_submissions(id) on delete set null;
 alter table public.climbers_events
+  add column if not exists effective_order integer,
+  add column if not exists effective_time_precision text not null default 'exact';
+alter table public.climbers_events
   add column if not exists course_challenge_submission_id uuid references public.course_challenge_submissions(id) on delete set null;
 
 create unique index if not exists all_time_observation_course_challenge_submission_uidx
@@ -54,7 +57,9 @@ begin
      or not exists (select 1 from information_schema.columns where table_schema='public' and table_name='all_time_record_observations' and column_name='authoritative_submitted_date')
      or not exists (select 1 from information_schema.columns where table_schema='public' and table_name='all_time_record_observations' and column_name='authoritative_time_precision')
      or not exists (select 1 from information_schema.columns where table_schema='public' and table_name='climbers_events' and column_name='effective_at')
-     or not exists (select 1 from information_schema.columns where table_schema='public' and table_name='climbers_events' and column_name='effective_date') then
+     or not exists (select 1 from information_schema.columns where table_schema='public' and table_name='climbers_events' and column_name='effective_date')
+     or not exists (select 1 from information_schema.columns where table_schema='public' and table_name='climbers_events' and column_name='effective_order')
+     or not exists (select 1 from information_schema.columns where table_schema='public' and table_name='climbers_events' and column_name='effective_time_precision') then
     raise exception 'Install the existing All-Time authoritative-time layer before Course Challenge integration';
   end if;
 end;
