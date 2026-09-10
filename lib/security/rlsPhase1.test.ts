@@ -30,3 +30,34 @@ test("Phase 1 mutations use the site-admin server routes", async () => {
   assert.doesNotMatch(playersRoute, /SUPABASE_SERVICE_ROLE|NEXT_PUBLIC_SUPABASE_SERVICE_ROLE/i)
   assert.doesNotMatch(resultsRoute, /SUPABASE_SERVICE_ROLE|NEXT_PUBLIC_SUPABASE_SERVICE_ROLE/i)
 })
+
+test("Phase 1 support tables are RLS-protected with narrow policies", async () => {
+  const migration = await readFile(
+    "supabase/migrations/20260910190000_rls_phase1_support_tables.sql",
+    "utf8",
+  )
+  const supportTables = [
+    "season_standings",
+    "player_league_memberships",
+    "player_tournament_entries",
+    "player_identity_links",
+    "seasons",
+    "schedule",
+    "match_roster_versions",
+    "match_division_roster_slots",
+    "match_schedule_state",
+    "match_final_scorecards",
+    "stroke_roster_versions",
+    "stroke_division_roster_slots",
+    "stroke_schedule_state",
+    "stroke_final_scorecards",
+  ]
+
+  for (const table of supportTables) {
+    assert.match(migration, new RegExp(`alter table public\\.${table} enable row level security`))
+  }
+  assert.match(migration, /using \(\(select public\.is_current_user_site_admin\(\)\)\)/)
+  assert.match(migration, /with check \(\(select public\.is_current_user_site_admin\(\)\)\)/)
+  assert.match(migration, /alter function public\.get_public_player_canonical_identity\(uuid\) security invoker/)
+  assert.doesNotMatch(migration, /create policy [^\n]+ on public\.(?:schedule|seasons|season_standings|player_league_memberships) for (?:insert|update|delete) to (?:anon|authenticated)[\s\S]{0,220}using \(true\)/i)
+})
