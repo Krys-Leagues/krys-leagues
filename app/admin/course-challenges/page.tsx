@@ -7,14 +7,16 @@ type Submission = { id: string; playerId: string; playerName: string; courseSlug
 
 export default function CourseChallengesAdminPage() {
   const [submissions, setSubmissions] = useState<Submission[]>([])
+  const [pendingCount, setPendingCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState("")
 
   async function load() {
     setLoading(true)
     const response = await fetch("/api/admin/course-challenges", { cache: "no-store" })
-    const payload = await response.json() as { submissions?: Submission[]; error?: string }
+    const payload = await response.json() as { submissions?: Submission[]; pendingCount?: number; error?: string }
     setSubmissions(payload.submissions || [])
+    setPendingCount(payload.pendingCount ?? payload.submissions?.length ?? 0)
     setMessage(response.ok ? "" : payload.error || "Course Challenge reviews could not be loaded.")
     setLoading(false)
   }
@@ -31,8 +33,8 @@ export default function CourseChallengesAdminPage() {
   return <main style={{ minHeight: "100vh", padding: 28, background: "#020617", color: "#f8fafc" }}>
     <div style={{ maxWidth: 1280, margin: "0 auto" }}>
       <Link href="/admin" style={{ color: "#c4b5fd" }}>← Admin</Link>
-      <h1>Course Challenges Review</h1>
-      <p style={{ color: "#cbd5e1" }}>Approve only after checking the player, course, difficulty, Level, photo, entered H1–H18, authoritative pars, calculated total, and every requirement. Public viewers never receive proof photos or review details.</p>
+      <h1>Course Challenge Review Queue</h1>
+      <p style={{ color: "#fef3c7", fontWeight: 800 }}>Pending submissions: {pendingCount}</p><p style={{ color: "#cbd5e1" }}>Approve only after checking the player, course, difficulty, Level, photo, entered H1–H18, authoritative pars, calculated total, and every requirement. Public viewers never receive proof photos or review details.</p>
       {message && <p role="status" style={{ padding: 12, border: "1px solid #f59e0b66", borderRadius: 10, color: "#fde68a" }}>{message}</p>}
       {loading ? <p>Loading reviews…</p> : submissions.length === 0 ? <p>No pending Course Challenge submissions.</p> : <div style={{ display: "grid", gap: 18 }}>{submissions.map((submission) => <article key={submission.id} style={{ border: "1px solid #334155", borderRadius: 16, padding: 18, background: "#0f172a" }}>
         <header style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", gap: 10 }}><div><h2 style={{ margin: 0 }}>{submission.playerName} · {submission.courseName}</h2><p style={{ color: "#cbd5e1" }}>{submission.challengeKey === "ace" ? "Ace Challenge" : "Level " + submission.level} · {submission.difficulty} · {submission.roundDate || "date needs review"} {submission.roundTime || "time needs review"} · {submission.gameMode || "Game Mode needs review"}</p></div><strong>{submission.status}</strong></header>

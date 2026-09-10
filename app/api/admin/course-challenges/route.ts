@@ -2,11 +2,17 @@ import { getCourseChallenge } from "@/lib/courseChallenges/catalog"
 import { levelRewardDefinitions, aceRewardDefinition } from "@/lib/courseChallenges/rewards"
 import { createCourseChallengesServiceClient, requireCourseChallengeAdmin } from "@/lib/courseChallenges/server"
 
-export async function GET() {
+export async function GET(request: Request) {
   const authorization = await requireCourseChallengeAdmin()
   if (authorization.response) return authorization.response
   try {
     const service = createCourseChallengesServiceClient()
+    const pendingQuery = service.from("course_challenge_submissions").select("id", { count: "exact", head: true }).in("status", ["pending", "needs_review"])
+    const pendingResult = await pendingQuery
+    if (pendingResult.error) throw pendingResult.error
+    if (new URL(request.url).searchParams.get("summary") === "1") {
+      return Response.json({ pendingCount: pendingResult.count || 0 }, { headers: { "Cache-Control": "no-store" } })
+    }
     const { data: rows, error } = await service.from("course_challenge_submissions").select("id,player_id,course_slug,challenge_key,level_number,difficulty,proof_photo_path,hole_scores,total_par,calculated_total,relative_to_par,entered_final_score,final_score_check,requirements_evaluation,status,review_reason,round_date,round_time,game_mode,created_at").in("status", ["pending", "needs_review"]).order("created_at", { ascending: true })
     if (error) throw error
     const submissions = (rows || []) as Array<Record<string, unknown>>
@@ -23,7 +29,7 @@ export async function GET() {
       const signed = row.proof_photo_path ? await service.storage.from("course-challenge-proof").createSignedUrl(String(row.proof_photo_path), 600) : { data: null, error: null }
       return { id: String(row.id), playerId: String(row.player_id), playerName: playerNames.get(String(row.player_id)) || "Unknown player", courseSlug: String(row.course_slug), courseName: course?.name || String(row.course_slug), challengeKey: row.challenge_key === "ace" ? "ace" : "level", level: Number(row.level_number), difficulty: row.difficulty, proofPhotoUrl: signed.data?.signedUrl || null, holeScores: row.hole_scores as number[], pars: pars.data?.hole_pars as number[] | null, calculatedTotal: Number(row.calculated_total), relativeToPar: Number(row.relative_to_par), requirements: (row.requirements_evaluation || []) as Array<Record<string, unknown>>, status: String(row.status), reviewReason: row.review_reason ? String(row.review_reason) : null, roundDate: row.round_date ? String(row.round_date) : null, roundTime: row.round_time ? String(row.round_time) : null, gameMode: row.game_mode ? String(row.game_mode) : null, enteredFinalScore: row.entered_final_score === null || row.entered_final_score === undefined ? null : Number(row.entered_final_score), finalScoreCheck: row.final_score_check ? String(row.final_score_check) : null, createdAt: row.created_at ? String(row.created_at) : null }
     }))
-    return Response.json({ submissions: output }, { headers: { "Cache-Control": "no-store" } })
+    return Response.json({ submissions: output, pendingCount: output.length }, { headers: { "Cache-Control": "no-store" } })
   } catch (caught) { return Response.json({ error: caught instanceof Error ? caught.message : "Course Challenge reviews are unavailable." }, { status: 503 }) }
 }
 

@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { useEffect, useState } from "react"
 
 const LEAGUES = [
   { name: "KWT League", href: "/admin/kwt", description: "KWT imports, scoring, seasons, active games" },
@@ -36,6 +37,17 @@ const GLOBAL_TOOLS = [
 ]
 
 export default function Admin() {
+  const [pendingCourseChallengeCount, setPendingCourseChallengeCount] = useState<number | null>(null)
+
+  useEffect(() => {
+    let active = true
+    fetch("/api/admin/course-challenges?summary=1", { cache: "no-store" })
+      .then((response) => response.ok ? response.json() as Promise<{ pendingCount?: number }> : null)
+      .then((payload) => { if (active && payload) setPendingCourseChallengeCount(Number(payload.pendingCount) || 0) })
+      .catch(() => undefined)
+    return () => { active = false }
+  }, [])
+
   return (
     <main style={page}>
       <h1 style={title}>Admin Dashboard</h1>
@@ -55,6 +67,10 @@ export default function Admin() {
 
       <section style={section}>
         <h2 style={sectionTitle}>Global Tools</h2>
+        <Link href="/admin/course-challenges" style={card}>
+          <strong style={cardTitle}>{pendingCourseChallengeCount === null ? "COURSE CHALLENGE SUBMISSIONS" : "COURSE CHALLENGE SUBMISSIONS (" + pendingCourseChallengeCount + ")"}</strong>
+          <span style={cardText}>Review pending scorecards, proof, requirements, and progression.</span>
+        </Link>
         <div style={grid}>
           {GLOBAL_TOOLS.map((item) => (
             <Link key={item.href} href={item.href} style={card}>
