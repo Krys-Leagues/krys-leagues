@@ -93,6 +93,23 @@ export const kwtArtwork: ArtworkPageDefinition = {
   ],
 }
 
+export const bracketTournamentsArtwork: ArtworkPageDefinition = {
+  id: "bracket-tournaments",
+  title: "Krys Leagues Bracket Tournaments",
+  imageSrc: "/approved-pages/ChatGPT Image Sep 7, 2026, 02_20_03 PM.png",
+  imageAlt: "Krys Leagues Bracket Tournaments with Four Majors, Open Registration, Current Brackets, Invitational Qualification, Live Bracket Preview, and Past Tournament Winners",
+  aspectRatio: "1713 / 918",
+  targets: [
+    { id: "back-to-krys-leagues", label: "Back to Krys Leagues", href: "/", x: 1.0, y: 1.0, width: 13.0, height: 7.5 },
+    { id: "four-majors", label: "Four Majors", href: "/majors?from=tournaments", x: 2.0, y: 25.0, width: 19.0, height: 10.0 },
+    { id: "open-registration", label: "Open Registration", href: "/register?league=cups", x: 2.0, y: 36.0, width: 19.0, height: 10.0 },
+    { id: "current-brackets", label: "Current Brackets", href: "/tournaments/current", x: 2.0, y: 47.0, width: 19.0, height: 10.0 },
+    { id: "invitational-qualification", label: "Invitational Qualification", href: "/invitationals", x: 2.0, y: 58.0, width: 19.0, height: 10.0 },
+    { id: "past-tournament-winners", label: "Past Tournament Winners", href: "/tournaments/history", x: 2.0, y: 69.0, width: 19.0, height: 10.0 },
+    { id: "live-bracket-preview", label: "Live Bracket Preview", href: "/tournaments/current#live-preview", x: 21.0, y: 31.0, width: 59.0, height: 46.0 },
+  ],
+}
+
 export const monthlyArtworkOverlayTargets: readonly ArtworkHitbox[] = [
   { id: "year", x: 4.2, y: 66.8, width: 27.3, height: 12.1 },
   { id: "month", x: 31.5, y: 66.8, width: 31.5, height: 12.1 },

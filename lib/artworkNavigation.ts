@@ -10,7 +10,7 @@ export type ArtworkTarget = {
 
 export type ArtworkHitbox = Pick<ArtworkTarget, "id" | "x" | "y" | "width" | "height">
 
-export type ArtworkPageId = "main-hub" | "league-play" | "join-leagues" | "kwt-hub" | "monthly-results"
+export type ArtworkPageId = "main-hub" | "league-play" | "join-leagues" | "kwt-hub" | "monthly-results" | "bracket-tournaments"
 
 export type ArtworkPageDefinition = {
   id: ArtworkPageId
