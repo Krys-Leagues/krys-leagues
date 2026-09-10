@@ -6,7 +6,7 @@ type ReviewEvent = { id: string; action: string; from_status: string | null; to_
 type PastCard = { id: string; challengeKey: "level" | "ace"; level: number; difficulty: string; status: string; proofPhotoUrl: string | null; calculatedTotal: number; relativeToPar: number; createdAt: string }
 type Requirement = { requirement?: { label?: string }; status?: string; passed?: boolean | null; reason?: string }
 type Submission = {
-  id: string; playerId: string; playerName: string; courseSlug: string; courseName: string; challengeKey: "level" | "ace"; level: number; difficulty: "Easy" | "Hard";
+  id: string; playerId: string; isOwnSubmission: boolean; playerName: string; courseSlug: string; courseName: string; challengeKey: "level" | "ace"; level: number; difficulty: "Easy" | "Hard";
   proofPhotoUrl: string | null; holeScores: number[]; pars: number[] | null; calculatedTotal: number; relativeToPar: number; requirements: Requirement[]; status: string;
   reviewReason: string | null; reviewNotes: string | null; roundDate: string | null; roundTime: string | null; gameMode: string | null; adminVerifiedGameMode: string | null;
   enteredFinalScore: number | null; finalScoreCheck: string | null; createdAt: string | null; possibleDuplicate: boolean; pastCards: PastCard[]; reviewEvents: ReviewEvent[];
@@ -79,7 +79,8 @@ function ReviewCard({ submission, mode, setMode, busy, onReview, onPreview }: { 
     <PastCards submission={submission} onPreview={onPreview} />
     {submission.status === "rejected" ? <button type="button" disabled={busy} onClick={() => void onReview(submission, "return_to_review")} style={buttonStyle("#92400e")}>RETURN TO REVIEW</button> : <div style={{ display: "grid", gap: 10 }}>
       {!lockedMode ? <fieldset style={modeFieldset}><legend>Verified Game Mode</legend><label><input type="radio" name={`mode-${submission.id}`} checked={mode === "solo"} onChange={() => setMode("solo")} /> SOLO</label><label><input type="radio" name={`mode-${submission.id}`} checked={mode === "multiplayer"} onChange={() => setMode("multiplayer")} /> MULTIPLAYER</label></fieldset> : <p style={modeNote}>MULTIPLAYER proof required for Level 3–5 and Ace Challenge.</p>}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}><button type="button" disabled={busy || (submission.level <= 2 && !mode)} onClick={() => void onReview(submission, "approve")} style={buttonStyle("#047857")}>APPROVE</button><button type="button" disabled={busy} onClick={() => void onReview(submission, "reject")} style={buttonStyle("#991b1b")}>REJECT</button></div>
+      {submission.isOwnSubmission && <p style={selfApprovalWarning}>You cannot approve your own Course Challenge submission.</p>}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}><button type="button" disabled={busy || submission.isOwnSubmission || (submission.level <= 2 && !mode)} onClick={() => void onReview(submission, "approve")} style={buttonStyle("#047857")}>APPROVE</button><button type="button" disabled={busy} onClick={() => void onReview(submission, "reject")} style={buttonStyle("#991b1b")}>REJECT</button></div>
     </div>}
     {submission.allTimeProcessingStatus === "processed" && submission.allTimeProcessingResult && <p style={result}>All-Time/Climbers processed: {String(submission.allTimeProcessingResult.classification || submission.allTimeProcessingResult.action || "complete")}</p>}
   </article>
@@ -98,6 +99,7 @@ const muted: React.CSSProperties = { color: "#cbd5e1", margin: 0 }
 const summary: React.CSSProperties = { color: "#e2e8f0", margin: 0 }
 const reviewReason: React.CSSProperties = { color: "#fde68a", margin: 0 }
 const warning: React.CSSProperties = { color: "#fecaca", background: "#7f1d1d", border: "1px solid #ef4444", borderRadius: 8, padding: 10, fontWeight: 800, margin: 0 }
+const selfApprovalWarning: React.CSSProperties = { color: "#fecaca", background: "#450a0a", border: "1px solid #f87171", borderRadius: 8, padding: 10, fontWeight: 800, margin: 0 }
 const result: React.CSSProperties = { color: "#86efac", border: "1px solid #166534", borderRadius: 8, padding: 10, margin: 0 }
 const proofButton: React.CSSProperties = { display: "grid", gap: 5, justifyItems: "start", border: "1px solid #475569", borderRadius: 10, padding: 8, background: "#020617", color: "#c4b5fd", cursor: "pointer" }
 const table: React.CSSProperties = { width: "100%", borderCollapse: "collapse" }

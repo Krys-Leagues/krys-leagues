@@ -99,6 +99,7 @@ set search_path to ''
 as $function$
 declare
   v_user_id uuid := auth.uid();
+  v_reviewer_player_id uuid := public.current_user_canonical_player_id();
   v_submission public.course_challenge_submissions%rowtype;
   v_course public.all_time_courses%rowtype;
   v_all_time jsonb;
@@ -118,6 +119,9 @@ begin
   where id = p_submission_id
   for update;
   if not found then raise exception 'Course Challenge submission was not found'; end if;
+  if v_reviewer_player_id is not null and v_reviewer_player_id = v_submission.player_id then
+    raise exception 'You cannot approve your own Course Challenge submission.' using errcode='42501';
+  end if;
   v_previous_status := v_submission.status;
   if v_submission.status = 'rejected' then
     raise exception 'Return this submission to review before approving it';
