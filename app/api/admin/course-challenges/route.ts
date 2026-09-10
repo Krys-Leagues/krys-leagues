@@ -1,6 +1,8 @@
 import { getCourseChallenge } from "@/lib/courseChallenges/catalog"
 import { levelRewardDefinitions, aceRewardDefinition } from "@/lib/courseChallenges/rewards"
 import { createCourseChallengesServiceClient, requireCourseChallengeAdmin } from "@/lib/courseChallenges/server"
+import { createServerSupabaseClient } from "@/lib/supabase/server"
+import { sha256Hex } from "@/lib/all-time/normal-records"
 
 export async function GET(request: Request) {
   const authorization = await requireCourseChallengeAdmin()
@@ -40,15 +42,35 @@ export async function PATCH(request: Request) {
     const body = await request.json() as { id?: string; action?: "approve" | "reject"; reviewNotes?: string }
     if (!body.id || !body.action) return Response.json({ error: "Submission ID and review action are required." }, { status: 400 })
     const service = createCourseChallengesServiceClient()
-    const submission = await service.from("course_challenge_submissions").select("id,player_id,course_slug,challenge_key,level_number,difficulty,status").eq("id", body.id).maybeSingle()
+    const submission = await service.from("course_challenge_submissions").select("id,player_id,course_slug,challenge_key,level_number,difficulty,status,hole_scores,relative_to_par,created_at,review_notes").eq("id", body.id).maybeSingle()
     if (submission.error) throw submission.error
     if (!submission.data) return Response.json({ error: "Submission not found." }, { status: 404 })
-    if (!["pending", "needs_review"].includes(String(submission.data.status))) return Response.json({ error: "This submission has already been reviewed." }, { status: 409 })
-    const nextStatus = body.action === "approve" ? "approved" : "rejected"
-    const update = await service.from("course_challenge_submissions").update({ status: nextStatus, reviewed_at: new Date().toISOString(), reviewed_by: authorization.user?.id || null, review_notes: body.reviewNotes?.trim() || null }).eq("id", body.id)
-    if (update.error) throw update.error
-    if (nextStatus === "approved") await updateProgressAndRewards(service, String(submission.data.player_id), String(submission.data.course_slug), Number(submission.data.level_number), String(submission.data.difficulty), submission.data.challenge_key === "ace" ? "ace" : "level", authorization.user?.id || null)
-    return Response.json({ message: nextStatus === "approved" ? "Submission approved. Progress and idempotent rewards were synchronized." : "Submission rejected. No progress or rewards were unlocked." })
+    const currentStatus = String(submission.data.status)
+    if (body.action === "reject" && currentStatus === "approved") return Response.json({ error: "This submission has already been approved." }, { status: 409 })
+    if (body.action === "reject" && currentStatus === "rejected") return Response.json({ error: "This submission has already been rejected." }, { status: 409 })
+    if (body.action === "approve" && currentStatus === "rejected") return Response.json({ error: "A rejected Course Challenge submission cannot be approved." }, { status: 409 })
+
+    if (body.action === "reject") {
+      const update = await service.from("course_challenge_submissions").update({ status: "rejected", reviewed_at: new Date().toISOString(), reviewed_by: authorization.user?.id || null, review_notes: body.reviewNotes?.trim() || null }).eq("id", body.id).in("status", ["pending", "needs_review"])
+      if (update.error) throw update.error
+      return Response.json({ message: "Submission rejected. No All-Time, Climbers, progress, or rewards were changed." })
+    }
+
+    const submissionRow = submission.data
+    const course = getCourseChallenge(String(submissionRow.course_slug))
+    const level = course?.levels.find((item) => item.level === Number(submissionRow.level_number))
+    const code = submissionRow.difficulty === "Easy" ? (level?.easyCode || course?.easyCode) : (level?.hardCode || course?.hardCode)
+    if (!code) return Response.json({ error: "The Course Challenge has no authoritative All-Time course mapping." }, { status: 409 })
+    const courseRow = await service.from("all_time_courses").select("id,code,difficulty").eq("code", code).eq("active", true).maybeSingle()
+    if (courseRow.error) throw courseRow.error
+    if (!courseRow.data) return Response.json({ error: "The authoritative All-Time course mapping is unavailable." }, { status: 503 })
+    const fingerprint = await sha256Hex(JSON.stringify({ source: "course_challenge", submissionId: submissionRow.id, courseId: courseRow.data.id, playerId: submissionRow.player_id, holeScores: submissionRow.hole_scores, relativeToPar: submissionRow.relative_to_par }))
+    const sessionClient = await createServerSupabaseClient()
+    const approval = await sessionClient.rpc("approve_course_challenge_submission", { p_submission_id: body.id, p_course_id: courseRow.data.id, p_fingerprint: fingerprint, p_review_notes: body.reviewNotes?.trim() || null })
+    if (approval.error) throw approval.error
+    const progress = await updateProgressAndRewards(service, String(submissionRow.player_id), String(submissionRow.course_slug), Number(submissionRow.level_number), String(submissionRow.difficulty), submissionRow.challenge_key === "ace" ? "ace" : "level", authorization.user?.id || null)
+    const result = approval.data as { all_time?: Record<string, unknown>; action?: string } | null
+    return Response.json({ message: formatApprovalMessage(result?.all_time, progress), processing: result })
   } catch (caught) { return Response.json({ error: caught instanceof Error ? caught.message : "Course Challenge review failed." }, { status: 503 }) }
 }
 
@@ -59,20 +81,49 @@ async function updateProgressAndRewards(service: ReturnType<typeof createCourseC
   const hardApproved = (accepted.data || []).some((row) => row.difficulty === "Hard")
   const complete = easyApproved && hardApproved
   if (challengeKey === "ace") {
-    if (!complete) return
+    if (!complete) return { complete: false, rewardLabels: [] as string[] }
     const course = getCourseChallenge(courseSlug)
     const reward = course ? aceRewardDefinition(course) : null
-    if (!reward) return
+    if (!reward) return { complete: true, rewardLabels: [] as string[] }
     const award = await service.from("course_challenge_rewards").upsert([{ player_id: playerId, reward_key: reward.rewardKey, label: reward.label, kind: reward.kind, course_slug: courseSlug, level: null, awarded_by: reviewerId }], { onConflict: "player_id,reward_key", ignoreDuplicates: true })
     if (award.error) throw award.error
-    return
+    return { complete: true, rewardLabels: [reward.label] }
   }
   const progress = await service.from("course_challenge_progress").upsert({ player_id: playerId, course_slug: courseSlug, level_number: level, easy_status: easyApproved ? "approved" : "pending", hard_status: hardApproved ? "approved" : "pending", completed_at: complete ? new Date().toISOString() : null, updated_at: new Date().toISOString() }, { onConflict: "player_id,course_slug,level_number" })
   if (progress.error) throw progress.error
-  if (!complete) return
+  if (!complete) return { complete: false, rewardLabels: [] as string[] }
   const course = getCourseChallenge(courseSlug)
-  if (!course) return
+  if (!course) return { complete: true, rewardLabels: [] as string[] }
   const rewards = levelRewardDefinitions(course, level).map((reward) => ({ player_id: playerId, reward_key: reward.rewardKey, label: reward.label, kind: reward.kind, course_slug: courseSlug, level: reward.level, awarded_by: reviewerId }))
   const award = await service.from("course_challenge_rewards").upsert(rewards, { onConflict: "player_id,reward_key", ignoreDuplicates: true })
   if (award.error) throw award.error
+  return { complete: true, rewardLabels: rewards.map((reward) => reward.label) }
+}
+
+function formatApprovalMessage(allTime: Record<string, unknown> | undefined, progress: { complete: boolean; rewardLabels: string[] }) {
+  const classification = String(allTime?.classification || allTime?.action || "")
+  const score = formatRelativeScore(allTime?.submitted_score)
+  const previous = formatRelativeScore(allTime?.old_pb_score)
+  const points = Number(allTime?.climbers_points || 0)
+  const passed = Array.isArray(allTime?.passed_player_ids) ? allTime?.passed_player_ids.length : points
+  const allTimeLine = classification === "FIRST"
+    ? `All-Time: New first score: ${score}`
+    : classification === "BETTER"
+      ? `All-Time: New PB: ${score}\nPrevious PB: ${previous}`
+      : classification === "EQUAL"
+        ? `All-Time: Existing PB remains ${previous}\nSubmitted score: ${score}`
+        : `All-Time: Existing PB remains ${previous}\nSubmitted score: ${score}`
+  const climbersLine = classification === "FIRST"
+    ? "Climbers: Starting PB — 0 points"
+    : classification === "BETTER"
+      ? `Climbers: ${passed} player${passed === 1 ? "" : "s"} passed\n${points} point${points === 1 ? "" : "s"} earned`
+      : "Climbers: No event"
+  const rewardLine = progress.complete && progress.rewardLabels.length ? `\nCourse Challenges: ${progress.rewardLabels.join(", ")} awarded.` : ""
+  return `COURSE CHALLENGE APPROVED\n\n${allTimeLine}\n\n${climbersLine}${rewardLine}`
+}
+
+function formatRelativeScore(value: unknown) {
+  if (value === null || value === undefined || value === "") return "—"
+  const score = Number(value)
+  return Number.isFinite(score) && score > 0 ? `+${score}` : String(value)
 }
