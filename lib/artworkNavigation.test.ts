@@ -30,8 +30,9 @@ test("active Main Hub route is artwork-only and keeps the approved destinations"
   assert.equal(mainHubArtwork.id, "main-hub")
   assert.match(page, /ArtworkNavigation/)
   assert.match(page, /mainHubArtwork/)
-  assert.match(page, /KRYS LEAGUES COURSE CHALLENGES/)
+  assert.match(page, /course-challenges\/course-challenges-hub-extension-preview\.png/)
   assert.match(page, /href="\/course-challenges"/)
+  assert.match(page, /alt="Course Challenges"/)
   assert.match(page, /href="\/admin"/)
   assert.match(page, /hiddenTargetIds=\{\["admin-login"\]\}/)
   assert.doesNotMatch(page, /Season 59|Player Dashboard|League Records|card-grid|fallback/i)
@@ -49,11 +50,20 @@ test("active Main Hub route is artwork-only and keeps the approved destinations"
   ])
 })
 
-test("featured Course Challenges hub action precedes the preserved Admin Login action", () => {
+test("Course Challenges banner preview precedes the preserved Admin Login action", () => {
   const page = read("app/page.tsx")
-  assert.ok(page.indexOf("KRYS LEAGUES COURSE CHALLENGES") < page.indexOf("ADMIN LOGIN"))
-  assert.match(read("components/navigation/artwork-navigation.css"), /artwork-navigation__featured-course-link/)
+  assert.ok(page.indexOf("course-challenges\/course-challenges-hub-extension-preview.png") < page.indexOf("ADMIN LOGIN"))
+  assert.match(read("components/navigation/artwork-navigation.css"), /artwork-navigation__course-challenges-preview-banner/)
   assert.match(read("components/navigation/artwork-navigation.css"), /artwork-navigation__after-frame/)
+})
+
+test("Main Hub extension uses explicit lower-layer structure without a covering footer mask", () => {
+  const component = read("components/navigation/ArtworkNavigation.tsx")
+  const styles = read("components/navigation/artwork-navigation.css")
+  assert.match(component, /artwork-navigation__hub-stack/)
+  assert.match(styles, /\.artwork-navigation__frame \{[\s\S]*z-index: 2;/)
+  assert.match(styles, /\.artwork-navigation__after-frame \{[\s\S]*z-index: 1;/)
+  assert.doesNotMatch(styles, /artwork-navigation__main-hub-footer-cover/)
 })
 
 test("active League Play route is artwork-only with exactly six league destinations", () => {
