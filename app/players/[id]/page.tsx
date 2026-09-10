@@ -15,8 +15,6 @@ import type { PublicCourse } from "@/lib/all-time/public-records"
 import styles from "./page.module.css"
 import TrophyMedia from "@/components/TrophyMedia"
 import PlayerCourseRecords from "@/components/records/PlayerCourseRecords"
-import CourseChallengesProfileSummary from "@/components/course-challenges/CourseChallengesProfileSummary"
-import { getPublicCourseChallenges } from "@/lib/courseChallenges/catalog"
 import { calculateMonthlyCareerStats, monthlyCourseMapName, uniqueMonthlyPeriodRecords, type MonthlyPresentationRow } from "@/lib/monthlyPresentation"
 
 type Player = {
@@ -570,8 +568,6 @@ export default function PublicPlayerProfilePage() {
         </nav>
 
         {openProfileSection === "records" && <PlayerCourseRecords playerId={player.id} />}
-
-        <CourseChallengesProfileSummary playerId={player.id} courses={getPublicCourseChallenges()} />
 
         {openProfileSection === "stats" && hasCareerParticipation && <section className={styles.profileSectionPanel} id="player-stats-panel" aria-label="Player Stats">
           <p className={styles.sectionDescription}>Overall career summary with separate, expandable competition statistics</p>

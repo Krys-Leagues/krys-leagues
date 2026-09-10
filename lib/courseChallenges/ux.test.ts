@@ -57,11 +57,13 @@ test("fresh and repair SQL preserve private review fallback for missing proof me
   assert.match(repair, /alter column game_mode drop not null/)
 })
 
-test("profile Course Challenges navigation has one entry and preserves the compact summary", () => {
+test("profile keeps Course Challenges navigation without rendering the obsolete summary block", () => {
   const profile = read("app/players/[id]/page.tsx")
   assert.match(profile, /<Link href="\/course-challenges" className=\{styles\.profileActionButton\}>Course Challenges<\/Link>/)
   assert.doesNotMatch(profile, /Course Challenge Collection/)
-  assert.match(profile, /<CourseChallengesProfileSummary/)
+  assert.doesNotMatch(profile, /CourseChallengesProfileSummary/)
+  assert.doesNotMatch(profile, /ACHIEVEMENT BOOK/)
+  assert.doesNotMatch(profile, /Only earned Level stickers are shown here/)
   assert.match(profile, /href="\/players\?browse=1".*Player Profiles/)
 })
 
