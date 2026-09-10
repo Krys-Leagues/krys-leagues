@@ -50,6 +50,7 @@ export default function CourseChallengesLanding({ courses }: { courses: CourseCh
     <div className={styles.shell}>
       <div className={styles.backLinks}>
         <Link href="/" className={styles.backLink}>← Krys Leagues</Link>
+        <Link href="/our-mission" className={styles.backLink}>Our Mission</Link>
         <button type="button" className={styles.backLinkButton} onClick={() => void openOwnProfile()}>← Player Profile</button>
       </div>
       {profileMessage && <p className={styles.notice} role="alert">{profileMessage}</p>}

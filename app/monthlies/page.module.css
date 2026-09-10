@@ -1,3 +1,28 @@
+.missionTagline {
+  width: min(1180px, calc(100% - 32px));
+  margin: 18px auto 0;
+  border: 1px solid #c4b5fd55;
+  border-radius: 16px;
+  padding: 13px 18px;
+  background: linear-gradient(100deg, #312e81aa, #4c1d9599);
+  color: #fef3c7;
+  text-align: center;
+  box-shadow: 0 12px 34px #0005;
+}
+
+.missionTagline p {
+  margin: 0;
+  font-size: clamp(0.95rem, 2vw, 1.2rem);
+  font-weight: 850;
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+}
+
+@media (max-width: 560px) {
+  .missionTagline {
+    width: calc(100% - 24px);
+  }
+}
 .page {
   min-height: 0;
   padding-bottom: 24px;

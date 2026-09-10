@@ -69,6 +69,7 @@ test("welcome page keeps both safe back destinations and canonical Player Profil
   const landing = read("components/course-challenges/CourseChallengesLanding.tsx")
   assert.match(landing, /href="\/".*← Krys Leagues/)
   assert.match(landing, /← Player Profile/)
+  assert.match(landing, /href="\/our-mission".*Our Mission/)
   assert.match(landing, /current_user_canonical_player_id/)
   assert.match(landing, /router\.push\("\/players\/"/)
   assert.doesNotMatch(landing, /auth\.uid|email|screen_name|display_name/)

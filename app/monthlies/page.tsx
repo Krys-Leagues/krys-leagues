@@ -189,6 +189,9 @@ export default function MonthliesPage() {
         }
       />
 
+      <section className={styles.missionTagline} aria-label="Krys Leagues mission">
+        <p>Ranks separate the competition — not the players.</p>
+      </section>
       {error && <section className={`${styles.status} ${styles.error}`} role="alert">{error}</section>}
       {hasCompleteSelection && resultsLoading && <section className={styles.status}>Loading the selected Monthly results…</section>}
       {hasCompleteSelection && !resultsLoading && !error && rows.length === 0 && <section className={styles.status}>No completed results are available for this selection.</section>}
