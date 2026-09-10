@@ -19,6 +19,8 @@ test("Our Mission is a permanent player-facing area with the approved philosophy
   ]) {
     assert.ok(page.toLowerCase().includes(phrase.toLowerCase()), phrase)
   }
+  assert.match(page, /className=\{styles\.headingRow\}/)
+  assert.match(page, /src="\/krys-leagues-logo\.png"/)
   assert.match(page, /className=\{styles\.callout\}/)
   assert.match(styles, /@media/)
 })

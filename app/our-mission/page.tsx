@@ -1,3 +1,4 @@
+import Image from "next/image"
 import Link from "next/link"
 import styles from "./page.module.css"
 
@@ -13,7 +14,10 @@ export default function OurMissionPage() {
 
         <article className={styles.card}>
           <p className={styles.eyebrow}>THE KRYS LEAGUES PROMISE</p>
-          <h1>OUR MISSION</h1>
+          <div className={styles.headingRow}>
+            <Image src="/krys-leagues-logo.png" alt="" width={96} height={96} className={styles.logo} priority aria-hidden="true" />
+            <h1>OUR MISSION</h1>
+          </div>
 
           <div className={styles.copy}>
             <p>Krys Leagues has always been about creating a place where every player belongs — from someone brand new to the game, to amateur players, experienced competitors, and the elite of the elite.</p>
