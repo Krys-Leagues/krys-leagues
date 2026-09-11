@@ -46,20 +46,15 @@ export default function DoublesSchedulePage() {
   }, [division])
 
   async function loadTeams() {
-    const { data, error } = await supabase
-      .from("doubles_teams")
-      .select("*")
-      .eq("division", division)
-      .eq("active", true)
-      .order("team_name", { ascending: true })
-
-    if (error) {
-      console.error(error)
+    const response = await fetch(`/api/admin/doubles/teams?division=${encodeURIComponent(division)}&active=true`, { cache: "no-store" })
+    const payload = await response.json().catch(() => ({})) as { data?: DoublesTeam[]; error?: string }
+    if (!response.ok || payload.error) {
+      console.error(payload.error || response.statusText)
       setTeams([])
       return
     }
 
-    setTeams((data || []) as DoublesTeam[])
+    setTeams(payload.data || [])
   }
 
   function teamDropdown(value: string, setValue: (value: string) => void) {

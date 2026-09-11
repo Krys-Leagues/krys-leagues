@@ -76,13 +76,10 @@ export default function DoublesTeamsPage() {
   }
 
   async function loadTeams() {
-    const { data } = await supabase
-      .from("doubles_teams")
-      .select("*")
-      .eq("division", division)
-      .order("team_name")
-
-    setTeams(data || [])
+    const response = await fetch(`/api/admin/doubles/teams?division=${encodeURIComponent(division)}`, { cache: "no-store" })
+    const payload = await response.json().catch(() => ({})) as { data?: any[]; error?: string }
+    if (!response.ok || payload.error) { setLoadError(payload.error || response.statusText); setTeams([]); return }
+    setTeams(payload.data || [])
   }
 
   async function addTeam() {
@@ -104,17 +101,14 @@ export default function DoublesTeamsPage() {
       return
     }
 
-    const { error } = await supabase.from("doubles_teams").insert({
-      team_name: teamName,
-      player1: p1.display_name,
-      player2: p2.display_name,
-      player_1_id: p1.id,
-      player_2_id: p2.id,
-      division,
+    const response = await fetch("/api/admin/doubles/teams", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ teamName, player1: p1.display_name, player2: p2.display_name, division }),
     })
-
-    if (error) {
-      alert(error.message)
+    const payload = await response.json().catch(() => ({})) as { error?: string }
+    if (!response.ok || payload.error) {
+      alert(payload.error || response.statusText)
       return
     }
 
