@@ -8,10 +8,10 @@ import { normalizeDiscordHistoricalName, reconcileKwtDiscordIdentities, type Kwt
 import { stageKwtDiscordEvidence } from "@/lib/importer/adapters/kwtDiscordStaging"
 import { buildKwtPersonWeekReview, type KwtManualIdentityAssignment } from "@/lib/importer/adapters/kwtDiscordWeekReview"
 import { buildKwtWeeklyReconciliation, emptyKwtSeasonReviewDraft, kwtFactRenderKey, kwtSeasonReviewDraftKey, parseKwtSeasonReviewDraft, type KwtExceptionDecision } from "@/lib/importer/adapters/kwtDiscordReconciliation"
-import { loadExistingKwtHistoryInventory } from "@/lib/importer/loadKwtExistingHistory"
+import type { KwtExistingHistoryInventory } from "@/lib/importer/loadKwtExistingHistory"
 
 type Result = ReturnType<typeof reconcileKwtDiscordIdentities>
-type Inventory = Awaited<ReturnType<typeof loadExistingKwtHistoryInventory>>
+type Inventory = KwtExistingHistoryInventory
 const nameKey = (value: string) => normalizeDiscordHistoricalName(value).toLocaleLowerCase()
 
 export default function KwtDiscordIdentityReview({ season }: { season: KwtDiscordSeason }) {
@@ -49,7 +49,13 @@ export default function KwtDiscordIdentityReview({ season }: { season: KwtDiscor
   async function review() {
     setLoading(true); setError("")
     try {
-      const [players, existing] = await Promise.all([loadGlobalPlayerDirectory(), loadExistingKwtHistoryInventory()])
+      const [players, inventoryResponse] = await Promise.all([
+        loadGlobalPlayerDirectory(),
+        fetch("/api/admin/kwt/season-9/inventory", { cache: "no-store" }),
+      ])
+      const inventoryPayload = await inventoryResponse.json() as Inventory | { error?: string }
+      if (!inventoryResponse.ok) throw new Error("error" in inventoryPayload && inventoryPayload.error ? inventoryPayload.error : "Existing KWT history could not be loaded.")
+      const existing = inventoryPayload as Inventory
       const directory = players.map(player => ({ id: player.id, screenName: player.screenName, verifiedAliases: player.verifiedAliases, identityAliases: player.identityAliases, status: player.status, active: player.active }))
       const beforeNormalization = reconcileKwtDiscordIdentities(season, directory, { removeLeadingAt: false })
       setUnresolvedFactsBeforeAtNormalization(beforeNormalization.filter(value => value.status === "unresolved").reduce((total, value) => total + value.factCount, 0))

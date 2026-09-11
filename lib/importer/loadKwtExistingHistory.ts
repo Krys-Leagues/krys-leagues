@@ -1,7 +1,19 @@
-import { supabase } from "@/lib/supabase"
 import type { KwtExistingRecord } from "./adapters/kwtDiscordStaging"
 
-const candidateTables = ["handicap_rounds", "player_career_events", "kwt_raw_scores", "import_rows"] as const
+export const KWT_EXISTING_HISTORY_TABLES = ["handicap_rounds", "player_career_events", "kwt_raw_scores", "import_rows"] as const
+
+export type KwtExistingHistoryInventory = {
+  records: KwtExistingRecord[]
+  errors: Array<{ table: string; message: string }>
+  tableCounts: Record<string, Record<string, number>>
+  truncatedAt: number
+}
+
+export type KwtExistingHistoryTableResult = {
+  table: string
+  data: unknown[] | null
+  error: string | null
+}
 
 function period(value: unknown): { season: number | null; week: number | null } {
   if (!value || typeof value !== "object") return { season: null, week: null }
@@ -16,21 +28,21 @@ function period(value: unknown): { season: number | null; week: number | null } 
   }
 }
 
-export async function loadExistingKwtHistoryInventory() {
+export function buildExistingKwtHistoryInventory(results: KwtExistingHistoryTableResult[]): KwtExistingHistoryInventory {
   const records: KwtExistingRecord[] = []
   const errors: Array<{ table: string; message: string }> = []
   const tableCounts: Record<string, Record<string, number>> = {}
-  for (const table of candidateTables) {
-    const result = await supabase.from(table).select("*").limit(20000)
-    if (result.error) { errors.push({ table, message: result.error.message }); continue }
+  for (const result of results) {
+    if (result.error) { errors.push({ table: result.table, message: result.error }); continue }
     for (const raw of result.data ?? []) {
+      if (!raw || typeof raw !== "object") continue
       const found = period(raw)
       if (![9, 11, 12].includes(found.season ?? -1)) continue
-      const record = { ...raw, _inventory_table: table, _inventory_season: found.season, _inventory_week: found.week }
+      const record = { ...raw, _inventory_table: result.table, _inventory_season: found.season, _inventory_week: found.week }
       records.push(record)
       const seasonKey = String(found.season)
-      tableCounts[table] ??= {}
-      tableCounts[table][seasonKey] = (tableCounts[table][seasonKey] ?? 0) + 1
+      tableCounts[result.table] ??= {}
+      tableCounts[result.table][seasonKey] = (tableCounts[result.table][seasonKey] ?? 0) + 1
     }
   }
   return { records, errors, tableCounts, truncatedAt: 20000 }
