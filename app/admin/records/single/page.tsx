@@ -4,7 +4,6 @@ import React, { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { AdminGlassCard, AdminRecordsHero, AdminRecordsShell, adminRecordsStyles as styles } from "@/components/admin/records/AdminRecordsUI"
 import { denseRanks } from "@/lib/all-time/dense-rank"
-import { supabase } from "@/lib/supabase"
 
 type SingleRecord = {
   id: string
@@ -59,10 +58,11 @@ export default function SingleRecordsPage() {
     let cancelled = false
     const timeout = window.setTimeout(() => void (async () => {
       try {
-        const courseResult = await supabase.from("all_time_courses").select("id, code, display_name, difficulty").eq("active", true).in("difficulty", ["Easy", "Hard"]).order("display_name")
-        if (courseResult.error) throw courseResult.error
+        const response = await fetch("/api/admin/records/all-time?view=single-catalog", { credentials: "same-origin", cache: "no-store" })
+        const payload = await response.json() as { error?: string; courses?: AllTimeCourse[] }
+        if (!response.ok) throw new Error(payload.error || "All-Time courses could not be loaded.")
         if (cancelled) return
-        const catalog = (courseResult.data ?? []) as AllTimeCourse[]
+        const catalog = (payload.courses ?? []) as AllTimeCourse[]
         setCourses(catalog); setCourseFilter((current) => current || catalog[0]?.id || "")
         if (!catalog.length) setLoading(false)
       } catch (caught) {
@@ -80,19 +80,16 @@ export default function SingleRecordsPage() {
     const timeout = window.setTimeout(() => void (async () => {
       setLoading(true); setError(""); setRecords([])
       try {
-        const [bestResult, unresolvedResult] = await Promise.all([
-          supabase.from("all_time_best_records").select("id, course_id, score, historical_player_name, player:players(screen_name)").eq("course_id", selected.id),
-          supabase.from("all_time_record_observations").select("id, course_id, score, historical_player_name").eq("course_id", selected.id).in("identity_status", ["unresolved", "ambiguous"]),
-        ])
-        if (bestResult.error) throw bestResult.error
-        if (unresolvedResult.error) throw unresolvedResult.error
+        const response = await fetch(`/api/admin/records/all-time?view=single-records&courseId=${encodeURIComponent(selected.id)}`, { credentials: "same-origin", cache: "no-store" })
+        const payload = await response.json() as { error?: string; records?: BestRecordRow[]; unresolved?: UnresolvedObservationRow[] }
+        if (!response.ok) throw new Error(payload.error || "All-Time records could not be loaded.")
         if (cancelled) return
-        const linked = ((bestResult.data ?? []) as BestRecordRow[]).map((row) => {
+        const linked = ((payload.records ?? []) as BestRecordRow[]).map((row) => {
           const player = Array.isArray(row.player) ? row.player[0] : row.player
           return { id: row.id, course_id: selected.id, course_code: selected.code, player_name: player?.screen_name ?? row.historical_player_name, historical_player_name: row.historical_player_name, identity_linked: Boolean(player), score: row.score }
         })
         const unresolvedBest = new Map<string, SingleRecord>()
-        for (const row of (unresolvedResult.data ?? []) as UnresolvedObservationRow[]) {
+        for (const row of (payload.unresolved ?? []) as UnresolvedObservationRow[]) {
           const existing = unresolvedBest.get(row.historical_player_name)
           if (!existing || row.score < existing.score) unresolvedBest.set(row.historical_player_name, { id: row.id, course_id: selected.id, course_code: selected.code, player_name: row.historical_player_name, historical_player_name: row.historical_player_name, identity_linked: false, score: row.score })
         }

@@ -40,17 +40,13 @@ export default function NormalRecordsEntryPage() {
 
   useEffect(() => {
     void (async () => {
-      const [courseResult, playerResult, seasonResult] = await Promise.all([
-        supabase.from("all_time_courses").select("id,code,display_name,difficulty,par,hole_pars").eq("active", true).in("difficulty", ["Easy", "Hard"]).order("display_name"),
-        supabase.from("players").select("id,screen_name").eq("active", true).order("screen_name"),
-        supabase.from("climbers_seasons").select("id,label,starts_at,ends_at,status").in("status", ["active", "awaiting_finalization"]).order("starts_at", { ascending: false }),
-      ])
-      const queryError = courseResult.error || playerResult.error
-      if (queryError) setError(queryError.message)
-      const seasons = (seasonResult.data ?? []) as Season[], now = Date.now()
+      const response = await fetch("/api/admin/records/all-time?view=entry", { credentials: "same-origin", cache: "no-store" })
+      const payload = await response.json() as { error?: string; courses?: Course[]; players?: Player[]; seasons?: Season[] }
+      if (!response.ok) throw new Error(payload.error || "Protected All-Time data could not be loaded.")
+      const seasons = (payload.seasons ?? []) as Season[], now = Date.now()
       const current = seasons.find((item) => item.status === "active" && new Date(item.starts_at).getTime() <= now && new Date(item.ends_at).getTime() > now) ?? null
       const previous = seasons.filter((item) => new Date(item.ends_at).getTime() <= now).sort((a, b) => new Date(b.ends_at).getTime() - new Date(a.ends_at).getTime())[0] ?? null
-      setCourses((courseResult.data ?? []) as Course[]); setPlayers((playerResult.data ?? []) as Player[]); setSeason(current); setPreviousSeason(previous); setLoading(false)
+      setCourses((payload.courses ?? []) as Course[]); setPlayers((payload.players ?? []) as Player[]); setSeason(current); setPreviousSeason(previous); setLoading(false)
     })()
   }, [])
 
@@ -77,13 +73,12 @@ export default function NormalRecordsEntryPage() {
     let cancelled = false
     void (async () => {
       setError(""); setBest(null); setCourseBests([]); setBestLoading(true)
-      const [bestResult, allResult] = await Promise.all([
-        supabase.from("all_time_best_records").select("player_id,score").eq("course_id", courseId).eq("player_id", playerId).maybeSingle(),
-        supabase.from("all_time_best_records").select("player_id,score").eq("course_id", courseId),
-      ])
+      const response = await fetch(`/api/admin/records/all-time?view=entry-bests&courseId=${encodeURIComponent(courseId)}`, { credentials: "same-origin", cache: "no-store" })
+      const payload = await response.json() as { error?: string; records?: Best[] }
       if (cancelled) return
-      if (bestResult.error || allResult.error) setError(bestResult.error?.message || allResult.error?.message || "Current All-Time records could not be loaded.")
-      setBest((bestResult.data as Best | null) ?? null); setCourseBests((allResult.data ?? []) as Best[]); setBestLoading(false)
+      if (!response.ok) setError(payload.error || "Current All-Time records could not be loaded.")
+      const rows = (payload.records ?? []) as Best[]
+      setBest(rows.find((item) => item.player_id === playerId) ?? null); setCourseBests(rows); setBestLoading(false)
     })()
     return () => { cancelled = true }
   }, [courseId, playerId])

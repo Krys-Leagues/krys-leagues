@@ -36,15 +36,11 @@ export default function LateBackfillPage() {
 
   useEffect(() => {
     void (async () => {
-      const [courseResult, playerResult, existingResult] = await Promise.all([
-        supabase.from("all_time_courses").select("id,code,display_name,difficulty,par,hole_pars").eq("active", true).in("difficulty", ["Easy", "Hard"]).order("display_name"),
-        supabase.from("players").select("id,screen_name").eq("active", true).order("screen_name"),
-        supabase.from("all_time_late_backfill_audit").select("card_batch_id,course_id,player_id,submitted_score,authoritative_submitted_date,source_label,status").order("authoritative_submitted_date", { ascending: false }),
-      ])
-      const queryError = courseResult.error || playerResult.error || existingResult.error
-      if (queryError) setError(queryError.message)
-      const nextCourses = (courseResult.data ?? []) as Course[], nextPlayers = (playerResult.data ?? []) as Player[]
-      setCourses(nextCourses); setPlayers(nextPlayers); setExisting((existingResult.data ?? []).map((row) => ({ ...row, score: row.submitted_score })) as Existing[])
+      const response = await fetch("/api/admin/records/all-time?view=backfill", { credentials: "same-origin", cache: "no-store" })
+      const payload = await response.json() as { error?: string; courses?: Course[]; players?: Player[]; existing?: Array<Existing & { submitted_score: number }> }
+      if (!response.ok) setError(payload.error || "All-Time backfill data could not be loaded.")
+      const nextCourses = (payload.courses ?? []) as Course[], nextPlayers = (payload.players ?? []) as Player[]
+      setCourses(nextCourses); setPlayers(nextPlayers); setExisting((payload.existing ?? []).map((row) => ({ ...row, score: row.submitted_score })) as Existing[])
       setCards([newCard({ courseId: nextCourses[0]?.id ?? "" })]); setQuickCourseId(nextCourses[0]?.id ?? ""); setQuickPlayerId(nextPlayers[0]?.id ?? ""); setLoading(false)
     })()
   }, [])
@@ -71,10 +67,11 @@ export default function LateBackfillPage() {
     if (!active?.courseId || ids.length === 0) return
     let cancelled = false
     void (async () => {
-      const result = await supabase.from("all_time_best_records").select("player_id,score").eq("course_id", active.courseId).in("player_id", ids)
+      const result = await fetch(`/api/admin/records/all-time?view=backfill-bests&courseId=${encodeURIComponent(active.courseId)}&playerIds=${encodeURIComponent(ids.join(","))}`, { credentials: "same-origin", cache: "no-store" })
+      const payload = await result.json() as { error?: string; records?: { player_id: string; score: number }[] }
       if (cancelled) return
-      if (result.error) { setPbError(result.error.message); setCurrentBestByPlayer(new Map()) }
-      else { setPbError(""); setCurrentBestByPlayer(new Map(((result.data ?? []) as { player_id: string; score: number }[]).map((row) => [row.player_id, row.score]))) }
+      if (!result.ok) { setPbError(payload.error || "Current PB lookup failed."); setCurrentBestByPlayer(new Map()) }
+      else { setPbError(""); setCurrentBestByPlayer(new Map((payload.records ?? []).map((row) => [row.player_id, row.score]))) }
       setLoadedBestKey(`${active.courseId}|${selectedPlayerKey}`)
     })()
     return () => { cancelled = true }

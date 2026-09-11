@@ -19,14 +19,10 @@ export default function RecordsHistoryPage() {
 
   async function load() {
     setLoading(true); setError("")
-    const [courseResult, playerResult, rowResult] = await Promise.all([
-      supabase.from("all_time_courses").select("id,code,display_name,difficulty,par,hole_pars").eq("active", true).in("difficulty", ["Easy", "Hard"]).order("display_name"),
-      supabase.from("players").select("id,screen_name").eq("active", true).order("screen_name"),
-      supabase.from("all_time_record_observations").select("id,card_batch_id,course_id,player_id,historical_player_name,score,entry_type,hole_strokes,source_label,provenance_reference,notes,observed_at,updated_at,recorded_at,recorded_by,authoritative_submitted_at,authoritative_submitted_date,authoritative_submission_order,authoritative_time_precision,voided_at,voided_by,void_reason,corrected_at").order("observed_at", { ascending: false }),
-    ])
-    const queryError = courseResult.error || playerResult.error || rowResult.error
-    if (queryError) setError(queryError.message)
-    setCourses((courseResult.data ?? []) as Course[]); setPlayers((playerResult.data ?? []) as Player[]); setRows((rowResult.data ?? []) as Observation[]); setLoading(false)
+    const response = await fetch("/api/admin/records/all-time?view=history", { credentials: "same-origin", cache: "no-store" })
+    const payload = await response.json() as { error?: string; courses?: Course[]; players?: Player[]; rows?: Observation[] }
+    if (!response.ok) setError(payload.error || "All-Time history could not be loaded.")
+    setCourses((payload.courses ?? []) as Course[]); setPlayers((payload.players ?? []) as Player[]); setRows((payload.rows ?? []) as Observation[]); setLoading(false)
   }
   useEffect(() => { const timer = window.setTimeout(() => void load(), 0); return () => window.clearTimeout(timer) }, [])
 
