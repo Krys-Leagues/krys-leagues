@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
+import { fetchPypAdminData } from "@/lib/admin/pypAdminData"
 
 type Fixture = { id: string; division_number: number; game_number: number; pyp_home_player_screen_name: string; pyp_away_player_screen_name: string }
 type PypResult = { schedule_id:string;course1_name:string;course1_difficulty:string|null;course1_home_hw:number;course1_away_hw:number;course2_name:string;course2_difficulty:string|null;course2_home_hw:number;course2_away_hw:number;home_total_hw:number;away_total_hw:number }
@@ -35,25 +36,25 @@ export default function PypSchedulePage() {
 
   const load = useCallback(async (id: string) => {
     setLoading(true)
-    const [{ data: seasonData, error: seasonError }, { data: rosterData, error: rosterError }, { data: stateData, error: stateError }, { data: fixtureData, error: fixtureError }, {data:resultData,error:resultError}] = await Promise.all([
-      supabase.from("seasons").select("season_number, start_date, end_date, league_type").eq("id", id).maybeSingle(),
-      supabase.from("pyp_roster_versions").select("status, division_count").eq("season_id", id).in("status", ["draft", "approved", "locked"]).order("created_at", { ascending: false }).limit(1).maybeSingle(),
-      supabase.from("pyp_schedule_state").select("change_revision, generated_revision, reviewed_revision").eq("season_id", id).maybeSingle(),
-      supabase.from("schedule").select("id, division_number, game_number, pyp_home_player_screen_name, pyp_away_player_screen_name").eq("league_type", "pyp").eq("season_id", id).not("pyp_roster_version_id", "is", null).order("division_number").order("game_number"),
-      supabase.from("pyp_managed_results").select("schedule_id,course1_name,course1_difficulty,course1_home_hw,course1_away_hw,course2_name,course2_difficulty,course2_home_hw,course2_away_hw,home_total_hw,away_total_hw").eq("season_id",id),
-    ])
-    const error = seasonError || rosterError || stateError || fixtureError || resultError
-    if (error || !seasonData || seasonData.league_type !== "pyp" || !rosterData) {
-      setMessage(error?.message || "Managed PYP season was not found.")
+    try {
+      const payload = await fetchPypAdminData<{
+        season: Season
+        roster: Roster
+        scheduleState: ScheduleState | null
+        fixtures: Fixture[]
+        results: PypResult[]
+      }>("schedule", { seasonId: id })
+      if (!payload.season || payload.season.league_type !== "pyp" || !payload.roster) throw new Error("Managed PYP season was not found.")
+      setSeason(payload.season)
+      setRoster(payload.roster)
+      setScheduleState(payload.scheduleState)
+      setFixtures(payload.fixtures)
+      setResults(payload.results)
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Managed PYP season was not found.")
+    } finally {
       setLoading(false)
-      return
     }
-    setSeason(seasonData as Season)
-    setRoster(rosterData as Roster)
-    setScheduleState(stateData as ScheduleState | null)
-    setFixtures((fixtureData || []) as Fixture[])
-    setResults((resultData || []) as PypResult[])
-    setLoading(false)
   }, [])
 
   // The URL-scoped managed schedule context is intentionally loaded once.

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import { logActivity } from "@/lib/activityLog"
+import { fetchPypAdminData } from "@/lib/admin/pypAdminData"
 
 type Entry = { player_id: string; player_screen_name: string; division_number: number; division_rank: number; completed_game_count: number }
 type Decision = { player_id: string; decision: "returning" | "not_returning" }
@@ -79,42 +80,36 @@ export default function PYPTransitionPage() {
     const requestedId = new URLSearchParams(window.location.search).get("scorecardId")?.trim() || ""
     if (!requestedId) { setError("An approved Final Scorecard ID is required."); setLoading(false); return }
     setScorecardId(requestedId)
-    const { data: scorecard, error: scorecardError } = await supabase.from("pyp_final_scorecards")
-      .select("id, season_id, status").eq("id", requestedId).maybeSingle()
-    if (scorecardError || !scorecard || scorecard.status !== "approved") {
-      setError(scorecardError?.message || "An approved Final Scorecard is required."); setLoading(false); return
+    let transitionData: {
+      scorecard: { id: string; season_id: string; status: string }
+      sourceSeason: { season_number: number }
+      entries: Entry[]
+      decisions: Decision[]
+      candidateSeasons: Season[]
+      players: Player[]
+      rosters: { id: string; season_id: string; division_count: number; source_final_scorecard_id: string | null }[]
+      slots: { division_number: number; slot_number: number; player_id: string | null; player_screen_name: string | null; roster_version_id: string }[]
     }
+    try {
+      transitionData = await fetchPypAdminData("transition", { scorecardId: requestedId })
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "An approved Final Scorecard is required.")
+      setLoading(false)
+      return
+    }
+    const scorecard = transitionData.scorecard
     setSourceSeasonId(scorecard.season_id)
-    const { data: sourceSeason, error: sourceError } = await supabase.from("seasons")
-      .select("season_number").eq("id", scorecard.season_id).maybeSingle()
-    if (sourceError || !sourceSeason) { setError(sourceError?.message || "Source season not found."); setLoading(false); return }
-    setSourceSeasonNumber(sourceSeason.season_number)
+    setSourceSeasonNumber(transitionData.sourceSeason.season_number)
 
-    const [entryResponse, decisionResponse, seasonResponse, playerResponse] = await Promise.all([
-      supabase.from("pyp_final_scorecard_entries")
-        .select("player_id, player_screen_name, division_number, division_rank, completed_game_count")
-        .eq("scorecard_id", requestedId).order("division_number").order("division_rank"),
-      supabase.from("pyp_final_scorecard_player_decisions").select("player_id, decision").eq("final_scorecard_id", requestedId),
-      supabase.from("seasons").select("id, season_number, start_date, end_date").eq("league_type", "pyp")
-        .is("division", null).eq("season_number", sourceSeason.season_number + 1),
-      supabase.from("players").select("id, screen_name").eq("active", true).order("screen_name"),
-    ])
-    const loadError = entryResponse.error || decisionResponse.error || seasonResponse.error || playerResponse.error
-    if (loadError) { setError(loadError.message); setLoading(false); return }
-    const loadedEntries = (entryResponse.data || []) as Entry[]
-    const loadedPlayers = (playerResponse.data || []) as Player[]
-    const candidateSeasons = (seasonResponse.data || []) as Season[]
+    const loadedEntries = transitionData.entries
+    const loadedPlayers = transitionData.players
+    const candidateSeasons = transitionData.candidateSeasons
     let loadedSeasons: Season[] = []
     let loadedTargetDivisionCount: number | null = null
     let loadedProposal: ProposalSlot[] = []
     if (candidateSeasons.length > 0) {
-      const { data: rosterData, error: rosterError } = await supabase
-        .from("pyp_roster_versions")
-        .select("id, season_id, division_count, source_final_scorecard_id")
-        .in("season_id", candidateSeasons.map((season) => season.id))
-        .in("status", ["draft", "approved"])
-      if (rosterError) { setError(rosterError.message); setLoading(false); return }
-      const managedIds = new Set((rosterData || []).map((roster) => roster.season_id as string))
+      const rosterData = transitionData.rosters
+      const managedIds = new Set(rosterData.map((roster) => roster.season_id))
       loadedSeasons = candidateSeasons.filter((season) => managedIds.has(season.id))
       if (loadedSeasons.length > 1) {
         setError("Multiple eligible managed PYP target seasons were found. Resolve the ambiguity before continuing.")
@@ -122,15 +117,10 @@ export default function PYPTransitionPage() {
         return
       }
       if (loadedSeasons.length === 1) {
-        const targetRoster = (rosterData || []).find((roster) => roster.season_id === loadedSeasons[0].id)
+        const targetRoster = rosterData.find((roster) => roster.season_id === loadedSeasons[0].id)
         if (targetRoster?.division_count) loadedTargetDivisionCount = Number(targetRoster.division_count)
         if (targetRoster?.source_final_scorecard_id === requestedId) {
-          const { data: slotData, error: slotError } = await supabase
-            .from("pyp_division_roster_slots")
-            .select("division_number, slot_number, player_id, player_screen_name")
-            .eq("roster_version_id", targetRoster.id)
-            .order("division_number").order("slot_number")
-          if (slotError) { setError(slotError.message); setLoading(false); return }
+          const slotData = transitionData.slots.filter((slot) => slot.roster_version_id === targetRoster.id)
           loadedProposal = withVisibleMovementLabels(((slotData || []) as Omit<ProposalSlot, "roster_version_id" | "target_season_id" | "target_division_count" | "movement_reason">[]).map((slot) => ({
             ...slot, roster_version_id: targetRoster.id, target_season_id: loadedSeasons[0].id,
             target_division_count: Number(targetRoster.division_count), movement_reason: null,
@@ -139,7 +129,7 @@ export default function PYPTransitionPage() {
       }
     }
     setEntries(loadedEntries)
-    setDecisions(new Map(((decisionResponse.data || []) as Decision[]).map((item) => [item.player_id, item.decision])))
+    setDecisions(new Map(transitionData.decisions.map((item) => [item.player_id, item.decision])))
     setTargetSeasons(loadedSeasons); setTargetSeasonId(loadedSeasons[0]?.id || "")
     const sourceDivisionCount = String(Math.max(1, ...loadedEntries.map((entry) => entry.division_number)))
     if (loadedSeasons.length === 1) {

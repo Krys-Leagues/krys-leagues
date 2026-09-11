@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { supabase } from "@/lib/supabase"
+import { fetchPypAdminData } from "@/lib/admin/pypAdminData"
 
 type SeasonRow = { id: string; season_number: number; league_type: string | null }
 type RosterRow = { id: string; division_count: number; status: "draft" | "approved" | "locked" }
@@ -47,19 +48,38 @@ export function ManagedLeaguePlayersPage({
         return
       }
 
-      const { data: rosterData, error: rosterError } = await supabase
-        .from(rosterTable)
-        .select("id, division_count, status")
-        .eq("season_id", seasonId)
-        .in("status", ["draft", "approved", "locked"])
-        .order("created_at", { ascending: false })
-      if (rosterError) {
-        setError(`Could not load the ${leagueName} roster: ${rosterError.message}`)
-        setLoading(false)
-        return
+      let rosters: RosterRow[]
+      let loadedSlots: SlotRow[]
+      if (leagueKey === "pyp") {
+        try {
+          const payload = await fetchPypAdminData<{
+            rosters: RosterRow[]
+            slots: (SlotRow & { roster_version_id: string })[]
+          }>("players", { seasonId })
+          rosters = payload.rosters
+          const selectedCandidate = rosters.find((item) => item.status === "draft") || rosters.find((item) => item.status === "approved") || rosters.find((item) => item.status === "locked") || null
+          loadedSlots = selectedCandidate ? payload.slots.filter((slot) => slot.roster_version_id === selectedCandidate.id) : []
+        } catch (error) {
+          setError(`Could not load the ${leagueName} roster: ${error instanceof Error ? error.message : "Protected PYP data could not be loaded."}`)
+          setLoading(false)
+          return
+        }
+      } else {
+        const { data: rosterData, error: rosterError } = await supabase
+          .from(rosterTable)
+          .select("id, division_count, status")
+          .eq("season_id", seasonId)
+          .in("status", ["draft", "approved", "locked"])
+          .order("created_at", { ascending: false })
+        if (rosterError) {
+          setError(`Could not load the ${leagueName} roster: ${rosterError.message}`)
+          setLoading(false)
+          return
+        }
+        rosters = (rosterData || []) as RosterRow[]
+        loadedSlots = []
       }
 
-      const rosters = (rosterData || []) as RosterRow[]
       const selectedRoster = rosters.find((item) => item.status === "draft") || rosters.find((item) => item.status === "approved") || rosters.find((item) => item.status === "locked") || null
       if (!selectedRoster) {
         setError(`No managed ${leagueName} roster belongs to this season.`)
@@ -68,20 +88,21 @@ export function ManagedLeaguePlayersPage({
         return
       }
 
-      const { data: slotData, error: slotError } = await supabase
-        .from(slotTable)
-        .select("player_id, player_screen_name, division_number, slot_number")
-        .eq("roster_version_id", selectedRoster.id)
-        .not("player_id", "is", null)
-        .order("division_number", { ascending: true })
-        .order("slot_number", { ascending: true })
-      if (slotError) {
-        setError(`Could not load the ${leagueName} roster players: ${slotError.message}`)
-        setLoading(false)
-        return
+      if (leagueKey !== "pyp") {
+        const { data: slotData, error: slotError } = await supabase
+          .from(slotTable)
+          .select("player_id, player_screen_name, division_number, slot_number")
+          .eq("roster_version_id", selectedRoster.id)
+          .not("player_id", "is", null)
+          .order("division_number", { ascending: true })
+          .order("slot_number", { ascending: true })
+        if (slotError) {
+          setError(`Could not load the ${leagueName} roster players: ${slotError.message}`)
+          setLoading(false)
+          return
+        }
+        loadedSlots = (slotData || []) as SlotRow[]
       }
-
-      const loadedSlots = (slotData || []) as SlotRow[]
       const playerIds = Array.from(new Set(loadedSlots.flatMap((slot) => slot.player_id ? [slot.player_id] : [])))
       const states = new Map<string, boolean>()
       if (playerIds.length > 0) {

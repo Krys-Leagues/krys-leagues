@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
+import { fetchPypAdminData } from "@/lib/admin/pypAdminData"
 
 type Slot = { slot_number: number; player_id: string | null; player_screen_name: string | null }
 type Player = { id: string; screen_name: string }
@@ -50,47 +51,26 @@ export default function PypSetupPage() {
       return
     }
 
-    const { data: seasonData, error: seasonError } = await supabase
-      .from("seasons")
-      .select("season_number, start_date, end_date, league_type")
-      .eq("id", selectedSeasonId)
-      .maybeSingle()
-    if (seasonError || !seasonData || seasonData.league_type !== "pyp") {
-      setMessage(seasonError?.message || "Managed PYP season not found.")
+    let payload: { season: Season; roster: Roster; slots: Slot[] }
+    try {
+      payload = await fetchPypAdminData("setup", { seasonId: selectedSeasonId, division: String(requestedDivision) })
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Managed PYP season or roster not found.")
       setLoading(false)
       return
     }
 
-    const { data: rosterData, error: rosterError } = await supabase
-      .from("pyp_roster_versions")
-      .select("id, division_count, status")
-      .eq("season_id", selectedSeasonId)
-      .in("status", ["draft", "approved", "locked"])
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle()
-    if (rosterError || !rosterData) {
-      setMessage(rosterError?.message || "PYP roster not found.")
-      setLoading(false)
-      return
-    }
-
-    const roster = rosterData as Roster
+    const seasonData = payload.season
+    const roster = payload.roster
     if (requestedDivision > roster.division_count) {
       setMessage(`Division must be between 1 and ${roster.division_count}.`)
       setLoading(false)
       return
     }
 
-    const { data: slotData, error: slotError } = await supabase
-      .from("pyp_division_roster_slots")
-      .select("slot_number, player_id, player_screen_name")
-      .eq("roster_version_id", roster.id)
-      .eq("division_number", requestedDivision)
-      .order("slot_number")
-    const slots = (slotData || []) as Slot[]
-    if (slotError || slots.length !== 4 || slots.some((slot, index) => slot.slot_number !== index + 1)) {
-      setMessage(slotError?.message || "Exactly four persistent roster slots were not found.")
+    const slots = payload.slots
+    if (slots.length !== 4 || slots.some((slot, index) => slot.slot_number !== index + 1)) {
+      setMessage("Exactly four persistent roster slots were not found.")
       setLoading(false)
       return
     }

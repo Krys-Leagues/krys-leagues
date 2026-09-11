@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
+import { fetchPypAdminData } from "@/lib/admin/pypAdminData"
 import { ManagedSeasonDangerZone } from "@/components/admin/ManagedSeasonDangerZone"
 
 type ManagedSeason = { id: string; season_number: number; is_active: boolean; is_locked: boolean; start_date: string | null; end_date: string | null; division_count: number | null; status: string | null }
@@ -27,41 +28,24 @@ export default function PypEditSeasonPage() {
 
   async function loadSeasons(preferredId?: string) {
     setLoading(true)
-    const { data: seasonData, error: seasonError } = await supabase
-      .from("seasons")
-      .select("id, season_number, is_active, is_locked, start_date, end_date")
-      .ilike("league_type", "pyp")
-      .is("division", null)
-      .order("season_number", { ascending: false })
-
-    if (seasonError) {
-      setMessage(`Could not load PYP seasons: ${seasonError.message}`)
+    let payload: { seasons: ManagedSeason[]; rosters: { season_id: string; division_count: number; status: string }[] }
+    try {
+      payload = await fetchPypAdminData("season-edit")
+    } catch (error) {
+      setMessage(`Could not load PYP seasons: ${error instanceof Error ? error.message : "Protected PYP data could not be loaded."}`)
       setLoading(false)
       return
     }
 
-    const source = seasonData || []
+    const source = payload.seasons
     if (source.length === 0) {
       setSeasons([])
       setLoading(false)
       return
     }
 
-    const { data: rosterData, error: rosterError } = await supabase
-      .from("pyp_roster_versions")
-      .select("season_id, division_count, status")
-      .in("season_id", source.map((season) => season.id))
-      .in("status", ["draft", "approved", "locked"])
-      .order("created_at", { ascending: false })
-
-    if (rosterError) {
-      setMessage(`Could not load PYP rosters: ${rosterError.message}`)
-      setLoading(false)
-      return
-    }
-
     const rosterBySeason = new Map<string, { division_count: number; status: string }>()
-    for (const roster of rosterData || []) {
+    for (const roster of payload.rosters) {
       if (!rosterBySeason.has(roster.season_id)) rosterBySeason.set(roster.season_id, roster)
     }
     const managed = source.map((season) => {

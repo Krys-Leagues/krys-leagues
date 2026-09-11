@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { supabase } from "@/lib/supabase"
+import { fetchPypAdminData } from "@/lib/admin/pypAdminData"
 
 type PypSeason = { id: string; season_number: number; is_active: boolean }
 type PypRoster = { season_id: string; status: string }
@@ -13,34 +13,17 @@ export default function PypAdminPage() {
 
   useEffect(() => {
     async function loadManagedSeason() {
-      const { data: seasonData, error: seasonError } = await supabase
-        .from("seasons")
-        .select("id, season_number, is_active")
-        .eq("league_type", "pyp")
-        .is("division", null)
-        .order("is_active", { ascending: false })
-        .order("season_number", { ascending: false })
-
-      if (seasonError) {
-        setLoadError(`Could not load the current PYP season: ${seasonError.message}`)
+      let payload: { seasons: PypSeason[]; rosters: PypRoster[] }
+      try {
+        payload = await fetchPypAdminData("hub")
+      } catch (error) {
+        setLoadError(`Could not load the current PYP season: ${error instanceof Error ? error.message : "Protected PYP data could not be loaded."}`)
         return
       }
 
-      const seasons = (seasonData || []) as PypSeason[]
+      const seasons = payload.seasons
       if (seasons.length === 0) return
-
-      const { data: rosterData, error: rosterError } = await supabase
-        .from("pyp_roster_versions")
-        .select("season_id, status")
-        .in("season_id", seasons.map((season) => season.id))
-        .in("status", ["draft", "approved", "locked"])
-
-      if (rosterError) {
-        setLoadError(`Could not load the current PYP roster: ${rosterError.message}`)
-        return
-      }
-
-      const rosters = (rosterData || []) as PypRoster[]
+      const rosters = payload.rosters
       const managedIds = new Set(rosters.map((roster) => roster.season_id))
       const currentIds = new Set(rosters.filter((roster) => roster.status !== "locked").map((roster) => roster.season_id))
       const requestedSeasonId = new URLSearchParams(window.location.search).get("seasonId")

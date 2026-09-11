@@ -3,11 +3,42 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
+import { fetchPypAdminData } from "@/lib/admin/pypAdminData"
 
 type Season={season_number:number;due_date:string|null;end_date:string|null;league_type:string|null};type Roster={id:string;status:"draft"|"approved"|"locked";division_count:number};type Slot={division_number:number;player_id:string;player_screen_name:string};type Standing={player_id:string;division:string;points:number;wins:number;losses:number;ties:number;strokes:number;rank:number};type Card={id:string;status:"draft"|"approved";source_roster_version_id:string};type Entry={id:string;division_number:number;division_rank:number;player_id:string;player_screen_name:string;completed_game_count:number;wins:number;losses:number;ties:number;points:number;holes_won:number};type Detail={id:string;player_id:string;game_number:number;opponent_screen_name:string;player_role:string;course1_name:string;course1_difficulty:string|null;course1_player_hw:number;course1_opponent_hw:number;course2_name:string;course2_difficulty:string|null;course2_player_hw:number;course2_opponent_hw:number;player_total_hw:number;opponent_total_hw:number;outcome:string}
 const themes:Record<number,string>={1:"#fb923c",2:"#4ade80",3:"#60a5fa",4:"#facc15",5:"#c084fc"}
 export default function PypStandingsPage(){const router=useRouter();const [seasonId,setSeasonId]=useState("");const [season,setSeason]=useState<Season|null>(null);const [roster,setRoster]=useState<Roster|null>(null);const [slots,setSlots]=useState<Slot[]>([]);const [standings,setStandings]=useState<Standing[]>([]);const [card,setCard]=useState<Card|null>(null);const [entries,setEntries]=useState<Entry[]>([]);const [details,setDetails]=useState<Detail[]>([]);const [message,setMessage]=useState("");const [busy,setBusy]=useState(false);const [loading,setLoading]=useState(true)
-const load=useCallback(async(id:string)=>{setLoading(true);const [{data:s,error:se},{data:r,error:re},{data:c,error:ce}]=await Promise.all([supabase.from("seasons").select("season_number,due_date,end_date,league_type").eq("id",id).maybeSingle(),supabase.from("pyp_roster_versions").select("id,status,division_count").eq("season_id",id).in("status",["draft","approved","locked"]).order("created_at",{ascending:false}).limit(1).maybeSingle(),supabase.from("pyp_final_scorecards").select("id,status,source_roster_version_id").eq("season_id",id).in("status",["draft","approved"]).order("created_at",{ascending:false}).limit(1).maybeSingle()]);if(se||re||ce||!s||!r||s.league_type!=="pyp"){setMessage(se?.message||re?.message||ce?.message||"Managed PYP season was not found.");setLoading(false);return}const rosterRow=r as Roster,cardRow=c as Card|null;if(rosterRow.status==="approved"&&cardRow?.status!=="approved"){for(let d=1;d<=rosterRow.division_count;d+=1){const {error}=await supabase.rpc("rebuild_pyp_standings",{p_season_id:id,p_division_number:d});if(error){setMessage(`Could not rebuild managed PYP standings: ${error.message}`);break}}}const [{data:sl},{data:st},{data:en},{data:de}]=await Promise.all([supabase.from("pyp_division_roster_slots").select("division_number,player_id,player_screen_name").eq("roster_version_id",rosterRow.id).not("player_id","is",null),supabase.from("season_standings").select("player_id,division,points,wins,losses,ties,strokes,rank").eq("league_type","pyp").eq("season_number",s.season_number),cardRow?supabase.from("pyp_final_scorecard_entries").select("id,division_number,division_rank,player_id,player_screen_name,completed_game_count,wins,losses,ties,points,holes_won").eq("scorecard_id",cardRow.id).order("division_number").order("division_rank"):Promise.resolve({data:[]}),cardRow?supabase.from("pyp_final_scorecard_fixture_details").select("id,player_id,game_number,opponent_screen_name,player_role,course1_name,course1_difficulty,course1_player_hw,course1_opponent_hw,course2_name,course2_difficulty,course2_player_hw,course2_opponent_hw,player_total_hw,opponent_total_hw,outcome").eq("scorecard_id",cardRow.id).order("game_number"):Promise.resolve({data:[]})]);setSeason(s as Season);setRoster(rosterRow);setCard(cardRow);setSlots((sl||[]) as Slot[]);setStandings((st||[]) as Standing[]);setEntries((en||[]) as Entry[]);setDetails((de||[]) as Detail[]);setLoading(false)},[])
+const load=useCallback(async(id:string)=>{
+  setLoading(true)
+  try {
+    const payload=await fetchPypAdminData<{
+      season:Season
+      roster:Roster
+      card:Card|null
+      slots:Slot[]
+      standings:Standing[]
+      entries:Entry[]
+      details:Detail[]
+    }>("standings",{seasonId:id})
+    if(payload.roster.status==="approved"&&payload.card?.status!=="approved"){
+      for(let d=1;d<=payload.roster.division_count;d+=1){
+        const {error}=await supabase.rpc("rebuild_pyp_standings",{p_season_id:id,p_division_number:d})
+        if(error){setMessage(`Could not rebuild managed PYP standings: ${error.message}`);break}
+      }
+    }
+    setSeason(payload.season)
+    setRoster(payload.roster)
+    setCard(payload.card)
+    setSlots(payload.slots)
+    setStandings(payload.standings)
+    setEntries(payload.entries)
+    setDetails(payload.details)
+  }catch(error){
+    setMessage(error instanceof Error?error.message:"Managed PYP standings could not be loaded.")
+  }finally{
+    setLoading(false)
+  }
+},[])
 useEffect(()=>{const id=new URLSearchParams(window.location.search).get("seasonId")||"";// eslint-disable-next-line react-hooks/set-state-in-effect
 setSeasonId(id);if(id)void load(id);else{setMessage("A managed seasonId is required.");setLoading(false)}},[load])
 async function generate(){setBusy(true);setMessage("");const {error}=await supabase.rpc("generate_pyp_final_scorecard",{p_season_id:seasonId});setBusy(false);if(error){setMessage(error.message);return}setMessage("PYP Final Scorecard draft generated.");await load(seasonId)}

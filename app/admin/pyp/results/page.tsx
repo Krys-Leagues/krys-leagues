@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
+import { fetchPypAdminData } from "@/lib/admin/pypAdminData"
 
 type Fixture = { id: string; division_number: number; game_number: number; pyp_home_player_screen_name: string; pyp_away_player_screen_name: string }
 type Difficulty = "Easy" | "Hard" | ""
@@ -33,17 +34,18 @@ export default function PypResultsPage() {
 
   const load = useCallback(async (id: string) => {
     setLoading(true)
-    const [{ data: fixtureData, error: fixtureError }, { data: resultData, error: resultError }] = await Promise.all([
-      supabase.from("schedule").select("id,division_number,game_number,pyp_home_player_screen_name,pyp_away_player_screen_name").eq("league_type", "pyp").eq("season_id", id).not("pyp_roster_version_id", "is", null).order("division_number").order("game_number"),
-      supabase.from("pyp_managed_results").select("id,schedule_id,course1_name,course1_difficulty,course1_home_hw,course1_away_hw,course2_name,course2_difficulty,course2_home_hw,course2_away_hw,home_total_hw,away_total_hw,is_draw").eq("season_id", id),
-    ])
-    setLoading(false)
-    if (fixtureError || resultError) {
-      setMessage(fixtureError?.message || resultError?.message || "Could not load PYP fixtures.")
-      return
+    try {
+      const payload = await fetchPypAdminData<{
+        fixtures: Fixture[]
+        results: Result[]
+      }>("results", { seasonId: id })
+      setFixtures(payload.fixtures)
+      setResults(payload.results)
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Could not load PYP fixtures.")
+    } finally {
+      setLoading(false)
     }
-    setFixtures((fixtureData || []) as Fixture[])
-    setResults((resultData || []) as Result[])
   }, [])
 
   useEffect(() => {
