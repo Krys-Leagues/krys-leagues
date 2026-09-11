@@ -1,5 +1,3 @@
-import { supabase } from "@/lib/supabase"
-
 type LogEntry = {
   userType: "admin" | "member" | "system"
 
@@ -24,17 +22,11 @@ type LogEntry = {
 
 export async function logActivity(entry: LogEntry) {
   try {
-    await supabase.from("activity_log").insert({
-      user_type: entry.userType,
-      action: entry.action,
-      status: entry.status ?? "success",
-      page: entry.page ?? null,
-      league_type: entry.leagueType ?? null,
-      division: entry.division ?? null,
-      discord_id: entry.discordId ?? null,
-      discord_name: entry.discordName ?? null,
-      user_id: entry.userId ?? null,
-      details: entry.details ?? {},
+    await fetch("/api/admin/activity-log", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify(entry),
     })
   } catch (err) {
     console.error("Activity Log Failed", err)

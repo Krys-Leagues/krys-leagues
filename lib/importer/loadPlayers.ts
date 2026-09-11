@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js"
+import { createClient, type SupabaseClient } from "@supabase/supabase-js"
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -14,8 +14,8 @@ export type PlayerRecord = {
   active: boolean
 }
 
-export async function loadPlayers(options: { includeInactive?: boolean } = {}): Promise<PlayerRecord[]> {
-  let query = supabase
+export async function loadPlayers(options: { includeInactive?: boolean } = {}, client: SupabaseClient = supabase): Promise<PlayerRecord[]> {
+  let query = client
     .from("players")
     .select(`
       id,

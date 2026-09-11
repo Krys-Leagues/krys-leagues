@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js"
+import { createClient, type SupabaseClient } from "@supabase/supabase-js"
 import type { PlayerIdentityAlias } from "@/lib/identity"
 
 const supabase = createClient(
@@ -15,10 +15,10 @@ type AliasDatabaseRow = {
   verified: boolean
 }
 
-export async function loadPlayerAliases(): Promise<
+export async function loadPlayerAliases(client: SupabaseClient = supabase): Promise<
   PlayerIdentityAlias[]
 > {
-  const { data, error } = await supabase
+  const { data, error } = await client
     .from("player_aliases")
     .select(`
       id,

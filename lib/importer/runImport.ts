@@ -1,3 +1,6 @@
+import "server-only"
+
+import { createTrustedSupabaseClient } from "@/lib/supabase/trustedServer"
 import { createImportBatch } from "./createImportBatch"
 import { saveImportRows } from "./saveImportRows"
 import { loadPlayers } from "./loadPlayers"
@@ -20,6 +23,7 @@ export async function runImport({
   rows,
   playerColumn,
 }: RunImportArgs) {
+  const client = createTrustedSupabaseClient()
 
   // STEP 1 - Create the import batch
   const batch = await createImportBatch({
@@ -27,7 +31,7 @@ export async function runImport({
     importType,
     originalFilename,
     totalRows: rows.length,
-  })
+  }, client)
 
   // STEP 2 - Save all CSV rows
   await saveImportRows(
@@ -37,12 +41,13 @@ export async function runImport({
       rawData: row,
       importedPlayerName:
         String(row[playerColumn] ?? ""),
-    }))
+    })),
+    client,
   )
 
   // STEP 3 - Load existing players
-  const players = await loadPlayers()
-  const aliases = await loadPlayerAliases()
+  const players = await loadPlayers({}, client)
+  const aliases = await loadPlayerAliases(client)
 
   // STEP 4 - Match imported player names
   const importedNames = rows.map((row) =>

@@ -51,6 +51,19 @@ test("admin schedule writes use the protected route", () => {
   assert.match(route, /SUPABASE_SERVICE_ROLE_KEY \|\| process\.env\.SUPABASE_SECRET_KEY/)
 })
 
-test("public schedule deletion remains explicitly flagged for follow-up auth review", () => {
-  assert.match(source("app/schedule/page.tsx"), /\.from\("schedule"\)[\s\S]*?\.delete\(\)/)
+test("public schedule deletion uses the protected site-admin endpoint", () => {
+  const page = source("app/schedule/page.tsx")
+  const route = source("app/api/delete-schedule/route.ts")
+  assert.match(page, /fetch\("\/api\/delete-schedule"/)
+  assert.doesNotMatch(page, /from\("schedule"\)[\s\S]*?\.delete\(\)/)
+  assert.match(route, /authorizeSiteAdminMutation\(\)/)
+  assert.match(route, /createTrustedSupabaseClient\(\)/)
+})
+
+test("internal production writes use protected server paths", () => {
+  assert.match(source("app/api/create-matches/route.ts"), /createTrustedSupabaseClient\(\)/)
+  assert.match(source("app/api/import/run/route.ts"), /authorizeSiteAdminMutation\(\)/)
+  assert.match(source("lib/importer/runImport.ts"), /createTrustedSupabaseClient\(\)/)
+  assert.match(source("app/api/admin/activity-log/route.ts"), /authorizeSiteAdminMutation\(\)/)
+  assert.doesNotMatch(source("lib/activityLog.ts"), /from\("activity_log"\)/)
 })

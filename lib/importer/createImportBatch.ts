@@ -1,9 +1,4 @@
-import { createClient } from "@supabase/supabase-js"
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+import type { SupabaseClient } from "@supabase/supabase-js"
 
 export type CreateImportBatchArgs = {
   sourceName: string
@@ -17,8 +12,8 @@ export async function createImportBatch({
   importType,
   originalFilename,
   totalRows,
-}: CreateImportBatchArgs) {
-  const { data, error } = await supabase
+}: CreateImportBatchArgs, client: SupabaseClient) {
+  const { data, error } = await client
     .from("import_batches")
     .insert({
       source_name: sourceName,

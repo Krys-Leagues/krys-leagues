@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 
 import { authorizeSiteAdminMutation } from "@/lib/auth/siteAdminMutation"
+import { createTrustedSupabaseClient } from "@/lib/supabase/trustedServer"
 
 export async function POST(request: Request) {
   const authorization = await authorizeSiteAdminMutation()
@@ -20,7 +21,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "A valid schedule row id is required." }, { status: 400 })
   }
 
-  const { data, error } = await authorization.supabase
+  const { data, error } = await createTrustedSupabaseClient()
     .from("schedule")
     .delete()
     .eq("id", id)

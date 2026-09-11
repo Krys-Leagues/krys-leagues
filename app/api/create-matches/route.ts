@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { authorizeSiteAdminMutation } from "@/lib/auth/siteAdminMutation"
+import { createTrustedSupabaseClient } from "@/lib/supabase/trustedServer"
 
 export async function POST(req: Request) {
   const authorization = await authorizeSiteAdminMutation()
@@ -15,7 +16,7 @@ export async function POST(req: Request) {
       )
     }
 
-    const { data, error } = await authorization.supabase
+    const { data, error } = await createTrustedSupabaseClient()
       .from("matches")
       .insert(
         matches.map((m: any) => ({
