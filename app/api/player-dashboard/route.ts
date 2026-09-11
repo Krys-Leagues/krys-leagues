@@ -26,7 +26,7 @@ export async function GET() {
 
   const identityIds = [...new Set(payload.identityIds || [payload.player.id])]
   const client = createTrustedSupabaseClient()
-  const opponentIds = [...new Set((payload.schedule || []).flatMap((match) => [match.player1_id, match.player2_id]).filter((id): id is string => Boolean(id) && !identityIds.includes(id)))]
+  const opponentIds = [...new Set((payload.schedule || []).flatMap((match) => [match.player1_id, match.player2_id]).filter((id): id is string => typeof id === "string" && !identityIds.includes(id)))]
   const opponentNames: Array<[string, string]> = []
   for (const opponentId of opponentIds) {
     const resolved = await client.rpc("get_public_player_canonical_identity", { p_player_id: opponentId })
