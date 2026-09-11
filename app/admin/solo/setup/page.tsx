@@ -4,11 +4,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
+import { fetchSoloAdminData } from "@/lib/admin/soloAdminData"
 import { SOLO_DIVISIONS, SOLO_DIVISION_PRESENTATION, type SoloDivision } from "@/lib/solo"
 
 type Player = { id: string; screen_name: string; active?: boolean; status?: string | null }
 type DiscordMatch = Player & { discord_id: string; already_in_pool: boolean }
-type PoolEntry = { player_id: string }
 type Entry = { player_id: string; player_screen_name: string; division: SoloDivision; display_order: number }
 type Roster = { id: string; status: "draft" | "approved" | "locked" }
 type Season = { season_number: number; league_type: string | null }
@@ -65,37 +65,19 @@ export default function SoloSetupPage() {
       setLoading(false)
       return
     }
-    const [{ data: s, error: se }, { data: r, error: re }, { data: p, error: pe }] = await Promise.all([
-      supabase.from("seasons").select("season_number,league_type").eq("id", id).maybeSingle(),
-      supabase.from("solo_roster_versions").select("id,status").eq("season_id", id).in("status", ["draft", "approved", "locked"]).order("version_number", { ascending: false }).limit(1).maybeSingle(),
-      supabase.from("solo_player_pool").select("player_id").eq("season_id", id),
-    ])
-    if (se || re || pe || !s || s.league_type !== "solo" || !r) {
-      setMessage(se?.message || re?.message || pe?.message || "Managed Solo season setup was not found.")
+    let response: { season: Season; roster: Roster; players: Player[]; entries: Entry[] }
+    try {
+      response = await fetchSoloAdminData<typeof response>("setup", { seasonId: id })
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Managed Solo season setup was not found.")
       setLoading(false)
       return
     }
-    const poolIds = ((p || []) as PoolEntry[]).map((entry) => entry.player_id)
-    const poolPlayerQuery = poolIds.length
-      ? supabase.from("players").select("id,screen_name").in("id", poolIds).order("screen_name")
-      : null
-    const [{ data: e, error: ee }, { data: poolPlayers, error: poolError }] = await Promise.all([
-      supabase.from("solo_roster_entries").select("player_id,player_screen_name,division,display_order").eq("roster_version_id", r.id).order("display_order"),
-      poolPlayerQuery
-        ? historical ? poolPlayerQuery : poolPlayerQuery.eq("active", true)
-        : Promise.resolve({ data: [] as Player[], error: null }),
-    ])
-    if (ee || poolError) {
-      setMessage(ee?.message || poolError?.message || "Solo player pool could not be loaded.")
-      setLoading(false)
-      return
-    }
-    const loadedEntries = (e || []) as Entry[]
-    setSeason(s as Season)
-    setRoster(r as Roster)
-    setPlayers((poolPlayers || []) as Player[])
-    setEntries(loadedEntries)
-    setSavedFingerprint(rosterFingerprint(loadedEntries))
+    setSeason(response.season)
+    setRoster(response.roster)
+    setPlayers(response.players.filter((player) => historical || player.active !== false))
+    setEntries(response.entries)
+    setSavedFingerprint(rosterFingerprint(response.entries))
     setLoading(false)
   }, [])
 

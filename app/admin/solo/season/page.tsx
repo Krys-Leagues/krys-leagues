@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
+import { fetchSoloAdminData } from "@/lib/admin/soloAdminData"
 
 const today = () => new Date().toLocaleDateString("en-CA")
 
@@ -20,16 +21,16 @@ export default function SoloSeasonPage() {
     const id = new URLSearchParams(window.location.search).get("seasonId") || ""
     setRequested(id)
     if (!id) return
-    void supabase.from("seasons").select("season_number,league_type,start_date,end_date").eq("id", id).maybeSingle().then(({ data, error }) => {
-      if (error || !data || data.league_type !== "solo") {
-        setMessage(error?.message || "The requested Solo season was not found. No fallback season was loaded.")
+    void fetchSoloAdminData<{ season: { season_number: number; league_type: string | null; start_date: string | null; end_date: string | null } | null }>("season", { seasonId: id }).then(({ season }) => {
+      if (!season || season.league_type !== "solo") {
+        setMessage("The requested Solo season was not found. No fallback season was loaded.")
         return
       }
-      setNumber(String(data.season_number))
-      setStart(data.start_date || "")
-      setEnd(data.end_date || "")
-      setMessage(`Editing managed Solo Season ${data.season_number}. Historical dates may be left blank.`)
-    })
+      setNumber(String(season.season_number))
+      setStart(season.start_date || "")
+      setEnd(season.end_date || "")
+      setMessage(`Editing managed Solo Season ${season.season_number}. Historical dates may be left blank.`)
+    }).catch((error) => setMessage(error instanceof Error ? error.message : "The requested Solo season could not be loaded."))
   }, [])
 
   async function save() {
