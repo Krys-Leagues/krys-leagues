@@ -3,7 +3,6 @@
 import React, { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { AdminRecordsHero, AdminRecordsShell, adminRecordsStyles as styles } from "@/components/admin/records/AdminRecordsUI"
-import { supabase } from "@/lib/supabase"
 
 type Player = {
   id: string
@@ -71,20 +70,11 @@ export default function CombinedRecordsPage() {
   async function loadData() {
     setLoading(true)
 
-    const { data: playerData } = await supabase
-      .from("players")
-      .select("id, screen_name")
-      .eq("active", true)
-      .order("screen_name", { ascending: true })
-
-    const { data: recordData } = await supabase
-      .from("combined_course_records")
-      .select("*")
-      .order("course_name", { ascending: true })
-      .order("combined_score", { ascending: true })
-
-    setPlayers(playerData || [])
-    setRecords(recordData || [])
+    const response = await fetch("/api/admin/records/combined", { credentials: "same-origin", cache: "no-store" })
+    const payload = await response.json() as { error?: string; players?: Player[]; records?: CombinedRecord[] }
+    if (!response.ok) { alert(payload.error || "Combined records could not be loaded."); setLoading(false); return }
+    setPlayers(payload.players || [])
+    setRecords(payload.records || [])
 
     setLoading(false)
   }
@@ -131,30 +121,18 @@ export default function CombinedRecordsPage() {
 
     setSaving(true)
 
-    const { error } = await supabase
-      .from("combined_course_records")
-      .upsert(
-        [
-          {
-            player_id: selectedPlayer.id,
-            player_name: selectedPlayer.screen_name,
-            course_name: courseName,
-            easy_score: Number(easyScore),
-            hard_score: Number(hardScore),
-            combined_score: combinedScore,
-            played_at: playedAt || null,
-            notes: notes || null,
-          },
-        ],
-        {
-          onConflict: "player_name,course_name",
-        }
-      )
+    const response = await fetch("/api/admin/records/combined", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({ player_id: selectedPlayer.id, player_name: selectedPlayer.screen_name, course_name: courseName, easy_score: Number(easyScore), hard_score: Number(hardScore), combined_score: combinedScore, played_at: playedAt || null, notes: notes || null }),
+    })
+    const payload = await response.json() as { error?: string }
 
     setSaving(false)
 
-    if (error) {
-      alert(error.message)
+    if (!response.ok) {
+      alert(payload.error || "Combined record save failed")
       return
     }
 
