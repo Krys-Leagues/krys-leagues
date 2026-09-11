@@ -2,9 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { AdminGlassCard, AdminRecordsHero, AdminRecordsShell, adminRecordsStyles as styles } from "@/components/admin/records/AdminRecordsUI"
+import { supabase } from "@/lib/supabase"
 import {
   CLIMBERS_BASELINE_CUTOFF,
-  CLIMBERS_BASELINE_IMPORT_KEY,
   EXPECTED_CLIMBERS_BASELINE,
   summarizeClimbersBaseline,
   validateClimbersBaselineForActivation,
