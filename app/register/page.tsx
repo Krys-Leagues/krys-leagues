@@ -7,7 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { createDiscordAuthCallbackUrl } from "@/lib/authReturnTo";
 import { getAuthenticatedDiscordId } from "@/lib/discordPlayerLogin";
 import { supabase } from "@/lib/supabase";
-import { isDuplicateWaitlistError, waitlistDuplicateMessage, waitlistSuccessMessage } from "@/lib/waitlistMessages";
+import { waitlistDuplicateMessage, waitlistSuccessMessage } from "@/lib/waitlistMessages";
 
 const LEAGUES: Record<string, { title: string; waitlistLabel: string; subtitle: string; image: string | null; ageNote: string }> = {
   match: { title: "Match League Registration", waitlistLabel: "Match", subtitle: "Head-to-head leagues are 18+.", image: "/league-media/match.png", ageNote: "18+ only" },
@@ -65,29 +65,17 @@ function RegisterContent() {
     const discordId = getAuthenticatedDiscordId(user);
     if (!discordId) return setStatus("Discord identity could not be verified. Please sign out and sign in with Discord again.");
 
-    const { data: existing, error: existingError } = await supabase
-      .from("player_waitlist")
-      .select("id")
-      .eq("discord_id", discordId)
-      .eq("league_type", leagueKey)
-      .in("status", ["waiting", "pending"])
-      .limit(1);
-
-    if (existingError) return setStatus(`Error: ${existingError.message || "We couldn't check your existing waitlist registration."}`);
-    if (existing?.length) return setStatus(waitlistDuplicateMessage(league.waitlistLabel));
-
-    const { error } = await supabase.from("player_waitlist").insert({
-      screen_name: screenName.trim(),
-      league_type: leagueKey,
-      discord_id: discordId,
-      discord_username: discordName,
-      notes: notes.trim() || null,
-      status: "waiting",
+    const response = await fetch("/api/register/waitlist", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({ screenName: screenName.trim(), leagueType: leagueKey, notes: notes.trim() || null }),
     });
+    const payload = await response.json().catch(() => ({})) as { error?: string };
 
-    if (error) {
-      if (isDuplicateWaitlistError(error)) return setStatus(waitlistDuplicateMessage(league.waitlistLabel));
-      return setStatus(`Error: ${error.message || "We couldn't save your waitlist registration."}`);
+    if (!response.ok || payload.error) {
+      if (response.status === 409) return setStatus(waitlistDuplicateMessage(league.waitlistLabel));
+      return setStatus(`Error: ${payload.error || "We couldn't save your waitlist registration."}`);
     }
 
     setStatus(waitlistSuccessMessage(league.waitlistLabel).join("\n"));

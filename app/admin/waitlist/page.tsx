@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { supabase } from "@/lib/supabase"
 import { postAdminDataMutation } from "@/lib/adminDataMutations"
 
 type WaitlistPlayer = {
@@ -53,21 +52,18 @@ export default function WaitlistAdminPage() {
     setLoading(true)
     setErrorMessage("")
 
-    const { data, error } = await supabase
-      .from("player_waitlist")
-      .select("*")
-      .in("status", ["waiting", "pending"])
-      .order("created_at", { ascending: false })
+    const response = await fetch("/api/admin/waitlist", { cache: "no-store" })
+    const payload = await response.json().catch(() => ({})) as { data?: WaitlistPlayer[]; error?: string }
 
     setLoading(false)
 
-    if (error) {
-      setErrorMessage(error.message)
+    if (!response.ok || payload.error) {
+      setErrorMessage(payload.error || response.statusText)
       setWaitlist([])
       return
     }
 
-    const rows = (data || []) as WaitlistPlayer[]
+    const rows = payload.data || []
     setWaitlist(rows)
 
     const defaults: Record<string, string> = {}
@@ -103,13 +99,15 @@ export default function WaitlistAdminPage() {
       return
     }
 
-    const { error: deleteError } = await supabase
-      .from("player_waitlist")
-      .delete()
-      .eq("id", player.id)
+    const deleteResponse = await fetch("/api/admin/waitlist", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: player.id }),
+    })
+    const deletePayload = await deleteResponse.json().catch(() => ({})) as { error?: string }
 
-    if (deleteError) {
-      setErrorMessage(deleteError.message)
+    if (!deleteResponse.ok || deletePayload.error) {
+      setErrorMessage(deletePayload.error || deleteResponse.statusText)
       setSavingId(null)
       return
     }
@@ -122,13 +120,15 @@ export default function WaitlistAdminPage() {
     setSavingId(player.id)
     setErrorMessage("")
 
-    const { error } = await supabase
-      .from("player_waitlist")
-      .delete()
-      .eq("id", player.id)
+    const response = await fetch("/api/admin/waitlist", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: player.id }),
+    })
+    const payload = await response.json().catch(() => ({})) as { error?: string }
 
-    if (error) {
-      setErrorMessage(error.message)
+    if (!response.ok || payload.error) {
+      setErrorMessage(payload.error || response.statusText)
       setSavingId(null)
       return
     }
