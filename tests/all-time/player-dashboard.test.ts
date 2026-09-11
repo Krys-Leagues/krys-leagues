@@ -18,8 +18,9 @@ test("Player Dashboard reads only the authenticated canonical player's current d
   assert.match(dashboard, /getSession\(\)/)
   assert.match(dashboard, /current_user_canonical_player_id/)
   assert.match(dashboard, /get_public_player_canonical_identity/)
-  assert.match(dashboard, /from\("seasons"\).*is_active/)
   assert.match(dashboard, /player_league_memberships.*loadedIdentityIds/)
+  assert.match(dashboard, /currentMembershipSeasonKeys/)
+  assert.doesNotMatch(dashboard, /from\("seasons"\)/)
   assert.doesNotMatch(dashboard, /loadCanonicalPublicPlayers|selectedPlayerId|<select/)
 })
 
@@ -31,5 +32,6 @@ test("Empty Dashboard provides Join Leagues and active schedules stay authoritat
   assert.match(dashboard, /samePair/)
   assert.match(dashboard, /Scheduled games/)
   assert.match(dashboard, /opponentName &&/)
+  assert.match(dashboard, /normalized === "monthlies" \? "monthly"/)
   assert.doesNotMatch(dashboard, /post-schedule|discord.*channel|role.*sync/i)
 })

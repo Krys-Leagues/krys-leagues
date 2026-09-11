@@ -52,3 +52,16 @@ test("league picker code no longer loads the full active players directory", asy
     assert.doesNotMatch(text, /from\("players"\)[\s\S]{0,180}\.eq\("active", true\)/)
   }
 })
+
+test("approved Solo rosters reconcile canonical current memberships", async () => {
+  const migration = await source("supabase/migrations/20260911210000_sync_solo_approved_roster_memberships.sql")
+
+  assert.match(migration, /create or replace function public\.approve_solo_roster_version/)
+  assert.match(migration, /can_current_user_admin_solo\(\)/)
+  assert.match(migration, /set search_path to ''/i)
+  assert.match(migration, /solo_roster_entries/)
+  assert.match(migration, /player_league_memberships/)
+  assert.match(migration, /resolve_canonical_player_id/)
+  assert.match(migration, /on conflict \(player_id, league_type, season_number, division\) do nothing/i)
+  assert.doesNotMatch(migration, /solo_historical_/i)
+})

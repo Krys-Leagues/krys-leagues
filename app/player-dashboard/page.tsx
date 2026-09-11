@@ -41,7 +41,8 @@ type Result = {
 }
 
 function leagueKey(value: string | null) {
-  return (value || "").trim().toLowerCase().replace(/[\s_]+/g, "-")
+  const normalized = (value || "").trim().toLowerCase().replace(/[\s_]+/g, "-")
+  return normalized === "monthlies" ? "monthly" : normalized
 }
 
 function seasonKey(leagueType: string | null, seasonNumber: number | null) {
@@ -59,7 +60,6 @@ export default function PlayerDashboardPage() {
   const [memberships, setMemberships] = useState<Membership[]>([])
   const [schedule, setSchedule] = useState<ScheduledMatch[]>([])
   const [results, setResults] = useState<Result[]>([])
-  const [activeSeasonKeys, setActiveSeasonKeys] = useState<Set<string>>(new Set())
   const [opponentNames, setOpponentNames] = useState<Map<string, string>>(new Map())
   const [loading, setLoading] = useState(true)
   const [authRequired, setAuthRequired] = useState(false)
@@ -84,21 +84,19 @@ export default function PlayerDashboardPage() {
       return
     }
 
-    const [playerResponse, identityResponse, activeSeasonsResponse] = await Promise.all([
+    const [playerResponse, identityResponse] = await Promise.all([
       supabase.from("players").select("id, screen_name, status, active").eq("id", canonicalId).maybeSingle(),
       supabase.rpc("get_public_player_canonical_identity", { p_player_id: canonicalId }),
-      supabase.from("seasons").select("league_type, season_number, is_active").eq("is_active", true),
     ])
 
-    if (playerResponse.error || identityResponse.error || activeSeasonsResponse.error || !playerResponse.data) {
-      setMessage(playerResponse.error?.message || identityResponse.error?.message || activeSeasonsResponse.error?.message || "Your player dashboard could not be loaded.")
+    if (playerResponse.error || identityResponse.error || !playerResponse.data) {
+      setMessage(playerResponse.error?.message || identityResponse.error?.message || "Your player dashboard could not be loaded.")
       setLoading(false)
       return
     }
 
     const identity = (Array.isArray(identityResponse.data) ? identityResponse.data[0] : identityResponse.data) as { identity_player_ids?: string[] | null } | null
     const loadedIdentityIds = identity?.identity_player_ids?.length ? Array.from(new Set(identity.identity_player_ids)) : [canonicalId]
-    const loadedActiveSeasonKeys = new Set((activeSeasonsResponse.data || []).map((season) => seasonKey(season.league_type, season.season_number)))
     const [membershipsResponse, scheduleResponse, resultsResponse] = await Promise.all([
       supabase.from("player_league_memberships").select("id, player_id, league_type, division, season_number").in("player_id", loadedIdentityIds),
       supabase.from("schedule").select("id, league_type, division, season_number, game, course, player1_id, player2_id").order("game", { ascending: true }),
@@ -130,7 +128,6 @@ export default function PlayerDashboardPage() {
 
     setPlayer(playerResponse.data as Player)
     setIdentityIds(loadedIdentityIds)
-    setActiveSeasonKeys(loadedActiveSeasonKeys)
     setMemberships((membershipsResponse.data || []) as Membership[])
     setSchedule(loadedSchedule)
     setResults((resultsResponse.data || []) as Result[])
@@ -145,18 +142,23 @@ export default function PlayerDashboardPage() {
   }, [])
 
   const playerMemberships = useMemo(
-    () => memberships.filter((membership) => identityIds.includes(membership.player_id) && activeSeasonKeys.has(seasonKey(membership.league_type, membership.season_number))),
-    [activeSeasonKeys, identityIds, memberships]
+    () => memberships.filter((membership) => identityIds.includes(membership.player_id)),
+    [identityIds, memberships]
+  )
+
+  const currentMembershipSeasonKeys = useMemo(
+    () => new Set(playerMemberships.map((membership) => seasonKey(membership.league_type, membership.season_number))),
+    [playerMemberships]
   )
 
   const scheduledMatches = useMemo(
-    () => schedule.filter((match) => activeSeasonKeys.has(seasonKey(match.league_type, match.season_number)) && (identityIds.includes(match.player1_id || "") || identityIds.includes(match.player2_id || ""))),
-    [activeSeasonKeys, identityIds, schedule]
+    () => schedule.filter((match) => currentMembershipSeasonKeys.has(seasonKey(match.league_type, match.season_number)) && (identityIds.includes(match.player1_id || "") || identityIds.includes(match.player2_id || ""))),
+    [currentMembershipSeasonKeys, identityIds, schedule]
   )
 
   const completedMatches = useMemo(
-    () => results.filter((result) => activeSeasonKeys.has(seasonKey(result.league_type, result.season_number)) && (identityIds.includes(result.player1_id || "") || identityIds.includes(result.player2_id || ""))),
-    [activeSeasonKeys, identityIds, results]
+    () => results.filter((result) => currentMembershipSeasonKeys.has(seasonKey(result.league_type, result.season_number)) && (identityIds.includes(result.player1_id || "") || identityIds.includes(result.player2_id || ""))),
+    [currentMembershipSeasonKeys, identityIds, results]
   )
 
   function hasResultFor(match: ScheduledMatch) {
