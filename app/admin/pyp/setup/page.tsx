@@ -76,20 +76,21 @@ export default function PypSetupPage() {
     }
 
     const selectedIds = slots.map((slot) => slot.player_id).filter((id): id is string => Boolean(id))
-    const [{ data: activePlayers, error: activeError }, rosterPlayersResult] = await Promise.all([
-      supabase.from("players").select("id, screen_name").eq("active", true).order("screen_name"),
+    const [membersResponse, rosterPlayersResult] = await Promise.all([
+      fetch(`/api/admin/league-memberships?league_type=pyp&season_number=${encodeURIComponent(String(seasonData.season_number))}&division=${encodeURIComponent(`PYP D${requestedDivision}`)}`, { cache: "no-store", credentials: "same-origin" }),
       selectedIds.length > 0
         ? supabase.from("players").select("id, screen_name").in("id", selectedIds)
         : Promise.resolve({ data: [] as Player[], error: null }),
     ])
-    if (activeError || rosterPlayersResult.error) {
-      setMessage(activeError?.message || rosterPlayersResult.error?.message || "Could not load players.")
+    const membersPayload = await membersResponse.json() as { error?: string; players?: Player[] }
+    if (!membersResponse.ok || rosterPlayersResult.error) {
+      setMessage(membersPayload.error || rosterPlayersResult.error?.message || "Could not load players.")
       setLoading(false)
       return
     }
 
     const playerMap = new Map<string, Player>()
-    for (const player of [...((activePlayers || []) as Player[]), ...((rosterPlayersResult.data || []) as Player[])]) playerMap.set(player.id, player)
+    for (const player of [...((membersPayload.players || []) as Player[]), ...((rosterPlayersResult.data || []) as Player[])]) playerMap.set(player.id, player)
     setPlayers(Array.from(playerMap.values()).sort((a, b) => a.screen_name.localeCompare(b.screen_name)))
     setSeasonId(selectedSeasonId)
     setSeason(seasonData as Season)

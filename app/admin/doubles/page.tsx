@@ -25,9 +25,9 @@ export default function DoublesAdminPage() {
           <span>View current Doubles standings.</span>
         </Link>
 
-        <Link href="/admin/players" style={card}>
+        <Link href="/admin/doubles/players" style={card}>
           <strong>Players</strong>
-          <span>Open the global player manager.</span>
+          <span>View and manage players enrolled in Doubles.</span>
         </Link>
 
         <Link href="/admin" style={card}>

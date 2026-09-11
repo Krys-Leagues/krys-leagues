@@ -102,12 +102,19 @@ export default function StrokeAdminPage() {
         </Link>
 
         {managedSeason ? (
-          <Link href={`/admin/stroke/players?seasonId=${encodeURIComponent(managedSeason.id)}`} style={card}>
+          <Link href="/admin/stroke/members" style={card}>
             <strong>Players</strong>
-            <span>View players in this Stroke season.</span>
+            <span>View and manage players enrolled in Stroke.</span>
           </Link>
         ) : (
           <div style={{ ...card, opacity: 0.65 }}><strong>Players</strong><span>{scheduleLinkError || "No current managed Stroke season is available yet."}</span></div>
+        )}
+
+        {managedSeason && (
+          <Link href={`/admin/stroke/players?seasonId=${encodeURIComponent(managedSeason.id)}`} style={card}>
+            <strong>Season Roster</strong>
+            <span>Assign the persistent roster slots for this Stroke season.</span>
+          </Link>
         )}
 
         <Link href="/admin" style={card}>

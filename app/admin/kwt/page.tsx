@@ -30,9 +30,9 @@ export default function KWTAdminPage() {
           <span>Track who is playing, who has submitted, and who needs a reminder.</span>
         </Link>
 
-        <Link href="/admin/players" style={card}>
+        <Link href="/admin/kwt/players" style={card}>
           <strong>Players</strong>
-          <span>View global player list used across all leagues.</span>
+          <span>View and manage players enrolled in KWT.</span>
         </Link>
 
         <Link href="/admin" style={card}>

@@ -110,12 +110,19 @@ export default function MatchAdminPage() {
         )}
 
         {managedSeason ? (
-          <Link href={`/admin/match/players?seasonId=${encodeURIComponent(managedSeason.id)}`} style={card}>
+          <Link href="/admin/match/members" style={card}>
             <strong>Players</strong>
-            <span>View players in this Match season.</span>
+            <span>View and manage players enrolled in Match.</span>
           </Link>
         ) : (
           <div style={{ ...card, opacity: 0.65 }}><strong>Players</strong><span>{scheduleLinkError || "No current managed Match season is available yet."}</span></div>
+        )}
+
+        {managedSeason && (
+          <Link href={`/admin/match/players?seasonId=${encodeURIComponent(managedSeason.id)}`} style={card}>
+            <strong>Season Roster</strong>
+            <span>Assign the persistent roster slots for this Match season.</span>
+          </Link>
         )}
 
         <Link href="/admin" style={card}>

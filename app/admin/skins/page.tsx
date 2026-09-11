@@ -30,9 +30,9 @@ export default function SkinsAdminPage() {
           <span>Track player progress and submissions.</span>
         </Link>
 
-        <Link href="/admin/players" style={card}>
+        <Link href="/admin/skins/players" style={card}>
           <strong>Players</strong>
-          <span>View global player list used across all leagues.</span>
+          <span>View and manage players enrolled in Skins.</span>
         </Link>
 
         <Link href="/admin" style={card}>

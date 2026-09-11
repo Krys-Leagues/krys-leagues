@@ -358,17 +358,14 @@ export default function StrokeSetup() {
       .map((slot) => slot.player_id)
       .filter((playerId): playerId is string => Boolean(playerId))
 
-    const { data: activePlayerData, error: activePlayerError } = await supabase
-      .from("players")
-      .select("id, screen_name")
-      .eq("active", true)
-      .order("screen_name")
-
-    if (activePlayerError) {
-      setSetupError(`Could not load players: ${activePlayerError.message}`)
+    const membersResponse = await fetch(`/api/admin/league-memberships?league_type=stroke&season_number=${encodeURIComponent(String(selectedSeason.season_number))}&division=${encodeURIComponent(`Stroke D${requestedDivision}`)}`, { cache: "no-store", credentials: "same-origin" })
+    const membersPayload = await membersResponse.json() as { error?: string; players?: Player[] }
+    if (!membersResponse.ok) {
+      setSetupError(`Could not load league players: ${membersPayload.error || membersResponse.statusText}`)
       setLoadingSetup(false)
       return
     }
+    const activePlayerData = membersPayload.players || []
 
     let rosterPlayerData: Player[] = []
 
@@ -388,7 +385,7 @@ export default function StrokeSetup() {
     }
 
     const playerMap = new Map<string, Player>()
-    ;([...(activePlayerData || []), ...rosterPlayerData] as Player[]).forEach(
+    ;([...activePlayerData, ...rosterPlayerData] as Player[]).forEach(
       (player) => playerMap.set(player.id, player)
     )
 

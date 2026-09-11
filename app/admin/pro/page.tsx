@@ -25,9 +25,9 @@ export default function ProAdminPage() {
           <span>View current standings.</span>
         </Link>
 
-        <Link href="/admin/players" style={card}>
+        <Link href="/admin/pro/players" style={card}>
           <strong>Players</strong>
-          <span>Open the global player manager.</span>
+          <span>View and manage players enrolled in Pro.</span>
         </Link>
 
         <Link href="/admin" style={card}>

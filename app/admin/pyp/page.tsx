@@ -67,11 +67,17 @@ export default function PypAdminPage() {
         )}
 
         {managedSeason ? (
-          <Link href={`/admin/pyp/players?seasonId=${encodeURIComponent(managedSeason.id)}`} style={card}>
-            <strong>Players</strong><span>View players in this PYP season.</span>
+          <Link href="/admin/pyp/members" style={card}>
+            <strong>Players</strong><span>View and manage players enrolled in PYP.</span>
           </Link>
         ) : (
           <div style={{ ...card, opacity: 0.65 }}><strong>Players</strong><span>{loadError || "No current managed PYP season is available yet."}</span></div>
+        )}
+
+        {managedSeason && (
+          <Link href={`/admin/pyp/players?seasonId=${encodeURIComponent(managedSeason.id)}`} style={card}>
+            <strong>Season Roster</strong><span>Assign the persistent roster slots for this PYP season.</span>
+          </Link>
         )}
 
         <Link href="/admin" style={card}>

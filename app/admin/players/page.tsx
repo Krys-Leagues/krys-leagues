@@ -38,20 +38,26 @@ type IdentityLink = {
   canonical_player_id: string
 }
 
-type LeagueKey = "stroke" | "pyp" | "skins" | "kwt"
+type LeagueKey = "stroke" | "match" | "pyp" | "pro" | "doubles" | "kwt" | "skins"
 
 const CURRENT_SEASON = 59
 
 const LEAGUES: { value: LeagueKey; label: string }[] = [
   { value: "stroke", label: "Stroke" },
+  { value: "match", label: "Match" },
   { value: "pyp", label: "PYP" },
+  { value: "pro", label: "Pro" },
+  { value: "doubles", label: "Doubles" },
   { value: "skins", label: "Skins" },
   { value: "kwt", label: "KWT" },
 ]
 
 const DIVISIONS_BY_LEAGUE: Record<LeagueKey, string[]> = {
   stroke: ["Stroke D1", "Stroke D2", "Stroke D3", "Stroke D4", "Stroke D5"],
+  match: ["Match D1", "Match D2", "Match D3", "Match D4", "Match D5"],
   pyp: ["PYP D1", "PYP D2", "PYP D3", "PYP D4", "PYP D5"],
+  pro: ["Pro D1", "Pro D2", "Pro D3", "Semi Pro D1", "Amateur D1"],
+  doubles: ["Doubles Elite", "Doubles D1", "Doubles D2", "Doubles D3", "Doubles D4", "Doubles D5"],
   skins: ["Skins D1", "Skins D2", "Skins D3", "Skins D4", "Skins D5"],
   kwt: ["Amateur", "Semi Pro", "Pro", "Elite"],
 }
@@ -374,7 +380,7 @@ export default function PlayersAdminPage() {
 
     setSavingLeague(true)
 
-    const response = await fetch("/api/admin/players", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "same-origin", body: JSON.stringify({ action: "add_league_membership", player_id: leaguePlayer.id, league_type: league, season_number: CURRENT_SEASON, division }) })
+    const response = await fetch("/api/admin/league-memberships", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "same-origin", body: JSON.stringify({ action: "add", player_id: leaguePlayer.id, league_type: league, season_number: CURRENT_SEASON, division }) })
     const payload = await response.json() as { error?: string }
 
     setSavingLeague(false)

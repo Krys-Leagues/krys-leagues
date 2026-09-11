@@ -1,7 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { supabase } from "@/lib/supabase"
+import { useCallback, useEffect, useState } from "react"
 // force redeploy
 
 const DIVISIONS = [
@@ -18,6 +17,13 @@ type Player = {
   display_name: string
 }
 
+type DoublesTeam = {
+  id: string | number
+  team_name: string
+  player1: string
+  player2: string
+}
+
 export default function DoublesTeamsPage() {
   const [division, setDivision] = useState("Doubles Elite")
   const [teamName, setTeamName] = useState("")
@@ -25,7 +31,7 @@ export default function DoublesTeamsPage() {
   const [player2, setPlayer2] = useState("")
 
   const [players, setPlayers] = useState<Player[]>([])
-  const [teams, setTeams] = useState<any[]>([])
+  const [teams, setTeams] = useState<DoublesTeam[]>([])
   const [loadError, setLoadError] = useState("")
 
   const inputStyle: React.CSSProperties = {
@@ -37,50 +43,41 @@ export default function DoublesTeamsPage() {
     width: "260px",
   }
 
-  useEffect(() => {
-    loadPlayers()
-    loadTeams()
-  }, [division])
-
-  async function loadPlayers() {
+  const loadPlayers = useCallback(async () => {
     setLoadError("")
 
-    const { data, error } = await supabase
-      .from("players")
-      .select("*")
-      .eq("active", true)
-      .order("id", { ascending: true })
+    const response = await fetch(`/api/admin/league-memberships?league_type=doubles&division=${encodeURIComponent(division)}`, { cache: "no-store", credentials: "same-origin" })
+    const payload = await response.json().catch(() => ({})) as { players?: Array<{ id: string; screen_name: string | null }>; error?: string }
 
-    if (error) {
-      setLoadError(error.message)
+    if (!response.ok) {
+      setLoadError(payload.error || response.statusText)
       setPlayers([])
       return
     }
 
     const normalized =
-      data
-        ?.map((p: any) => ({
-          id: String(p.id),
-          display_name: String(
-            p.screen_name ||
-            p.player_name ||
-            p.name ||
-            p.discord_name ||
-            ""
-          ).trim(),
-        }))
+      (payload.players || [])
+        .map((player) => ({ id: String(player.id), display_name: String(player.screen_name || "").trim() }))
         .filter((p) => p.id && p.display_name)
         .sort((a, b) => a.display_name.localeCompare(b.display_name)) || []
 
     setPlayers(normalized)
-  }
+  }, [division])
 
-  async function loadTeams() {
+  const loadTeams = useCallback(async () => {
     const response = await fetch(`/api/admin/doubles/teams?division=${encodeURIComponent(division)}`, { cache: "no-store" })
-    const payload = await response.json().catch(() => ({})) as { data?: any[]; error?: string }
+    const payload = await response.json().catch(() => ({})) as { data?: DoublesTeam[]; error?: string }
     if (!response.ok || payload.error) { setLoadError(payload.error || response.statusText); setTeams([]); return }
     setTeams(payload.data || [])
-  }
+  }, [division])
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void loadPlayers()
+      void loadTeams()
+    }, 0)
+    return () => window.clearTimeout(timer)
+  }, [division, loadPlayers, loadTeams])
 
   async function addTeam() {
     if (!teamName || !player1 || !player2) {

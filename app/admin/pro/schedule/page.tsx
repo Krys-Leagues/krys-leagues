@@ -1,7 +1,6 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
-import { supabase } from "@/lib/supabase"
 
 const LEAGUE_TYPE = "pro"
 const DIVISIONS = ["Pro D1", "Pro D2", "Pro D3", "Semi Pro D1", "Amateur D1"]
@@ -34,21 +33,19 @@ export default function ProSchedulePage() {
   }
 
   const loadPlayers = useCallback(async () => {
-    const { data, error } = await supabase
-      .from("players")
-      .select("screen_name")
-      .eq("active", true)
-      .eq("division", division)
-      .order("screen_name", { ascending: true })
+    const params = new URLSearchParams({ league_type: LEAGUE_TYPE, division })
+    if (season.trim()) params.set("season_number", season.trim())
+    const response = await fetch(`/api/admin/league-memberships?${params.toString()}`, { cache: "no-store", credentials: "same-origin" })
+    const payload = await response.json() as { error?: string; players?: Array<{ screen_name: string | null }> }
 
-    if (error) {
-      console.error(error)
+    if (!response.ok) {
+      console.error(payload.error || response.statusText)
       setPlayers([])
       return
     }
 
-    setPlayers(data?.map((p: { screen_name: string }) => p.screen_name) || [])
-  }, [division])
+    setPlayers((payload.players || []).map((player) => player.screen_name).filter((name): name is string => Boolean(name)))
+  }, [division, season])
 
   useEffect(() => {
     const timer = window.setTimeout(() => void loadPlayers(), 0)
