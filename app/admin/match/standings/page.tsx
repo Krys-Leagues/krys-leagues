@@ -214,79 +214,31 @@ export default function MatchStandingsPage() {
   async function loadFinalScorecard(activeSeason: SeasonRow, requestId: number) {
     setScorecardLoading(true)
     setScorecardError("")
-    const { data: scorecardData, error: scorecardLoadError } = await supabase
-      .from("match_final_scorecards")
-      .select("id, season_id, source_roster_version_id, status, approved_at, approval_note")
-      .eq("season_id", activeSeason.id)
-      .in("status", ["draft", "approved"])
-
+    const response = await fetch(`/api/admin/match/final-scorecard?seasonId=${encodeURIComponent(activeSeason.id)}`, { cache: "no-store" })
+    const payload = await response.json().catch(() => ({})) as {
+      error?: string
+      data?: { scorecard: ScorecardRow | null; entries: ScorecardEntryRow[]; completedFixtures: number; totalFixtures: number }
+    }
     if (requestId !== loadVersion.current) return
-    if (scorecardLoadError) {
-      setScorecardError(`Could not load Final Scorecard: ${scorecardLoadError.message}`)
+    if (!response.ok || payload.error || !payload.data) {
+      setScorecardError(`Could not load Final Scorecard: ${payload.error || response.statusText}`)
       setScorecardLoading(false)
       return
     }
 
-    const scorecards = (scorecardData || []) as ScorecardRow[]
-    const selected = scorecards.find((item) => item.status === "approved") || scorecards.find((item) => item.status === "draft") || null
+    const selected = payload.data.scorecard
     if (!selected) {
       setScorecard(null)
-      setEntries([])
-      setCompletedFixtures(0)
-      setTotalFixtures(0)
+      setEntries(payload.data.entries)
+      setCompletedFixtures(payload.data.completedFixtures)
+      setTotalFixtures(payload.data.totalFixtures)
       setScorecardLoading(false)
       return
     }
-
-    const [entryResponse, fixtureResponse] = await Promise.all([
-      supabase
-        .from("match_final_scorecard_entries")
-        .select("id, division_number, division_rank, player_id, player_screen_name, completed_game_count, wins, losses, ties, points, holes_won, game1_course, game1_outcome, game1_hw, game2_course, game2_outcome, game2_hw, game3_course, game3_outcome, game3_hw")
-        .eq("scorecard_id", selected.id)
-        .order("division_number", { ascending: true })
-        .order("division_rank", { ascending: true }),
-      supabase
-        .from("schedule")
-        .select("id")
-        .eq("league_type", "match")
-        .eq("season_id", activeSeason.id)
-        .eq("match_roster_version_id", selected.source_roster_version_id),
-    ])
-
-    if (requestId !== loadVersion.current) return
-    if (entryResponse.error || fixtureResponse.error) {
-      setScorecardError(
-        entryResponse.error
-          ? `Could not load Final Scorecard entries: ${entryResponse.error.message}`
-          : `Could not load fixture progress: ${fixtureResponse.error?.message}`
-      )
-      setScorecardLoading(false)
-      return
-    }
-
-    const fixtureIds = (fixtureResponse.data || []).map((fixture) => fixture.id)
-    let completedCount = 0
-    if (fixtureIds.length > 0) {
-      const { data: resultData, error: resultError } = await supabase
-        .from("results")
-        .select("schedule_id, player1_hw, player2_hw")
-        .eq("league_type", "match")
-        .in("schedule_id", fixtureIds)
-      if (requestId !== loadVersion.current) return
-      if (resultError) {
-        setScorecardError(`Could not load result progress: ${resultError.message}`)
-        setScorecardLoading(false)
-        return
-      }
-      completedCount = (resultData || []).filter(
-        (result) => result.player1_hw !== null && result.player2_hw !== null
-      ).length
-    }
-
     setScorecard(selected)
-    setEntries((entryResponse.data || []) as ScorecardEntryRow[])
-    setTotalFixtures(fixtureIds.length)
-    setCompletedFixtures(completedCount)
+    setEntries(payload.data.entries)
+    setTotalFixtures(payload.data.totalFixtures)
+    setCompletedFixtures(payload.data.completedFixtures)
     setApprovalNote(selected.approval_note || "")
     setScorecardLoading(false)
   }

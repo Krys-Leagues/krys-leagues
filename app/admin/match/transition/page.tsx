@@ -82,29 +82,29 @@ export default function MatchTransitionPage() {
     const requestedId = new URLSearchParams(window.location.search).get("scorecardId")?.trim() || ""
     if (!requestedId) { setError("An approved Final Scorecard ID is required."); setLoading(false); return }
     setScorecardId(requestedId)
-    const { data: scorecard, error: scorecardError } = await supabase.from("match_final_scorecards")
-      .select("id, season_id, status").eq("id", requestedId).maybeSingle()
-    if (scorecardError || !scorecard || scorecard.status !== "approved") {
-      setError(scorecardError?.message || "An approved Final Scorecard is required."); setLoading(false); return
+    const scorecardResponse = await fetch(`/api/admin/match/final-scorecard?scorecardId=${encodeURIComponent(requestedId)}`, { cache: "no-store" })
+    const scorecardPayload = await scorecardResponse.json().catch(() => ({})) as {
+      error?: string
+      data?: { scorecard: { id: string; season_id: string; status: string }; entries: Entry[]; decisions: Decision[] }
     }
+    if (!scorecardResponse.ok || scorecardPayload.error || !scorecardPayload.data?.scorecard) {
+      setError(scorecardPayload.error || "An approved Final Scorecard is required."); setLoading(false); return
+    }
+    const scorecard = scorecardPayload.data.scorecard
     setSourceSeasonId(scorecard.season_id)
     const { data: sourceSeason, error: sourceError } = await supabase.from("seasons")
       .select("season_number").eq("id", scorecard.season_id).maybeSingle()
     if (sourceError || !sourceSeason) { setError(sourceError?.message || "Source season not found."); setLoading(false); return }
     setSourceSeasonNumber(sourceSeason.season_number)
 
-    const [entryResponse, decisionResponse, seasonResponse, playerResponse] = await Promise.all([
-      supabase.from("match_final_scorecard_entries")
-        .select("player_id, player_screen_name, division_number, division_rank, completed_game_count")
-        .eq("scorecard_id", requestedId).order("division_number").order("division_rank"),
-      supabase.from("match_final_scorecard_player_decisions").select("player_id, decision").eq("final_scorecard_id", requestedId),
+    const [seasonResponse, playerResponse] = await Promise.all([
       supabase.from("seasons").select("id, season_number, start_date, end_date, game1_course, game2_course, game3_course").eq("league_type", "match")
         .is("division", null).eq("season_number", sourceSeason.season_number + 1),
       supabase.from("players").select("id, screen_name").eq("active", true).order("screen_name"),
     ])
-    const loadError = entryResponse.error || decisionResponse.error || seasonResponse.error || playerResponse.error
+    const loadError = seasonResponse.error || playerResponse.error
     if (loadError) { setError(loadError.message); setLoading(false); return }
-    const loadedEntries = (entryResponse.data || []) as Entry[]
+    const loadedEntries = scorecardPayload.data.entries
     const loadedPlayers = (playerResponse.data || []) as Player[]
     const candidateSeasons = (seasonResponse.data || []) as Season[]
     let loadedSeasons: Season[] = []
@@ -142,7 +142,7 @@ export default function MatchTransitionPage() {
       }
     }
     setEntries(loadedEntries)
-    setDecisions(new Map(((decisionResponse.data || []) as Decision[]).map((item) => [item.player_id, item.decision])))
+    setDecisions(new Map(scorecardPayload.data.decisions.map((item) => [item.player_id, item.decision])))
     setTargetSeasons(loadedSeasons); setTargetSeasonId(loadedSeasons[0]?.id || "")
     const sourceDivisionCount = String(Math.max(1, ...loadedEntries.map((entry) => entry.division_number)))
     if (loadedSeasons.length === 1) {
