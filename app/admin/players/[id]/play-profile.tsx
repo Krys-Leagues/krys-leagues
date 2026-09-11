@@ -78,21 +78,13 @@ export default function PlayerProfilePage() {
 
     setLoading(true)
 
-    const { data: playerData } = await supabase
-      .from("players")
-      .select("id, screen_name, discord_id, discord_name, discord_username, status, active")
-      .eq("id", playerId)
-      .single()
+    const profileResponse = await fetch(`/api/admin/players?view=profile&player_id=${encodeURIComponent(playerId)}`, { credentials: "same-origin", cache: "no-store" })
+    const profilePayload = await profileResponse.json() as { player?: Player; memberships?: Membership[]; results?: ResultRow[] }
+    const playerData = profilePayload.player || null
 
     setPlayer(playerData)
 
-    const { data: membershipData } = await supabase
-      .from("player_league_memberships")
-      .select("id, league_type, season_number, division")
-      .eq("player_id", playerId)
-      .order("season_number", { ascending: false })
-
-    setMemberships(membershipData || [])
+    setMemberships(profilePayload.memberships || [])
 
     const { data: trophyData } = await supabase
       .from("player_trophies")
@@ -102,12 +94,7 @@ export default function PlayerProfilePage() {
 
     setTrophies(trophyData || [])
 
-    const { data: resultData } = await supabase
-      .from("results")
-      .select("id, player1_id, player2_id, winner, is_draw")
-      .or(`player1_id.eq.${playerId},player2_id.eq.${playerId}`)
-
-    const results = (resultData || []) as ResultRow[]
+    const results = (profilePayload.results || []) as ResultRow[]
 
     const matchesPlayed = results.length
     const draws = results.filter((result) => result.is_draw).length

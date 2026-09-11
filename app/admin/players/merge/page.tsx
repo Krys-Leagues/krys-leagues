@@ -46,11 +46,10 @@ export default function MergePlayersPage() {
 
   async function loadPlayers() {
     setLoading(true)
-    const { data, error } = await supabase
-      .from("players")
-      .select("id, screen_name, status, active")
-      .eq("active", true)
-      .order("screen_name", { ascending: true })
+    const response = await fetch("/api/admin/players?view=players&active=true", { credentials: "same-origin", cache: "no-store" })
+    const payload = await response.json() as { players?: Player[]; error?: string }
+    const data = payload.players || []
+    const error = response.ok ? null : new Error(payload.error || "Players could not be loaded.")
     setLoading(false)
 
     if (error) {

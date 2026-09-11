@@ -183,10 +183,10 @@ export default function StrokeStandingsPage() {
     const playerIds = savedRows.map((row) => row.player_id)
     let playerMap = new Map<string, string>()
     if (playerIds.length > 0) {
-      const { data: playerData, error: playerError } = await supabase
-        .from("players")
-        .select("id, screen_name")
-        .in("id", playerIds)
+      const playerResponse = await fetch(`/api/admin/players?view=players&ids=${encodeURIComponent(playerIds.join(","))}`, { credentials: "same-origin", cache: "no-store" })
+      const playerPayload = await playerResponse.json() as { players?: PlayerRow[]; error?: string }
+      const playerData = playerPayload.players || []
+      const playerError = playerResponse.ok ? null : new Error(playerPayload.error || "Players could not be loaded.")
       if (requestId !== loadVersion.current) return
       if (playerError) {
         setScorecardError(`Could not load standing player names: ${playerError.message}`)

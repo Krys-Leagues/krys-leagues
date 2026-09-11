@@ -370,10 +370,10 @@ export default function MatchSetup() {
     let rosterPlayerData: Player[] = []
 
     if (currentPlayerIds.length > 0) {
-      const { data, error } = await supabase
-        .from("players")
-        .select("id, screen_name")
-        .in("id", currentPlayerIds)
+      const response = await fetch(`/api/admin/players?view=players&ids=${encodeURIComponent(currentPlayerIds.join(","))}`, { credentials: "same-origin", cache: "no-store" })
+      const payload = await response.json() as { players?: Player[]; error?: string }
+      const data = payload.players || []
+      const error = response.ok ? null : new Error(payload.error || "Players could not be loaded.")
 
       if (error) {
         setSetupError(`Could not load roster players: ${error.message}`)

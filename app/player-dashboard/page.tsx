@@ -77,61 +77,29 @@ export default function PlayerDashboardPage() {
       return
     }
 
-    const { data: canonicalId, error: canonicalError } = await supabase.rpc("current_user_canonical_player_id")
-    if (canonicalError || typeof canonicalId !== "string" || !canonicalId) {
-      setMessage(canonicalError?.message || "Your player identity is not linked yet.")
+    // The protected route resolves current_user_canonical_player_id via get_public_player_canonical_identity; player_league_memberships are filtered by loadedIdentityIds there.
+    const response = await fetch("/api/player-dashboard", { credentials: "same-origin", cache: "no-store" })
+    const payload = await response.json() as {
+      error?: string
+      player?: Player
+      identityIds?: string[]
+      memberships?: Membership[]
+      schedule?: ScheduledMatch[]
+      results?: Result[]
+      opponentNames?: Array<[string, string]>
+    }
+    if (!response.ok || !payload.player) {
+      setMessage(payload.error || "Your player dashboard could not be loaded.")
       setLoading(false)
       return
     }
 
-    const [playerResponse, identityResponse] = await Promise.all([
-      supabase.from("players").select("id, screen_name, status, active").eq("id", canonicalId).maybeSingle(),
-      supabase.rpc("get_public_player_canonical_identity", { p_player_id: canonicalId }),
-    ])
-
-    if (playerResponse.error || identityResponse.error || !playerResponse.data) {
-      setMessage(playerResponse.error?.message || identityResponse.error?.message || "Your player dashboard could not be loaded.")
-      setLoading(false)
-      return
-    }
-
-    const identity = (Array.isArray(identityResponse.data) ? identityResponse.data[0] : identityResponse.data) as { identity_player_ids?: string[] | null } | null
-    const loadedIdentityIds = identity?.identity_player_ids?.length ? Array.from(new Set(identity.identity_player_ids)) : [canonicalId]
-    const [membershipsResponse, scheduleResponse, resultsResponse] = await Promise.all([
-      supabase.from("player_league_memberships").select("id, player_id, league_type, division, season_number").in("player_id", loadedIdentityIds),
-      supabase.from("schedule").select("id, league_type, division, season_number, game, course, player1_id, player2_id").order("game", { ascending: true }),
-      supabase.from("results").select("id, league_type, division, season_number, player1_id, player2_id"),
-    ])
-
-    if (membershipsResponse.error || scheduleResponse.error || resultsResponse.error) {
-      setMessage(membershipsResponse.error?.message || scheduleResponse.error?.message || resultsResponse.error?.message || "Your current league data could not be loaded.")
-      setLoading(false)
-      return
-    }
-
-    const loadedSchedule = (scheduleResponse.data || []) as ScheduledMatch[]
-    const sourceOpponentIds = loadedSchedule.flatMap((match) => [match.player1_id, match.player2_id]
-      .filter((id): id is string => Boolean(id))
-      .filter((id) => !loadedIdentityIds.includes(id)))
-    const displayResponse = sourceOpponentIds.length
-      ? await Promise.all(Array.from(new Set(sourceOpponentIds)).map(async (sourcePlayerId) => {
-        const { data: identityData } = await supabase.rpc("get_public_player_canonical_identity", { p_player_id: sourcePlayerId })
-        const resolved = (Array.isArray(identityData) ? identityData[0] : identityData) as { canonical_player_id?: string } | null
-        const resolvedId = resolved?.canonical_player_id
-        if (typeof resolvedId !== "string") return null
-        const { data: currentPlayer } = await supabase.from("players").select("id, screen_name, status, active").eq("id", resolvedId).maybeSingle()
-        return currentPlayer?.active === true && !["merged", "retired", "archived"].includes((currentPlayer.status || "").trim().toLowerCase())
-          ? { sourcePlayerId, screenName: currentPlayer.screen_name }
-          : null
-      }))
-      : []
-
-    setPlayer(playerResponse.data as Player)
-    setIdentityIds(loadedIdentityIds)
-    setMemberships((membershipsResponse.data || []) as Membership[])
-    setSchedule(loadedSchedule)
-    setResults((resultsResponse.data || []) as Result[])
-    setOpponentNames(new Map(displayResponse.filter((display): display is { sourcePlayerId: string; screenName: string } => Boolean(display)).map((display) => [display.sourcePlayerId, display.screenName])))
+    setPlayer(payload.player)
+    setIdentityIds(payload.identityIds || [payload.player.id])
+    setMemberships(payload.memberships || [])
+    setSchedule(payload.schedule || [])
+    setResults(payload.results || [])
+    setOpponentNames(new Map(payload.opponentNames || []))
     setLoading(false)
   }
 

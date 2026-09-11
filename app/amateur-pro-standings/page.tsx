@@ -82,10 +82,10 @@ export default function AmateurProStandingsPage() {
     let playerMap = new Map<string, string>()
 
     if (playerIds.length > 0) {
-      const { data: playerData, error: playerError } = await supabase
-        .from("players")
-        .select("id, screen_name")
-        .in("id", playerIds)
+      const playerResponse = await fetch(`/api/public/players?mode=names&ids=${encodeURIComponent(playerIds.join(","))}`, { cache: "no-store" })
+      const playerPayload = await playerResponse.json() as { data?: PlayerRow[]; error?: string }
+      const playerData = playerResponse.ok ? playerPayload.data || [] : null
+      const playerError = playerResponse.ok ? null : new Error(playerPayload.error || "Player names could not be loaded.")
 
       if (playerError) {
         setStandings([])

@@ -422,11 +422,10 @@ export default function MatchScheduleReviewPage() {
     const fixtureIds = loadedFixtures.map((fixture) => fixture.id)
     let loadedResults: ResultRow[] = []
     if (fixtureIds.length > 0) {
-      const { data: resultData, error: resultError } = await supabase
-        .from("results")
-        .select("schedule_id, player1_hw, player2_hw")
-        .eq("league_type", "match")
-        .in("schedule_id", fixtureIds)
+      const resultResponse = await fetch(`/api/admin/players?view=results&league_type=match&schedule_ids=${encodeURIComponent(fixtureIds.join(","))}`, { credentials: "same-origin", cache: "no-store" })
+      const resultPayload = await resultResponse.json() as { results?: ResultRow[]; error?: string }
+      const resultData = resultPayload.results || []
+      const resultError = resultResponse.ok ? null : new Error(resultPayload.error || "Results could not be loaded.")
       if (resultError) {
         setError(`Could not load Match fixture results: ${resultError.message}`)
         setLoading(false)

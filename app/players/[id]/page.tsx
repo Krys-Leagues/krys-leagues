@@ -248,19 +248,9 @@ export default function PublicPlayerProfilePage() {
     if (canonicalId !== playerId) {
       router.replace(`/players/${canonicalId}`)
     }
-    const identityIds = identity.identity_player_ids.length > 0
-      ? identity.identity_player_ids
-      : [canonicalId]
-    const resultIdentityFilter = identityIds.flatMap((id) => [
-      `player1_id.eq.${id}`,
-      `player2_id.eq.${id}`,
-    ]).join(",")
-
     const [
-      playerResponse,
-      membershipsResponse,
+      profileResponse,
       trophiesResponse,
-      resultsResponse,
       strokeHistoryResponse,
       matchHistoryResponse,
       pypHistoryResponse,
@@ -273,17 +263,27 @@ export default function PublicPlayerProfilePage() {
       preferencesResponse,
       sessionResponse,
     ] = await Promise.all([
-      supabase
-        .from("players")
-        .select("id, screen_name, status, active")
-        .eq("id", canonicalId)
-        .maybeSingle(),
-
-      supabase
-        .from("player_league_memberships")
-        .select("id, league_type, division, season_number")
-        .in("player_id", identityIds)
-        .order("season_number", { ascending: false }),
+      fetch(`/api/public/player-profile?id=${encodeURIComponent(canonicalId)}`, { cache: "no-store" })
+        .then(async response => {
+          const payload = await response.json() as {
+            player?: Player | null
+            memberships?: Membership[]
+            results?: Result[]
+            error?: string
+          }
+          return {
+            player: payload.player || null,
+            memberships: payload.memberships || [],
+            results: payload.results || [],
+            error: response.ok ? null : payload.error || "Player profile could not be loaded.",
+          }
+        })
+        .catch(caught => ({
+          player: null,
+          memberships: [] as Membership[],
+          results: [] as Result[],
+          error: caught instanceof Error ? caught.message : "Player profile could not be loaded.",
+        })),
 
       supabase
         .from("player_trophies")
@@ -292,11 +292,6 @@ export default function PublicPlayerProfilePage() {
         )
         .eq("player_id", canonicalId)
         .order("created_at", { ascending: false }),
-
-      supabase
-        .from("results")
-        .select("id, player1, player2, player1_id, player2_id, winner, is_draw")
-        .or(resultIdentityFilter),
 
       supabase.rpc("get_public_stroke_player_history", {
         p_player_id: playerId,
@@ -334,21 +329,21 @@ export default function PublicPlayerProfilePage() {
       supabase.auth.getSession(),
     ])
 
-    if (playerResponse.error) {
-      setMessage(playerResponse.error.message)
+    if (profileResponse.error) {
+      setMessage(profileResponse.error)
       setLoading(false)
       return
     }
 
-    if (!playerResponse.data) {
+    if (!profileResponse.player) {
       setMessage("Player not found.")
       setLoading(false)
       return
     }
 
-    const canonicalStatus = playerResponse.data.status?.trim().toLowerCase()
+    const canonicalStatus = profileResponse.player.status?.trim().toLowerCase()
     if (
-      playerResponse.data.active !== true ||
+      profileResponse.player.active !== true ||
       canonicalStatus === "retired" ||
       canonicalStatus === "merged" ||
       canonicalStatus === "archived"
@@ -358,11 +353,11 @@ export default function PublicPlayerProfilePage() {
       return
     }
 
-    setPlayer(playerResponse.data)
+    setPlayer(profileResponse.player)
     setAliases(identity.aliases || [])
-    setMemberships(membershipsResponse.data || [])
+    setMemberships(profileResponse.memberships)
     setTrophies(trophiesResponse.data || [])
-    setResults(resultsResponse.data || [])
+    setResults(profileResponse.results)
     setStrokeHistory(
       (strokeHistoryResponse.data || []) as StrokeSeasonHistory[]
     )

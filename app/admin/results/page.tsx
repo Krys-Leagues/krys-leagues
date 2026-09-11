@@ -122,13 +122,10 @@ export default function ResultsPage() {
       .eq("season_number", seasonNumber)
       .eq("game", game)
 
-    const { data: resultData, error: resultError } = await supabase
-      .from("results")
-      .select("player1, player2, player1_id, player2_id")
-      .eq("league_type", leagueType)
-      .eq("division", division)
-      .eq("season_number", seasonNumber)
-      .eq("game", game)
+    const resultResponse = await fetch(`/api/admin/players?view=results&league_type=${encodeURIComponent(leagueType)}&division=${encodeURIComponent(division)}&season_number=${seasonNumber}&game=${game}`, { credentials: "same-origin", cache: "no-store" })
+    const resultPayload = await resultResponse.json() as { results?: ResultRow[]; error?: string }
+    const resultData = resultPayload.results || []
+    const resultError = resultResponse.ok ? null : new Error(resultPayload.error || "Results could not be loaded.")
 
     setMatchesLoading(false)
 
@@ -284,13 +281,10 @@ export default function ResultsPage() {
       else isDraw = true
     }
 
-    const { data: existingResults, error: duplicateError } = await supabase
-      .from("results")
-      .select("player1, player2, player1_id, player2_id")
-      .eq("league_type", leagueType)
-      .eq("division", division)
-      .eq("season_number", seasonNumber)
-      .eq("game", game)
+    const existingResponse = await fetch(`/api/admin/players?view=results&league_type=${encodeURIComponent(leagueType)}&division=${encodeURIComponent(division)}&season_number=${seasonNumber}&game=${game}`, { credentials: "same-origin", cache: "no-store" })
+    const existingPayload = await existingResponse.json() as { results?: ResultRow[]; error?: string }
+    const existingResults = existingPayload.results || []
+    const duplicateError = existingResponse.ok ? null : new Error(existingPayload.error || "Results could not be loaded.")
 
     if (duplicateError) {
       alert("Error checking duplicate result: " + duplicateError.message)

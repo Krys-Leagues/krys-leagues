@@ -2,7 +2,6 @@
 
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
-import { supabase } from "@/lib/supabase"
 import { loadCanonicalPlayerDisplays, type CanonicalPlayerDisplay } from "@/lib/canonicalPlayerDisplay"
 
 type Player = {
@@ -74,28 +73,15 @@ export default function MatchesPage() {
 
   useEffect(() => {
     loadData()
-  }, [])
+  }, [division, seasonNumber])
 
   async function loadData() {
     setLoading(true)
 
-    const [scheduleResponse, resultsResponse] =
-      await Promise.all([
-        supabase
-          .from("schedule")
-          .select(
-            "id, league_type, division, season_number, game, course, player1_id, player2_id"
-          )
-          .order("game", { ascending: true }),
-        supabase
-          .from("results")
-          .select(
-            "id, league_type, division, season_number, player1_id, player2_id, player1_score, player2_score, is_draw"
-          ),
-      ])
-
-    const loadedSchedule = scheduleResponse.data || []
-    const loadedResults = resultsResponse.data || []
+    const response = await fetch(`/api/public/matches?division=${encodeURIComponent(division)}&season=${encodeURIComponent(seasonNumber)}`, { cache: "no-store" })
+    const payload = await response.json() as { schedule?: ScheduledMatch[]; results?: Result[]; error?: string }
+    const loadedSchedule = response.ok ? payload.schedule || [] : []
+    const loadedResults = response.ok ? payload.results || [] : []
     const sourcePlayerIds = [...loadedSchedule, ...loadedResults].flatMap((row) =>
       [row.player1_id, row.player2_id].filter((id): id is string => Boolean(id)),
     )
@@ -104,6 +90,7 @@ export default function MatchesPage() {
     setPlayers(playerResponse.data)
     setSchedule(loadedSchedule)
     setResults(loadedResults)
+    if (!response.ok) setLoading(false)
     setLoading(false)
   }
 

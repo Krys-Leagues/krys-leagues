@@ -247,17 +247,8 @@ export default function PlayerMatchingPage() {
     setSelectedMemberId("")
     setCurrentPlayerIndex(0)
 
-    const [
-      { data: playerData, error: playerError },
-      { data: memberData, error: memberError },
-    ] = await Promise.all([
-      supabase
-        .from("players")
-        .select("id, screen_name, discord_id")
-        .eq("active", true)
-        .is("discord_id", null)
-        .order("screen_name"),
-
+    const [playerResponse, memberResponse] = await Promise.all([
+      fetch("/api/admin/players?view=players&active=true", { credentials: "same-origin", cache: "no-store" }),
       supabase
         .from("discord_members")
         .select(
@@ -269,6 +260,11 @@ export default function PlayerMatchingPage() {
 
     setLoading(false)
 
+    const playerPayload = await playerResponse.json() as { players?: Array<{ id: string; screen_name: string; discord_id: string | null }>; error?: string }
+    const playerData = (playerPayload.players || []).filter((player) => !player.discord_id)
+    const memberData = memberResponse.data
+    const playerError = playerResponse.ok ? null : new Error(playerPayload.error || "Players could not be loaded.")
+    const memberError = memberResponse.error
     if (playerError) {
       alert(playerError.message)
       return

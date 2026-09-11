@@ -92,12 +92,13 @@ export default function StrokeTransitionPage() {
     const [seasonResponse, playerResponse] = await Promise.all([
       supabase.from("seasons").select("id, season_number, start_date, end_date, game1_course, game2_course, game3_course").eq("league_type", "stroke")
         .is("division", null).eq("season_number", sourceSeason.season_number + 1),
-      supabase.from("players").select("id, screen_name").eq("active", true).order("screen_name"),
+      fetch("/api/admin/players?view=players&active=true", { credentials: "same-origin", cache: "no-store" }),
     ])
-    const loadError = seasonResponse.error || playerResponse.error
+    const playerPayload = await playerResponse.json() as { players?: Player[]; error?: string }
+    const loadError = seasonResponse.error || (!playerResponse.ok ? new Error(playerPayload.error || "Players could not be loaded.") : null)
     if (loadError) { setError(loadError.message); setLoading(false); return }
     const loadedEntries = scorecardPayload.data.entries
-    const loadedPlayers = (playerResponse.data || []) as Player[]
+    const loadedPlayers = (playerPayload.players || []) as Player[]
     const candidateSeasons = (seasonResponse.data || []) as Season[]
     let loadedSeasons: Season[] = []
     let loadedTargetDivisionCount: number | null = null

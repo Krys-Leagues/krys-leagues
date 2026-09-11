@@ -100,12 +100,10 @@ export default function StandingsPage() {
 
     setLoading(true)
 
-    const { data, error } = await supabase
-      .from("results")
-      .select("*")
-      .eq("league_type", leagueType)
-      .eq("division", division)
-      .eq("season_number", seasonNumber)
+    const response = await fetch(`/api/admin/players?view=results&league_type=${encodeURIComponent(leagueType)}&division=${encodeURIComponent(division)}&season_number=${seasonNumber}`, { credentials: "same-origin", cache: "no-store" })
+    const payload = await response.json() as { results?: ResultRow[]; error?: string }
+    const data = payload.results || []
+    const error = response.ok ? null : new Error(payload.error || "Results could not be loaded.")
 
     setLoading(false)
 

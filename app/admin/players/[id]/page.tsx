@@ -137,23 +137,19 @@ export default function PlayerProfilePage() {
 
     const identity = (Array.isArray(identityData) ? identityData[0] : identityData) as CanonicalIdentity | null
     const canonicalPlayerId = identity?.canonical_player_id || playerId
-    const [{ data: playerData }, avatarResult] = await Promise.all([
-      supabase.from("players").select("id, screen_name, discord_id, discord_name, discord_username, status, active").eq("id", canonicalPlayerId).single(),
+    const [profileResponse, avatarResult] = await Promise.all([
+      fetch(`/api/admin/players?view=profile&player_id=${encodeURIComponent(canonicalPlayerId)}`, { credentials: "same-origin", cache: "no-store" }),
       getCanonicalPlayerAvatar(canonicalPlayerId)
         .then((avatar) => ({ avatar, error: "" }))
         .catch((error: unknown) => ({ avatar: null, error: error instanceof Error ? error.message : "Avatar could not be loaded" })),
     ])
+    const profilePayload = await profileResponse.json() as { player?: Player; memberships?: Membership[]; results?: ResultRow[]; error?: string }
+    const playerData = profilePayload.player || null
     setPlayer(playerData)
     if (avatarResult.error) setAvatarError(`Could not load avatar: ${avatarResult.error}`)
     else setAvatarPath(avatarResult.avatar?.avatarPath || null)
 
-    const { data: membershipData } = await supabase
-      .from("player_league_memberships")
-      .select("id, league_type, season_number, division")
-      .eq("player_id", playerId)
-      .order("season_number", { ascending: false })
-
-    setMemberships(membershipData || [])
+    setMemberships(profilePayload.memberships || [])
 
     const { data: trophyData } = await supabase
       .from("player_trophies")
@@ -163,12 +159,7 @@ export default function PlayerProfilePage() {
 
     setTrophies(trophyData || [])
 
-    const { data: resultData } = await supabase
-      .from("results")
-      .select("id, player1_id, player2_id, winner, is_draw")
-      .or(`player1_id.eq.${playerId},player2_id.eq.${playerId}`)
-
-    const results = (resultData || []) as ResultRow[]
+    const results = (profilePayload.results || []) as ResultRow[]
 
     const matchesPlayed = results.length
     const draws = results.filter((result) => result.is_draw).length

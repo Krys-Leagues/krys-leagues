@@ -156,11 +156,8 @@ export default function PlayersAdminPage() {
   async function loadPlayers() {
     setLoading(true)
 
-    const [playersResult, registrationsResponse, identityLinksResult] = await Promise.all([
-      supabase
-        .from("players")
-        .select("id, screen_name, discord_id, discord_name, status, active, avatar_path, is_server_booster, has_krys_server_tag, profile_badges")
-        .order("screen_name", { ascending: true }),
+    const [playersResponse, registrationsResponse, identityLinksResult] = await Promise.all([
+      fetch("/api/admin/players?view=players", { credentials: "same-origin", cache: "no-store" }),
       fetch("/api/admin/players", { credentials: "same-origin", cache: "no-store" }),
       supabase
         .from("player_identity_links")
@@ -169,14 +166,15 @@ export default function PlayersAdminPage() {
 
     setLoading(false)
 
+    const playersPayload = await playersResponse.json() as { error?: string; players?: Player[] }
     const registrationsPayload = await registrationsResponse.json() as { error?: string; memberships?: typeof leagueMemberships; tournaments?: typeof tournamentEntries }
-    const loadError = playersResult.error || identityLinksResult.error || (!registrationsResponse.ok ? new Error(registrationsPayload.error || "Player registrations could not be loaded.") : null)
+    const loadError = !playersResponse.ok ? new Error(playersPayload.error || "Players could not be loaded.") : identityLinksResult.error || (!registrationsResponse.ok ? new Error(registrationsPayload.error || "Player registrations could not be loaded.") : null)
     if (loadError) {
       alert(loadError.message)
       return
     }
 
-    setPlayers(playersResult.data || [])
+    setPlayers(playersPayload.players || [])
     setLeagueMemberships(registrationsPayload.memberships || [])
     setTournamentEntries(registrationsPayload.tournaments || [])
     setIdentityLinks(identityLinksResult.data || [])
@@ -508,13 +506,9 @@ export default function PlayersAdminPage() {
 
       const allNames = Array.from(uniqueImportMap.values())
 
-      const { data: existing } = await supabase
-        .from("players")
-        .select("screen_name")
-
-      const existingSet = new Set(
-        (existing || []).map((p) => normalizeName(p.screen_name))
-      )
+      const existingResponse = await fetch("/api/admin/players?view=players", { credentials: "same-origin", cache: "no-store" })
+      const existingPayload = await existingResponse.json() as { players?: Array<{ screen_name: string }> }
+      const existingSet = new Set((existingPayload.players || []).map((p) => normalizeName(p.screen_name)))
 
       const newPlayers = allNames
         .filter((name) => !existingSet.has(normalizeName(name)))

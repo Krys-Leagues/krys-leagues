@@ -58,27 +58,8 @@ export default function CareerAdminPage() {
     setLoading(true)
     setMessage("")
 
-    const [
-      playersResponse,
-      resultsResponse,
-      membershipsResponse,
-      trophiesResponse,
-    ] = await Promise.all([
-      supabase
-        .from("players")
-        .select("id, screen_name, status, active")
-        .order("screen_name", { ascending: true }),
-
-      supabase
-        .from("results")
-        .select(
-          "id, player1_id, player2_id, winner, is_draw, league_type, division, season_number"
-        ),
-
-      supabase
-        .from("player_league_memberships")
-        .select("id, player_id, league_type, division, season_number"),
-
+    const [careerResponse, trophiesResponse] = await Promise.all([
+      fetch("/api/admin/players?view=career", { credentials: "same-origin", cache: "no-store" }),
       supabase
         .from("player_trophies")
         .select(
@@ -86,11 +67,10 @@ export default function CareerAdminPage() {
         ),
     ])
 
-    const firstError =
-      playersResponse.error ||
-      resultsResponse.error ||
-      membershipsResponse.error ||
-      trophiesResponse.error
+    const careerPayload = await careerResponse.json() as { error?: string; players?: Player[]; results?: Result[]; memberships?: Membership[] }
+    const firstError = !careerResponse.ok
+      ? new Error(careerPayload.error || "Career data could not be loaded.")
+      : trophiesResponse.error
 
     if (firstError) {
       setMessage(firstError.message)
@@ -98,11 +78,11 @@ export default function CareerAdminPage() {
       return
     }
 
-    const loadedPlayers = playersResponse.data || []
+    const loadedPlayers = careerPayload.players || []
 
     setPlayers(loadedPlayers)
-    setResults(resultsResponse.data || [])
-    setMemberships(membershipsResponse.data || [])
+    setResults(careerPayload.results || [])
+    setMemberships(careerPayload.memberships || [])
     setTrophies(trophiesResponse.data || [])
 
     if (loadedPlayers.length > 0) {
