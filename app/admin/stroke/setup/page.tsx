@@ -1,8 +1,10 @@
 "use client"
+/* eslint-disable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps */
 
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
+import { fetchAdminDivisionCourseOverrides } from "@/lib/admin/courseOverrideRead"
 
 type Player = {
   id: string
@@ -338,14 +340,12 @@ export default function StrokeSetup() {
       return
     }
 
-    const { data: overrideData, error: overrideError } = await supabase
-      .from("stroke_division_course_overrides")
-      .select(
-        "game1_course_override, game2_course_override, game3_course_override"
+    const { data: overrideData, error: overrideError } =
+      await fetchAdminDivisionCourseOverrides(
+        "stroke",
+        requestedSeasonId,
+        requestedDivision
       )
-      .eq("season_id", requestedSeasonId)
-      .eq("division_number", requestedDivision)
-      .maybeSingle()
 
     if (overrideError) {
       setSetupError(`Could not load course overrides: ${overrideError.message}`)

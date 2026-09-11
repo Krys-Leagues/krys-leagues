@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
+import { fetchAdminDivisionCourseOverrides } from "@/lib/admin/courseOverrideRead"
 
 type SeasonRow = {
   id: string
@@ -393,13 +394,7 @@ export default function StrokeScheduleReviewPage() {
         .eq("roster_version_id", selectedRoster.id)
         .order("division_number", { ascending: true })
         .order("slot_number", { ascending: true }),
-      supabase
-        .from("stroke_division_course_overrides")
-        .select(
-          "division_number, game1_course_override, game2_course_override, game3_course_override"
-        )
-        .eq("season_id", requestedSeasonId)
-        .order("division_number", { ascending: true }),
+      fetchAdminDivisionCourseOverrides("stroke", requestedSeasonId),
     ])
 
     if (stateResponse.error) {
