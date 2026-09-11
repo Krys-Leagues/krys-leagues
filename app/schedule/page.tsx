@@ -129,12 +129,13 @@ export default function SchedulePage() {
 
     if (!confirmDelete) return
 
-    const { error } = await supabase
-      .from("schedule")
-      .delete()
-      .eq("id", id)
+    const response = await fetch("/api/delete-schedule", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    })
 
-    if (error) {
+    if (!response.ok) {
       alert("Delete failed")
       return
     }
