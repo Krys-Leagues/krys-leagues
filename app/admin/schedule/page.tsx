@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { supabase } from "@/lib/supabase"
 
 const DIVISIONS: Record<string, string[]> = {
   stroke: ["Stroke D1", "Stroke D2", "Stroke D3", "Stroke D4", "Stroke D5"],
@@ -52,22 +51,13 @@ export default function ScheduleAdminPage() {
 
     setLoading(true)
 
-    const { error } = await supabase.from("schedule").insert([
-      {
-        league_type: leagueType,
-        division,
-        season_number: seasonNumber,
-        game,
-        course,
-        player1,
-        player2,
-      },
-    ])
+    const response = await fetch("/api/admin/schedules", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "same-origin", body: JSON.stringify({ action: "insert_schedule", row: { league_type: leagueType, division, season_number: seasonNumber, game, course, player1, player2 } }) })
+    const payload = await response.json() as { error?: string }
 
     setLoading(false)
 
-    if (error) {
-      alert("Error saving schedule: " + error.message)
+    if (!response.ok) {
+      alert("Error saving schedule: " + (payload.error || "unknown error"))
       return
     }
 

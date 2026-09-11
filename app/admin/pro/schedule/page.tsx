@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { supabase } from "@/lib/supabase"
 
 const LEAGUE_TYPE = "pro"
@@ -33,11 +33,7 @@ export default function ProSchedulePage() {
     width: "260px",
   }
 
-  useEffect(() => {
-    loadPlayers()
-  }, [division])
-
-  async function loadPlayers() {
+  const loadPlayers = useCallback(async () => {
     const { data, error } = await supabase
       .from("players")
       .select("screen_name")
@@ -51,8 +47,13 @@ export default function ProSchedulePage() {
       return
     }
 
-    setPlayers(data?.map((p: any) => p.screen_name) || [])
-  }
+    setPlayers(data?.map((p: { screen_name: string }) => p.screen_name) || [])
+  }, [division])
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => void loadPlayers(), 0)
+    return () => window.clearTimeout(timer)
+  }, [loadPlayers])
 
   function playerDropdown(value: string, setValue: (value: string) => void) {
     return (
@@ -92,39 +93,6 @@ export default function ProSchedulePage() {
 
     setLoading(true)
 
-    const { data: existingSeason, error: existingError } = await supabase
-      .from("seasons")
-      .select("id")
-      .eq("league_type", LEAGUE_TYPE)
-      .eq("division", division)
-      .eq("season_number", seasonNumber)
-      .maybeSingle()
-
-    if (existingError) {
-      setLoading(false)
-      alert(existingError.message)
-      return
-    }
-
-    if (existingSeason) {
-      setLoading(false)
-      alert("This season already exists")
-      return
-    }
-
-    const { error: seasonError } = await supabase.from("seasons").insert({
-      league_type: LEAGUE_TYPE,
-      division,
-      season_number: seasonNumber,
-      due_date: dueDate,
-    })
-
-    if (seasonError) {
-      setLoading(false)
-      alert(seasonError.message)
-      return
-    }
-
     const matches = [
       { game: "1", player1: p1, player2: p2, course: map1 },
       { game: "1", player1: p3, player2: p4, course: map1 },
@@ -136,21 +104,11 @@ export default function ProSchedulePage() {
       { game: "3", player1: p2, player2: p3, course: map3 },
     ]
 
-    const payload = matches.map((m) => ({
-      league_type: LEAGUE_TYPE,
-      division,
-      season_number: seasonNumber,
-      game: m.game,
-      course: m.course,
-      player1: m.player1,
-      player2: m.player2,
-    }))
-
-    const { error: scheduleError } = await supabase.from("schedule").insert(payload)
-
-    if (scheduleError) {
+    const response = await fetch("/api/admin/schedules", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "same-origin", body: JSON.stringify({ action: "create_league_schedule", league_type: LEAGUE_TYPE, division, season_number: seasonNumber, due_date: dueDate, matches }) })
+    const responseBody = await response.json() as { error?: string }
+    if (!response.ok) {
       setLoading(false)
-      alert(scheduleError.message)
+      alert(responseBody.error || "Schedule could not be saved")
       return
     }
 
@@ -170,18 +128,18 @@ export default function ProSchedulePage() {
       })
 
       const text = await res.text()
-      let data: any = {}
+      let data: { error?: string } = {}
 
-      if (text) data = JSON.parse(text)
+      if (text) { const parsed: unknown = JSON.parse(text); if (parsed && typeof parsed === "object") data = parsed as { error?: string } }
 
       if (!res.ok) {
         setLoading(false)
         alert("Season saved, Discord failed: " + (data.error || "Unknown"))
         return
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       setLoading(false)
-      alert("Discord error: " + err.message)
+      alert("Discord error: " + (err instanceof Error ? err.message : "Unknown error"))
       return
     }
 

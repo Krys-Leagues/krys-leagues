@@ -1,7 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { supabase } from "@/lib/supabase"
+import { useCallback, useEffect, useState } from "react"
 
 const LEAGUE_TYPE = "doubles"
 const DIVISIONS = ["Doubles D1", "Doubles D2", "Doubles D3"]
@@ -41,11 +40,7 @@ export default function DoublesSchedulePage() {
     width: "280px",
   }
 
-  useEffect(() => {
-    loadTeams()
-  }, [division])
-
-  async function loadTeams() {
+  const loadTeams = useCallback(async () => {
     const response = await fetch(`/api/admin/doubles/teams?division=${encodeURIComponent(division)}&active=true`, { cache: "no-store" })
     const payload = await response.json().catch(() => ({})) as { data?: DoublesTeam[]; error?: string }
     if (!response.ok || payload.error) {
@@ -55,7 +50,12 @@ export default function DoublesSchedulePage() {
     }
 
     setTeams(payload.data || [])
-  }
+  }, [division])
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => void loadTeams(), 0)
+    return () => window.clearTimeout(timer)
+  }, [loadTeams])
 
   function teamDropdown(value: string, setValue: (value: string) => void) {
     return (
@@ -95,39 +95,6 @@ export default function DoublesSchedulePage() {
 
     setLoading(true)
 
-    const { data: existingSeason, error: existingError } = await supabase
-      .from("seasons")
-      .select("id")
-      .eq("league_type", LEAGUE_TYPE)
-      .eq("division", division)
-      .eq("season_number", seasonNumber)
-      .maybeSingle()
-
-    if (existingError) {
-      setLoading(false)
-      alert(existingError.message)
-      return
-    }
-
-    if (existingSeason) {
-      setLoading(false)
-      alert("This season already exists")
-      return
-    }
-
-    const { error: seasonError } = await supabase.from("seasons").insert({
-      league_type: LEAGUE_TYPE,
-      division,
-      season_number: seasonNumber,
-      due_date: dueDate,
-    })
-
-    if (seasonError) {
-      setLoading(false)
-      alert(seasonError.message)
-      return
-    }
-
     const matches = [
       { game: "1", player1: team1, player2: team2, course: course1 },
       { game: "1", player1: team3, player2: team4, course: course1 },
@@ -139,21 +106,11 @@ export default function DoublesSchedulePage() {
       { game: "3", player1: team2, player2: team3, course: course3 },
     ]
 
-    const payload = matches.map((m) => ({
-      league_type: LEAGUE_TYPE,
-      division,
-      season_number: seasonNumber,
-      game: m.game,
-      course: m.course,
-      player1: m.player1,
-      player2: m.player2,
-    }))
-
-    const { error: scheduleError } = await supabase.from("schedule").insert(payload)
-
-    if (scheduleError) {
+    const response = await fetch("/api/admin/schedules", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "same-origin", body: JSON.stringify({ action: "create_league_schedule", league_type: LEAGUE_TYPE, division, season_number: seasonNumber, due_date: dueDate, matches }) })
+    const responseBody = await response.json() as { error?: string }
+    if (!response.ok) {
       setLoading(false)
-      alert(scheduleError.message)
+      alert(responseBody.error || "Schedule could not be saved")
       return
     }
 
@@ -173,18 +130,18 @@ export default function DoublesSchedulePage() {
       })
 
       const text = await res.text()
-      let data: any = {}
+      let data: { error?: string } = {}
 
-      if (text) data = JSON.parse(text)
+      if (text) { const parsed: unknown = JSON.parse(text); if (parsed && typeof parsed === "object") data = parsed as { error?: string } }
 
       if (!res.ok) {
         setLoading(false)
         alert("Season saved, Discord failed: " + (data.error || "Unknown"))
         return
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       setLoading(false)
-      alert("Discord error: " + err.message)
+      alert("Discord error: " + (err instanceof Error ? err.message : "Unknown error"))
       return
     }
 
