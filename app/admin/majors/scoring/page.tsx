@@ -16,6 +16,7 @@ import {
   type GlobalPlayerDirectoryEntry,
 } from "@/lib/identity/globalPlayerDirectory"
 import { supabase } from "@/lib/supabase"
+import { fetchMajorAdminData } from "@/lib/admin/majorAdminData"
 
 export default function MajorScoringAdminPage() {
   const [events, setEvents] = useState<MajorEvent[]>([])
@@ -50,34 +51,33 @@ export default function MajorScoringAdminPage() {
   const browserOrigin = typeof window === "undefined" ? "" : window.location.origin
 
   const loadSession = useCallback(async (id: string) => {
-    const [participantResponse, scoreResponse] = await Promise.all([
-      supabase.from("major_scoring_participants").select("*").eq("session_id", id).order("position"),
-      supabase.from("major_hole_scores").select("*").eq("session_id", id).order("hole_number"),
-    ])
-    const loadedParticipants = (participantResponse.data as MajorScoringParticipant[] | null) || []
-    const loadedScores = (scoreResponse.data as MajorHoleScore[] | null) || []
-    setParticipants(loadedParticipants)
-    setScores(loadedScores)
-    const session = sessions.find((item) => item.id === id)
-    if (session) {
-      setHole(session.current_hole)
-      setLabel(session.label)
-      setActive(session.is_active)
-      setPublished(session.is_public)
+    try {
+      const response = await fetchMajorAdminData<{ participants: MajorScoringParticipant[]; scores: MajorHoleScore[] }>("scoring", { sessionId: id })
+      setParticipants(response.participants)
+      setScores(response.scores)
+      const session = sessions.find((item) => item.id === id)
+      if (session) {
+        setHole(session.current_hole)
+        setLabel(session.label)
+        setActive(session.is_active)
+        setPublished(session.is_public)
+      }
+      setMessage("")
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Major scoring data could not be loaded.")
     }
-    setMessage(participantResponse.error?.message || scoreResponse.error?.message || "")
   }, [sessions])
 
   const loadFoundation = useCallback(async () => {
     const [eventResponse, playerResponse, sessionResponse] = await Promise.all([
-      supabase.from("major_events").select("*").order("slug"),
+      fetchMajorAdminData<{ events: MajorEvent[] }>("scoring").then((data) => ({ data: data.events, error: null })).catch((error: Error) => ({ data: [] as MajorEvent[], error })),
       loadGlobalPlayerDirectory()
         .then((data) => ({ data, error: null }))
         .catch((error: Error) => ({ data: [], error })),
-      supabase.from("major_scoring_sessions").select("*").order("updated_at", { ascending: false }),
+      fetchMajorAdminData<{ sessions: MajorScoringSession[] }>("scoring").then((data) => ({ data: data.sessions, error: null })).catch((error: Error) => ({ data: [] as MajorScoringSession[], error })),
     ])
-    const loadedEvents = (eventResponse.data as MajorEvent[] | null) || []
-    const loadedSessions = (sessionResponse.data as MajorScoringSession[] | null) || []
+    const loadedEvents = eventResponse.data || []
+    const loadedSessions = sessionResponse.data || []
     setEvents(loadedEvents)
     setPlayers(playerResponse.data.filter((player) => player.active))
     setSessions(loadedSessions)

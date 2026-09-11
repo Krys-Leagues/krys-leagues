@@ -5,6 +5,7 @@ import { useParams } from "next/navigation"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { MAJOR_COURSES, formatMajorToPar, majorHoleOutcome, majorRoundDayLabel, type MajorEvent, type MajorPlayerScorecard } from "@/lib/majors"
 import { supabase } from "@/lib/supabase"
+import { fetchMajorPublicData } from "@/lib/majorsPublicData"
 
 type MyRound = MajorPlayerScorecard & { scoring_entry_open: boolean; label: string }
 
@@ -18,10 +19,13 @@ export default function MajorPlayerScoringPage() {
   const [busy, setBusy] = useState(false)
 
   const load = useCallback(async () => {
-    const eventResponse = await supabase.from("major_events").select("*").eq("slug", slug).maybeSingle()
-    const loaded = eventResponse.data as MajorEvent | null
+    let loaded: MajorEvent
+    try {
+      loaded = (await fetchMajorPublicData<{ event: MajorEvent }>("event", { slug })).event
+    } catch (error) {
+      return setMessage(error instanceof Error ? error.message : "Major not found.")
+    }
     setEvent(loaded)
-    if (!loaded) return setMessage(eventResponse.error?.message || "Major not found.")
     const response = await supabase.rpc("get_my_major_scorecards", { p_major_event_id: loaded.id })
     const cards = (response.data as MyRound[] | null) || []
     setRounds(cards)

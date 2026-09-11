@@ -2,8 +2,8 @@
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { supabase } from "@/lib/supabase"
 import { formatMajorDate, type MajorEvent } from "@/lib/majors"
+import { fetchMajorPublicData } from "@/lib/majorsPublicData"
 
 const MAJOR_CARD_DISPLAY: Record<string, { name: string; date: string }> = {
   "major-1": { name: "MINI GOLF MASTERS", date: "SEPTEMBER 2026" },
@@ -19,13 +19,13 @@ export default function MajorsPage() {
 
   useEffect(() => {
     async function loadEvents() {
-      const response = await supabase
-        .from("major_events")
-        .select("*")
-        .or("is_test_event.eq.false,test_event_listed.eq.true")
-        .order("starts_at", { ascending: true, nullsFirst: false })
-      setEvents((response.data as MajorEvent[] | null) || [])
-      setError(response.error?.message || "")
+      try {
+        const response = await fetchMajorPublicData<{ events: MajorEvent[] }>("events")
+        setEvents(response.events)
+        setError("")
+      } catch (error) {
+        setError(error instanceof Error ? error.message : "Public Majors could not be loaded.")
+      }
       setLoading(false)
     }
     void loadEvents()

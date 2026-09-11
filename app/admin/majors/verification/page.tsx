@@ -4,15 +4,15 @@ import Link from "next/link"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { formatMajorLocalTime, formatMajorToPar, majorRoundDayLabel, type MajorEvent, type MajorPlayDay, type MajorPlayerScorecard } from "@/lib/majors"
 import { supabase } from "@/lib/supabase"
+import { fetchMajorAdminData } from "@/lib/admin/majorAdminData"
 
 export default function MajorVerificationPage(){
  const [events,setEvents]=useState<MajorEvent[]>([]),[days,setDays]=useState<MajorPlayDay[]>([]),[cards,setCards]=useState<MajorPlayerScorecard[]>([]),[entryCount,setEntryCount]=useState(0)
  const [eventId,setEventId]=useState(""),[dayId,setDayId]=useState(""),[status,setStatus]=useState("submitted"),[slot,setSlot]=useState(""),[room,setRoom]=useState(""),[search,setSearch]=useState(""),[message,setMessage]=useState("")
- const load=useCallback(async()=>{const [e,d]=await Promise.all([supabase.from("major_events").select("*").order("slug"),supabase.from("major_play_days").select("*").order("day_number")]);setEvents((e.data as MajorEvent[])||[]);setDays((d.data as MajorPlayDay[])||[]);setEventId(x=>x||(e.data?.[0]?.id as string)||"");setMessage(e.error?.message||d.error?.message||"")},[])
+ const load=useCallback(async()=>{try{const response=await fetchMajorAdminData<{events:MajorEvent[];days:MajorPlayDay[];cards:MajorPlayerScorecard[];entryCount:number}>("verification",{eventId:eventId||undefined});setEvents(response.events);setDays(response.days);setCards(response.cards);setEntryCount(response.entryCount);setEventId(x=>x||response.events[0]?.id||"");setMessage("")}catch(error){setMessage(error instanceof Error?error.message:"Major verification data could not be loaded.")}},[eventId])
  // Initial authenticated Supabase synchronization.
  // eslint-disable-next-line react-hooks/set-state-in-effect
  useEffect(()=>{void load()},[load])
- useEffect(()=>{if(!eventId)return;void(async()=>{const [r,e]=await Promise.all([supabase.rpc("get_major_scorecard_verification_queue",{p_major_event_id:eventId}),supabase.from("major_entries").select("id",{count:"exact",head:true}).eq("major_event_id",eventId).in("status",["registered","confirmed"])]);setCards((r.data as MajorPlayerScorecard[])||[]);setEntryCount(e.count||0);setMessage(r.error?.message||e.error?.message||"")})()},[eventId])
  const visible=useMemo(()=>cards.filter(c=>(!dayId||c.play_day_id===dayId)&&(!status||c.status===status)&&(!slot||c.slot_starts_at===slot)&&(!room||c.room_label===room)&&c.player_screen_name_snapshot.toLowerCase().includes(search.toLowerCase())),[cards,dayId,status,slot,room,search])
  const eventDays=days.filter(d=>d.major_event_id===eventId),submitted=cards.filter(c=>c.major_event_id===eventId&&c.status==="submitted").length,verified=cards.filter(c=>c.major_event_id===eventId&&c.status==="verified").length
  async function refreshCards(){if(!eventId)return;const r=await supabase.rpc("get_major_scorecard_verification_queue",{p_major_event_id:eventId});setCards((r.data as MajorPlayerScorecard[])||[])}

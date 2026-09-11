@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useCallback, useEffect, useState } from "react"
 import { MAJOR_ENTRY_STATUSES, MAJOR_EVENT_STATUSES, formatMajorDate, toDateTimeLocal, type MajorEntry, type MajorEvent } from "@/lib/majors"
 import { supabase } from "@/lib/supabase"
+import { fetchMajorAdminData } from "@/lib/admin/majorAdminData"
 
 type EventDraft = Omit<MajorEvent, "created_at" | "updated_at">
 
@@ -18,20 +19,29 @@ export default function MajorsAdminPage() {
   const [saving, setSaving] = useState(false)
 
   const loadEntries = useCallback(async (eventId: string) => {
-    const response = await supabase.from("major_entries").select("*").eq("major_event_id", eventId).order("registered_at")
-    setEntries((response.data as MajorEntry[] | null) || [])
-    if (response.error) setMessage(response.error.message)
+    try {
+      const response = await fetchMajorAdminData<{ entries: MajorEntry[] }>("entries", { eventId })
+      setEntries(response.entries)
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Major entries could not be loaded.")
+    }
   }, [])
 
   const loadEvents = useCallback(async (preferredId?: string) => {
-    const response = await supabase.from("major_events").select("*").order("slug")
-    const loaded = (response.data as MajorEvent[] | null) || []
+    let loaded: MajorEvent[]
+    try {
+      loaded = (await fetchMajorAdminData<{ events: MajorEvent[] }>("events")).events
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Major events could not be loaded.")
+      setLoading(false)
+      return
+    }
     const nextId = preferredId || loaded[0]?.id || ""
     const nextEvent = loaded.find((event) => event.id === nextId) || null
     setEvents(loaded)
     setSelectedId(nextId)
     setDraft(nextEvent ? { ...nextEvent } : null)
-    setMessage(response.error?.message || "")
+    setMessage("")
     setLoading(false)
     if (nextId) await loadEntries(nextId)
   }, [loadEntries])

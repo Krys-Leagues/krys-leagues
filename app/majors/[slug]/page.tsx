@@ -7,6 +7,7 @@ import { useCallback, useEffect, useState } from "react"
 import { formatMajorDate, formatMajorDeadline, formatMajorLocalTime, isMajorDayLocked, isMastersScorecardTheme, type MajorDayChoice, type MajorEntry, type MajorEvent, type MajorPlayDay, type MajorSignupStatus, type MajorTimeSlot } from "@/lib/majors"
 import { createDiscordAuthCallbackUrl } from "@/lib/authReturnTo"
 import { supabase } from "@/lib/supabase"
+import { fetchMajorPublicData } from "@/lib/majorsPublicData"
 import styles from "./page.module.css"
 
 export default function MajorDetailPage() {
@@ -25,21 +26,22 @@ export default function MajorDetailPage() {
   const [currentTime, setCurrentTime] = useState(0)
 
   const loadEvent = useCallback(async () => {
-    const eventResult = await supabase.from("major_events").select("*").eq("slug", slug).maybeSingle()
-    const loadedEvent = eventResult.data as MajorEvent | null
+    let response: { event: MajorEvent; entries: MajorEntry[]; days: MajorPlayDay[]; slots: MajorTimeSlot[] }
+    try {
+      response = await fetchMajorPublicData("detail", { slug })
+    } catch (error) {
+      setEvent(null)
+      setMessage(error instanceof Error ? error.message : "This Major is not available.")
+      setLoading(false)
+      return
+    }
+    const loadedEvent = response.event
     setEvent(loadedEvent)
-    if (!loadedEvent) { setMessage(eventResult.error?.message || "This Major is not available."); setLoading(false); return }
-    const [entryResult, dayResult] = await Promise.all([
-      supabase.from("major_entries").select("*").eq("major_event_id", loadedEvent.id).order("registered_at"),
-      supabase.from("major_play_days").select("*").eq("major_event_id", loadedEvent.id).order("day_number"),
-    ])
-    const loadedDays = (dayResult.data as MajorPlayDay[] | null) || []
-    const dayIds = loadedDays.map((day) => day.id)
-    const slotResult = dayIds.length ? await supabase.from("major_time_slots").select("*").in("play_day_id", dayIds).eq("is_available", true).order("starts_at") : { data: [], error: null }
+    const loadedDays = response.days
     const statusResult = await supabase.rpc("get_major_signup_status", { p_major_event_id: loadedEvent.id })
-    setEntries((entryResult.data as MajorEntry[] | null) || [])
+    setEntries(response.entries)
     setDays(loadedDays)
-    setSlots((slotResult.data as MajorTimeSlot[] | null) || [])
+    setSlots(response.slots)
     setSignupStatus(statusResult.data as MajorSignupStatus | null)
     const user = await supabase.auth.getUser()
     if (user.data.user) {
@@ -48,7 +50,7 @@ export default function MajorDetailPage() {
       setSchedule(mine)
       setChoices(Object.fromEntries(mine.map((choice) => [choice.play_day_id, choice.time_slot_id])))
     }
-    setMessage(eventResult.error?.message || entryResult.error?.message || dayResult.error?.message || slotResult.error?.message || "")
+    setMessage(statusResult.error?.message || "")
     setCurrentTime(Date.now())
     setLoading(false)
   }, [slug])

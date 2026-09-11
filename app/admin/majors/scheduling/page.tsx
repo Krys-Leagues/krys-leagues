@@ -28,6 +28,7 @@ import {
   type GlobalPlayerDirectoryEntry,
 } from "@/lib/identity/globalPlayerDirectory"
 import { supabase } from "@/lib/supabase"
+import { fetchMajorAdminData, mutateMajorAdminData } from "@/lib/admin/majorAdminData"
 import styles from "./page.module.css"
 
 type AdminSection = "setup" | `day-${1 | 2 | 3 | 4}` | "weekend" | "results" | "testers"
@@ -59,49 +60,47 @@ export default function MajorSchedulingAdminPage() {
 
   const loadSchedule = useCallback(async (id: string) => {
     if (!id) return
-    const dayResult = await supabase.from("major_play_days").select("*").eq("major_event_id", id).order("day_number")
-    const loadedDays = (dayResult.data as MajorPlayDay[] | null) || []
-    const dayIds = loadedDays.map((day) => day.id)
-    const [slotResult, standardTimeResult, entryResult, weekendResult, groupResult, placementResult, testerResult] = await Promise.all([
-      dayIds.length ? supabase.from("major_time_slots").select("*").in("play_day_id", dayIds).order("starts_at") : Promise.resolve({ data: [], error: null }),
-      supabase.from("major_standard_signup_times").select("*").eq("major_event_id", id).eq("is_active", true).order("local_time"),
-      supabase.from("major_entries").select("*").eq("major_event_id", id).order("player_screen_name_snapshot"),
-      supabase.from("major_entry_weekend_status").select("*").eq("major_event_id", id),
-      supabase.from("major_schedule_groups").select("*").eq("major_event_id", id).order("group_label"),
-      supabase.from("major_final_placements").select("*").eq("major_event_id", id),
-      supabase.rpc("get_major_test_testers", { p_major_event_id: id }),
-    ])
-    const loadedEntries = (entryResult.data as MajorEntry[] | null) || []
-    const loadedGroups = (groupResult.data as MajorScheduleGroup[] | null) || []
-    const [choiceResult, memberResult] = await Promise.all([
-      loadedEntries.length ? supabase.from("major_entry_day_choices").select("*").in("entry_id", loadedEntries.map((entry) => entry.id)) : Promise.resolve({ data: [], error: null }),
-      loadedGroups.length ? supabase.from("major_schedule_group_members").select("*").in("group_id", loadedGroups.map((group) => group.id)) : Promise.resolve({ data: [], error: null }),
-    ])
-    setDays(loadedDays)
-    setSlots((slotResult.data as MajorTimeSlot[] | null) || [])
-    setStandardTimes((standardTimeResult.data as MajorStandardSignupTime[] | null) || [])
-    setEntries(loadedEntries)
-    setChoices((choiceResult.data as MajorDayChoice[] | null) || [])
-    setWeekend((weekendResult.data as MajorWeekendStatus[] | null) || [])
-    setGroups(loadedGroups)
-    setMembers((memberResult.data as MajorScheduleGroupMember[] | null) || [])
-    setPlacements((placementResult.data as MajorFinalPlacement[] | null) || [])
-    setTesters((testerResult.data as MajorTestTester[] | null) || [])
-    setMessage(dayResult.error?.message || slotResult.error?.message || standardTimeResult.error?.message || entryResult.error?.message || choiceResult.error?.message || weekendResult.error?.message || groupResult.error?.message || memberResult.error?.message || placementResult.error?.message || testerResult.error?.message || "")
+    try {
+      const response = await fetchMajorAdminData<{
+        days: MajorPlayDay[]
+        slots: MajorTimeSlot[]
+        standardTimes: MajorStandardSignupTime[]
+        entries: MajorEntry[]
+        choices: MajorDayChoice[]
+        weekend: MajorWeekendStatus[]
+        groups: MajorScheduleGroup[]
+        members: MajorScheduleGroupMember[]
+        placements: MajorFinalPlacement[]
+        testers: MajorTestTester[]
+      }>("schedule", { eventId: id })
+      setDays(response.days)
+      setSlots(response.slots)
+      setStandardTimes(response.standardTimes)
+      setEntries(response.entries)
+      setChoices(response.choices)
+      setWeekend(response.weekend)
+      setGroups(response.groups)
+      setMembers(response.members)
+      setPlacements(response.placements)
+      setTesters(response.testers)
+      setMessage("")
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Major schedule data could not be loaded.")
+    }
   }, [])
-
   const reloadEvents = useCallback(async (preferred?: string) => {
     const [result, playerDirectoryResult] = await Promise.all([
-      supabase.from("major_events").select("*").order("slug"),
+      fetchMajorAdminData<{ events: MajorEvent[] }>("events").then((data) => ({ data: data.events, error: null })).catch((error: Error) => ({ data: [] as MajorEvent[], error })),
       loadGlobalPlayerDirectory()
         .then((data) => ({ data, error: null }))
         .catch((error: Error) => ({ data: [], error })),
     ])
-    const loaded = (result.data as MajorEvent[] | null) || []
+    const loaded = result.data || []
     const next = preferred || loaded[0]?.id || ""
     setEvents(loaded)
     setGlobalPlayers(playerDirectoryResult.data)
-    if (playerDirectoryResult.error) setMessage(playerDirectoryResult.error.message)
+    if (result.error) setMessage(result.error.message)
+    else if (playerDirectoryResult.error) setMessage(playerDirectoryResult.error.message)
     setEventId(next)
     if (next) await loadSchedule(next)
   }, [loadSchedule])
@@ -160,8 +159,13 @@ export default function MajorSchedulingAdminPage() {
       play_date: String(data.get("date")),
       choices_locked: data.get("locked") === "on",
     }
-    const result = await supabase.from("major_play_days").upsert(row, { onConflict: "major_event_id,day_number" })
-    if (showResult(result.error, `${DAY_NAMES[dayNumber - 1].short} settings saved.`)) await loadSchedule(eventId)
+    try {
+      await mutateMajorAdminData({ action: "save_play_day", ...row })
+      setMessage(`${DAY_NAMES[dayNumber - 1].short} settings saved.`)
+      await loadSchedule(eventId)
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Could not save the tournament day.")
+    }
   }
 
   async function saveStandardTime(form: HTMLFormElement, standardTime?: MajorStandardSignupTime) {
@@ -221,8 +225,9 @@ export default function MajorSchedulingAdminPage() {
       const startsAt = majorEventLocalTimeToIso(`${day.play_date}T${String(data.get("time"))}`, selectedEvent.schedule_timezone)
       const selectedCount = choices.filter((choice) => choice.time_slot_id === slot.id).length
       if (startsAt !== slot.starts_at && selectedCount > 0 && !window.confirm(`${selectedCount} ${selectedCount === 1 ? "player has" : "players have"} selected this time. Editing it keeps them in this slot at the new time. Continue?`)) return
-      const result = await supabase.from("major_time_slots").update({ starts_at: startsAt, label: String(data.get("label") || "").trim() || null, standard_signup_time_id: null }).eq("id", slot.id)
-      if (showResult(result.error, "Signup time updated and the day lock deadline recalculated.")) await loadSchedule(eventId)
+      await mutateMajorAdminData({ action: "update_time_slot", id: slot.id, starts_at: startsAt, label: String(data.get("label") || "").trim(), clear_standard_signup_time: true })
+      setMessage("Signup time updated and the day lock deadline recalculated.")
+      await loadSchedule(eventId)
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Could not convert that event-local time.")
     }
@@ -230,8 +235,13 @@ export default function MajorSchedulingAdminPage() {
 
   async function setSlotAvailability(slot: MajorTimeSlot, available: boolean, playerCount: number) {
     if (!available && playerCount > 0 && !window.confirm(`${playerCount} ${playerCount === 1 ? "player has" : "players have"} selected this time. Disabling it preserves their selections, but they must be moved with the administrator override. Disable it?`)) return
-    const result = await supabase.from("major_time_slots").update({ is_available: available, standard_signup_time_id: null }).eq("id", slot.id)
-    if (showResult(result.error, available ? "Signup time enabled and available to players." : "Signup time disabled. Existing selections were preserved.")) await loadSchedule(eventId)
+    try {
+      await mutateMajorAdminData({ action: "update_time_slot", id: slot.id, is_available: available, clear_standard_signup_time: true })
+      setMessage(available ? "Signup time enabled and available to players." : "Signup time disabled. Existing selections were preserved.")
+      await loadSchedule(eventId)
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Could not update signup time availability.")
+    }
   }
 
   async function removeSlot(slot: MajorTimeSlot, playerCount: number, roomCount: number) {
@@ -240,8 +250,13 @@ export default function MajorSchedulingAdminPage() {
       return
     }
     if (!window.confirm("Remove this unused signup time? This cannot be undone.")) return
-    const result = await supabase.from("major_time_slots").delete().eq("id", slot.id)
-    if (showResult(result.error, "Unused signup time removed and the day lock deadline recalculated.")) await loadSchedule(eventId)
+    try {
+      await mutateMajorAdminData({ action: "delete_time_slot", id: slot.id })
+      setMessage("Unused signup time removed and the day lock deadline recalculated.")
+      await loadSchedule(eventId)
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Could not remove signup time.")
+    }
   }
 
   async function movePlayer(entryId: string, dayId: string, slotId: string) {

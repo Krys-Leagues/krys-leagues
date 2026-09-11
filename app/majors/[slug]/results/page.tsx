@@ -5,10 +5,11 @@ import { useParams } from "next/navigation"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { formatMajorToPar, majorHoleOutcome, majorRoundDayLabel, type MajorPlayerScorecard, type MajorResultsPayload } from "@/lib/majors"
 import { supabase } from "@/lib/supabase"
+import { fetchMajorPublicData } from "@/lib/majorsPublicData"
 
 export default function MajorResultsPage(){
  const {slug}=useParams<{slug:string}>();const [data,setData]=useState<MajorResultsPayload|null>(null),[selected,setSelected]=useState<string|null>(null),[message,setMessage]=useState("")
- const load=useCallback(async()=>{const e=await supabase.from("major_events").select("id").eq("slug",slug).maybeSingle();if(!e.data)return setMessage(e.error?.message||"Major not found.");const r=await supabase.rpc("get_public_major_live_results",{p_major_event_id:e.data.id});setData(r.data as MajorResultsPayload|null);setMessage(r.error?.message||"")},[slug])
+ const load=useCallback(async()=>{try{const e=await fetchMajorPublicData<{event:{id:string}}>("event",{slug});const r=await supabase.rpc("get_public_major_live_results",{p_major_event_id:e.event.id});setData(r.data as MajorResultsPayload|null);setMessage(r.error?.message||"")}catch(error){setMessage(error instanceof Error?error.message:"Major not found.")}},[slug])
  // Initial public result synchronization plus lightweight live polling.
  // eslint-disable-next-line react-hooks/set-state-in-effect
  useEffect(()=>{void load();const timer=setInterval(()=>void load(),15000);return()=>clearInterval(timer)},[load])
