@@ -150,19 +150,12 @@ export default function PlayersAdminPage() {
   async function loadPlayers() {
     setLoading(true)
 
-    const [playersResult, membershipsResult, tournamentsResult, identityLinksResult] = await Promise.all([
+    const [playersResult, registrationsResponse, identityLinksResult] = await Promise.all([
       supabase
         .from("players")
         .select("id, screen_name, discord_id, discord_name, status, active, avatar_path, is_server_booster, has_krys_server_tag, profile_badges")
         .order("screen_name", { ascending: true }),
-      supabase
-        .from("player_league_memberships")
-        .select("player_id, league_type, season_number, division")
-        .order("season_number", { ascending: false }),
-      supabase
-        .from("player_tournament_entries")
-        .select("player_id, tournament_type, bracket, status")
-        .order("created_at", { ascending: false }),
+      fetch("/api/admin/players", { credentials: "same-origin", cache: "no-store" }),
       supabase
         .from("player_identity_links")
         .select("historical_player_id, canonical_player_id"),
@@ -170,15 +163,16 @@ export default function PlayersAdminPage() {
 
     setLoading(false)
 
-    const loadError = playersResult.error || membershipsResult.error || tournamentsResult.error || identityLinksResult.error
+    const registrationsPayload = await registrationsResponse.json() as { error?: string; memberships?: typeof leagueMemberships; tournaments?: typeof tournamentEntries }
+    const loadError = playersResult.error || identityLinksResult.error || (!registrationsResponse.ok ? new Error(registrationsPayload.error || "Player registrations could not be loaded.") : null)
     if (loadError) {
       alert(loadError.message)
       return
     }
 
     setPlayers(playersResult.data || [])
-    setLeagueMemberships(membershipsResult.data || [])
-    setTournamentEntries(tournamentsResult.data || [])
+    setLeagueMemberships(registrationsPayload.memberships || [])
+    setTournamentEntries(registrationsPayload.tournaments || [])
     setIdentityLinks(identityLinksResult.data || [])
   }
 
@@ -380,43 +374,13 @@ export default function PlayersAdminPage() {
 
     setSavingLeague(true)
 
-    const { data: existingMemberships, error: checkError } = await supabase
-      .from("player_league_memberships")
-      .select("id")
-      .eq("player_id", leaguePlayer.id)
-      .eq("league_type", league)
-      .eq("season_number", CURRENT_SEASON)
-      .eq("division", division)
-
-    if (checkError) {
-      setSavingLeague(false)
-      alert(checkError.message)
-      return
-    }
-
-    if (existingMemberships && existingMemberships.length > 0) {
-      setSavingLeague(false)
-      alert(
-        `${leaguePlayer.screen_name} is already registered for ${division} in Season ${CURRENT_SEASON}.`
-      )
-      return
-    }
-
-    const { error } = await supabase
-      .from("player_league_memberships")
-      .insert([
-        {
-          player_id: leaguePlayer.id,
-          league_type: league,
-          season_number: CURRENT_SEASON,
-          division,
-        },
-      ])
+    const response = await fetch("/api/admin/players", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "same-origin", body: JSON.stringify({ action: "add_league_membership", player_id: leaguePlayer.id, league_type: league, season_number: CURRENT_SEASON, division }) })
+    const payload = await response.json() as { error?: string }
 
     setSavingLeague(false)
 
-    if (error) {
-      alert(error.message)
+    if (!response.ok) {
+      alert(response.status === 409 ? `${leaguePlayer.screen_name} is already registered for ${division} in Season ${CURRENT_SEASON}.` : payload.error || "League registration failed")
       return
     }
 
@@ -446,44 +410,13 @@ export default function PlayersAdminPage() {
 
     setSavingTournament(true)
 
-    const { data: existingEntries, error: checkError } = await supabase
-      .from("player_tournament_entries")
-      .select("id")
-      .eq("player_id", tourneyPlayer.id)
-      .eq("tournament_type", tournamentType)
-      .eq("bracket", tournamentBracket)
-      .eq("status", "registered")
-
-    if (checkError) {
-      setSavingTournament(false)
-      alert(checkError.message)
-      return
-    }
-
-    if (existingEntries && existingEntries.length > 0) {
-      setSavingTournament(false)
-      alert(
-        `${tourneyPlayer.screen_name} is already registered for ${tournamentType} - ${tournamentBracket}.`
-      )
-      return
-    }
-
-    const { error } = await supabase
-      .from("player_tournament_entries")
-      .insert([
-        {
-          player_id: tourneyPlayer.id,
-          player_name: tourneyPlayer.screen_name,
-          tournament_type: tournamentType,
-          bracket: tournamentBracket,
-          status: "registered",
-        },
-      ])
+    const response = await fetch("/api/admin/players", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "same-origin", body: JSON.stringify({ action: "add_tournament_entry", player_id: tourneyPlayer.id, player_name: tourneyPlayer.screen_name, tournament_type: tournamentType, bracket: tournamentBracket }) })
+    const payload = await response.json() as { error?: string }
 
     setSavingTournament(false)
 
-    if (error) {
-      alert(error.message)
+    if (!response.ok) {
+      alert(response.status === 409 ? `${tourneyPlayer.screen_name} is already registered for ${tournamentType} - ${tournamentBracket}.` : payload.error || "Tournament registration failed")
       return
     }
 
