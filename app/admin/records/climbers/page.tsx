@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { AdminGlassCard, AdminRecordsHero, AdminRecordsShell, adminRecordsStyles as styles } from "@/components/admin/records/AdminRecordsUI"
-import { supabase } from "@/lib/supabase"
 import {
   CLIMBERS_BASELINE_CUTOFF,
   CLIMBERS_BASELINE_IMPORT_KEY,
@@ -21,6 +20,17 @@ type Course = { id: string; display_name: string; difficulty: "Easy" | "Hard"; c
 type Event = { id: string; season_id: string; player_id: string; course_id: string; difficulty: "Easy" | "Hard"; old_pb_score: number | null; new_pb_score: number; points: number; calculation_version: string; source_label: string | null; provenance_reference: string | null; created_at: string; voided_at: string | null }
 type Pass = { event_id: string; passed_player_id: string }
 type Ytd = { player_id: string; points: number; event_count: number }
+type ClimbersAdminPayload = {
+  seasons: Season[]
+  events: Event[]
+  passes: Pass[]
+  ytd: Ytd[]
+  players: Player[]
+  courses: Course[]
+  baselineMarker: ClimbersBaselineImportMarker | null
+  baselineSourceRows: ClimbersBaselineSourceRow[]
+  activeBaselinePlayers: number
+}
 
 const statusLabel = (status: Season["status"]) => status.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase())
 
@@ -31,22 +41,18 @@ export default function ClimbersAdminPage() {
 
   async function load() {
     setLoading(true); setError("")
-    const [seasonResult, eventResult, passResult, ytdResult, playerResult, courseResult, baselineMarkerResult, baselineSourceResult, baselineResult] = await Promise.all([
-      supabase.from("climbers_seasons").select("id,label,starts_at,ends_at,status").order("starts_at", { ascending: false }),
-      supabase.from("climbers_events").select("id,season_id,player_id,course_id,difficulty,old_pb_score,new_pb_score,points,calculation_version,source_label,provenance_reference,created_at,voided_at").order("created_at", { ascending: false }),
-      supabase.from("climbers_event_passes").select("event_id,passed_player_id"),
-      supabase.from("climbers_year_to_date").select("player_id,points,event_count").order("points", { ascending: false }),
-      supabase.from("players").select("id,screen_name").order("screen_name"),
-      supabase.from("all_time_courses").select("id,code,display_name,difficulty").eq("active", true).in("difficulty", ["Easy", "Hard"]),
-      supabase.from("climbers_legacy_baseline_imports").select("import_key,cutoff_at,applied_at").eq("import_key", CLIMBERS_BASELINE_IMPORT_KEY).maybeSingle(),
-      supabase.from("climbers_legacy_baseline_source_rows").select("source_name,ytd_points,period_points,canonical_player_id,identity_status").eq("import_key", CLIMBERS_BASELINE_IMPORT_KEY),
-      supabase.from("climbers_legacy_baselines").select("canonical_player_id").eq("import_key", CLIMBERS_BASELINE_IMPORT_KEY),
-    ])
-    const queryError = seasonResult.error || eventResult.error || passResult.error || ytdResult.error || playerResult.error || courseResult.error || baselineMarkerResult.error || baselineSourceResult.error || baselineResult.error
-    if (queryError) setError(queryError.message)
-    const nextSeasons = (seasonResult.data ?? []) as Season[]
-    setSeasons(nextSeasons); setEvents((eventResult.data ?? []) as Event[]); setPasses((passResult.data ?? []) as Pass[]); setYtd((ytdResult.data ?? []) as Ytd[]); setPlayers((playerResult.data ?? []) as Player[]); setCourses((courseResult.data ?? []) as Course[]); setSeasonId((current) => current || nextSeasons.find((season) => season.status === "active")?.id || nextSeasons[0]?.id || ""); setLoading(false)
-    setBaselineMarker((baselineMarkerResult.data ?? null) as ClimbersBaselineImportMarker | null); setBaselineSourceRows((baselineSourceResult.data ?? []) as ClimbersBaselineSourceRow[]); setActiveBaselinePlayers((baselineResult.data ?? []).length)
+    try {
+      const response = await fetch("/api/admin/records/climbers", { cache: "no-store" })
+      const body = await response.json().catch(() => null) as (ClimbersAdminPayload & { error?: string }) | null
+      if (!response.ok || !body) throw new Error(body?.error || "Climbers admin data could not be loaded.")
+      const nextSeasons = body.seasons
+      setSeasons(nextSeasons); setEvents(body.events); setPasses(body.passes); setYtd(body.ytd); setPlayers(body.players); setCourses(body.courses); setSeasonId((current) => current || nextSeasons.find((season) => season.status === "active")?.id || nextSeasons[0]?.id || "")
+      setBaselineMarker(body.baselineMarker); setBaselineSourceRows(body.baselineSourceRows); setActiveBaselinePlayers(body.activeBaselinePlayers)
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Climbers admin data could not be loaded.")
+    } finally {
+      setLoading(false)
+    }
   }
   useEffect(() => { const timer = window.setTimeout(() => void load(), 0); return () => window.clearTimeout(timer) }, [])
 
