@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { supabase } from "@/lib/supabase"
 
 type Player = {
   id: string
@@ -33,17 +32,14 @@ export default function BracketBuilder() {
   async function fetchPlayers() {
     setLoading(true)
 
-    const { data, error } = await supabase
-      .from("player_tracker")
-      .select("id, screen_name, discord_username, discord_id, status, cup_tier")
-      .order("screen_name", { ascending: true })
-
-    if (error) {
-      alert(error.message)
-      console.error(error)
+    const response = await fetch("/api/admin/player-tracker", { cache: "no-store" })
+    const payload = await response.json().catch(() => ({})) as { data?: Player[]; error?: string }
+    if (!response.ok || payload.error) {
+      alert(payload.error || response.statusText)
+      console.error(payload.error || response.statusText)
     }
 
-    if (data) setPlayers(data)
+    if (payload.data) setPlayers(payload.data)
     setLoading(false)
   }
 

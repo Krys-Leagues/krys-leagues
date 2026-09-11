@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { supabase } from "@/lib/supabase"
 
 type Player = {
   id: string
@@ -45,17 +44,14 @@ export default function PlayerTracker() {
   async function fetchPlayers() {
     setLoading(true)
 
-    const { data, error } = await supabase
-      .from("player_tracker")
-      .select("*")
-      .order("screen_name", { ascending: true })
-
-    if (error) {
-      alert(error.message)
-      console.error(error)
+    const response = await fetch("/api/admin/player-tracker", { cache: "no-store" })
+    const payload = await response.json().catch(() => ({})) as { data?: Player[]; error?: string }
+    if (!response.ok || payload.error) {
+      alert(payload.error || response.statusText)
+      console.error(payload.error || response.statusText)
     }
 
-    if (data) setPlayers(data)
+    if (payload.data) setPlayers(payload.data)
     setLoading(false)
   }
 
@@ -70,8 +66,10 @@ export default function PlayerTracker() {
       return
     }
 
-    const { error } = await supabase.from("player_tracker").insert([
-      {
+    const response = await fetch("/api/admin/player-tracker", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ player: {
         screen_name: form.screen_name.trim(),
         discord_username: form.discord_username.trim(),
         discord_id: form.discord_id.trim() || null,
@@ -80,12 +78,13 @@ export default function PlayerTracker() {
         best_bracket_round: form.best_bracket_round,
         bracket_wins: form.bracket_wins,
         notes: form.notes.trim(),
-      },
-    ])
+      } }),
+    })
+    const payload = await response.json().catch(() => ({})) as { error?: string }
 
-    if (error) {
-      alert(error.message)
-      console.error(error)
+    if (!response.ok || payload.error) {
+      alert(payload.error || response.statusText)
+      console.error(payload.error || response.statusText)
       return
     }
 
@@ -104,17 +103,15 @@ export default function PlayerTracker() {
   }
 
   async function importWaitlist() {
-    const { data, error } = await supabase
-      .from("player_waitlist")
-      .select("screen_name, discord_username, discord_id")
-
-    if (error) {
-      alert(error.message)
-      console.error(error)
+    const response = await fetch("/api/admin/player-tracker?includeWaitlist=true", { cache: "no-store" })
+    const payload = await response.json().catch(() => ({})) as { data?: Player[]; waitlist?: WaitlistPlayer[]; error?: string }
+    if (!response.ok || payload.error) {
+      alert(payload.error || response.statusText)
+      console.error(payload.error || response.statusText)
       return
     }
 
-    const waitlist = (data || []) as WaitlistPlayer[]
+    const waitlist = payload.waitlist || []
 
     const existingScreenNames = new Set(
       players.map((p) => (p.screen_name || "").toLowerCase().trim())
@@ -151,13 +148,16 @@ export default function PlayerTracker() {
       return
     }
 
-    const { error: insertError } = await supabase
-      .from("player_tracker")
-      .insert(inserts)
+    const insertResponse = await fetch("/api/admin/player-tracker", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ players: inserts }),
+    })
+    const insertPayload = await insertResponse.json().catch(() => ({})) as { error?: string }
 
-    if (insertError) {
-      alert(insertError.message)
-      console.error(insertError)
+    if (!insertResponse.ok || insertPayload.error) {
+      alert(insertPayload.error || insertResponse.statusText)
+      console.error(insertPayload.error || insertResponse.statusText)
       return
     }
 
@@ -166,14 +166,15 @@ export default function PlayerTracker() {
   }
 
   async function updatePlayer(id: string, field: string, value: string | number | null) {
-    const { error } = await supabase
-      .from("player_tracker")
-      .update({ [field]: value })
-      .eq("id", id)
-
-    if (error) {
-      alert(error.message)
-      console.error(error)
+    const response = await fetch("/api/admin/player-tracker", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, field, value }),
+    })
+    const payload = await response.json().catch(() => ({})) as { error?: string }
+    if (!response.ok || payload.error) {
+      alert(payload.error || response.statusText)
+      console.error(payload.error || response.statusText)
       return
     }
 

@@ -59,17 +59,14 @@ export default function BracketResultsPage() {
   async function fetchPlayers() {
     setLoading(true)
 
-    const { data, error } = await supabase
-      .from("player_tracker")
-      .select("id, screen_name, cup_tier, best_bracket_round")
-      .order("screen_name", { ascending: true })
-
-    if (error) {
-      alert(error.message)
-      console.error(error)
+    const response = await fetch("/api/admin/player-tracker", { cache: "no-store" })
+    const payload = await response.json().catch(() => ({})) as { data?: Player[]; error?: string }
+    if (!response.ok || payload.error) {
+      alert(payload.error || response.statusText)
+      console.error(payload.error || response.statusText)
     }
 
-    setPlayers(data || [])
+    setPlayers(payload.data || [])
     setLoading(false)
   }
 
@@ -127,17 +124,15 @@ export default function BracketResultsPage() {
       return
     }
 
-    const { error: updateError } = await supabase
-      .from("player_tracker")
-      .update({
-        cup_tier: newTier,
-        best_bracket_round: newBestRound,
-      })
-      .eq("id", selectedPlayer.id)
-
-    if (updateError) {
-      alert(updateError.message)
-      console.error(updateError)
+    const updateResponse = await fetch("/api/admin/player-tracker", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: selectedPlayer.id, updates: { cup_tier: newTier, best_bracket_round: newBestRound } }),
+    })
+    if (!updateResponse.ok) {
+      const updatePayload = await updateResponse.json().catch(() => ({})) as { error?: string }
+      alert(updatePayload.error || updateResponse.statusText)
+      console.error(updatePayload.error || updateResponse.statusText)
       return
     }
 
