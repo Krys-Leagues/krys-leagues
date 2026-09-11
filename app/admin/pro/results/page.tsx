@@ -1,8 +1,8 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { supabase } from "@/lib/supabase"
+import { useState } from "react"
 import { postAdminDataMutation } from "@/lib/adminDataMutations"
+import { fetchAdminSchedule } from "@/lib/admin/scheduleRead"
 
 const LEAGUE_TYPE = "pro"
 const DIVISIONS = ["Pro D1", "Pro D2", "Pro D3", "Semi Pro D1", "Amateur D1"]
@@ -90,13 +90,12 @@ export default function ProResultsPage() {
 
     setLoading(true)
 
-    const { data, error } = await supabase
-      .from("schedule")
-      .select("*")
-      .eq("league_type", LEAGUE_TYPE)
-      .eq("division", division)
-      .eq("season_number", seasonNumber)
-      .order("game", { ascending: true })
+    const { data, error } = await fetchAdminSchedule<ScheduleMatch>({
+      league_type: LEAGUE_TYPE,
+      division,
+      season_number: seasonNumber,
+      sort: "game",
+    })
 
     setLoading(false)
 

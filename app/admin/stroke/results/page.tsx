@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
+import { fetchAdminSchedule } from "@/lib/admin/scheduleRead"
 
 type SeasonRow = {
   id: string
@@ -118,19 +119,12 @@ export default function StrokeResultsPage() {
     setLoading(true)
     setError("")
 
-    const { data, error: fixtureError } = await supabase
-      .from("schedule")
-      .select("id, season_id, division_number, division, game_number, game, course, player1, player2, player1_name, player2_name, player1_id, player2_id")
-      .eq("league_type", "stroke")
-      .eq("season_id", selectedSeasonId)
-      .not("roster_version_id", "is", null)
-      .not("division_number", "is", null)
-      .not("game_number", "is", null)
-      .not("player1_id", "is", null)
-      .not("player2_id", "is", null)
-      .order("division_number", { ascending: true })
-      .order("game_number", { ascending: true })
-      .order("id", { ascending: true })
+    const { data, error: fixtureError } = await fetchAdminSchedule<ScheduleMatch>({
+      league_type: "stroke",
+      season_id: selectedSeasonId,
+      roster_version_id_not_null: true,
+      require_real_players: true,
+    })
 
     if (fixtureError) {
       setError(`Could not load managed Stroke fixtures: ${fixtureError.message}`)

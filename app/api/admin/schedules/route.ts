@@ -20,7 +20,52 @@ type Body = {
   row?: Record<string, unknown>
 }
 
+const ADMIN_SCHEDULE_COLUMNS = "id, season_id, league_type, division, season_number, division_number, game_number, game, course, player1, player2, player1_name, player2_name, player1_id, player2_id, status, due_date, roster_version_id, match_roster_version_id"
+
 function errorResponse(error: string, status = 400) { return Response.json({ error }, { status }) }
+
+export async function GET(request: Request) {
+  const authorization = await authorizeSiteAdminMutation()
+  if (!authorization.authorized) return authorization.response
+
+  const params = new URL(request.url).searchParams
+  const client = trustedClient()
+  let query = client.from("schedule").select(ADMIN_SCHEDULE_COLUMNS)
+
+  const leagueType = params.get("league_type")?.trim()
+  const division = params.get("division")?.trim()
+  const seasonId = params.get("season_id")?.trim()
+  const seasonNumber = params.get("season_number")
+  const game = params.get("game")?.trim()
+  const matchRosterVersionId = params.get("match_roster_version_id")?.trim()
+  const rosterVersionId = params.get("roster_version_id")?.trim()
+
+  if (leagueType) query = query.eq("league_type", leagueType)
+  if (division) query = query.eq("division", division)
+  if (seasonId) query = query.eq("season_id", seasonId)
+  if (seasonNumber) {
+    const value = Number(seasonNumber)
+    if (!Number.isInteger(value)) return errorResponse("season_number must be an integer")
+    query = query.eq("season_number", value)
+  }
+  if (game) query = query.eq("game", game)
+  if (matchRosterVersionId) query = query.eq("match_roster_version_id", matchRosterVersionId)
+  if (rosterVersionId) query = query.eq("roster_version_id", rosterVersionId)
+  if (params.get("require_real_players") === "true") {
+    query = query
+      .not("division_number", "is", null)
+      .not("game_number", "is", null)
+      .not("player1_id", "is", null)
+      .not("player2_id", "is", null)
+  }
+  if (params.get("roster_version_id_not_null") === "true") query = query.not("roster_version_id", "is", null)
+
+  const result = params.get("sort") === "game"
+    ? await query.order("game", { ascending: true })
+    : await query.order("division_number", { ascending: true }).order("game_number", { ascending: true }).order("id", { ascending: true })
+  if (result.error) return errorResponse(result.error.message, 503)
+  return Response.json({ schedule: result.data || [] }, { headers: { "Cache-Control": "no-store" } })
+}
 
 export async function POST(request: Request) {
   const authorization = await authorizeSiteAdminMutation()

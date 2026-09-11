@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
+import { fetchAdminSchedule } from "@/lib/admin/scheduleRead"
 
 type SeasonRow = {
   id: string
@@ -133,19 +134,12 @@ export default function MatchResultsPage() {
       return
     }
 
-    const { data, error: fixtureError } = await supabase
-      .from("schedule")
-      .select("id, season_id, division_number, division, game_number, game, course, player1, player2, player1_name, player2_name, player1_id, player2_id")
-      .eq("league_type", "match")
-      .eq("season_id", selectedSeasonId)
-      .eq("match_roster_version_id", rosterData.id)
-      .not("division_number", "is", null)
-      .not("game_number", "is", null)
-      .not("player1_id", "is", null)
-      .not("player2_id", "is", null)
-      .order("division_number", { ascending: true })
-      .order("game_number", { ascending: true })
-      .order("id", { ascending: true })
+    const { data, error: fixtureError } = await fetchAdminSchedule<ScheduleMatch>({
+      league_type: "match",
+      season_id: selectedSeasonId,
+      match_roster_version_id: rosterData.id,
+      require_real_players: true,
+    })
 
     if (fixtureError) {
       setError(`Could not load managed Match fixtures: ${fixtureError.message}`)

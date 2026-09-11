@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import PlayerAvatar from "@/components/PlayerAvatar"
 import { postAdminDataMutation } from "@/lib/adminDataMutations"
+import { fetchAdminSchedule } from "@/lib/admin/scheduleRead"
 
 type Player = {
   id: string
@@ -466,9 +467,7 @@ export default function PlayersAdminPage() {
     setImporting(true)
 
     try {
-      const { data: scheduleData } = await supabase
-        .from("schedule")
-        .select("player1, player2")
+      const { data: scheduleData } = await fetchAdminSchedule<{ player1: string | null; player2: string | null }>({})
 
       const { data: handicapData } = await supabase
         .from("handicap_rounds")

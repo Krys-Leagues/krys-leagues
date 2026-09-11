@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import { fetchAdminDivisionCourseOverrides } from "@/lib/admin/courseOverrideRead"
+import { fetchAdminSchedule } from "@/lib/admin/scheduleRead"
 
 type SeasonRow = {
   id: string
@@ -378,16 +379,10 @@ export default function StrokeScheduleReviewPage() {
         )
         .eq("season_id", requestedSeasonId)
         .maybeSingle(),
-      supabase
-        .from("schedule")
-        .select(
-          "id, division_number, division, game_number, game, course, player1, player2, player1_name, player2_name, player1_id, player2_id, status, due_date"
-        )
-        .eq("league_type", "stroke")
-        .eq("season_id", requestedSeasonId)
-        .order("division_number", { ascending: true })
-        .order("game_number", { ascending: true })
-        .order("id", { ascending: true }),
+      fetchAdminSchedule<FixtureRow>({
+        league_type: "stroke",
+        season_id: requestedSeasonId,
+      }),
       supabase
         .from("stroke_division_roster_slots")
         .select("division_number, slot_number, player_id, player_screen_name")

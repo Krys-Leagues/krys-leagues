@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import { fetchAdminDivisionCourseOverrides } from "@/lib/admin/courseOverrideRead"
+import { fetchAdminSchedule } from "@/lib/admin/scheduleRead"
 
 type SeasonRow = {
   id: string
@@ -372,17 +373,11 @@ export default function MatchScheduleReviewPage() {
         )
         .eq("season_id", requestedSeasonId)
         .maybeSingle(),
-      supabase
-        .from("schedule")
-        .select(
-          "id, division_number, division, game_number, game, course, player1, player2, player1_name, player2_name, player1_id, player2_id, status, due_date"
-        )
-        .eq("league_type", "match")
-        .eq("season_id", requestedSeasonId)
-        .eq("match_roster_version_id", selectedRoster.id)
-        .order("division_number", { ascending: true })
-        .order("game_number", { ascending: true })
-        .order("id", { ascending: true }),
+      fetchAdminSchedule<FixtureRow>({
+        league_type: "match",
+        season_id: requestedSeasonId,
+        match_roster_version_id: selectedRoster.id,
+      }),
       supabase
         .from("match_division_roster_slots")
         .select("division_number, slot_number, player_id, player_screen_name")

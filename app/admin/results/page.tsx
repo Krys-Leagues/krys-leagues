@@ -1,8 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { supabase } from "@/lib/supabase"
 import { postAdminDataMutation } from "@/lib/adminDataMutations"
+import { fetchAdminSchedule } from "@/lib/admin/scheduleRead"
 
 type ScheduleMatch = {
   game: string
@@ -114,13 +114,13 @@ export default function ResultsPage() {
 
     setMatchesLoading(true)
 
-    const { data: scheduleData, error: scheduleError } = await supabase
-      .from("schedule")
-      .select("game, course, player1, player2, player1_id, player2_id")
-      .eq("league_type", leagueType)
-      .eq("division", division)
-      .eq("season_number", seasonNumber)
-      .eq("game", game)
+    const { data: scheduleData, error: scheduleError } = await fetchAdminSchedule<ScheduleMatch>({
+      league_type: leagueType,
+      division,
+      season_number: seasonNumber,
+      game,
+      sort: "game",
+    })
 
     const resultResponse = await fetch(`/api/admin/players?view=results&league_type=${encodeURIComponent(leagueType)}&division=${encodeURIComponent(division)}&season_number=${seasonNumber}&game=${game}`, { credentials: "same-origin", cache: "no-store" })
     const resultPayload = await resultResponse.json() as { results?: ResultRow[]; error?: string }
@@ -143,7 +143,7 @@ export default function ResultsPage() {
 
     const allMatches =
       scheduleData?.filter(
-        (row: any) => row.player1 && row.player2 && row.player1_id && row.player2_id
+        (row) => row.player1 && row.player2 && row.player1_id && row.player2_id
       ) || []
 
     const scoredResults = (resultData || []) as ResultRow[]
@@ -187,7 +187,7 @@ export default function ResultsPage() {
     setCourse(match.course || "")
   }
 
-  async function postResultToDiscord(result: any) {
+  async function postResultToDiscord(result: unknown) {
     try {
       const res = await fetch("/api/discord/result-card", {
         method: "POST",
@@ -198,18 +198,18 @@ export default function ResultsPage() {
       })
 
       const text = await res.text()
-      let data: any = {}
+      let data: Record<string, unknown> = {}
 
       if (text) {
         data = JSON.parse(text)
       }
 
       if (!res.ok) {
-        alert("Result saved, but Discord failed: " + (data.error || "Unknown error"))
+        alert("Result saved, but Discord failed: " + (String(data.error || "Unknown error")))
         return
       }
-    } catch (err: any) {
-      alert("Result saved, but Discord failed: " + err.message)
+    } catch (err: unknown) {
+      alert("Result saved, but Discord failed: " + (err instanceof Error ? err.message : "Unknown error"))
     }
   }
 

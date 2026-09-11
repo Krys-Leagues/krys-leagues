@@ -4,6 +4,7 @@ import { join } from "node:path"
 import type { SupabaseClient } from "@supabase/supabase-js"
 import Papa from "papaparse"
 import { authorizedAdminClient } from "@/app/api/admin/records/arizona-modern/_shared"
+import { createTrustedSupabaseClient } from "@/lib/supabase/trustedServer"
 import { isMonthlyLegacyMergedPlaceholder, previewMonthlyWebsiteCsvRows } from "@/lib/importer/adapters/monthlyWebsiteAdapter"
 import { matchPlayers, type PlayerMatch } from "@/lib/importer/matchPlayers"
 import { normalizeIdentity } from "@/lib/identity/normalizeIdentity"
@@ -87,6 +88,7 @@ export async function GET(request: Request) {
   const authorization = await authorizedAdminClient(request)
   if (authorization.error) return authorization.error
   const supabase = authorization.supabase!
+  const trusted = createTrustedSupabaseClient()
   try {
     const [manifestText, csvText] = await Promise.all([
       readFile(join(root, "monthly-website-source-manifest.json"), "utf8"),
@@ -102,7 +104,7 @@ export async function GET(request: Request) {
     if (preview.summary.duplicateRows || preview.summary.conflictingRows || preview.summary.totalMismatches) throw new Error("source_validation_error")
 
     const [playersResult, aliasesResult, linksResult, importsResult] = await Promise.all([
-      supabase.from("players").select("id, screen_name, discord_name, discord_username, discord_id, active, status").order("screen_name"),
+      trusted.from("players").select("id, screen_name, discord_name, discord_username, discord_id, active, status").order("screen_name"),
       supabase.from("player_aliases").select("id, player_id, alias, normalized_alias, source, verified").eq("verified", true).order("alias"),
       supabase.from("player_identity_links").select("historical_player_id, canonical_player_id"),
       supabase.from("historical_monthly_imports").select("id, source_sha256, source_row_count, applied_row_count, committed_by, committed_at"),

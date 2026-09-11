@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js"
+import { createTrustedSupabaseClient } from "@/lib/supabase/trustedServer"
 
 type SeasonRow = {
   id: string
@@ -115,6 +116,8 @@ export async function POST(request: Request) {
     )
   }
 
+  const trusted = createTrustedSupabaseClient()
+
   let body: { season_id?: unknown }
 
   try {
@@ -131,17 +134,17 @@ export async function POST(request: Request) {
   }
 
   const [seasonResponse, rosterResponse, stateResponse] = await Promise.all([
-    supabase
+    trusted
       .from("seasons")
       .select("id, league_type, season_number, due_date")
       .eq("id", seasonId)
       .maybeSingle(),
-    supabase
+    trusted
       .from("stroke_roster_versions")
       .select("id, division_count, status")
       .eq("season_id", seasonId)
       .eq("status", "approved"),
-    supabase
+    trusted
       .from("stroke_schedule_state")
       .select(
         "change_revision, generated_revision, reviewed_revision, posted_revision"
@@ -223,7 +226,7 @@ export async function POST(request: Request) {
     )
   }
 
-  const { data: fixtureData, error: fixtureError } = await supabase
+  const { data: fixtureData, error: fixtureError } = await trusted
     .from("schedule")
     .select(
       "division_number, game_number, course, player1_id, player2_id, player1, player2, player1_name, player2_name, status"
@@ -267,7 +270,7 @@ export async function POST(request: Request) {
   const discordIds = new Map<string, string>()
 
   if (playerIds.length > 0) {
-    const { data: playerData, error: playerError } = await supabase
+    const { data: playerData, error: playerError } = await trusted
       .from("players")
       .select("id, discord_id")
       .in("id", playerIds)

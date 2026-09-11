@@ -1,8 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { supabase } from "@/lib/supabase"
 import { postAdminDataMutation } from "@/lib/adminDataMutations"
+import { fetchAdminSchedule } from "@/lib/admin/scheduleRead"
 
 const LEAGUE_TYPE = "doubles"
 const DIVISIONS = ["Doubles D1", "Doubles D2", "Doubles D3"]
@@ -86,13 +86,12 @@ export default function DoublesResultsPage() {
 
     setLoading(true)
 
-    const { data, error } = await supabase
-      .from("schedule")
-      .select("*")
-      .eq("league_type", LEAGUE_TYPE)
-      .eq("division", division)
-      .eq("season_number", seasonNumber)
-      .order("game", { ascending: true })
+    const { data, error } = await fetchAdminSchedule<ScheduleMatch>({
+      league_type: LEAGUE_TYPE,
+      division,
+      season_number: seasonNumber,
+      sort: "game",
+    })
 
     setLoading(false)
 

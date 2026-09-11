@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { authorizeSiteAdminMutation } from "@/lib/auth/siteAdminMutation"
+import { createTrustedSupabaseClient } from "@/lib/supabase/trustedServer"
 
 type ResultRow = {
   player1: string
@@ -45,6 +46,7 @@ function ensurePlayer(map: Map<string, Standing>, player: string, playerId: stri
 export async function POST(req: Request) {
   const authorization = await authorizeSiteAdminMutation()
   if (!authorization.authorized) return authorization.response
+  const trusted = createTrustedSupabaseClient()
 
   try {
     const body = await req.json()
@@ -73,7 +75,7 @@ export async function POST(req: Request) {
       )
     }
 
-    const { data, error } = await authorization.supabase
+    const { data, error } = await trusted
       .from("results")
       .select("player1, player2, player1_id, player2_id, player1_score, player2_score, winner, is_draw")
       .eq("league_type", leagueType)
@@ -171,7 +173,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: true, saved: 0 })
     }
 
-    const { error: saveError } = await authorization.supabase
+    const { error: saveError } = await trusted
       .from("season_standings")
       .upsert(rows, {
         onConflict: "player_id,league_type,season_number,division",
@@ -188,9 +190,9 @@ export async function POST(req: Request) {
       success: true,
       saved: rows.length,
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
-      { success: false, error: error.message || "Recalculate standings failed" },
+      { success: false, error: error instanceof Error ? error.message : "Recalculate standings failed" },
       { status: 500 }
     )
   }

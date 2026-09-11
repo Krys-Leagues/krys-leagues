@@ -1,28 +1,32 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { supabase } from "@/lib/supabase"
 import { loadCanonicalPlayerDisplays, type CanonicalPlayerDisplay } from "@/lib/canonicalPlayerDisplay"
+import { fetchPublicSchedule } from "@/lib/public/scheduleRead"
+
+type ScheduleRow = {
+  id: string
+  league_type: string | null
+  division: string | null
+  season_number: number | null
+  game: string | null
+  course: string | null
+  player1_id: string | null
+  player2_id: string | null
+}
 
 export default function SchedulePage() {
-  const [schedule, setSchedule] = useState<any[]>([])
+  const [schedule, setSchedule] = useState<ScheduleRow[]>([])
   const [players, setPlayers] = useState<CanonicalPlayerDisplay[]>([])
   const [division, setDivision] = useState("Stroke D1")
   const [seasonNumber, setSeasonNumber] = useState("59")
   const [posting, setPosting] = useState(false)
   const [generating, setGenerating] = useState(false)
 
-  useEffect(() => {
-    loadData()
-  }, [])
-
   async function loadData() {
-    const { data: scheduleData } = await supabase
-      .from("schedule")
-      .select("*")
-      .order("game", { ascending: true })
+    const { data: scheduleData } = await fetchPublicSchedule<ScheduleRow>()
 
-    if (scheduleData) setSchedule(scheduleData)
+    setSchedule(scheduleData)
     const sourcePlayerIds = (scheduleData || []).flatMap((row) =>
       [row.player1_id, row.player2_id].filter((id): id is string => Boolean(id)),
     )
@@ -30,7 +34,12 @@ export default function SchedulePage() {
     setPlayers(playerResponse.data)
   }
 
-  function getPlayerName(id: string) {
+  useEffect(() => {
+    void Promise.resolve().then(loadData)
+  }, [])
+
+  function getPlayerName(id: string | null) {
+    if (!id) return "Unavailable Player"
     return players.find((player) => player.source_player_id === id && player.eligible)?.screen_name || "Unavailable Player"
   }
 

@@ -2,6 +2,7 @@ import { createHash } from "node:crypto"
 import { readFile } from "node:fs/promises"
 import { join } from "node:path"
 import { createClient } from "@supabase/supabase-js"
+import { createTrustedSupabaseClient } from "@/lib/supabase/trustedServer"
 import Papa from "papaparse"
 import { parseHistoricalKwtRows } from "@/lib/importer/adapters/kwtAdapter"
 import identityCandidates from "@/docs/historical-sources/kwt/website-score-recovery/identity-candidates.json"
@@ -123,9 +124,10 @@ export async function GET(request: Request) {
   if (authorized.error) return authorized.error
 
   try {
+    const trusted = createTrustedSupabaseClient()
     const [sources, playersResult, aliasesResult, linksResult, importsResult, scorecardsResult] = await Promise.all([
       readRecoverySources(),
-      authorized.supabase.from("players").select("id, screen_name, discord_name, discord_username, discord_id, active, status").order("screen_name"),
+      trusted.from("players").select("id, screen_name, discord_name, discord_username, discord_id, active, status").order("screen_name"),
       authorized.supabase.from("player_aliases").select("id, player_id, alias, normalized_alias, source, verified").eq("verified", true).order("alias"),
       authorized.supabase.from("player_identity_links").select("historical_player_id, canonical_player_id"),
       authorized.supabase.from("historical_kwt_imports").select("source_sha256"),

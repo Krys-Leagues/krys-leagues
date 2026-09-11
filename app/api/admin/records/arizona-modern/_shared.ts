@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js"
+import { createTrustedSupabaseClient } from "@/lib/supabase/trustedServer"
 import { matchPlayers } from "@/lib/importer/matchPlayers"
 import type { PlayerIdentityAlias } from "@/lib/identity"
 import type { AllTimeCourseOption, AllTimeCourseTarget } from "@/lib/all-time/arizona/types"
@@ -19,8 +20,9 @@ export async function authorizedAdminClient(request: Request) {
 }
 
 export async function loadIdentityDirectory(supabase: SupabaseClient) {
+  const trusted = createTrustedSupabaseClient()
   const [playersResult, aliasesResult, linksResult] = await Promise.all([
-    supabase.from("players").select("id, screen_name, discord_name, discord_username, discord_id, active").order("screen_name"),
+    trusted.from("players").select("id, screen_name, discord_name, discord_username, discord_id, active").order("screen_name"),
     supabase.from("player_aliases").select("id, player_id, alias, normalized_alias, source, verified").eq("verified", true).order("alias"),
     supabase.from("player_identity_links").select("historical_player_id, canonical_player_id"),
   ])

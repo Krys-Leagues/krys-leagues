@@ -106,14 +106,22 @@ export function ManagedLeaguePlayersPage({
       const playerIds = Array.from(new Set(loadedSlots.flatMap((slot) => slot.player_id ? [slot.player_id] : [])))
       const states = new Map<string, boolean>()
       if (playerIds.length > 0) {
-        const { data: playerData, error: playerError } = await supabase
-          .from("players")
-          .select("id, active")
-          .in("id", playerIds)
+        const playerResponse = await fetch(`/api/admin/players?view=players&ids=${encodeURIComponent(playerIds.join(","))}`, {
+          credentials: "same-origin",
+          cache: "no-store",
+        })
+        const playerPayload = (await playerResponse.json().catch(() => ({}))) as {
+          players?: PlayerState[]
+          error?: string
+        }
+        const playerData = playerPayload.players || []
+        const playerError = !playerResponse.ok
+          ? new Error(playerPayload.error || `Player status request failed (${playerResponse.status}).`)
+          : null
         if (playerError) {
           setError(`Roster loaded, but player status could not be read: ${playerError.message}`)
         } else {
-          for (const player of (playerData || []) as PlayerState[]) states.set(player.id, player.active)
+          for (const player of playerData) states.set(player.id, player.active)
         }
       }
 
