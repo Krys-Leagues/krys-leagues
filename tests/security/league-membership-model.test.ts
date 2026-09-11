@@ -33,8 +33,22 @@ test("league membership route is admin-only and preserves canonical membership s
   assert.match(route, /from\("player_league_memberships"\)/)
   assert.match(route, /Canonical player was not found/)
   assert.match(route, /already enrolled in this league division/)
+  assert.match(route, /MONTHLIES_CURRENT_SEASON = 1/)
+  assert.match(route, /MONTHLIES_CURRENT_DIVISION = "Monthlies"/)
+  assert.match(route, /normalizeLeagueType/)
+  assert.match(route, /normalized === "monthlies" \? "monthly"/)
   assert.match(route, /from\("player_identity_links"\)/)
   assert.match(route, /delete\(\)\.eq\("id", body\.membership_id\)/)
+})
+
+test("Monthlies uses the canonical protected Players workflow", async () => {
+  const page = await source("app/admin/monthlies/players/page.tsx")
+  const admin = await source("app/admin/monthlies/page.tsx")
+  const component = await source("components/admin/LeaguePlayersPage.tsx")
+  assert.match(page, /leagueType="monthly"/)
+  assert.match(page, /leagueName="Monthlies"/)
+  assert.match(admin, /\/admin\/monthlies\/players/)
+  assert.match(component, /monthly: \["Monthlies"\]/)
 })
 
 test("league picker code no longer loads the full active players directory", async () => {

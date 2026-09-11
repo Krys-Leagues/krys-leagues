@@ -27,6 +27,7 @@ const DIVISIONS: Record<string, string[]> = {
   doubles: ["Doubles Elite", "Doubles D1", "Doubles D2", "Doubles D3", "Doubles D4", "Doubles D5"],
   kwt: ["Amateur", "Semi Pro", "Pro", "Elite"],
   skins: ["Skins D1", "Skins D2", "Skins D3", "Skins D4", "Skins D5"],
+  monthly: ["Monthlies"],
 }
 
 type Props = {

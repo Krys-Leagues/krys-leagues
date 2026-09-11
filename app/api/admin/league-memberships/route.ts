@@ -6,7 +6,9 @@ import { authorizeSiteAdminMutation } from "@/lib/auth/siteAdminMutation"
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
-const LEAGUES = new Set(["stroke", "match", "pyp", "pro", "doubles", "kwt", "skins"])
+const LEAGUES = new Set(["stroke", "match", "pyp", "pro", "doubles", "kwt", "skins", "monthly"])
+const MONTHLIES_CURRENT_SEASON = 1
+const MONTHLIES_CURRENT_DIVISION = "Monthlies"
 
 type MembershipBody = {
   action?: "add" | "remove"
@@ -35,7 +37,14 @@ function normalizeSearch(value: string) {
   return value.trim().toLocaleLowerCase().replace(/[^\p{L}\p{N}]+/gu, "")
 }
 
+function normalizeLeagueType(value: string | null | undefined) {
+  const normalized = value?.trim().toLowerCase() || ""
+  return normalized === "monthlies" ? "monthly" : normalized
+}
+
 async function resolveSeasonNumber(client: ReturnType<typeof adminClient>, leagueType: string, requested: string | null) {
+  if (leagueType === "monthly") return MONTHLIES_CURRENT_SEASON
+
   if (requested) {
     const parsed = Number(requested)
     if (Number.isInteger(parsed) && parsed > 0) return parsed
@@ -114,7 +123,7 @@ export async function GET(request: Request) {
   if (!authorization.authorized) return authorization.response
 
   const params = new URL(request.url).searchParams
-  const leagueType = params.get("league_type")?.trim().toLowerCase() || ""
+  const leagueType = normalizeLeagueType(params.get("league_type"))
   if (!LEAGUES.has(leagueType)) return json({ error: "A supported league_type is required." }, 400)
 
   try {
@@ -169,18 +178,19 @@ export async function POST(request: Request) {
   }
 
   if (body.action !== "add") return json({ error: "Unsupported membership action." }, 400)
-  const leagueType = body.league_type?.trim().toLowerCase() || ""
-  if (!LEAGUES.has(leagueType) || !body.player_id || !body.division || typeof body.season_number !== "number" || !Number.isInteger(body.season_number) || body.season_number <= 0) {
+  const leagueType = normalizeLeagueType(body.league_type)
+  const division = leagueType === "monthly" ? (body.division?.trim() || MONTHLIES_CURRENT_DIVISION) : body.division?.trim() || ""
+  const seasonNumber = leagueType === "monthly" ? MONTHLIES_CURRENT_SEASON : body.season_number
+  if (!LEAGUES.has(leagueType) || !body.player_id || !division || typeof seasonNumber !== "number" || !Number.isInteger(seasonNumber) || seasonNumber <= 0) {
     return json({ error: "player_id, league_type, season_number, and division are required." }, 400)
   }
-  const seasonNumber = body.season_number
 
   try {
     const client = adminClient()
     const [player, historicalLink, existing] = await Promise.all([
       client.from("players").select("id, status, active").eq("id", body.player_id).maybeSingle(),
       client.from("player_identity_links").select("historical_player_id").eq("historical_player_id", body.player_id).maybeSingle(),
-      client.from("player_league_memberships").select("id").eq("player_id", body.player_id).eq("league_type", leagueType).eq("season_number", seasonNumber).eq("division", body.division).maybeSingle(),
+      client.from("player_league_memberships").select("id").eq("player_id", body.player_id).eq("league_type", leagueType).eq("season_number", seasonNumber).eq("division", division).maybeSingle(),
     ])
     if (player.error || historicalLink.error || existing.error) return json({ error: (player.error || historicalLink.error || existing.error)?.message }, 503)
     if (!player.data) return json({ error: "Canonical player was not found." }, 404)
@@ -190,7 +200,7 @@ export async function POST(request: Request) {
 
     const result = await client
       .from("player_league_memberships")
-      .insert({ player_id: body.player_id, league_type: leagueType, season_number: seasonNumber, division: body.division })
+      .insert({ player_id: body.player_id, league_type: leagueType, season_number: seasonNumber, division })
       .select("id, player_id, league_type, season_number, division")
       .single()
     if (result.error) return json({ error: result.error.message }, 503)

@@ -11,6 +11,7 @@ const LEAGUES = [
   { name: "Doubles", href: "/admin/doubles", description: "Doubles seasons, scoring and standings" },
   { name: "Solo", href: "/admin/solo", description: "Solo league management" },
   { name: "Skins", href: "/admin/skins", description: "Skins seasons, scoring, active games" },
+  { name: "Monthlies", href: "/admin/monthlies", description: "Manage current Monthlies membership" },
   { name: "Spicy", href: "/admin/spicy", description: "Spicy tournament tracking" },
   { name: "Krys Tourney", href: "/admin/krys-tourney", description: "Tournament setup and tracking" },
   { name: "Champion of Champions", href: "/admin/champion-of-champions", description: "Champion event tracking" },
