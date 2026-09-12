@@ -1,7 +1,9 @@
+import { CHERRY_BLOSSOM_REWARD_ASSET_PATHS } from "./assets.ts"
 import type { CourseChallengeCourse, CourseChallengeLevel, CourseChallengeRequirement } from "./types"
 
 const levelNumbers = [1, 2, 3, 4, 5] as const
 const asset = (name: string) => "/course-challenges/tourist-trap/" + name
+const cherryAsset = (name: string) => "/course-challenges/cherry-blossom/" + name
 function req(id: string, label: string, kind: CourseChallengeRequirement["kind"], operator: CourseChallengeRequirement["operator"] = "eq", target?: number, hole?: number, reviewRequired = false, helpText?: string): CourseChallengeRequirement {
   return { id, label, kind, operator, target, hole, reviewRequired, helpText }
 }
@@ -63,7 +65,7 @@ function pendingLevels(slug: string, easyCode: string, hardCode: string): Course
         easyRequirements: [complete(1), relative(1, "easy", -10), strokeOuts(1, "easy", 0), req("cbl1-easy-eagles", "2 eagles or better", "eagle_count", "gte", 2)],
         hardRequirements: [complete(1), req("cbl1-hard-pars", "6 holes at par or better", "par_or_better_count", "gte", 6), holeRelative(1, "hard", 2, "Hole 2 — bogey or better", 1, "The bridges have very little friction, so the ball keeps rolling. Use soft, controlled shots and don’t be afraid to lay up."), holeRelative(1, "hard", 10, "Hole 10 — par or better", 0, "Take all the right-side holes. If you don’t miss any putts, that route can produce an albatross.")],
         stickerKey: "course-challenge:" + slug + ":level-" + level + ":sticker",
-        stickerAsset: null,
+        stickerAsset: cherryAsset("cherry-blossom-level-" + level + ".png"),
         badgeKey: null,
         badgeAsset: null,
       }
@@ -76,7 +78,7 @@ function pendingLevels(slug: string, easyCode: string, hardCode: string): Course
       easyRequirements: [],
       hardRequirements: [],
       stickerKey: "course-challenge:" + slug + ":level-" + level + ":sticker",
-      stickerAsset: null,
+      stickerAsset: slug === "cherry-blossom" ? cherryAsset("cherry-blossom-level-" + level + ".png") : null,
       badgeKey: level === 3 || level === 5 ? "course-challenge:" + slug + ":level-" + level + ":badge" : null,
       badgeAsset: null,
     }
@@ -107,13 +109,15 @@ export const COURSE_CHALLENGE_COURSES: CourseChallengeCourse[] = [
   {
     slug: "cherry-blossom",
     name: "Cherry Blossom",
-    status: "scheduled",
+    status: "live",
     displayOrder: 2,
     shortDescription: "A second launch course using the same five-Level, two-sided progression engine.",
     backgroundImage: "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idw1nygcxpvm/b/wmgt-assets/o/CBE_FULL.jpg",
     easyCode: "CBE",
     hardCode: "CBH",
     levels: pendingLevels("cherry-blossom", "CBE", "CBH"),
+    courseProAsset: CHERRY_BLOSSOM_REWARD_ASSET_PATHS.coursePro,
+    courseMasterAsset: CHERRY_BLOSSOM_REWARD_ASSET_PATHS.courseMaster,
   },
 ]
 

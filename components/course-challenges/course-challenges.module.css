@@ -56,6 +56,15 @@
 .rewardOrder strong { color: #fde68a; }
 .pageHeader { display: grid; gap: 14px; margin: 18px 0 20px; }
 .book { display: grid; gap: 18px; }
+.bookSpread { display: grid; grid-template-columns: minmax(260px, .8fr) minmax(0, 1.6fr); gap: 18px; align-items: start; }
+.rewardPage, .challengePage { display: grid; gap: 18px; min-width: 0; border: 1px solid #ffffff22; border-radius: 22px; padding: 22px; background: linear-gradient(145deg, #111827e8, #020617e8); box-shadow: 0 20px 60px #0004; }
+.rewardPage { background: linear-gradient(145deg, #172554e8, #020617e8); }
+.bookPageHeading { display: grid; gap: 6px; }
+.bookPageHeading h2, .bookPageHeading p { margin: 0; }
+.bookPageHeading h2 { color: #fdf4ff; font-size: 1.45rem; }
+.bookPageHeading p:last-child { color: #cbd5e1; line-height: 1.45; }
+.rewardBookGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.rewardBookGrid .reward { min-width: 0; border: 1px solid #ffffff1b; border-radius: 14px; padding: 10px 6px; background: #02061766; }
 .rulesHelp { border: 1px solid #ffffff20; border-radius: 16px; padding: 15px 18px; background: #02061799; color: #cbd5e1; }
 .rulesHelp summary { cursor: pointer; color: #fff; font-weight: 900; }
 .rulesHelp p { line-height: 1.55; }
@@ -107,6 +116,7 @@
 .profileStickers { display: flex; flex-wrap: wrap; gap: 8px; }
 .profileSticker { border: 1px solid #fbbf2444; border-radius: 999px; padding: 6px 9px; color: #fde68a; font-size: .75rem; font-weight: 800; }
 @media (max-width: 720px) {
+  .bookSpread { grid-template-columns: 1fr; }
   .sideGrid, .formGrid { grid-template-columns: 1fr; }
   .levelRail { grid-template-columns: repeat(5, minmax(74px, 1fr)); overflow-x: auto; }
   .levelTab { min-height: 64px; padding: 8px; }

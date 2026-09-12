@@ -85,6 +85,22 @@ export default function CourseChallengeBook({ course }: { course: CourseChalleng
         </details>
         {profileRewardMessage && <div className={styles.profileRewardNotice} role="status"><strong>NEW PROFILE REWARD UNLOCKED!</strong><span>You can now use {profileRewardMessage} on your Player Profile.</span></div>}
         {message && <p className={styles.notice}>{message}</p>}
+        <div className={styles.bookSpread}>
+          <aside className={styles.rewardPage} aria-label={course.name + " sticker and reward book"}>
+            <div className={styles.bookPageHeading}><p className={styles.eyebrow}>STICKER &amp; REWARD BOOK</p><h2>Earned &amp; ahead</h2><p>Every reward stays with this course, from Level 1 through the final prestige rewards.</p></div>
+            <div className={styles.rewardBookGrid}>
+              {course.levels.map((level) => {
+                const rewardState = rewardKeys.has(level.stickerKey) ? "earned" : level.level === currentLevel ? "current" : "locked"
+                return <Reward key={level.stickerKey} rewardKey={level.stickerKey} label={"Level " + level.level + " sticker"} rewardState={rewardState} assetPath={level.stickerAsset} />
+              })}
+              {course.aceChallenge && <Reward label="Ace Challenge badge" rewardKey={course.aceChallenge.rewardKey} rewardState={rewardKeys.has(course.aceChallenge.rewardKey) ? "earned" : aceUnlocked ? "current" : "locked"} assetPath={course.aceChallenge.rewardAsset} />}
+              <Reward rewardKey={"course-challenge:" + course.slug + ":course-pro"} label="Course Pro" rewardState={rewardKeys.has("course-challenge:" + course.slug + ":course-pro") ? "earned" : currentLevel === 3 ? "current" : "locked"} assetPath={course.courseProAsset || null} />
+              <Reward rewardKey={"course-challenge:" + course.slug + ":course-master"} label="Course Master" rewardState={rewardKeys.has("course-challenge:" + course.slug + ":course-master") ? "earned" : currentLevel === 5 ? "current" : "locked"} assetPath={course.courseMasterAsset || null} />
+            </div>
+            <p className={styles.helper}>Progress currently recorded: Level {maxCompleted || 0} complete. Earned rewards can be selected for display in place of your avatar.</p>
+            <CourseChallengeRewardSelector />
+          </aside>
+          <section className={styles.challengePage} aria-label={course.name + " current challenge page"}>
         <nav className={styles.levelRail} aria-label={course.name + " levels"}>
           {course.levels.map((level) => {
             const complete = completedLevels.includes(level.level)
@@ -119,15 +135,8 @@ export default function CourseChallengeBook({ course }: { course: CourseChalleng
           </>}
           <Reward label="Ace Challenge badge" rewardKey={ace.rewardKey} rewardState={rewardKeys.has(ace.rewardKey) ? "earned" : aceUnlocked ? "current" : "locked"} assetPath={ace.rewardAsset} />
         </section>}
-        <section className={styles.levelCard} aria-label="Major Course Challenge rewards">
-          <div className={styles.levelHeader}><div><h2>Prestige rewards</h2><p>Earned Course Challenge rewards can be selected for display in place of your avatar.</p></div></div>
-          <div className={styles.rewardStrip}>
-            <Reward rewardKey={"course-challenge:" + course.slug + ":course-pro"} label="Course Pro" rewardState={rewardKeys.has("course-challenge:" + course.slug + ":course-pro") ? "earned" : currentLevel === 3 ? "current" : "locked"} assetPath={course.courseProAsset || null} />
-            <Reward rewardKey={"course-challenge:" + course.slug + ":course-master"} label="Course Master" rewardState={rewardKeys.has("course-challenge:" + course.slug + ":course-master") ? "earned" : currentLevel === 5 ? "current" : "locked"} assetPath={course.courseMasterAsset || null} />
-          </div>
-          <p className={styles.helper}>Only earned rewards become selectable. Progress currently recorded: Level {maxCompleted || 0} complete.</p>
-          <CourseChallengeRewardSelector />
-        </section>
+          </section>
+        </div>
       </div>
     </div>
   </main>
