@@ -7,6 +7,7 @@ import { useEffect, useState } from "react"
 import { supabase } from "@/lib/supabase"
 import type { CourseChallengeCourse } from "@/lib/courseChallenges/types"
 import CourseChallengesGuide from "./CourseChallengesGuide"
+import CourseChallengeCelebrations from "./CourseChallengeCelebrations"
 import styles from "./course-challenges.module.css"
 
 const INTRO_STORAGE_KEY = "course-challenges-intro-dismissed-v1"
@@ -63,13 +64,14 @@ export default function CourseChallengesLanding({ courses }: { courses: CourseCh
         height={900}
         priority
       />
+      <CourseChallengeCelebrations />
       <section className={styles.courseList} aria-label="Available Course Challenges">
         <h2 className="sr-only">Available courses</h2>
         {courses.map((course) => <article className={styles.courseCard} key={course.slug}>
           <div className={styles.courseCardBackdrop} style={course.backgroundImage ? { backgroundImage: `url("${course.backgroundImage}")` } : undefined} aria-hidden="true" />
           <div className={styles.courseCardContent}>
             <div><p className={styles.eyebrow}>LAUNCH COURSE</p><h2><Link href={`/course-challenges/${course.slug}`} className={styles.courseNameLink}>{course.name}</Link></h2><p>{course.shortDescription}</p></div>
-            <Link href={`/course-challenges/${course.slug}`} className={`${styles.primaryButton} ${styles.courseCardLink}`}>Open {course.name} Book →</Link>
+            <div className={styles.courseCardActions}><Link href={`/course-challenges/${course.slug}`} className={`${styles.primaryButton} ${styles.courseCardLink}`}>Open {course.name} Book →</Link><Link href={`/course-challenges/${course.slug}/community`} className={styles.communityLink}>Meet the challengers →</Link></div>
           </div>
         </article>)}
       </section>

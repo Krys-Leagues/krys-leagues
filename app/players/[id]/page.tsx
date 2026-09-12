@@ -16,6 +16,8 @@ import styles from "./page.module.css"
 import TrophyMedia from "@/components/TrophyMedia"
 import PlayerCourseRecords from "@/components/records/PlayerCourseRecords"
 import { calculateMonthlyCareerStats, monthlyCourseMapName, uniqueMonthlyPeriodRecords, type MonthlyPresentationRow } from "@/lib/monthlyPresentation"
+import { getPublicCourseChallenges } from "@/lib/courseChallenges/catalog"
+import { aceRewardDefinition, levelRewardDefinitions } from "@/lib/courseChallenges/rewards"
 
 type Player = {
   id: string
@@ -43,6 +45,8 @@ type Trophy = {
   image_url: string | null
   created_at: string
 }
+
+type CourseChallengeOwnedReward = { id: string; reward_key: string; label: string; course_slug: string; level: number | null; earned_at: string | null }
 
 type ProfilePreferences = SavedProfilePreferences & { has_saved_preferences: boolean | null }
 
@@ -173,6 +177,7 @@ export default function PublicPlayerProfilePage() {
   const [player, setPlayer] = useState<Player | null>(null)
   const [memberships, setMemberships] = useState<Membership[]>([])
   const [trophies, setTrophies] = useState<Trophy[]>([])
+  const [courseChallengeRewards, setCourseChallengeRewards] = useState<CourseChallengeOwnedReward[]>([])
   const [results, setResults] = useState<Result[]>([])
   const [strokeHistory, setStrokeHistory] = useState<StrokeSeasonHistory[]>([])
   const [strokeHistoryError, setStrokeHistoryError] = useState("")
@@ -260,6 +265,7 @@ export default function PublicPlayerProfilePage() {
       playerResponse,
       membershipsResponse,
       trophiesResponse,
+      courseChallengeRewardsResponse,
       resultsResponse,
       strokeHistoryResponse,
       matchHistoryResponse,
@@ -292,6 +298,12 @@ export default function PublicPlayerProfilePage() {
         )
         .eq("player_id", canonicalId)
         .order("created_at", { ascending: false }),
+
+      supabase
+        .from("course_challenge_rewards")
+        .select("id, reward_key, label, course_slug, level, earned_at")
+        .eq("player_id", canonicalId)
+        .order("earned_at", { ascending: false }),
 
       supabase
         .from("results")
@@ -362,6 +374,7 @@ export default function PublicPlayerProfilePage() {
     setAliases(identity.aliases || [])
     setMemberships(membershipsResponse.data || [])
     setTrophies(trophiesResponse.data || [])
+    setCourseChallengeRewards((courseChallengeRewardsResponse.data || []) as CourseChallengeOwnedReward[])
     setResults(resultsResponse.data || [])
     setStrokeHistory(
       (strokeHistoryResponse.data || []) as StrokeSeasonHistory[]
@@ -693,7 +706,7 @@ export default function PublicPlayerProfilePage() {
           <p className={styles.sectionDescription}>Player identity and name history</p><ul className={styles.aliasList}>{knownAliases.map(alias => <li key={alias}>{alias}</li>)}</ul>
         </section>}
 
-        {openProfileSection === "trophies" && trophies.length > 0 && <section className={`${styles.profileSectionPanel} ${styles.trophyCasePanel}`} id="trophy-case" aria-label="Trophies & Achievements">
+        {openProfileSection === "trophies" && (trophies.length > 0 || courseChallengeRewards.length > 0) && <section className={`${styles.profileSectionPanel} ${styles.trophyCasePanel}`} id="trophy-case" aria-label="Trophies & Achievements">
           <p className={styles.sectionDescription}>Complete trophy case and achievement history</p>
           <h2 style={sectionTitle}>Trophy Case</h2>
 
@@ -722,6 +735,7 @@ export default function PublicPlayerProfilePage() {
                 </article>
               ))}
             </div>
+            {courseChallengeRewards.length > 0 && <CourseChallengeTrophyGroups rewards={courseChallengeRewards} />}
         </section>}
 
         </div>
@@ -784,6 +798,16 @@ function MonthlyPeriodCard({ period, rows }: { period: MonthlyHistory; rows: Mon
       </div>
     </details>
   </article>
+}
+
+function CourseChallengeTrophyGroups({ rewards }: { rewards: CourseChallengeOwnedReward[] }) {
+  const courses = getPublicCourseChallenges()
+  const definitions = new Map(courses.flatMap(course => [
+    ...course.levels.flatMap(level => levelRewardDefinitions(course, level.level)),
+    ...(course.aceChallenge ? [aceRewardDefinition(course)] : []),
+  ]).filter(Boolean).map(reward => [reward!.rewardKey, reward!]))
+  const grouped = courses.map(course => ({ course, rewards: rewards.filter(reward => reward.course_slug === course.slug) })).filter(group => group.rewards.length > 0)
+  return <section className={styles.courseAchievementGroups} aria-label="Course Challenges achievements"><h3>Course Challenges</h3>{grouped.map(({ course, rewards: owned }) => <div className={styles.courseAchievementGroup} key={course.slug}><h4>{course.name}</h4><div className={styles.courseAchievementGrid}>{owned.map(reward => { const definition = definitions.get(reward.reward_key); return <article className={styles.courseAchievementCard} key={reward.id}>{definition?.assetPath ? <TrophyMedia src={definition.assetPath} alt="" className={styles.courseAchievementMedia} /> : <span className={styles.rewardMark} aria-hidden="true">✦</span>}<strong>{definition?.label || reward.label}</strong><small>{reward.earned_at ? new Date(reward.earned_at).toLocaleDateString() : "Earned"}</small></article> })}</div></div>)}</section>
 }
 
 const page: React.CSSProperties = {

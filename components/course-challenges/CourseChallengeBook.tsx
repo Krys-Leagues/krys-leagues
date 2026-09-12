@@ -76,7 +76,7 @@ export default function CourseChallengeBook({ course }: { course: CourseChalleng
 
   return <main className={styles.page} style={{ "--course-background-image": course.backgroundImage ? "url(\"" + course.backgroundImage + "\")" : "none" } as React.CSSProperties}>
     <div className={styles.shell}>
-      <Link href="/course-challenges" className={styles.backLink}>← Course Challenges</Link>
+      <div className={styles.backLinks}><Link href="/course-challenges" className={styles.backLink}>← Course Challenges</Link><Link href={`/course-challenges/${course.slug}/community`} className={styles.backLink}>Who&apos;s taking on {course.name}? →</Link></div>
       <h1 className={styles.courseTitle}>{course.name}</h1>
       <div className={styles.book}>
         <details className={styles.rulesHelp}>
