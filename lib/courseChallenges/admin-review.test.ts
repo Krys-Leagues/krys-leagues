@@ -39,3 +39,18 @@ test("review desk and site-wide alert use the same protected queue", () => {
   assert.match(submissions, /DISCORD_WEBHOOK_COURSE_CHALLENGE_REVIEW/)
   assert.match(submissions, /notification_kind: "discord_review_needed"/)
 })
+
+test("duplicate evidence is a review warning and Ace credit is an explicit idempotent choice", () => {
+  const api = read("app/api/admin/course-challenges/route.ts")
+  const queue = read("components/admin/course-challenges/CourseChallengeReviewQueue.tsx")
+  const submissions = read("app/api/course-challenges/submissions/route.ts")
+  assert.match(queue, /POSSIBLE DUPLICATE CARD — REVIEW WARNING/)
+  assert.match(queue, /This card also counts toward Ace Track/)
+  assert.match(queue, /Choose Solo or Multiplayer before approving this card/)
+  assert.doesNotMatch(queue, /possibleDuplicate\)\s*\&\&.*disabled/)
+  assert.match(api, /countTowardAceTrack/)
+  assert.match(api, /applyAceCrossCredit/)
+  assert.match(api, /ignoreDuplicates: true/)
+  assert.match(api, /unique ace holes/)
+  assert.match(submissions, /aceStageAtSubmission|ace_stage_number: challengeKey === "ace" \? requestedAceStage : aceState\.nextStage\?\.stage/)
+})

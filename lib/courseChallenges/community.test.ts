@@ -57,6 +57,20 @@ test("profile achievements reuse the existing trophy case and omit private revie
   assert.doesNotMatch(profile, /proof_photo_path|entered_scores|review_notes|admin_notes/)
 })
 
+test("public profiles expose a large earned sticker showcase with a secondary course link", () => {
+  const page = read("app/players/[id]/page.tsx")
+  const styles = read("app/players/[id]/page.module.css")
+  assert.match(page, /Course Challenge Sticker Showcase/)
+  assert.match(page, /get_public_player_canonical_identity/)
+  assert.doesNotMatch(page, /from\("players"\)/)
+  assert.match(page, /Take Me to Course Challenges/)
+  assert.match(page, /courseChallengeRewards\.length > 0/)
+  assert.match(page, /rewards\.filter\(reward => reward\.course_slug === course\.slug\)/)
+  assert.match(styles, /\.courseAchievementMedia/)
+  assert.match(styles, /grid-template-columns: repeat\(auto-fit, minmax\(min\(100%, 250px\), 1fr\)\)/)
+  assert.match(styles, /\.courseChallengeExploreLink/)
+})
+
 test("Discord celebration support is optional and disabled until configured", () => {
   const helper = read("lib/courseChallenges/celebrations.ts")
   const sql = read("course_challenges_community.sql")

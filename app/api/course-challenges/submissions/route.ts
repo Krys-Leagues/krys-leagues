@@ -54,10 +54,8 @@ export async function POST(request: Request) {
     if (courseResult.error) throw courseResult.error
     const pars = courseResult.data?.hole_pars as number[] | null | undefined
     if (!validHolePars(pars || [])) return Response.json({ error: "The authoritative 18-hole pars are unavailable for this course." }, { status: 503 })
-    const approvedAce = challengeKey === "ace" ? await service.from("course_challenge_submissions").select("challenge_key,level_number,difficulty,hole_scores,requirements_evaluation,status").eq("player_id", identity.playerId).eq("course_slug", course.slug).eq("status", "approved") : { data: [], error: null }
-    if (approvedAce.error) throw approvedAce.error
-    const aceRows = (approvedAce.data || []) as AceSubmissionRecord[]
-    const aceState = challengeKey === "ace" ? aceProgress(course, aceRows) : null
+    const aceRows = await loadAceEligibleRows(service, identity.playerId, course.slug)
+    const aceState = aceProgress(course, aceRows)
     const currentAceStage = aceState?.nextStage || null
     if (challengeKey === "ace" && (!currentAceStage || (body.aceStage !== undefined && Number(body.aceStage) !== currentAceStage.stage))) return Response.json({ error: "Submit the currently open Ace Track stage." }, { status: 409 })
     const requirements = challengeKey === "ace" ? (difficulty === "Easy" ? currentAceStage?.easyRequirements : currentAceStage?.hardRequirements) : challengeKey === "prestige" ? (difficulty === "Easy" ? prestigeStage?.easyRequirements : prestigeStage?.hardRequirements) : (difficulty === "Easy" ? currentLevel?.easyRequirements : currentLevel?.hardRequirements)
@@ -74,7 +72,7 @@ export async function POST(request: Request) {
     ].filter((reason): reason is string => Boolean(reason))
     const proofImageSha256 = await proofHash(service, body.proofPhotoPath)
     const status = "needs_review"
-    const insert = await service.from("course_challenge_submissions").insert({ player_id: identity.playerId, course_slug: course.slug, challenge_key: challengeKey, level_number: level, ace_stage_number: challengeKey === "ace" ? requestedAceStage : null, prestige_stage_number: challengeKey === "prestige" ? requestedPrestigeStage : null, difficulty, proof_photo_path: body.proofPhotoPath, round_date: body.roundDate || null, round_time: body.roundTime || null, game_mode: null, proof_image_sha256: proofImageSha256, hole_scores: body.scores, calculated_total: evaluation.metrics.totalStrokes, total_par: evaluation.metrics.totalPar, relative_to_par: evaluation.metrics.relativeToPar, entered_final_score: enteredFinalScore, final_score_check: finalScoreCheck, metrics: evaluation.metrics, requirements_evaluation: evaluation.requirements, auto_evaluation_status: evaluation.status, photo_total_check: "needs_review", status, review_reason: reviewReasons.join(" ") || "The evidence photo and challenge requirements require review." }).select("id,status").single()
+    const insert = await service.from("course_challenge_submissions").insert({ player_id: identity.playerId, course_slug: course.slug, challenge_key: challengeKey, level_number: level, ace_stage_number: challengeKey === "ace" ? requestedAceStage : aceState.nextStage?.stage || null, prestige_stage_number: challengeKey === "prestige" ? requestedPrestigeStage : null, difficulty, proof_photo_path: body.proofPhotoPath, round_date: body.roundDate || null, round_time: body.roundTime || null, game_mode: null, proof_image_sha256: proofImageSha256, hole_scores: body.scores, calculated_total: evaluation.metrics.totalStrokes, total_par: evaluation.metrics.totalPar, relative_to_par: evaluation.metrics.relativeToPar, entered_final_score: enteredFinalScore, final_score_check: finalScoreCheck, metrics: evaluation.metrics, requirements_evaluation: evaluation.requirements, auto_evaluation_status: evaluation.status, photo_total_check: "needs_review", status, review_reason: reviewReasons.join(" ") || "The evidence photo and challenge requirements require review." }).select("id,status").single()
     if (insert.error) throw insert.error
     await service.from("course_challenge_submission_review_events").insert({ submission_id: insert.data?.id, action: "submitted", from_status: null, to_status: status, metadata: { source: "player_submission" } })
     await notifyCourseChallengeReview(service, String(insert.data?.id), course.name, level, difficulty)
@@ -91,6 +89,16 @@ async function proofHash(service: ReturnType<typeof createCourseChallengesServic
   } catch {
     return null
   }
+}
+
+async function loadAceEligibleRows(service: ReturnType<typeof createCourseChallengesServiceClient>, playerId: string, courseSlug: string): Promise<AceSubmissionRecord[]> {
+  const submissions = await service.from("course_challenge_submissions").select("id,challenge_key,level_number,ace_stage_number,difficulty,hole_scores,requirements_evaluation,status,created_at").eq("player_id", playerId).eq("course_slug", courseSlug).eq("status", "approved")
+  if (submissions.error) throw submissions.error
+  const ids = (submissions.data || []).map((row) => String(row.id))
+  const events = ids.length ? await service.from("course_challenge_submission_review_events").select("submission_id,metadata").in("submission_id", ids) : { data: [], error: null }
+  if (events.error) throw events.error
+  const crossCredited = new Set((events.data || []).filter((event) => Boolean((event.metadata as Record<string, unknown> | null)?.count_toward_ace_track)).map((event) => String(event.submission_id)))
+  return (submissions.data || []).filter((row) => row.challenge_key === "ace" || (Number(row.ace_stage_number) > 0 && crossCredited.has(String(row.id)))) as AceSubmissionRecord[]
 }
 
 async function notifyCourseChallengeReview(service: ReturnType<typeof createCourseChallengesServiceClient>, submissionId: string, courseName: string, level: number, difficulty: CourseChallengeDifficulty) {

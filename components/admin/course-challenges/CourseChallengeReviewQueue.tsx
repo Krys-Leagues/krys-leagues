@@ -3,13 +3,14 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 
 type ReviewEvent = { id: string; action: string; from_status: string | null; to_status: string; reviewer_id: string | null; notes: string | null; created_at: string }
+type DuplicateMatch = { id: string; challengeKey: "level" | "ace"; level: number; aceStage: number | null; difficulty: string; status: string; createdAt: string }
 type PastCard = { id: string; challengeKey: "level" | "ace" | "prestige"; level: number; aceStage?: number | null; prestigeStage?: number | null; difficulty: string; status: string; proofPhotoUrl: string | null; calculatedTotal: number; relativeToPar: number; createdAt: string }
 type Requirement = { requirement?: { label?: string }; status?: string; passed?: boolean | null; reason?: string }
 type Submission = {
   id: string; playerId: string; isOwnSubmission: boolean; playerName: string; courseSlug: string; courseName: string; challengeKey: "level" | "ace" | "prestige"; level: number; aceStage?: number | null; aceLabel?: string | null; prestigeStage?: number | null; prestigeLabel?: string | null; difficulty: "Easy" | "Hard";
   proofPhotoUrl: string | null; holeScores: number[]; pars: number[] | null; calculatedTotal: number; relativeToPar: number; requirements: Requirement[]; status: string;
   reviewReason: string | null; reviewNotes: string | null; roundDate: string | null; roundTime: string | null; gameMode: string | null; adminVerifiedGameMode: string | null;
-  enteredFinalScore: number | null; finalScoreCheck: string | null; createdAt: string | null; possibleDuplicate: boolean; pastCards: PastCard[]; reviewEvents: ReviewEvent[];
+  enteredFinalScore: number | null; finalScoreCheck: string | null; createdAt: string | null; aceStageAtSubmission: number | null; possibleDuplicate: boolean; duplicateMatches: DuplicateMatch[]; pastCards: PastCard[]; reviewEvents: ReviewEvent[];
   allTimeProcessingStatus: string; allTimeProcessingResult: Record<string, unknown> | null;
 }
 
@@ -22,6 +23,7 @@ export default function CourseChallengeReviewQueue({ includeRejected = false, re
   const [message, setMessage] = useState("")
   const [busyId, setBusyId] = useState<string | null>(null)
   const [modes, setModes] = useState<Record<string, "solo" | "multiplayer">>({})
+  const [aceCounts, setAceCounts] = useState<Record<string, boolean>>({})
   const [preview, setPreview] = useState<{ url: string; label: string } | null>(null)
 
   const load = useCallback(async () => {
@@ -45,7 +47,7 @@ export default function CourseChallengeReviewQueue({ includeRejected = false, re
     const mode = submission.level <= 2 && submission.challengeKey === "level" ? modes[submission.id] : "multiplayer"
     if (action === "approve" && !mode) { setMessage("Select verified Solo or Multiplayer before approving this Level 1 or 2 card."); return }
     setBusyId(submission.id)
-    const response = await fetch("/api/admin/course-challenges", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: submission.id, action, gameMode: mode }) })
+    const response = await fetch("/api/admin/course-challenges", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: submission.id, action, gameMode: mode, countTowardAceTrack: aceCounts[submission.id] === true }) })
     const payload = await response.json() as { error?: string; message?: string }
     setMessage(response.ok ? payload.message || "Review saved." : payload.error || "Review failed.")
     setBusyId(null)
@@ -59,17 +61,17 @@ export default function CourseChallengeReviewQueue({ includeRejected = false, re
       <span style={{ color: "#94a3b8", fontSize: 13 }}>Refreshes every 20 seconds</span>
     </div>
     {message && <p role="status" style={{ padding: 12, border: "1px solid #f59e0b66", borderRadius: 10, color: "#fde68a", whiteSpace: "pre-line" }}>{message}</p>}
-    {loading ? <p>Loading reviews…</p> : submissions.length === 0 ? <p>No {includeRejected ? "Course Challenge cards" : "pending Course Challenge submissions"}.</p> : submissions.map((submission) => <ReviewCard key={submission.id} submission={submission} mode={modes[submission.id]} setMode={(value) => setModes((current) => ({ ...current, [submission.id]: value }))} busy={busyId === submission.id} onReview={review} onPreview={setPreview} />)}
+    {loading ? <p>Loading reviews…</p> : submissions.length === 0 ? <p>No {includeRejected ? "Course Challenge cards" : "pending Course Challenge submissions"}.</p> : submissions.map((submission) => <ReviewCard key={submission.id} submission={submission} mode={modes[submission.id]} setMode={(value) => setModes((current) => ({ ...current, [submission.id]: value }))} countTowardAceTrack={aceCounts[submission.id] === true} setCountTowardAceTrack={(value) => setAceCounts((current) => ({ ...current, [submission.id]: value }))} busy={busyId === submission.id} onReview={review} onPreview={setPreview} />)}
     {preview && <div role="dialog" aria-modal="true" onClick={() => setPreview(null)} style={modalBackdrop}><div onClick={(event) => event.stopPropagation()} style={modalPanel}><button type="button" onClick={() => setPreview(null)} style={closeButton}>Close</button><img src={preview.url} alt={preview.label} style={{ maxWidth: "100%", maxHeight: "80vh", objectFit: "contain" }} /></div></div>}
   </section>
 }
 
-function ReviewCard({ submission, mode, setMode, busy, onReview, onPreview }: { submission: Submission; mode?: "solo" | "multiplayer"; setMode: (value: "solo" | "multiplayer") => void; busy: boolean; onReview: (submission: Submission, action: "approve" | "reject" | "return_to_review") => Promise<void>; onPreview: (preview: { url: string; label: string }) => void }) {
+function ReviewCard({ submission, mode, setMode, countTowardAceTrack, setCountTowardAceTrack, busy, onReview, onPreview }: { submission: Submission; mode?: "solo" | "multiplayer"; setMode: (value: "solo" | "multiplayer") => void; countTowardAceTrack: boolean; setCountTowardAceTrack: (value: boolean) => void; busy: boolean; onReview: (submission: Submission, action: "approve" | "reject" | "return_to_review") => Promise<void>; onPreview: (preview: { url: string; label: string }) => void }) {
   const lockedMode = submission.level >= 3 || submission.challengeKey !== "level"
   const stageLabel = submission.challengeKey === "ace" ? submission.aceLabel || "Ace Track" : submission.challengeKey === "prestige" ? submission.prestigeLabel || "Prestige" : `Level ${submission.level}`
   return <article style={card}>
     <header style={header}><div><h3 style={{ margin: 0 }}>{submission.playerName} · {submission.courseName}</h3><p style={muted}>{stageLabel} · {submission.difficulty} · {submission.status.toUpperCase()}</p></div><strong style={{ color: submission.status === "rejected" ? "#fca5a5" : "#fde68a" }}>{submission.status}</strong></header>
-    {submission.possibleDuplicate && <p style={warning}>POSSIBLE DUPLICATE CARD — THIS IMAGE WAS PREVIOUSLY SUBMITTED.</p>}
+    {submission.possibleDuplicate && <div style={warning}><strong>POSSIBLE DUPLICATE CARD — REVIEW WARNING</strong><span>This image was submitted before. Review the matching submission before approving. The same verified card may legitimately support one Level and Ace Track.</span>{submission.duplicateMatches.map((match) => <small key={match.id}>Previous: {match.challengeKey === "ace" ? `Ace ${match.aceStage || "Track"}` : `Level ${match.level}`} · {match.difficulty} · {match.status} · {new Date(match.createdAt).toLocaleString()}</small>)}</div>}
     {submission.proofPhotoUrl && <button type="button" onClick={() => onPreview({ url: submission.proofPhotoUrl || "", label: "Private scorecard evidence" })} style={proofButton}><img src={submission.proofPhotoUrl} alt="Private scorecard evidence thumbnail" style={{ maxWidth: "100%", maxHeight: 340, objectFit: "contain", background: "#020617" }} /><span>Open original private proof</span></button>}
     <p style={muted}>Submitted {submission.createdAt ? new Date(submission.createdAt).toLocaleString() : "—"} · Round date/time: {submission.roundDate || "needs review"} {submission.roundTime || "needs review"}</p>
     <p style={summary}>Player final score: <strong>{formatScore(submission.enteredFinalScore)}</strong> · System relative score: <strong>{formatScore(submission.relativeToPar)}</strong> · Final score check: <strong>{submission.finalScoreCheck || "needs review"}</strong></p>
@@ -80,7 +82,9 @@ function ReviewCard({ submission, mode, setMode, busy, onReview, onPreview }: { 
     <PastCards submission={submission} onPreview={onPreview} />
     {submission.status === "rejected" ? <button type="button" disabled={busy} onClick={() => void onReview(submission, "return_to_review")} style={buttonStyle("#92400e")}>RETURN TO REVIEW</button> : <div style={{ display: "grid", gap: 10 }}>
       {!lockedMode ? <fieldset style={modeFieldset}><legend>Verified Game Mode</legend><label><input type="radio" name={`mode-${submission.id}`} checked={mode === "solo"} onChange={() => setMode("solo")} /> SOLO</label><label><input type="radio" name={`mode-${submission.id}`} checked={mode === "multiplayer"} onChange={() => setMode("multiplayer")} /> MULTIPLAYER</label></fieldset> : <p style={modeNote}>MULTIPLAYER proof required for Level 3–5, Course Pro, Course Master, and Ace.</p>}
+      <fieldset style={aceFieldset}><legend>ACE TRACK</legend><label><input type="checkbox" checked={countTowardAceTrack} disabled={submission.challengeKey !== "level" || submission.isOwnSubmission} onChange={(event) => setCountTowardAceTrack(event.target.checked)} /> This card also counts toward Ace Track</label>{submission.aceStageAtSubmission ? <small style={muted}>Ace stage open when submitted: Stage {submission.aceStageAtSubmission}. Admin must verify the named-room, continuous-session, and Practice Mode rules from the private proof.</small> : <small style={muted}>Check this only when the verified card should credit the Ace stage that was open at submission.</small>}</fieldset>
       {submission.isOwnSubmission && <p style={selfApprovalWarning}>You cannot approve your own Course Challenge submission.</p>}
+      {!submission.isOwnSubmission && submission.level <= 2 && !mode && <p style={modeNote}>Choose Solo or Multiplayer before approving this card.</p>}
       <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}><button type="button" disabled={busy || submission.isOwnSubmission || (submission.level <= 2 && !mode)} onClick={() => void onReview(submission, "approve")} style={buttonStyle("#047857")}>APPROVE</button><button type="button" disabled={busy} onClick={() => void onReview(submission, "reject")} style={buttonStyle("#991b1b")}>REJECT</button></div>
     </div>}
     {submission.allTimeProcessingStatus === "processed" && submission.allTimeProcessingResult && <p style={result}>All-Time/Climbers processed: {String(submission.allTimeProcessingResult.classification || submission.allTimeProcessingResult.action || "complete")}</p>}
@@ -99,13 +103,14 @@ const header: React.CSSProperties = { display: "flex", flexWrap: "wrap", justify
 const muted: React.CSSProperties = { color: "#cbd5e1", margin: 0 }
 const summary: React.CSSProperties = { color: "#e2e8f0", margin: 0 }
 const reviewReason: React.CSSProperties = { color: "#fde68a", margin: 0 }
-const warning: React.CSSProperties = { color: "#fecaca", background: "#7f1d1d", border: "1px solid #ef4444", borderRadius: 8, padding: 10, fontWeight: 800, margin: 0 }
+const warning: React.CSSProperties = { display: "grid", gap: 5, color: "#fef3c7", background: "#78350f", border: "1px solid #f59e0b", borderRadius: 8, padding: 10, margin: 0 }
 const selfApprovalWarning: React.CSSProperties = { color: "#fecaca", background: "#450a0a", border: "1px solid #f87171", borderRadius: 8, padding: 10, fontWeight: 800, margin: 0 }
 const result: React.CSSProperties = { color: "#86efac", border: "1px solid #166534", borderRadius: 8, padding: 10, margin: 0 }
 const proofButton: React.CSSProperties = { display: "grid", gap: 5, justifyItems: "start", border: "1px solid #475569", borderRadius: 10, padding: 8, background: "#020617", color: "#c4b5fd", cursor: "pointer" }
 const table: React.CSSProperties = { width: "100%", borderCollapse: "collapse" }
 const cell: React.CSSProperties = { padding: 6, textAlign: "center", whiteSpace: "nowrap" }
 const modeFieldset: React.CSSProperties = { display: "flex", flexWrap: "wrap", gap: 14, border: "1px solid #475569", borderRadius: 10, padding: 10 }
+const aceFieldset: React.CSSProperties = { display: "grid", gap: 7, border: "1px solid #475569", borderRadius: 10, padding: 10 }
 const modeNote: React.CSSProperties = { color: "#fef3c7", margin: 0 }
 const pastCards: React.CSSProperties = { borderTop: "1px solid #334155", paddingTop: 10 }
 const pastGrid: React.CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))", gap: 10, marginTop: 10 }
