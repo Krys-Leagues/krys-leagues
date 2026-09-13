@@ -46,7 +46,7 @@ export type CourseChallengeLevel = {
 }
 
 export type CourseChallengeAce = {
-  unlockAfterLevel: 3
+  unlockAfterLevel: 1
   easyRequirements: CourseChallengeRequirement[]
   hardRequirements: CourseChallengeRequirement[]
   requirementsStatus: RequirementsStatus

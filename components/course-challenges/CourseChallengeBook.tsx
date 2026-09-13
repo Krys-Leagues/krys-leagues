@@ -104,8 +104,8 @@ export default function CourseChallengeBook({ course }: { course: CourseChalleng
                 return <Reward key={level.stickerKey} rewardKey={level.stickerKey} label={"Level " + level.level + " sticker"} rewardState={rewardState} assetPath={level.stickerAsset} />
               })}
               {aceStages.map((stage) => <Reward key={stage.rewardKey} label={stage.label} rewardKey={stage.rewardKey} rewardState={rewardKeys.has(stage.rewardKey) ? "earned" : aceUnlocked && currentAceStage?.stage === stage.stage ? "current" : "locked"} assetPath={stage.rewardAsset} />)}
-              <Reward rewardKey={"course-challenge:" + course.slug + ":course-pro"} label="Course Pro" rewardState={rewardKeys.has("course-challenge:" + course.slug + ":course-pro") ? "earned" : currentLevel === 3 ? "current" : "locked"} assetPath={course.courseProAsset || null} />
-              <Reward rewardKey={"course-challenge:" + course.slug + ":course-master"} label="Course Master" rewardState={rewardKeys.has("course-challenge:" + course.slug + ":course-master") ? "earned" : currentLevel === 5 ? "current" : "locked"} assetPath={course.courseMasterAsset || null} />
+              <Reward rewardKey={"course-challenge:" + course.slug + ":course-pro"} label="Course Pro" rewardState={rewardKeys.has("course-challenge:" + course.slug + ":course-pro") ? "earned" : currentLevel > course.levels.length ? "current" : "locked"} assetPath={course.courseProAsset || null} />
+              <Reward rewardKey={"course-challenge:" + course.slug + ":course-master"} label="Course Master" rewardState={rewardKeys.has("course-challenge:" + course.slug + ":course-master") ? "earned" : currentLevel > course.levels.length ? "current" : "locked"} assetPath={course.courseMasterAsset || null} />
             </div>
             <p className={styles.helper}>Progress currently recorded: Level {maxCompleted || 0} complete. Earned rewards can be selected for display in place of your avatar.</p>
             <CourseChallengeRewardSelector />

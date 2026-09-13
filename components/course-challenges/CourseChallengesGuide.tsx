@@ -37,14 +37,39 @@ export default function CourseChallengesGuide({ includeScorecardHelp = false }: 
 
     <section className={styles.guideSection}>
       <h3>SHOW OFF WHAT YOU EARN</h3>
-      <p>Show off what you earn: When you earn Course Pro, an Ace Track reward, Level 5, or Course Master, you can use that reward on your Player Profile in place of your regular profile image.</p>
-      <ol className={styles.rewardOrder}>
-        <li><strong>Course Pro</strong> — Earned when you complete Level 3.</li>
-        <li><strong>Ace Track</strong> — Becomes available after Level 3 and builds through Wader, Chaser, Hunter, and Legend.</li>
-        <li><strong>Level 5</strong> — The Level 5 reward is a major display reward.</li>
-        <li><strong>Course Master</strong> — Earned when you complete Level 5.</li>
-      </ol>
-      <p className={styles.helper}>Only earned rewards can be selected for your Player Profile. Choosing a display reward never changes ownership.</p>
+      <p>As you work through your Course Challenge Book, you can earn Levels, Ace Track rewards, Course Pro, and Course Master rewards.</p>
+    </section>
+
+    <section className={styles.guideSection}>
+      <h3>ACE TRACK</h3>
+      <p>Your Ace Track is available from Level 1 and runs alongside your regular Level challenges.</p>
+      <p>A verified Level scorecard can count toward both your Level challenge and your Ace Track at the same time.</p>
+      <p>Ace progress is based on different holes you have aced:</p>
+      <ul className={styles.guideList}>
+        <li>Ace Wader — Ace 1 unique hole.</li>
+        <li>Ace Chaser — Ace 3 different unique holes.</li>
+        <li>Ace Hunter — Ace 6 different unique holes.</li>
+        <li>Ace Legend — Ace all 9 different holes.</li>
+      </ul>
+      <p>A hole only counts once toward your unique-hole Ace progress, even if you ace it again later.</p>
+    </section>
+
+    <section className={styles.guideSection}>
+      <h3>LEVELS 1–5</h3>
+      <p>Work your way through Levels 1, 2, 3, 4, and 5 by completing the established challenges for each level.</p>
+    </section>
+
+    <section className={styles.guideSection}>
+      <h3>COURSE PRO &amp; COURSE MASTER</h3>
+      <p>After you complete Levels 1–5, Course Pro and Course Master open as the advanced challenges in your Course Challenge Book.</p>
+      <p>Complete their established requirements to earn those rewards.</p>
+    </section>
+
+    <section className={styles.guideSection}>
+      <h3>PLAYER PROFILE REWARDS</h3>
+      <p>Earned display rewards can be selected for your Player Profile in place of your regular profile image.</p>
+      <p>Only rewards you have actually earned can be selected.</p>
+      <p>Choosing a display reward never changes ownership or your saved Course Challenge progress.</p>
     </section>
 
     {includeScorecardHelp && <section className={styles.guideSection}>
