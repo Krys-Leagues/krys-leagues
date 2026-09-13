@@ -19,13 +19,13 @@ export async function POST(request: Request) {
     const difficulty = body.difficulty as CourseChallengeDifficulty
     const currentLevel = course && challengeKey === "level" ? getCourseChallengeLevel(course, requestedLevel) : null
     if (!course || course.status !== "live" || !["Easy", "Hard"].includes(difficulty) || (challengeKey === "level" && !currentLevel) || (challengeKey === "ace" && !course.aceStages?.length)) return Response.json({ error: "Course Challenge course, challenge, Level, or difficulty is invalid." }, { status: 400 })
-    const level = challengeKey === "ace" ? 3 : requestedLevel
+    const level = challengeKey === "ace" ? (typeof body.aceStage === "number" ? body.aceStage : Number(body.aceStage)) : requestedLevel
     const service = createCourseChallengesServiceClient()
     const profile = await service.from("course_challenge_progress").select("level_number,completed_at").eq("player_id", identity.playerId).eq("course_slug", course.slug).order("level_number", { ascending: true })
     if (profile.error) throw profile.error
     const completedLevels = (profile.data || []).filter((row) => row.completed_at).map((row) => Number(row.level_number))
     if (challengeKey === "level" && level > 1 && !completedLevels.includes(level - 1)) return Response.json({ error: "Complete both sides of the previous Level before submitting this one." }, { status: 409 })
-    if (challengeKey === "ace" && !isAceChallengeUnlocked(course, completedLevels)) return Response.json({ error: "Complete Level 3 before submitting the Ace Track." }, { status: 409 })
+    if (challengeKey === "ace" && !isAceChallengeUnlocked(course, completedLevels)) return Response.json({ error: "The Ace Track is unavailable for this course." }, { status: 409 })
     if (typeof body.proofPhotoPath !== "string" || !body.proofPhotoPath.startsWith(identity.user.id + "/")) return Response.json({ error: "A proof scorecard photo is required." }, { status: 400 })
     if (!Array.isArray(body.scores) || !validHoleScores(body.scores)) return Response.json({ error: "Enter all 18 positive whole-number hole scores." }, { status: 400 })
 
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     if (courseResult.error) throw courseResult.error
     const pars = courseResult.data?.hole_pars as number[] | null | undefined
     if (!validHolePars(pars || [])) return Response.json({ error: "The authoritative 18-hole pars are unavailable for this course." }, { status: 503 })
-    const approvedAce = challengeKey === "ace" ? await service.from("course_challenge_submissions").select("difficulty,hole_scores,requirements_evaluation,status").eq("player_id", identity.playerId).eq("course_slug", course.slug).eq("challenge_key", "ace").eq("status", "approved") : { data: [], error: null }
+    const approvedAce = challengeKey === "ace" ? await service.from("course_challenge_submissions").select("challenge_key,level_number,difficulty,hole_scores,requirements_evaluation,status").eq("player_id", identity.playerId).eq("course_slug", course.slug).eq("status", "approved") : { data: [], error: null }
     if (approvedAce.error) throw approvedAce.error
     const aceRows = (approvedAce.data || []) as AceSubmissionRecord[]
     const aceState = challengeKey === "ace" ? aceProgress(course, aceRows) : null

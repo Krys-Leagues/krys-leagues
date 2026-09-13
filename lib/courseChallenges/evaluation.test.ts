@@ -116,8 +116,8 @@ test("photo totals and Course Pro/Master rewards remain wired", () => {
 })
 
 test("Tourist Trap and Cherry Blossom expose the full four-stage Ace Track", () => {
-  assert.equal(isAceChallengeUnlocked(tourist, []), false)
-  assert.equal(isAceChallengeUnlocked(tourist, [1, 2]), false)
+  assert.equal(isAceChallengeUnlocked(tourist, []), true)
+  assert.equal(isAceChallengeUnlocked(tourist, [1, 2]), true)
   assert.equal(isAceChallengeUnlocked(tourist, [1, 2, 3]), true)
   assert.deepEqual(tourist.aceStages?.map((stage) => [stage.key, stage.easyRequirements[0].target, stage.hardRequirements[0].target]), [["wader", 1, 1], ["chaser", 3, 3], ["hunter", 6, 6], ["legend", 9, 9]])
   assert.deepEqual(cherry.aceStages?.map((stage) => [stage.key, stage.easyRequirements[0].target, stage.hardRequirements[0].target]), [["wader", 1, 1], ["chaser", 3, 3], ["hunter", 6, 6], ["legend", 9, 9]])

@@ -2,7 +2,7 @@
   position: relative;
   isolation: isolate;
   min-height: 100vh;
-  overflow: hidden;
+  overflow: visible;
   background: #0b1d28;
   color: #f8fafc;
   padding: 28px 18px 72px;
@@ -56,6 +56,18 @@
 .rewardOrder strong { color: #fde68a; }
 .pageHeader { display: grid; gap: 14px; margin: 18px 0 20px; }
 .book { display: grid; gap: 18px; }
+.bookStage { position: relative; min-height: 520px; perspective: 1400px; }
+.bookPages { position: relative; z-index: 1; opacity: 0; visibility: hidden; transform: translateY(14px); }
+.bookCover { position: absolute; inset: 0; z-index: 2; display: grid; place-content: center; justify-items: center; gap: 12px; min-height: 520px; border: 1px solid #ffffff35; border-radius: 22px; padding: 36px; background-position: center; background-size: cover; box-shadow: 0 30px 90px #000b, inset 0 0 0 1px #f9a8d433; color: #fff; font: inherit; text-align: center; cursor: pointer; transform-origin: left center; backface-visibility: hidden; }
+.bookCover strong { color: #f9a8d4; font-size: clamp(1.5rem, 4vw, 2.8rem); letter-spacing: .08em; text-shadow: 0 3px 20px #000; }
+.bookCover span:last-child { color: #d1fae5; font-size: 1.1rem; font-weight: 900; }
+.bookCoverKicker { color: #86efac; font-size: .78rem; font-weight: 950; letter-spacing: .2em; }
+.bookCover:disabled { cursor: wait; }
+.bookStage[data-book-phase="opening"] .bookPages { visibility: visible; animation: bookPagesReveal 1600ms 140ms ease-out forwards; }
+.bookStage[data-book-phase="open"] .bookPages { visibility: visible; opacity: 1; transform: none; }
+.bookStage[data-book-phase="opening"] .bookCover { animation: bookCoverOpen 1600ms ease-in-out forwards; pointer-events: none; }
+@keyframes bookCoverOpen { 0% { opacity: 1; transform: rotateY(0) translateX(0); } 72% { opacity: 1; transform: rotateY(-78deg) translateX(-2%); } 100% { opacity: 0; transform: rotateY(-102deg) translateX(-5%); } }
+@keyframes bookPagesReveal { 0% { opacity: .2; clip-path: inset(0 50% 0 50%); transform: translateY(14px); } 100% { opacity: 1; clip-path: inset(0); transform: translateY(0); } }
 .bookSpread { display: grid; grid-template-columns: minmax(260px, .8fr) minmax(0, 1.6fr); gap: 18px; align-items: start; }
 .rewardPage, .challengePage { display: grid; gap: 18px; min-width: 0; border: 1px solid #ffffff22; border-radius: 22px; padding: 22px; background: linear-gradient(145deg, #111827e8, #020617e8); box-shadow: 0 20px 60px #0004; }
 .rewardPage { background: linear-gradient(145deg, #172554e8, #020617e8); }
@@ -125,6 +137,8 @@
 .profileStickers { display: flex; flex-wrap: wrap; gap: 8px; }
 .profileSticker { border: 1px solid #fbbf2444; border-radius: 999px; padding: 6px 9px; color: #fde68a; font-size: .75rem; font-weight: 800; }
 @media (max-width: 720px) {
+  .bookStage { min-height: 420px; }
+  .bookCover { min-height: 420px; padding: 24px; }
   .bookSpread { grid-template-columns: 1fr; }
   .rewardBookGrid .reward { min-height: 178px; }
   .reward > img, .rewardMark, .rewardSilhouette { width: min(100%, 124px); height: 124px; }
@@ -132,6 +146,9 @@
   .sideGrid, .formGrid { grid-template-columns: 1fr; }
   .levelRail { grid-template-columns: repeat(5, minmax(74px, 1fr)); overflow-x: auto; }
   .levelTab { min-height: 64px; padding: 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bookStage[data-book-phase="opening"] .bookCover, .bookStage[data-book-phase="opening"] .bookPages { animation-duration: 1ms; animation-delay: 0ms; }
 }
 .courseNameLink { color: #fff; text-decoration: none; }
 .courseNameLink:hover, .courseNameLink:focus-visible { color: #f9a8d4; text-decoration: underline; text-underline-offset: 5px; }

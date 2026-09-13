@@ -147,6 +147,6 @@ export function getCourseChallenge(slug: string) { return COURSE_CHALLENGE_COURS
 export function getPublicCourseChallenges() { return COURSE_CHALLENGE_COURSES.filter((course) => course.status === "live").sort((left, right) => left.displayOrder - right.displayOrder) }
 export function getCourseChallengeLevel(course: CourseChallengeCourse, level: number) { return course.levels.find((item) => item.level === level) ?? null }
 export function getAceStage(course: CourseChallengeCourse, stage: number) { return course.aceStages?.find((item) => item.stage === stage) ?? null }
-export function isAceChallengeUnlocked(course: CourseChallengeCourse, completedLevels: number[]) { return Boolean(course.aceStages?.length && completedLevels.includes(3)) }
+export function isAceChallengeUnlocked(course: CourseChallengeCourse, completedLevels: number[]) { void completedLevels; return Boolean(course.aceStages?.length) }
 export function aceStageForUniqueHoleCount(course: CourseChallengeCourse, uniqueHoleCount: number) { return course.aceStages?.find((stage) => (stage.easyRequirements[0]?.target || Number.MAX_SAFE_INTEGER) > uniqueHoleCount) ?? null }
 export function courseChallengeRewardLabel(course: CourseChallengeCourse, level: number, kind: "sticker" | "badge") { return kind === "sticker" ? course.name + " Level " + level + " sticker" : course.name + " Level " + level + " badge" }

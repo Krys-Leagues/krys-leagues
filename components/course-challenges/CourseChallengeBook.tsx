@@ -14,7 +14,7 @@ import styles from "./course-challenges.module.css"
 import CourseChallengesGuide from "./CourseChallengesGuide"
 import CourseChallengeRewardSelector from "./CourseChallengeRewardSelector"
 
-type ProgressPayload = { completedLevels?: number[]; rewards?: Array<{ rewardKey: string; label: string; level: number | null; kind: "sticker" | "badge" }>; courses?: Array<{ slug: string; uniqueAceHoles?: number; completedAceStages?: number[] }> }
+type ProgressPayload = { completedLevels?: number[]; levelProgress?: Array<{ courseSlug?: string; level: number; easyStatus: string; hardStatus: string; completedAt: string | null; updatedAt: string | null }>; rewards?: Array<{ rewardKey: string; label: string; level: number | null; kind: "sticker" | "badge" }>; courses?: Array<{ slug: string; uniqueAceHoles?: number; completedAceStages?: number[] }> }
 type CatalogPayload = { pars?: Partial<Record<CourseChallengeDifficulty, number[]>>; available?: boolean; error?: string }
 type SubmissionState = { challengeKey: "level" | "ace"; level: number; aceStage?: number; difficulty: CourseChallengeDifficulty }
 
@@ -28,6 +28,7 @@ export default function CourseChallengeBook({ course }: { course: CourseChalleng
   const [submission, setSubmission] = useState<SubmissionState | null>(null)
   const [uniqueAceHoles, setUniqueAceHoles] = useState(0)
   const [completedAceStages, setCompletedAceStages] = useState<number[]>([])
+  const [bookPhase, setBookPhase] = useState<"closed" | "opening" | "open">("closed")
 
   useEffect(() => {
     let active = true
@@ -91,7 +92,10 @@ export default function CourseChallengeBook({ course }: { course: CourseChalleng
         </details>
         {profileRewardMessage && <div className={styles.profileRewardNotice} role="status"><strong>NEW PROFILE REWARD UNLOCKED!</strong><span>You can now use {profileRewardMessage} on your Player Profile.</span></div>}
         {message && <p className={styles.notice}>{message}</p>}
-        <div className={styles.bookSpread}>
+        <div className={styles.bookStage} data-book-phase={bookPhase}>
+          {bookPhase !== "open" && <button type="button" className={styles.bookCover} style={{ backgroundImage: course.backgroundImage ? "linear-gradient(90deg, #020617d9, #02061748), url(\"" + course.backgroundImage + "\")" : undefined }} disabled={bookPhase === "opening"} onClick={() => setBookPhase("opening")} onAnimationEnd={() => setBookPhase("open")}><span className={styles.bookCoverKicker}>KRYS&apos; LEAGUES</span><strong>COURSE CHALLENGE BOOK</strong><span>Open {course.name}</span></button>}
+          <div className={styles.bookPages} aria-hidden={bookPhase !== "open"}>
+          <div className={styles.bookSpread}>
           <aside className={styles.rewardPage} aria-label={course.name + " sticker and reward book"}>
             <div className={styles.bookPageHeading}><p className={styles.eyebrow}>STICKER &amp; REWARD BOOK</p><h2>Earned &amp; ahead</h2><p>Every reward stays with this course, from Level 1 through the final prestige rewards.</p></div>
             <div className={styles.rewardBookGrid}>
@@ -130,10 +134,10 @@ export default function CourseChallengeBook({ course }: { course: CourseChalleng
             </>
           })()}
         </section>}
-        {selectedLevelData.level >= 3 && aceStages.length > 0 && <section className={styles.levelCard} aria-label="Ace Track">
-          <div className={styles.levelHeader}><div><h2>ACE TRACK</h2><p>Unlocks after Level 3 · {uniqueAceHoles} of 9 unique ace holes</p></div><span className={styles.statusChip}>{aceUnlocked ? currentAceStage ? currentAceStage.label : "Complete" : "Locked"}</span></div>
+        {aceStages.length > 0 && <section className={styles.levelCard} aria-label="Ace Track">
+          <div className={styles.levelHeader}><div><h2>ACE TRACK</h2><p>Available from Level 1 · {uniqueAceHoles} of 9 unique ace holes</p></div><span className={styles.statusChip}>{aceUnlocked ? currentAceStage ? currentAceStage.label : "Complete" : "Unavailable"}</span></div>
           <div className={styles.aceStageRail}>{aceStages.map((stage) => <div className={styles.aceStage} data-complete={completedAceStages.includes(stage.stage)} data-current={aceUnlocked && currentAceStage?.stage === stage.stage} key={stage.rewardKey}><strong>{stage.label}</strong><small>{stage.easyRequirements[0]?.label}</small></div>)}</div>
-          {!aceUnlocked ? <p className={styles.helper}>Complete Level 3 to unlock the Ace Track. Your unique ace-hole progress will continue through Levels 4 and 5.</p> : currentAceStage ? <>
+          {!aceUnlocked ? <p className={styles.helper}>This course does not currently publish an Ace Track.</p> : currentAceStage ? <>
             <div className={styles.sideGrid}>
               <ChallengeSide course={course} difficulty="Easy" requirements={currentAceStage.easyRequirements} requirementsPending={currentAceStage.requirementsStatus === "pending_review"} onSubmit={() => setSubmission({ challengeKey: "ace", level: 3, aceStage: currentAceStage.stage, difficulty: "Easy" })} />
               <ChallengeSide course={course} difficulty="Hard" requirements={currentAceStage.hardRequirements} requirementsPending={currentAceStage.requirementsStatus === "pending_review"} onSubmit={() => setSubmission({ challengeKey: "ace", level: 3, aceStage: currentAceStage.stage, difficulty: "Hard" })} />
@@ -142,6 +146,8 @@ export default function CourseChallengeBook({ course }: { course: CourseChalleng
           </> : <p className={styles.success}>Ace Legend complete — all 9 unique ace holes are in your verified track.</p>}
         </section>}
           </section>
+        </div>
+          </div>
         </div>
       </div>
     </div>

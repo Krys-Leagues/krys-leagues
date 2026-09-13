@@ -29,12 +29,14 @@ test("Ace Track completes stages cumulatively and remains unlocked through later
   const rows = [
     aceSubmission("wader", "Easy", [1]),
     aceSubmission("wader", "Hard", [1]),
-    aceSubmission("chaser", "Easy", [1, 3]),
-    aceSubmission("chaser", "Hard", [1, 3]),
+    aceSubmission("chaser", "Easy", [1, 3, 5]),
+    aceSubmission("chaser", "Hard", [1, 3, 5]),
   ]
   const progress = aceProgress(tourist, rows)
-  assert.deepEqual(progress.uniqueHoles, [1, 3])
+  assert.deepEqual(progress.uniqueHoles, [1, 3, 5])
   assert.deepEqual(progress.completedStages, [1, 2])
   assert.equal(progress.nextStage?.key, "hunter")
+  assert.equal(isAceChallengeUnlocked(tourist, []), true)
+  assert.equal(isAceChallengeUnlocked(tourist, [1]), true)
   assert.equal(isAceChallengeUnlocked(tourist, [1, 2, 3, 4, 5]), true)
 })
