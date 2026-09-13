@@ -84,12 +84,17 @@ test("site access decisions contain no email or display-name matching inputs", (
 })
 
 
-test("Vercel previews bypass only the top-level private testing gate for public pages", () => {
+test("Vercel previews bypass only the private testing gate for public pages and read-only Course Challenge data", () => {
   for (const pathname of ["/players", "/kwt", "/records"]) {
     assert.equal(shouldBypassPrivateTestingGate({ pathname, vercelEnv: "preview" }), true)
     assert.equal(shouldBypassPrivateTestingGate({ pathname, vercelEnv: "production" }), false)
   }
-  assert.equal(shouldBypassPrivateTestingGate({ pathname: "/admin/import/monthly", vercelEnv: "preview" }), false)
-  assert.equal(shouldBypassPrivateTestingGate({ pathname: "/api/admin/monthly-website-recovery/apply", vercelEnv: "preview" }), false)
+  for (const pathname of ["/api/course-challenges/catalog", "/api/course-challenges/profile", "/api/course-challenges/profile/player-1", "/api/course-challenges/community", "/api/course-challenges/celebrations"]) {
+    assert.equal(shouldBypassPrivateTestingGate({ pathname, method: "GET", vercelEnv: "preview" }), true)
+  }
+  assert.equal(shouldBypassPrivateTestingGate({ pathname: "/admin/import/monthly", method: "GET", vercelEnv: "preview" }), false)
+  assert.equal(shouldBypassPrivateTestingGate({ pathname: "/api/admin/monthly-website-recovery/apply", method: "GET", vercelEnv: "preview" }), false)
+  assert.equal(shouldBypassPrivateTestingGate({ pathname: "/api/course-challenges/catalog", method: "POST", vercelEnv: "preview" }), false)
+  assert.equal(shouldBypassPrivateTestingGate({ pathname: "/api/course-challenges/profile/selection", method: "PUT", vercelEnv: "preview" }), false)
   assert.equal(shouldBypassPrivateTestingGate({ pathname: "/players", vercelEnv: undefined }), false)
 })

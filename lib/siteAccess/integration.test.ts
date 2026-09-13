@@ -34,7 +34,7 @@ test("SQL stores canonical player IDs and never email or display names", async (
 
 test("preview bypass is limited to the site gate and keeps admin/API paths protected", async () => {
   const source = await readFile("proxy.ts", "utf8")
-  assert.match(source, /shouldBypassPrivateTestingGate\(\{ pathname, vercelEnv: process\.env\.VERCEL_ENV \}\)/)
+  assert.match(source, /shouldBypassPrivateTestingGate\(\{ pathname, method: request\.method, vercelEnv: process\.env\.VERCEL_ENV \}\)/)
   assert.match(source, /if \(mode === "prelaunch" && !previewPublicBypass\)/)
   assert.match(source, /else if \(!previewPublicBypass && pathname === "\/testing-access"\)/)
   const adminIndex = source.indexOf('if (pathname === "/admin" || pathname.startsWith("/admin/"))')

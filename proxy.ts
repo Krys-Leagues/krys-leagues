@@ -62,7 +62,7 @@ export async function proxy(request: NextRequest) {
     return withSessionCookies(session.response, NextResponse.redirect(denial))
   }
 
-  const previewPublicBypass = shouldBypassPrivateTestingGate({ pathname, vercelEnv: process.env.VERCEL_ENV })
+  const previewPublicBypass = shouldBypassPrivateTestingGate({ pathname, method: request.method, vercelEnv: process.env.VERCEL_ENV })
   let access: CurrentSiteAccess | null = null
   let resolutionFailed = false
   const feature = getFeatureRoute(pathname)

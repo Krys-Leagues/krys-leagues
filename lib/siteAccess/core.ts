@@ -15,12 +15,20 @@ export function parseSiteAccessMode(value: string | null | undefined): SiteAcces
 
 export function shouldBypassPrivateTestingGate(input: {
   pathname: string
+  method?: string | null
   vercelEnv?: string | null
 }) {
   if (input.vercelEnv?.trim().toLowerCase() !== "preview") return false
   if (input.pathname === "/testing-access" || input.pathname === "/auth/callback") return false
   if (input.pathname === "/admin" || input.pathname.startsWith("/admin/")) return false
-  if (input.pathname.startsWith("/api/")) return false
+  if (input.pathname.startsWith("/api/")) {
+    if ((input.method || "GET").toUpperCase() !== "GET") return false
+    return input.pathname === "/api/course-challenges/catalog"
+      || input.pathname === "/api/course-challenges/profile"
+      || /^\/api\/course-challenges\/profile\/[^/]+$/.test(input.pathname)
+      || input.pathname === "/api/course-challenges/community"
+      || input.pathname === "/api/course-challenges/celebrations"
+  }
   return true
 }
 
