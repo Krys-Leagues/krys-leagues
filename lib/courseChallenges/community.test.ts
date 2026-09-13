@@ -28,6 +28,8 @@ test("community route groups each player only at their highest completed level",
   assert.match(route, /Math\.max\(highest\.get\(row\.player_id\) \|\| 0, row\.level_number\)/)
   assert.match(route, /value === level/)
   assert.match(route, /getPublicCourseChallenges\(\)/)
+  assert.match(route, /createCourseChallengesServiceClient\(\)/)
+  assert.doesNotMatch(route, /createServerSupabaseClient\(\)/)
   assert.match(page, /LEVEL \{group\.level\}/)
   assert.match(page, /communityGrid/)
 })

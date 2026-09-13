@@ -1,7 +1,7 @@
 import { getPublicCourseChallenges } from "@/lib/courseChallenges/catalog"
 import { aceRewardDefinition, aceStageRewardDefinitions, levelRewardDefinitions } from "@/lib/courseChallenges/rewards"
 import { playerAvatarPublicUrl } from "@/lib/playerAvatars"
-import { createServerSupabaseClient } from "@/lib/supabase/server"
+import { createCourseChallengesServiceClient } from "@/lib/courseChallenges/server"
 
 type ProgressRow = { player_id: string; level_number: number; completed_at: string | null }
 type RewardRow = { id: string; player_id: string; reward_key: string; label: string; course_slug: string; level: number | null; earned_at: string | null }
@@ -11,7 +11,10 @@ export async function GET(request: Request) {
   const course = getPublicCourseChallenges().find((item) => item.slug === courseSlug)
   if (!course) return Response.json({ error: "Course not found." }, { status: 404 })
   try {
-    const service = await createServerSupabaseClient()
+    // Community progress is public Course Challenge data, but the player directory
+    // intentionally has no public SELECT policy. Use the existing server-only
+    // service client for this narrowly filtered, read-only join.
+    const service = createCourseChallengesServiceClient()
     const progress = await service.from("course_challenge_progress").select("player_id,level_number,completed_at").eq("course_slug", course.slug).not("completed_at", "is", null)
     if (progress.error) throw progress.error
     const highest = new Map<string, number>()
