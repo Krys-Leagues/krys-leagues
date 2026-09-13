@@ -38,6 +38,17 @@ test("community route groups each player only at their highest completed level",
   assert.match(page, /communityGrid/)
 })
 
+test("community player cards preserve artwork size and reflow for long names", () => {
+  const styles = read("components/course-challenges/course-challenges.module.css")
+  assert.match(styles, /\.communityGrid, \.specialGrid \{[^}]*minmax\(260px, 1fr\)/)
+  assert.match(styles, /\.communityCard \{[^}]*grid-template-columns: 44px minmax\(0, 1fr\) 44px/)
+  assert.match(styles, /\.communityCard \{[^}]*min-width: 0/)
+  assert.match(styles, /\.communityPlayer \{[^}]*font-size: clamp\([^}]*\)/)
+  assert.match(styles, /\.communityPlayer \{[^}]*overflow-wrap: anywhere/)
+  assert.match(styles, /\.communityCard > img \{[^}]*width: 44px; height: 44px/)
+  assert.match(styles, /@media \(max-width: 720px\) \{\s*\.communityGrid, \.specialGrid \{ grid-template-columns: minmax\(0, 1fr\); \}/)
+})
+
 test("profile achievements reuse the existing trophy case and omit private review fields", () => {
   const profile = read("app/players/[id]/page.tsx")
   assert.match(profile, /from\("course_challenge_rewards"\)/)

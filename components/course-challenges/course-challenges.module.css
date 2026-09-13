@@ -218,12 +218,18 @@
 .communitySection { border: 1px solid #ffffff22; border-radius: 16px; background: #020617aa; overflow: hidden; }
 .communitySection summary { display: flex; justify-content: space-between; gap: 10px; padding: 15px 17px; color: #fff; font-weight: 950; letter-spacing: .08em; cursor: pointer; }
 .communitySection summary span { color: #a5b4fc; font-size: .78rem; letter-spacing: 0; }
-.communityGrid, .specialGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; padding: 0 14px 14px; }
-.communityCard { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; border: 1px solid #ffffff18; border-radius: 12px; padding: 10px; background: #111827cc; }
-.communityAvatar { width: 42px; height: 42px; }
-.communityCard p { margin: 4px 0 0; color: #cbd5e1; font-size: .78rem; }
-.communityCard img { width: 44px; height: 44px; object-fit: contain; }
-.communityLevelSticker { grid-column: 2 / -1; color: #fde68a; font-size: .72rem; font-weight: 900; }
+.communityGrid, .specialGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; padding: 0 14px 14px; }
+.communityCard { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; gap: 10px; align-items: start; min-width: 0; border: 1px solid #ffffff18; border-radius: 12px; padding: 10px; background: #111827cc; }
+.communityAvatarLink { width: 44px; min-width: 44px; }
+.communityAvatar { width: 44px; height: 44px; }
+.communityCard > div { min-width: 0; }
+.communityCard p { margin: 4px 0 0; color: #cbd5e1; font-size: .78rem; line-height: 1.35; overflow-wrap: anywhere; }
+.communityCard > img { width: 44px; height: 44px; flex: 0 0 44px; object-fit: contain; }
+.communityPlayer { display: block; min-width: 0; font-size: clamp(.82rem, 1.4vw, .95rem); line-height: 1.2; overflow-wrap: anywhere; }
+.communityLevelSticker { grid-column: 2 / 3; min-width: 0; color: #fde68a; font-size: .72rem; font-weight: 900; overflow-wrap: anywhere; }
+@media (max-width: 720px) {
+  .communityGrid, .specialGrid { grid-template-columns: minmax(0, 1fr); }
+}
 .courseAchievementGroups { display: grid; gap: 14px; margin-top: 22px; border-top: 1px solid #ffffff1c; padding-top: 18px; }
 .courseAchievementGroups h3, .courseAchievementGroup h4 { margin: 0; }
 .courseAchievementGroups h3 { color: #f9a8d4; letter-spacing: .08em; }
