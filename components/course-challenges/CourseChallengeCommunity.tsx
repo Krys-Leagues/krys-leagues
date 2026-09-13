@@ -8,7 +8,7 @@ import styles from "./course-challenges.module.css"
 
 type Player = { id: string; name: string; avatarUrl: string | null; highestLevel: number; levelStickerAsset: string | null; profileUrl: string }
 type Group = { level: number; players: Player[] }
-type SpecialGroup = { key: string; label: string; players: Array<{ player: Player; reward?: { assetPath: string | null } }> }
+type SpecialGroup = { key: string; label: string; kind: "advanced" | "ace"; players: Array<{ player: Player; reward?: { assetPath: string | null } }> }
 type Payload = { levelGroups: Group[]; specialGroups: SpecialGroup[] }
 
 export default function CourseChallengeCommunity({ course }: { course: CourseChallengeCourse }) {
@@ -21,7 +21,8 @@ export default function CourseChallengeCommunity({ course }: { course: CourseCha
     {error && <p className={styles.notice}>{error}</p>}
     {!payload && !error ? <p className={styles.helper}>Loading challengers…</p> : <>
       <div className={styles.communityGroups}>{payload?.levelGroups.map((group) => <details key={group.level} className={styles.communitySection} open={group.level === 1}><summary>LEVEL {group.level}<span>{group.players.length} challenger{group.players.length === 1 ? "" : "s"}</span></summary><PlayerGrid players={group.players} course={course} /></details>)}</div>
-      <div className={styles.communityGroups}>{payload?.specialGroups.map((group) => <details key={group.key} className={styles.communitySection}><summary>{group.label.toUpperCase()}<span>{group.players.length} earned</span></summary><div className={styles.specialGrid}>{group.players.map(({ player, reward }) => <PlayerCard key={player.id} player={player} course={course} rewardAsset={reward?.assetPath || null} />)}</div></details>)}</div>
+      {payload?.specialGroups.some((group) => group.kind === "advanced") && <div className={styles.communityGroups}>{payload.specialGroups.filter((group) => group.kind === "advanced").map((group) => <details key={group.key} className={styles.communitySection}><summary>{group.label.toUpperCase()}<span>{group.players.length} earned</span></summary><div className={styles.specialGrid}>{group.players.map(({ player, reward }) => <PlayerCard key={player.id} player={player} course={course} rewardAsset={reward?.assetPath || null} />)}</div></details>)}</div>}
+      {payload?.specialGroups.some((group) => group.kind === "ace") && <><h2 className={styles.communitySubheading}>ACE TRACK</h2><div className={styles.communityGroups}>{payload.specialGroups.filter((group) => group.kind === "ace").map((group) => <details key={group.key} className={styles.communitySection}><summary>{group.label.toUpperCase()}<span>{group.players.length} earned</span></summary><div className={styles.specialGrid}>{group.players.map(({ player, reward }) => <PlayerCard key={player.id} player={player} course={course} rewardAsset={reward?.assetPath || null} />)}</div></details>)}</div></>}
     </>}
   </div></main>
 }

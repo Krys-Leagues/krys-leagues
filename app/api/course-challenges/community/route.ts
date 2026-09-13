@@ -1,5 +1,5 @@
 import { getPublicCourseChallenges } from "@/lib/courseChallenges/catalog"
-import { aceRewardDefinition, aceStageRewardDefinitions, levelRewardDefinitions } from "@/lib/courseChallenges/rewards"
+import { aceStageRewardDefinitions, levelRewardDefinitions } from "@/lib/courseChallenges/rewards"
 import { playerAvatarPublicUrl } from "@/lib/playerAvatars"
 import { createCourseChallengesServiceClient } from "@/lib/courseChallenges/server"
 
@@ -26,10 +26,18 @@ export async function GET(request: Request) {
     const players = playerIds.length ? await service.from("players").select("id,screen_name,avatar_path,status,active").in("id", playerIds) : { data: [], error: null }
     if (players.error) throw players.error
     const visiblePlayers = new Map((players.data || []).filter((player) => player.active !== false && !["retired", "merged", "archived"].includes(String(player.status || "").toLowerCase())).map((player) => [String(player.id), player]))
-    const definitions = new Map([...course.levels.flatMap((level) => levelRewardDefinitions(course, level.level)), ...aceStageRewardDefinitions(course), ...(course.aceChallenge ? [aceRewardDefinition(course)] : [])].filter(Boolean).map((reward) => [reward!.rewardKey, reward!]))
+    const definitions = new Map([...course.levels.flatMap((level) => levelRewardDefinitions(course, level.level)), ...aceStageRewardDefinitions(course)].filter(Boolean).map((reward) => [reward!.rewardKey, reward!]))
     const player = (id: string) => { const row = visiblePlayers.get(id); const highestLevel = highest.get(id) || 0; const sticker = highestLevel ? definitions.get("course-challenge:" + course.slug + ":level-" + highestLevel + ":sticker") : null; return row ? { id, name: row.screen_name, avatarUrl: playerAvatarPublicUrl(row.avatar_path), highestLevel, levelStickerAsset: sticker?.assetPath || null, profileUrl: `/players/${encodeURIComponent(id)}` } : null }
     const levelGroups = [1, 2, 3, 4, 5].map((level) => ({ level, players: [...highest.entries()].filter(([, value]) => value === level).map(([id]) => player(id)).filter(Boolean) }))
-    const specialGroups = ["course-pro", "ace-challenge", "course-master"].map((suffix) => ({ key: suffix, label: suffix === "course-pro" ? "Course Pro" : suffix === "ace-challenge" ? "Ace Challenge" : "Course Master", players: [...new Set(rewardRows.filter((row) => row.reward_key.endsWith(":" + suffix)).map((row) => row.player_id))].map((id) => ({ player: player(id), reward: definitions.get(rewardRows.find((row) => row.player_id === id && row.reward_key.endsWith(":" + suffix))?.reward_key || "") })).filter((entry) => entry.player) }))
+    const rewardGroups = [
+      { key: "course-pro", label: "Course Pro", kind: "advanced" as const, matches: (row: RewardRow) => row.reward_key.endsWith(":course-pro") },
+      { key: "course-master", label: "Course Master", kind: "advanced" as const, matches: (row: RewardRow) => row.reward_key.endsWith(":course-master") },
+      ...(course.aceStages || []).map((stage) => ({ key: stage.key, label: stage.label, kind: "ace" as const, matches: (row: RewardRow) => row.reward_key === stage.rewardKey })),
+    ]
+    const specialGroups = rewardGroups.map((group) => {
+      const matchingRows = rewardRows.filter(group.matches)
+      return { key: group.key, label: group.label, kind: group.kind, players: [...new Set(matchingRows.map((row) => row.player_id))].map((id) => ({ player: player(id), reward: definitions.get(matchingRows.find((row) => row.player_id === id)?.reward_key || "") })).filter((entry) => entry.player) }
+    })
     return Response.json({ course: { slug: course.slug, name: course.name }, levelGroups, specialGroups }, { headers: { "Cache-Control": "no-store" } })
   } catch (caught) {
     return Response.json({ error: caught instanceof Error ? caught.message : "Community progress is unavailable." }, { status: 503 })

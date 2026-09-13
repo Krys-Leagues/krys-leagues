@@ -213,6 +213,7 @@
 .emptyCelebrations, .communityEmpty { margin: 0; border: 1px dashed #ffffff2b; border-radius: 12px; padding: 14px; color: #cbd5e1; }
 .communityHeader { display: grid; gap: 7px; margin: 20px 0; }
 .communityHeader .courseTitle { margin: 0; }
+.communitySubheading { margin: 28px 0 0; color: #f9a8d4; font-size: 1.05rem; letter-spacing: .16em; }
 .communityGroups { display: grid; gap: 12px; margin-top: 14px; }
 .communitySection { border: 1px solid #ffffff22; border-radius: 16px; background: #020617aa; overflow: hidden; }
 .communitySection summary { display: flex; justify-content: space-between; gap: 10px; padding: 15px 17px; color: #fff; font-weight: 950; letter-spacing: .08em; cursor: pointer; }

@@ -30,7 +30,11 @@ test("community route groups each player only at their highest completed level",
   assert.match(route, /getPublicCourseChallenges\(\)/)
   assert.match(route, /createCourseChallengesServiceClient\(\)/)
   assert.doesNotMatch(route, /createServerSupabaseClient\(\)/)
+  assert.match(route, /course\.aceStages \|\| \[\]/)
+  assert.doesNotMatch(route, /label: suffix === "course-pro" \? "Course Pro" : suffix === "ace-challenge"/)
   assert.match(page, /LEVEL \{group\.level\}/)
+  assert.match(page, /ACE TRACK/)
+  assert.match(page, /group\.kind === "ace"/)
   assert.match(page, /communityGrid/)
 })
 
