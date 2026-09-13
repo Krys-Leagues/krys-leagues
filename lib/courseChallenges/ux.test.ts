@@ -94,16 +94,21 @@ test("first-time intro is dismissible and Rules / Help remains available", () =>
   assert.doesNotMatch(landing, /heroCopy/)
 })
 
-test("landing page keeps the active course books and adds only a non-clickable Coming Soon placeholder", () => {
+test("landing page keeps the active course books and adds two non-clickable Coming Soon books", () => {
   const landing = read("components/course-challenges/CourseChallengesLanding.tsx")
   const styles = read("components/course-challenges/course-challenges.module.css")
   const courseListIndex = landing.indexOf("className={styles.courseList}")
   const comingSoonIndex = landing.indexOf("className={styles.comingSoon}")
   assert.ok(courseListIndex >= 0 && courseListIndex < comingSoonIndex)
   assert.match(landing, /<h2>COMING SOON<\/h2>/)
+  assert.match(landing, /80 DAYS AROUND THE WORLD/)
+  assert.match(landing, /WIDOW&apos;S WALKABOUT/)
+  assert.match(landing, /className=\{styles\.comingSoonBook\}/)
+  assert.match(landing, /className=\{styles\.comingSoonBadge\}/)
   assert.match(landing, /aria-label="Coming soon"/)
   assert.match(styles, /\.comingSoon \{/)
-  assert.doesNotMatch(landing, /80 Days Around the World|Widow’s Walkabout|Widow's Walkabout/)
+  assert.match(styles, /\.comingSoonGrid \{/)
+  assert.match(styles, /@media \(max-width: 720px\)/)
 })
 
 test("Tourist Trap book uses full-page scenery and starts with Rules / Help", () => {

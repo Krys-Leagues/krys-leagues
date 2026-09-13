@@ -88,6 +88,18 @@ export default function CourseChallengesLanding({ courses }: { courses: CourseCh
       </section>
       <section className={styles.comingSoon} aria-label="Coming soon">
         <h2>COMING SOON</h2>
+        <div className={styles.comingSoonGrid}>
+          <article className={styles.comingSoonBook} aria-label="80 Days Around the World coming soon">
+            <span className={styles.comingSoonBookKicker}>COURSE CHALLENGE BOOK</span>
+            <h3>80 DAYS AROUND THE WORLD</h3>
+            <span className={styles.comingSoonBadge}>COMING SOON</span>
+          </article>
+          <article className={styles.comingSoonBook} aria-label="Widow’s Walkabout coming soon">
+            <span className={styles.comingSoonBookKicker}>COURSE CHALLENGE BOOK</span>
+            <h3>WIDOW&apos;S WALKABOUT</h3>
+            <span className={styles.comingSoonBadge}>COMING SOON</span>
+          </article>
+        </div>
       </section>
       <div className={styles.buttonRow}>
         <button type="button" className={styles.secondaryButton} onClick={() => setShowRules(true)}>Rules / Help</button>
