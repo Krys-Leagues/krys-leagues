@@ -55,7 +55,7 @@
 .challengeCallout { color: #f9a8d4; font-size: 1.2rem; font-weight: 950; letter-spacing: .08em; }
 .rewardOrder strong { color: #fde68a; }
 .pageHeader { display: grid; gap: 14px; margin: 18px 0 20px; }
-.book { display: grid; gap: 18px; }
+.book { display: grid; gap: 18px; container-type: inline-size; }
 .bookStage { position: relative; min-height: 520px; perspective: 1400px; }
 .bookPages { position: relative; z-index: 1; opacity: 0; visibility: hidden; transform: translateY(14px); border: 1px solid #f8fafc2b; border-radius: 28px; padding: 12px; background: linear-gradient(90deg, #172554ee, #0f172af0 48%, #172554ee); box-shadow: 0 28px 80px #0008, inset 0 0 0 1px #f9a8d41c; }
 .bookCover { position: absolute; inset: 0; z-index: 2; display: grid; place-content: center; justify-items: center; gap: 12px; min-height: 520px; border: 1px solid #ffffff35; border-radius: 22px; padding: 36px; background-position: center; background-size: cover; box-shadow: 0 30px 90px #000b, inset 0 0 0 1px #f9a8d433; color: #fff; font: inherit; text-align: center; cursor: pointer; transform-origin: left center; backface-visibility: hidden; }
@@ -69,7 +69,10 @@
 @keyframes bookCoverOpen { 0% { opacity: 1; transform: rotateY(0) translateX(0); } 72% { opacity: 1; transform: rotateY(-78deg) translateX(-2%); } 100% { opacity: 0; transform: rotateY(-102deg) translateX(-5%); } }
 @keyframes bookPagesReveal { 0% { opacity: .2; clip-path: inset(0 50% 0 50%); transform: translateY(14px); } 100% { opacity: 1; clip-path: inset(0); transform: translateY(0); } }
 .bookSpread { position: relative; display: grid; grid-template-columns: minmax(260px, .8fr) minmax(0, 1.6fr); gap: 18px; align-items: start; }
-.bookSpread::after { content: ""; position: absolute; z-index: 3; top: 10px; bottom: 10px; left: 50%; width: 12px; transform: translateX(-50%); border-left: 1px solid #0008; border-right: 1px solid #f8fafc2b; border-radius: 50%; background: linear-gradient(90deg, #020617aa, #f8fafc2b, #020617aa); box-shadow: 0 0 14px #020617aa; pointer-events: none; }
+.bookSpread::after { display: none; content: ""; position: absolute; z-index: 3; top: 10px; bottom: 10px; left: calc((100% - 18px) / 3 + 9px); width: 8px; transform: translateX(-50%); border-left: 1px solid #0008; border-right: 1px solid #f8fafc2b; border-radius: 50%; background: linear-gradient(90deg, #020617aa, #f8fafc2b, #020617aa); box-shadow: 0 0 10px #020617aa; pointer-events: none; }
+@container (min-width: 1040px) {
+  .bookSpread::after { display: block; }
+}
 .rewardPage, .challengePage { display: grid; gap: 18px; min-width: 0; border: 1px solid #ffffff22; border-radius: 22px; padding: 22px; background: linear-gradient(145deg, #111827e8, #020617e8); box-shadow: 0 20px 60px #0004; }
 .rewardPage { background: linear-gradient(145deg, #172554e8, #020617e8); }
 .bookPageHeading { display: grid; gap: 6px; }
