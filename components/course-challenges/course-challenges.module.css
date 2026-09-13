@@ -42,11 +42,8 @@
 .courseCardContent h2, .courseCardContent p { margin: 0; }
 .courseCardContent h2 { font-size: clamp(1.6rem, 4vw, 2.5rem); }
 .courseCardContent p { max-width: 560px; color: #dbeafe; line-height: 1.55; }
-.courseBookChoice { position: relative; z-index: 2; display: grid; align-content: space-between; gap: 9px; min-height: 198px; padding: 20px; border: 1px solid #ffffff35; border-radius: 16px; color: #fff; text-decoration: none; background: linear-gradient(135deg, #020617d9, #172554b8 56%, #064e3b8a); box-shadow: inset 0 0 0 1px #f9a8d433, 0 18px 35px #0005; transform-origin: left center; }
-.bookChoiceKicker { color: #86efac; font-size: .7rem; font-weight: 950; letter-spacing: .16em; }
+.courseBookChoice { position: relative; z-index: 2; display: grid; align-content: center; justify-items: center; min-height: 198px; padding: 20px; border: 1px solid #ffffff35; border-radius: 16px; color: #fff; text-align: center; text-decoration: none; background: linear-gradient(135deg, #020617d9, #172554b8 56%, #064e3b8a); box-shadow: inset 0 0 0 1px #f9a8d433, 0 18px 35px #0005; transform-origin: left center; }
 .courseBookChoice h2 { margin: 0; color: #fff; font-size: clamp(1.55rem, 4vw, 2.25rem); letter-spacing: .02em; text-shadow: 0 3px 18px #000c; }
-.bookChoiceDescription { color: #dbeafe; line-height: 1.4; }
-.bookChoiceHint { color: #f9a8d4; font-size: .9rem; font-weight: 900; }
 .courseBookChoice:focus-visible { outline: 3px solid #f9a8d4; outline-offset: 4px; }
 .courseCard[data-book-opening="true"] { z-index: 5; }
 .courseCard[data-book-opening="true"]::before { animation: landingBookPages 900ms ease-in forwards; }

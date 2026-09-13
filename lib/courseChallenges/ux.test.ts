@@ -12,6 +12,8 @@ test("Course Challenges opens on the approved welcome experience and direct cour
   assert.match(landing, /data-book-opening=\{openingCourse === course\.slug \? "true" : undefined\}/)
   assert.match(landing, /router\.push/)
   assert.match(landing, /\?open=1/)
+  assert.doesNotMatch(landing, /course\.shortDescription/)
+  assert.doesNotMatch(landing, /Choose this book/)
   assert.doesNotMatch(landing, /Open \{course\.name\} Book/)
 })
 

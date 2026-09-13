@@ -80,10 +80,7 @@ export default function CourseChallengesLanding({ courses }: { courses: CourseCh
           <div className={styles.courseCardBackdrop} style={course.backgroundImage ? { backgroundImage: `url("${course.backgroundImage}")` } : undefined} aria-hidden="true" />
           <div className={styles.courseCardContent}>
             <Link href={`/course-challenges/${course.slug}`} className={styles.courseBookChoice} aria-label={`Choose ${course.name} course book`} aria-busy={openingCourse === course.slug} onClick={(event) => beginCourseOpening(event, course.slug)}>
-              <span className={styles.bookChoiceKicker}>COURSE CHALLENGE BOOK</span>
               <h2 className={styles.courseNameLink}>{course.name}</h2>
-              <span className={styles.bookChoiceDescription}>{course.shortDescription}</span>
-              <span className={styles.bookChoiceHint}>{openingCourse === course.slug ? "Opening…" : "Choose this book →"}</span>
             </Link>
             <div className={styles.courseCardActions}><Link href={`/course-challenges/${course.slug}/community`} className={styles.communityLink}>Meet the challengers →</Link></div>
           </div>
