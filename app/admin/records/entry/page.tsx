@@ -33,28 +33,53 @@ export default function NormalRecordsEntryPage() {
   const [scoreText, setScoreText] = useState(""), [holes, setHoles] = useState<string[]>(emptyHoles)
   const [source, setSource] = useState(""), [reference, setReference] = useState(""), [notes, setNotes] = useState("")
   const [best, setBest] = useState<Best | null>(null), [courseBests, setCourseBests] = useState<Best[]>([]), [bestLoading, setBestLoading] = useState(false)
-  const [season, setSeason] = useState<Season | null>(null), [previousSeason, setPreviousSeason] = useState<Season | null>(null), [twoPeriodsAgoSeason, setTwoPeriodsAgoSeason] = useState<Season | null>(null), [loading, setLoading] = useState(true), [busy, setBusy] = useState(false), [message, setMessage] = useState(""), [error, setError] = useState(""), [confirmed, setConfirmed] = useState(false), [previewFingerprint, setPreviewFingerprint] = useState(""), [periodPreview, setPeriodPreview] = useState<VerifiedPeriodPreview | null>(null), [sessionEntries, setSessionEntries] = useState<SessionEntry[]>([]), [finished, setFinished] = useState(false)
+  const [season, setSeason] = useState<Season | null>(null), [previousSeason, setPreviousSeason] = useState<Season | null>(null), [twoPeriodsAgoSeason, setTwoPeriodsAgoSeason] = useState<Season | null>(null), [loading, setLoading] = useState(true), [playerLoading, setPlayerLoading] = useState(true), [busy, setBusy] = useState(false), [message, setMessage] = useState(""), [error, setError] = useState(""), [confirmed, setConfirmed] = useState(false), [previewFingerprint, setPreviewFingerprint] = useState(""), [periodPreview, setPeriodPreview] = useState<VerifiedPeriodPreview | null>(null), [sessionEntries, setSessionEntries] = useState<SessionEntry[]>([]), [finished, setFinished] = useState(false)
   const nextActionRef = useRef<HTMLButtonElement>(null), entryKeyRef = useRef(crypto.randomUUID())
 
   useEffect(() => {
     void (async () => {
-      const [courseResult, playerResult, seasonResult] = await Promise.all([
+      const [courseResult, seasonResult] = await Promise.all([
         supabase.from("all_time_courses").select("id,code,display_name,difficulty,par,hole_pars").eq("active", true).in("difficulty", ["Easy", "Hard"]).order("display_name"),
-        supabase.from("players").select("id,screen_name").eq("active", true).order("screen_name"),
         supabase.from("climbers_seasons").select("id,starts_at,ends_at,status").neq("status", "upcoming").order("starts_at", { ascending: false }),
       ])
-      const queryError = courseResult.error || playerResult.error
-      if (queryError) setError(queryError.message)
+      if (courseResult.error) setError(courseResult.error.message)
       const seasons = (seasonResult.data ?? []) as Season[], now = Date.now()
       const current = seasons.find((item) => item.status === "active" && new Date(item.starts_at).getTime() <= now && new Date(item.ends_at).getTime() > now) ?? null
       const completed = seasons.filter((item) => new Date(item.ends_at).getTime() <= now).sort((a, b) => new Date(b.ends_at).getTime() - new Date(a.ends_at).getTime())
-      setCourses((courseResult.data ?? []) as Course[]); setPlayers((playerResult.data ?? []) as Player[]); setSeason(current); setPreviousSeason(completed[0] ?? null); setTwoPeriodsAgoSeason(completed[1] ?? null); setLoading(false)
+      setCourses((courseResult.data ?? []) as Course[]); setSeason(current); setPreviousSeason(completed[0] ?? null); setTwoPeriodsAgoSeason(completed[1] ?? null); setLoading(false)
     })()
   }, [])
 
+  useEffect(() => {
+    let cancelled = false
+    const timer = window.setTimeout(() => {
+      void (async () => {
+        setPlayerLoading(true)
+        try {
+          const response = await fetch(`/api/admin/records/player-search?q=${encodeURIComponent(playerSearch)}`, { cache: "no-store" })
+          const payload = await response.json() as { players?: Player[]; error?: string }
+          if (!response.ok) throw new Error(payload.error || "Global Players could not be loaded.")
+          if (!cancelled) setPlayers(Array.isArray(payload.players) ? payload.players : [])
+        } catch (caught) {
+          if (!cancelled) {
+            setPlayers([])
+            setError(errorMessage(caught, "Global Players could not be loaded."))
+          }
+        } finally {
+          if (!cancelled) setPlayerLoading(false)
+        }
+      })()
+    }, 150)
+
+    return () => {
+      cancelled = true
+      window.clearTimeout(timer)
+    }
+  }, [playerSearch])
+
   const course = courses.find((item) => item.id === courseId) ?? null
   const player = players.find((item) => item.id === playerId) ?? null
-  const filteredPlayers = useMemo(() => { const query = playerSearch.trim().toLowerCase(); return query ? players.filter((item) => item.screen_name.toLowerCase().includes(query)) : players }, [playerSearch, players])
+  const filteredPlayers = useMemo(() => players, [players])
   const holePars = validHolePars(course) ? course.hole_pars : []
   const parsedHoles = holes.map(parsePositiveHoleScore)
   const fullStats: FullCardStats | null = entryType === "full_card" && parsedHoles.every((value): value is number => value !== null) && holePars.length === 18 ? (() => { const result = deriveFullCardStats(parsedHoles, holePars); return "error" in result ? null : result })() : null
@@ -176,7 +201,7 @@ export default function NormalRecordsEntryPage() {
         <label className={styles.field}>Climbers period<select className={styles.select} value={period} onChange={(event) => { setPeriod(event.target.value as Period); invalidatePreview() }}><option value="current">CURRENT PERIOD — DEFAULT</option><option value="previous">PREVIOUS PERIOD{previousSeason ? "" : " — UNAVAILABLE"}</option><option value="two_periods_ago">TWO PERIODS AGO{twoPeriodsAgoSeason ? "" : " — UNAVAILABLE"}</option></select></label>
         <label className={styles.field}>Course<select className={styles.select} value={courseId} onChange={(event) => { setCourseId(event.target.value); setBest(null); setCourseBests([]); setHoles(emptyHoles()); setScoreText(""); invalidatePreview() }}><option value="">Choose an Easy/Hard course</option>{courses.map((item) => <option key={item.id} value={item.id}>{item.display_name} · {item.difficulty} · {item.code}</option>)}</select></label>
         <label className={styles.field}>Search Global Players<input className={styles.input} value={playerSearch} onChange={(event) => setPlayerSearch(event.target.value)} placeholder="Filter canonical players" aria-label="Search canonical Global Players" /></label>
-        <label className={styles.field}>Canonical Global Player<select className={styles.select} value={playerId} onChange={(event) => { setPlayerId(event.target.value); setBest(null); setCourseBests([]); invalidatePreview() }} aria-label="Canonical Global Player"><option value="">Choose one player</option>{filteredPlayers.map((item) => <option key={item.id} value={item.id}>{item.screen_name}</option>)}</select></label>
+        <label className={styles.field}>Canonical Global Player<select className={styles.select} value={playerId} onChange={(event) => { setPlayerId(event.target.value); setBest(null); setCourseBests([]); invalidatePreview() }} aria-label="Canonical Global Player"><option value="">{playerLoading ? "Loading canonical Global Players…" : "Choose one player"}</option>{filteredPlayers.map((item) => <option key={item.id} value={item.id}>{item.screen_name}</option>)}</select></label>
       </div>
       <div className="mt-5 grid gap-4 md:grid-cols-3"><label className={styles.field}>Entry method<select className={styles.select} value={entryType} onChange={(event) => { setEntryType(event.target.value as NormalEntryType); invalidatePreview() }}><option value="full_card">18-hole scorecard</option><option value="quick_score">Quick Score</option></select></label><label className={styles.field}>Source / provenance<input className={styles.input} value={source} onChange={(event) => { setSource(event.target.value); invalidatePreview() }} /></label><label className={styles.field}>Reference<input className={styles.input} value={reference} onChange={(event) => { setReference(event.target.value); invalidatePreview() }} placeholder="URL, message, or source row" /></label><label className={`${styles.field} md:col-span-3`}>Notes<textarea className={styles.textarea} value={notes} onChange={(event) => { setNotes(event.target.value); invalidatePreview() }} /></label></div>
       {course && <p className={styles.sectionKicker}>Selected {course.difficulty} · authoritative total par: {course.par ?? "not loaded"}. Selecting data is read-only and never creates an observation, PB, season, or Climbers event.</p>}
