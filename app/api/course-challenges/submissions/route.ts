@@ -1,4 +1,4 @@
-import { getCourseChallenge, getCourseChallengeLevel, isAceChallengeUnlocked } from "@/lib/courseChallenges/catalog"
+import { getCourseChallenge, getCourseChallengeLevel, getPrestigeStage, isAceChallengeUnlocked, isRegularTrackComplete } from "@/lib/courseChallenges/catalog"
 import { aceProgress, uniqueAceHoleNumbers, type AceSubmissionRecord } from "@/lib/courseChallenges/ace"
 import { compareEnteredFinalScore, evaluateCourseChallengeRequirements, validHoleScores, validHolePars } from "@/lib/courseChallenges/evaluation"
 import { eligibleRoundDate, audienceForCanonicalPlayer } from "@/lib/courseChallenges/release"
@@ -12,20 +12,33 @@ export async function POST(request: Request) {
   try {
     const identity = await getCourseChallengeIdentity()
     if (!identity) return Response.json({ error: "A canonical Krys Leagues player identity is required for Course Challenge submissions." }, { status: 401 })
-    const body = await request.json() as Partial<CourseChallengeSubmissionPayload> & { aceStage?: number }
+    const body = await request.json() as Partial<CourseChallengeSubmissionPayload> & { aceStage?: number; prestigeStage?: number }
     const course = typeof body.courseSlug === "string" ? getCourseChallenge(body.courseSlug) : null
-    const challengeKey = body.challengeKey === "ace" ? "ace" : "level"
+    const challengeKey = body.challengeKey === "ace" ? "ace" : body.challengeKey === "prestige" ? "prestige" : "level"
     const requestedLevel = typeof body.level === "number" ? body.level : Number(body.level)
     const difficulty = body.difficulty as CourseChallengeDifficulty
     const currentLevel = course && challengeKey === "level" ? getCourseChallengeLevel(course, requestedLevel) : null
-    if (!course || course.status !== "live" || !["Easy", "Hard"].includes(difficulty) || (challengeKey === "level" && !currentLevel) || (challengeKey === "ace" && !course.aceStages?.length)) return Response.json({ error: "Course Challenge course, challenge, Level, or difficulty is invalid." }, { status: 400 })
-    const level = challengeKey === "ace" ? (typeof body.aceStage === "number" ? body.aceStage : Number(body.aceStage)) : requestedLevel
+    const requestedAceStage = typeof body.aceStage === "number" ? body.aceStage : Number(body.aceStage)
+    const requestedPrestigeStage = typeof body.prestigeStage === "number" ? body.prestigeStage : Number(body.prestigeStage)
+    const aceStage = course && challengeKey === "ace" ? course.aceStages?.find((stage) => stage.stage === requestedAceStage) || null : null
+    const prestigeStage = course && challengeKey === "prestige" ? getPrestigeStage(course, requestedPrestigeStage) : null
+    if (!course || course.status !== "live" || !["Easy", "Hard"].includes(difficulty) || (challengeKey === "level" && !currentLevel) || (challengeKey === "ace" && !aceStage) || (challengeKey === "prestige" && !prestigeStage)) return Response.json({ error: "Course Challenge course, challenge, Level, or difficulty is invalid." }, { status: 400 })
+    const level = challengeKey === "ace" ? requestedAceStage : challengeKey === "prestige" ? requestedPrestigeStage : requestedLevel
     const service = createCourseChallengesServiceClient()
     const profile = await service.from("course_challenge_progress").select("level_number,completed_at").eq("player_id", identity.playerId).eq("course_slug", course.slug).order("level_number", { ascending: true })
     if (profile.error) throw profile.error
     const completedLevels = (profile.data || []).filter((row) => row.completed_at).map((row) => Number(row.level_number))
     if (challengeKey === "level" && level > 1 && !completedLevels.includes(level - 1)) return Response.json({ error: "Complete both sides of the previous Level before submitting this one." }, { status: 409 })
     if (challengeKey === "ace" && !isAceChallengeUnlocked(course, completedLevels)) return Response.json({ error: "The Ace Track is unavailable for this course." }, { status: 409 })
+    if (challengeKey === "prestige") {
+      if (requestedPrestigeStage === 1 && !isRegularTrackComplete(completedLevels)) return Response.json({ error: "Complete Levels 1–5 before submitting Course Pro." }, { status: 409 })
+      if (requestedPrestigeStage > 1) {
+        const prestigeProgress = await service.from("course_challenge_prestige_progress").select("stage_number,completed_at").eq("player_id", identity.playerId).eq("course_slug", course.slug)
+        if (prestigeProgress.error) throw prestigeProgress.error
+        const completedStages = (prestigeProgress.data || []).filter((row) => row.completed_at).map((row) => Number(row.stage_number))
+        if (!completedStages.includes(requestedPrestigeStage - 1)) return Response.json({ error: "Complete Course Pro before submitting Course Master." }, { status: 409 })
+      }
+    }
     if (typeof body.proofPhotoPath !== "string" || !body.proofPhotoPath.startsWith(identity.user.id + "/")) return Response.json({ error: "A proof scorecard photo is required." }, { status: 400 })
     if (!Array.isArray(body.scores) || !validHoleScores(body.scores)) return Response.json({ error: "Enter all 18 positive whole-number hole scores." }, { status: 400 })
 
@@ -45,10 +58,10 @@ export async function POST(request: Request) {
     if (approvedAce.error) throw approvedAce.error
     const aceRows = (approvedAce.data || []) as AceSubmissionRecord[]
     const aceState = challengeKey === "ace" ? aceProgress(course, aceRows) : null
-    const aceStage = aceState?.nextStage || null
-    if (challengeKey === "ace" && (!aceStage || (body.aceStage !== undefined && Number(body.aceStage) !== aceStage.stage))) return Response.json({ error: "Submit the currently open Ace Track stage." }, { status: 409 })
-    const requirements = challengeKey === "ace" ? (difficulty === "Easy" ? aceStage?.easyRequirements : aceStage?.hardRequirements) : (difficulty === "Easy" ? currentLevel?.easyRequirements : currentLevel?.hardRequirements)
-    const requirementsStatus = challengeKey === "ace" ? aceStage?.requirementsStatus : currentLevel?.requirementsStatus
+    const currentAceStage = aceState?.nextStage || null
+    if (challengeKey === "ace" && (!currentAceStage || (body.aceStage !== undefined && Number(body.aceStage) !== currentAceStage.stage))) return Response.json({ error: "Submit the currently open Ace Track stage." }, { status: 409 })
+    const requirements = challengeKey === "ace" ? (difficulty === "Easy" ? currentAceStage?.easyRequirements : currentAceStage?.hardRequirements) : challengeKey === "prestige" ? (difficulty === "Easy" ? prestigeStage?.easyRequirements : prestigeStage?.hardRequirements) : (difficulty === "Easy" ? currentLevel?.easyRequirements : currentLevel?.hardRequirements)
+    const requirementsStatus = challengeKey === "ace" ? currentAceStage?.requirementsStatus : challengeKey === "prestige" ? prestigeStage?.requirementsStatus : currentLevel?.requirementsStatus
     const combinedAceHoles = challengeKey === "ace" ? uniqueAceHoleNumbers(aceRows, body.scores) : []
     if (challengeKey === "ace" && combinedAceHoles.length <= (aceState?.uniqueHoles.length || 0)) return Response.json({ error: "This Ace scorecard must add at least one new unique ace hole." }, { status: 409 })
     const evaluation = evaluateCourseChallengeRequirements(body.scores, pars || [], requirements || [], requirementsStatus || "pending_review", challengeKey === "ace" ? { uniqueAceHoles: combinedAceHoles.length } : undefined)
@@ -61,7 +74,7 @@ export async function POST(request: Request) {
     ].filter((reason): reason is string => Boolean(reason))
     const proofImageSha256 = await proofHash(service, body.proofPhotoPath)
     const status = "needs_review"
-    const insert = await service.from("course_challenge_submissions").insert({ player_id: identity.playerId, course_slug: course.slug, challenge_key: challengeKey, level_number: level, difficulty, proof_photo_path: body.proofPhotoPath, round_date: body.roundDate || null, round_time: body.roundTime || null, game_mode: null, proof_image_sha256: proofImageSha256, hole_scores: body.scores, calculated_total: evaluation.metrics.totalStrokes, total_par: evaluation.metrics.totalPar, relative_to_par: evaluation.metrics.relativeToPar, entered_final_score: enteredFinalScore, final_score_check: finalScoreCheck, metrics: evaluation.metrics, requirements_evaluation: evaluation.requirements, auto_evaluation_status: evaluation.status, photo_total_check: "needs_review", status, review_reason: reviewReasons.join(" ") || "The evidence photo and challenge requirements require review." }).select("id,status").single()
+    const insert = await service.from("course_challenge_submissions").insert({ player_id: identity.playerId, course_slug: course.slug, challenge_key: challengeKey, level_number: level, ace_stage_number: challengeKey === "ace" ? requestedAceStage : null, prestige_stage_number: challengeKey === "prestige" ? requestedPrestigeStage : null, difficulty, proof_photo_path: body.proofPhotoPath, round_date: body.roundDate || null, round_time: body.roundTime || null, game_mode: null, proof_image_sha256: proofImageSha256, hole_scores: body.scores, calculated_total: evaluation.metrics.totalStrokes, total_par: evaluation.metrics.totalPar, relative_to_par: evaluation.metrics.relativeToPar, entered_final_score: enteredFinalScore, final_score_check: finalScoreCheck, metrics: evaluation.metrics, requirements_evaluation: evaluation.requirements, auto_evaluation_status: evaluation.status, photo_total_check: "needs_review", status, review_reason: reviewReasons.join(" ") || "The evidence photo and challenge requirements require review." }).select("id,status").single()
     if (insert.error) throw insert.error
     await service.from("course_challenge_submission_review_events").insert({ submission_id: insert.data?.id, action: "submitted", from_status: null, to_status: status, metadata: { source: "player_submission" } })
     await notifyCourseChallengeReview(service, String(insert.data?.id), course.name, level, difficulty)

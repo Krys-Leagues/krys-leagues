@@ -3,10 +3,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 
 type ReviewEvent = { id: string; action: string; from_status: string | null; to_status: string; reviewer_id: string | null; notes: string | null; created_at: string }
-type PastCard = { id: string; challengeKey: "level" | "ace"; level: number; difficulty: string; status: string; proofPhotoUrl: string | null; calculatedTotal: number; relativeToPar: number; createdAt: string }
+type PastCard = { id: string; challengeKey: "level" | "ace" | "prestige"; level: number; aceStage?: number | null; prestigeStage?: number | null; difficulty: string; status: string; proofPhotoUrl: string | null; calculatedTotal: number; relativeToPar: number; createdAt: string }
 type Requirement = { requirement?: { label?: string }; status?: string; passed?: boolean | null; reason?: string }
 type Submission = {
-  id: string; playerId: string; isOwnSubmission: boolean; playerName: string; courseSlug: string; courseName: string; challengeKey: "level" | "ace"; level: number; difficulty: "Easy" | "Hard";
+  id: string; playerId: string; isOwnSubmission: boolean; playerName: string; courseSlug: string; courseName: string; challengeKey: "level" | "ace" | "prestige"; level: number; aceStage?: number | null; aceLabel?: string | null; prestigeStage?: number | null; prestigeLabel?: string | null; difficulty: "Easy" | "Hard";
   proofPhotoUrl: string | null; holeScores: number[]; pars: number[] | null; calculatedTotal: number; relativeToPar: number; requirements: Requirement[]; status: string;
   reviewReason: string | null; reviewNotes: string | null; roundDate: string | null; roundTime: string | null; gameMode: string | null; adminVerifiedGameMode: string | null;
   enteredFinalScore: number | null; finalScoreCheck: string | null; createdAt: string | null; possibleDuplicate: boolean; pastCards: PastCard[]; reviewEvents: ReviewEvent[];
@@ -42,7 +42,7 @@ export default function CourseChallengeReviewQueue({ includeRejected = false, re
   }, [load])
 
   async function review(submission: Submission, action: "approve" | "reject" | "return_to_review") {
-    const mode = submission.level <= 2 && submission.challengeKey !== "ace" ? modes[submission.id] : "multiplayer"
+    const mode = submission.level <= 2 && submission.challengeKey === "level" ? modes[submission.id] : "multiplayer"
     if (action === "approve" && !mode) { setMessage("Select verified Solo or Multiplayer before approving this Level 1 or 2 card."); return }
     setBusyId(submission.id)
     const response = await fetch("/api/admin/course-challenges", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: submission.id, action, gameMode: mode }) })
@@ -65,9 +65,10 @@ export default function CourseChallengeReviewQueue({ includeRejected = false, re
 }
 
 function ReviewCard({ submission, mode, setMode, busy, onReview, onPreview }: { submission: Submission; mode?: "solo" | "multiplayer"; setMode: (value: "solo" | "multiplayer") => void; busy: boolean; onReview: (submission: Submission, action: "approve" | "reject" | "return_to_review") => Promise<void>; onPreview: (preview: { url: string; label: string }) => void }) {
-  const lockedMode = submission.level >= 3 || submission.challengeKey === "ace"
+  const lockedMode = submission.level >= 3 || submission.challengeKey !== "level"
+  const stageLabel = submission.challengeKey === "ace" ? submission.aceLabel || "Ace Track" : submission.challengeKey === "prestige" ? submission.prestigeLabel || "Prestige" : `Level ${submission.level}`
   return <article style={card}>
-    <header style={header}><div><h3 style={{ margin: 0 }}>{submission.playerName} · {submission.courseName}</h3><p style={muted}>{submission.challengeKey === "ace" ? "Ace Challenge" : `Level ${submission.level}`} · {submission.difficulty} · {submission.status.toUpperCase()}</p></div><strong style={{ color: submission.status === "rejected" ? "#fca5a5" : "#fde68a" }}>{submission.status}</strong></header>
+    <header style={header}><div><h3 style={{ margin: 0 }}>{submission.playerName} · {submission.courseName}</h3><p style={muted}>{stageLabel} · {submission.difficulty} · {submission.status.toUpperCase()}</p></div><strong style={{ color: submission.status === "rejected" ? "#fca5a5" : "#fde68a" }}>{submission.status}</strong></header>
     {submission.possibleDuplicate && <p style={warning}>POSSIBLE DUPLICATE CARD — THIS IMAGE WAS PREVIOUSLY SUBMITTED.</p>}
     {submission.proofPhotoUrl && <button type="button" onClick={() => onPreview({ url: submission.proofPhotoUrl || "", label: "Private scorecard evidence" })} style={proofButton}><img src={submission.proofPhotoUrl} alt="Private scorecard evidence thumbnail" style={{ maxWidth: "100%", maxHeight: 340, objectFit: "contain", background: "#020617" }} /><span>Open original private proof</span></button>}
     <p style={muted}>Submitted {submission.createdAt ? new Date(submission.createdAt).toLocaleString() : "—"} · Round date/time: {submission.roundDate || "needs review"} {submission.roundTime || "needs review"}</p>
@@ -78,7 +79,7 @@ function ReviewCard({ submission, mode, setMode, busy, onReview, onPreview }: { 
     <p style={muted}>Stored Game Mode: {submission.gameMode || "not supplied by player"} · Admin verified: {submission.adminVerifiedGameMode || "not verified"}</p>
     <PastCards submission={submission} onPreview={onPreview} />
     {submission.status === "rejected" ? <button type="button" disabled={busy} onClick={() => void onReview(submission, "return_to_review")} style={buttonStyle("#92400e")}>RETURN TO REVIEW</button> : <div style={{ display: "grid", gap: 10 }}>
-      {!lockedMode ? <fieldset style={modeFieldset}><legend>Verified Game Mode</legend><label><input type="radio" name={`mode-${submission.id}`} checked={mode === "solo"} onChange={() => setMode("solo")} /> SOLO</label><label><input type="radio" name={`mode-${submission.id}`} checked={mode === "multiplayer"} onChange={() => setMode("multiplayer")} /> MULTIPLAYER</label></fieldset> : <p style={modeNote}>MULTIPLAYER proof required for Level 3–5 and Ace Challenge.</p>}
+      {!lockedMode ? <fieldset style={modeFieldset}><legend>Verified Game Mode</legend><label><input type="radio" name={`mode-${submission.id}`} checked={mode === "solo"} onChange={() => setMode("solo")} /> SOLO</label><label><input type="radio" name={`mode-${submission.id}`} checked={mode === "multiplayer"} onChange={() => setMode("multiplayer")} /> MULTIPLAYER</label></fieldset> : <p style={modeNote}>MULTIPLAYER proof required for Level 3–5, Course Pro, Course Master, and Ace.</p>}
       {submission.isOwnSubmission && <p style={selfApprovalWarning}>You cannot approve your own Course Challenge submission.</p>}
       <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}><button type="button" disabled={busy || submission.isOwnSubmission || (submission.level <= 2 && !mode)} onClick={() => void onReview(submission, "approve")} style={buttonStyle("#047857")}>APPROVE</button><button type="button" disabled={busy} onClick={() => void onReview(submission, "reject")} style={buttonStyle("#991b1b")}>REJECT</button></div>
     </div>}
@@ -87,7 +88,7 @@ function ReviewCard({ submission, mode, setMode, busy, onReview, onPreview }: { 
 }
 
 function PastCards({ submission, onPreview }: { submission: Submission; onPreview: (preview: { url: string; label: string }) => void }) {
-  return <details style={pastCards}><summary>PAST CARDS ({submission.pastCards.length})</summary>{submission.pastCards.length === 0 ? <p style={muted}>No previous card for this player and course.</p> : <div style={pastGrid}>{submission.pastCards.map((card) => <div key={card.id} style={pastCard}>{card.proofPhotoUrl ? <button type="button" onClick={() => onPreview({ url: card.proofPhotoUrl || "", label: "Private past scorecard evidence" })} style={thumbButton}><img src={card.proofPhotoUrl} alt="Private past scorecard thumbnail" style={thumbnail} /></button> : <span style={thumbnailPlaceholder}>No proof</span>}<strong>{card.challengeKey === "ace" ? "Ace" : `L${card.level}`} · {card.difficulty}</strong><span>{card.status} · {formatScore(card.relativeToPar)}</span><small>{new Date(card.createdAt).toLocaleString()}</small></div>)}</div>}</details>
+  return <details style={pastCards}><summary>PAST CARDS ({submission.pastCards.length})</summary>{submission.pastCards.length === 0 ? <p style={muted}>No previous card for this player and course.</p> : <div style={pastGrid}>{submission.pastCards.map((card) => <div key={card.id} style={pastCard}>{card.proofPhotoUrl ? <button type="button" onClick={() => onPreview({ url: card.proofPhotoUrl || "", label: "Private past scorecard evidence" })} style={thumbButton}><img src={card.proofPhotoUrl} alt="Private past scorecard thumbnail" style={thumbnail} /></button> : <span style={thumbnailPlaceholder}>No proof</span>}<strong>{card.challengeKey === "ace" ? `Ace ${card.aceStage || ""}` : card.challengeKey === "prestige" ? `Prestige ${card.prestigeStage || ""}` : `L${card.level}`} · {card.difficulty}</strong><span>{card.status} · {formatScore(card.relativeToPar)}</span><small>{new Date(card.createdAt).toLocaleString()}</small></div>)}</div>}</details>
 }
 
 function formatScore(value: number | null | undefined) { if (value === null || value === undefined) return "—"; return value > 0 ? `+${value}` : String(value) }

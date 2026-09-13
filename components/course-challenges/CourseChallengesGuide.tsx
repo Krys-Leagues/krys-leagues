@@ -24,7 +24,8 @@ export default function CourseChallengesGuide({ includeScorecardHelp = false }: 
         <li>All requirements for one difficulty must come from the same 18-hole scorecard.</li>
         <li>Levels 1–2: Solo or Multiplayer Game Mode qualifies.</li>
         <li>Levels 3–5: Multiplayer Game Mode is required.</li>
-        <li>Ace Track: Multiplayer Game Mode is required. Practice Mode does not qualify.</li>
+        <li>Ace Track is available from Level 1 and progresses alongside Levels 1–5; verified Level scorecards may also count qualifying aces.</li>
+        <li>Ace progress is cumulative by unique holes: Wader 1, Chaser 3, Hunter 6, and Legend all 9. Practice Mode does not qualify.</li>
         <li>Upload the scorecard and enter H1–H18. The website checks the Level requirements automatically.</li>
         <li>Verified Easy + verified Hard completes the Level, earns the reward, and unlocks the next Level.</li>
       </ul>
@@ -42,7 +43,7 @@ export default function CourseChallengesGuide({ includeScorecardHelp = false }: 
 
     <section className={styles.guideSection}>
       <h3>ACE TRACK</h3>
-      <p>Your Ace Track is available from Level 1 and runs alongside your regular Level challenges.</p>
+      <p>Your Ace Track is available from Level 1 and runs alongside your regular Level challenges. You do not need a separate Ace-only card when a verified Level scorecard supplies qualifying aces.</p>
       <p>A verified Level scorecard can count toward both your Level challenge and your Ace Track at the same time.</p>
       <p>Ace progress is based on different holes you have aced:</p>
       <ul className={styles.guideList}>
@@ -52,6 +53,7 @@ export default function CourseChallengesGuide({ includeScorecardHelp = false }: 
         <li>Ace Legend — Ace all 9 different holes.</li>
       </ul>
       <p>A hole only counts once toward your unique-hole Ace progress, even if you ace it again later.</p>
+      <p>Ace cards follow the established Multiplayer review rule; admins verify the private proof and reject Practice Mode.</p>
     </section>
 
     <section className={styles.guideSection}>
@@ -61,7 +63,7 @@ export default function CourseChallengesGuide({ includeScorecardHelp = false }: 
 
     <section className={styles.guideSection}>
       <h3>COURSE PRO &amp; COURSE MASTER</h3>
-      <p>After you complete Levels 1–5, Course Pro and Course Master open as the advanced challenges in your Course Challenge Book.</p>
+      <p>After you complete Levels 1–5, Course Pro opens first. Course Master opens only after Course Pro is complete; neither reward is awarded early.</p>
       <p>Complete their established requirements to earn those rewards.</p>
     </section>
 

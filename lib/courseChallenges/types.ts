@@ -66,6 +66,18 @@ export type CourseChallengeAceStage = {
   requiresHard: boolean
 }
 
+export type CourseChallengePrestigeStage = {
+  stage: 1 | 2
+  key: "course-pro" | "course-master"
+  label: "Course Pro" | "Course Master"
+  easyRequirements: CourseChallengeRequirement[]
+  hardRequirements: CourseChallengeRequirement[]
+  requirementsStatus: RequirementsStatus
+  rewardKey: string
+  rewardAsset: string | null
+  requiresHard: true
+}
+
 export type CourseChallengeCourse = {
   slug: string
   name: string
@@ -78,6 +90,7 @@ export type CourseChallengeCourse = {
   levels: CourseChallengeLevel[]
   aceChallenge?: CourseChallengeAce
   aceStages?: CourseChallengeAceStage[]
+  prestigeStages?: CourseChallengePrestigeStage[]
   courseProAsset?: string | null
   courseMasterAsset?: string | null
 }
@@ -116,8 +129,9 @@ export type CourseChallengeSubmissionPayload = {
   courseSlug: string
   level: number
   difficulty: CourseChallengeDifficulty
-  challengeKey?: "level" | "ace"
+  challengeKey?: "level" | "ace" | "prestige"
   aceStage?: number
+  prestigeStage?: number
   proofPhotoPath: string
   scores: number[]
   finalScore: number

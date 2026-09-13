@@ -6,8 +6,6 @@ export function levelRewardDefinitions(course: CourseChallengeCourse, level: num
   return [
     { rewardKey: levelData.stickerKey, label: course.name + " Level " + level + " sticker", kind: "sticker", courseSlug: course.slug, level, assetPath: levelData.stickerAsset },
     ...(levelData.badgeKey ? [{ rewardKey: levelData.badgeKey, label: course.name + " Level " + level + " badge", kind: "badge" as const, courseSlug: course.slug, level, assetPath: levelData.badgeAsset }] : []),
-    ...(level === 3 ? [{ rewardKey: "course-challenge:" + course.slug + ":course-pro", label: "Course Pro", kind: "badge" as const, courseSlug: course.slug, level: null, assetPath: course.courseProAsset ?? null }] : []),
-    ...(level === 5 ? [{ rewardKey: "course-challenge:" + course.slug + ":course-master", label: "Course Master", kind: "badge" as const, courseSlug: course.slug, level: null, assetPath: course.courseMasterAsset ?? null }] : []),
   ]
 }
 
@@ -29,4 +27,9 @@ export function aceRewardDefinition(course: CourseChallengeCourse): CourseChalle
 
 export function aceStageRewardDefinitions(course: CourseChallengeCourse): CourseChallengeRewardDefinition[] {
   return (course.aceStages || []).map((stage) => ({ rewardKey: stage.rewardKey, label: course.name + " " + stage.label, kind: "badge" as const, courseSlug: course.slug, level: null, assetPath: stage.rewardAsset }))
+}
+
+export function prestigeStageRewardDefinitions(course: CourseChallengeCourse, stage: number): CourseChallengeRewardDefinition[] {
+  const prestige = course.prestigeStages?.find((item) => item.stage === stage)
+  return prestige ? [{ rewardKey: prestige.rewardKey, label: prestige.label, kind: "badge", courseSlug: course.slug, level: null, assetPath: prestige.rewardAsset }] : []
 }

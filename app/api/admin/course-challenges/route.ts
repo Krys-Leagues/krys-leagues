@@ -1,6 +1,7 @@
-import { getCourseChallenge } from "@/lib/courseChallenges/catalog"
-import { aceStageRewardDefinitions, levelRewardDefinitions } from "@/lib/courseChallenges/rewards"
+import { getAceStage, getCourseChallenge, getPrestigeStage } from "@/lib/courseChallenges/catalog"
+import { aceStageRewardDefinitions, levelRewardDefinitions, prestigeStageRewardDefinitions } from "@/lib/courseChallenges/rewards"
 import { aceProgress, type AceSubmissionRecord } from "@/lib/courseChallenges/ace"
+import { isEligibleGameMode } from "@/lib/courseChallenges/gameMode"
 import { createCourseChallengesServiceClient, requireCourseChallengeAdmin } from "@/lib/courseChallenges/server"
 import { createServerSupabaseClient } from "@/lib/supabase/server"
 import { sha256Hex } from "@/lib/all-time/normal-records"
@@ -22,7 +23,7 @@ export async function GET(request: Request) {
     const viewer = await sessionClient.rpc("current_user_canonical_player_id")
     if (viewer.error) throw viewer.error
     const viewerPlayerId = viewer.data ? String(viewer.data) : null
-    const { data: rows, error } = await service.from("course_challenge_submissions").select("id,player_id,course_slug,challenge_key,level_number,difficulty,proof_photo_path,proof_image_sha256,hole_scores,total_par,calculated_total,relative_to_par,entered_final_score,final_score_check,requirements_evaluation,status,review_reason,review_notes,round_date,round_time,game_mode,admin_verified_game_mode,created_at,reviewed_at,reviewed_by,all_time_processing_status,all_time_processing_result").in("status", statuses).order("created_at", { ascending: true })
+    const { data: rows, error } = await service.from("course_challenge_submissions").select("id,player_id,course_slug,challenge_key,level_number,ace_stage_number,prestige_stage_number,difficulty,proof_photo_path,proof_image_sha256,hole_scores,total_par,calculated_total,relative_to_par,entered_final_score,final_score_check,requirements_evaluation,status,review_reason,review_notes,round_date,round_time,game_mode,admin_verified_game_mode,created_at,reviewed_at,reviewed_by,all_time_processing_status,all_time_processing_result").in("status", statuses).order("created_at", { ascending: true })
     if (error) throw error
     const submissions = (rows || []) as Array<Record<string, unknown>>
     const playerIds = [...new Set(submissions.map((row) => String(row.player_id)))]
@@ -31,7 +32,10 @@ export async function GET(request: Request) {
     const playerNames = new Map((players.data || []).map((player) => [String(player.id), String(player.screen_name)]))
     const output = await Promise.all(submissions.map(async (row) => {
       const course = getCourseChallenge(String(row.course_slug))
-      const level = course?.levels.find((item) => item.level === Number(row.level_number))
+      const challengeKey = row.challenge_key === "ace" ? "ace" : row.challenge_key === "prestige" ? "prestige" : "level"
+      const aceStage = challengeKey === "ace" && course ? getAceStage(course, Number(row.ace_stage_number || row.level_number)) : null
+      const prestigeStage = challengeKey === "prestige" && course ? getPrestigeStage(course, Number(row.prestige_stage_number || row.level_number)) : null
+      const level = challengeKey === "level" ? course?.levels.find((item) => item.level === Number(row.level_number)) : null
       const code = row.difficulty === "Easy" ? (level?.easyCode || course?.easyCode) : (level?.hardCode || course?.hardCode)
       const pars = code ? await service.from("all_time_courses").select("hole_pars").eq("code", code).maybeSingle() : { data: null, error: null }
       if (pars.error) throw pars.error
@@ -41,7 +45,7 @@ export async function GET(request: Request) {
       if (duplicate.error) throw duplicate.error
       const events = await service.from("course_challenge_submission_review_events").select("id,action,from_status,to_status,reviewer_id,notes,created_at").eq("submission_id", String(row.id)).order("created_at", { ascending: true })
       if (events.error) throw events.error
-      return { id: String(row.id), playerId: String(row.player_id), isOwnSubmission: viewerPlayerId === String(row.player_id), playerName: playerNames.get(String(row.player_id)) || "Unknown player", courseSlug: String(row.course_slug), courseName: course?.name || String(row.course_slug), challengeKey: row.challenge_key === "ace" ? "ace" : "level", level: Number(row.level_number), difficulty: row.difficulty, proofPhotoUrl: signed.data?.signedUrl || null, holeScores: row.hole_scores as number[], pars: pars.data?.hole_pars as number[] | null, calculatedTotal: Number(row.calculated_total), relativeToPar: Number(row.relative_to_par), requirements: (row.requirements_evaluation || []) as Array<Record<string, unknown>>, status: String(row.status), reviewReason: row.review_reason ? String(row.review_reason) : null, reviewNotes: row.review_notes ? String(row.review_notes) : null, roundDate: row.round_date ? String(row.round_date) : null, roundTime: row.round_time ? String(row.round_time) : null, gameMode: row.game_mode ? String(row.game_mode) : null, adminVerifiedGameMode: row.admin_verified_game_mode ? String(row.admin_verified_game_mode) : null, enteredFinalScore: row.entered_final_score === null || row.entered_final_score === undefined ? null : Number(row.entered_final_score), finalScoreCheck: row.final_score_check ? String(row.final_score_check) : null, createdAt: row.created_at ? String(row.created_at) : null, possibleDuplicate: Boolean(duplicate.data), pastCards, reviewEvents: events.data || [], allTimeProcessingStatus: String(row.all_time_processing_status || "not_processed"), allTimeProcessingResult: row.all_time_processing_result || null }
+      return { id: String(row.id), playerId: String(row.player_id), isOwnSubmission: viewerPlayerId === String(row.player_id), playerName: playerNames.get(String(row.player_id)) || "Unknown player", courseSlug: String(row.course_slug), courseName: course?.name || String(row.course_slug), challengeKey, level: Number(row.level_number), aceStage: aceStage?.stage || null, aceLabel: aceStage?.label || null, prestigeStage: prestigeStage?.stage || null, prestigeLabel: prestigeStage?.label || null, difficulty: row.difficulty, proofPhotoUrl: signed.data?.signedUrl || null, holeScores: row.hole_scores as number[], pars: pars.data?.hole_pars as number[] | null, calculatedTotal: Number(row.calculated_total), relativeToPar: Number(row.relative_to_par), requirements: (row.requirements_evaluation || []) as Array<Record<string, unknown>>, status: String(row.status), reviewReason: row.review_reason ? String(row.review_reason) : null, reviewNotes: row.review_notes ? String(row.review_notes) : null, roundDate: row.round_date ? String(row.round_date) : null, roundTime: row.round_time ? String(row.round_time) : null, gameMode: row.game_mode ? String(row.game_mode) : null, adminVerifiedGameMode: row.admin_verified_game_mode ? String(row.admin_verified_game_mode) : null, enteredFinalScore: row.entered_final_score === null || row.entered_final_score === undefined ? null : Number(row.entered_final_score), finalScoreCheck: row.final_score_check ? String(row.final_score_check) : null, createdAt: row.created_at ? String(row.created_at) : null, possibleDuplicate: Boolean(duplicate.data), pastCards, reviewEvents: events.data || [], allTimeProcessingStatus: String(row.all_time_processing_status || "not_processed"), allTimeProcessingResult: row.all_time_processing_result || null }
     }))
     return Response.json({ submissions: output, pendingCount: pendingResult.count || 0, latestPendingId: pendingResult.data?.[0]?.id || null, latestPendingAt: pendingResult.data?.[0]?.created_at || null }, { headers: { "Cache-Control": "no-store" } })
   } catch (caught) { return Response.json({ error: caught instanceof Error ? caught.message : "Course Challenge reviews are unavailable." }, { status: 503 }) }
@@ -55,9 +59,9 @@ async function signProof(service: ReturnType<typeof createCourseChallengesServic
 }
 
 async function loadPastCards(service: ReturnType<typeof createCourseChallengesServiceClient>, playerId: string, courseSlug: string, currentId: string) {
-  const result = await service.from("course_challenge_submissions").select("id,challenge_key,level_number,difficulty,status,proof_photo_path,calculated_total,relative_to_par,created_at").eq("player_id", playerId).eq("course_slug", courseSlug).neq("id", currentId).order("created_at", { ascending: false })
+  const result = await service.from("course_challenge_submissions").select("id,challenge_key,level_number,ace_stage_number,prestige_stage_number,difficulty,status,proof_photo_path,calculated_total,relative_to_par,created_at").eq("player_id", playerId).eq("course_slug", courseSlug).neq("id", currentId).order("created_at", { ascending: false })
   if (result.error) throw result.error
-  return Promise.all((result.data || []).map(async (row) => ({ id: String(row.id), challengeKey: row.challenge_key === "ace" ? "ace" : "level", level: Number(row.level_number), difficulty: String(row.difficulty), status: String(row.status), proofPhotoUrl: await signProof(service, row.proof_photo_path), calculatedTotal: Number(row.calculated_total), relativeToPar: Number(row.relative_to_par), createdAt: String(row.created_at) })))
+  return Promise.all((result.data || []).map(async (row) => ({ id: String(row.id), challengeKey: row.challenge_key === "ace" ? "ace" : row.challenge_key === "prestige" ? "prestige" : "level", level: Number(row.level_number), aceStage: row.ace_stage_number ? Number(row.ace_stage_number) : null, prestigeStage: row.prestige_stage_number ? Number(row.prestige_stage_number) : null, difficulty: String(row.difficulty), status: String(row.status), proofPhotoUrl: await signProof(service, row.proof_photo_path), calculatedTotal: Number(row.calculated_total), relativeToPar: Number(row.relative_to_par), createdAt: String(row.created_at) })))
 }
 
 export async function PATCH(request: Request) {
@@ -67,7 +71,7 @@ export async function PATCH(request: Request) {
     const body = await request.json() as { id?: string; action?: "approve" | "reject" | "return_to_review"; reviewNotes?: string; gameMode?: "solo" | "multiplayer" }
     if (!body.id || !body.action) return Response.json({ error: "Submission ID and review action are required." }, { status: 400 })
     const service = createCourseChallengesServiceClient()
-    const submission = await service.from("course_challenge_submissions").select("id,player_id,course_slug,challenge_key,level_number,difficulty,status,hole_scores,relative_to_par,created_at,review_notes,all_time_processing_status").eq("id", body.id).maybeSingle()
+    const submission = await service.from("course_challenge_submissions").select("id,player_id,course_slug,challenge_key,level_number,ace_stage_number,prestige_stage_number,difficulty,status,hole_scores,relative_to_par,created_at,review_notes,all_time_processing_status").eq("id", body.id).maybeSingle()
     if (submission.error) throw submission.error
     if (!submission.data) return Response.json({ error: "Submission not found." }, { status: 404 })
     const currentStatus = String(submission.data.status)
@@ -99,6 +103,9 @@ export async function PATCH(request: Request) {
 
     const submissionRow = submission.data
     const course = getCourseChallenge(String(submissionRow.course_slug))
+    const challengeKey = submissionRow.challenge_key === "ace" ? "ace" : submissionRow.challenge_key === "prestige" ? "prestige" : "level"
+    const verifiedGameMode = body.gameMode || (challengeKey === "prestige" || challengeKey === "ace" || Number(submissionRow.level_number) >= 3 ? "multiplayer" : null)
+    if (!isEligibleGameMode(Number(submissionRow.level_number), verifiedGameMode, challengeKey)) return Response.json({ error: "Select verified Solo or Multiplayer before approving this Course Challenge card." }, { status: 400 })
     const level = course?.levels.find((item) => item.level === Number(submissionRow.level_number))
     const code = submissionRow.difficulty === "Easy" ? (level?.easyCode || course?.easyCode) : (level?.hardCode || course?.hardCode)
     if (!code) return Response.json({ error: "The Course Challenge has no authoritative All-Time course mapping." }, { status: 409 })
@@ -106,16 +113,16 @@ export async function PATCH(request: Request) {
     if (courseRow.error) throw courseRow.error
     if (!courseRow.data) return Response.json({ error: "The authoritative All-Time course mapping is unavailable." }, { status: 503 })
     const fingerprint = await sha256Hex(JSON.stringify({ source: "course_challenge", submissionId: submissionRow.id, courseId: courseRow.data.id, playerId: submissionRow.player_id, holeScores: submissionRow.hole_scores, relativeToPar: submissionRow.relative_to_par }))
-    const approval = await sessionClient.rpc("approve_course_challenge_submission", { p_submission_id: body.id, p_course_id: courseRow.data.id, p_fingerprint: fingerprint, p_review_notes: body.reviewNotes?.trim() || null, p_admin_verified_game_mode: body.gameMode || null })
+    const approval = await sessionClient.rpc("approve_course_challenge_submission", { p_submission_id: body.id, p_course_id: courseRow.data.id, p_fingerprint: fingerprint, p_review_notes: body.reviewNotes?.trim() || null, p_admin_verified_game_mode: verifiedGameMode })
     if (approval.error) throw approval.error
-    const progress = await updateProgressAndRewards(service, String(submissionRow.player_id), String(submissionRow.course_slug), Number(submissionRow.level_number), String(submissionRow.difficulty), submissionRow.challenge_key === "ace" ? "ace" : "level", authorization.user?.id || null)
+    const progress = await updateProgressAndRewards(service, String(submissionRow.player_id), String(submissionRow.course_slug), Number(submissionRow.level_number), String(submissionRow.difficulty), challengeKey, authorization.user?.id || null)
     const result = approval.data as { all_time?: Record<string, unknown>; action?: string; game_mode?: string } | null
     return Response.json({ message: formatApprovalMessage(result?.all_time, result?.game_mode, progress), processing: result })
   } catch (caught) { return Response.json({ error: caught instanceof Error ? caught.message : "Course Challenge review failed." }, { status: 503 }) }
 }
 
-async function updateProgressAndRewards(service: ReturnType<typeof createCourseChallengesServiceClient>, playerId: string, courseSlug: string, level: number, difficulty: string, challengeKey: "level" | "ace", reviewerId: string | null) {
-  const accepted = await service.from("course_challenge_submissions").select("difficulty,hole_scores,requirements_evaluation,status").eq("player_id", playerId).eq("course_slug", courseSlug).eq("level_number", level).eq("challenge_key", challengeKey).eq("status", "approved")
+async function updateProgressAndRewards(service: ReturnType<typeof createCourseChallengesServiceClient>, playerId: string, courseSlug: string, level: number, difficulty: string, challengeKey: "level" | "ace" | "prestige", reviewerId: string | null) {
+  const accepted = await service.from("course_challenge_submissions").select("difficulty,hole_scores,requirements_evaluation,status,ace_stage_number,prestige_stage_number,level_number").eq("player_id", playerId).eq("course_slug", courseSlug).eq("challenge_key", challengeKey).eq("status", "approved")
   if (accepted.error) throw accepted.error
   if (challengeKey === "ace") {
     const course = getCourseChallenge(courseSlug)
@@ -126,6 +133,21 @@ async function updateProgressAndRewards(service: ReturnType<typeof createCourseC
       return stage ? aceStageRewardDefinitions({ ...course, aceStages: [stage] }) : []
     }).map((reward) => ({ player_id: playerId, reward_key: reward.rewardKey, label: reward.label, kind: reward.kind, course_slug: courseSlug, level: null, awarded_by: reviewerId }))
     if (!rewards.length) return { complete: false, rewardLabels: [] as string[] }
+    const award = await service.from("course_challenge_rewards").upsert(rewards, { onConflict: "player_id,reward_key", ignoreDuplicates: true })
+    if (award.error) throw award.error
+    return { complete: true, rewardLabels: rewards.map((reward) => reward.label) }
+  }
+  if (challengeKey === "prestige") {
+    const stageRows = (accepted.data || []).filter((row) => Number(row.prestige_stage_number || row.level_number) === level)
+    const course = getCourseChallenge(courseSlug)
+    const stage = course?.prestigeStages?.find((item) => item.stage === level)
+    const easyApproved = stageRows.some((row) => row.difficulty === "Easy")
+    const hardApproved = stageRows.some((row) => row.difficulty === "Hard")
+    const complete = easyApproved && Boolean(stage?.requiresHard ? hardApproved : true)
+    const progress = await service.from("course_challenge_prestige_progress").upsert({ player_id: playerId, course_slug: courseSlug, stage_number: level, easy_status: easyApproved ? "approved" : "pending", hard_status: hardApproved ? "approved" : "pending", completed_at: complete ? new Date().toISOString() : null, updated_at: new Date().toISOString() }, { onConflict: "player_id,course_slug,stage_number" })
+    if (progress.error) throw progress.error
+    if (!complete || !course) return { complete: false, rewardLabels: [] as string[] }
+    const rewards = prestigeStageRewardDefinitions(course, level).map((reward) => ({ player_id: playerId, reward_key: reward.rewardKey, label: reward.label, kind: reward.kind, course_slug: courseSlug, level: null, awarded_by: reviewerId }))
     const award = await service.from("course_challenge_rewards").upsert(rewards, { onConflict: "player_id,reward_key", ignoreDuplicates: true })
     if (award.error) throw award.error
     return { complete: true, rewardLabels: rewards.map((reward) => reward.label) }

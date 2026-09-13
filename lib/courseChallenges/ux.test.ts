@@ -163,7 +163,7 @@ test("welcome guide explains the purpose, progression, hints, and profile reward
   assert.match(guide, /Course Master/)
   assert.match(guide, /Your Ace Track is available from Level 1/)
   assert.match(guide, /verified Level scorecard can count toward both your Level challenge and your Ace Track/)
-  assert.match(guide, /After you complete Levels 1–5, Course Pro and Course Master open as the advanced challenges/)
+  assert.match(guide, /After you complete Levels 1–5, Course Pro opens first\. Course Master opens only after Course Pro is complete/)
   assert.match(guide, /Complete their established requirements to earn those rewards/)
   assert.match(guide, /Only rewards you have actually earned can be selected/)
   assert.doesNotMatch(guide, /Earned when you complete Level 3/)

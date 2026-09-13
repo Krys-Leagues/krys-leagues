@@ -17,7 +17,7 @@ import TrophyMedia from "@/components/TrophyMedia"
 import PlayerCourseRecords from "@/components/records/PlayerCourseRecords"
 import { calculateMonthlyCareerStats, monthlyCourseMapName, uniqueMonthlyPeriodRecords, type MonthlyPresentationRow } from "@/lib/monthlyPresentation"
 import { getPublicCourseChallenges } from "@/lib/courseChallenges/catalog"
-import { aceStageRewardDefinitions, levelRewardDefinitions } from "@/lib/courseChallenges/rewards"
+import { aceStageRewardDefinitions, levelRewardDefinitions, prestigeStageRewardDefinitions } from "@/lib/courseChallenges/rewards"
 
 type Player = {
   id: string
@@ -805,6 +805,7 @@ function CourseChallengeTrophyGroups({ rewards }: { rewards: CourseChallengeOwne
   const definitions = new Map(courses.flatMap(course => [
     ...course.levels.flatMap(level => levelRewardDefinitions(course, level.level)),
     ...aceStageRewardDefinitions(course),
+    ...(course.prestigeStages || []).flatMap(stage => prestigeStageRewardDefinitions(course, stage.stage)),
   ]).filter(Boolean).map(reward => [reward!.rewardKey, reward!]))
   const grouped = courses.map(course => ({ course, rewards: rewards.filter(reward => reward.course_slug === course.slug) })).filter(group => group.rewards.length > 0)
   return <section className={styles.courseAchievementGroups} aria-label="Course Challenges achievements"><h3>Course Challenges</h3>{grouped.map(({ course, rewards: owned }) => <div className={styles.courseAchievementGroup} key={course.slug}><h4>{course.name}</h4><div className={styles.courseAchievementGrid}>{owned.map(reward => { const definition = definitions.get(reward.reward_key); return <article className={styles.courseAchievementCard} key={reward.id}>{definition?.assetPath ? <TrophyMedia src={definition.assetPath} alt="" className={styles.courseAchievementMedia} /> : <span className={styles.rewardMark} aria-hidden="true">✦</span>}<strong>{definition?.label || reward.label}</strong><small>{reward.earned_at ? new Date(reward.earned_at).toLocaleDateString() : "Earned"}</small></article> })}</div></div>)}</section>

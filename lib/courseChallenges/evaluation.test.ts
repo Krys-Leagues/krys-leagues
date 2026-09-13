@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
 import test from "node:test"
-import { getCourseChallenge, isAceChallengeUnlocked } from "./catalog.ts"
-import { aceStageRewardDefinitions, levelRewardDefinitions } from "./rewards.ts"
+import { getCourseChallenge, isAceChallengeUnlocked, isPrestigeStageUnlocked } from "./catalog.ts"
+import { aceStageRewardDefinitions, levelRewardDefinitions, prestigeStageRewardDefinitions } from "./rewards.ts"
 import { calculateCourseChallengeMetrics, compareEnteredFinalScore, comparePhotoTotal, evaluateCourseChallengeRequirements, levelIsComplete, nextUnlockedLevel } from "./evaluation.ts"
 
 const tourist = getCourseChallenge("tourist-trap")!
@@ -61,11 +61,11 @@ test("Tourist Trap stroke-out thresholds accept two and reject three", () => {
   assert.equal(evaluateCourseChallengeRequirements(three, touristPars, requirement, "ready").status, "auto_fail")
 })
 
-test("Cherry Blossom uses the newest Level 1 through 5 plan", () => {
+test("Cherry Blossom uses the authoritative Level 1 through 5 plan", () => {
   assert.deepEqual(cherry.levels.map((level) => level.easyRequirements.map((requirement) => [requirement.kind, requirement.target, requirement.hole])), [
     [["relative_to_par", -10, undefined]],
     [["relative_to_par", -12, undefined], ["hole_relative_to_par", 0, 2], ["hole_relative_to_par", -1, 10]],
-    [["relative_to_par", -14, undefined], ["hole_relative_to_par", -1, 2], ["hole_relative_to_par", -2, 10]],
+    [["relative_to_par", -14, undefined]],
     [["relative_to_par", -16, undefined], ["hole_relative_to_par", -2, 2], ["hole_relative_to_par", -3, 10]],
     [["relative_to_par", -18, undefined], ["hole_relative_to_par", -1, 1], ["hole_relative_to_par", -2, 9], ["hole_relative_to_par", -3, 18]],
   ])
@@ -105,14 +105,35 @@ test("a level needs both approved sides and unlocks one next level", () => {
   assert.equal(nextUnlockedLevel([1, 2, 3]), 4)
 })
 
-test("photo totals and Course Pro/Master rewards remain wired", () => {
+test("photo totals and Course Pro/Master rewards remain wired as advanced stages", () => {
   const metrics = calculateCourseChallengeMetrics(touristScores, touristPars)
   assert.equal(comparePhotoTotal(metrics, 64, true), "passed")
   assert.equal(comparePhotoTotal(metrics, 63, true), "needs_review")
   assert.equal(compareEnteredFinalScore(metrics, metrics.relativeToPar), "passed")
   assert.equal(compareEnteredFinalScore(metrics, metrics.relativeToPar + 1), "needs_review")
-  assert.equal(levelRewardDefinitions(tourist, 3).some((reward) => reward.label === "Course Pro"), true)
-  assert.equal(levelRewardDefinitions(tourist, 5).some((reward) => reward.label === "Course Master"), true)
+  assert.equal(levelRewardDefinitions(tourist, 3).some((reward) => reward.label === "Course Pro"), false)
+  assert.equal(levelRewardDefinitions(tourist, 5).some((reward) => reward.label === "Course Master"), false)
+  assert.equal(tourist.prestigeStages?.[0].easyRequirements[0].target, -23)
+  assert.equal(cherry.prestigeStages?.[0].easyRequirements[0].target, -28)
+})
+
+test("Course Pro and Course Master unlock only after the regular track", () => {
+  assert.equal(isPrestigeStageUnlocked(tourist, 1, [3, 4, 5], []), false)
+  assert.equal(isPrestigeStageUnlocked(tourist, 1, [1, 2, 3, 4, 5], []), true)
+  assert.equal(isPrestigeStageUnlocked(tourist, 2, [1, 2, 3, 4, 5], []), false)
+  assert.equal(isPrestigeStageUnlocked(tourist, 2, [1, 2, 3, 4, 5], [1]), true)
+  assert.deepEqual(prestigeStageRewardDefinitions(cherry, 1).map((reward) => reward.label), ["Course Pro"])
+  assert.deepEqual(prestigeStageRewardDefinitions(cherry, 2).map((reward) => reward.label), ["Course Master"])
+})
+
+test("Cherry Level 3 Easy is exactly -14 or better and has no hole side rules", () => {
+  const requirement = cherry.levels[2].easyRequirements
+  assert.deepEqual(requirement.map((item) => [item.kind, item.target, item.hole]), [["relative_to_par", -14, undefined]])
+  const scoreAt = (improvement: number) => { let remaining = improvement; return cherryPars.map((par) => { const reduction = Math.min(par - 1, remaining); remaining -= reduction; return par - reduction }) }
+  const atMinus14 = evaluateCourseChallengeRequirements(scoreAt(14), cherryPars, requirement, "ready")
+  const atMinus13 = evaluateCourseChallengeRequirements(scoreAt(13), cherryPars, requirement, "ready")
+  assert.equal(atMinus14.status, "auto_pass")
+  assert.equal(atMinus13.status, "auto_fail")
 })
 
 test("Tourist Trap and Cherry Blossom expose the full four-stage Ace Track", () => {

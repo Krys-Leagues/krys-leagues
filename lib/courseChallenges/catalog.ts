@@ -1,5 +1,5 @@
 import { CHERRY_BLOSSOM_REWARD_ASSET_PATHS } from "./assets.ts"
-import type { CourseChallengeCourse, CourseChallengeLevel, CourseChallengeRequirement } from "./types"
+import type { CourseChallengeCourse, CourseChallengeLevel, CourseChallengePrestigeStage, CourseChallengeRequirement } from "./types"
 
 const levelNumbers = [1, 2, 3, 4, 5] as const
 const asset = (name: string) => "/course-challenges/tourist-trap/" + name
@@ -66,7 +66,7 @@ function cherryBlossomLevels(): CourseChallengeLevel[] {
       hard: [relative(2, "hard", 4), holeRelative(2, "hard", 10, "Hole 10 — under par", -1)],
     },
     3: {
-      easy: [relative(3, "easy", -14), holeRelative(3, "easy", 2, "Hole 2 — birdie or better", -1), holeRelative(3, "easy", 10, "Hole 10 — eagle or better", -2)],
+      easy: [relative(3, "easy", -14)],
       hard: [relative(3, "hard", 2), holeRelative(3, "hard", 2, "Hole 2 — par or better", 0)],
     },
     4: {
@@ -90,6 +90,20 @@ function cherryBlossomLevels(): CourseChallengeLevel[] {
     badgeKey: null,
     badgeAsset: null,
   }))
+}
+
+function touristPrestigeStages(): CourseChallengePrestigeStage[] {
+  return [
+    { stage: 1, key: "course-pro", label: "Course Pro", easyRequirements: [relative(6, "easy", -23), bogeys(6, "easy", 0)], hardRequirements: [relative(6, "hard", -20), bogeys(6, "hard", 0), eagles(6, "hard", 2)], requirementsStatus: "ready", rewardKey: "course-challenge:tourist-trap:course-pro", rewardAsset: asset("tourist-trap-course-pro.png"), requiresHard: true },
+    { stage: 2, key: "course-master", label: "Course Master", easyRequirements: [relative(7, "easy", -25), bogeys(7, "easy", 0), eagles(7, "easy", 3)], hardRequirements: [relative(7, "hard", -23), bogeys(7, "hard", 0), holeRelative(7, "hard", 9, "Birdie or better on Hole 9", -1), holeRelative(7, "hard", 13, "Birdie or better on Hole 13", -1), holeRelative(7, "hard", 14, "Birdie or better on Hole 14", -1), holeRelative(7, "hard", 15, "Birdie or better on Hole 15", -1)], requirementsStatus: "ready", rewardKey: "course-challenge:tourist-trap:course-master", rewardAsset: asset("tourist-trap-course-master.png"), requiresHard: true },
+  ]
+}
+
+function cherryPrestigeStages(): CourseChallengePrestigeStage[] {
+  return [
+    { stage: 1, key: "course-pro", label: "Course Pro", easyRequirements: [relative(6, "easy", -28)], hardRequirements: [relative(6, "hard", -23), holeRelative(6, "hard", 16, "Hole 16 — par or better", 0), holeRelative(6, "hard", 17, "Hole 17 — par or better", 0), holeRelative(6, "hard", 18, "Hole 18 — par or better", 0)], requirementsStatus: "ready", rewardKey: "course-challenge:cherry-blossom:course-pro", rewardAsset: cherryAsset("cherry-blossom-course-pro.png"), requiresHard: true },
+    { stage: 2, key: "course-master", label: "Course Master", easyRequirements: [relative(7, "easy", -31)], hardRequirements: [relative(7, "hard", -26), holeRelative(7, "hard", 15, "Hole 15 — birdie or better", -1), holeRelative(7, "hard", 16, "Hole 16 — birdie or better", -1), holeRelative(7, "hard", 17, "Hole 17 — birdie or better", -1), holeRelative(7, "hard", 18, "Hole 18 — birdie or better", -1)], requirementsStatus: "ready", rewardKey: "course-challenge:cherry-blossom:course-master", rewardAsset: cherryAsset("cherry-blossom-course-master.png"), requiresHard: true },
+  ]
 }
 
 type AceStageSpec = { key: "wader" | "chaser" | "hunter" | "legend"; label: string; target: number }
@@ -126,6 +140,7 @@ export const COURSE_CHALLENGE_COURSES: CourseChallengeCourse[] = [
     courseProAsset: asset("tourist-trap-course-pro.png"),
     courseMasterAsset: asset("tourist-trap-course-master.png"),
     aceStages: touristAceStages,
+    prestigeStages: touristPrestigeStages(),
   },
   {
     slug: "cherry-blossom",
@@ -140,6 +155,7 @@ export const COURSE_CHALLENGE_COURSES: CourseChallengeCourse[] = [
     aceStages: cherryAceStages,
     courseProAsset: CHERRY_BLOSSOM_REWARD_ASSET_PATHS.coursePro,
     courseMasterAsset: CHERRY_BLOSSOM_REWARD_ASSET_PATHS.courseMaster,
+    prestigeStages: cherryPrestigeStages(),
   },
 ]
 
@@ -147,6 +163,12 @@ export function getCourseChallenge(slug: string) { return COURSE_CHALLENGE_COURS
 export function getPublicCourseChallenges() { return COURSE_CHALLENGE_COURSES.filter((course) => course.status === "live").sort((left, right) => left.displayOrder - right.displayOrder) }
 export function getCourseChallengeLevel(course: CourseChallengeCourse, level: number) { return course.levels.find((item) => item.level === level) ?? null }
 export function getAceStage(course: CourseChallengeCourse, stage: number) { return course.aceStages?.find((item) => item.stage === stage) ?? null }
+export function getPrestigeStage(course: CourseChallengeCourse, stage: number) { return course.prestigeStages?.find((item) => item.stage === stage) ?? null }
+export function isRegularTrackComplete(completedLevels: number[]) { return levelNumbers.every((level) => completedLevels.includes(level)) }
+export function isPrestigeStageUnlocked(course: CourseChallengeCourse, stage: number, completedLevels: number[], completedPrestigeStages: number[]) {
+  if (stage === 1) return isRegularTrackComplete(completedLevels)
+  return completedPrestigeStages.includes(stage - 1)
+}
 export function isAceChallengeUnlocked(course: CourseChallengeCourse, completedLevels: number[]) { void completedLevels; return Boolean(course.aceStages?.length) }
 export function aceStageForUniqueHoleCount(course: CourseChallengeCourse, uniqueHoleCount: number) { return course.aceStages?.find((stage) => (stage.easyRequirements[0]?.target || Number.MAX_SAFE_INTEGER) > uniqueHoleCount) ?? null }
 export function courseChallengeRewardLabel(course: CourseChallengeCourse, level: number, kind: "sticker" | "badge") { return kind === "sticker" ? course.name + " Level " + level + " sticker" : course.name + " Level " + level + " badge" }
