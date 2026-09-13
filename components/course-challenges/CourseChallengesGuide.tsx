@@ -24,7 +24,7 @@ export default function CourseChallengesGuide({ includeScorecardHelp = false }: 
         <li>All requirements for one difficulty must come from the same 18-hole scorecard.</li>
         <li>Levels 1–2: Solo or Multiplayer Game Mode qualifies.</li>
         <li>Levels 3–5: Multiplayer Game Mode is required.</li>
-        <li>Ace Challenge: Multiplayer Game Mode is required. Practice Mode does not qualify.</li>
+        <li>Ace Track: Multiplayer Game Mode is required. Practice Mode does not qualify.</li>
         <li>Upload the scorecard and enter H1–H18. The website checks the Level requirements automatically.</li>
         <li>Verified Easy + verified Hard completes the Level, earns the reward, and unlocks the next Level.</li>
       </ul>
@@ -37,10 +37,10 @@ export default function CourseChallengesGuide({ includeScorecardHelp = false }: 
 
     <section className={styles.guideSection}>
       <h3>SHOW OFF WHAT YOU EARN</h3>
-      <p>Show off what you earn: When you earn Course Pro, Ace Challenge, Level 5, or Course Master, you can use that reward on your Player Profile in place of your regular profile image.</p>
+      <p>Show off what you earn: When you earn Course Pro, an Ace Track reward, Level 5, or Course Master, you can use that reward on your Player Profile in place of your regular profile image.</p>
       <ol className={styles.rewardOrder}>
         <li><strong>Course Pro</strong> — Earned when you complete Level 3.</li>
-        <li><strong>Ace Challenge</strong> — Becomes available after Level 3 as a separate challenge.</li>
+        <li><strong>Ace Track</strong> — Becomes available after Level 3 and builds through Wader, Chaser, Hunter, and Legend.</li>
         <li><strong>Level 5</strong> — The Level 5 reward is a major display reward.</li>
         <li><strong>Course Master</strong> — Earned when you complete Level 5.</li>
       </ol>

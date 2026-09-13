@@ -17,6 +17,7 @@ export type CourseChallengeRequirementKind =
   | "par_or_better_count"
   | "birdie_count"
   | "eagle_count"
+  | "unique_ace_hole_count"
 
 export type RequirementOperator = "eq" | "lte" | "gte"
 
@@ -53,6 +54,18 @@ export type CourseChallengeAce = {
   rewardAsset: string | null
 }
 
+export type CourseChallengeAceStage = {
+  stage: 1 | 2 | 3 | 4
+  key: "wader" | "chaser" | "hunter" | "legend"
+  label: string
+  easyRequirements: CourseChallengeRequirement[]
+  hardRequirements: CourseChallengeRequirement[]
+  requirementsStatus: RequirementsStatus
+  rewardKey: string
+  rewardAsset: string | null
+  requiresHard: boolean
+}
+
 export type CourseChallengeCourse = {
   slug: string
   name: string
@@ -64,6 +77,7 @@ export type CourseChallengeCourse = {
   hardCode: string
   levels: CourseChallengeLevel[]
   aceChallenge?: CourseChallengeAce
+  aceStages?: CourseChallengeAceStage[]
   courseProAsset?: string | null
   courseMasterAsset?: string | null
 }
@@ -103,6 +117,7 @@ export type CourseChallengeSubmissionPayload = {
   level: number
   difficulty: CourseChallengeDifficulty
   challengeKey?: "level" | "ace"
+  aceStage?: number
   proofPhotoPath: string
   scores: number[]
   finalScore: number

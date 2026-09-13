@@ -84,6 +84,13 @@
 .levelHeader h2 { font-size: 1.8rem; }
 .levelHeader p { margin-top: 5px; color: #cbd5e1; }
 .statusChip { display: inline-flex; border-radius: 999px; padding: 7px 11px; background: #1e293b; color: #e2e8f0; font-size: .78rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+.aceStageRail { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.aceStage { display: grid; gap: 6px; min-height: 92px; border: 1px solid #ffffff1f; border-radius: 14px; padding: 12px; background: #02061799; color: #94a3b8; }
+.aceStage strong { color: #cbd5e1; }
+.aceStage small { line-height: 1.35; }
+.aceStage[data-current="true"] { border-color: #f9a8d4; background: #312e81cc; box-shadow: 0 0 0 2px #f9a8d444; color: #fdf4ff; }
+.aceStage[data-current="true"] strong, .aceStage[data-complete="true"] strong { color: #fff; }
+.aceStage[data-complete="true"] { border-color: #34d399; background: #064e3b88; color: #bbf7d0; }
 .sideGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 .sideCard { display: grid; gap: 10px; border: 1px solid #ffffff1f; border-radius: 16px; padding: 17px; background: #02061799; }
 .sideCard h3, .sideCard p { margin: 0; }
@@ -121,6 +128,7 @@
   .bookSpread { grid-template-columns: 1fr; }
   .rewardBookGrid .reward { min-height: 178px; }
   .reward > img, .rewardMark, .rewardSilhouette { width: min(100%, 124px); height: 124px; }
+  .aceStageRail { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .sideGrid, .formGrid { grid-template-columns: 1fr; }
   .levelRail { grid-template-columns: repeat(5, minmax(74px, 1fr)); overflow-x: auto; }
   .levelTab { min-height: 64px; padding: 8px; }

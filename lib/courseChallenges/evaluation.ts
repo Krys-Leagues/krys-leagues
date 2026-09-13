@@ -26,7 +26,7 @@ export function calculateCourseChallengeMetrics(scores: number[], pars: number[]
 }
 
 function compare(actual: number, operator: CourseChallengeRequirement["operator"], target: number) { if (operator === "gte") return actual >= target; if (operator === "lte") return actual <= target; return actual === target }
-function requirementValue(requirement: CourseChallengeRequirement, metrics: CourseChallengeMetrics, scores: number[], pars: number[]) {
+function requirementValue(requirement: CourseChallengeRequirement, metrics: CourseChallengeMetrics, scores: number[], pars: number[], uniqueAceHoles?: number) {
   switch (requirement.kind) {
     case "complete_course": return 1
     case "relative_to_par": return metrics.relativeToPar
@@ -40,16 +40,17 @@ function requirementValue(requirement: CourseChallengeRequirement, metrics: Cour
     case "par_or_better_count": return metrics.parsOrBetter
     case "birdie_count": return metrics.birdies
     case "eagle_count": return metrics.eagles
+    case "unique_ace_hole_count": return uniqueAceHoles ?? null
     default: return null
   }
 }
 
-export function evaluateCourseChallengeRequirements(scores: number[], pars: number[], requirements: CourseChallengeRequirement[], requirementsStatus: "ready" | "pending_review"): CourseChallengeEvaluation {
+export function evaluateCourseChallengeRequirements(scores: number[], pars: number[], requirements: CourseChallengeRequirement[], requirementsStatus: "ready" | "pending_review", options?: { uniqueAceHoles?: number }): CourseChallengeEvaluation {
   const metrics = calculateCourseChallengeMetrics(scores, pars)
   if (requirementsStatus !== "ready") return { metrics, requirements: [{ requirement: { id: "requirements-pending", label: "Approved challenge requirements are pending review.", kind: "relative_to_par", reviewRequired: true }, passed: null, status: "needs_review", reason: "The finalized Course Challenge requirement data is not present in source yet." }], status: "needs_review", reason: "Challenge requirements require Krys review before automatic approval." }
   const evaluations: RequirementEvaluation[] = requirements.map((requirement) => {
     if (requirement.reviewRequired || requirement.target === undefined) return { requirement, passed: null, status: "needs_review", reason: requirement.reviewRequired ? "This requirement needs photo/admin review." : "This requirement has no target." }
-    const value = requirementValue(requirement, metrics, scores, pars)
+    const value = requirementValue(requirement, metrics, scores, pars, options?.uniqueAceHoles)
     if (value === null || value === undefined) return { requirement, passed: null, status: "needs_review", reason: "This requirement cannot be verified from typed scores alone." }
     const passed = compare(value, requirement.operator ?? "eq", requirement.target)
     return { requirement, passed, status: passed ? "passed" : "failed" }

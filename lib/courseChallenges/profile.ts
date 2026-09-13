@@ -1,4 +1,5 @@
 import { getPublicCourseChallenges } from "./catalog"
+import { aceProgress, type AceSubmissionRecord } from "./ace"
 import { isProfileDisplayRewardKey } from "./rewards"
 import type { CourseChallengeProfileReward } from "./types"
 
@@ -7,10 +8,12 @@ export async function loadCourseChallengeProfile(client: { from: (table: string)
   const progressQuery = client.from("course_challenge_progress").select("course_slug,level_number,completed_at").eq("player_id", playerId)
   const rewardQuery = client.from("course_challenge_rewards").select("reward_key,label,kind,course_slug,level,earned_at").eq("player_id", playerId)
   const selectionQuery = client.from("course_challenge_profile_selections").select("selected_reward_key").eq("player_id", playerId).maybeSingle()
-  const [{ data: progress, error: progressError }, { data: rewards, error: rewardError }, { data: selection, error: selectionError }] = await Promise.all([progressQuery, rewardQuery, selectionQuery])
+  const aceQuery = client.from("course_challenge_submissions").select("course_slug,difficulty,hole_scores,requirements_evaluation,status").eq("player_id", playerId).eq("challenge_key", "ace").eq("status", "approved")
+  const [{ data: progress, error: progressError }, { data: rewards, error: rewardError }, { data: selection, error: selectionError }, { data: aceRows, error: aceError }] = await Promise.all([progressQuery, rewardQuery, selectionQuery, aceQuery])
   if (progressError) throw progressError
   if (rewardError) throw rewardError
   if (selectionError) throw selectionError
+  if (aceError) throw aceError
 
   const filteredProgress = (progress || []).filter((row: { course_slug: string }) => !courseSlug || row.course_slug === courseSlug)
   const filteredRewards = ((rewards || [])
@@ -20,12 +23,15 @@ export async function loadCourseChallengeProfile(client: { from: (table: string)
   const courses = getPublicCourseChallenges().map((course) => {
     const courseProgress = filteredProgress.filter((row: { course_slug: string }) => row.course_slug === course.slug)
     const courseRewards = filteredRewards.filter((row) => row.courseSlug === course.slug)
+    const ace = aceProgress(course, (aceRows || []).filter((row: { course_slug: string }) => row.course_slug === course.slug) as AceSubmissionRecord[])
     return {
       slug: course.slug,
       name: course.name,
       completedLevels: courseProgress.filter((row: { completed_at: string | null }) => Boolean(row.completed_at)).map((row: { level_number: number }) => row.level_number),
       stickers: courseRewards.filter((reward) => reward.kind === "sticker"),
       prestigeRewards: courseRewards.filter((reward) => reward.kind === "badge"),
+      uniqueAceHoles: ace.uniqueHoles,
+      completedAceStages: ace.completedStages,
     }
   })
   return { selectedRewardKey: selection?.selected_reward_key || null, courses, rewards: filteredRewards, profileRewards: filteredRewards.filter((reward) => isProfileDisplayRewardKey(reward.rewardKey)), completedLevels: filteredProgress.filter((row: { completed_at: string | null }) => Boolean(row.completed_at)).map((row: { level_number: number }) => row.level_number) }

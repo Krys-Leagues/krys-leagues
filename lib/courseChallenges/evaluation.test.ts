@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
 import test from "node:test"
 import { getCourseChallenge, isAceChallengeUnlocked } from "./catalog.ts"
-import { aceRewardDefinition, levelRewardDefinitions } from "./rewards.ts"
+import { aceStageRewardDefinitions, levelRewardDefinitions } from "./rewards.ts"
 import { calculateCourseChallengeMetrics, compareEnteredFinalScore, comparePhotoTotal, evaluateCourseChallengeRequirements, levelIsComplete, nextUnlockedLevel } from "./evaluation.ts"
 
 const tourist = getCourseChallenge("tourist-trap")!
@@ -9,8 +9,6 @@ const cherry = getCourseChallenge("cherry-blossom")!
 const touristPars = [3, 4, 3, 4, 3, 3, 3, 4, 3, 5, 3, 4, 2, 3, 3, 3, 3, 7]
 const touristScores = touristPars.map((par, index) => par + (index === 17 ? 1 : 0))
 const cherryPars = [3, 4, 3, 4, 3, 3, 3, 4, 3, 5, 3, 4, 2, 3, 3, 3, 3, 7]
-const cherryEasyScores = cherryPars.map((par, index) => index < 2 ? par - 2 : index < 8 ? par - 1 : par)
-const cherryHardScores = cherryPars.map((par, index) => index === 1 ? par + 1 : par)
 
 test("course challenge metrics use one complete 18-hole card and authoritative pars", () => {
   const metrics = calculateCourseChallengeMetrics(touristScores, touristPars)
@@ -63,24 +61,37 @@ test("Tourist Trap stroke-out thresholds accept two and reject three", () => {
   assert.equal(evaluateCourseChallengeRequirements(three, touristPars, requirement, "ready").status, "auto_fail")
 })
 
-test("Cherry Blossom Level 1 Easy enforces complete, minus ten, no stroke-outs, and two eagles", () => {
-  const result = evaluateCourseChallengeRequirements(cherryEasyScores, cherryPars, cherry.levels[0].easyRequirements, "ready")
-  assert.equal(result.metrics.relativeToPar, -10)
-  assert.equal(result.metrics.strokeOuts, 0)
-  assert.equal(result.metrics.eagles, 2)
-  assert.equal(result.status, "auto_pass")
-  const thresholdMiss = [...cherryEasyScores]
-  thresholdMiss[7] = cherryPars[7]
-  assert.equal(evaluateCourseChallengeRequirements(thresholdMiss, cherryPars, cherry.levels[0].easyRequirements, "ready").status, "auto_fail")
+test("Cherry Blossom uses the newest Level 1 through 5 plan", () => {
+  assert.deepEqual(cherry.levels.map((level) => level.easyRequirements.map((requirement) => [requirement.kind, requirement.target, requirement.hole])), [
+    [["relative_to_par", -10, undefined]],
+    [["relative_to_par", -12, undefined], ["hole_relative_to_par", 0, 2], ["hole_relative_to_par", -1, 10]],
+    [["relative_to_par", -14, undefined], ["hole_relative_to_par", -1, 2], ["hole_relative_to_par", -2, 10]],
+    [["relative_to_par", -16, undefined], ["hole_relative_to_par", -2, 2], ["hole_relative_to_par", -3, 10]],
+    [["relative_to_par", -18, undefined], ["hole_relative_to_par", -1, 1], ["hole_relative_to_par", -2, 9], ["hole_relative_to_par", -3, 18]],
+  ])
+  assert.deepEqual(cherry.levels.map((level) => level.hardRequirements.map((requirement) => [requirement.kind, requirement.target, requirement.hole])), [
+    [["relative_to_par", 6, undefined], ["hole_relative_to_par", 1, 2], ["hole_relative_to_par", 0, 10]],
+    [["relative_to_par", 4, undefined], ["hole_relative_to_par", -1, 10]],
+    [["relative_to_par", 2, undefined], ["hole_relative_to_par", 0, 2]],
+    [["relative_to_par", 0, undefined], ["hole_relative_to_par", -1, 2], ["hole_relative_to_par", -2, 10]],
+    [["relative_to_par", -2, undefined], ["hole_relative_to_par", 0, 1], ["hole_relative_to_par", -1, 9], ["hole_relative_to_par", -2, 18]],
+  ])
+  assert.equal(cherry.levels[3].hardRequirements[0].label, "Par or better")
 })
 
-test("Cherry Blossom Level 1 Hard enforces six pars-or-better and hole-specific checks", () => {
-  const result = evaluateCourseChallengeRequirements(cherryHardScores, cherryPars, cherry.levels[0].hardRequirements, "ready")
-  assert.equal(result.metrics.parsOrBetter, 17)
-  assert.equal(result.status, "auto_pass")
-  assert.equal(result.requirements.some((item) => item.requirement.hole === 2 && item.passed === true), true)
-  assert.equal(result.requirements.some((item) => item.requirement.hole === 10 && item.passed === true), true)
-  const holeTwoMiss = [...cherryHardScores]
+test("Cherry Blossom evaluates the newest Level 1 Easy and Hard requirements", () => {
+  const easyScores = cherryPars.map((par, index) => index < 2 ? par - 2 : index < 8 ? par - 1 : par)
+  const easy = evaluateCourseChallengeRequirements(easyScores, cherryPars, cherry.levels[0].easyRequirements, "ready")
+  assert.equal(easy.metrics.relativeToPar, -10)
+  assert.equal(easy.status, "auto_pass")
+
+  const hardScores = cherryPars.map((par) => par)
+  hardScores[0] = cherryPars[0] + 5
+  hardScores[1] = cherryPars[1] + 1
+  const hard = evaluateCourseChallengeRequirements(hardScores, cherryPars, cherry.levels[0].hardRequirements, "ready")
+  assert.equal(hard.metrics.relativeToPar, 6)
+  assert.equal(hard.status, "auto_pass")
+  const holeTwoMiss = [...hardScores]
   holeTwoMiss[1] = cherryPars[1] + 2
   assert.equal(evaluateCourseChallengeRequirements(holeTwoMiss, cherryPars, cherry.levels[0].hardRequirements, "ready").status, "auto_fail")
 })
@@ -104,14 +115,25 @@ test("photo totals and Course Pro/Master rewards remain wired", () => {
   assert.equal(levelRewardDefinitions(tourist, 5).some((reward) => reward.label === "Course Master"), true)
 })
 
-test("Ace Challenge stays locked before Level 3 and requires both cards after unlock", () => {
+test("Tourist Trap and Cherry Blossom expose the full four-stage Ace Track", () => {
   assert.equal(isAceChallengeUnlocked(tourist, []), false)
   assert.equal(isAceChallengeUnlocked(tourist, [1, 2]), false)
   assert.equal(isAceChallengeUnlocked(tourist, [1, 2, 3]), true)
-  assert.equal(aceRewardDefinition(tourist)?.rewardKey, "course-challenge:tourist-trap:ace-challenge")
-  assert.equal(aceRewardDefinition(tourist)?.assetPath, "/course-challenges/tourist-trap/tourist-trap-ace-challenge.png")
-  assert.equal(tourist.aceChallenge?.easyRequirements[0].target, 8)
-  assert.equal(tourist.aceChallenge?.hardRequirements[0].target, 2)
+  assert.deepEqual(tourist.aceStages?.map((stage) => [stage.key, stage.easyRequirements[0].target, stage.hardRequirements[0].target]), [["wader", 1, 1], ["chaser", 3, 3], ["hunter", 6, 6], ["legend", 9, 9]])
+  assert.deepEqual(cherry.aceStages?.map((stage) => [stage.key, stage.easyRequirements[0].target, stage.hardRequirements[0].target]), [["wader", 1, 1], ["chaser", 3, 3], ["hunter", 6, 6], ["legend", 9, 9]])
+  assert.deepEqual(aceStageRewardDefinitions(tourist).map((reward) => reward.rewardKey), [
+    "course-challenge:tourist-trap:ace-wader",
+    "course-challenge:tourist-trap:ace-chaser",
+    "course-challenge:tourist-trap:ace-hunter",
+    "course-challenge:tourist-trap:ace-legend",
+  ])
   assert.equal(levelIsComplete("approved", "pending"), false)
   assert.equal(levelIsComplete("approved", "approved"), true)
+})
+
+test("unique Ace hole requirements evaluate from the cumulative unique-hole count", () => {
+  const requirement = tourist.aceStages?.[1].easyRequirements[0]
+  assert.ok(requirement)
+  assert.equal(evaluateCourseChallengeRequirements([1, ...touristPars.slice(1)], touristPars, [requirement], "ready", { uniqueAceHoles: 3 }).status, "auto_pass")
+  assert.equal(evaluateCourseChallengeRequirements([1, ...touristPars.slice(1)], touristPars, [requirement], "ready", { uniqueAceHoles: 2 }).status, "auto_fail")
 })

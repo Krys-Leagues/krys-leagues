@@ -1,5 +1,6 @@
 import { getCourseChallenge } from "@/lib/courseChallenges/catalog"
-import { levelRewardDefinitions, aceRewardDefinition } from "@/lib/courseChallenges/rewards"
+import { aceStageRewardDefinitions, levelRewardDefinitions } from "@/lib/courseChallenges/rewards"
+import { aceProgress, type AceSubmissionRecord } from "@/lib/courseChallenges/ace"
 import { createCourseChallengesServiceClient, requireCourseChallengeAdmin } from "@/lib/courseChallenges/server"
 import { createServerSupabaseClient } from "@/lib/supabase/server"
 import { sha256Hex } from "@/lib/all-time/normal-records"
@@ -114,20 +115,24 @@ export async function PATCH(request: Request) {
 }
 
 async function updateProgressAndRewards(service: ReturnType<typeof createCourseChallengesServiceClient>, playerId: string, courseSlug: string, level: number, difficulty: string, challengeKey: "level" | "ace", reviewerId: string | null) {
-  const accepted = await service.from("course_challenge_submissions").select("difficulty").eq("player_id", playerId).eq("course_slug", courseSlug).eq("level_number", level).eq("challenge_key", challengeKey).eq("status", "approved")
+  const accepted = await service.from("course_challenge_submissions").select("difficulty,hole_scores,requirements_evaluation,status").eq("player_id", playerId).eq("course_slug", courseSlug).eq("level_number", level).eq("challenge_key", challengeKey).eq("status", "approved")
   if (accepted.error) throw accepted.error
+  if (challengeKey === "ace") {
+    const course = getCourseChallenge(courseSlug)
+    if (!course) return { complete: false, rewardLabels: [] as string[] }
+    const aceState = aceProgress(course, (accepted.data || []) as AceSubmissionRecord[])
+    const rewards = aceState.completedStages.flatMap((stageNumber) => {
+      const stage = course.aceStages?.find((item) => item.stage === stageNumber)
+      return stage ? aceStageRewardDefinitions({ ...course, aceStages: [stage] }) : []
+    }).map((reward) => ({ player_id: playerId, reward_key: reward.rewardKey, label: reward.label, kind: reward.kind, course_slug: courseSlug, level: null, awarded_by: reviewerId }))
+    if (!rewards.length) return { complete: false, rewardLabels: [] as string[] }
+    const award = await service.from("course_challenge_rewards").upsert(rewards, { onConflict: "player_id,reward_key", ignoreDuplicates: true })
+    if (award.error) throw award.error
+    return { complete: true, rewardLabels: rewards.map((reward) => reward.label) }
+  }
   const easyApproved = (accepted.data || []).some((row) => row.difficulty === "Easy")
   const hardApproved = (accepted.data || []).some((row) => row.difficulty === "Hard")
   const complete = easyApproved && hardApproved
-  if (challengeKey === "ace") {
-    if (!complete) return { complete: false, rewardLabels: [] as string[] }
-    const course = getCourseChallenge(courseSlug)
-    const reward = course ? aceRewardDefinition(course) : null
-    if (!reward) return { complete: true, rewardLabels: [] as string[] }
-    const award = await service.from("course_challenge_rewards").upsert([{ player_id: playerId, reward_key: reward.rewardKey, label: reward.label, kind: reward.kind, course_slug: courseSlug, level: null, awarded_by: reviewerId }], { onConflict: "player_id,reward_key", ignoreDuplicates: true })
-    if (award.error) throw award.error
-    return { complete: true, rewardLabels: [reward.label] }
-  }
   const progress = await service.from("course_challenge_progress").upsert({ player_id: playerId, course_slug: courseSlug, level_number: level, easy_status: easyApproved ? "approved" : "pending", hard_status: hardApproved ? "approved" : "pending", completed_at: complete ? new Date().toISOString() : null, updated_at: new Date().toISOString() }, { onConflict: "player_id,course_slug,level_number" })
   if (progress.error) throw progress.error
   if (!complete) return { complete: false, rewardLabels: [] as string[] }

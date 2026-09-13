@@ -9,7 +9,7 @@ export async function PUT(request: Request) {
     const rewardKey = body.rewardKey?.trim() || null
     const service = createCourseChallengesServiceClient()
     if (rewardKey) {
-      if (!isProfileDisplayRewardKey(rewardKey)) return Response.json({ error: "Only Course Pro, Ace Challenge, Level 5, and Course Master rewards can be selected for profile display." }, { status: 403 })
+      if (!isProfileDisplayRewardKey(rewardKey)) return Response.json({ error: "Only Course Pro, Ace Track, Level 5, and Course Master rewards can be selected for profile display." }, { status: 403 })
       const reward = await service.from("course_challenge_rewards").select("reward_key").eq("player_id", identity.playerId).eq("reward_key", rewardKey).maybeSingle()
       if (reward.error) throw reward.error
       if (!reward.data) return Response.json({ error: "Only earned Course Challenge rewards can be selected." }, { status: 403 })

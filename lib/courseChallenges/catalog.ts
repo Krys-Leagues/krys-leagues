@@ -9,6 +9,7 @@ function req(id: string, label: string, kind: CourseChallengeRequirement["kind"]
 }
 const complete = (level: number) => req("l" + level + "-complete", "Complete the course", "complete_course", "eq", 1)
 const relative = (level: number, side: string, target: number) => req("l" + level + "-" + side + "-relative", (target > 0 ? "+" : "") + target + " or better", "relative_to_par", "lte", target)
+const relativeLabel = (level: number, side: string, target: number, label: string) => req("l" + level + "-" + side + "-relative", label, "relative_to_par", "lte", target)
 const hio = (level: number, side: string, target: number) => req("l" + level + "-" + side + "-hio", target + " hole-in-one" + (target === 1 ? "" : "s"), "hio_count", "gte", target)
 const bogeys = (level: number, side: string, target: number) => req("l" + level + "-" + side + "-bogeys", target + " bogeys or fewer", "bogey_count", "lte", target)
 const birdies = (level: number, side: string, target: number) => req("l" + level + "-" + side + "-birdies", target + " birdie" + (target === 1 ? "" : "s"), "birdie_count", "gte", target)
@@ -54,36 +55,63 @@ function touristTrapLevels(): CourseChallengeLevel[] {
   }))
 }
 
-function pendingLevels(slug: string, easyCode: string, hardCode: string): CourseChallengeLevel[] {
-  return levelNumbers.map((level) => {
-    if (slug === "cherry-blossom" && level === 1) {
-      return {
-        level,
-        easyCode,
-        hardCode,
-        requirementsStatus: "ready",
-        easyRequirements: [complete(1), relative(1, "easy", -10), strokeOuts(1, "easy", 0), req("cbl1-easy-eagles", "2 eagles or better", "eagle_count", "gte", 2)],
-        hardRequirements: [complete(1), req("cbl1-hard-pars", "6 holes at par or better", "par_or_better_count", "gte", 6), holeRelative(1, "hard", 2, "Hole 2 — bogey or better", 1, "The bridges have very little friction, so the ball keeps rolling. Use soft, controlled shots and don’t be afraid to lay up."), holeRelative(1, "hard", 10, "Hole 10 — par or better", 0, "Take all the right-side holes. If you don’t miss any putts, that route can produce an albatross.")],
-        stickerKey: "course-challenge:" + slug + ":level-" + level + ":sticker",
-        stickerAsset: cherryAsset("cherry-blossom-level-" + level + ".png"),
-        badgeKey: null,
-        badgeAsset: null,
-      }
-    }
+function cherryBlossomLevels(): CourseChallengeLevel[] {
+  const requirements: Record<number, { easy: CourseChallengeRequirement[]; hard: CourseChallengeRequirement[] }> = {
+    1: {
+      easy: [relative(1, "easy", -10)],
+      hard: [relative(1, "hard", 6), holeRelative(1, "hard", 2, "Hole 2 — bogey or better", 1), holeRelative(1, "hard", 10, "Hole 10 — par or better", 0)],
+    },
+    2: {
+      easy: [relative(2, "easy", -12), holeRelative(2, "easy", 2, "Hole 2 — par or better", 0), holeRelative(2, "easy", 10, "Hole 10 — birdie or better", -1)],
+      hard: [relative(2, "hard", 4), holeRelative(2, "hard", 10, "Hole 10 — under par", -1)],
+    },
+    3: {
+      easy: [relative(3, "easy", -14), holeRelative(3, "easy", 2, "Hole 2 — birdie or better", -1), holeRelative(3, "easy", 10, "Hole 10 — eagle or better", -2)],
+      hard: [relative(3, "hard", 2), holeRelative(3, "hard", 2, "Hole 2 — par or better", 0)],
+    },
+    4: {
+      easy: [relative(4, "easy", -16), holeRelative(4, "easy", 2, "Hole 2 — eagle or better", -2), holeRelative(4, "easy", 10, "Hole 10 — albatross or better", -3)],
+      hard: [relativeLabel(4, "hard", 0, "Par or better"), holeRelative(4, "hard", 2, "Hole 2 — birdie or better", -1), holeRelative(4, "hard", 10, "Hole 10 — eagle or better", -2)],
+    },
+    5: {
+      easy: [relative(5, "easy", -18), holeRelative(5, "easy", 1, "Hole 1 — birdie or better", -1), holeRelative(5, "easy", 9, "Hole 9 — eagle or better", -2), holeRelative(5, "easy", 18, "Hole 18 — albatross or better", -3)],
+      hard: [relative(5, "hard", -2), holeRelative(5, "hard", 1, "Hole 1 — par or better", 0), holeRelative(5, "hard", 9, "Hole 9 — birdie or better", -1), holeRelative(5, "hard", 18, "Hole 18 — eagle or better", -2)],
+    },
+  }
+  return levelNumbers.map((level) => ({
+    level,
+    easyCode: "CBE",
+    hardCode: "CBH",
+    requirementsStatus: "ready",
+    easyRequirements: requirements[level].easy,
+    hardRequirements: requirements[level].hard,
+    stickerKey: "course-challenge:cherry-blossom:level-" + level + ":sticker",
+    stickerAsset: cherryAsset("cherry-blossom-level-" + level + ".png"),
+    badgeKey: null,
+    badgeAsset: null,
+  }))
+}
+
+type AceStageSpec = { key: "wader" | "chaser" | "hunter" | "legend"; label: string; target: number }
+function aceStages(slug: string, specs: AceStageSpec[], assetPath: (name: string) => string) {
+  return specs.map((spec, index) => {
+    const requirement = req(slug + "-ace-" + spec.key + "-unique-holes", spec.target + " unique ace hole" + (spec.target === 1 ? "" : "s") + " cumulatively", "unique_ace_hole_count", "gte", spec.target)
     return {
-      level,
-      easyCode,
-      hardCode,
-      requirementsStatus: "pending_review",
-      easyRequirements: [],
-      hardRequirements: [],
-      stickerKey: "course-challenge:" + slug + ":level-" + level + ":sticker",
-      stickerAsset: slug === "cherry-blossom" ? cherryAsset("cherry-blossom-level-" + level + ".png") : null,
-      badgeKey: level === 3 || level === 5 ? "course-challenge:" + slug + ":level-" + level + ":badge" : null,
-      badgeAsset: null,
+      stage: (index + 1) as 1 | 2 | 3 | 4,
+      key: spec.key,
+      label: "Ace " + spec.label,
+      easyRequirements: [requirement],
+      hardRequirements: [{ ...requirement, id: slug + "-ace-" + spec.key + "-unique-holes-hard" }],
+      requirementsStatus: "ready" as const,
+      rewardKey: "course-challenge:" + slug + ":ace-" + spec.key,
+      rewardAsset: assetPath(slug + "-ace-" + spec.key + ".png"),
+      requiresHard: true,
     }
   })
 }
+
+const touristAceStages = aceStages("tourist-trap", [{ key: "wader", label: "Wader", target: 1 }, { key: "chaser", label: "Chaser", target: 3 }, { key: "hunter", label: "Hunter", target: 6 }, { key: "legend", label: "Legend", target: 9 }], asset)
+const cherryAceStages = aceStages("cherry-blossom", [{ key: "wader", label: "Wader", target: 1 }, { key: "chaser", label: "Chaser", target: 3 }, { key: "hunter", label: "Hunter", target: 6 }, { key: "legend", label: "Legend", target: 9 }], cherryAsset)
 export const COURSE_CHALLENGE_COURSES: CourseChallengeCourse[] = [
   {
     slug: "tourist-trap",
@@ -97,25 +125,19 @@ export const COURSE_CHALLENGE_COURSES: CourseChallengeCourse[] = [
     levels: touristTrapLevels(),
     courseProAsset: asset("tourist-trap-course-pro.png"),
     courseMasterAsset: asset("tourist-trap-course-master.png"),
-    aceChallenge: {
-      unlockAfterLevel: 3,
-      requirementsStatus: "ready",
-      easyRequirements: [req("ace-easy-hio", "8 hole-in-ones in one round", "hio_count", "gte", 8)],
-      hardRequirements: [req("ace-hard-hio", "2 hole-in-ones in one round", "hio_count", "gte", 2)],
-      rewardKey: "course-challenge:tourist-trap:ace-challenge",
-      rewardAsset: asset("tourist-trap-ace-challenge.png"),
-    },
+    aceStages: touristAceStages,
   },
   {
     slug: "cherry-blossom",
     name: "Cherry Blossom",
     status: "live",
     displayOrder: 2,
-    shortDescription: "A second launch course using the same five-Level, two-sided progression engine.",
+    shortDescription: "A second launch course using the same five-Level book and full Ace Track.",
     backgroundImage: "https://objectstorage.us-ashburn-1.oraclecloud.com/n/idw1nygcxpvm/b/wmgt-assets/o/CBE_FULL.jpg",
     easyCode: "CBE",
     hardCode: "CBH",
-    levels: pendingLevels("cherry-blossom", "CBE", "CBH"),
+    levels: cherryBlossomLevels(),
+    aceStages: cherryAceStages,
     courseProAsset: CHERRY_BLOSSOM_REWARD_ASSET_PATHS.coursePro,
     courseMasterAsset: CHERRY_BLOSSOM_REWARD_ASSET_PATHS.courseMaster,
   },
@@ -124,5 +146,7 @@ export const COURSE_CHALLENGE_COURSES: CourseChallengeCourse[] = [
 export function getCourseChallenge(slug: string) { return COURSE_CHALLENGE_COURSES.find((course) => course.slug === slug) ?? null }
 export function getPublicCourseChallenges() { return COURSE_CHALLENGE_COURSES.filter((course) => course.status === "live").sort((left, right) => left.displayOrder - right.displayOrder) }
 export function getCourseChallengeLevel(course: CourseChallengeCourse, level: number) { return course.levels.find((item) => item.level === level) ?? null }
-export function isAceChallengeUnlocked(course: CourseChallengeCourse, completedLevels: number[]) { return Boolean(course.aceChallenge && completedLevels.includes(course.aceChallenge.unlockAfterLevel)) }
+export function getAceStage(course: CourseChallengeCourse, stage: number) { return course.aceStages?.find((item) => item.stage === stage) ?? null }
+export function isAceChallengeUnlocked(course: CourseChallengeCourse, completedLevels: number[]) { return Boolean(course.aceStages?.length && completedLevels.includes(3)) }
+export function aceStageForUniqueHoleCount(course: CourseChallengeCourse, uniqueHoleCount: number) { return course.aceStages?.find((stage) => (stage.easyRequirements[0]?.target || Number.MAX_SAFE_INTEGER) > uniqueHoleCount) ?? null }
 export function courseChallengeRewardLabel(course: CourseChallengeCourse, level: number, kind: "sticker" | "badge") { return kind === "sticker" ? course.name + " Level " + level + " sticker" : course.name + " Level " + level + " badge" }

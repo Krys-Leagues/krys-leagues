@@ -1,4 +1,5 @@
 import { getCourseChallenge, getCourseChallengeLevel, isAceChallengeUnlocked } from "@/lib/courseChallenges/catalog"
+import { aceProgress, uniqueAceHoleNumbers, type AceSubmissionRecord } from "@/lib/courseChallenges/ace"
 import { compareEnteredFinalScore, evaluateCourseChallengeRequirements, validHoleScores, validHolePars } from "@/lib/courseChallenges/evaluation"
 import { eligibleRoundDate, audienceForCanonicalPlayer } from "@/lib/courseChallenges/release"
 import { createCourseChallengesServiceClient, getCourseChallengeIdentity } from "@/lib/courseChallenges/server"
@@ -11,21 +12,20 @@ export async function POST(request: Request) {
   try {
     const identity = await getCourseChallengeIdentity()
     if (!identity) return Response.json({ error: "A canonical Krys Leagues player identity is required for Course Challenge submissions." }, { status: 401 })
-    const body = await request.json() as Partial<CourseChallengeSubmissionPayload>
+    const body = await request.json() as Partial<CourseChallengeSubmissionPayload> & { aceStage?: number }
     const course = typeof body.courseSlug === "string" ? getCourseChallenge(body.courseSlug) : null
     const challengeKey = body.challengeKey === "ace" ? "ace" : "level"
     const requestedLevel = typeof body.level === "number" ? body.level : Number(body.level)
     const difficulty = body.difficulty as CourseChallengeDifficulty
     const currentLevel = course && challengeKey === "level" ? getCourseChallengeLevel(course, requestedLevel) : null
-    const ace = course?.aceChallenge
-    if (!course || course.status !== "live" || !["Easy", "Hard"].includes(difficulty) || (challengeKey === "level" && !currentLevel) || (challengeKey === "ace" && !ace)) return Response.json({ error: "Course Challenge course, challenge, Level, or difficulty is invalid." }, { status: 400 })
+    if (!course || course.status !== "live" || !["Easy", "Hard"].includes(difficulty) || (challengeKey === "level" && !currentLevel) || (challengeKey === "ace" && !course.aceStages?.length)) return Response.json({ error: "Course Challenge course, challenge, Level, or difficulty is invalid." }, { status: 400 })
     const level = challengeKey === "ace" ? 3 : requestedLevel
     const service = createCourseChallengesServiceClient()
     const profile = await service.from("course_challenge_progress").select("level_number,completed_at").eq("player_id", identity.playerId).eq("course_slug", course.slug).order("level_number", { ascending: true })
     if (profile.error) throw profile.error
     const completedLevels = (profile.data || []).filter((row) => row.completed_at).map((row) => Number(row.level_number))
     if (challengeKey === "level" && level > 1 && !completedLevels.includes(level - 1)) return Response.json({ error: "Complete both sides of the previous Level before submitting this one." }, { status: 409 })
-    if (challengeKey === "ace" && !isAceChallengeUnlocked(course, completedLevels)) return Response.json({ error: "Complete Level 3 before submitting the Ace Challenge." }, { status: 409 })
+    if (challengeKey === "ace" && !isAceChallengeUnlocked(course, completedLevels)) return Response.json({ error: "Complete Level 3 before submitting the Ace Track." }, { status: 409 })
     if (typeof body.proofPhotoPath !== "string" || !body.proofPhotoPath.startsWith(identity.user.id + "/")) return Response.json({ error: "A proof scorecard photo is required." }, { status: 400 })
     if (!Array.isArray(body.scores) || !validHoleScores(body.scores)) return Response.json({ error: "Enter all 18 positive whole-number hole scores." }, { status: 400 })
 
@@ -41,9 +41,17 @@ export async function POST(request: Request) {
     if (courseResult.error) throw courseResult.error
     const pars = courseResult.data?.hole_pars as number[] | null | undefined
     if (!validHolePars(pars || [])) return Response.json({ error: "The authoritative 18-hole pars are unavailable for this course." }, { status: 503 })
-    const requirements = challengeKey === "ace" ? (difficulty === "Easy" ? ace?.easyRequirements : ace?.hardRequirements) : (difficulty === "Easy" ? currentLevel?.easyRequirements : currentLevel?.hardRequirements)
-    const requirementsStatus = challengeKey === "ace" ? ace?.requirementsStatus : currentLevel?.requirementsStatus
-    const evaluation = evaluateCourseChallengeRequirements(body.scores, pars || [], requirements || [], requirementsStatus || "pending_review")
+    const approvedAce = challengeKey === "ace" ? await service.from("course_challenge_submissions").select("difficulty,hole_scores,requirements_evaluation,status").eq("player_id", identity.playerId).eq("course_slug", course.slug).eq("challenge_key", "ace").eq("status", "approved") : { data: [], error: null }
+    if (approvedAce.error) throw approvedAce.error
+    const aceRows = (approvedAce.data || []) as AceSubmissionRecord[]
+    const aceState = challengeKey === "ace" ? aceProgress(course, aceRows) : null
+    const aceStage = aceState?.nextStage || null
+    if (challengeKey === "ace" && (!aceStage || (body.aceStage !== undefined && Number(body.aceStage) !== aceStage.stage))) return Response.json({ error: "Submit the currently open Ace Track stage." }, { status: 409 })
+    const requirements = challengeKey === "ace" ? (difficulty === "Easy" ? aceStage?.easyRequirements : aceStage?.hardRequirements) : (difficulty === "Easy" ? currentLevel?.easyRequirements : currentLevel?.hardRequirements)
+    const requirementsStatus = challengeKey === "ace" ? aceStage?.requirementsStatus : currentLevel?.requirementsStatus
+    const combinedAceHoles = challengeKey === "ace" ? uniqueAceHoleNumbers(aceRows, body.scores) : []
+    if (challengeKey === "ace" && combinedAceHoles.length <= (aceState?.uniqueHoles.length || 0)) return Response.json({ error: "This Ace scorecard must add at least one new unique ace hole." }, { status: 409 })
+    const evaluation = evaluateCourseChallengeRequirements(body.scores, pars || [], requirements || [], requirementsStatus || "pending_review", challengeKey === "ace" ? { uniqueAceHoles: combinedAceHoles.length } : undefined)
     const finalScoreCheck = compareEnteredFinalScore(evaluation.metrics, enteredFinalScore)
     const reviewReasons = [
       !body.roundDate || !body.roundTime ? "Scorecard date/time evidence requires admin review." : null,

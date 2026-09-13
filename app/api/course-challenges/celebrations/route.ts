@@ -1,6 +1,6 @@
 import { getPublicCourseChallenges } from "@/lib/courseChallenges/catalog"
 import { celebrationRewardLabel, COURSE_CHALLENGE_REACTIONS, type CourseChallengeReaction } from "@/lib/courseChallenges/celebrations"
-import { aceRewardDefinition, levelRewardDefinitions } from "@/lib/courseChallenges/rewards"
+import { aceRewardDefinition, aceStageRewardDefinitions, levelRewardDefinitions } from "@/lib/courseChallenges/rewards"
 import { getCourseChallengeIdentity } from "@/lib/courseChallenges/server"
 import { playerAvatarPublicUrl } from "@/lib/playerAvatars"
 import { createServerSupabaseClient } from "@/lib/supabase/server"
@@ -18,6 +18,7 @@ function dateRange(dateParam: string | null) {
 function rewardDefinitions() {
   return new Map(getPublicCourseChallenges().flatMap((course) => [
     ...course.levels.flatMap((level) => levelRewardDefinitions(course, level.level)),
+    ...aceStageRewardDefinitions(course),
     ...(course.aceChallenge ? [aceRewardDefinition(course)] : []),
   ].filter((reward): reward is NonNullable<typeof reward> => Boolean(reward)).map((reward) => [reward.rewardKey, reward])))
 }

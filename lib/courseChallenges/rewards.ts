@@ -12,12 +12,12 @@ export function levelRewardDefinitions(course: CourseChallengeCourse, level: num
 }
 
 export function isProfileDisplayRewardKey(rewardKey: string): boolean {
-  return rewardKey.endsWith(":course-pro") || rewardKey.endsWith(":ace-challenge") || rewardKey.endsWith(":course-master") || rewardKey.includes(":level-5:")
+  return rewardKey.endsWith(":course-pro") || rewardKey.endsWith(":ace-challenge") || rewardKey.includes(":ace-") || rewardKey.endsWith(":course-master") || rewardKey.includes(":level-5:")
 }
 
 export function profileDisplayRewardRank(rewardKey: string): number {
   if (rewardKey.endsWith(":course-pro")) return 0
-  if (rewardKey.endsWith(":ace-challenge")) return 1
+  if (rewardKey.endsWith(":ace-challenge") || rewardKey.includes(":ace-")) return 1
   if (rewardKey.includes(":level-5:")) return 2
   return 3
 }
@@ -25,4 +25,8 @@ export function profileDisplayRewardRank(rewardKey: string): number {
 export function aceRewardDefinition(course: CourseChallengeCourse): CourseChallengeRewardDefinition | null {
   const ace = course.aceChallenge
   return ace ? { rewardKey: ace.rewardKey, label: course.name + " Ace Challenge badge", kind: "badge", courseSlug: course.slug, level: null, assetPath: ace.rewardAsset } : null
+}
+
+export function aceStageRewardDefinitions(course: CourseChallengeCourse): CourseChallengeRewardDefinition[] {
+  return (course.aceStages || []).map((stage) => ({ rewardKey: stage.rewardKey, label: course.name + " " + stage.label, kind: "badge" as const, courseSlug: course.slug, level: null, assetPath: stage.rewardAsset }))
 }

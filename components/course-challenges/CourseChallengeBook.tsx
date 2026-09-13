@@ -14,9 +14,9 @@ import styles from "./course-challenges.module.css"
 import CourseChallengesGuide from "./CourseChallengesGuide"
 import CourseChallengeRewardSelector from "./CourseChallengeRewardSelector"
 
-type ProgressPayload = { completedLevels?: number[]; rewards?: Array<{ rewardKey: string; label: string; level: number | null; kind: "sticker" | "badge" }> }
+type ProgressPayload = { completedLevels?: number[]; rewards?: Array<{ rewardKey: string; label: string; level: number | null; kind: "sticker" | "badge" }>; courses?: Array<{ slug: string; uniqueAceHoles?: number; completedAceStages?: number[] }> }
 type CatalogPayload = { pars?: Partial<Record<CourseChallengeDifficulty, number[]>>; available?: boolean; error?: string }
-type SubmissionState = { challengeKey: "level" | "ace"; level: number; difficulty: CourseChallengeDifficulty }
+type SubmissionState = { challengeKey: "level" | "ace"; level: number; aceStage?: number; difficulty: CourseChallengeDifficulty }
 
 export default function CourseChallengeBook({ course }: { course: CourseChallengeCourse }) {
   const [completedLevels, setCompletedLevels] = useState<number[]>([])
@@ -26,6 +26,8 @@ export default function CourseChallengeBook({ course }: { course: CourseChalleng
   const [message, setMessage] = useState("")
   const [profileRewardMessage, setProfileRewardMessage] = useState("")
   const [submission, setSubmission] = useState<SubmissionState | null>(null)
+  const [uniqueAceHoles, setUniqueAceHoles] = useState(0)
+  const [completedAceStages, setCompletedAceStages] = useState<number[]>([])
 
   useEffect(() => {
     let active = true
@@ -37,6 +39,9 @@ export default function CourseChallengeBook({ course }: { course: CourseChalleng
       setPars(catalog.pars || {})
       setCompletedLevels(profile.completedLevels || [])
       setRewards(profile.rewards || [])
+      const courseProfile = profile.courses?.find((item) => item.slug === course.slug)
+      setUniqueAceHoles(courseProfile?.uniqueAceHoles || 0)
+      setCompletedAceStages(courseProfile?.completedAceStages || [])
       if (catalog.error) setMessage(catalog.error)
     }).catch(() => { if (active) setMessage("Course data could not be loaded yet.") }).finally(() => { if (active) setLoading(false) })
     return () => { active = false }
@@ -46,7 +51,8 @@ export default function CourseChallengeBook({ course }: { course: CourseChalleng
   const maxCompleted = completedLevels.length ? Math.max(...completedLevels) : 0
   const currentLevel = useMemo(() => course.levels.find((level) => !completedLevels.includes(level.level))?.level || course.levels.length + 1, [completedLevels, course.levels])
   const aceUnlocked = isAceChallengeUnlocked(course, completedLevels)
-  const ace = course.aceChallenge
+  const aceStages = course.aceStages || []
+  const currentAceStage = aceStages.find((stage) => !completedAceStages.includes(stage.stage)) || null
   const [selectedLevel, setSelectedLevel] = useState(1)
   const selectedLevelData = course.levels.find((level) => level.level === selectedLevel) || course.levels[0]
 
@@ -93,7 +99,7 @@ export default function CourseChallengeBook({ course }: { course: CourseChalleng
                 const rewardState = rewardKeys.has(level.stickerKey) ? "earned" : level.level === currentLevel ? "current" : "locked"
                 return <Reward key={level.stickerKey} rewardKey={level.stickerKey} label={"Level " + level.level + " sticker"} rewardState={rewardState} assetPath={level.stickerAsset} />
               })}
-              {course.aceChallenge && <Reward label="Ace Challenge badge" rewardKey={course.aceChallenge.rewardKey} rewardState={rewardKeys.has(course.aceChallenge.rewardKey) ? "earned" : aceUnlocked ? "current" : "locked"} assetPath={course.aceChallenge.rewardAsset} />}
+              {aceStages.map((stage) => <Reward key={stage.rewardKey} label={stage.label} rewardKey={stage.rewardKey} rewardState={rewardKeys.has(stage.rewardKey) ? "earned" : aceUnlocked && currentAceStage?.stage === stage.stage ? "current" : "locked"} assetPath={stage.rewardAsset} />)}
               <Reward rewardKey={"course-challenge:" + course.slug + ":course-pro"} label="Course Pro" rewardState={rewardKeys.has("course-challenge:" + course.slug + ":course-pro") ? "earned" : currentLevel === 3 ? "current" : "locked"} assetPath={course.courseProAsset || null} />
               <Reward rewardKey={"course-challenge:" + course.slug + ":course-master"} label="Course Master" rewardState={rewardKeys.has("course-challenge:" + course.slug + ":course-master") ? "earned" : currentLevel === 5 ? "current" : "locked"} assetPath={course.courseMasterAsset || null} />
             </div>
@@ -124,16 +130,16 @@ export default function CourseChallengeBook({ course }: { course: CourseChalleng
             </>
           })()}
         </section>}
-        {selectedLevelData.level === (ace?.unlockAfterLevel || 3) && ace && <section className={styles.levelCard} aria-label="Ace Challenge">
-          <div className={styles.levelHeader}><div><h2>ACE CHALLENGE</h2><p>Unlocks after Level {ace.unlockAfterLevel}</p></div><span className={styles.statusChip}>{aceUnlocked ? "Unlocked" : "Locked"}</span></div>
-          {!aceUnlocked ? <p className={styles.helper}>Complete Level 3 to reveal the Ace Challenge requirements. The requirements stay hidden until then.</p> : <>
+        {selectedLevelData.level >= 3 && aceStages.length > 0 && <section className={styles.levelCard} aria-label="Ace Track">
+          <div className={styles.levelHeader}><div><h2>ACE TRACK</h2><p>Unlocks after Level 3 · {uniqueAceHoles} of 9 unique ace holes</p></div><span className={styles.statusChip}>{aceUnlocked ? currentAceStage ? currentAceStage.label : "Complete" : "Locked"}</span></div>
+          <div className={styles.aceStageRail}>{aceStages.map((stage) => <div className={styles.aceStage} data-complete={completedAceStages.includes(stage.stage)} data-current={aceUnlocked && currentAceStage?.stage === stage.stage} key={stage.rewardKey}><strong>{stage.label}</strong><small>{stage.easyRequirements[0]?.label}</small></div>)}</div>
+          {!aceUnlocked ? <p className={styles.helper}>Complete Level 3 to unlock the Ace Track. Your unique ace-hole progress will continue through Levels 4 and 5.</p> : currentAceStage ? <>
             <div className={styles.sideGrid}>
-              <ChallengeSide course={course} difficulty="Easy" requirements={ace.easyRequirements} requirementsPending={ace.requirementsStatus === "pending_review"} onSubmit={() => setSubmission({ challengeKey: "ace", level: ace.unlockAfterLevel, difficulty: "Easy" })} />
-              <ChallengeSide course={course} difficulty="Hard" requirements={ace.hardRequirements} requirementsPending={ace.requirementsStatus === "pending_review"} onSubmit={() => setSubmission({ challengeKey: "ace", level: ace.unlockAfterLevel, difficulty: "Hard" })} />
+              <ChallengeSide course={course} difficulty="Easy" requirements={currentAceStage.easyRequirements} requirementsPending={currentAceStage.requirementsStatus === "pending_review"} onSubmit={() => setSubmission({ challengeKey: "ace", level: 3, aceStage: currentAceStage.stage, difficulty: "Easy" })} />
+              <ChallengeSide course={course} difficulty="Hard" requirements={currentAceStage.hardRequirements} requirementsPending={currentAceStage.requirementsStatus === "pending_review"} onSubmit={() => setSubmission({ challengeKey: "ace", level: 3, aceStage: currentAceStage.stage, difficulty: "Hard" })} />
             </div>
-            {submission?.challengeKey === "ace" && <SubmissionForm course={course} level={ace.unlockAfterLevel} challengeKey="ace" difficulty={submission.difficulty} pars={pars?.[submission.difficulty] || null} onCancel={() => setSubmission(null)} onSubmitted={(result) => { setMessage(result); setSubmission(null) }} />}
-          </>}
-          <Reward label="Ace Challenge badge" rewardKey={ace.rewardKey} rewardState={rewardKeys.has(ace.rewardKey) ? "earned" : aceUnlocked ? "current" : "locked"} assetPath={ace.rewardAsset} />
+            {submission?.challengeKey === "ace" && <SubmissionForm course={course} level={3} challengeKey="ace" aceStage={submission.aceStage} difficulty={submission.difficulty} pars={pars?.[submission.difficulty] || null} onCancel={() => setSubmission(null)} onSubmitted={(result) => { setMessage(result); setSubmission(null) }} />}
+          </> : <p className={styles.success}>Ace Legend complete — all 9 unique ace holes are in your verified track.</p>}
         </section>}
           </section>
         </div>
@@ -169,7 +175,7 @@ function Reward({ label, rewardKey, rewardState, assetPath }: { label: string; r
   const earned = rewardState === "earned"
   return <div className={styles.reward} data-earned={earned} data-reward-state={rewardState} data-reward-key={rewardKey}>{assetPath && rewardState === "earned" ? <Image src={assetPath} alt="" width={56} height={56} sizes="56px" /> : assetPath && rewardState === "current" ? <Image className={styles.rewardGhost} src={assetPath} alt="" width={56} height={56} sizes="56px" /> : earned ? <span className={styles.rewardMark} aria-hidden="true">✦</span> : <span className={styles.rewardSilhouette} style={silhouetteStyle} aria-hidden="true" />}<span>{label}</span></div>
 }
-function SubmissionForm({ course, level, challengeKey, difficulty, pars, onCancel, onSubmitted }: { course: CourseChallengeCourse; level: number; challengeKey: "level" | "ace"; difficulty: CourseChallengeDifficulty; pars: number[] | null; onCancel: () => void; onSubmitted: (message: string) => void }) {
+function SubmissionForm({ course, level, challengeKey, aceStage, difficulty, pars, onCancel, onSubmitted }: { course: CourseChallengeCourse; level: number; challengeKey: "level" | "ace"; aceStage?: number; difficulty: CourseChallengeDifficulty; pars: number[] | null; onCancel: () => void; onSubmitted: (message: string) => void }) {
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [scores, setScores] = useState<string[]>(Array.from({ length: 18 }, () => ""))
@@ -247,15 +253,15 @@ function SubmissionForm({ course, level, challengeKey, difficulty, pars, onCance
       const storagePath = userResult.data.user.id + "/" + course.slug + "/" + challengeKey + "-" + level + "-" + difficulty + "-" + crypto.randomUUID() + "." + extension
       const upload = await supabase.storage.from("course-challenge-proof").upload(storagePath, file, { contentType: file.type || "image/jpeg", upsert: false })
       if (upload.error) throw new Error("Proof photo upload failed: " + upload.error.message)
-      const response = await fetch("/api/course-challenges/submissions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ courseSlug: course.slug, level, challengeKey, difficulty, proofPhotoPath: storagePath, scores: numericScores, finalScore: calculatedFinalScore }) })
+    const response = await fetch("/api/course-challenges/submissions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ courseSlug: course.slug, level, challengeKey, aceStage, difficulty, proofPhotoPath: storagePath, scores: numericScores, finalScore: calculatedFinalScore }) })
       const payload = await response.json() as { error?: string; message?: string }
       if (!response.ok) throw new Error(payload.error || "Course Challenge submission failed.")
       onSubmitted(payload.message || "Scorecard received for review.")
     } catch (caught) { setError(caught instanceof Error ? caught.message : "Course Challenge submission failed.") } finally { setBusy(false) }
   }
 
-  return <section className={styles.submissionPanel} aria-label={(challengeKey === "ace" ? "Ace Challenge" : "Level " + level) + " " + difficulty + " scorecard submission"}>
-    <div><p className={styles.eyebrow}>{challengeKey === "ace" ? "ACE CHALLENGE" : "LEVEL " + level} · {difficulty.toUpperCase()}</p><h3>Upload your scorecard, then enter the scores</h3></div>
+  return <section className={styles.submissionPanel} aria-label={(challengeKey === "ace" ? "Ace Track" : "Level " + level) + " " + difficulty + " scorecard submission"}>
+    <div><p className={styles.eyebrow}>{challengeKey === "ace" ? "ACE TRACK" : "LEVEL " + level} · {difficulty.toUpperCase()}</p><h3>Upload your scorecard, then enter the scores</h3></div>
     <details className={styles.formHelp}><summary>Rules / Help</summary><p>Drag your scorecard photo here or tap to choose one. The scorecard numbers and final score should be clearly readable. Recommended: crop the photo so the scorecard fills the image.</p><p>Do not type the date, time, or Game Mode. Levels 1–2 accept Solo or Multiplayer; Levels 3–5 and Ace require Multiplayer. Practice Mode never qualifies. An admin verifies the private proof before approval.</p></details>
     <div className={styles.dropZone + (dragActive ? " " + styles.dropZoneActive : "")} role="button" tabIndex={0} onClick={() => fileInputRef.current?.click()} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); fileInputRef.current?.click() } }} onDragEnter={(event) => { event.preventDefault(); setDragActive(true) }} onDragOver={(event) => event.preventDefault()} onDragLeave={() => setDragActive(false)} onDrop={(event) => { event.preventDefault(); setDragActive(false); chooseFile(event.dataTransfer.files?.[0] || null) }}>
       <input ref={fileInputRef} className={styles.hiddenFileInput} type="file" accept="image/*" onChange={(event) => chooseFile(event.target.files?.[0] || null)} />
