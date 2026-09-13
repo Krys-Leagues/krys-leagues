@@ -33,14 +33,26 @@
 .primaryButton, .submitButton { background: linear-gradient(135deg, #7c3aed, #db2777); }
 .secondaryButton, .lockedButton { background: #0f172acc; }
 .lockedButton { cursor: not-allowed; color: #94a3b8; }
-.courseList { display: grid; gap: 16px; margin-top: 8px; }
-.courseCard { position: relative; overflow: hidden; min-height: 210px; border: 1px solid #ffffff2b; border-radius: 22px; background: #0f172a; box-shadow: 0 20px 60px #0005; }
+.courseList { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 16px; width: min(760px, 100%); margin: 8px auto 0; }
+.courseCard { position: relative; overflow: hidden; min-height: 230px; border: 1px solid #ffffff2b; border-radius: 22px; background: #0f172a; box-shadow: 0 20px 60px #0005; perspective: 1200px; }
 .courseCardBackdrop { position: absolute; inset: 0; background-position: center; background-size: cover; opacity: .34; filter: saturate(.9); }
 .courseCardBackdrop::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, #020617f2, #020617a8, #02061731); }
-.courseCardContent { position: relative; min-height: 210px; display: flex; flex-direction: column; justify-content: space-between; gap: 18px; padding: 24px; }
+.courseCard::before { content: ""; position: absolute; z-index: 1; inset: 12px 12px 12px 18px; border: 1px solid #f8fafc45; border-radius: 16px; background: linear-gradient(100deg, #fdf4ffea, #d1fae5d9 48%, #f9a8d4dd); box-shadow: 0 14px 35px #0006, inset 0 0 0 3px #ffffff80; opacity: 0; transform: rotateY(-88deg) scaleX(.02); transform-origin: left center; pointer-events: none; }
+.courseCardContent { position: relative; z-index: 2; min-height: 230px; display: flex; flex-direction: column; justify-content: space-between; gap: 14px; padding: 16px; }
 .courseCardContent h2, .courseCardContent p { margin: 0; }
 .courseCardContent h2 { font-size: clamp(1.6rem, 4vw, 2.5rem); }
 .courseCardContent p { max-width: 560px; color: #dbeafe; line-height: 1.55; }
+.courseBookChoice { position: relative; z-index: 2; display: grid; align-content: space-between; gap: 9px; min-height: 198px; padding: 20px; border: 1px solid #ffffff35; border-radius: 16px; color: #fff; text-decoration: none; background: linear-gradient(135deg, #020617d9, #172554b8 56%, #064e3b8a); box-shadow: inset 0 0 0 1px #f9a8d433, 0 18px 35px #0005; transform-origin: left center; }
+.bookChoiceKicker { color: #86efac; font-size: .7rem; font-weight: 950; letter-spacing: .16em; }
+.courseBookChoice h2 { margin: 0; color: #fff; font-size: clamp(1.55rem, 4vw, 2.25rem); letter-spacing: .02em; text-shadow: 0 3px 18px #000c; }
+.bookChoiceDescription { color: #dbeafe; line-height: 1.4; }
+.bookChoiceHint { color: #f9a8d4; font-size: .9rem; font-weight: 900; }
+.courseBookChoice:focus-visible { outline: 3px solid #f9a8d4; outline-offset: 4px; }
+.courseCard[data-book-opening="true"] { z-index: 5; }
+.courseCard[data-book-opening="true"]::before { animation: landingBookPages 900ms ease-in forwards; }
+.courseCard[data-book-opening="true"] .courseBookChoice { animation: landingBookCover 900ms ease-in forwards; pointer-events: none; }
+@keyframes landingBookPages { 0% { opacity: 0; transform: rotateY(-88deg) scaleX(.02); } 38% { opacity: .9; transform: rotateY(-12deg) scaleX(.72); } 100% { opacity: 1; transform: rotateY(0) scaleX(1.12); } }
+@keyframes landingBookCover { 0% { transform: rotateY(0) scale(1); } 45% { transform: rotateY(-42deg) scale(1.12); } 100% { opacity: .08; transform: rotateY(-96deg) scale(1.42); } }
 .courseCardLink { align-self: flex-start; color: #fff; text-decoration: none; }
 .rulesOverlay { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 18px; background: #020617d9; backdrop-filter: blur(10px); }
 .rulesCard { width: min(760px, 100%); max-height: min(820px, 92vh); overflow: auto; border: 1px solid #ffffff2d; border-radius: 22px; padding: 26px; background: #0f172a; box-shadow: 0 35px 100px #000b; }
@@ -141,6 +153,9 @@
 .profileStickers { display: flex; flex-wrap: wrap; gap: 8px; }
 .profileSticker { border: 1px solid #fbbf2444; border-radius: 999px; padding: 6px 9px; color: #fde68a; font-size: .75rem; font-weight: 800; }
 @media (max-width: 720px) {
+  .courseList { grid-template-columns: 1fr; width: min(360px, 100%); }
+  .courseCard, .courseCardContent { min-height: 218px; }
+  .courseBookChoice { min-height: 184px; padding: 18px; }
   .bookStage { min-height: 420px; }
   .bookCover { min-height: 420px; padding: 24px; }
   .bookSpread { grid-template-columns: 1fr; }
@@ -153,6 +168,7 @@
   .levelTab { min-height: 64px; padding: 8px; }
 }
 @media (prefers-reduced-motion: reduce) {
+  .courseCard[data-book-opening="true"]::before, .courseCard[data-book-opening="true"] .courseBookChoice { animation-duration: 1ms; animation-delay: 0ms; }
   .bookStage[data-book-phase="opening"] .bookCover, .bookStage[data-book-phase="opening"] .bookPages { animation-duration: 1ms; animation-delay: 0ms; }
 }
 .courseNameLink { color: #fff; text-decoration: none; }

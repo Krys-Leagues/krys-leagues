@@ -9,6 +9,10 @@ test("Course Challenges opens on the approved welcome experience and direct cour
   assert.match(landing, /course-challenges-welcome-approved\.png/)
   assert.match(landing, /className=\{styles\.courseNameLink\}/)
   assert.match(landing, /href=\{`\/course-challenges\/\$\{course\.slug\}`\}/)
+  assert.match(landing, /data-book-opening=\{openingCourse === course\.slug \? "true" : undefined\}/)
+  assert.match(landing, /router\.push/)
+  assert.match(landing, /\?open=1/)
+  assert.doesNotMatch(landing, /Open \{course\.name\} Book/)
 })
 
 test("profile summary omits empty sticker placeholder and keeps course name clickable", () => {

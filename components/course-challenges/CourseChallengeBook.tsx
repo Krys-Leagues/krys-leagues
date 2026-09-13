@@ -18,7 +18,7 @@ type ProgressPayload = { completedLevels?: number[]; levelProgress?: Array<{ cou
 type CatalogPayload = { pars?: Partial<Record<CourseChallengeDifficulty, number[]>>; available?: boolean; error?: string }
 type SubmissionState = { challengeKey: "level" | "ace"; level: number; aceStage?: number; difficulty: CourseChallengeDifficulty }
 
-export default function CourseChallengeBook({ course }: { course: CourseChallengeCourse }) {
+export default function CourseChallengeBook({ course, autoOpen = false }: { course: CourseChallengeCourse; autoOpen?: boolean }) {
   const [completedLevels, setCompletedLevels] = useState<number[]>([])
   const [rewards, setRewards] = useState<ProgressPayload["rewards"]>([])
   const [pars, setPars] = useState<CatalogPayload["pars"]>({})
@@ -28,7 +28,7 @@ export default function CourseChallengeBook({ course }: { course: CourseChalleng
   const [submission, setSubmission] = useState<SubmissionState | null>(null)
   const [uniqueAceHoles, setUniqueAceHoles] = useState(0)
   const [completedAceStages, setCompletedAceStages] = useState<number[]>([])
-  const [bookPhase, setBookPhase] = useState<"closed" | "opening" | "open">("closed")
+  const [bookPhase, setBookPhase] = useState<"closed" | "opening" | "open">(autoOpen ? "opening" : "closed")
 
   useEffect(() => {
     let active = true
