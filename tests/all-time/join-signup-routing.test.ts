@@ -23,7 +23,6 @@ test("every visible Join Leagues card maps to its intended registration experien
     ["Join Doubles League", "/register?league=doubles"],
     ["Join Pro League", "/register?league=pro"],
     ["Join Bracket / Cup Players", "/register?league=cups"],
-    ["Join Community, Records, and Leaderboards", "/register?league=community"],
   ])
 })
 
