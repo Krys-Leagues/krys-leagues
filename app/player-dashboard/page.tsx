@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { createDiscordAuthCallbackUrl } from "@/lib/authReturnTo"
 import { supabase } from "@/lib/supabase"
+import PlayerProfileNavLink from "@/components/PlayerProfileNavLink"
 
 type Player = {
   id: string
@@ -271,12 +272,9 @@ export default function PlayerDashboardPage() {
                 View Matches
               </Link>
 
-              <Link
-                href={`/players/${player.id}`}
-                style={actionButton}
-              >
+              <PlayerProfileNavLink style={actionButton}>
                 Player Profile
-              </Link>
+              </PlayerProfileNavLink>
 
               <Link href="/standings" style={actionButton}>
                 View Standings

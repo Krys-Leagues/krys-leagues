@@ -72,7 +72,8 @@ test("profile keeps Course Challenges navigation without rendering the obsolete 
   assert.doesNotMatch(profile, /CourseChallengesProfileSummary/)
   assert.doesNotMatch(profile, /ACHIEVEMENT BOOK/)
   assert.doesNotMatch(profile, /Only earned Level stickers are shown here/)
-  assert.match(profile, /href="\/players\?browse=1".*Player Profiles/)
+  assert.match(profile, /PlayerProfileNavLink currentPlayerId=\{player\.id\}/)
+  assert.match(read("components/PlayerProfileNavLink.tsx"), /\/players\?browse=1/)
 })
 
 test("welcome page keeps both safe back destinations and canonical Player Profile routing", () => {

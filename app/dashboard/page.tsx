@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { supabase } from "@/lib/supabase"
 import { loadCanonicalPublicPlayers, type CanonicalPublicPlayer } from "@/lib/publicPlayers"
+import PlayerProfileNavLink from "@/components/PlayerProfileNavLink"
 
 type Player = CanonicalPublicPlayer
 
@@ -36,6 +37,8 @@ export default function PlayerDashboardPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // The existing dashboard loader intentionally runs once on mount.
+    // eslint-disable-next-line react-hooks/immutability
     loadData()
   }, [])
 
@@ -213,9 +216,9 @@ export default function PlayerDashboardPage() {
     View Matches
   </Link>
 
-  <Link href="/players" style={actionButton}>
-    Player Profiles
-  </Link>
+  <PlayerProfileNavLink style={actionButton}>
+    Player Profile
+  </PlayerProfileNavLink>
 
   <Link href="/standings" style={actionButton}>
     View Standings

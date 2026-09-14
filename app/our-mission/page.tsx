@@ -1,5 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
+import PlayerProfileNavLink from "@/components/PlayerProfileNavLink"
 import styles from "./page.module.css"
 
 export default function OurMissionPage() {
@@ -8,7 +9,7 @@ export default function OurMissionPage() {
       <div className={styles.shell}>
         <nav className={styles.nav} aria-label="Our Mission navigation">
           <Link href="/" className={styles.navLink}>← Krys Leagues</Link>
-          <Link href="/players" className={styles.navLink}>Player Profiles</Link>
+          <PlayerProfileNavLink className={styles.navLink}>Player Profile</PlayerProfileNavLink>
           <Link href="/course-challenges" className={styles.navLink}>Course Challenges</Link>
         </nav>
 

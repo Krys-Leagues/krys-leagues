@@ -3,6 +3,7 @@ import Link from "next/link"
 import type { ReactNode } from "react"
 import type { ArtworkPageDefinition } from "@/lib/artworkNavigation"
 import { artworkTargetStyle, validateArtworkTargets } from "@/lib/artworkNavigation"
+import PlayerProfileNavLink from "@/components/PlayerProfileNavLink"
 
 export function ArtworkNavigation({ definition, overlay, afterFrame, hiddenTargetIds = [], frameAspectRatio, frameClassName }: { definition: ArtworkPageDefinition; overlay?: ReactNode; afterFrame?: ReactNode; hiddenTargetIds?: readonly string[]; frameAspectRatio?: string; frameClassName?: string }) {
   const errors = validateArtworkTargets(definition.targets)
@@ -37,7 +38,11 @@ export function ArtworkNavigation({ definition, overlay, afterFrame, hiddenTarge
                 style: artworkTargetStyle(target),
                 "data-artwork-target-id": target.id,
               }
-              return target.external ? (
+                return target.id === "player-profiles" ? (
+                  <PlayerProfileNavLink key={target.id} ariaLabel={target.label} className={props.className} style={props.style} dataArtworkTargetId={target.id}>
+                    <span className="sr-only">{target.label}</span>
+                  </PlayerProfileNavLink>
+                ) : target.external ? (
                 <a key={target.id} href={target.href} target="_blank" rel="noopener noreferrer" {...props}>
                   <span className="sr-only">{target.label}</span>
                 </a>

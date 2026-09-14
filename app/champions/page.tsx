@@ -2,6 +2,7 @@
 
 import Image from "next/image"
 import Link from "next/link"
+import PlayerProfileNavLink from "@/components/PlayerProfileNavLink"
 import { Suspense, useEffect, useMemo, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import { supabase } from "@/lib/supabase"
@@ -165,9 +166,9 @@ function ChampionsContent() {
             League Records
           </Link>
 
-          <Link href="/players" style={backButton}>
-            Player Profiles
-          </Link>
+          <PlayerProfileNavLink style={backButton}>
+            Player Profile
+          </PlayerProfileNavLink>
         </div>
 
         {loading ? (

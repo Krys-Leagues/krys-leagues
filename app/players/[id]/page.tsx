@@ -17,6 +17,7 @@ import TrophyMedia from "@/components/TrophyMedia"
 import PlayerCourseRecords from "@/components/records/PlayerCourseRecords"
 import { calculateMonthlyCareerStats, monthlyCourseMapName, uniqueMonthlyPeriodRecords, type MonthlyPresentationRow } from "@/lib/monthlyPresentation"
 import { groupProfileCourseChallengeRewards, type ProfileCourseChallengeRewardView } from "@/lib/playerProfileCourseChallenges"
+import PlayerProfileNavLink from "@/components/PlayerProfileNavLink"
 
 type Player = {
   id: string
@@ -606,7 +607,7 @@ export default function PublicPlayerProfilePage() {
 
         <nav className={styles.profileActions} aria-label="Player profile sections and navigation">
           <Link href="/" style={backButton}>← Krys Leagues</Link>
-          <Link href="/players?browse=1" style={backButton}>← Player Profiles</Link>
+          <PlayerProfileNavLink currentPlayerId={player.id} style={backButton}>Player Profile</PlayerProfileNavLink>
           {canEditProfile && <Link href="/player-dashboard" className={styles.profileActionButton}>Player Dashboard</Link>}
           <button type="button" className={styles.profileActionButton} aria-pressed={openProfileSection === "records"} onClick={() => setOpenProfileSection(current => current === "records" ? null : "records")}>Course Records</button>
           {hasCareerParticipation && <button type="button" className={styles.profileActionButton} aria-pressed={openProfileSection === "stats"} onClick={() => setOpenProfileSection(current => current === "stats" ? null : "stats")}>Player Stats</button>}
