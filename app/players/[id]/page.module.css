@@ -492,6 +492,34 @@
   opacity: .65;
 }
 
+.profileRewardSignInButton,
+.profileRewardOwnerMessage {
+  display: inline-block;
+  margin: 12px 0 0;
+  padding: 10px 13px;
+  border: 1px solid #ffffff38;
+  border-radius: 10px;
+  background: #02061766;
+  color: #f8fafc;
+  font: inherit;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.profileRewardSignInButton {
+  cursor: pointer;
+}
+
+.profileRewardSignInButton:hover,
+.profileRewardSignInButton:focus-visible {
+  border-color: #f9a8d4;
+  background: #be185918;
+}
+
+.profileRewardOwnerMessage {
+  color: #fde68a;
+}
+
 .profileRewardSelectionMessage {
   margin: 0;
   padding: 10px 12px;

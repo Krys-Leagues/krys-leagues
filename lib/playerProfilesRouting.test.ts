@@ -29,5 +29,5 @@ test("Player Profiles routing uses only the canonical player resolver", () => {
   assert.match(profile, /PlayerProfileNavLink currentPlayerId=\{player\.id\}/)
   assert.match(nav, /current_user_canonical_player_id/)
   assert.doesNotMatch(nav, /screen_name|display_name|email/)
-  assert.doesNotMatch(hub, /auth\.uid|email|display_name|discord/i)
+  assert.doesNotMatch(hub, /auth\.uid|email|display_name|discord_id|discord_username/i)
 })

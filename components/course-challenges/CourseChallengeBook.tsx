@@ -13,6 +13,7 @@ import scorecardStyles from "@/components/admin/records/NormalScorecard.module.c
 import styles from "./course-challenges.module.css"
 import CourseChallengesGuide from "./CourseChallengesGuide"
 import CourseChallengeRewardSelector from "./CourseChallengeRewardSelector"
+import DiscordSignInButton from "@/components/auth/DiscordSignInButton"
 
 type ProgressPayload = { completedLevels?: number[]; levelProgress?: Array<{ courseSlug?: string; level: number; easyStatus: string; hardStatus: string; completedAt: string | null; updatedAt: string | null }>; rewards?: Array<{ rewardKey: string; label: string; level: number | null; kind: "sticker" | "badge" }>; courses?: Array<{ slug: string; uniqueAceHoles?: number; completedAceStages?: number[]; completedPrestigeStages?: number[] }> }
 type CatalogPayload = { pars?: Partial<Record<CourseChallengeDifficulty, number[]>>; available?: boolean; error?: string }
@@ -87,7 +88,7 @@ export default function CourseChallengeBook({ course, autoOpen = false }: { cour
 
   return <main className={styles.page} style={{ "--course-background-image": course.backgroundImage ? "url(\"" + course.backgroundImage + "\")" : "none" } as React.CSSProperties}>
     <div className={styles.shell}>
-      <div className={styles.backLinks}><Link href="/course-challenges" className={styles.backLink}>← Course Challenges</Link><Link href={`/course-challenges/${course.slug}/community`} className={styles.backLink}>Who&apos;s taking on {course.name}? →</Link></div>
+      <div className={styles.backLinks}><Link href="/course-challenges" className={styles.backLink}>← Course Challenges</Link><DiscordSignInButton /><Link href={`/course-challenges/${course.slug}/community`} className={styles.backLink}>Who&apos;s taking on {course.name}? →</Link></div>
       <h1 className={styles.courseTitle}>{course.name}</h1>
       <div className={styles.book}>
         <details className={styles.rulesHelp}>

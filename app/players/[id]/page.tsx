@@ -3,7 +3,6 @@
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { createDiscordAuthCallbackUrl } from "@/lib/authReturnTo"
 import { supabase } from "@/lib/supabase"
 import PlayerProfileHero, { PlayerProfileRecognition } from "@/components/PlayerProfileHero"
 import PlayerProfileEditor, { type ProfilePreferences as SavedProfilePreferences } from "@/components/PlayerProfileEditor"
@@ -18,6 +17,8 @@ import PlayerCourseRecords from "@/components/records/PlayerCourseRecords"
 import { calculateMonthlyCareerStats, monthlyCourseMapName, uniqueMonthlyPeriodRecords, type MonthlyPresentationRow } from "@/lib/monthlyPresentation"
 import { groupProfileCourseChallengeRewards, type ProfileCourseChallengeRewardView } from "@/lib/playerProfileCourseChallenges"
 import PlayerProfileNavLink from "@/components/PlayerProfileNavLink"
+import DiscordSignInButton from "@/components/auth/DiscordSignInButton"
+import SignInRequiredModal from "@/components/auth/SignInRequiredModal"
 
 type Player = {
   id: string
@@ -140,6 +141,7 @@ type PypFixtureHistory = {
 }
 
 type StatsSectionKey = "kwt" | "stroke" | "match" | "pyp" | "doubles" | "pro" | "solo" | "monthly"
+type ProfileViewerState = "checking" | "signed-out" | "linked-owner" | "linked-other" | "signed-in-unlinked"
 
 const monthNames = ["", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 
@@ -204,8 +206,9 @@ export default function PublicPlayerProfilePage() {
     profileBadges: [] as string[],
   })
   const [preferences, setPreferences] = useState<ProfilePreferences>(DEFAULT_PREFERENCES)
-  const [hasSession, setHasSession] = useState(false)
   const [canEditProfile, setCanEditProfile] = useState(false)
+  const [viewerState, setViewerState] = useState<ProfileViewerState>("checking")
+  const [signInModalOpen, setSignInModalOpen] = useState(false)
   const [openProfileSection, setOpenProfileSection] = useState<"records" | "stats" | "aliases" | "trophies" | "course-challenges" | null>(null)
   const [openStatsSection, setOpenStatsSection] = useState<StatsSectionKey | null>(null)
   const [kwtMapFilter, setKwtMapFilter] = useState("")
@@ -232,6 +235,7 @@ export default function PublicPlayerProfilePage() {
     setPypHistoryError("")
     setKwtHistoryError("")
     setMonthlyHistoryError("")
+    setViewerState("checking")
 
     const { data: identityData, error: identityError } = await supabase.rpc(
       "get_public_player_canonical_identity",
@@ -427,25 +431,16 @@ export default function PublicPlayerProfilePage() {
       if (loaded) setPreferences({ ...DEFAULT_PREFERENCES, ...loaded, has_saved_preferences: loaded.has_saved_preferences === true, ...normalizeProfilePresentation({ ...loaded, avatar_glow_color: loaded.avatar_glow_color || loaded.glow_color }) } as ProfilePreferences)
     }
     const session = sessionResponse.data.session
-    setHasSession(Boolean(session))
     if (session) {
-      const { data: viewerCanonicalId } = await supabase.rpc("current_user_canonical_player_id")
-      setCanEditProfile(typeof viewerCanonicalId === "string" && viewerCanonicalId === canonicalId)
+      const { data: viewerCanonicalId, error: viewerCanonicalError } = await supabase.rpc("current_user_canonical_player_id")
+      const normalizedViewerId = typeof viewerCanonicalId === "string" ? viewerCanonicalId.trim() : ""
+      setCanEditProfile(Boolean(normalizedViewerId) && normalizedViewerId === canonicalId)
+      setViewerState(viewerCanonicalError || !normalizedViewerId ? "signed-in-unlinked" : normalizedViewerId === canonicalId ? "linked-owner" : "linked-other")
     } else {
       setCanEditProfile(false)
+      setViewerState("signed-out")
     }
     setLoading(false)
-  }
-
-  async function signInWithDiscord() {
-    if (!player) return
-
-    await supabase.auth.signInWithOAuth({
-      provider: "discord",
-      options: {
-        redirectTo: createDiscordAuthCallbackUrl("player", `/players/${player.id}`),
-      },
-    })
   }
 
   async function selectProfileReward(rewardKey: string | null) {
@@ -568,6 +563,7 @@ export default function PublicPlayerProfilePage() {
   }
 
   return (
+    <>
     <main className={styles.page} data-glass-style={preferences.glass_style} data-blue-panel-glow={preferences.blue_panel_glow} style={{ "--profile-bg": preferences.background_color, "--profile-text": preferences.text_color, "--profile-background-image": `url("${profileBackgroundImage}")`, ...profilePresentationStyle(preferences, preferences.has_saved_preferences === false) } as React.CSSProperties}>
       <div style={container} className={styles.profilePageContainer}>
         <PlayerProfileHero
@@ -607,6 +603,7 @@ export default function PublicPlayerProfilePage() {
 
         <nav className={styles.profileActions} aria-label="Player profile sections and navigation">
           <Link href="/" style={backButton}>← Krys Leagues</Link>
+          <DiscordSignInButton />
           <PlayerProfileNavLink currentPlayerId={player.id} style={backButton}>Player Profile</PlayerProfileNavLink>
           {canEditProfile && <Link href="/player-dashboard" className={styles.profileActionButton}>Player Dashboard</Link>}
           <button type="button" className={styles.profileActionButton} aria-pressed={openProfileSection === "records"} onClick={() => setOpenProfileSection(current => current === "records" ? null : "records")}>Course Records</button>
@@ -614,11 +611,10 @@ export default function PublicPlayerProfilePage() {
           {knownAliases.length > 0 && <button type="button" className={styles.profileActionButton} aria-pressed={openProfileSection === "aliases"} onClick={() => setOpenProfileSection(current => current === "aliases" ? null : "aliases")}>Names / Known As</button>}
           {(trophies.length > 0 || courseChallengeRewards.length > 0) && <button type="button" className={styles.profileActionButton} aria-pressed={openProfileSection === "trophies"} onClick={() => setOpenProfileSection(current => current === "trophies" ? null : "trophies")}>Trophies &amp; Achievements</button>}
           <button type="button" className={styles.profileActionButton} aria-pressed={openProfileSection === "course-challenges"} aria-controls="course-challenge-sticker-showcase" onClick={() => setOpenProfileSection(current => current === "course-challenges" ? null : "course-challenges")}>Course Challenges</button>
-          {!hasSession && <button type="button" className={styles.profileActionButton} onClick={() => void signInWithDiscord()}>Sign in with Discord</button>}
           {canEditProfile && <PlayerProfileEditor playerId={player.id} initial={preferences} isServerBooster={recognition.isServerBooster} hasKrysServerTag={recognition.hasKrysServerTag} profileBadges={recognition.profileBadges} onSaved={(saved) => setPreferences(current => ({ ...current, ...saved }))} />}
         </nav>
 
-        {openProfileSection === "course-challenges" && <CourseChallengeTrophyGroups rewards={courseChallengeRewards} canEditProfile={canEditProfile} selectedRewardKey={selectedProfileRewardKey} saving={savingProfileReward} message={profileRewardMessage} onSelectReward={(rewardKey) => void selectProfileReward(rewardKey)} />}
+        {openProfileSection === "course-challenges" && <CourseChallengeTrophyGroups rewards={courseChallengeRewards} canEditProfile={canEditProfile} viewerState={viewerState} selectedRewardKey={selectedProfileRewardKey} saving={savingProfileReward} message={profileRewardMessage} onRequestSignIn={() => setSignInModalOpen(true)} onSelectReward={(rewardKey) => void selectProfileReward(rewardKey)} />}
 
         {openProfileSection === "records" && <PlayerCourseRecords playerId={player.id} />}
 
@@ -781,6 +777,8 @@ export default function PublicPlayerProfilePage() {
 
       </div>
     </main>
+    <SignInRequiredModal open={signInModalOpen} onClose={() => setSignInModalOpen(false)} />
+    </>
   )
 }
 
@@ -856,10 +854,10 @@ function CourseChallengeRewardCard({ reward, canEditProfile, selected, saving, o
   </article>
 }
 
-function CourseChallengeTrophyGroups({ rewards, canEditProfile, selectedRewardKey, saving, message, onSelectReward }: { rewards: CourseChallengeOwnedReward[]; canEditProfile: boolean; selectedRewardKey: string | null; saving: boolean; message: string; onSelectReward: (rewardKey: string) => void }) {
+function CourseChallengeTrophyGroups({ rewards, canEditProfile, viewerState, selectedRewardKey, saving, message, onRequestSignIn, onSelectReward }: { rewards: CourseChallengeOwnedReward[]; canEditProfile: boolean; viewerState: ProfileViewerState; selectedRewardKey: string | null; saving: boolean; message: string; onRequestSignIn: () => void; onSelectReward: (rewardKey: string) => void }) {
   const grouped = groupProfileCourseChallengeRewards(rewards)
   return <section className={styles.courseAchievementGroups} id="course-challenge-sticker-showcase" aria-label="Course Challenge sticker showcase">
-    <div className={styles.courseAchievementHeader}><div><p className={styles.panelEyebrow}>Earned rewards</p><h2>Course Challenge Sticker Showcase</h2><p className={styles.sectionDescription}>Publicly earned Course Challenge stickers and badges for this player.{canEditProfile ? " Choose any earned reward as your profile picture." : ""}</p></div><span className={styles.courseAchievementCount}>{rewards.length} earned</span></div>
+    <div className={styles.courseAchievementHeader}><div><p className={styles.panelEyebrow}>Earned rewards</p><h2>Course Challenge Sticker Showcase</h2><p className={styles.sectionDescription}>Publicly earned Course Challenge stickers and badges for this player.{canEditProfile ? " Choose any earned reward as your profile picture." : ""}</p>{viewerState === "signed-out" && <button type="button" className={styles.profileRewardSignInButton} onClick={onRequestSignIn}>Sign in to use an earned reward as your profile picture</button>}{viewerState === "signed-in-unlinked" && <p className={styles.profileRewardOwnerMessage}>Your Discord account is signed in, but it is not linked to your Krys Leagues player profile yet. Please contact a Krys Leagues admin.</p>}</div><span className={styles.courseAchievementCount}>{rewards.length} earned</span></div>
     {grouped.length === 0 ? <p className={styles.courseAchievementEmpty}>No Course Challenge stickers earned yet.</p> : grouped.map(({ course, mainRewards, aceRewards }) => <div className={styles.courseAchievementGroup} key={course.slug}>
       <h3>{course.name}</h3>
       {mainRewards.length > 0 && <div className={styles.courseAchievementRow} aria-label={`${course.name} main and progression stickers`}><span className={styles.courseAchievementRowLabel}>MAIN / LEVEL / PRESTIGE</span><div className={styles.courseAchievementGrid}>{mainRewards.map(reward => <CourseChallengeRewardCard key={reward.id} reward={reward} canEditProfile={canEditProfile} selected={selectedRewardKey === reward.reward_key} saving={saving} onSelect={onSelectReward} />)}</div></div>}

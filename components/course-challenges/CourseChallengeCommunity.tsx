@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 import type { CourseChallengeCourse } from "@/lib/courseChallenges/types"
 import styles from "./course-challenges.module.css"
+import DiscordSignInButton from "@/components/auth/DiscordSignInButton"
 
 type Player = { id: string; name: string; avatarUrl: string | null; highestLevel: number; levelStickerAsset: string | null; profileUrl: string }
 type Group = { level: number; players: Player[] }
@@ -16,7 +17,7 @@ export default function CourseChallengeCommunity({ course }: { course: CourseCha
   const [error, setError] = useState("")
   useEffect(() => { fetch("/api/course-challenges/community?courseSlug=" + encodeURIComponent(course.slug), { cache: "no-store" }).then(async response => { const data = await response.json() as Payload & { error?: string }; if (!response.ok) throw new Error(data.error || "Community progress could not be loaded."); setPayload(data) }).catch(caught => setError(caught instanceof Error ? caught.message : "Community progress could not be loaded.")) }, [course.slug])
   return <main className={styles.page} style={{ "--course-background-image": course.backgroundImage ? `url("${course.backgroundImage}")` : "none" } as React.CSSProperties}><div className={styles.shell}>
-    <div className={styles.backLinks}><Link href={`/course-challenges/${course.slug}`} className={styles.backLink}>← {course.name} Book</Link><Link href="/course-challenges" className={styles.backLink}>← Course Challenges</Link></div>
+    <div className={styles.backLinks}><Link href={`/course-challenges/${course.slug}`} className={styles.backLink}>← {course.name} Book</Link><DiscordSignInButton /><Link href="/course-challenges" className={styles.backLink}>← Course Challenges</Link></div>
     <header className={styles.communityHeader}><p className={styles.eyebrow}>COURSE CHALLENGE COMMUNITY</p><h1 className={styles.courseTitle}>WHO’S TAKING ON {course.name.toUpperCase()}?</h1><p className={styles.helper}>Players are grouped by the highest completed main Level for this course.</p></header>
     {error && <p className={styles.notice}>{error}</p>}
     {!payload && !error ? <p className={styles.helper}>Loading challengers…</p> : <>

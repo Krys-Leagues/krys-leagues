@@ -7,6 +7,7 @@ import PlayerAvatar from "@/components/PlayerAvatar"
 import { ArtworkNavigation } from "@/components/navigation/ArtworkNavigation"
 import { playerProfilesArtwork } from "@/lib/artworkPageMaps"
 import { supabase } from "@/lib/supabase"
+import DiscordSignInButton from "@/components/auth/DiscordSignInButton"
 import { ownProfilePath, shouldAutoOpenOwnProfile } from "@/lib/playerProfilesRouting"
 import styles from "./page.module.css"
 
@@ -156,9 +157,12 @@ export default function PlayerProfilesPage() {
 
   return (
     <div className={styles.page}>
-      <Link href="/" className={styles.backButton} aria-label="Back to Krys Leagues">
-        ← Krys Leagues
-      </Link>
+      <div className={styles.backRow}>
+        <Link href="/" className={styles.backButton} aria-label="Back to Krys Leagues">
+          ← Krys Leagues
+        </Link>
+        <DiscordSignInButton />
+      </div>
       <ArtworkNavigation definition={playerProfilesArtwork} overlay={overlay} />
     </div>
   )

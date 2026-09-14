@@ -31,13 +31,13 @@ export default function PlayerProfileNavLink({ children, currentPlayerId, classN
 
   const resolveOwnPlayer = useCallback(async () => {
     const { data: sessionData } = await supabase.auth.getSession()
-    if (!sessionData.session) return null
+    if (!sessionData.session) return { authenticated: false, canonicalId: null }
 
     const { data, error } = await supabase.rpc("current_user_canonical_player_id")
-    if (error) return null
+    if (error) return { authenticated: true, canonicalId: null }
 
     const canonicalId = canonicalIdFromRpc(data)
-    return canonicalId
+    return { authenticated: true, canonicalId }
   }, [])
   const href = "/players?browse=1"
 
@@ -45,12 +45,14 @@ export default function PlayerProfileNavLink({ children, currentPlayerId, classN
     event.preventDefault()
     setMessage("")
 
-    const canonicalId = await resolveOwnPlayer()
-    const destination = playerProfileNavigationPath(currentPlayerId, canonicalId)
-    if (!destination) {
-      setMessage("Your canonical player profile could not be resolved. Use Player Profiles to browse safely.")
+    const resolved = await resolveOwnPlayer()
+    if (!resolved.authenticated || !resolved.canonicalId) {
+      router.push(href)
       return
     }
+
+    const destination = playerProfileNavigationPath(currentPlayerId, resolved.canonicalId)
+    if (!destination) return
 
     router.push(destination)
   }

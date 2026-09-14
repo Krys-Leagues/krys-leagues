@@ -24,6 +24,18 @@
   text-decoration: none;
 }
 
+.backRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.backRow .backButton {
+  margin: 0;
+}
+
 .backButton:focus-visible {
   outline: 3px solid #fff;
   outline-offset: 3px;

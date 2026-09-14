@@ -4,18 +4,18 @@ import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
-import { supabase } from "@/lib/supabase"
 import type { CourseChallengeCourse } from "@/lib/courseChallenges/types"
 import CourseChallengesGuide from "./CourseChallengesGuide"
 import CourseChallengeCelebrations from "./CourseChallengeCelebrations"
 import styles from "./course-challenges.module.css"
+import PlayerProfileNavLink from "@/components/PlayerProfileNavLink"
+import DiscordSignInButton from "@/components/auth/DiscordSignInButton"
 
 const INTRO_STORAGE_KEY = "course-challenges-intro-dismissed-v1"
 
 export default function CourseChallengesLanding({ courses }: { courses: CourseChallengeCourse[] }) {
   const [showIntro, setShowIntro] = useState(false)
   const [showRules, setShowRules] = useState(false)
-  const [profileMessage, setProfileMessage] = useState("")
   const [openingCourse, setOpeningCourse] = useState<string | null>(null)
   const router = useRouter()
 
@@ -38,16 +38,6 @@ export default function CourseChallengesLanding({ courses }: { courses: CourseCh
     setShowIntro(false)
   }
 
-  async function openOwnProfile() {
-    setProfileMessage("")
-    const { data: canonicalId, error } = await supabase.rpc("current_user_canonical_player_id")
-    if (error || typeof canonicalId !== "string" || !canonicalId) {
-      setProfileMessage("Your canonical player profile could not be resolved. Use Player Profiles to browse safely.")
-      return
-    }
-    router.push("/players/" + encodeURIComponent(canonicalId))
-  }
-
   function beginCourseOpening(event: React.MouseEvent<HTMLAnchorElement>, slug: string) {
     event.preventDefault()
     if (openingCourse) return
@@ -60,10 +50,10 @@ export default function CourseChallengesLanding({ courses }: { courses: CourseCh
     <div className={styles.shell}>
       <div className={styles.backLinks}>
         <Link href="/" className={styles.backLink}>← Krys Leagues</Link>
+        <DiscordSignInButton />
         <Link href="/our-mission" className={styles.backLink}>Our Mission</Link>
-        <button type="button" className={styles.backLinkButton} onClick={() => void openOwnProfile()}>← Player Profile</button>
+        <PlayerProfileNavLink className={styles.backLinkButton}>← Player Profile</PlayerProfileNavLink>
       </div>
-      {profileMessage && <p className={styles.notice} role="alert">{profileMessage}</p>}
       <h1 id="course-challenges-title" className="sr-only">Course Challenges</h1>
       <Image
         className={styles.heroImage}

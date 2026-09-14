@@ -81,8 +81,9 @@ test("welcome page keeps both safe back destinations and canonical Player Profil
   assert.match(landing, /href="\/".*← Krys Leagues/)
   assert.match(landing, /← Player Profile/)
   assert.match(landing, /href="\/our-mission".*Our Mission/)
-  assert.match(landing, /current_user_canonical_player_id/)
-  assert.match(landing, /router\.push\("\/players\/"/)
+  assert.match(landing, /PlayerProfileNavLink/)
+  assert.match(read("components/PlayerProfileNavLink.tsx"), /current_user_canonical_player_id/)
+  assert.match(read("components/PlayerProfileNavLink.tsx"), /playerProfileNavigationPath/)
   assert.doesNotMatch(landing, /auth\.uid|email|screen_name|display_name/)
 })
 
