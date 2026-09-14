@@ -6,6 +6,7 @@ import { useParams } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
 import { formatMajorDate, formatMajorDeadline, formatMajorLocalTime, isMajorDayLocked, isMastersScorecardTheme, type MajorDayChoice, type MajorEntry, type MajorEvent, type MajorPlayDay, type MajorSignupStatus, type MajorTimeSlot } from "@/lib/majors"
 import { createDiscordAuthCallbackUrl } from "@/lib/authReturnTo"
+import { meaningfulMajorSlotLabel, PLAYER_LOCAL_TIME_HEADING } from "@/lib/mastersSignupDisplay"
 import { supabase } from "@/lib/supabase"
 import styles from "./page.module.css"
 
@@ -156,10 +157,11 @@ export default function MajorDetailPage() {
           const dayName = DAY_LABELS[day.day_number - 1]
           return <fieldset key={day.id} className={styles.dayCard} disabled={locked || signupDisabled}>
             <legend><span>{dayName.day}</span>{dayName.round}</legend><p className={styles.dayContext}>Official round date: {formatPlayDate(day.play_date)}</p>
-            <div className={styles.slotHeader}><span>Choose</span><span>Slot</span><strong>Your local date &amp; time</strong></div>
+            <p className={styles.availabilityNote}>{PLAYER_LOCAL_TIME_HEADING}</p>
             {daySlots.length ? daySlots.map((slot) => {
               const dateShift = localDateShift(day.play_date, slot.starts_at, localTimeZone)
-              return <label key={slot.id} className={`${styles.slotLabel} ${choices[day.id] === slot.id ? styles.selected : ""}`}><input type="radio" name={day.id} checked={choices[day.id] === slot.id} onChange={() => { setChoices((old) => ({ ...old, [day.id]: slot.id })); setReviewing(false) }} /><span className={styles.slotName}>{slot.label || "Available"}</span><span className={styles.localDateTime}><strong>{formatMajorLocalDate(slot.starts_at, localTimeZone)}</strong><b>{formatMajorLocalTime(slot.starts_at, localTimeZone)}</b><small>{event.schedule_timezone !== localTimeZone ? `${formatMajorLocalTime(slot.starts_at, event.schedule_timezone)} · event time` : "Event reference time"}</small>{dateShift && <em>{dateShift}</em>}</span></label>
+              const slotLabel = meaningfulMajorSlotLabel(slot.label)
+              return <label key={slot.id} className={`${styles.slotLabel} ${choices[day.id] === slot.id ? styles.selected : ""}`}><input type="radio" name={day.id} checked={choices[day.id] === slot.id} onChange={() => { setChoices((old) => ({ ...old, [day.id]: slot.id })); setReviewing(false) }} /><span className={styles.localDateTime}>{slotLabel && <span className={styles.slotDescriptor}>{slotLabel}</span>}<strong>{formatMajorLocalDate(slot.starts_at, localTimeZone)}</strong><b>{formatMajorLocalTime(slot.starts_at, localTimeZone)}</b><small>{event.schedule_timezone !== localTimeZone ? `${formatMajorLocalTime(slot.starts_at, event.schedule_timezone)} · event time` : "Event reference time"}</small>{dateShift && <em>{dateShift}</em>}</span></label>
             }) : <p className={styles.notice}>No times available yet.</p>}
             <p className={styles.lockDeadline}>{dayName.day} selections lock:<strong>{day.selection_locks_at ? formatMajorDeadline(day.selection_locks_at, localTimeZone) : "Deadline appears after the first time is scheduled"}</strong><span>{localTimeZone}</span></p>
             {locked && <p className={styles.locked}>{firstScheduledTimeHasBegun ? "Selection locked" : "Selection locked — tournament admins can still help"}</p>}

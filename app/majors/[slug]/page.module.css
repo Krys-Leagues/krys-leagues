@@ -277,11 +277,11 @@
 .dayCard legend { padding: 0 8px; font-family: Georgia, serif; font-weight: 800; }
 .dayCard legend span { display: inline-block; margin-right: 8px; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; }
 .dayContext { margin: 0 0 10px; color: var(--muted); font-size: 0.75rem; }
-.slotHeader { display: grid; grid-template-columns: 54px minmax(80px, .7fr) minmax(140px, 1.3fr); gap: 10px; padding: 0 11px 5px; color: var(--muted); font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; }
-.slotLabel { display: grid; grid-template-columns: 54px minmax(80px, .7fr) minmax(140px, 1.3fr); align-items: center; gap: 10px; margin: 7px 0; padding: 11px; border: 1px solid #573443; border-radius: 9px; background: rgba(21, 15, 18, 0.9); cursor: pointer; }
+.availabilityNote { margin: 0 0 10px; padding: 9px 11px; border-left: 3px solid var(--accent); background: rgba(83, 28, 53, 0.42); color: #ffd5e5; font-size: .72rem; font-weight: 900; letter-spacing: .08em; line-height: 1.35; text-transform: uppercase; }
+.slotLabel { display: grid; grid-template-columns: 54px minmax(0, 1fr); align-items: center; gap: 10px; margin: 7px 0; padding: 11px; border: 1px solid #573443; border-radius: 9px; background: rgba(21, 15, 18, 0.9); cursor: pointer; }
 .slotLabel:hover, .selected { border-color: var(--accent); background: rgba(83, 28, 53, 0.75); }
 .slotLabel input { width: 17px; height: 17px; accent-color: var(--accent); }
-.slotName { color: var(--muted); font-size: .84rem; }
+.slotDescriptor { color: var(--muted); font-size: .78rem; }
 .localDateTime { display: grid; gap: 2px; color: #fff; }
 .localDateTime > strong { font-size: .9rem; }
 .localDateTime > b { font-size: 1.08rem; }
@@ -355,8 +355,7 @@
   .capacity { width: 100%; margin-left: 0; }
   .hero { padding: 18px; }
   .eyebrow { letter-spacing: 0.13em; }
-  .slotHeader { display: none; }
-  .slotLabel { grid-template-columns: 32px minmax(70px, .7fr) minmax(125px, 1.3fr); align-items: flex-start; }
+  .slotLabel { grid-template-columns: 32px minmax(0, 1fr); align-items: flex-start; }
   .reviewActions { grid-template-columns: 1fr; }
   .signupProgress { grid-template-columns: repeat(2, 1fr); margin-bottom: 22px; }
   .signupProgress span { padding: 7px 4px; }
