@@ -416,6 +416,18 @@
   gap: 14px;
 }
 
+.courseAchievementRow {
+  display: grid;
+  gap: 10px;
+}
+
+.courseAchievementRowLabel {
+  color: #bae6fd;
+  font-size: .78rem;
+  font-weight: 900;
+  letter-spacing: .12em;
+}
+
 .courseAchievementGroup h3 {
   margin: 0;
   color: #fbcfe8;

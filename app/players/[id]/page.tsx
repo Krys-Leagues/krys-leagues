@@ -16,8 +16,7 @@ import styles from "./page.module.css"
 import TrophyMedia from "@/components/TrophyMedia"
 import PlayerCourseRecords from "@/components/records/PlayerCourseRecords"
 import { calculateMonthlyCareerStats, monthlyCourseMapName, uniqueMonthlyPeriodRecords, type MonthlyPresentationRow } from "@/lib/monthlyPresentation"
-import { getPublicCourseChallenges } from "@/lib/courseChallenges/catalog"
-import { aceStageRewardDefinitions, levelRewardDefinitions, prestigeStageRewardDefinitions } from "@/lib/courseChallenges/rewards"
+import { groupProfileCourseChallengeRewards, type ProfileCourseChallengeRewardView } from "@/lib/playerProfileCourseChallenges"
 
 type Player = {
   id: string
@@ -202,7 +201,7 @@ export default function PublicPlayerProfilePage() {
   const [preferences, setPreferences] = useState<ProfilePreferences>(DEFAULT_PREFERENCES)
   const [hasSession, setHasSession] = useState(false)
   const [canEditProfile, setCanEditProfile] = useState(false)
-  const [openProfileSection, setOpenProfileSection] = useState<"records" | "stats" | "aliases" | "trophies" | null>(null)
+  const [openProfileSection, setOpenProfileSection] = useState<"records" | "stats" | "aliases" | "trophies" | "course-challenges" | null>(null)
   const [openStatsSection, setOpenStatsSection] = useState<StatsSectionKey | null>(null)
   const [kwtMapFilter, setKwtMapFilter] = useState("")
   const [kwtCourseCatalog, setKwtCourseCatalog] = useState<Array<Pick<PublicCourse, "code" | "base_map">>>([])
@@ -575,12 +574,12 @@ export default function PublicPlayerProfilePage() {
           {hasCareerParticipation && <button type="button" className={styles.profileActionButton} aria-pressed={openProfileSection === "stats"} onClick={() => setOpenProfileSection(current => current === "stats" ? null : "stats")}>Player Stats</button>}
           {knownAliases.length > 0 && <button type="button" className={styles.profileActionButton} aria-pressed={openProfileSection === "aliases"} onClick={() => setOpenProfileSection(current => current === "aliases" ? null : "aliases")}>Names / Known As</button>}
           {(trophies.length > 0 || courseChallengeRewards.length > 0) && <button type="button" className={styles.profileActionButton} aria-pressed={openProfileSection === "trophies"} onClick={() => setOpenProfileSection(current => current === "trophies" ? null : "trophies")}>Trophies &amp; Achievements</button>}
-          <Link href="/course-challenges" className={styles.profileActionButton}>Course Challenges</Link>
+          <button type="button" className={styles.profileActionButton} aria-pressed={openProfileSection === "course-challenges"} aria-controls="course-challenge-sticker-showcase" onClick={() => setOpenProfileSection(current => current === "course-challenges" ? null : "course-challenges")}>Course Challenges</button>
           {!hasSession && <button type="button" className={styles.profileActionButton} onClick={() => void signInWithDiscord()}>Sign in with Discord</button>}
           {canEditProfile && <PlayerProfileEditor playerId={player.id} initial={preferences} isServerBooster={recognition.isServerBooster} hasKrysServerTag={recognition.hasKrysServerTag} profileBadges={recognition.profileBadges} onSaved={(saved) => setPreferences(current => ({ ...current, ...saved }))} />}
         </nav>
 
-        <CourseChallengeTrophyGroups rewards={courseChallengeRewards} />
+        {openProfileSection === "course-challenges" && <CourseChallengeTrophyGroups rewards={courseChallengeRewards} />}
 
         {openProfileSection === "records" && <PlayerCourseRecords playerId={player.id} />}
 
@@ -801,15 +800,26 @@ function MonthlyPeriodCard({ period, rows }: { period: MonthlyHistory; rows: Mon
   </article>
 }
 
+function CourseChallengeRewardCard({ reward }: { reward: ProfileCourseChallengeRewardView }) {
+  const label = reward.definition?.label || reward.label
+  return <article className={styles.courseAchievementCard} data-reward-key={reward.reward_key} data-earned-at={reward.earned_at || undefined}>
+    {reward.definition?.assetPath ? <TrophyMedia src={reward.definition.assetPath} alt={`${label} earned sticker`} className={styles.courseAchievementMedia} /> : <span className={styles.rewardMark} aria-hidden="true">✦</span>}
+    <strong>{label}</strong>
+    <small>{reward.earned_at ? new Date(reward.earned_at).toLocaleDateString() : "Earned"}</small>
+  </article>
+}
+
 function CourseChallengeTrophyGroups({ rewards }: { rewards: CourseChallengeOwnedReward[] }) {
-  const courses = getPublicCourseChallenges()
-  const definitions = new Map(courses.flatMap(course => [
-    ...course.levels.flatMap(level => levelRewardDefinitions(course, level.level)),
-    ...aceStageRewardDefinitions(course),
-    ...(course.prestigeStages || []).flatMap(stage => prestigeStageRewardDefinitions(course, stage.stage)),
-  ]).filter(Boolean).map(reward => [reward!.rewardKey, reward!]))
-  const grouped = courses.map(course => ({ course, rewards: rewards.filter(reward => reward.course_slug === course.slug) })).filter(group => group.rewards.length > 0)
-  return <section className={styles.courseAchievementGroups} aria-label="Course Challenge sticker showcase"><div className={styles.courseAchievementHeader}><div><p className={styles.panelEyebrow}>Earned rewards</p><h2>Course Challenge Sticker Showcase</h2><p className={styles.sectionDescription}>Publicly earned Course Challenge stickers and badges for this player.</p></div><span className={styles.courseAchievementCount}>{rewards.length} earned</span></div>{grouped.length === 0 ? <p className={styles.courseAchievementEmpty}>No Course Challenge stickers earned yet.</p> : grouped.map(({ course, rewards: owned }) => <div className={styles.courseAchievementGroup} key={course.slug}><h3>{course.name}</h3><div className={styles.courseAchievementGrid}>{owned.map(reward => { const definition = definitions.get(reward.reward_key); return <article className={styles.courseAchievementCard} key={reward.id}>{definition?.assetPath ? <TrophyMedia src={definition.assetPath} alt={`${definition.label || reward.label} earned sticker`} className={styles.courseAchievementMedia} /> : <span className={styles.rewardMark} aria-hidden="true">✦</span>}<strong>{definition?.label || reward.label}</strong><small>{reward.earned_at ? new Date(reward.earned_at).toLocaleDateString() : "Earned"}</small></article> })}</div></div>)}<Link href="/course-challenges" className={styles.courseChallengeExploreLink}>Take Me to Course Challenges</Link></section>
+  const grouped = groupProfileCourseChallengeRewards(rewards)
+  return <section className={styles.courseAchievementGroups} id="course-challenge-sticker-showcase" aria-label="Course Challenge sticker showcase">
+    <div className={styles.courseAchievementHeader}><div><p className={styles.panelEyebrow}>Earned rewards</p><h2>Course Challenge Sticker Showcase</h2><p className={styles.sectionDescription}>Publicly earned Course Challenge stickers and badges for this player.</p></div><span className={styles.courseAchievementCount}>{rewards.length} earned</span></div>
+    {grouped.length === 0 ? <p className={styles.courseAchievementEmpty}>No Course Challenge stickers earned yet.</p> : grouped.map(({ course, mainRewards, aceRewards }) => <div className={styles.courseAchievementGroup} key={course.slug}>
+      <h3>{course.name}</h3>
+      {mainRewards.length > 0 && <div className={styles.courseAchievementRow} aria-label={`${course.name} main and progression stickers`}><span className={styles.courseAchievementRowLabel}>MAIN / LEVEL / PRESTIGE</span><div className={styles.courseAchievementGrid}>{mainRewards.map(reward => <CourseChallengeRewardCard key={reward.id} reward={reward} />)}</div></div>}
+      {aceRewards.length > 0 && <div className={styles.courseAchievementRow} aria-label={`${course.name} Ace Track stickers`}><span className={styles.courseAchievementRowLabel}>ACE TRACK</span><div className={styles.courseAchievementGrid}>{aceRewards.map(reward => <CourseChallengeRewardCard key={reward.id} reward={reward} />)}</div></div>}
+    </div>)}
+    <Link href="/course-challenges" className={styles.courseChallengeExploreLink}>Take Me to Course Challenges</Link>
+  </section>
 }
 
 const page: React.CSSProperties = {
