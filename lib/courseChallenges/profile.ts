@@ -1,6 +1,5 @@
 import { getPublicCourseChallenges } from "./catalog"
 import { aceProgress, type AceSubmissionRecord } from "./ace"
-import { isProfileDisplayRewardKey } from "./rewards"
 import type { CourseChallengeProfileReward } from "./types"
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -42,5 +41,9 @@ export async function loadCourseChallengeProfile(client: { from: (table: string)
       completedAceStages: ace.completedStages,
     }
   })
-  return { selectedRewardKey: selection?.selected_reward_key || null, courses, rewards: filteredRewards, profileRewards: filteredRewards.filter((reward) => isProfileDisplayRewardKey(reward.rewardKey)), levelProgress: filteredProgress.map((row: { course_slug: string; level_number: number; easy_status: string; hard_status: string; completed_at: string | null; updated_at: string | null }) => ({ courseSlug: row.course_slug, level: Number(row.level_number), easyStatus: row.easy_status, hardStatus: row.hard_status, completedAt: row.completed_at, updatedAt: row.updated_at })), completedLevels: filteredProgress.filter((row: { completed_at: string | null }) => Boolean(row.completed_at)).map((row: { level_number: number }) => row.level_number) }
+  // Every row in course_challenge_rewards is already an earned, persisted
+  // reward. The server-side selection route verifies ownership again before
+  // accepting a profile-display choice, so future reward metadata does not
+  // need another hard-coded allow-list here.
+  return { selectedRewardKey: selection?.selected_reward_key || null, courses, rewards: filteredRewards, profileRewards: filteredRewards, levelProgress: filteredProgress.map((row: { course_slug: string; level_number: number; easy_status: string; hard_status: string; completed_at: string | null; updated_at: string | null }) => ({ courseSlug: row.course_slug, level: Number(row.level_number), easyStatus: row.easy_status, hardStatus: row.hard_status, completedAt: row.completed_at, updatedAt: row.updated_at })), completedLevels: filteredProgress.filter((row: { completed_at: string | null }) => Boolean(row.completed_at)).map((row: { level_number: number }) => row.level_number) }
 }

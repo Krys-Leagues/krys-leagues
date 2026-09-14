@@ -465,6 +465,43 @@
   font-weight: 700;
 }
 
+.profileRewardButton {
+  align-self: start;
+  min-height: 42px;
+  padding: 9px 12px;
+  border: 1px solid #f9a8d466;
+  border-radius: 10px;
+  background: #83184366;
+  color: #fce7f3;
+  cursor: pointer;
+  font: inherit;
+  font-size: .76rem;
+  font-weight: 900;
+  letter-spacing: .06em;
+}
+
+.profileRewardButton:hover,
+.profileRewardButton:focus-visible,
+.profileRewardButton[aria-pressed="true"] {
+  border-color: #f9a8d4;
+  background: #be185d99;
+}
+
+.profileRewardButton:disabled {
+  cursor: wait;
+  opacity: .65;
+}
+
+.profileRewardSelectionMessage {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid #ffffff24;
+  border-radius: 10px;
+  background: #02061766;
+  color: #fce7f3;
+  font-weight: 700;
+}
+
 .courseAchievementMedia {
   display: block;
   width: 100%;

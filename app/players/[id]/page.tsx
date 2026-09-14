@@ -193,6 +193,10 @@ export default function PublicPlayerProfilePage() {
   const [message, setMessage] = useState("")
   const [aliases, setAliases] = useState<string[]>([])
   const [avatarPath, setAvatarPath] = useState<string | null>(null)
+  const [normalAvatarPath, setNormalAvatarPath] = useState<string | null>(null)
+  const [selectedProfileRewardKey, setSelectedProfileRewardKey] = useState<string | null>(null)
+  const [profileRewardMessage, setProfileRewardMessage] = useState("")
+  const [savingProfileReward, setSavingProfileReward] = useState(false)
   const [recognition, setRecognition] = useState({
     isServerBooster: false,
     hasKrysServerTag: false,
@@ -279,6 +283,7 @@ export default function PublicPlayerProfilePage() {
       kwtCourseCatalogResponse,
       monthlyHistoryResponse,
       avatarResponse,
+      courseChallengeProfileResponse,
       preferencesResponse,
       sessionResponse,
     ] = await Promise.all([
@@ -341,6 +346,9 @@ export default function PublicPlayerProfilePage() {
         })
         .catch(caught => ({ rows: [] as MonthlyHistory[], error: caught instanceof Error ? caught.message : "Monthly history could not be loaded." })),
       getCanonicalPlayerAvatar(playerId).catch(() => ({ canonicalPlayerId: playerId, avatarPath: null })),
+      fetch(`/api/course-challenges/profile/${encodeURIComponent(canonicalId)}`, { cache: "no-store" })
+        .then(async response => response.ok ? await response.json() as { selectedRewardKey?: string | null } : { selectedRewardKey: null })
+        .catch(() => ({ selectedRewardKey: null })),
       supabase.rpc("get_public_player_profile_preferences_v6", { p_player_id: canonicalId }),
       supabase.auth.getSession(),
     ])
@@ -408,7 +416,11 @@ export default function PublicPlayerProfilePage() {
     if (monthlyHistoryResponse.error) {
       setMonthlyHistoryError(`Monthly history could not be loaded: ${monthlyHistoryResponse.error}`)
     }
-    setAvatarPath(avatarResponse.avatarPath)
+    const selectedRewardKey = courseChallengeProfileResponse.selectedRewardKey || null
+    const normalAvatar = avatarResponse.avatarPath
+    setSelectedProfileRewardKey(selectedRewardKey)
+    setNormalAvatarPath(normalAvatar)
+    setAvatarPath(resolveEarnedProfileRewardAsset(courseChallengeRewardsResponse.data || [], selectedRewardKey) || normalAvatar)
     if (!preferencesResponse.error) {
       const loaded = Array.isArray(preferencesResponse.data) ? preferencesResponse.data[0] : preferencesResponse.data
       if (loaded) setPreferences({ ...DEFAULT_PREFERENCES, ...loaded, has_saved_preferences: loaded.has_saved_preferences === true, ...normalizeProfilePresentation({ ...loaded, avatar_glow_color: loaded.avatar_glow_color || loaded.glow_color }) } as ProfilePreferences)
@@ -433,6 +445,32 @@ export default function PublicPlayerProfilePage() {
         redirectTo: createDiscordAuthCallbackUrl("player", `/players/${player.id}`),
       },
     })
+  }
+
+  async function selectProfileReward(rewardKey: string | null) {
+    if (!canEditProfile) return
+    setSavingProfileReward(true)
+    setProfileRewardMessage("")
+    try {
+      const response = await fetch("/api/course-challenges/profile/selection", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rewardKey }),
+      })
+      const payload = await response.json() as { error?: string; selectedRewardKey?: string | null }
+      if (!response.ok) {
+        setProfileRewardMessage(payload.error || "Profile picture selection could not be saved.")
+        return
+      }
+      const selected = payload.selectedRewardKey || null
+      setSelectedProfileRewardKey(selected)
+      setAvatarPath(resolveEarnedProfileRewardAsset(courseChallengeRewards, selected) || normalAvatarPath)
+      setProfileRewardMessage(selected ? "Earned reward selected as your profile picture." : "Your regular profile image is active again.")
+    } catch {
+      setProfileRewardMessage("Profile picture selection could not be saved.")
+    } finally {
+      setSavingProfileReward(false)
+    }
   }
 
   const orderedKwtHistory = [...kwtHistory].sort((left, right) => left.season_number - right.season_number || left.week_number - right.week_number)
@@ -579,7 +617,7 @@ export default function PublicPlayerProfilePage() {
           {canEditProfile && <PlayerProfileEditor playerId={player.id} initial={preferences} isServerBooster={recognition.isServerBooster} hasKrysServerTag={recognition.hasKrysServerTag} profileBadges={recognition.profileBadges} onSaved={(saved) => setPreferences(current => ({ ...current, ...saved }))} />}
         </nav>
 
-        {openProfileSection === "course-challenges" && <CourseChallengeTrophyGroups rewards={courseChallengeRewards} />}
+        {openProfileSection === "course-challenges" && <CourseChallengeTrophyGroups rewards={courseChallengeRewards} canEditProfile={canEditProfile} selectedRewardKey={selectedProfileRewardKey} saving={savingProfileReward} message={profileRewardMessage} onSelectReward={(rewardKey) => void selectProfileReward(rewardKey)} />}
 
         {openProfileSection === "records" && <PlayerCourseRecords playerId={player.id} />}
 
@@ -800,24 +838,33 @@ function MonthlyPeriodCard({ period, rows }: { period: MonthlyHistory; rows: Mon
   </article>
 }
 
-function CourseChallengeRewardCard({ reward }: { reward: ProfileCourseChallengeRewardView }) {
+function resolveEarnedProfileRewardAsset(rewards: CourseChallengeOwnedReward[], rewardKey: string | null) {
+  if (!rewardKey) return null
+  return groupProfileCourseChallengeRewards(rewards)
+    .flatMap((group) => group.rewards)
+    .find((reward) => reward.reward_key === rewardKey)?.definition?.assetPath || null
+}
+
+function CourseChallengeRewardCard({ reward, canEditProfile, selected, saving, onSelect }: { reward: ProfileCourseChallengeRewardView; canEditProfile: boolean; selected: boolean; saving: boolean; onSelect: (rewardKey: string) => void }) {
   const label = reward.definition?.label || reward.label
   return <article className={styles.courseAchievementCard} data-reward-key={reward.reward_key} data-earned-at={reward.earned_at || undefined}>
     {reward.definition?.assetPath ? <TrophyMedia src={reward.definition.assetPath} alt={`${label} earned sticker`} className={styles.courseAchievementMedia} /> : <span className={styles.rewardMark} aria-hidden="true">✦</span>}
     <strong>{label}</strong>
     <small>{reward.earned_at ? new Date(reward.earned_at).toLocaleDateString() : "Earned"}</small>
+    {canEditProfile && <button type="button" className={styles.profileRewardButton} aria-pressed={selected} disabled={saving} onClick={() => onSelect(reward.reward_key)}>{selected ? "CURRENT PROFILE PICTURE" : "USE AS PROFILE PICTURE"}</button>}
   </article>
 }
 
-function CourseChallengeTrophyGroups({ rewards }: { rewards: CourseChallengeOwnedReward[] }) {
+function CourseChallengeTrophyGroups({ rewards, canEditProfile, selectedRewardKey, saving, message, onSelectReward }: { rewards: CourseChallengeOwnedReward[]; canEditProfile: boolean; selectedRewardKey: string | null; saving: boolean; message: string; onSelectReward: (rewardKey: string) => void }) {
   const grouped = groupProfileCourseChallengeRewards(rewards)
   return <section className={styles.courseAchievementGroups} id="course-challenge-sticker-showcase" aria-label="Course Challenge sticker showcase">
-    <div className={styles.courseAchievementHeader}><div><p className={styles.panelEyebrow}>Earned rewards</p><h2>Course Challenge Sticker Showcase</h2><p className={styles.sectionDescription}>Publicly earned Course Challenge stickers and badges for this player.</p></div><span className={styles.courseAchievementCount}>{rewards.length} earned</span></div>
+    <div className={styles.courseAchievementHeader}><div><p className={styles.panelEyebrow}>Earned rewards</p><h2>Course Challenge Sticker Showcase</h2><p className={styles.sectionDescription}>Publicly earned Course Challenge stickers and badges for this player.{canEditProfile ? " Choose any earned reward as your profile picture." : ""}</p></div><span className={styles.courseAchievementCount}>{rewards.length} earned</span></div>
     {grouped.length === 0 ? <p className={styles.courseAchievementEmpty}>No Course Challenge stickers earned yet.</p> : grouped.map(({ course, mainRewards, aceRewards }) => <div className={styles.courseAchievementGroup} key={course.slug}>
       <h3>{course.name}</h3>
-      {mainRewards.length > 0 && <div className={styles.courseAchievementRow} aria-label={`${course.name} main and progression stickers`}><span className={styles.courseAchievementRowLabel}>MAIN / LEVEL / PRESTIGE</span><div className={styles.courseAchievementGrid}>{mainRewards.map(reward => <CourseChallengeRewardCard key={reward.id} reward={reward} />)}</div></div>}
-      {aceRewards.length > 0 && <div className={styles.courseAchievementRow} aria-label={`${course.name} Ace Track stickers`}><span className={styles.courseAchievementRowLabel}>ACE TRACK</span><div className={styles.courseAchievementGrid}>{aceRewards.map(reward => <CourseChallengeRewardCard key={reward.id} reward={reward} />)}</div></div>}
+      {mainRewards.length > 0 && <div className={styles.courseAchievementRow} aria-label={`${course.name} main and progression stickers`}><span className={styles.courseAchievementRowLabel}>MAIN / LEVEL / PRESTIGE</span><div className={styles.courseAchievementGrid}>{mainRewards.map(reward => <CourseChallengeRewardCard key={reward.id} reward={reward} canEditProfile={canEditProfile} selected={selectedRewardKey === reward.reward_key} saving={saving} onSelect={onSelectReward} />)}</div></div>}
+      {aceRewards.length > 0 && <div className={styles.courseAchievementRow} aria-label={`${course.name} Ace Track stickers`}><span className={styles.courseAchievementRowLabel}>ACE TRACK</span><div className={styles.courseAchievementGrid}>{aceRewards.map(reward => <CourseChallengeRewardCard key={reward.id} reward={reward} canEditProfile={canEditProfile} selected={selectedRewardKey === reward.reward_key} saving={saving} onSelect={onSelectReward} />)}</div></div>}
     </div>)}
+    {message && <p className={styles.profileRewardSelectionMessage} role="status">{message}</p>}
     <Link href="/course-challenges" className={styles.courseChallengeExploreLink}>Take Me to Course Challenges</Link>
   </section>
 }

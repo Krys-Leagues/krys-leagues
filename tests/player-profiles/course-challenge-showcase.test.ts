@@ -54,6 +54,10 @@ test("profile UI expands the owner showcase and keeps the viewer navigation link
   assert.match(page, /\.eq\("player_id", canonicalId\)/)
   assert.match(page, /id="course-challenge-sticker-showcase"/)
   assert.match(page, /ACE TRACK[\s\S]*Take Me to Course Challenges/)
+  assert.match(page, /canEditProfile/)
+  assert.match(page, /USE AS PROFILE PICTURE/)
+  assert.match(page, /profileRewardSelectionMessage/)
+  assert.match(page, /selectedRewardKey === reward\.reward_key/)
   assert.doesNotMatch(page, /CourseChallengeRewardSelector/)
 })
 

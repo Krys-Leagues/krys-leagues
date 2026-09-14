@@ -6,7 +6,7 @@ export const PLAYER_AVATAR_MIME_TYPES = ["image/png", "image/jpeg", "image/webp"
 
 export function playerAvatarPublicUrl(path: string | null | undefined) {
   if (!path) return null
-  if (/^(blob:|data:|https?:\/\/)/i.test(path)) return path
+  if (/^(\/|blob:|data:|https?:\/\/)/i.test(path)) return path
   return supabase.storage.from(PLAYER_AVATAR_BUCKET).getPublicUrl(path).data.publicUrl
 }
 

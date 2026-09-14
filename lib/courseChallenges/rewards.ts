@@ -10,7 +10,10 @@ export function levelRewardDefinitions(course: CourseChallengeCourse, level: num
 }
 
 export function isProfileDisplayRewardKey(rewardKey: string): boolean {
-  return rewardKey.endsWith(":course-pro") || rewardKey.endsWith(":ace-challenge") || rewardKey.includes(":ace-") || rewardKey.endsWith(":course-master") || rewardKey.includes(":level-5:")
+  // Eligibility comes from the persisted course_challenge_rewards ownership
+  // row. This helper is intentionally generic so new earned reward metadata
+  // becomes displayable without another reward-key allow-list change.
+  return rewardKey.trim().length > 0
 }
 
 export function profileDisplayRewardRank(rewardKey: string): number {

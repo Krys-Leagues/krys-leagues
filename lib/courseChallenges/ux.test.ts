@@ -66,7 +66,8 @@ test("fresh and repair SQL preserve private review fallback for missing proof me
 
 test("profile keeps Course Challenges navigation without rendering the obsolete summary block", () => {
   const profile = read("app/players/[id]/page.tsx")
-  assert.match(profile, /<Link href="\/course-challenges" className=\{styles\.profileActionButton\}>Course Challenges<\/Link>/)
+  assert.match(profile, /aria-pressed=\{openProfileSection === "course-challenges"\}/)
+  assert.match(profile, /Course Challenges<\/button>/)
   assert.doesNotMatch(profile, /Course Challenge Collection/)
   assert.doesNotMatch(profile, /CourseChallengesProfileSummary/)
   assert.doesNotMatch(profile, /ACHIEVEMENT BOOK/)
@@ -204,7 +205,7 @@ test("the course book visibly animates its cover open before revealing the pages
   assert.doesNotMatch(book, /currentLevel === 5/)
 })
 
-test("profile display rewards are restricted and ordered without changing ownership", () => {
+test("profile display rewards include every persisted earned reward without changing ownership", () => {
   const rewards = read("lib/courseChallenges/rewards.ts")
   const profile = read("lib/courseChallenges/profile.ts")
   const selector = read("components/course-challenges/CourseChallengeRewardSelector.tsx")
@@ -212,8 +213,12 @@ test("profile display rewards are restricted and ordered without changing owners
   assert.match(rewards, /isProfileDisplayRewardKey/)
   assert.match(profile, /profileRewards/)
   assert.match(selector, /profileRewards/)
-  assert.match(selector, /Course Pro, Ace Track reward, Level 5, or Course Master/)
-  assert.match(route, /isProfileDisplayRewardKey/)
+  assert.doesNotMatch(route, /isProfileDisplayRewardKey/)
+  assert.match(route, /eq\("player_id", identity\.playerId\)/)
+  assert.match(route, /eq\("reward_key", rewardKey\)/)
+  assert.match(route, /That Course Challenge reward has not been earned/)
+  assert.match(profile, /profileRewards: filteredRewards/)
+  assert.match(selector, /any earned Course Challenge sticker or badge/)
   assert.match(selector, /<option value="">None<\/option>/)
 })
 
