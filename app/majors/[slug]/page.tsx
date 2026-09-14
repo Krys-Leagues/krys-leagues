@@ -98,8 +98,16 @@ export default function MajorDetailPage() {
   const publishedRooms = days
     .map((day) => ({ day, assignment: schedule.find((choice) => choice.play_day_id === day.id) }))
     .filter(({ assignment }) => Boolean(assignment?.group_label))
+  const infoBlocks = [
+    { title: "Scheduling", body: event.scheduling_instructions },
+    { title: "Rounds 1 and 2", body: event.qualifier_information },
+    { title: "Friday cut", body: event.cut_information },
+    { title: "Weekend fields", body: event.weekend_information },
+    { title: "Room and play rules", body: event.room_rules },
+    { title: "Stream information", body: event.stream_information },
+  ].filter((block): block is { title: string; body: string } => Boolean(block.body))
 
-  return <main className={`${styles.page} ${masters ? styles.masters : styles.defaultTheme}`}><div className={styles.atmosphere}>{masters && <div className={styles.mastersScene} aria-hidden="true"><i className={styles.blossomTree} /><i className={styles.bench} /><i className={styles.putter} /><i className={styles.golfBall} /><i className={styles.golfBallTwo} /></div>}</div><div className={styles.container}>
+  return <main className={`${styles.page} ${masters ? styles.masters : styles.defaultTheme}`}><div className={styles.atmosphere}>{masters && <div className={styles.mastersScene} aria-hidden="true"><i className={styles.blossomTree} /><i className={styles.bench} /></div>}</div><div className={styles.container}>
     <Link href="/majors" className={styles.backLink}>← Four Majors</Link>
     {testEvent && <div className={styles.testBanner}><strong>TEST EVENT</strong><span>TEST DATA — NOT OFFICIAL</span></div>}
     <header className={styles.hero}>
@@ -110,14 +118,14 @@ export default function MajorDetailPage() {
       </nav>
       <section className={styles.majorsIntro}>
         <h1>WELCOME TO THE FOUR MAJORS</h1>
-        <p className={styles.majorNames}>The Masters <i>·</i> The PGA <i>·</i> The U.S. Open <i>·</i> The Open Championship</p>
+        <p className={styles.majorNames}>{masters ? <>THE MINI-GOLF MASTERS <i>*</i> THE MGA <i>*</i> THE MINI-GOLF OPEN <i>*</i> THE MINI-GOLF CHAMPIONSHIP</> : <>The Masters <i>·</i> The PGA <i>·</i> The U.S. Open <i>·</i> The Open Championship</>}</p>
         <p className={styles.miniGolfStyle}>MINI GOLF STYLE</p>
         <p>In traditional major-championship style, each Major will be played over four rounds of golf — Thursday, Friday, Saturday, and Sunday.</p>
         <p>Choose your preferred playing time for each round below.</p>
         <strong className={styles.aspirational}>WHO WILL BE THE FIRST TO WIN ALL FOUR?</strong>
       </section>
       <div className={styles.brandRow}><Image src="/league-media/BIG LOGO TRANSPARENT.png" width={136} height={136} alt="Krys Leagues" className={styles.logo} priority /><div><h2 className={styles.eventTitle}>{testEvent ? "TEST EVENT" : masters ? "THE MASTERS" : event.name}</h2><p className={styles.eventIdentity}>{testEvent ? "TEST DATA — NOT OFFICIAL" : masters ? "MINI GOLF MASTERS" : "MAJOR CHAMPIONSHIP"}</p><p className={styles.subtitle}>{testEvent ? "The real Major workflow, rehearsed safely" : masters ? "CHERRY BLOSSOM" : "Four-round mini golf championship"}</p></div></div>
-      {masters && <div className={styles.mastersFeature} role="img" aria-label="Cherry Blossom course artwork from the Masters scorecard"><div className={styles.featureSheen} /></div>}
+      {masters && <div className={styles.mastersFeature}><Image src="/approved-pages/the masters.jpg" alt="Cherry blossom Masters course artwork" fill sizes="(max-width: 700px) 100vw, 1036px" className={styles.mastersBanner} priority /><div className={styles.featureSheen} /></div>}
       <div className={styles.statusRow}><span className={styles.badge}>{event.status}</span><span className={`${styles.badge} ${styles[signupState]}`}>Signup {signupState}</span><span className={styles.capacity}>{signupStatus?.capacity ? `${signupStatus.spots_claimed} / ${signupStatus.capacity} spots claimed` : `${entries.length} claimed · field capacity not set`}</span></div>
       <p className={styles.meta}>{event.year || "Year to be announced"} · {formatMajorDate(event.starts_at)}</p>
       {event.description && <p className={styles.description}>{event.description}</p>}
@@ -166,14 +174,12 @@ export default function MajorDetailPage() {
       </section>}
       {message && <p className={styles.notice}>{message}</p>}
     </header>
-    {[event.scheduling_instructions,event.qualifier_information,event.cut_information,event.weekend_information,event.room_rules,event.stream_information].some(Boolean) && <section className={styles.contentCard}><h2>Tournament information</h2>
-      {event.scheduling_instructions && <InfoBlock title="Scheduling" body={event.scheduling_instructions} />}
-      {event.qualifier_information && <InfoBlock title="Rounds 1 and 2" body={event.qualifier_information} />}
-      {event.cut_information && <InfoBlock title="Friday cut" body={event.cut_information} />}
-      {event.weekend_information && <InfoBlock title="Weekend fields" body={event.weekend_information} />}
-      {event.room_rules && <InfoBlock title="Room and play rules" body={event.room_rules} />}
-      {event.stream_information && <InfoBlock title="Stream information" body={event.stream_information} />}
+    {!masters && infoBlocks.length > 0 && <section className={styles.contentCard}><h2>Tournament information</h2>
+      {infoBlocks.map((block) => <InfoBlock key={block.title} title={block.title} body={block.body} />)}
     </section>}
+    {masters && infoBlocks.length > 0 && <div className={styles.infoBoxGrid}>
+      {infoBlocks.map((block) => <section key={block.title} className={styles.contentCard}><h2>{block.title}</h2><p className={styles.description}>{block.body}</p></section>)}
+    </div>}
     {(event.stream_url || event.stream_scheduled_at) && <section className={styles.contentCard}><h2>Official broadcast</h2>{event.stream_is_live && <p className={styles.live}>● Live now</p>}<p className={styles.meta}>{event.stream_label || event.stream_platform || "Major broadcast"}</p>{event.stream_url && <a href={event.stream_url} target="_blank" rel="noreferrer" className={styles.streamLink}>Watch official stream ↗</a>}</section>}
     <section className={styles.contentCard}><h2>{testEvent ? "TEST field" : "Championship field"} <span>{entries.length}</span></h2>{entries.length === 0 ? <p className={styles.meta}>No public participants yet.</p> : <div className={styles.entrantGrid}>{entries.map((entry) => <div key={entry.id} className={styles.entrant}><strong>{entry.player_screen_name_snapshot}</strong><span>{entry.status}</span></div>)}</div>}</section>
   </div></main>
