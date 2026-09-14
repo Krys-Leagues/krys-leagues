@@ -24,9 +24,9 @@ import {
 import {
   globalPlayerIdentitySummary,
   globalPlayerMatchesSearch,
-  loadGlobalPlayerDirectory,
-  type GlobalPlayerDirectoryEntry,
-} from "@/lib/identity/globalPlayerDirectory"
+  loadProtectedAdminGlobalPlayers,
+  type ProtectedAdminGlobalPlayer,
+} from "@/lib/identity/adminGlobalPlayerClient"
 import { supabase } from "@/lib/supabase"
 import styles from "./page.module.css"
 
@@ -53,7 +53,7 @@ export default function MajorSchedulingAdminPage() {
   const [members, setMembers] = useState<MajorScheduleGroupMember[]>([])
   const [placements, setPlacements] = useState<MajorFinalPlacement[]>([])
   const [testers, setTesters] = useState<MajorTestTester[]>([])
-  const [globalPlayers, setGlobalPlayers] = useState<GlobalPlayerDirectoryEntry[]>([])
+  const [globalPlayers, setGlobalPlayers] = useState<ProtectedAdminGlobalPlayer[]>([])
   const [message, setMessage] = useState("")
   const selectedEvent = events.find((event) => event.id === eventId)
 
@@ -93,7 +93,7 @@ export default function MajorSchedulingAdminPage() {
   const reloadEvents = useCallback(async (preferred?: string) => {
     const [result, playerDirectoryResult] = await Promise.all([
       supabase.from("major_events").select("*").order("slug"),
-      loadGlobalPlayerDirectory()
+      loadProtectedAdminGlobalPlayers()
         .then((data) => ({ data, error: null }))
         .catch((error: Error) => ({ data: [], error })),
     ])
@@ -673,7 +673,7 @@ function Results({ entries, weekend, placements, onSave }: {
 function Testers({ event, testers, globalPlayers, onAdd, onRemove, onSetListing }: {
   event: MajorEvent
   testers: MajorTestTester[]
-  globalPlayers: GlobalPlayerDirectoryEntry[]
+  globalPlayers: ProtectedAdminGlobalPlayer[]
   onAdd: (playerId: string) => Promise<boolean>
   onRemove: (playerId: string) => Promise<void>
   onSetListing: (listed: boolean) => Promise<void>

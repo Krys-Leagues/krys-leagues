@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 
 import { authorizeSiteAdminMutation } from "@/lib/auth/siteAdminMutation"
-import { loadAdminGlobalPlayers } from "@/lib/identity/adminGlobalPlayerLookup"
+import { loadAdminGlobalPlayerDirectory, loadAdminGlobalPlayers } from "@/lib/identity/adminGlobalPlayerLookup"
 
 export const runtime = "nodejs"
 
@@ -15,8 +15,12 @@ export async function GET(request: Request) {
   if (!authorization.authorized) return authorization.response
 
   try {
-    const search = new URL(request.url).searchParams.get("q") ?? ""
-    return json({ players: await loadAdminGlobalPlayers(search) })
+    const params = new URL(request.url).searchParams
+    const search = params.get("q") ?? ""
+    const players = params.get("details") === "identity"
+      ? await loadAdminGlobalPlayerDirectory(search)
+      : await loadAdminGlobalPlayers(search)
+    return json({ players })
   } catch (error) {
     return json({
       players: [],

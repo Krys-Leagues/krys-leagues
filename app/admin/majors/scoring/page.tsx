@@ -12,14 +12,14 @@ import {
 } from "@/lib/majors"
 import {
   globalPlayerIdentitySummary,
-  loadGlobalPlayerDirectory,
-  type GlobalPlayerDirectoryEntry,
-} from "@/lib/identity/globalPlayerDirectory"
+  loadProtectedAdminGlobalPlayers,
+  type ProtectedAdminGlobalPlayer,
+} from "@/lib/identity/adminGlobalPlayerClient"
 import { supabase } from "@/lib/supabase"
 
 export default function MajorScoringAdminPage() {
   const [events, setEvents] = useState<MajorEvent[]>([])
-  const [players, setPlayers] = useState<GlobalPlayerDirectoryEntry[]>([])
+  const [players, setPlayers] = useState<ProtectedAdminGlobalPlayer[]>([])
   const [sessions, setSessions] = useState<MajorScoringSession[]>([])
   const [sessionId, setSessionId] = useState("")
   const [participants, setParticipants] = useState<MajorScoringParticipant[]>([])
@@ -71,7 +71,7 @@ export default function MajorScoringAdminPage() {
   const loadFoundation = useCallback(async () => {
     const [eventResponse, playerResponse, sessionResponse] = await Promise.all([
       supabase.from("major_events").select("*").order("slug"),
-      loadGlobalPlayerDirectory()
+      loadProtectedAdminGlobalPlayers()
         .then((data) => ({ data, error: null }))
         .catch((error: Error) => ({ data: [], error })),
       supabase.from("major_scoring_sessions").select("*").order("updated_at", { ascending: false }),
