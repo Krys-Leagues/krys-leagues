@@ -36,13 +36,22 @@ export default function MastersLiveAnnouncement() {
     }
   }, [pathname])
 
-  function dismiss() {
+  function rememberDismissal() {
     try {
       window.localStorage.setItem(MASTERS_LIVE_ANNOUNCEMENT_KEY, "dismissed")
     } catch {
-      // The component still closes for this render if browser storage is unavailable.
+      // The announcement can still navigate or close if browser storage is unavailable.
     }
+  }
+
+  function dismiss() {
+    rememberDismissal()
     setVisible(false)
+  }
+
+  function goToMasters() {
+    // Keep the link mounted during the click so Next can complete navigation.
+    rememberDismissal()
   }
 
   if (!visible) return null
@@ -65,7 +74,7 @@ export default function MastersLiveAnnouncement() {
           Signups are now open. Choose your times for all four rounds and come join us for the first Krys Leagues Major!
         </p>
         <div className={styles.actions}>
-          <Link href="/majors/masters" onClick={dismiss} className={styles.primary}>
+          <Link href="/majors/masters" onClick={goToMasters} className={styles.primary}>
             GO TO THE MINI-GOLF MASTERS
           </Link>
           <button type="button" onClick={dismiss} className={styles.secondary}>

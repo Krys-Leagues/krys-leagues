@@ -28,6 +28,7 @@ test("announcement copy, destination, and client-only dismissal are wired", asyn
   assert.match(component, /Players of ALL skill levels are welcome in The Masters\./u)
   assert.match(component, /Signups are now open\. Choose your times for all four rounds/u)
   assert.match(component, /href="\/majors\/masters"/u)
+  assert.match(component, /onClick=\{goToMasters\}/u)
   assert.match(component, /localStorage/u)
   assert.match(layout, /<MastersLiveAnnouncement \/>/u)
 })
