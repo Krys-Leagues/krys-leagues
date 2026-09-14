@@ -57,7 +57,9 @@ export default function MastersLiveAnnouncement() {
       <section className={styles.panel}>
         <div className={styles.blossom} aria-hidden="true">🌸</div>
         <p className={styles.eyebrow}>KRYS LEAGUES PRESENTS</p>
-        <h2 id="masters-live-announcement-title">THE MINI-GOLF MASTERS IS LIVE! 🌸⛳</h2>
+        <h2 id="masters-live-announcement-title">
+          THE MINI-GOLF MASTERS IS LIVE! 🌸⛳ <span className={styles.jacketIcon} aria-hidden="true">🧥</span>
+        </h2>
         <p className={styles.message}>Players of ALL skill levels are welcome in The Masters.</p>
         <p className={styles.message}>
           Signups are now open. Choose your times for all four rounds and come join us for the first Krys Leagues Major!

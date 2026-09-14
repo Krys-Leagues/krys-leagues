@@ -23,6 +23,8 @@ test("announcement copy, destination, and client-only dismissal are wired", asyn
   const layout = await readFile("app/layout.tsx", "utf8")
 
   assert.match(component, /THE MINI-GOLF MASTERS IS LIVE! 🌸⛳/u)
+  assert.match(component, /className=\{styles\.jacketIcon\}/u)
+  assert.match(component, /🧥/u)
   assert.match(component, /Players of ALL skill levels are welcome in The Masters\./u)
   assert.match(component, /Signups are now open\. Choose your times for all four rounds/u)
   assert.match(component, /href="\/majors\/masters"/u)
