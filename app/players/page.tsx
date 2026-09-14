@@ -8,11 +8,13 @@ import { ArtworkNavigation } from "@/components/navigation/ArtworkNavigation"
 import { playerProfilesArtwork } from "@/lib/artworkPageMaps"
 import { supabase } from "@/lib/supabase"
 import { ownProfilePath, shouldAutoOpenOwnProfile } from "@/lib/playerProfilesRouting"
-import {
-  loadCanonicalPublicPlayers,
-  type CanonicalPublicPlayer,
-} from "@/lib/publicPlayers"
 import styles from "./page.module.css"
+
+type CanonicalPublicPlayer = {
+  id: string
+  screen_name: string
+  avatar_path: string | null
+}
 
 export default function PlayerProfilesPage() {
   const router = useRouter()
@@ -40,31 +42,40 @@ export default function PlayerProfilesPage() {
 
   useEffect(() => {
     let active = true
-
-    void loadCanonicalPublicPlayers().then((response) => {
-      if (!active) return
-
-      if (response.error) {
-        setMessage(response.error.message)
-      } else {
-        setPlayers(response.data)
-      }
-
-      setLoading(false)
-    })
+    const timer = window.setTimeout(() => {
+      setLoading(true)
+      setMessage("")
+      const query = search.trim()
+      void fetch(`/api/players/public-search${query ? `?search=${encodeURIComponent(query)}` : ""}`, { cache: "no-store" })
+        .then(async (response) => {
+          const payload = await response.json() as { players?: CanonicalPublicPlayer[]; message?: string }
+          if (!response.ok) throw new Error(payload.message || "Player profiles are temporarily unavailable.")
+          return payload.players || []
+        })
+        .then((loadedPlayers) => {
+          if (!active) return
+          setPlayers(loadedPlayers)
+        })
+        .catch(() => {
+          if (active) {
+            setPlayers([])
+            setMessage("Player profiles are temporarily unavailable. Please try again later.")
+          }
+        })
+        .finally(() => {
+          if (active) setLoading(false)
+        })
+    }, search.trim() ? 220 : 0)
 
     return () => {
       active = false
+      window.clearTimeout(timer)
     }
-  }, [])
+  }, [search])
 
   const filteredPlayers = useMemo(() => {
     const query = search.trim().toLowerCase()
-    if (!query) return players
-
-    return players.filter((player) =>
-      player.screen_name.toLowerCase().includes(query)
-    )
+    return query ? players.filter((player) => player.screen_name.toLowerCase().includes(query)) : players
   }, [players, search])
 
   function updateSearch(value: string) {

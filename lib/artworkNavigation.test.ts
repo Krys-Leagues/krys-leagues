@@ -139,7 +139,7 @@ test("Player Profiles uses the approved artwork with an overlaid canonical searc
   assert.equal(playerProfilesArtwork.aspectRatio, "2064 / 793")
   assert.match(page, /ArtworkNavigation/)
   assert.match(page, /playerProfilesArtwork/)
-  assert.match(page, /loadCanonicalPublicPlayers/)
+  assert.match(page, /api\/players\/public-search/)
   assert.match(page, /Search players by screen name/)
   assert.match(page, /href=\{`\/players\/\$\{player\.id\}`\}/)
   assert.match(page, /href="\/".*Back to Krys Leagues/)

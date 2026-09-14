@@ -12,7 +12,7 @@ test("public Player Profiles keeps the canonical search and profile routes", () 
 
   assert.match(page, /ArtworkNavigation/)
   assert.match(page, /playerProfilesArtwork/)
-  assert.match(page, /loadCanonicalPublicPlayers/)
+  assert.match(page, /api\/players\/public-search/)
   assert.match(page, /player\.screen_name\.toLowerCase\(\)\.includes\(query\)/)
   assert.match(page, /href=\{`\/players\/\$\{player\.id\}`\}/)
   assert.match(page, /event\.key === "ArrowDown"/)
