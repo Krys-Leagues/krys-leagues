@@ -3,7 +3,7 @@ import { decideAdminGate, type AdminPermissions } from "@/lib/adminAccess/core"
 import { featureAccessDecision } from "@/lib/featureVisibility/core"
 import { getFeatureRoute } from "@/lib/featureVisibility/server"
 import { refreshSupabaseSession } from "@/lib/supabase/proxy"
-import { getSiteAccessMode } from "@/lib/siteAccess/config"
+import { resolveSiteAccessMode } from "@/lib/siteAccess/config"
 import { decideSiteAccessGate, safePrelaunchNext, shouldBypassPrivateTestingGate, testingAccessRedirect, type CurrentSiteAccess } from "@/lib/siteAccess/core"
 import { canonicalRedirectUrl } from "@/lib/canonicalHost"
 
@@ -17,7 +17,6 @@ export async function proxy(request: NextRequest) {
   if (canonicalRedirect) return NextResponse.redirect(canonicalRedirect, 308)
 
   const session = await refreshSupabaseSession(request)
-  const mode = getSiteAccessMode()
   const pathname = request.nextUrl.pathname
   if (pathname === "/auth/callback") return session.response
   if (pathname === "/api/auth/admin-authorization") return session.response
@@ -62,6 +61,7 @@ export async function proxy(request: NextRequest) {
     return withSessionCookies(session.response, NextResponse.redirect(denial))
   }
 
+  const mode = await resolveSiteAccessMode(session.supabase)
   const previewPublicBypass = shouldBypassPrivateTestingGate({ pathname, method: request.method, vercelEnv: process.env.VERCEL_ENV })
   let access: CurrentSiteAccess | null = null
   let resolutionFailed = false

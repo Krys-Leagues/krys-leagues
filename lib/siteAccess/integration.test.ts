@@ -2,8 +2,9 @@ import assert from "node:assert/strict"
 import { readFile } from "node:fs/promises"
 import test from "node:test"
 
-test("PUBLIC live routes do not require the tester database lookup", async () => {
+test("runtime site mode is resolved from the live database control", async () => {
   const source = await readFile("proxy.ts", "utf8")
+  assert.match(source, /resolveSiteAccessMode\(session\.supabase\)/)
   assert.match(source, /const needsAccess = mode === "prelaunch" \|\| Boolean\(feature && feature\.visibility !== "live"\)/)
   assert.match(source, /if \(session\.user && needsAccess\)/)
 })
