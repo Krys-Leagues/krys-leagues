@@ -5,8 +5,6 @@ import Link from "next/link"
 import PlayerProfileNavLink from "@/components/PlayerProfileNavLink"
 import { Suspense, useEffect, useMemo, useState } from "react"
 import { useSearchParams } from "next/navigation"
-import { supabase } from "@/lib/supabase"
-import { historicalPlayerName, loadCanonicalPlayerDisplays, type CanonicalPlayerDisplay } from "@/lib/canonicalPlayerDisplay"
 import TrophyMedia from "@/components/TrophyMedia"
 import { filterTrophiesForScope, type ChampionScope } from "@/lib/championScope"
 import { hallOfChampionsArtworkAsset } from "@/lib/artworkPageMaps"
@@ -14,7 +12,7 @@ import { hallOfChampionsArtworkAsset } from "@/lib/artworkPageMaps"
 type Trophy = {
   id: string
   player_id: string | null
-  player_name: string | null
+  playerName: string
   trophy_title: string | null
   league_type: string | null
   placement: string | null
@@ -25,9 +23,7 @@ type Trophy = {
   image_url: string | null
 }
 
-type ChampionEntry = Trophy & {
-  playerName: string
-}
+type ChampionEntry = Trophy
 
 type TrophyGroup = {
   key: string
@@ -53,8 +49,7 @@ function ChampionsContent() {
   const hallScope = resolveHallScope(searchParams.get("league"), searchParams.get("category"))
   const filteredHall = hallScope !== "all"
   const backHref = hallBackHref(hallScope, searchParams.get("from"))
-  const [players, setPlayers] = useState<CanonicalPlayerDisplay[]>([])
-  const [trophies, setTrophies] = useState<Trophy[]>([])
+  const [trophies, setTrophies] = useState<ChampionEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState("")
 
@@ -67,49 +62,20 @@ function ChampionsContent() {
     setLoading(true)
     setMessage("")
 
-    let trophiesQuery = supabase
-        .from("player_trophies")
-        .select(
-          "id, player_id, player_name, trophy_title, placement, event_name, league_type, division, season, week, image_url"
-        )
-        .order("season", { ascending: false })
-    if (scope === "kwt") trophiesQuery = trophiesQuery.eq("league_type", "kwt")
-
-    const trophiesResponse = await trophiesQuery
-
-    const firstError = trophiesResponse.error
-
-    if (firstError) {
-      setMessage(firstError.message)
+    try {
+      const response = await fetch(`/api/champions/public?scope=${encodeURIComponent(scope)}`, {
+        cache: "no-store",
+      })
+      const payload = await response.json() as { trophies?: ChampionEntry[]; message?: string }
+      if (!response.ok) throw new Error(payload.message || "Hall of Champions is temporarily unavailable.")
+      setTrophies(filterTrophiesForScope(payload.trophies || [], scope))
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Hall of Champions is temporarily unavailable.")
+    } finally {
       setLoading(false)
-      return
     }
-
-    const loadedTrophies = filterTrophiesForScope(trophiesResponse.data || [], scope)
-    const playerResponse = await loadCanonicalPlayerDisplays(
-      loadedTrophies.map((trophy) => trophy.player_id).filter((id): id is string => Boolean(id)),
-    )
-    if (playerResponse.error) {
-      setMessage(playerResponse.error.message)
-      setLoading(false)
-      return
-    }
-    setPlayers(playerResponse.data)
-    setTrophies(loadedTrophies)
-    setLoading(false)
   }
-    const championEntries = useMemo<ChampionEntry[]>(() => {
-    const playerDisplays = new Map(players.map((player) => [player.source_player_id, player]))
-
-    return trophies.map((trophy) => ({
-      ...trophy,
-      playerName:
-        historicalPlayerName(
-          trophy.player_id ? playerDisplays.get(trophy.player_id) : undefined,
-          trophy.player_name,
-        ),
-    }))
-  }, [players, trophies])
+  const championEntries = trophies
 
   const spicyCupEntries = useMemo(() => {
     return championEntries.filter((entry) =>
@@ -119,9 +85,7 @@ function ChampionsContent() {
 
   const spicyCupWinner = useMemo(() => {
     return spicyCupEntries.find((entry) =>
-      [entry.playerName, entry.player_name]
-        .filter(Boolean)
-        .some((name) => name!.trim().toLowerCase() === "hh aus hoss")
+      entry.playerName.trim().toLowerCase() === "hh aus hoss"
     )
   }, [spicyCupEntries])
 

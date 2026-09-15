@@ -23,9 +23,10 @@ test("KWT hub uses the approved artwork and preserves public card destinations",
 
 test("KWT Past Champions scopes the Hall while the default Hall remains full", () => {
   const champions = read("app/champions/page.tsx")
+  const championsReader = read("lib/champions/public.ts")
   const mainHub = read("lib/artworkPageMaps.ts")
   assert.match(champions, /useSearchParams/)
-  assert.match(champions, /eq\("league_type", "kwt"\)/)
+  assert.match(championsReader, /eq\("league_type", "kwt"\)/)
   assert.match(champions, /resolveHallScope/)
   assert.match(champions, /scope === "kwt"\) return "🏆 KWT Hall of Champions"/)
   assert.match(champions, /scope === "kwt"\) return "\/kwt"/)
