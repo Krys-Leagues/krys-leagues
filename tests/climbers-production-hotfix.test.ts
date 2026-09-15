@@ -1,4 +1,5 @@
 import assert from "node:assert/strict"
+import { createHash } from "node:crypto"
 import { readFileSync } from "node:fs"
 import test from "node:test"
 
@@ -52,4 +53,12 @@ test("public Climbers stays read-only and renders normalized payloads", () => {
   const payload = normalizePublicClimbersPayload({ current_season_id: "season-1", seasons: [{ id: "season-1", label: "Season 1", starts_at: "2026-01-01", ends_at: "2026-02-01", status: "active", standings: [{ player_id: "player-1", screen_name: "Krys", points: 81, event_count: 1 }], winner_names: [] }] })
   assert.equal(payload.seasons[0]?.standings[0]?.screen_name, "Krys")
   assert.equal(payload.seasons[0]?.standings[0]?.points, 81)
+})
+
+test("public Climbers uses the exact committed YUK1N artwork", () => {
+  const page = read("app/leaderboards/climbers/page.tsx")
+  const artwork = readFileSync("public/recognition/yuk1n.png")
+  assert.match(page, /src="\/recognition\/yuk1n\.png"/)
+  assert.equal(artwork.length, 411522)
+  assert.equal(createHash("sha256").update(artwork).digest("hex"), "48f17ae43649cc544394eb20375c97d51052c5891972f065d759004f5b01fbc5")
 })
