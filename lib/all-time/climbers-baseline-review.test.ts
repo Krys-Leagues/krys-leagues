@@ -30,7 +30,7 @@ test("review UI persists through the protected verified-alias RPC and not browse
   const { readFile } = await import("node:fs/promises")
   const source = await readFile(new URL("../../app/admin/records/climbers/LegacyBaselineIdentityReview.tsx", import.meta.url), "utf8")
   assert.match(source, /remember_verified_player_alias/)
-  assert.match(source, /loadGlobalPlayerDirectory/)
+  assert.match(source, /\/api\/admin\/records\/climbers\/players/)
   assert.doesNotMatch(source, /localStorage|sessionStorage/)
   assert.doesNotMatch(source, /create_player|insert\(/i)
 })

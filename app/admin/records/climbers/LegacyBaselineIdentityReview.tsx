@@ -3,8 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 
 import ExistingPlayerPicker from "@/app/admin/import/csv/components/ExistingPlayerPicker"
-import type { GlobalPlayerDirectoryEntry } from "@/lib/identity/globalPlayerDirectory"
-import { loadGlobalPlayerDirectory, normalizeGlobalPlayerSearch } from "@/lib/identity/globalPlayerDirectory"
+import { normalizeGlobalPlayerSearch, type GlobalPlayerDirectoryEntry } from "@/lib/identity/globalPlayerDirectory"
 import { rememberVerifiedPlayerAliases } from "@/lib/importer/rememberVerifiedPlayerAliases"
 import { supabase } from "@/lib/supabase"
 import {
@@ -50,7 +49,9 @@ function rowId(row: ClimbersBaselineReviewRow) {
   return normalizeBaselineIdentity(row.sourceName)
 }
 
-export default function LegacyBaselineIdentityReview() {
+type Props = { baselineActive?: boolean }
+
+export default function LegacyBaselineIdentityReview({ baselineActive }: Props) {
   const [directory, setDirectory] = useState<GlobalPlayerDirectoryEntry[]>([])
   const [selections, setSelections] = useState<Record<string, Selection>>({})
   const [searching, setSearching] = useState<string | null>(null)
@@ -63,7 +64,10 @@ export default function LegacyBaselineIdentityReview() {
     setState("loading")
     setError("")
     try {
-      const nextDirectory = await loadGlobalPlayerDirectory()
+      const response = await fetch("/api/admin/records/climbers/players", { cache: "no-store" })
+      const payload = await response.json() as { players?: GlobalPlayerDirectoryEntry[]; error?: string }
+      if (!response.ok) throw new Error(payload.error || "Global Player identity data could not be loaded.")
+      const nextDirectory = payload.players || []
       setDirectory(nextDirectory)
       setSelections((current) => {
         const next = { ...current }
@@ -127,7 +131,7 @@ export default function LegacyBaselineIdentityReview() {
       <div>
         <p className="text-sm font-bold uppercase tracking-widest text-lime-300">Protected identity review</p>
         <h2 className="mt-2 text-2xl font-bold">Climbers baseline · {unresolvedReviewCount} names still need review</h2>
-        <p className="mt-2 max-w-3xl text-sm text-zinc-300">Confirm only an existing Global Player when the evidence is clear. Source names and point values remain unchanged; the baseline SQL stays gated until all 79 source names are resolved.</p>
+        <p className="mt-2 max-w-3xl text-sm text-zinc-300">Confirm only an existing Global Player when the evidence is clear. Source names and point values remain unchanged. {baselineActive ? "The verified legacy baseline is already active; this review is canonical identity cleanup only and does not reactivate or replay it." : "Baseline activation remains separately gated until its verified identity checks are complete."}</p>
       </div>
       <div className="rounded-lg border border-lime-700 bg-black/30 px-4 py-3 text-sm">
         <div>Source names: <strong>{CLIMBERS_BASELINE_SOURCE_PLAYERS}</strong></div>
@@ -154,12 +158,12 @@ export default function LegacyBaselineIdentityReview() {
           {exactMatches.length > 1 && <p className="mt-3 text-sm text-amber-200">Multiple exact verified candidates exist. Do not guess; use the picker and confirm only with evidence.</p>}
           {suggestions.length > 0 && <div className="mt-3 text-sm text-zinc-300"><div className="font-semibold text-amber-200">Suggested candidates — review only</div>{suggestions.map(({ player, score }) => <div key={player.id} className="mt-1">{player.screenName} <span className="text-xs text-zinc-500">({score}% discovery match · {player.id})</span></div>)}</div>}
           <button type="button" disabled={busy === key} onClick={() => setSearching(key)} className="mt-3 rounded bg-lime-700 px-4 py-2 font-bold text-black disabled:opacity-50">{busy === key ? "Saving…" : "Search / confirm existing player"}</button>
-          {searching === key && <ExistingPlayerPicker historicalDisplayName={row.sourceName} selectLabel="Save / Confirm identity" onCancel={() => setSearching(null)} onSelect={(player) => void confirmSelection(row, player)} />}
+          {searching === key && <ExistingPlayerPicker historicalDisplayName={row.sourceName} directoryEndpoint="/api/admin/records/climbers/players" selectLabel="Save / Confirm identity" onCancel={() => setSearching(null)} onSelect={(player) => void confirmSelection(row, player)} />}
         </>}
       </article>
     })}</div>}
     {message && <p role="status" className="mt-4 text-sm text-lime-200">{message}</p>}
     {error && <p role="alert" className="mt-4 text-sm text-red-300">{error}</p>}
-    {unresolvedReviewCount === 0 && state === "ready" && <div className="mt-4 rounded-lg border border-emerald-700 bg-emerald-950/40 p-4 text-emerald-200">All 17 review names now resolve through the server-backed identity directory. The baseline migration is ready for a separate review; it has not been run.</div>}
+    {unresolvedReviewCount === 0 && state === "ready" && <div className="mt-4 rounded-lg border border-emerald-700 bg-emerald-950/40 p-4 text-emerald-200">All review names now resolve through the protected server-backed identity directory. {baselineActive ? "The active baseline remains unchanged; no activation or replay is performed by this review." : "Baseline activation remains a separate gated action."}</div>}
   </section>
 }

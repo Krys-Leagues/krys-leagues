@@ -136,3 +136,31 @@ export async function loadAdminGlobalPlayers(search = "") {
     search,
   )
 }
+
+export async function loadAdminCanonicalPlayerNames() {
+  const client = createAdminDataClient()
+  const [playersResult, linksResult] = await Promise.all([
+    client.from("players").select("id,screen_name"),
+    client.from("player_identity_links").select("historical_player_id,canonical_player_id"),
+  ])
+
+  const error = playersResult.error || linksResult.error
+  if (error) throw error
+
+  const players = (playersResult.data ?? []) as Array<{ id: string; screen_name: string | null }>
+  const links = new Map(
+    ((linksResult.data ?? []) as AdminIdentityLinkRow[]).map((link) => [link.historical_player_id, link.canonical_player_id]),
+  )
+  const canonicalNames = new Map(
+    players
+      .filter((player) => resolveCanonicalId(player.id, links) === player.id)
+      .flatMap((player) => player.screen_name ? [[player.id, player.screen_name] as const] : []),
+  )
+
+  return new Map(
+    players.flatMap((player) => {
+      const name = canonicalNames.get(resolveCanonicalId(player.id, links))
+      return name ? [[player.id, name] as const] : []
+    }),
+  )
+}

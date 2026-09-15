@@ -68,6 +68,14 @@
 .empty { margin-top:16px; color:#94a3b8; text-align:center; border-style:dashed; background:rgba(2,6,23,.4); }
 .gridTwo { display:grid; grid-template-columns:minmax(280px, .72fr) minmax(0, 1.28fr); gap:20px; align-items:start; }
 .stack { display:grid; gap:16px; }
+.eventCard { display:grid; gap:10px; margin-top:12px; padding:16px; border:1px solid rgba(148,163,184,.2); border-radius:16px; background:rgba(15,23,42,.72); min-width:0; }
+.eventHeader { display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px 18px; font-size:clamp(16px,2vw,20px); }
+.eventHeader strong { color:#f8fafc; }
+.eventHeader span { color:#bae6fd; }
+.eventMeta { color:#cbd5e1; line-height:1.55; overflow-wrap:anywhere; }
+.passedList { display:flex; flex-wrap:wrap; gap:6px 12px; margin-left:6px; }
+.passedList span { color:#e0f2fe; }
+.passedList small { color:#94a3b8; font-size:.8em; }
 
 @media (max-width: 800px) {
   .inner { padding-top: 16px; }

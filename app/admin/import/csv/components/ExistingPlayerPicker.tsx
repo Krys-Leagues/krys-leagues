@@ -15,9 +15,10 @@ type Props = {
   selectLabel?: string
   usePageScroll?: boolean
   allowedPlayerIds?: string[]
+  directoryEndpoint?: string
 }
 
-export default function ExistingPlayerPicker({ historicalDisplayName, onSelect, onCancel, selectLabel = "Link this player", usePageScroll = false, allowedPlayerIds }: Props) {
+export default function ExistingPlayerPicker({ historicalDisplayName, onSelect, onCancel, selectLabel = "Link this player", usePageScroll = false, allowedPlayerIds, directoryEndpoint }: Props) {
   const [query, setQuery] = useState("")
   const [players, setPlayers] = useState<PlayerRecord[]>([])
   const [aliases, setAliases] = useState<PlayerIdentityAlias[]>([])
@@ -26,8 +27,19 @@ export default function ExistingPlayerPicker({ historicalDisplayName, onSelect, 
 
   useEffect(() => {
     let cancelled = false
-    Promise.all([loadPlayers({ includeInactive: true }), loadPlayerAliases()])
-      .then(([loadedPlayers, loadedAliases]) => {
+    const loadDirectory = directoryEndpoint
+      ? fetch(directoryEndpoint, { cache: "no-store" }).then(async (response) => {
+        const payload = await response.json() as { players?: Array<{ id: string; screenName: string; discordName: string | null; discordUsername: string | null; discordId: string | null; active: boolean; verifiedAliases: string[] }>; error?: string }
+        if (!response.ok) throw new Error(payload.error || "Existing players could not be loaded.")
+        const remotePlayers = payload.players || []
+        return {
+          players: remotePlayers.map((player) => ({ id: player.id, screen_name: player.screenName, discord_name: player.discordName, discord_username: player.discordUsername, discord_id: player.discordId, active: player.active })),
+          aliases: remotePlayers.flatMap((player) => player.verifiedAliases.map((alias, index) => ({ id: `${player.id}-${index}`, playerId: player.id, aliasName: alias, normalizedAlias: alias.toLocaleLowerCase(), source: "historical_alias" as const, firstSeenLeague: null, firstSeenSeason: null, lastSeenLeague: null, lastSeenSeason: null, active: true, verified: true }))),
+        }
+      })
+      : Promise.all([loadPlayers({ includeInactive: true }), loadPlayerAliases()]).then(([players, aliases]) => ({ players, aliases }))
+    loadDirectory
+      .then(({ players: loadedPlayers, aliases: loadedAliases }) => {
         if (cancelled) return
         setPlayers(loadedPlayers)
         setAliases(loadedAliases)
@@ -39,7 +51,7 @@ export default function ExistingPlayerPicker({ historicalDisplayName, onSelect, 
         setLoading(false)
       })
     return () => { cancelled = true }
-  }, [])
+  }, [directoryEndpoint])
 
   const results = useMemo(() => {
     const allowed = allowedPlayerIds ? new Set(allowedPlayerIds) : null
