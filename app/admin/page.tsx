@@ -20,6 +20,7 @@ const LEAGUES = [
 
 const GLOBAL_TOOLS = [
   { name: "Command Center", href: "/admin/command-center", description: "Krys Central project board and roadmap" },
+  { name: "League Rosters", href: "/admin/league-rosters", description: "Current Stroke, Match, Doubles, PYP, Pro, Solo, and player lists" },
   { name: "Players", href: "/admin/players", description: "Global player list, statuses, merge tools" },
   { name: "Player Identity", href: "/admin/player-identity", description: "Aliases, Discord identities, historical names and player matching" },
   { name: "Historical Imports", href: "/admin/import/csv", description: "Import old Match, Stroke, PYP, and other league seasons." },
