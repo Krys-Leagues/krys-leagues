@@ -15,6 +15,7 @@ export const FEATURE_ROUTES: readonly FeatureRoute[] = [
   { key: "register", path: "/register/success", visibility: "live" },
   { key: "player_dashboard", path: "/player-dashboard", visibility: "live" },
   { key: "players", path: "/players", visibility: "live" },
+  { key: "course_challenges", path: "/course-challenges", visibility: "live" },
   { key: "league_play", path: "/league-play", visibility: "live" },
   { key: "match_standings", path: "/match-standings", visibility: "live" },
   { key: "match_play", path: "/match-play", visibility: "live" },

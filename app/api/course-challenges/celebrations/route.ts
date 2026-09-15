@@ -1,7 +1,7 @@
 import { getPublicCourseChallenges } from "@/lib/courseChallenges/catalog"
 import { celebrationRewardLabel, COURSE_CHALLENGE_REACTIONS, type CourseChallengeReaction } from "@/lib/courseChallenges/celebrations"
 import { aceRewardDefinition, aceStageRewardDefinitions, levelRewardDefinitions, prestigeStageRewardDefinitions } from "@/lib/courseChallenges/rewards"
-import { getCourseChallengeIdentity } from "@/lib/courseChallenges/server"
+import { createCourseChallengesServiceClient, getCourseChallengeIdentity } from "@/lib/courseChallenges/server"
 import { playerAvatarPublicUrl } from "@/lib/playerAvatars"
 import { createServerSupabaseClient } from "@/lib/supabase/server"
 
@@ -26,7 +26,7 @@ function rewardDefinitions() {
 
 export async function GET(request: Request) {
   try {
-    const service = await createServerSupabaseClient()
+    const service = createCourseChallengesServiceClient()
     const range = dateRange(new URL(request.url).searchParams.get("date"))
     const definitions = rewardDefinitions()
     const rewards = await service.from("course_challenge_rewards").select("id,player_id,reward_key,label,kind,course_slug,level,earned_at").gte("earned_at", range.start).lt("earned_at", range.end).order("earned_at", { ascending: false })
