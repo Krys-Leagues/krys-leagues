@@ -31,5 +31,6 @@ export const FEATURE_ROUTES: readonly FeatureRoute[] = [
   { key: "pyp", path: "/pyp", visibility: "live" },
   { key: "champions", path: "/champions", visibility: "live" },
   { key: "leaderboards", path: "/leaderboards", visibility: "live" },
+  { key: "handicaps", path: "/handicaps", visibility: "live" },
   { key: "main_hub", path: "/", visibility: "live" },
 ] as const
