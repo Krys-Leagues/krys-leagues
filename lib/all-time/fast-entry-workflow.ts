@@ -11,6 +11,8 @@ export type FastEntryWorkspace = {
   reference: string
   notes: string
   scorecardKey: string | null
+  verifiedDate: string
+  verifiedOrder: string
 }
 
 const emptyHoles = () => Array.from({ length: 18 }, () => "")
@@ -20,6 +22,9 @@ export function workspaceAfterSuccessfulSave(
   action: FastEntryAction,
 ): FastEntryWorkspace {
   const keepScorecard = action === "add_again_scorecard"
+  const nextOrder = action === "add_again" && /^\d+$/.test(current.verifiedOrder)
+    ? String(Number(current.verifiedOrder) + 1)
+    : keepScorecard ? current.verifiedOrder : ""
 
   return {
     period: current.period,
@@ -32,6 +37,8 @@ export function workspaceAfterSuccessfulSave(
     reference: "",
     notes: "",
     scorecardKey: keepScorecard ? current.scorecardKey : null,
+    verifiedDate: action === "finish" ? "" : current.verifiedDate,
+    verifiedOrder: nextOrder,
   }
 }
 

@@ -22,6 +22,7 @@ test("All-Time fast entry exposes optional manual scorecard evidence above score
 
 test("fast-entry actions are distinct and duplicate saves are guarded", () => {
   const page = read("app/admin/records/entry/page.tsx")
+  const fingerprint = page.slice(page.indexOf("async function fingerprintForEntry"), page.indexOf("async function previewEntry"))
   assert.match(page, /ADD AGAIN SC/)
   assert.match(page, /saveEntry\("add_again"\)/)
   assert.match(page, /saveEntry\("add_again_scorecard"\)/)
@@ -29,6 +30,19 @@ test("fast-entry actions are distinct and duplicate saves are guarded", () => {
   assert.match(page, /savingRef\.current/)
   assert.match(page, /Duplicate prevented/)
   assert.match(page, /Do not resubmit the score/)
+  assert.doesNotMatch(fingerprint, /verifiedSourceBatchId/)
+})
+
+test("verified-period intake preserves source-backed ordering and reports replay results", () => {
+  const page = read("app/admin/records/entry/page.tsx")
+  assert.match(page, /AUTHORITATIVE BACKLOG CHRONOLOGY/)
+  assert.match(page, /admin entry time is never used/)
+  assert.match(page, /p_authoritative_submitted_date: verifiedDate/)
+  assert.match(page, /p_authoritative_submission_order: Number\(verifiedOrder\)/)
+  assert.match(page, /p_verified_source_batch_id: verifiedSourceBatchRef\.current/)
+  assert.match(page, /saved\.climbers_points \?\? points/)
+  assert.match(page, /CLIMBERS: \$\{savedPoints\}/)
+  assert.doesNotMatch(page, /PENDING PERIOD REPLAY|0 points · pending replay/)
 })
 
 test("session log records PB movement, Climbers, evidence, and saved time", () => {

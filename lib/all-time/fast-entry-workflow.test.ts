@@ -14,6 +14,8 @@ const workspace = (): FastEntryWorkspace => ({
   reference: "message 123",
   notes: "player-specific note",
   scorecardKey: "card.png",
+  verifiedDate: "2026-08-20",
+  verifiedOrder: "7",
 })
 
 test("scorecard selection defaults provenance without overwriting an explicit source", () => {
@@ -32,6 +34,8 @@ test("ADD AGAIN clears player, course, scores, evidence, and result-specific pro
   assert.equal(next.scoreText, "")
   assert.equal(next.reference, "")
   assert.equal(next.notes, "")
+  assert.equal(next.verifiedDate, "2026-08-20")
+  assert.equal(next.verifiedOrder, "8")
 })
 
 test("ADD AGAIN SC keeps only the same scorecard, course, source, and period", () => {
@@ -44,6 +48,8 @@ test("ADD AGAIN SC keeps only the same scorecard, course, source, and period", (
   assert.equal(next.playerSearch, "")
   assert.equal(next.scoreText, "")
   assert.ok(next.holes.every((hole) => hole === ""))
+  assert.equal(next.verifiedDate, "2026-08-20")
+  assert.equal(next.verifiedOrder, "7")
 })
 
 test("ADD & FINISH clears the whole entry workspace while preserving safe batch defaults", () => {
@@ -53,6 +59,8 @@ test("ADD & FINISH clears the whole entry workspace while preserving safe batch 
   assert.equal(next.scorecardKey, null)
   assert.equal(next.period, "previous")
   assert.equal(next.source, "SCORECARD")
+  assert.equal(next.verifiedDate, "")
+  assert.equal(next.verifiedOrder, "")
 })
 
 test("scorecard validation accepts supported images up to 10 MB", () => {
