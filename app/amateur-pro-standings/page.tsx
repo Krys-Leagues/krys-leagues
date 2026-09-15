@@ -2,7 +2,6 @@
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { supabase } from "@/lib/supabase"
 
 const DIVISIONS = [
   "Amateur D1",
@@ -12,22 +11,7 @@ const DIVISIONS = [
   "Pro D3",
 ]
 
-type StandingRow = {
-  player_id: string
-  points: number | null
-  wins: number | null
-  losses: number | null
-  ties: number | null
-  rank: number | null
-}
-
-type PlayerRow = {
-  id: string
-  screen_name: string
-}
-
 type Standing = {
-  playerId: string
   player: string
   played: number
   wins: number
@@ -45,88 +29,35 @@ export default function AmateurProStandingsPage() {
   const [message, setMessage] = useState("")
 
   useEffect(() => {
-    loadStandings()
-  }, [division, season])
+    let cancelled = false
 
-  async function loadStandings() {
-    const seasonNumber = Number(season)
-
-    if (!seasonNumber) {
-      setStandings([])
-      setMessage("Enter a valid season number.")
-      setLoading(false)
-      return
-    }
-
-    setLoading(true)
-    setMessage("")
-
-    const { data, error } = await supabase
-      .from("season_standings")
-      .select("player_id, points, wins, losses, ties, rank")
-      .eq("league_type", "pro")
-      .eq("division", division)
-      .eq("season_number", seasonNumber)
-      .order("rank", { ascending: true })
-
-    if (error) {
-      setStandings([])
-      setMessage(error.message)
-      setLoading(false)
-      return
-    }
-
-    const savedRows = (data || []) as StandingRow[]
-    const playerIds = savedRows.map((row) => row.player_id).filter(Boolean)
-
-    let playerMap = new Map<string, string>()
-
-    if (playerIds.length > 0) {
-      const { data: playerData, error: playerError } = await supabase
-        .from("players")
-        .select("id, screen_name")
-        .in("id", playerIds)
-
-      if (playerError) {
+    void fetch(
+      `/api/amateur-pro/public-standings?division=${encodeURIComponent(division)}&season=${encodeURIComponent(season)}`,
+      { cache: "no-store" },
+    )
+      .then(async (response) => {
+        const payload = (await response.json()) as { standings?: Standing[]; message?: string }
+        if (!response.ok) throw new Error(payload.message || "Standings are temporarily unavailable.")
+        return payload.standings || []
+      })
+      .then((rows) => {
+        if (cancelled) return
+        setStandings(rows)
+        setMessage(rows.length === 0 ? "No saved standings found for this division and season." : "")
+      })
+      .catch((error: unknown) => {
+        if (cancelled) return
         setStandings([])
-        setMessage(playerError.message)
-        setLoading(false)
-        return
-      }
+        setMessage(error instanceof Error ? error.message : "Standings are temporarily unavailable.")
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
 
-      playerMap = new Map(
-        ((playerData || []) as PlayerRow[]).map((player) => [
-          player.id,
-          player.screen_name,
-        ])
-      )
+    return () => {
+      cancelled = true
     }
-
-    const rows = savedRows.map((row) => {
-      const wins = Number(row.wins || 0)
-      const draws = Number(row.ties || 0)
-      const losses = Number(row.losses || 0)
-
-      return {
-        playerId: row.player_id,
-        player: playerMap.get(row.player_id) || "Unknown Player",
-        played: wins + draws + losses,
-        wins,
-        draws,
-        losses,
-        points: Number(row.points || 0),
-        rank: Number(row.rank || 0),
-      }
-    })
-
-    setStandings(rows)
-
-    if (rows.length === 0) {
-      setMessage("No saved standings found for this division and season.")
-    }
-
-    setLoading(false)
-  }
+  }, [division, season])
 
   return (
     <main style={page}>
@@ -148,7 +79,11 @@ export default function AmateurProStandingsPage() {
 
               <select
                 value={division}
-                onChange={(event) => setDivision(event.target.value)}
+                onChange={(event) => {
+                  setDivision(event.target.value)
+                  setLoading(true)
+                  setMessage("")
+                }}
                 style={input}
               >
                 {DIVISIONS.map((divisionName) => (
@@ -164,7 +99,11 @@ export default function AmateurProStandingsPage() {
 
               <input
                 value={season}
-                onChange={(event) => setSeason(event.target.value)}
+                onChange={(event) => {
+                  setSeason(event.target.value)
+                  setLoading(true)
+                  setMessage("")
+                }}
                 style={input}
               />
             </div>
@@ -191,8 +130,8 @@ export default function AmateurProStandingsPage() {
               </thead>
 
               <tbody>
-                {standings.map((row) => (
-                  <tr key={row.playerId}>
+                {standings.map((row, index) => (
+                  <tr key={`${row.rank}-${row.player}-${index}`}>
                     <td style={td}>{row.rank}</td>
                     <td style={playerCell}>{row.player}</td>
                     <td style={td}>{row.played}</td>
