@@ -106,6 +106,13 @@ test("historical seasons without fixtures render standings without an empty matc
   const sql = readFileSync("historical_match_public_read.sql", "utf8")
   assert.match(sql, /coalesce\(jsonb_agg\(to_jsonb\(matchup\)[\s\S]*'\[\]'::jsonb\)/)
   assert.match(page, /divisionMatchups\.length > 0 && <MatchupSection/)
+  assert.match(page, /selectedMatchups\.length > 0[\s\S]*Published standings and matchup records for this season\.[\s\S]*Published final standings for this season\./)
+})
+test("trophy API failure remains optional and does not fail Match Play", () => {
+  const page = readFileSync("app/match-play/page.tsx", "utf8")
+  assert.match(page, /fetch\("\/api\/champions\/public\?scope=all"[\s\S]*\.catch\(\(\) => \[\] as PublicMatchTrophy\[\]\)/)
+  assert.match(page, /setTrophies\(loadedTrophies\)/)
+  assert.doesNotMatch(page, /Trophy source failed|throw new Error/)
 })
 test("SQL grants only read RPC execution and keeps historical tables behind their RLS", () => {
   const sql = readFileSync("historical_match_public_read.sql", "utf8")

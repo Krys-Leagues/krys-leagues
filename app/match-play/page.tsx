@@ -60,9 +60,15 @@ export default function MatchPlayPage() {
     let cancelled = false
 
     async function loadPage() {
-      const [matchResponse, trophiesResponse] = await Promise.all([
+      const [matchResponse, loadedTrophies] = await Promise.all([
         supabase.rpc("get_public_match_play"),
-        fetch("/api/champions/public?scope=all", { cache: "no-store" }),
+        fetch("/api/champions/public?scope=all", { cache: "no-store" })
+          .then(async (response) => {
+            if (!response.ok) return []
+            const payload = await response.json() as { trophies?: unknown }
+            return Array.isArray(payload.trophies) ? payload.trophies as PublicMatchTrophy[] : []
+          })
+          .catch(() => [] as PublicMatchTrophy[]),
       ])
 
       if (cancelled) return
@@ -76,9 +82,7 @@ export default function MatchPlayPage() {
       const loaded = matchResponse.data as PublicMatchPayload
       setData(loaded)
 
-      if (!trophiesResponse.ok) throw new Error("Trophy source failed")
-      const trophyPayload = await trophiesResponse.json() as { trophies?: PublicMatchTrophy[] }
-      setTrophies(trophyPayload.trophies || [])
+      setTrophies(loadedTrophies)
 
       setSelectedSeason(loaded.current.season_number ?? loaded.historical_seasons[0]?.season_number ?? null)
       setLoading(false)
@@ -204,7 +208,11 @@ export default function MatchPlayPage() {
               <div>
                 <p className={styles.eyebrow}>{showingCurrent ? "LIVE LEAGUE" : "SEASON RECORD"}</p>
                 <h1>Season {selectedSeason}</h1>
-                <p>{showingCurrent ? "Approved Match roster, managed schedule, and current overall totals." : "Published standings and matchup records for this season."}</p>
+                <p>{showingCurrent
+                  ? "Approved Match roster, managed schedule, and current overall totals."
+                  : selectedMatchups.length > 0
+                    ? "Published standings and matchup records for this season."
+                    : "Published final standings for this season."}</p>
               </div>
               {showingCurrent && <span className={styles.currentBadge}>CURRENT</span>}
             </section>
