@@ -128,13 +128,11 @@ export const invitationalsArtwork: ArtworkPageDefinition = {
 export const matchPlayArtwork: ArtworkPageDefinition = {
   id: "match-play",
   title: "Krys Leagues Match Play",
-  imageSrc: "/approved-pages/match-play-approved.jpg",
-  imageAlt: "Krys Leagues Match Play with League Play, Matches and Results, Classic standings, and Current Season artwork",
-  aspectRatio: "1507 / 1044",
+  imageSrc: "/approved-pages/match-play-hero-16x9.png",
+  imageAlt: "Krys Leagues Match Play with head-to-head mini golf artwork",
+  aspectRatio: "16 / 9",
   targets: [
-    { id: "back-to-league-play", label: "Back to League Play", href: "/league-play", x: 1.4, y: 2.0, width: 14.2, height: 7.2 },
-    { id: "matches-and-results", label: "Matches and Results", href: "/matches", x: 60.5, y: 2.0, width: 19.3, height: 7.4 },
-    { id: "classic-standings", label: "Classic standings", href: "/match-standings", x: 80.8, y: 2.0, width: 18.0, height: 7.4 },
+    { id: "back-to-league-play", label: "Back to League Play", href: "/league-play", x: 2.1, y: 5.4, width: 15.0, height: 7.9 },
   ],
 }
 

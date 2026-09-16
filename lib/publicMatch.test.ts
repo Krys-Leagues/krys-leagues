@@ -85,6 +85,15 @@ test("standings-only, null year, and responsive public states are supported", ()
   assert.match(css, /data-label/)
 })
 
+test("public Match uses one selected-season header without archive language or a current badge", () => {
+  const page = readFileSync("app/match-play/page.tsx", "utf8")
+  assert.equal((page.match(/aria-label="Season selection"/g) || []).length, 1)
+  assert.equal((page.match(/<select value=\{selectedSeason/g) || []).length, 1)
+  assert.match(page, /showingCurrent && <p className=\{styles\.eyebrow\}>LIVE LEAGUE<\/p>/)
+  assert.match(page, /<h1>Season \{selectedSeason\}<\/h1>/)
+  assert.doesNotMatch(page, /MATCH PLAY SEASONS|Choose a season|SEASON RECORD|currentBadge|>CURRENT<|Historical|Archive/)
+})
+
 test("current public rows include roster players even without a standings row", () => {
   const sql = readFileSync("historical_match_public_read.sql", "utf8")
   assert.match(sql, /left join public\.season_standings as standing/)

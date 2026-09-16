@@ -171,37 +171,28 @@ export default function MatchPlayPage() {
     <div className={styles.page}>
       <ArtworkNavigation
         definition={matchPlayArtwork}
-        hiddenTargetIds={["matches-and-results", "classic-standings"]}
-        frameAspectRatio="1507 / 690"
         frameClassName={styles.heroArtworkFrame}
-        overlay={<div className={styles.heroNavMask} aria-hidden="true"><span>KRYS LEAGUES</span><strong>PUBLIC MATCH CENTER</strong></div>}
       />
 
       <div className={`${styles.duelRail} ${styles.duelRailLeft}`} aria-hidden="true"><span>01</span><strong>HEAD</strong><i>VS</i><strong>HEAD</strong></div>
       <div className={`${styles.duelRail} ${styles.duelRailRight}`} aria-hidden="true"><span>18</span><strong>MATCH</strong><i>×</i><strong>PLAY</strong></div>
 
       <main className={styles.shell}>
-        <header className={styles.matchMasthead}>
-          <div className={styles.mastheadCopy}>
-            <p className={styles.mastheadKicker}>KRYS LEAGUES · HEAD-TO-HEAD GOLF</p>
-            <h2>MATCH <em>PLAY</em></h2>
-            <p>One opponent. One course. Every division playing for position.</p>
-          </div>
-          <div className={styles.duelCrest} aria-hidden="true"><span /><b>VS</b><span /></div>
-          <div className={styles.mastheadMeta} aria-hidden="true"><span>RIVALRIES</span><span>DIVISIONS</span><span>COURSES</span></div>
-        </header>
-
         <div className={styles.contentFrame}>
           {loading && <div className={styles.message}>Loading Match Play…</div>}
           {error && <div className={styles.message} role="alert">{error}</div>}
 
           {!loading && !error && data && (
             <>
-            <section className={styles.seasonBar} aria-label="Season selection">
-              <div>
-                <p className={styles.eyebrow}>MATCH PLAY SEASONS</p>
-                <h2>Choose a season</h2>
-                <p>Every division, every matchup, one scrollable season page.</p>
+            <section className={styles.seasonIntro} aria-label="Season selection">
+              <div className={styles.seasonHeadingCopy}>
+                {showingCurrent && <p className={styles.eyebrow}>LIVE LEAGUE</p>}
+                <h1>Season {selectedSeason}</h1>
+                <p>{showingCurrent
+                  ? "Approved Match roster, managed schedule, and current overall totals."
+                  : selectedMatchups.length > 0
+                    ? "Published standings and matchup records for this season."
+                    : "Published final standings for this season."}</p>
               </div>
               <label className={styles.seasonSelect}>
                 <span className={styles.srOnly}>Season</span>
@@ -216,19 +207,6 @@ export default function MatchPlayPage() {
             </section>
 
             {selectedSeasonTrophies.length > 0 && <TrophySection trophies={selectedSeasonTrophies} />}
-
-            <section className={styles.seasonIntro}>
-              <div>
-                <p className={styles.eyebrow}>{showingCurrent ? "LIVE LEAGUE" : "SEASON RECORD"}</p>
-                <h1>Season {selectedSeason}</h1>
-                <p>{showingCurrent
-                  ? "Approved Match roster, managed schedule, and current overall totals."
-                  : selectedMatchups.length > 0
-                    ? "Published standings and matchup records for this season."
-                    : "Published final standings for this season."}</p>
-              </div>
-              {showingCurrent && <span className={styles.currentBadge}>CURRENT</span>}
-            </section>
 
             {divisions.length === 0 ? (
               <div className={styles.empty}>No standings are available for this season.</div>

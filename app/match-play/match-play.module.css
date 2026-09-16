@@ -41,7 +41,7 @@
 }
 
 .page :global(.artwork-navigation__hub-stack) {
-  width: min(calc(100% - 36px), 1507px);
+  width: min(calc(100% - 36px), 1600px);
 }
 
 .page :global(.artwork-navigation__frame) {
@@ -52,40 +52,7 @@
 }
 
 .heroArtworkFrame :global(.artwork-navigation__image) {
-  object-fit: cover;
-  object-position: center top;
-}
-
-.heroNavMask {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 41%;
-  height: 13%;
-  display: grid;
-  align-content: center;
-  justify-items: end;
-  padding-right: clamp(12px, 2.7vw, 42px);
-  border-left: 1px solid rgba(56, 189, 248, .28);
-  background: linear-gradient(110deg, rgba(3, 19, 40, .78), rgba(3, 19, 40, .97) 42%, rgba(7, 29, 53, .99));
-  box-shadow: inset 0 -1px rgba(190, 242, 100, .16);
-  pointer-events: none !important;
-}
-
-.heroNavMask span {
-  color: var(--match-lime);
-  font-size: clamp(7px, .78vw, 12px);
-  font-weight: 950;
-  letter-spacing: .28em;
-}
-
-.heroNavMask strong {
-  margin-top: 2px;
-  color: #f8fafc;
-  font-size: clamp(9px, 1.15vw, 18px);
-  font-style: italic;
-  letter-spacing: .08em;
-  text-shadow: 0 0 18px rgba(56, 189, 248, .48);
+  object-fit: contain;
 }
 
 .shell {
@@ -93,147 +60,12 @@
   z-index: 1;
   width: min(1080px, calc(100% - 210px));
   margin: 0 auto;
-  padding: 22px 0 84px;
-}
-
-.matchMasthead {
-  position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 18px 32px;
-  overflow: hidden;
-  padding: 27px 32px 24px;
-  border: 1px solid rgba(190, 242, 100, .42);
-  border-radius: 24px 24px 10px 10px;
-  background:
-    radial-gradient(circle at 84% 28%, rgba(56, 189, 248, .2), transparent 27%),
-    radial-gradient(circle at 12% 100%, rgba(217, 70, 239, .16), transparent 31%),
-    linear-gradient(120deg, rgba(4, 18, 36, .96), rgba(3, 9, 23, .94));
-  box-shadow: 0 22px 62px rgba(0, 0, 0, .46), inset 0 1px rgba(255, 255, 255, .05);
-}
-
-.matchMasthead::before,
-.matchMasthead::after {
-  content: "";
-  position: absolute;
-  pointer-events: none;
-}
-
-.matchMasthead::before {
-  inset: 0;
-  opacity: .2;
-  background: repeating-linear-gradient(115deg, transparent 0 34px, rgba(255, 255, 255, .07) 35px 36px);
-}
-
-.matchMasthead::after {
-  right: -58px;
-  bottom: -88px;
-  width: 260px;
-  height: 260px;
-  border: 38px solid rgba(190, 242, 100, .06);
-  border-radius: 50%;
-}
-
-.mastheadCopy,
-.duelCrest,
-.mastheadMeta {
-  position: relative;
-  z-index: 1;
-}
-
-.mastheadKicker {
-  margin: 0;
-  color: var(--match-lime);
-  font-size: .72rem;
-  font-weight: 950;
-  letter-spacing: .22em;
-}
-
-.mastheadCopy h2 {
-  margin: 3px 0 0;
-  font-size: clamp(2.55rem, 6vw, 5.1rem);
-  font-style: italic;
-  font-weight: 1000;
-  letter-spacing: -.055em;
-  line-height: .92;
-  text-transform: uppercase;
-  text-shadow: 0 8px 28px rgba(0, 0, 0, .42);
-}
-
-.mastheadCopy h2 em {
-  color: var(--match-lime);
-  font-style: inherit;
-  text-shadow: 0 0 26px rgba(190, 242, 100, .3);
-}
-
-.mastheadCopy > p:last-child {
-  max-width: 600px;
-  margin: 12px 0 0;
-  color: #cbd5e1;
-  font-size: clamp(.92rem, 1.4vw, 1.05rem);
-}
-
-.duelCrest {
-  width: 126px;
-  height: 126px;
-  align-self: center;
-  display: grid;
-  place-items: center;
-  border: 1px solid rgba(125, 211, 252, .5);
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(15, 43, 67, .96) 0 46%, rgba(2, 8, 23, .92) 47% 100%);
-  box-shadow: 0 0 0 8px rgba(56, 189, 248, .05), 0 0 34px rgba(56, 189, 248, .2);
-  animation: duelGlow 5s ease-in-out infinite;
-}
-
-.duelCrest span {
-  position: absolute;
-  width: 5px;
-  height: 82px;
-  border-radius: 999px;
-  background: linear-gradient(#f8fafc 0 76%, var(--match-lime) 77%);
-  box-shadow: 0 0 12px rgba(255, 255, 255, .28);
-}
-
-.duelCrest span:first-child { transform: rotate(47deg); }
-.duelCrest span:nth-child(2) { transform: rotate(-47deg); }
-
-.duelCrest b {
-  z-index: 1;
-  display: grid;
-  width: 50px;
-  height: 50px;
-  place-items: center;
-  border: 2px solid var(--match-lime);
-  border-radius: 50%;
-  background: #07111f;
-  color: #fff;
-  font-size: 1rem;
-  font-style: italic;
-  box-shadow: 0 0 18px rgba(190, 242, 100, .45);
-}
-
-.mastheadMeta {
-  grid-column: 1 / -1;
-  display: flex;
-  gap: 9px;
-  flex-wrap: wrap;
-}
-
-.mastheadMeta span {
-  padding: 6px 10px;
-  border: 1px solid rgba(148, 163, 184, .25);
-  border-radius: 999px;
-  background: rgba(15, 23, 42, .62);
-  color: #a5b4c9;
-  font-size: .62rem;
-  font-weight: 900;
-  letter-spacing: .18em;
+  padding: 14px 0 84px;
 }
 
 .contentFrame {
   position: relative;
-  margin-top: 12px;
+  margin-top: 0;
   padding: 20px;
   border: 1px solid rgba(125, 211, 252, .2);
   border-radius: 10px 10px 26px 26px;
@@ -243,9 +75,9 @@
 }
 
 .duelRail {
-  position: fixed;
-  z-index: 2;
-  top: 46%;
+  position: absolute;
+  z-index: 0;
+  top: min(62vw, 960px);
   width: 68px;
   min-height: 310px;
   display: flex;
@@ -256,7 +88,6 @@
   border: 1px solid rgba(148, 163, 184, .24);
   background: linear-gradient(180deg, rgba(2, 8, 23, .45), rgba(2, 8, 23, .88), rgba(2, 8, 23, .45));
   box-shadow: 0 18px 42px rgba(0, 0, 0, .38), inset 0 0 22px rgba(255, 255, 255, .025);
-  transform: translateY(-30%);
   pointer-events: none;
 }
 
@@ -292,24 +123,12 @@
 .duelRailLeft { left: 18px; color: #e879f9; border-radius: 9px 30px 30px 9px; }
 .duelRailRight { right: 18px; color: #38bdf8; border-radius: 30px 9px 9px 30px; }
 
-.seasonBar,
 .seasonIntro,
 .trophySection,
 .divisionSection {
   border: 1px solid rgba(148, 163, 184, .3);
   background: rgba(3, 10, 26, .94);
   box-shadow: 0 16px 42px rgba(0, 0, 0, .3), inset 0 1px rgba(255, 255, 255, .035);
-}
-
-.seasonBar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 28px;
-  padding: 22px 26px;
-  border-color: rgba(190, 242, 100, .4);
-  border-radius: 17px;
-  background: linear-gradient(115deg, rgba(12, 31, 38, .96), rgba(3, 10, 26, .96) 68%);
 }
 
 .eyebrow,
@@ -321,7 +140,6 @@
   letter-spacing: .2em;
 }
 
-.seasonBar h2,
 .seasonIntro h1,
 .trophyHeader h2 {
   margin: 3px 0 0;
@@ -329,7 +147,6 @@
   line-height: 1;
 }
 
-.seasonBar p:last-child,
 .seasonIntro p:last-child {
   margin: .55rem 0 0;
   color: #a5b4c9;
@@ -375,18 +192,18 @@
 
 .seasonIntro {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 18px;
-  margin-top: 18px;
+  margin-top: 0;
   padding: 25px 28px;
   border-color: rgba(56, 189, 248, .36);
   border-radius: 17px;
   background: linear-gradient(115deg, rgba(5, 23, 43, .96), rgba(3, 10, 26, .96));
 }
 
+.seasonHeadingCopy { min-width: 0; flex: 1; }
 .seasonIntro h1 { font-size: clamp(2.1rem, 5vw, 3.8rem); }
-.currentBadge { padding: 8px 12px; border-radius: 999px; background: #65a30d; color: #fff; font-size: .7rem; font-weight: 950; letter-spacing: .17em; white-space: nowrap; box-shadow: 0 0 22px rgba(132, 204, 22, .24); }
 .divisionStack { display: grid; gap: 18px; margin-top: 18px; }
 
 .divisionSection {
@@ -443,11 +260,6 @@
 .empty { position: relative; margin: 0 auto; padding: 20px; border: 1px solid rgba(148, 163, 184, .3); border-radius: 14px; background: rgba(15, 23, 42, .94); color: #cbd5e1; text-align: center; }
 .message { width: min(900px, 100%); }
 
-@keyframes duelGlow {
-  0%, 100% { box-shadow: 0 0 0 8px rgba(56, 189, 248, .05), 0 0 28px rgba(56, 189, 248, .16); }
-  50% { box-shadow: 0 0 0 8px rgba(190, 242, 100, .07), 0 0 42px rgba(190, 242, 100, .24); }
-}
-
 @media (max-width: 1180px) {
   .shell { width: min(100% - 32px, 1080px); }
   .duelRail { display: none; }
@@ -463,26 +275,14 @@
   .page :global(.artwork-navigation) { padding-top: 0; }
   .page :global(.artwork-navigation__hub-stack) { width: 100%; }
   .page :global(.artwork-navigation__frame) { border-width: 0 0 1px; border-radius: 0; }
-  .heroArtworkFrame { aspect-ratio: 1507 / 690 !important; }
-  .heroNavMask { display: none; }
   .shell { width: min(100% - 18px, 1080px); padding-top: 10px; }
-  .matchMasthead { grid-template-columns: minmax(0, 1fr) auto; padding: 22px 18px 18px; border-radius: 18px 18px 8px 8px; }
-  .mastheadCopy h2 { font-size: clamp(2.35rem, 14vw, 4rem); }
-  .mastheadCopy > p:last-child { max-width: 32ch; }
-  .duelCrest { width: 82px; height: 82px; }
-  .duelCrest span { height: 56px; width: 4px; }
-  .duelCrest b { width: 38px; height: 38px; font-size: .78rem; }
-  .mastheadMeta { gap: 6px; }
-  .mastheadMeta span { padding: 5px 8px; font-size: .56rem; }
   .contentFrame { margin-top: 8px; padding: 9px; border-radius: 8px 8px 18px 18px; }
-  .seasonBar,
   .seasonIntro,
   .trophySection,
   .divisionSection { padding: 18px 14px; border-radius: 14px; }
-  .seasonBar { display: grid; gap: 16px; }
-  .seasonSelect select { width: 100%; }
   .seasonIntro { display: block; }
-  .currentBadge { display: inline-block; margin-top: 14px; }
+  .seasonSelect { display: block; margin-top: 16px; }
+  .seasonSelect select { width: 100%; }
   .trophyGrid { grid-template-columns: 1fr; }
   .divisionSection { border-left-width: 4px; }
   .divisionHeading h2 { font-size: 2rem; }
@@ -502,14 +302,4 @@
   .tableWrap td.rank { font-size: 1rem; }
   .tableWrap td.noRows { display: block; text-align: center; }
   .tableWrap td.noRows::before { content: none; }
-}
-
-@media (max-width: 500px) {
-  .matchMasthead { grid-template-columns: 1fr; }
-  .duelCrest { display: none; }
-  .mastheadCopy > p:last-child { max-width: none; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .duelCrest { animation: none; }
 }
