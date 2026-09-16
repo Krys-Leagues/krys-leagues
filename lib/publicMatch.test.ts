@@ -13,13 +13,17 @@ test("public page uses frozen source rank and historical display name", () => {
   const page = readFileSync("app/match-play/page.tsx", "utf8")
   assert.match(page, /source_final_rank/)
   assert.match(page, /historical_display_name/)
-  assert.doesNotMatch(page, /canonical_player_id|source_sha256|preview_fingerprint|validated_preview|committed_by/)
+  assert.match(page, /Season \{option\.seasonNumber\}/)
+  assert.doesNotMatch(page, /Historical Seasons|Historical standings|canonical_player_id|source_sha256|preview_fingerprint|validated_preview|committed_by/)
 })
-test("public Match uses only its read RPC and no historical write paths", () => {
+test("public Match uses read-only sources and no private score paths", () => {
   const page = readFileSync("app/match-play/page.tsx", "utf8")
   assert.match(page, /rpc\("get_public_match_play"\)/)
-  assert.doesNotMatch(page, /commit_historical|set_historical|remember_verified|insert\(|update\(|delete\(/)
-  assert.doesNotMatch(page, /opponent|fixture/i)
+  assert.match(page, /from\("schedule"\)/)
+  assert.match(page, /WHO PLAYS WHO/)
+  assert.match(page, /league_type/)
+  assert.match(page, /match_roster_version_id/)
+  assert.doesNotMatch(page, /commit_historical|set_historical|remember_verified|insert\(|update\(|delete\(|player1_score|player2_score|from\("results"\)/)
 })
 test("read SQL preserves authoritative current rank and exposes no admin provenance", () => {
   const sql = readFileSync("historical_match_public_read.sql", "utf8")
@@ -32,11 +36,18 @@ test("read SQL preserves authoritative current rank and exposes no admin provena
 test("standings-only, null year, and responsive public states are supported", () => {
   const page = readFileSync("app/match-play/page.tsx", "utf8")
   const css = readFileSync("app/match-play/match-play.module.css", "utf8")
-  assert.match(page, /standings_only/)
-  assert.match(page, /historical_year !== null/)
-  assert.match(page, /No course-level history was recorded/)
-  assert.match(css, /@media\(max-width:680px\)/)
-  assert.match(css, /overflow-x:auto/)
+  assert.match(page, /historical_standings/)
+  assert.match(page, /selectedSchedule/)
+  assert.match(css, /@media\(max-width:760px\)/)
+  assert.match(css, /overflow-x:hidden/)
+  assert.match(css, /data-label/)
+})
+
+test("current public rows include roster players even without a standings row", () => {
+  const sql = readFileSync("historical_match_public_read.sql", "utf8")
+  assert.match(sql, /left join public\.season_standings as standing/)
+  assert.match(sql, /coalesce\(standing\.wins, 0\)/)
+  assert.match(sql, /coalesce\(standing\.strokes, 0\)/)
 })
 test("SQL grants only read RPC execution and keeps historical tables behind their RLS", () => {
   const sql = readFileSync("historical_match_public_read.sql", "utf8")

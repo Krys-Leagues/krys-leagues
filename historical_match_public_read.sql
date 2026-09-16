@@ -42,7 +42,7 @@ with current_season as (
   join current_roster as roster on roster.season_id = season.id
   join public.match_division_roster_slots as slot
     on slot.roster_version_id = roster.id and slot.slot_status = 'active'
-  join public.season_standings as standing
+  left join public.season_standings as standing
     on standing.player_id = slot.player_id
    and standing.season_number = season.season_number
    and lower(btrim(standing.league_type)) = 'match'
