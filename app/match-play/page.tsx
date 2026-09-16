@@ -5,24 +5,8 @@ import { ArtworkNavigation } from "@/components/navigation/ArtworkNavigation"
 import TrophyMedia from "@/components/TrophyMedia"
 import { matchPlayArtwork } from "@/lib/artworkPageMaps"
 import { supabase } from "@/lib/supabase"
-import { publicMatchDivisions, type PublicMatchPayload } from "@/lib/publicMatch"
+import { publicMatchDivisions, publicMatchDisplayRank, type PublicMatchPayload } from "@/lib/publicMatch"
 import styles from "./match-play.module.css"
-
-type PublicScheduleRow = {
-  id: string
-  league_type: string | null
-  season_number: number | null
-  division_number: number | null
-  division: string | null
-  game_number: number | null
-  game: string | number | null
-  course: string | null
-  player1: string | null
-  player2: string | null
-  player1_name: string | null
-  player2_name: string | null
-  match_roster_version_id: string | null
-}
 
 type PublicMatchTrophy = {
   id: string
@@ -49,6 +33,14 @@ type DisplayRow = {
   holesWon: number
 }
 
+type DisplayMatchup = {
+  division: number
+  gameNumber: number
+  player1: string | null
+  player2: string | null
+  course: string | null
+}
+
 const DIVISION_THEMES: Record<number, { accent: string; soft: string; label: string }> = {
   1: { accent: "#fb923c", soft: "rgba(154, 52, 18, .22)", label: "ORANGE" },
   2: { accent: "#4ade80", soft: "rgba(21, 128, 61, .22)", label: "GREEN" },
@@ -59,7 +51,6 @@ const DIVISION_THEMES: Record<number, { accent: string; soft: string; label: str
 
 export default function MatchPlayPage() {
   const [data, setData] = useState<PublicMatchPayload | null>(null)
-  const [schedule, setSchedule] = useState<PublicScheduleRow[]>([])
   const [trophies, setTrophies] = useState<PublicMatchTrophy[]>([])
   const [selectedSeason, setSelectedSeason] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
@@ -69,13 +60,8 @@ export default function MatchPlayPage() {
     let cancelled = false
 
     async function loadPage() {
-      const [matchResponse, scheduleResponse, trophiesResponse] = await Promise.all([
+      const [matchResponse, trophiesResponse] = await Promise.all([
         supabase.rpc("get_public_match_play"),
-        supabase
-          .from("schedule")
-          .select("id, league_type, season_number, division_number, division, game_number, game, course, player1, player2, player1_name, player2_name, match_roster_version_id")
-          .order("game_number", { ascending: true })
-          .order("game", { ascending: true }),
         fetch("/api/champions/public?scope=all", { cache: "no-store" }),
       ])
 
@@ -89,12 +75,10 @@ export default function MatchPlayPage() {
 
       const loaded = matchResponse.data as PublicMatchPayload
       setData(loaded)
-      setSchedule((scheduleResponse.data || []) as PublicScheduleRow[])
 
-      if (trophiesResponse.ok) {
-        const trophyPayload = await trophiesResponse.json() as { trophies?: PublicMatchTrophy[] }
-        setTrophies(trophyPayload.trophies || [])
-      }
+      if (!trophiesResponse.ok) throw new Error("Trophy source failed")
+      const trophyPayload = await trophiesResponse.json() as { trophies?: PublicMatchTrophy[] }
+      setTrophies(trophyPayload.trophies || [])
 
       setSelectedSeason(loaded.current.season_number ?? loaded.historical_seasons[0]?.season_number ?? null)
       setLoading(false)
@@ -125,9 +109,9 @@ export default function MatchPlayPage() {
     if (!data || selectedSeason === null) return []
 
     if (showingCurrent) {
-      return data.current.standings.map((row, index) => ({
+      return data.current.standings.map((row) => ({
         division: row.division_number,
-        rank: row.rank || index + 1,
+        rank: publicMatchDisplayRank(row.rank, row.starting_rank),
         name: row.player_screen_name,
         played: row.played,
         wins: row.wins,
@@ -163,7 +147,21 @@ export default function MatchPlayPage() {
 
   const selectedSeasonTrophies = trophies.filter((trophy) => isMatchTrophyForSeason(trophy, selectedSeason))
 
-  const selectedSchedule = schedule.filter((row) => Number(row.season_number) === selectedSeason && isMatchSchedule(row) && (!showingCurrent || row.match_roster_version_id !== null))
+  const selectedMatchups: DisplayMatchup[] = showingCurrent
+    ? (data?.current.schedule || []).filter((row) => row.season_number === selectedSeason).map((row) => ({
+      division: row.division_number,
+      gameNumber: row.game_number,
+      player1: row.player1_display_name,
+      player2: row.player2_display_name,
+      course: row.course,
+    }))
+    : (data?.historical_matchups || []).filter((row) => row.season_number === selectedSeason).map((row) => ({
+      division: row.division_number,
+      gameNumber: row.game_number,
+      player1: row.player1_historical_display_name,
+      player2: row.player2_historical_display_name,
+      course: row.historical_course_name,
+    }))
 
   return (
     <div className={styles.page}>
@@ -218,7 +216,7 @@ export default function MatchPlayPage() {
                 {divisions.map((division) => {
                   const theme = DIVISION_THEMES[division] || { accent: "#cbd5e1", soft: "rgba(71, 85, 105, .25)", label: "MATCH" }
                   const divisionRows = rows.filter((row) => row.division === division)
-                  const divisionSchedule = selectedSchedule.filter((row) => getScheduleDivision(row) === division)
+                  const divisionMatchups = selectedMatchups.filter((row) => row.division === division)
 
                   return (
                     <section className={styles.divisionSection} style={{ "--division-accent": theme.accent, "--division-soft": theme.soft } as React.CSSProperties} key={division}>
@@ -230,7 +228,7 @@ export default function MatchPlayPage() {
                         <span className={styles.divisionMark} aria-hidden="true">D{division}</span>
                       </div>
 
-                      {divisionSchedule.length > 0 && <MatchupSection schedule={divisionSchedule} />}
+                      {divisionMatchups.length > 0 && <MatchupSection schedule={divisionMatchups} />}
 
                       <div className={styles.standingsBlock}>
                         <div className={styles.standingsHeading}>
@@ -277,7 +275,7 @@ function TrophySection({ trophies }: { trophies: PublicMatchTrophy[] }) {
   )
 }
 
-function MatchupSection({ schedule }: { schedule: PublicScheduleRow[] }) {
+function MatchupSection({ schedule }: { schedule: DisplayMatchup[] }) {
   return (
     <div className={styles.matchupBlock}>
       <div className={styles.matchupHeader}>
@@ -286,14 +284,14 @@ function MatchupSection({ schedule }: { schedule: PublicScheduleRow[] }) {
       </div>
       <div className={styles.matchupList}>
         {schedule.map((match) => (
-          <div className={styles.matchupRow} key={match.id}>
+          <div className={styles.matchupRow} key={`${match.gameNumber}:${match.player1}:${match.player2}`}>
             <div className={styles.matchPlayers}>
-              <strong>{displayScheduleName(match.player1_name, match.player1)}</strong>
+              <strong>{displayScheduleName(match.player1)}</strong>
               <span>vs</span>
-              <strong>{displayScheduleName(match.player2_name, match.player2)}</strong>
+              <strong>{displayScheduleName(match.player2)}</strong>
             </div>
             <div className={styles.courseCell}>
-              <span>{gameLabel(match)}</span>
+              <span>{gameLabel(match.gameNumber)}</span>
               <strong>{match.course?.trim() || "Course not set"}</strong>
             </div>
           </div>
@@ -327,23 +325,12 @@ function StandingsTable({ rows }: { rows: DisplayRow[] }) {
   )
 }
 
-function isMatchSchedule(row: PublicScheduleRow) {
-  return row.league_type?.trim().toLowerCase() === "match" || row.division?.toLowerCase().startsWith("match")
+function displayScheduleName(name: string | null) {
+  return name?.trim() || "Player name unavailable"
 }
 
-function getScheduleDivision(row: PublicScheduleRow) {
-  if (row.division_number) return row.division_number
-  const match = row.division?.match(/(?:d|division\s*)(\d+)/i)
-  return match ? Number(match[1]) : null
-}
-
-function displayScheduleName(primary: string | null, fallback: string | null) {
-  return primary?.trim() || fallback?.trim() || "Player name unavailable"
-}
-
-function gameLabel(match: PublicScheduleRow) {
-  const value = match.game_number ?? match.game
-  return value === null || value === "" ? "MATCH" : `GAME ${value}`
+function gameLabel(gameNumber: number) {
+  return `GAME ${gameNumber}`
 }
 
 function isMatchTrophyForSeason(trophy: PublicMatchTrophy, season: number | null) {

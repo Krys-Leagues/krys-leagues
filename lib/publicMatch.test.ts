@@ -1,13 +1,23 @@
 import assert from "node:assert/strict"
 import { readFileSync } from "node:fs"
 import test from "node:test"
-import { historicalCourseLabel, publicMatchDivisions } from "./publicMatch.ts"
+import { publicMatchDisplayRank, publicMatchDivisions } from "./publicMatch.ts"
 
 test("public Match divisions include only populated values", () => {
   assert.deepEqual(publicMatchDivisions([{ division_number: 3 }, { division_number: 1 }, { division_number: 3 }]), [1, 3])
 })
-test("unplayed historical courses never look like played zero results", () => {
-  assert.equal(historicalCourseLabel({ season_number: 55, division_number: 1, source_final_rank: 1, course_order: 1, historical_course_name: "COURSE", played: false, outcome: null, holes_won: null }), "Unplayed")
+test("preseason rank follows approved roster slot order", () => {
+  assert.deepEqual([1, 2, 3, 4].map((slot) => publicMatchDisplayRank(null, slot)), [1, 2, 3, 4])
+})
+test("approved transition roster keeps promoted or relegated players in assigned slots", () => {
+  const sql = readFileSync("historical_match_public_read.sql", "utf8")
+  assert.match(sql, /join public\.match_division_roster_slots as slot/)
+  assert.match(sql, /slot\.slot_number::integer as starting_rank/)
+  assert.equal(publicMatchDisplayRank(null, 4), 4)
+})
+test("authoritative season rank replaces preseason rank once present", () => {
+  assert.equal(publicMatchDisplayRank(null, 4), 4)
+  assert.equal(publicMatchDisplayRank(2, 4), 2)
 })
 test("public page uses frozen source rank and historical display name", () => {
   const page = readFileSync("app/match-play/page.tsx", "utf8")
@@ -19,25 +29,50 @@ test("public page uses frozen source rank and historical display name", () => {
 test("public Match uses read-only sources and no private score paths", () => {
   const page = readFileSync("app/match-play/page.tsx", "utf8")
   assert.match(page, /rpc\("get_public_match_play"\)/)
-  assert.match(page, /from\("schedule"\)/)
+  assert.doesNotMatch(page, /from\("schedule"\)/)
   assert.match(page, /WHO PLAYS WHO/)
-  assert.match(page, /league_type/)
-  assert.match(page, /match_roster_version_id/)
+  assert.match(page, /current\.schedule/)
+  assert.match(page, /historical_matchups/)
   assert.doesNotMatch(page, /commit_historical|set_historical|remember_verified|insert\(|update\(|delete\(|player1_score|player2_score|from\("results"\)/)
 })
 test("read SQL preserves authoritative current rank and exposes no admin provenance", () => {
   const sql = readFileSync("historical_match_public_read.sql", "utf8")
   assert.match(sql, /standing\.rank/)
+  assert.match(sql, /slot\.slot_number::integer as starting_rank/)
   assert.match(sql, /standing\.source_final_rank/)
   assert.match(sql, /standing\.historical_display_name/)
+  assert.match(sql, /public\.schedule as fixture/)
+  assert.match(sql, /public\.historical_match_fixtures as fixture/)
+  assert.match(sql, /player1\.historical_display_name/)
+  assert.match(sql, /player2\.historical_display_name/)
+  assert.match(sql, /'historical_matchups'/)
   assert.doesNotMatch(sql, /source_sha256|preview_fingerprint|validated_preview|committed_by|identity_resolution_note/)
   assert.doesNotMatch(sql, /\b(insert|update|delete)\b/i)
+})
+test("safe current matchup data is included only for the managed current roster", () => {
+  const sql = readFileSync("historical_match_public_read.sql", "utf8")
+  assert.match(sql, /join public\.schedule as fixture/)
+  assert.match(sql, /fixture\.match_roster_version_id = roster\.id/)
+  assert.match(sql, /fixture\.season_id = roster\.season_id/)
+  assert.match(sql, /fixture\.game_number/)
+  assert.match(sql, /fixture\.player1_name/)
+  assert.match(sql, /fixture\.player2_name/)
+  assert.match(sql, /fixture\.course/)
+  assert.doesNotMatch(sql, /fixture\.player1\b|fixture\.player2\b|fixture\.id\b/)
+})
+test("historical fixture evidence resolves only preserved standing display names", () => {
+  const sql = readFileSync("historical_match_public_read.sql", "utf8")
+  assert.match(sql, /fixture\.player1_standing_id/)
+  assert.match(sql, /fixture\.player2_standing_id/)
+  assert.match(sql, /player1\.historical_display_name/)
+  assert.match(sql, /player2\.historical_display_name/)
+  assert.match(sql, /fixture\.course_order as game_number/)
 })
 test("standings-only, null year, and responsive public states are supported", () => {
   const page = readFileSync("app/match-play/page.tsx", "utf8")
   const css = readFileSync("app/match-play/match-play.module.css", "utf8")
   assert.match(page, /historical_standings/)
-  assert.match(page, /selectedSchedule/)
+  assert.match(page, /selectedMatchups/)
   assert.match(css, /@media\(max-width:760px\)/)
   assert.match(css, /overflow-x:hidden/)
   assert.match(css, /data-label/)
@@ -48,6 +83,22 @@ test("current public rows include roster players even without a standings row", 
   assert.match(sql, /left join public\.season_standings as standing/)
   assert.match(sql, /coalesce\(standing\.wins, 0\)/)
   assert.match(sql, /coalesce\(standing\.strokes, 0\)/)
+  assert.match(sql, /slot\.slot_status = 'active'/)
+})
+test("public matchup data contains no score or result detail", () => {
+  const sql = readFileSync("historical_match_public_read.sql", "utf8")
+  const page = readFileSync("app/match-play/page.tsx", "utf8")
+  assert.match(sql, /player1_display_name/)
+  assert.match(sql, /player2_display_name/)
+  assert.match(sql, /historical_course_name/)
+  assert.doesNotMatch(sql, /historical_courses|player1_holes_won|player2_holes_won|result_id|scorecard/i)
+  assert.doesNotMatch(page, /player1_score|player2_score|from\("results"\)|holes_won_per_game/i)
+})
+test("historical seasons without fixtures render standings without an empty matchup block", () => {
+  const page = readFileSync("app/match-play/page.tsx", "utf8")
+  const sql = readFileSync("historical_match_public_read.sql", "utf8")
+  assert.match(sql, /coalesce\(jsonb_agg\(to_jsonb\(matchup\)[\s\S]*'\[\]'::jsonb\)/)
+  assert.match(page, /divisionMatchups\.length > 0 && <MatchupSection/)
 })
 test("SQL grants only read RPC execution and keeps historical tables behind their RLS", () => {
   const sql = readFileSync("historical_match_public_read.sql", "utf8")
