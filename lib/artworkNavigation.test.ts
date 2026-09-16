@@ -219,12 +219,18 @@ test("Invitationals uses the approved artwork and preserves only existing public
 
 test("Match Play uses the approved artwork with one public season selector", () => {
   const page = read("app/match-play/page.tsx")
+  const css = read("app/match-play/match-play.module.css")
   assert.equal(matchPlayArtwork.imageSrc, "/approved-pages/match-play-approved.jpg")
   assert.equal(matchPlayArtwork.aspectRatio, "1507 / 1044")
   assert.match(page, /ArtworkNavigation/)
   assert.match(page, /matchPlayArtwork/)
   assert.match(page, /aria-label="Season selection"/)
   assert.match(page, /<select value=\{selectedSeason/)
+  assert.match(page, /matchMasthead/)
+  assert.match(page, /duelRailLeft/)
+  assert.match(page, /duelRailRight/)
+  assert.match(css, /url\(['"]\/league-media\/match\.png['"]\)/)
+  assert.match(css, /contentFrame/)
   assert.deepEqual(matchPlayArtwork.targets.map(({ id, label, href }) => [id, label, href]), [
     ["back-to-league-play", "Back to League Play", "/league-play"],
     ["matches-and-results", "Matches and Results", "/matches"],

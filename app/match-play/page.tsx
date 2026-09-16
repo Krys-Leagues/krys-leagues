@@ -172,18 +172,31 @@ export default function MatchPlayPage() {
       <ArtworkNavigation
         definition={matchPlayArtwork}
         hiddenTargetIds={["matches-and-results", "classic-standings"]}
-        overlay={<div className={styles.heroNavMask} aria-hidden="true" />}
+        frameAspectRatio="1507 / 690"
+        frameClassName={styles.heroArtworkFrame}
+        overlay={<div className={styles.heroNavMask} aria-hidden="true"><span>KRYS LEAGUES</span><strong>PUBLIC MATCH CENTER</strong></div>}
       />
 
-      <div className={styles.edgeNoteLeft} aria-hidden="true">MATCH / PLAY</div>
-      <div className={styles.edgeNoteRight} aria-hidden="true">HEAD · TO · HEAD</div>
+      <div className={`${styles.duelRail} ${styles.duelRailLeft}`} aria-hidden="true"><span>01</span><strong>HEAD</strong><i>VS</i><strong>HEAD</strong></div>
+      <div className={`${styles.duelRail} ${styles.duelRailRight}`} aria-hidden="true"><span>18</span><strong>MATCH</strong><i>×</i><strong>PLAY</strong></div>
 
       <main className={styles.shell}>
-        {loading && <div className={styles.message}>Loading Match Play…</div>}
-        {error && <div className={styles.message} role="alert">{error}</div>}
+        <header className={styles.matchMasthead}>
+          <div className={styles.mastheadCopy}>
+            <p className={styles.mastheadKicker}>KRYS LEAGUES · HEAD-TO-HEAD GOLF</p>
+            <h2>MATCH <em>PLAY</em></h2>
+            <p>One opponent. One course. Every division playing for position.</p>
+          </div>
+          <div className={styles.duelCrest} aria-hidden="true"><span /><b>VS</b><span /></div>
+          <div className={styles.mastheadMeta} aria-hidden="true"><span>RIVALRIES</span><span>DIVISIONS</span><span>COURSES</span></div>
+        </header>
 
-        {!loading && !error && data && (
-          <>
+        <div className={styles.contentFrame}>
+          {loading && <div className={styles.message}>Loading Match Play…</div>}
+          {error && <div className={styles.message} role="alert">{error}</div>}
+
+          {!loading && !error && data && (
+            <>
             <section className={styles.seasonBar} aria-label="Season selection">
               <div>
                 <p className={styles.eyebrow}>MATCH PLAY SEASONS</p>
@@ -250,8 +263,9 @@ export default function MatchPlayPage() {
                 })}
               </div>
             )}
-          </>
-        )}
+            </>
+          )}
+        </div>
       </main>
     </div>
   )
