@@ -26,11 +26,29 @@ with current_season as (
   where roster.status in ('approved', 'locked')
   order by case roster.status when 'approved' then 0 else 1 end, roster.created_at desc
   limit 1
+), current_division_state as (
+  select
+    slot.division_number,
+    coalesce(bool_or(
+      coalesce(standing.wins, 0)
+      + coalesce(standing.losses, 0)
+      + coalesce(standing.ties, 0) > 0
+    ), false) as results_started
+  from current_season as season
+  join current_roster as roster on roster.season_id = season.id
+  join public.match_division_roster_slots as slot
+    on slot.roster_version_id = roster.id and slot.slot_status = 'active'
+  left join public.season_standings as standing
+    on standing.player_id = slot.player_id
+   and standing.season_number = season.season_number
+   and lower(btrim(standing.league_type)) = 'match'
+   and standing.division = 'Match D' || slot.division_number::text
+  group by slot.division_number
 ), current_rows as (
   select
     season.season_number,
     slot.division_number,
-    standing.rank,
+    case when division_state.results_started then standing.rank else null end as rank,
     slot.slot_number::integer as starting_rank,
     slot.player_screen_name,
     coalesce(standing.wins, 0)::integer as wins,
@@ -43,6 +61,8 @@ with current_season as (
   join current_roster as roster on roster.season_id = season.id
   join public.match_division_roster_slots as slot
     on slot.roster_version_id = roster.id and slot.slot_status = 'active'
+  join current_division_state as division_state
+    on division_state.division_number = slot.division_number
   left join public.season_standings as standing
     on standing.player_id = slot.player_id
    and standing.season_number = season.season_number
@@ -61,6 +81,16 @@ with current_season as (
   join public.schedule as fixture
     on fixture.season_id = roster.season_id
    and fixture.match_roster_version_id = roster.id
+  join public.match_division_roster_slots as player1_slot
+    on player1_slot.roster_version_id = roster.id
+   and player1_slot.division_number = fixture.division_number
+   and player1_slot.player_id = fixture.player1_id
+   and player1_slot.slot_status = 'active'
+  join public.match_division_roster_slots as player2_slot
+    on player2_slot.roster_version_id = roster.id
+   and player2_slot.division_number = fixture.division_number
+   and player2_slot.player_id = fixture.player2_id
+   and player2_slot.slot_status = 'active'
   where lower(btrim(fixture.league_type)) = 'match'
     and fixture.game_number is not null
 ), historical_seasons as (
