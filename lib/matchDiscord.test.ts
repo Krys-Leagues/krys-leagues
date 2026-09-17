@@ -63,21 +63,64 @@ test("Discord route is admin protected, reads authoritative public Match data, a
   assert.ok(auth >= 0 && denial > auth && body > denial)
   assert.match(source, /\.rpc\("get_public_match_play"\)/)
   assert.doesNotMatch(source, /\.from\(/)
-  assert.doesNotMatch(source, /webhookUrl[,:]\s*webhookUrl/)
+  assert.doesNotMatch(source, /webhook/i)
+  assert.match(source, /\{ divisionNumber\?: unknown \}/)
+  assert.doesNotMatch(source, /body[^\n]*(?:channel|token|apiUrl)/i)
   assert.match(source, /seasonNumber:/)
   assert.match(source, /divisionNumber:/)
+  const successResponse = source.slice(source.indexOf("return NextResponse.json({\n    success: true"))
+  assert.doesNotMatch(successResponse, /botToken|channelId|Authorization/)
 })
 
-test("Discord destinations remain server-only and mapped by Match division", async () => {
+test("Discord bot token and division channels remain server-only", async () => {
   const serverSource = await readFile("lib/matchDiscordServer.ts", "utf8")
+  const routeSource = await readFile("app/api/admin/match/discord/route.ts", "utf8")
   const clientSource = await readFile("app/admin/match/results/page.tsx", "utf8")
   for (let division = 1; division <= 5; division += 1) {
-    assert.match(serverSource, new RegExp(`DISCORD_WEBHOOK_MATCH_D${division}`))
+    assert.match(
+      serverSource,
+      new RegExp(`${division}: "DISCORD_MATCH_D${division}_CHANNEL_ID"`),
+    )
   }
-  assert.doesNotMatch(clientSource, /DISCORD_WEBHOOK|webhook/i)
+  assert.match(serverSource, /process\.env\.DISCORD_BOT_TOKEN/)
+  assert.match(serverSource, /Authorization: `Bot \$\{options\.botToken\}`/)
+  assert.match(serverSource, /\/channels\/\$\{encodeURIComponent\(options\.channelId\)\}\/messages/)
+  assert.doesNotMatch(serverSource, /webhook/i)
+  assert.doesNotMatch(routeSource, /process\.env|discord\.com\/api/)
+  assert.doesNotMatch(clientSource, /DISCORD_BOT_TOKEN|CHANNEL_ID|discord\.com\/api|webhook/i)
   assert.match(clientSource, /selectedSeason\?\.is_active/)
   assert.match(clientSource, /onClick=\{\(\) => void handleDiscordSend\(division\)\}/)
   assert.doesNotMatch(clientSource, /useEffect\(\(\) => \{\s*void handleDiscordSend/)
+  const resultSaveFlow = clientSource.slice(
+    clientSource.indexOf("async function handleSubmit"),
+    clientSource.indexOf("async function handleDeleteResult"),
+  )
+  assert.doesNotMatch(resultSaveFlow, /handleDiscordSend|api\/admin\/match\/discord/)
+})
+
+test("Match manual-send feature contains no legacy webhook configuration", async () => {
+  const legacyVariablePrefix = ["DISCORD", "WEBHOOK", "MATCH"].join("_")
+  const files = [
+    "app/api/admin/match/discord/route.ts",
+    "app/admin/match/results/page.tsx",
+    "lib/matchDiscord.ts",
+    "lib/matchDiscordServer.ts",
+    "lib/matchDiscordSnapshot.tsx",
+  ]
+  for (const file of files) {
+    const source = await readFile(file, "utf8")
+    assert.doesNotMatch(source, new RegExp(legacyVariablePrefix))
+    assert.doesNotMatch(source, /webhookUrl|getMatchDiscordWebhook/i)
+  }
+})
+
+test("validated D1 can resolve only the D1 server channel configuration", async () => {
+  const serverSource = await readFile("lib/matchDiscordServer.ts", "utf8")
+  const routeSource = await readFile("app/api/admin/match/discord/route.ts", "utf8")
+  assert.match(serverSource, /1: "DISCORD_MATCH_D1_CHANNEL_ID"/)
+  assert.match(serverSource, /process\.env\[MATCH_DISCORD_CHANNELS\[divisionNumber\]\]/)
+  assert.match(routeSource, /getMatchDiscordChannelId\(divisionNumber\)/)
+  assert.doesNotMatch(routeSource, /channelId[^\n]*body|body[^\n]*channelId/)
 })
 
 test("public Match page has no Discord controls or send behavior", async () => {
@@ -91,8 +134,14 @@ test("snapshot source contains required presentation fields and no private ident
   assert.match(source, /COURSE ASSIGNMENTS/)
   assert.match(source, /CURRENT STANDINGS/)
   assert.match(source, /RANK/)
+  assert.match(source, /PLAYED/)
+  assert.match(source, /WINS/)
+  assert.match(source, /LOSSES/)
+  assert.match(source, /DRAWS/)
   assert.match(source, /POINTS/)
   assert.match(source, /HW/)
+  assert.match(source, /justifyContent: "center"[\s\S]*?MATCH DIVISION/)
+  assert.doesNotMatch(source, />P<|>W<|>L<|>D</)
   assert.doesNotMatch(
     source,
     /snapshot\.(?:email|auth_user_id|player_id|discord_id|admin_notes|private_metadata)/i,

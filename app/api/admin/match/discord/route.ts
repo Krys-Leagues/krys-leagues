@@ -7,7 +7,8 @@ import {
   type MatchDiscordSnapshot,
 } from "@/lib/matchDiscord"
 import {
-  getMatchDiscordWebhookUrl,
+  getDiscordBotToken,
+  getMatchDiscordChannelId,
   isMatchDiscordDivision,
   postMatchDivisionImage,
 } from "@/lib/matchDiscordServer"
@@ -35,8 +36,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Choose a valid Match division." }, { status: 400 })
   }
 
-  const webhookUrl = getMatchDiscordWebhookUrl(divisionNumber)
-  if (!webhookUrl) {
+  const botToken = getDiscordBotToken()
+  if (!botToken) {
+    return NextResponse.json(
+      { error: "The Discord bot is not configured for Match posting." },
+      { status: 503 },
+    )
+  }
+
+  const channelId = getMatchDiscordChannelId(divisionNumber)
+  if (!channelId) {
     return NextResponse.json(
       { error: "Discord is not configured for this Match division." },
       { status: 503 },
@@ -53,7 +62,7 @@ export async function POST(request: Request) {
     const snapshot = prepareMatchDiscordSnapshot(data as PublicMatchPayload, divisionNumber)
     const image = createMatchDivisionImage(snapshot)
     const png = await image.arrayBuffer()
-    const messageId = await postMatchDivisionImage({ webhookUrl, snapshot, png })
+    const messageId = await postMatchDivisionImage({ botToken, channelId, snapshot, png })
     logSendResult("success", authorization.user.id, snapshot, messageId)
     return snapshot
   }).catch((sendError: unknown) => {
