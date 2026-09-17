@@ -224,7 +224,7 @@ export default function MatchPlayPage() {
                           <span className={styles.divisionOverline}>DIVISION {division}</span>
                           <h2>Match D{division}</h2>
                         </div>
-                        <span className={styles.divisionMark} aria-hidden="true">D{division}</span>
+                        <span className={styles.divisionMark} aria-hidden="true">{division}</span>
                       </div>
 
                       {divisionMatchups.length > 0 && <MatchupSection schedule={divisionMatchups} />}
@@ -280,7 +280,6 @@ function MatchupSection({ schedule }: { schedule: DisplayMatchup[] }) {
     <div className={styles.matchupBlock}>
       <div className={styles.matchupHeader}>
         <span className={styles.sectionEyebrow}>COURSE ASSIGNMENTS</span>
-        <span className={styles.matchupLines} aria-hidden="true">× × ×</span>
       </div>
       <div className={styles.matchupList}>
         {schedule.map((match) => (
