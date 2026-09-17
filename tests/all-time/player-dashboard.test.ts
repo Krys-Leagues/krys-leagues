@@ -79,10 +79,19 @@ test("reader adds no broad access and client never exposes raw database errors",
   assert.doesNotMatch(client, /response\.error\?\.message|sessionError\.message|permission denied for table players/)
 })
 
-test("dashboard shows Join Now only after a successful zero-membership response", () => {
+test("dashboard gates Join Now behind authoritative global membership coverage", () => {
   const client = read("app/player-dashboard/PlayerDashboardClient.tsx")
 
-  assert.match(client, /availableLeagues\.length === 0/)
-  assert.match(client, /href="\/join"[\s\S]*JOIN NOW/)
-  assert.match(client, /message \?[\s\S]*role="alert"/)
+  assert.match(client, /membershipView === "coverage-pending"[\s\S]*<MembershipCoveragePending/)
+  assert.match(client, /membershipView === "authoritative-empty"[\s\S]*<GlobalJoinState/)
+  assert.match(client, /function GlobalJoinState\(\)[\s\S]*href="\/join"[\s\S]*JOIN NOW/)
+  assert.match(client, /Your current league information is still being connected\./)
+})
+
+test("reader failure uses the friendly error branch before membership rendering", () => {
+  const client = read("app/player-dashboard/PlayerDashboardClient.tsx")
+
+  assert.match(client, /message \?[\s\S]*role="alert"[\s\S]*dashboard && match/)
+  assert.match(client, /DASHBOARD_ERROR/)
+  assert.doesNotMatch(client, /response\.error\?\.message|sessionError\.message|permission denied for table players/)
 })

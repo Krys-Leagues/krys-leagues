@@ -51,6 +51,8 @@ export type DashboardLeagueOption = {
   label: string
 }
 
+export type DashboardMembershipView = "available" | "authoritative-empty" | "coverage-pending"
+
 export type PlayerDashboardPayload = {
   player: {
     screen_name: string
@@ -69,6 +71,15 @@ const DASHBOARD_LEAGUE_OPTIONS: readonly DashboardLeagueOption[] = [
 
 export function currentDashboardLeagues(leagues: DashboardLeagueStates) {
   return DASHBOARD_LEAGUE_OPTIONS.filter((option) => leagues[option.key]?.rostered === true)
+}
+
+export function hasAuthoritativeGlobalMembershipCoverage(leagues: DashboardLeagueStates) {
+  return DASHBOARD_LEAGUE_OPTIONS.every((option) => Object.prototype.hasOwnProperty.call(leagues, option.key))
+}
+
+export function dashboardMembershipView(leagues: DashboardLeagueStates): DashboardMembershipView {
+  if (currentDashboardLeagues(leagues).length > 0) return "available"
+  return hasAuthoritativeGlobalMembershipCoverage(leagues) ? "authoritative-empty" : "coverage-pending"
 }
 
 export function selectedDashboardLeague(

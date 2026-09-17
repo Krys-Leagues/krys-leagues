@@ -6,6 +6,7 @@ import PlayerProfileNavLink from "@/components/PlayerProfileNavLink"
 import { createDiscordAuthCallbackUrl } from "@/lib/authReturnTo"
 import {
   currentDashboardLeagues,
+  dashboardMembershipView,
   formatDashboardDate,
   matchDivisionAccent,
   selectedDashboardLeague,
@@ -87,6 +88,7 @@ export default function PlayerDashboardClient() {
   const match = dashboard?.leagues.match ?? null
   const availableLeagues = dashboard ? currentDashboardLeagues(dashboard.leagues) : []
   const activeLeague = selectedDashboardLeague(selectedLeague, availableLeagues)
+  const membershipView = dashboard ? dashboardMembershipView(dashboard.leagues) : null
 
   return (
     <main className={styles.page}>
@@ -118,13 +120,10 @@ export default function PlayerDashboardClient() {
               <h2>{dashboard.player.screen_name}</h2>
             </section>
 
-            {availableLeagues.length === 0 ? (
-              <section className={styles.joinCard}>
-                <p className={styles.kicker}>CURRENT LEAGUES</p>
-                <h2>Ready to play?</h2>
-                <p>You are not currently rostered in a Krys League.</p>
-                <Link href="/join" className={styles.joinButton}>JOIN NOW</Link>
-              </section>
+            {membershipView === "coverage-pending" ? (
+              <MembershipCoveragePending />
+            ) : membershipView === "authoritative-empty" ? (
+              <GlobalJoinState />
             ) : (
               <>
                 <LeagueSwitcher
@@ -153,6 +152,27 @@ export default function PlayerDashboardClient() {
         )}
       </div>
     </main>
+  )
+}
+
+function MembershipCoveragePending() {
+  return (
+    <section className={styles.futureLeague}>
+      <p className={styles.kicker}>CURRENT LEAGUES</p>
+      <h2>Your league dashboard is on the way</h2>
+      <p>Your current league information is still being connected. Please check back soon.</p>
+    </section>
+  )
+}
+
+function GlobalJoinState() {
+  return (
+    <section className={styles.joinCard}>
+      <p className={styles.kicker}>CURRENT LEAGUES</p>
+      <h2>Ready to play?</h2>
+      <p>You are not currently rostered in a Krys League.</p>
+      <Link href="/join" className={styles.joinButton}>JOIN NOW</Link>
+    </section>
   )
 }
 

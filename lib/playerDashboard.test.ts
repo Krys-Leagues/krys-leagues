@@ -2,6 +2,8 @@ import assert from "node:assert/strict"
 import test from "node:test"
 import {
   currentDashboardLeagues,
+  dashboardMembershipView,
+  hasAuthoritativeGlobalMembershipCoverage,
   selectedDashboardLeague,
   type DashboardLeagueStates,
   type MatchDashboardLeague,
@@ -49,11 +51,13 @@ test("one current membership is selected automatically", () => {
   assert.equal(selectedDashboardLeague(null, available), "match")
 })
 
-test("zero current memberships produce no selected league for the Join Now state", () => {
+test("absence from Match alone does not claim authoritative zero membership", () => {
   const available = currentDashboardLeagues({ match: matchState(false) })
 
   assert.deepEqual(available, [])
   assert.equal(selectedDashboardLeague(null, available), null)
+  assert.equal(hasAuthoritativeGlobalMembershipCoverage({ match: matchState(false) }), false)
+  assert.equal(dashboardMembershipView({ match: matchState(false) }), "coverage-pending")
 })
 
 test("absent Match membership does not hide another authoritative league state", () => {
@@ -73,4 +77,23 @@ test("league switching is constrained to authenticated payload options", () => {
 
   assert.equal(selectedDashboardLeague("pyp", available), "pyp")
   assert.equal(selectedDashboardLeague("skins", available), "match")
+})
+
+test("Join Now requires authoritative zero membership across every supported league", () => {
+  const leagues: DashboardLeagueStates = {
+    match: matchState(false),
+    stroke: { rostered: false },
+    pyp: { rostered: false },
+    "amateur-pro": { rostered: false },
+    doubles: { rostered: false },
+    skins: { rostered: false },
+  }
+
+  assert.equal(hasAuthoritativeGlobalMembershipCoverage(leagues), true)
+  assert.equal(dashboardMembershipView(leagues), "authoritative-empty")
+})
+
+test("a Match membership keeps the Match dashboard available", () => {
+  assert.equal(dashboardMembershipView({ match: matchState(true) }), "available")
+  assert.deepEqual(currentDashboardLeagues({ match: matchState(true) }), [{ key: "match", label: "Match Play" }])
 })
