@@ -1,7 +1,7 @@
 import test from "node:test"
 import assert from "node:assert/strict"
 import { artworkTargetStyle, validateArtworkHitboxes, validateArtworkTargets } from "./artworkNavigation.ts"
-import { amateurToProArtwork, bracketTournamentsArtwork, doublesArtwork, invitationalsArtwork, joinArtwork, kwtArtwork, leaguePlayActionTargets, leaguePlayArtwork, leaguePlayDestinations, mainHubArtwork, matchPlayArtwork, monthlyArtwork, monthlyArtworkOverlayTargets, overallLeaderboardsArtwork, playerProfilesArtwork, pypArtwork, skinsArtwork, strokeArtwork } from "./artworkPageMaps.ts"
+import { amateurToProArtwork, bracketTournamentsArtwork, doublesArtwork, invitationalsArtwork, joinArtwork, kwtArtwork, leaguePlayArtwork, leaguePlayDestinations, mainHubArtwork, matchPlayArtwork, monthlyArtwork, monthlyArtworkOverlayTargets, overallLeaderboardsArtwork, playerProfilesArtwork, pypArtwork, skinsArtwork, strokeArtwork } from "./artworkPageMaps.ts"
 import { readFileSync } from "node:fs"
 
 const read = (path: string) => readFileSync(path, "utf8")
@@ -68,26 +68,25 @@ test("Main Hub extension uses explicit lower-layer structure without a covering 
 
 test("active League Play route is artwork-only with exactly six league destinations", () => {
   const page = read("app/league-play/page.tsx")
+  const dashboardPage = read("app/player-dashboard/page.tsx")
   assert.equal(leaguePlayArtwork.id, "league-play")
   assert.match(page, /ArtworkNavigation/)
   assert.match(page, /leaguePlayArtwork/)
   assert.doesNotMatch(page, /Choose a league to view schedules|gridTemplateColumns|card-grid|fallback/i)
-  assert.deepEqual(leaguePlayDestinations.map(({ label, href }) => [label, href]), [
-    ["Stroke Play", "/stroke"],
-    ["Match Play", "/match-play"],
-    ["Doubles", "/doubles"],
-    ["Amateur to Pro", "/amateur-pro"],
-    ["Skins", "/skins"],
-    ["PYP / Pick Your Poison", "/pyp"],
+  assert.deepEqual(leaguePlayDestinations.map(({ id, label, href }) => [id, label, href]), [
+    ["stroke-play", "Stroke Play", "/stroke"],
+    ["match-play", "Match Play", "/match-play"],
+    ["doubles", "Doubles", "/doubles"],
+    ["amateur-pro", "Amateur to Pro", "/amateur-pro"],
+    ["skins", "Skins", "/skins"],
+    ["pyp", "PYP / Pick Your Poison", "/pyp"],
   ])
-  assert.deepEqual(leaguePlayActionTargets.map(({ label, href }) => [label, href]), [
-    ["stroke Schedules", "/matches?league=stroke"], ["stroke Standings", "/standings"], ["stroke Results", "/matches?league=stroke"], ["stroke Records", "/records"],
-    ["match Schedules", "/matches?league=match"], ["match Standings", "/match-standings"], ["match Results", "/matches?league=match"], ["match Records", "/records"],
-    ["doubles Schedules", "/matches?league=doubles"], ["doubles Standings", "/doubles-standings"], ["doubles Results", "/matches?league=doubles"], ["doubles Records", "/records"],
-    ["amateur-pro Schedules", "/matches"], ["amateur-pro Standings", "/amateur-pro-standings"], ["amateur-pro Results", "/matches"], ["amateur-pro Records", "/records"],
-    ["skins League", "/skins"], ["skins Standings", "/skins-standings"], ["skins Results", "/skins"],
-    ["pyp Schedules", "/matches?league=pyp"], ["pyp Standings", "/pyp-standings"], ["pyp Results", "/matches?league=pyp"], ["pyp Records", "/records"],
-  ])
+  assert.equal(leaguePlayArtwork.targets.length, 7)
+  assert.deepEqual(leaguePlayArtwork.targets.slice(1), leaguePlayDestinations)
+  assert.equal(leaguePlayArtwork.targets.some(({ label }) => /Schedules|Standings|Results|Records/.test(label)), false)
+  assert.deepEqual(leaguePlayDestinations.map(({ height }) => height), [25.8, 25.8, 25.8, 28.0, 28.0, 28.0])
+  assert.deepEqual(matchPlayArtwork.targets.map(({ id, href }) => [id, href]), [["back-to-league-play", "/league-play"]])
+  assert.equal(dashboardPage.trim(), 'export { default } from "./PlayerDashboardClient"')
 })
 
 test("artwork navigation exposes stable page identity markers", () => {
