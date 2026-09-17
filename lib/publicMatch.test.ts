@@ -98,12 +98,12 @@ test("public Match uses one selected-season header without archive language or a
 test("division headings use color as styling only", () => {
   const page = readFileSync("app/match-play/page.tsx", "utf8")
   const css = readFileSync("app/match-play/match-play.module.css", "utf8")
-  assert.match(page, /<span className=\{styles\.divisionOverline\}>DIVISION \{division\}<\/span>/)
-  assert.doesNotMatch(page, /DIVISION \{division\} · \{theme\.label\}/)
-  assert.match(page, /<span className=\{styles\.divisionMark\} aria-hidden="true">\{division\}<\/span>/)
+  assert.match(page, /<div className=\{styles\.divisionHeading\}>\s*<h2>MATCH DIVISION \{division\}<\/h2>\s*<\/div>/)
+  assert.doesNotMatch(page, /divisionOverline|divisionMark|Match D\{division\}/)
   assert.doesNotMatch(page, /matchupLines|× × ×/)
-  assert.match(css, /\.divisionMark \{[^}]*place-items: center[^}]*color: var\(--division-accent\)/)
-  assert.doesNotMatch(css, /\.matchupLines/)
+  assert.match(css, /\.divisionHeading \{ text-align: center; \}/)
+  assert.match(css, /\.divisionHeading h2 \{[^}]*color: var\(--division-accent\)/)
+  assert.doesNotMatch(css, /\.divisionOverline|\.divisionMark|\.matchupLines/)
 })
 
 test("current public rows include roster players even without a standings row", () => {

@@ -176,7 +176,6 @@
 }
 
 .trophyHeader,
-.divisionHeading,
 .matchupHeader,
 .standingsHeading { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 
@@ -226,9 +225,8 @@
   opacity: .82;
 }
 
-.divisionOverline { color: var(--division-accent); font-size: .72rem; font-weight: 950; letter-spacing: .2em; }
-.divisionHeading h2 { margin: 4px 0 0; font-size: clamp(1.9rem, 4vw, 2.8rem); }
-.divisionMark { display: grid; place-items: center; align-self: stretch; flex: 0 0 clamp(64px, 10vw, 104px); color: var(--division-accent); text-align: center; font-size: clamp(3.2rem, 8vw, 5.6rem); font-weight: 1000; line-height: .8; opacity: .24; text-shadow: 0 0 24px currentColor; }
+.divisionHeading { text-align: center; }
+.divisionHeading h2 { margin: 0; color: var(--division-accent); font-size: clamp(2rem, 4.6vw, 3.2rem); font-weight: 1000; letter-spacing: .04em; }
 .matchupBlock { margin-top: 22px; }
 .matchupHeader { padding-bottom: 10px; border-bottom: 1px solid color-mix(in srgb, var(--division-accent) 38%, transparent); }
 .matchupHeader .sectionEyebrow { color: var(--division-accent); }
