@@ -35,6 +35,15 @@ test("nested routes inherit the parent feature state", () => {
   assert.equal(matchesFeatureRoute("/player-dashboard", "/players"), false)
 })
 
+test("Our Mission remains live for anonymous and authenticated visitors", () => {
+  const mission = FEATURE_ROUTES.find((route) => route.path === "/our-mission")
+
+  assert.ok(mission)
+  assert.equal(mission.visibility, "live")
+  assert.equal(featureAccessDecision({ siteMode: "public", visibility: mission.visibility, access: null }), "allow")
+  assert.equal(featureAccessDecision({ siteMode: "public", visibility: mission.visibility, access: ordinary }), "allow")
+})
+
 test("approved player-facing routes remain live for anonymous viewing", () => {
   assert.equal(FEATURE_ROUTES.some((route) => route.visibility === "tester"), false)
 
@@ -49,6 +58,7 @@ test("approved player-facing routes remain live for anonymous viewing", () => {
     "/invitationals",
     "/kwt",
     "/monthlies",
+    "/our-mission",
   ]) {
     assert.equal(FEATURE_ROUTES.find((route) => route.path === path)?.visibility, "live")
   }
