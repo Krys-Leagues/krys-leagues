@@ -279,7 +279,7 @@ function MatchupSection({ schedule }: { schedule: DisplayMatchup[] }) {
   return (
     <div className={styles.matchupBlock}>
       <div className={styles.matchupHeader}>
-        <span className={styles.sectionEyebrow}>WHO PLAYS WHO</span>
+        <span className={styles.sectionEyebrow}>COURSE ASSIGNMENTS</span>
         <span className={styles.matchupLines} aria-hidden="true">× × ×</span>
       </div>
       <div className={styles.matchupList}>
