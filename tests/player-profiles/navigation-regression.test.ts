@@ -13,7 +13,7 @@ test("Main Hub artwork Player Profile target uses canonical context-aware naviga
 
 test("dashboard and public profile controls preserve own-profile and directory behavior", () => {
   assert.match(read("app/dashboard/page.tsx"), /PlayerProfileNavLink[\s\S]*Player Profile/)
-  assert.match(read("app/player-dashboard/page.tsx"), /PlayerProfileNavLink[\s\S]*Player Profile/)
+  assert.match(read("app/player-dashboard/PlayerDashboardClient.tsx"), /PlayerProfileNavLink[\s\S]*Player Profile/)
   assert.match(read("app/players/[id]/page.tsx"), /PlayerProfileNavLink currentPlayerId=\{player\.id\}/)
   assert.match(read("components/PlayerProfileNavLink.tsx"), /\/players\?browse=1/)
 })

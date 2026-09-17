@@ -3,8 +3,9 @@ import { readFileSync } from "node:fs"
 import test from "node:test"
 
 const read = (path: string) => readFileSync(path, "utf8")
+const migrationPath = "supabase/migrations/20260917124646_player_dashboard_match_reader.sql"
 
-test("Player Dashboard is linked only from the signed-in player's own profile", () => {
+test("Player Dashboard remains available only from the signed-in player's own profile", () => {
   const profile = read("app/players/[id]/page.tsx")
   const homepage = read("app/page.tsx")
 
@@ -12,24 +13,76 @@ test("Player Dashboard is linked only from the signed-in player's own profile", 
   assert.doesNotMatch(homepage, /href="\/player-dashboard"|Player Dashboard/)
 })
 
-test("Player Dashboard reads only the authenticated canonical player's current data", () => {
-  const dashboard = read("app/player-dashboard/page.tsx")
+test("dashboard browser code uses one protected reader and no protected table reads", () => {
+  const route = read("app/player-dashboard/page.tsx")
+  const client = read("app/player-dashboard/PlayerDashboardClient.tsx")
 
-  assert.match(dashboard, /getSession\(\)/)
-  assert.match(dashboard, /current_user_canonical_player_id/)
-  assert.match(dashboard, /get_public_player_canonical_identity/)
-  assert.match(dashboard, /from\("seasons"\).*is_active/)
-  assert.match(dashboard, /player_league_memberships.*loadedIdentityIds/)
-  assert.doesNotMatch(dashboard, /loadCanonicalPublicPlayers|selectedPlayerId|<select/)
+  assert.match(route, /export \{ default \} from "\.\/PlayerDashboardClient"/)
+  assert.match(client, /getSession\(\)/)
+  assert.match(client, /rpc\("get_player_dashboard_v1"\)/)
+  assert.doesNotMatch(client, /\.from\(/)
+  assert.doesNotMatch(client, /current_user_canonical_player_id|get_public_player_canonical_identity/)
 })
 
-test("Empty Dashboard provides Join Leagues and active schedules stay authoritative", () => {
-  const dashboard = read("app/player-dashboard/page.tsx")
+test("dashboard reader is self-only and authenticated-only", () => {
+  const sql = read(migrationPath)
 
-  assert.match(dashboard, /No current league participation/)
-  assert.match(dashboard, /href="\/join"/)
-  assert.match(dashboard, /samePair/)
-  assert.match(dashboard, /Scheduled games/)
-  assert.match(dashboard, /opponentName &&/)
-  assert.doesNotMatch(dashboard, /post-schedule|discord.*channel|role.*sync/i)
+  assert.match(sql, /function public\.get_player_dashboard_v1\(\)/)
+  assert.match(sql, /v_user_id uuid := auth\.uid\(\)/)
+  assert.match(sql, /v_player_id := public\.current_user_canonical_player_id\(\)/)
+  assert.match(sql, /revoke all on function public\.get_player_dashboard_v1\(\) from anon/)
+  assert.match(sql, /grant execute on function public\.get_player_dashboard_v1\(\) to authenticated/)
+  assert.doesNotMatch(sql, /p_player_id|grant\s+select/i)
+})
+
+test("current approved Match roster and active slot determine membership", () => {
+  const sql = read(migrationPath)
+
+  assert.match(sql, /public\.match_roster_versions/)
+  assert.match(sql, /roster\.status in \('approved', 'locked'\)/)
+  assert.match(sql, /public\.match_division_roster_slots/)
+  assert.match(sql, /slot\.slot_status = 'active'/)
+  assert.match(sql, /public\.resolve_canonical_player_id\(slot\.player_id\) = v_player_id/)
+  assert.doesNotMatch(sql, /players\.division|player_league_memberships/)
+})
+
+test("dashboard Match rank follows roster order until division results begin", () => {
+  const sql = read(migrationPath)
+
+  assert.match(sql, /slot\.slot_number::integer as starting_rank/)
+  assert.match(sql, /coalesce\(standing\.wins, 0\)[\s\S]*coalesce\(standing\.losses, 0\)[\s\S]*coalesce\(standing\.ties, 0\) > 0/)
+  assert.match(sql, /'current_rank', case when state\.results_started then standing\.rank else null end/)
+  assert.match(sql, /'displayed_rank', coalesce\(case when state\.results_started then standing\.rank else null end, slot\.starting_rank\)/)
+})
+
+test("dashboard returns only the caller's Match fixtures and safe display fields", () => {
+  const sql = read(migrationPath)
+
+  assert.match(sql, /fixture\.player1_id = slot\.player_id or fixture\.player2_id = slot\.player_id/)
+  assert.match(sql, /opponent_screen_name/)
+  assert.match(sql, /fixture\.course/)
+  assert.match(sql, /fixture\.due_date/)
+  assert.match(sql, /player_holes_won/)
+  assert.match(sql, /opponent_holes_won/)
+  assert.match(sql, /'rostered', false/)
+  assert.doesNotMatch(sql, /'email'|'auth_user_id'|'discord_id'|'player_id'/)
+})
+
+test("reader adds no broad access and client never exposes raw database errors", () => {
+  const sql = read(migrationPath)
+  const client = read("app/player-dashboard/PlayerDashboardClient.tsx")
+
+  assert.match(sql, /security definer/)
+  assert.match(sql, /set search_path to ''/)
+  assert.doesNotMatch(sql, /grant\s+(select|insert|update|delete)/i)
+  assert.match(client, /DASHBOARD_ERROR/)
+  assert.doesNotMatch(client, /response\.error\?\.message|sessionError\.message|permission denied for table players/)
+})
+
+test("dashboard shows Join Now only after a successful zero-membership response", () => {
+  const client = read("app/player-dashboard/PlayerDashboardClient.tsx")
+
+  assert.match(client, /availableLeagues\.length === 0/)
+  assert.match(client, /href="\/join"[\s\S]*JOIN NOW/)
+  assert.match(client, /message \?[\s\S]*role="alert"/)
 })
