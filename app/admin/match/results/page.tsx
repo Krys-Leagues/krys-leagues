@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
+import { matchDiscordControlDivisions } from "@/lib/matchDiscord"
+import type { PublicMatchPayload } from "@/lib/publicMatch"
 import { supabase } from "@/lib/supabase"
 
 type SeasonRow = {
@@ -41,6 +43,7 @@ type DiscordSendStatus = "idle" | "sending" | "sent" | "error"
 export default function MatchResultsPage() {
   const router = useRouter()
   const [seasons, setSeasons] = useState<SeasonRow[]>([])
+  const [publicMatch, setPublicMatch] = useState<PublicMatchPayload | null>(null)
   const [seasonId, setSeasonId] = useState("")
   const [divisionNumber, setDivisionNumber] = useState("")
   const [scheduledMatches, setScheduledMatches] = useState<ScheduleMatch[]>([])
@@ -71,19 +74,33 @@ export default function MatchResultsPage() {
     setLoading(true)
     setError("")
 
-    const { data, error: seasonError } = await supabase
-      .from("seasons")
-      .select("id, season_number, is_active")
-      .eq("league_type", "match")
-      .is("division", null)
-      .order("is_active", { ascending: false })
-      .order("season_number", { ascending: false })
+    const [seasonResult, publicMatchResult] = await Promise.all([
+      supabase
+        .from("seasons")
+        .select("id, season_number, is_active")
+        .eq("league_type", "match")
+        .is("division", null)
+        .order("is_active", { ascending: false })
+        .order("season_number", { ascending: false }),
+      supabase.rpc("get_public_match_play"),
+    ])
+
+    const { data, error: seasonError } = seasonResult
 
     if (seasonError) {
       setError(`Could not load Match seasons: ${seasonError.message}`)
       setLoading(false)
       return
     }
+
+    if (publicMatchResult.error || !publicMatchResult.data) {
+      setError("Could not load the authoritative current Match season.")
+      setLoading(false)
+      return
+    }
+
+    const authoritativeMatch = publicMatchResult.data as PublicMatchPayload
+    setPublicMatch(authoritativeMatch)
 
     const candidateSeasons = (data || []) as SeasonRow[]
     let loadedSeasons: SeasonRow[] = []
@@ -93,7 +110,7 @@ export default function MatchResultsPage() {
         .from("match_roster_versions")
         .select("season_id")
         .in("season_id", candidateSeasons.map((item) => item.id))
-        .eq("status", "approved")
+        .in("status", ["approved", "locked"])
 
       if (rosterError) {
         setError(`Could not load managed Match seasons: ${rosterError.message}`)
@@ -110,13 +127,16 @@ export default function MatchResultsPage() {
     const requestedSeasonId = new URLSearchParams(window.location.search)
       .get("seasonId")
       ?.trim()
+    const authoritativeCurrentSeasonId = loadedSeasons.find(
+      (item) => item.season_number === authoritativeMatch.current.season_number,
+    )?.id
     setSeasons(loadedSeasons)
     setSeasonId((current) => {
       if (loadedSeasons.some((item) => item.id === current)) return current
       if (loadedSeasons.some((item) => item.id === requestedSeasonId)) {
         return requestedSeasonId || ""
       }
-      return loadedSeasons[0]?.id || ""
+      return authoritativeCurrentSeasonId || loadedSeasons[0]?.id || ""
     })
     setLoading(false)
   }
@@ -358,7 +378,7 @@ export default function MatchResultsPage() {
     }
   }
 
-  const divisions = useMemo(
+  const fixtureDivisions = useMemo(
     () => Array.from(new Set(scheduledMatches.map((fixture) => fixture.division_number))).sort((a, b) => a - b),
     [scheduledMatches]
   )
@@ -368,6 +388,10 @@ export default function MatchResultsPage() {
   )
   const selectedMatch = scheduledMatches.find((fixture) => fixture.id === selectedScheduleId) || null
   const selectedSeason = seasons.find((season) => season.id === seasonId) || null
+  const discordDivisions = useMemo(
+    () => matchDiscordControlDivisions(publicMatch, selectedSeason?.season_number ?? null),
+    [publicMatch, selectedSeason],
+  )
   const player1Name = selectedMatch?.player1_name || selectedMatch?.player1 || "Player 1"
   const player2Name = selectedMatch?.player2_name || selectedMatch?.player2 || "Player 2"
   const selectedResult = selectedMatch
@@ -425,7 +449,7 @@ export default function MatchResultsPage() {
               <div>
                 <label style={label}>Division</label>
                 <select value={divisionNumber} onChange={(event) => { setDivisionNumber(event.target.value); resetPickedMatch() }} style={input}>
-                  {divisions.map((division) => (
+                  {fixtureDivisions.map((division) => (
                     <option key={division} value={division}>Match D{division}</option>
                   ))}
                 </select>
@@ -496,7 +520,7 @@ export default function MatchResultsPage() {
             </div>
           )}
 
-          {selectedSeason?.is_active && (
+          {discordDivisions.length > 0 && (
             <section style={discordSection}>
               <h2 style={sectionTitle}>Send Match Divisions to Discord</h2>
               <p style={discordHelp}>
@@ -504,7 +528,7 @@ export default function MatchResultsPage() {
                 course assignments, and standings, then sends only that division.
               </p>
               <div style={discordButtonGrid}>
-                {divisions.map((division) => {
+                {discordDivisions.map((division) => {
                   const status = discordSendStatuses[division] || "idle"
                   const anySendInProgress = Object.values(discordSendStatuses).includes("sending")
                   const buttonText = status === "sending"

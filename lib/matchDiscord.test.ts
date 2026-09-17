@@ -2,7 +2,11 @@ import assert from "node:assert/strict"
 import { readFile } from "node:fs/promises"
 import test from "node:test"
 
-import { prepareMatchDiscordSnapshot, runMatchDiscordSendExclusive } from "./matchDiscord.ts"
+import {
+  matchDiscordControlDivisions,
+  prepareMatchDiscordSnapshot,
+  runMatchDiscordSendExclusive,
+} from "./matchDiscord.ts"
 import type { PublicMatchPayload } from "./publicMatch.ts"
 
 const payload: PublicMatchPayload = {
@@ -24,6 +28,62 @@ const payload: PublicMatchPayload = {
   historical_standings: [],
   historical_matchups: [],
 }
+
+const season58ControlPayload: PublicMatchPayload = {
+  ...payload,
+  current: {
+    ...payload.current,
+    division_count: 4,
+    standings: [1, 2, 3, 4].map((divisionNumber) => ({
+      season_number: 58,
+      division_number: divisionNumber,
+      rank: null,
+      starting_rank: 1,
+      player_screen_name: `D${divisionNumber} Player`,
+      played: 0,
+      wins: 0,
+      losses: 0,
+      draws: 0,
+      points: 0,
+      holes_won: 0,
+    })),
+    schedule: [
+      ...payload.current.schedule,
+      {
+        season_number: 58,
+        division_number: 5,
+        game_number: 1,
+        player1_display_name: "Schedule Only One",
+        player2_display_name: "Schedule Only Two",
+        course: "Schedule Only Course",
+      },
+    ],
+  },
+}
+
+test("authoritative current roster controls ignore legacy is_active and schedule-only divisions", () => {
+  const legacySeason = { season_number: 58, is_active: false }
+  assert.deepEqual(
+    matchDiscordControlDivisions(season58ControlPayload, legacySeason.season_number),
+    [1, 2, 3, 4],
+  )
+})
+
+test("past Match seasons never receive Discord controls", () => {
+  assert.deepEqual(matchDiscordControlDivisions(season58ControlPayload, 57), [])
+})
+
+test("an authoritative future D5 roster exposes the D5 control", () => {
+  const futureD5: PublicMatchPayload = {
+    ...season58ControlPayload,
+    current: {
+      ...season58ControlPayload.current,
+      season_number: 59,
+      division_count: 5,
+    },
+  }
+  assert.deepEqual(matchDiscordControlDivisions(futureD5, 59), [1, 2, 3, 4, 5])
+})
 
 test("snapshot contains only the requested current Match division", () => {
   const snapshot = prepareMatchDiscordSnapshot(payload, 1)
@@ -88,7 +148,11 @@ test("Discord bot token and division channels remain server-only", async () => {
   assert.doesNotMatch(serverSource, /webhook/i)
   assert.doesNotMatch(routeSource, /process\.env|discord\.com\/api/)
   assert.doesNotMatch(clientSource, /DISCORD_BOT_TOKEN|CHANNEL_ID|discord\.com\/api|webhook/i)
-  assert.match(clientSource, /selectedSeason\?\.is_active/)
+  assert.match(clientSource, /supabase\.rpc\("get_public_match_play"\)/)
+  assert.match(clientSource, /authoritativeCurrentSeasonId/)
+  assert.doesNotMatch(clientSource, /selectedSeason\?\.is_active/)
+  assert.match(clientSource, /matchDiscordControlDivisions\(publicMatch, selectedSeason\?\.season_number \?\? null\)/)
+  assert.match(clientSource, /discordDivisions\.map\(\(division\) =>/)
   assert.match(clientSource, /onClick=\{\(\) => void handleDiscordSend\(division\)\}/)
   assert.doesNotMatch(clientSource, /useEffect\(\(\) => \{\s*void handleDiscordSend/)
   const resultSaveFlow = clientSource.slice(

@@ -1,9 +1,36 @@
 import {
+  publicMatchDivisions,
   publicMatchDisplayRank,
   type PublicCurrentMatchStanding,
   type PublicCurrentMatchup,
   type PublicMatchPayload,
 } from "./publicMatch.ts"
+
+const MAX_CONFIGURED_MATCH_DISCORD_DIVISION = 5
+
+export function matchDiscordControlDivisions(
+  payload: PublicMatchPayload | null,
+  selectedSeasonNumber: number | null,
+) {
+  if (
+    payload?.current.season_number === null ||
+    payload?.current.season_number === undefined ||
+    selectedSeasonNumber !== payload.current.season_number
+  ) {
+    return []
+  }
+
+  const divisionCount = payload.current.division_count
+  if (Number.isInteger(divisionCount) && divisionCount !== null && divisionCount > 0) {
+    return Array.from(
+      { length: Math.min(divisionCount, MAX_CONFIGURED_MATCH_DISCORD_DIVISION) },
+      (_, index) => index + 1,
+    )
+  }
+
+  return publicMatchDivisions(payload.current.standings)
+    .filter((division) => division <= MAX_CONFIGURED_MATCH_DISCORD_DIVISION)
+}
 
 export type MatchDiscordStanding = Omit<PublicCurrentMatchStanding, "rank" | "starting_rank"> & {
   displayed_rank: number
