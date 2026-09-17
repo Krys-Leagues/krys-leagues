@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 
@@ -36,6 +36,8 @@ type DeletedResultRow = {
   result_deleted: boolean
 }
 
+type DiscordSendStatus = "idle" | "sending" | "sent" | "error"
+
 export default function MatchResultsPage() {
   const router = useRouter()
   const [seasons, setSeasons] = useState<SeasonRow[]>([])
@@ -51,6 +53,9 @@ export default function MatchResultsPage() {
   const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState("")
   const [message, setMessage] = useState("")
+  const [discordSendStatuses, setDiscordSendStatuses] = useState<Record<number, DiscordSendStatus>>({})
+  const [discordSendErrors, setDiscordSendErrors] = useState<Record<number, string>>({})
+  const discordSendInFlight = useRef(false)
 
   useEffect(() => {
     void loadSeasons()
@@ -320,6 +325,39 @@ export default function MatchResultsPage() {
     setDeleting(false)
   }
 
+  async function handleDiscordSend(targetDivision: number) {
+    if (discordSendInFlight.current) return
+
+    discordSendInFlight.current = true
+    setDiscordSendStatuses((current) => ({ ...current, [targetDivision]: "sending" }))
+    setDiscordSendErrors((current) => ({ ...current, [targetDivision]: "" }))
+
+    try {
+      const response = await fetch("/api/admin/match/discord", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ divisionNumber: targetDivision }),
+      })
+      const result = await response.json().catch(() => null) as { error?: string } | null
+
+      if (!response.ok) {
+        throw new Error(result?.error || "The Match division image could not be sent.")
+      }
+
+      setDiscordSendStatuses((current) => ({ ...current, [targetDivision]: "sent" }))
+    } catch (sendError) {
+      setDiscordSendStatuses((current) => ({ ...current, [targetDivision]: "error" }))
+      setDiscordSendErrors((current) => ({
+        ...current,
+        [targetDivision]: sendError instanceof Error
+          ? sendError.message
+          : "The Match division image could not be sent.",
+      }))
+    } finally {
+      discordSendInFlight.current = false
+    }
+  }
+
   const divisions = useMemo(
     () => Array.from(new Set(scheduledMatches.map((fixture) => fixture.division_number))).sort((a, b) => a - b),
     [scheduledMatches]
@@ -329,6 +367,7 @@ export default function MatchResultsPage() {
     [divisionNumber, scheduledMatches]
   )
   const selectedMatch = scheduledMatches.find((fixture) => fixture.id === selectedScheduleId) || null
+  const selectedSeason = seasons.find((season) => season.id === seasonId) || null
   const player1Name = selectedMatch?.player1_name || selectedMatch?.player1 || "Player 1"
   const player2Name = selectedMatch?.player2_name || selectedMatch?.player2 || "Player 2"
   const selectedResult = selectedMatch
@@ -457,6 +496,43 @@ export default function MatchResultsPage() {
             </div>
           )}
 
+          {selectedSeason?.is_active && (
+            <section style={discordSection}>
+              <h2 style={sectionTitle}>Send Match Divisions to Discord</h2>
+              <p style={discordHelp}>
+                Each button creates the latest presentation image from the approved current Match roster,
+                course assignments, and standings, then sends only that division.
+              </p>
+              <div style={discordButtonGrid}>
+                {divisions.map((division) => {
+                  const status = discordSendStatuses[division] || "idle"
+                  const anySendInProgress = Object.values(discordSendStatuses).includes("sending")
+                  const buttonText = status === "sending"
+                    ? "SENDING…"
+                    : status === "sent"
+                      ? `SENT D${division} ✓`
+                      : `SEND D${division} TO DISCORD`
+
+                  return (
+                    <div key={division} style={discordAction}>
+                      <button
+                        type="button"
+                        onClick={() => void handleDiscordSend(division)}
+                        disabled={loading || anySendInProgress}
+                        style={discordButton}
+                      >
+                        {buttonText}
+                      </button>
+                      {status === "error" && (
+                        <p role="alert" style={discordError}>{discordSendErrors[division]}</p>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </section>
+          )}
+
           {loading && <p style={infoText}>Loading managed Match fixtures...</p>}
           {error && <p role="alert" style={errorText}>{error}</p>}
           {message && <p role="status" style={successText}>{message}</p>}
@@ -491,3 +567,9 @@ const successText: React.CSSProperties = { marginTop: 16, color: "#86efac", whit
 const existingResultNotice: React.CSSProperties = { padding: 12, color: "#fde68a", background: "#2a1f05", border: "1px solid #92400e", borderRadius: 8 }
 const destructiveArea: React.CSSProperties = { marginTop: 24, paddingTop: 18, borderTop: "1px solid #7f1d1d" }
 const deleteButton: React.CSSProperties = { padding: "11px 16px", background: "transparent", color: "#fca5a5", border: "1px solid #b91c1c", borderRadius: 9, fontWeight: 800, cursor: "pointer" }
+const discordSection: React.CSSProperties = { marginTop: 30, paddingTop: 24, borderTop: "1px solid #334155" }
+const discordHelp: React.CSSProperties = { maxWidth: 760, color: "#aeb9ca", lineHeight: 1.6 }
+const discordButtonGrid: React.CSSProperties = { display: "flex", flexWrap: "wrap", gap: 12, marginTop: 16 }
+const discordAction: React.CSSProperties = { display: "flex", flexDirection: "column", minWidth: 190, flex: "1 1 190px" }
+const discordButton: React.CSSProperties = { minHeight: 48, padding: "12px 16px", background: "#4c1d95", color: "white", border: "1px solid #8b5cf6", borderRadius: 10, fontWeight: 900, cursor: "pointer" }
+const discordError: React.CSSProperties = { margin: "8px 0 0", color: "#fca5a5", fontSize: 14 }

@@ -78,6 +78,7 @@ const protectedRoutes = [
   "app/api/discord/route.ts",
   "app/api/discord/result-card/route.ts",
   "app/api/discord/season-schedule/route.ts",
+  "app/api/admin/match/discord/route.ts",
 ]
 
 for (const route of protectedRoutes) {
