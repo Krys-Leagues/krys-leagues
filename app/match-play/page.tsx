@@ -221,7 +221,7 @@ export default function MatchPlayPage() {
                     <section className={styles.divisionSection} style={{ "--division-accent": theme.accent, "--division-soft": theme.soft } as React.CSSProperties} key={division}>
                       <div className={styles.divisionHeading}>
                         <div>
-                          <span className={styles.divisionOverline}>DIVISION {division} · {theme.label}</span>
+                          <span className={styles.divisionOverline}>DIVISION {division}</span>
                           <h2>Match D{division}</h2>
                         </div>
                         <span className={styles.divisionMark} aria-hidden="true">D{division}</span>

@@ -94,6 +94,12 @@ test("public Match uses one selected-season header without archive language or a
   assert.doesNotMatch(page, /MATCH PLAY SEASONS|Choose a season|SEASON RECORD|currentBadge|>CURRENT<|Historical|Archive/)
 })
 
+test("division headings use color as styling only", () => {
+  const page = readFileSync("app/match-play/page.tsx", "utf8")
+  assert.match(page, /<span className=\{styles\.divisionOverline\}>DIVISION \{division\}<\/span>/)
+  assert.doesNotMatch(page, /DIVISION \{division\} · \{theme\.label\}/)
+})
+
 test("current public rows include roster players even without a standings row", () => {
   const sql = readFileSync("historical_match_public_read.sql", "utf8")
   assert.match(sql, /left join public\.season_standings as standing/)
