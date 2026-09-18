@@ -53,7 +53,7 @@ create table if not exists public.shared_scorecard_participants (
   role_key text not null check (role_key ~ '^[a-z][a-z0-9_]{0,39}$'),
   subject_type text not null check (subject_type in ('player', 'team')),
   player_id uuid references public.players(id) on delete restrict,
-  team_id uuid references public.doubles_teams(id) on delete restrict,
+  team_id bigint references public.doubles_teams(id) on delete restrict,
   display_name_snapshot text not null,
   participant_metadata jsonb not null default '{}'::jsonb check (jsonb_typeof(participant_metadata) = 'object'),
   created_at timestamptz not null default now(),

@@ -14,6 +14,22 @@ test("shared scorecard migration is additive, private, and preserves all eightee
   assert.doesNotMatch(sql, /alter table public\.(players|schedule|results|season_standings).*disable row level security/i)
 })
 
+test("external references use the authoritative key types", () => {
+  assert.match(sql, /season_id uuid references public\.seasons\(id\) on delete restrict/)
+  assert.match(sql, /course_id uuid not null references public\.all_time_courses\(id\) on delete restrict/)
+  assert.match(sql, /player_id uuid references public\.players\(id\) on delete restrict/)
+  assert.match(sql, /submitted_by_player_id uuid references public\.players\(id\) on delete restrict/)
+  assert.match(sql, /team_id bigint references public\.doubles_teams\(id\) on delete restrict/)
+  assert.doesNotMatch(sql, /team_id uuid references public\.doubles_teams\(id\)/)
+  assert.match(sql, /verified_by_auth_user_id uuid/)
+  assert.match(sql, /changed_by_auth_user_id uuid not null/)
+  assert.match(sql, /requested_by_auth_user_id uuid not null/)
+  assert.match(
+    sql,
+    /subject_type = 'player' and player_id is not null and team_id is null[\s\S]*subject_type = 'team' and team_id is not null and player_id is null/,
+  )
+})
+
 test("evidence is private and no anonymous or authenticated table access is granted", () => {
   assert.match(sql, /'shared-scorecard-evidence',[\s\S]*?false,/)
   assert.match(sql, /revoke all on table public\.shared_scorecard_evidence from public, anon, authenticated/)
