@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto"
 import { parseVerifiedScorecardJson, verifyScorecardBridgeRequest } from "@/lib/scorecards/bridge"
 import { createScorecardServiceClient } from "@/lib/scorecards/server"
 import { loadAuthoritativeStrokeBoards } from "@/lib/scorecards/strokeBoardServer"
+import { filterStrokePilotBoards, parseStrokeScorecardPilotDivisions } from "@/lib/scorecards/strokePilot"
 
 export const runtime = "nodejs"
 const DISCORD_ID = /^\d+$/
@@ -28,11 +29,15 @@ export async function POST(request: Request) {
   const service = createScorecardServiceClient()
   try {
     const boards = await loadAuthoritativeStrokeBoards(service)
+    const pilotBoards = filterStrokePilotBoards(
+      boards,
+      parseStrokeScorecardPilotDivisions(process.env.STROKE_SCORECARD_PILOT_DIVISIONS),
+    )
     if (body.action === "poll") {
       const mappings = await service.from("stroke_discord_boards").select("season_id,division_number,discord_channel_id,discord_message_id,last_payload_hash")
       if (mappings.error) throw new Error("STROKE_BOARD_STATE_UNAVAILABLE")
       const mappingByKey = new Map((mappings.data || []).map((row) => [`${row.season_id}:${row.division_number}`, row]))
-      for (const board of boards) {
+      for (const board of pilotBoards) {
         const key = `${board.seasonId}:${board.division}`
         const mapping = mappingByKey.get(key)
         if (!mapping?.discord_message_id) {
@@ -47,7 +52,7 @@ export async function POST(request: Request) {
       const claimed = await service.rpc("claim_stroke_discord_board_sync_tasks_service", { p_claim_token: claimToken, p_limit: 5 })
       if (claimed.error) throw claimed.error
       const claimedKeys = new Set((claimed.data || []).map((row: { season_id: string; division_number: number }) => `${row.season_id}:${row.division_number}`))
-      const tasks = boards.filter((board) => claimedKeys.has(`${board.seasonId}:${board.division}`)).map((board) => ({
+      const tasks = pilotBoards.filter((board) => claimedKeys.has(`${board.seasonId}:${board.division}`)).map((board) => ({
         seasonId: board.seasonId, seasonNumber: board.seasonNumber, division: board.division,
         games: board.games.map((game) => ({
           sourceKey: game.sourceKey, gameNumber: game.gameNumber, playerOne: game.playerOne,
@@ -63,8 +68,8 @@ export async function POST(request: Request) {
     if (body.action !== "ack") return NextResponse.json({ error: "Invalid board action." }, { status: 400 })
     const seasonId = String(body.seasonId || "")
     const division = Number(body.division)
-    const board = boards.find((candidate) => candidate.seasonId === seasonId && candidate.division === division)
-    if (!board) return NextResponse.json({ error: "Board is not an occupied current Stroke division." }, { status: 409 })
+    const board = pilotBoards.find((candidate) => candidate.seasonId === seasonId && candidate.division === division)
+    if (!board) return NextResponse.json({ error: "Board is not enabled for the current Stroke pilot." }, { status: 409 })
     const succeeded = body.succeeded === true
     const channelId = String(body.channelId || "")
     const messageId = String(body.messageId || "")

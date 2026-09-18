@@ -31,6 +31,7 @@ Played Date is selected in this order: arranged fixture date, authoritative even
 Website and Railway:
 
 - `SCORECARD_BRIDGE_SECRET` — one dedicated strong shared secret, never the Discord token.
+- `STROKE_SCORECARD_PILOT_DIVISIONS` — fail-closed comma-separated pilot allowlist. The controlled first pilot uses `D1`; later expansion to `D1,D2,D3,D4` is configuration-only. A configured D5 still receives no task unless D5 is occupied in the approved current roster.
 
 Railway:
 
