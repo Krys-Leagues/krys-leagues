@@ -10,6 +10,7 @@ import {
   getDiscordBotToken,
   getMatchDiscordChannelId,
   isMatchDiscordDivision,
+  loadMatchDiscordAssignmentResults,
   postMatchDivisionImage,
 } from "@/lib/matchDiscordServer"
 import { createMatchDivisionImage } from "@/lib/matchDiscordSnapshot"
@@ -59,7 +60,16 @@ export async function POST(request: Request) {
       throw new Error("MATCH_PUBLIC_READER_FAILED")
     }
 
-    const snapshot = prepareMatchDiscordSnapshot(data as PublicMatchPayload, divisionNumber)
+    const publicMatch = data as PublicMatchPayload
+    const seasonNumber = publicMatch.current.season_number
+    if (seasonNumber === null) throw new Error("MATCH_CURRENT_SEASON_UNAVAILABLE")
+
+    const assignmentResults = await loadMatchDiscordAssignmentResults({
+      supabase: authorization.supabase,
+      seasonNumber,
+      divisionNumber,
+    })
+    const snapshot = prepareMatchDiscordSnapshot(publicMatch, divisionNumber, assignmentResults)
     const image = createMatchDivisionImage(snapshot)
     const png = await image.arrayBuffer()
     const messageId = await postMatchDivisionImage({ botToken, channelId, snapshot, png })
