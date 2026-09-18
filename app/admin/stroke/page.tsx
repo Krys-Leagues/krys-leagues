@@ -64,7 +64,7 @@ export default function StrokeAdminPage() {
   return (
     <main style={page}>
       <h1 style={title}>Stroke Play Admin</h1>
-      <p style={subtitle}>Manage Stroke Play seasons, scoring, and active games.</p>
+      <p style={subtitle}>Set up future seasons or work in the one current-season workspace.</p>
 
       <div style={grid}>
         <Link href="/admin/stroke/season" style={card}>
@@ -72,48 +72,16 @@ export default function StrokeAdminPage() {
           <span>Create or prepare a new Stroke Play season.</span>
         </Link>
 
-        <Link href="/admin/stroke/results" style={card}>
-          <strong>Score Current Season</strong>
-          <span>Enter or review Stroke Play results.</span>
-        </Link>
-
         {managedSeason ? (
-          <Link
-            href={`/admin/stroke/schedule?seasonId=${encodeURIComponent(managedSeason.id)}`}
-            style={card}
-          >
-            <strong>Schedule &amp; Images</strong>
-            <span>
-              View the current schedule, review changes, and download division schedule images.
-            </span>
+          <Link href="/admin/stroke/manage" style={card}>
+            <strong>Manage Current Season</strong>
+            <span>Assignments, scorecards, scoring, standings, and live-board status.</span>
           </Link>
         ) : (
-          <div style={{ ...card, opacity: 0.65 }}>
-            <strong>Schedule &amp; Images</strong>
-            <span>
-              {scheduleLinkError || "No current managed Stroke season is available yet."}
-            </span>
-          </div>
+          <div style={{ ...card, opacity: 0.65 }}><strong>Manage Current Season</strong><span>{scheduleLinkError || "No current managed Stroke season is available yet."}</span></div>
         )}
 
-               <Link href="/admin/stroke/standings" style={card}>
-          <strong>Standings</strong>
-          <span>View and save live Stroke Play standings.</span>
-        </Link>
-
-        {managedSeason ? (
-          <Link href={`/admin/stroke/players?seasonId=${encodeURIComponent(managedSeason.id)}`} style={card}>
-            <strong>Players</strong>
-            <span>View players in this Stroke season.</span>
-          </Link>
-        ) : (
-          <div style={{ ...card, opacity: 0.65 }}><strong>Players</strong><span>{scheduleLinkError || "No current managed Stroke season is available yet."}</span></div>
-        )}
-
-        <Link href="/admin" style={card}>
-          <strong>Back to Admin Home</strong>
-          <span>Return to the main admin dashboard.</span>
-        </Link>
+        <Link href="/admin" style={{ color: "#7dd3fc", alignSelf: "center" }}>← Back to Admin Home</Link>
       </div>
     </main>
   )
