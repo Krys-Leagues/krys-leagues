@@ -3,6 +3,7 @@ import { NextResponse } from "next/server"
 import { verifyScorecardBridgeRequest } from "@/lib/scorecards/bridge"
 import { SCORECARD_ADAPTER_KEYS, type ScorecardAdapterKey } from "@/lib/scorecards/core"
 import { createScorecardServiceClient, storeDiscordScorecardEvidence } from "@/lib/scorecards/server"
+import { enqueueStrokeBoardSync } from "@/lib/scorecards/strokeBoardServer"
 
 export const runtime = "nodejs"
 
@@ -33,7 +34,15 @@ export async function POST(request: Request) {
       const status = result.reason === "already_submitted" ? 409 : result.reason === "invalid_image" ? 400 : 403
       return NextResponse.json(result, { status })
     }
-    return NextResponse.json(result, { status: 201 })
+    let boardSync: "queued" | "retry_required" = "queued"
+    if (result.adapterKey === "stroke" && result.seasonId && result.divisionNumber) {
+      try {
+        await enqueueStrokeBoardSync(createScorecardServiceClient(), result.seasonId, result.divisionNumber, "scorecard_received")
+      } catch {
+        boardSync = "retry_required"
+      }
+    }
+    return NextResponse.json({ ...result, boardSync }, { status: 201 })
   } catch (error) {
     const reason = error instanceof Error && error.message === "SCORECARD_ADAPTER_INTAKE_NOT_ENABLED"
       ? "adapter_not_enabled"

@@ -6,13 +6,15 @@ import test from "node:test"
 const read = (path: string) => readFileSync(join(process.cwd(), path), "utf8")
 
 test("admin review API authorizes before service-role access", () => {
-  const source = read("app/api/admin/scorecards/route.ts")
-  for (const method of ["GET", "PATCH"]) {
-    const start = source.indexOf(`export async function ${method}`)
-    const next = source.indexOf("export async function", start + 1)
-    const body = source.slice(start, next < 0 ? undefined : next)
-    assert.ok(body.indexOf("await authorizeSiteAdminMutation()") >= 0)
-    assert.ok(body.indexOf("authorizeSiteAdminMutation") < body.indexOf("createScorecardServiceClient"))
+  for (const [path, methods] of [["app/api/admin/scorecards/route.ts", ["GET", "PATCH"]], ["app/api/admin/stroke/manage/route.ts", ["GET", "POST"]]] as const) {
+    const source = read(path)
+    for (const method of methods) {
+      const start = source.indexOf(`export async function ${method}`)
+      const next = source.indexOf("export async function", start + 1)
+      const body = source.slice(start, next < 0 ? undefined : next)
+      assert.ok(body.indexOf("await authorizeSiteAdminMutation()") >= 0)
+      assert.ok(body.indexOf("authorizeSiteAdminMutation") < body.indexOf("createScorecardServiceClient"))
+    }
   }
 })
 
@@ -20,8 +22,11 @@ test("Discord bridge uses a dedicated secret and never accepts destination confi
   const bridge = read("lib/scorecards/bridge.ts")
   const authorize = read("app/api/internal/scorecards/discord/authorize/route.ts")
   const upload = read("app/api/internal/scorecards/discord/upload/route.ts")
+  const boards = read("app/api/internal/scorecards/stroke/boards/route.ts")
   assert.match(bridge, /SCORECARD_BRIDGE_SECRET/)
-  assert.doesNotMatch(`${bridge}${authorize}${upload}`, /DISCORD_BOT_TOKEN|NEXT_PUBLIC_SCORECARD|channelId|discordApiUrl/)
+  assert.doesNotMatch(`${bridge}${authorize}${upload}${boards}`, /DISCORD_BOT_TOKEN|NEXT_PUBLIC_SCORECARD|discordApiUrl/)
+  assert.match(boards, /verifyScorecardBridgeRequest/)
+  assert.match(boards, /Board is not an occupied current Stroke division/)
   assert.match(bridge, /timingSafeEqual/)
   assert.match(bridge, /MAX_CLOCK_SKEW_SECONDS = 300/)
 })

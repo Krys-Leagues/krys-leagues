@@ -5,6 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js"
 import { strokeScorecardAdapter } from "./adapters/stroke"
 import type { ScorecardAdapterContext, VerifiedParticipantCard } from "./adapters/contracts"
 import { calculateScorecardTotals, resolvePlayedDate, type ScorecardHoleInput } from "./core"
+import { enqueueStrokeBoardSync } from "./strokeBoardServer"
 
 type ContextRow = {
   id: string
@@ -110,11 +111,13 @@ export async function saveAdminScorecardReview(options: {
     adminSelectedDate: options.playedDate,
     rawCardDateText: options.rawCardDateText,
   })
-  const saved: Array<{ cardId: string; card: VerifiedParticipantCard }> = []
-  for (const input of options.cards) {
+  const prepared = options.cards.map((input) => {
     const participant = participantById.get(input.participantId)
     if (!participant) throw new Error("SCORECARD_REVIEW_PARTICIPANT_INVALID")
-    const totals = calculateScorecardTotals(input.holes, context.pars)
+    return { input, participant, totals: calculateScorecardTotals(input.holes, context.pars) }
+  })
+  const saved: Array<{ cardId: string; card: VerifiedParticipantCard }> = []
+  for (const { input, participant, totals } of prepared) {
     const result = await options.client.rpc("save_shared_scorecard_draft_service", {
       p_card_id: null,
       p_context_id: review.context.id,
@@ -159,7 +162,11 @@ export async function saveAdminScorecardReview(options: {
   const existingCommit = await options.client.from("shared_scorecard_adapter_commits").select("commit_state").eq("id", commitId).single()
   if (existingCommit.error) throw new Error("SCORECARD_VERIFICATION_STATE_FAILED")
   if (existingCommit.data.commit_state === "succeeded") {
-    return { verified: true, cardIds: saved.map((entry) => entry.cardId) }
+    let boardSync: "queued" | "retry_required" = "queued"
+    try {
+      await enqueueStrokeBoardSync(options.client, context.seasonId!, context.divisionNumber!, "verified_result_retry")
+    } catch { boardSync = "retry_required" }
+    return { verified: true, cardIds: saved.map((entry) => entry.cardId), boardSync }
   }
   try {
     const { rpc: resultRpc, ...resultArgs } = plan.resultPayload
@@ -177,7 +184,11 @@ export async function saveAdminScorecardReview(options: {
       p_error_message: null,
     })
     if (completed.error || completed.data !== true) throw new Error("SCORECARD_VERIFICATION_COMPLETE_FAILED")
-    return { verified: true, cardIds: saved.map((entry) => entry.cardId) }
+    let boardSync: "queued" | "retry_required" = "queued"
+    try {
+      await enqueueStrokeBoardSync(options.client, context.seasonId!, context.divisionNumber!, "verified_result")
+    } catch { boardSync = "retry_required" }
+    return { verified: true, cardIds: saved.map((entry) => entry.cardId), boardSync }
   } catch {
     await options.client.rpc("complete_shared_scorecard_verification_service", {
       p_commit_id: commitId,

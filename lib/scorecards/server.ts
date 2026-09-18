@@ -254,5 +254,12 @@ export async function storeDiscordScorecardEvidence(options: {
     updated_at: new Date().toISOString(),
   }).eq("id", evidenceId).eq("review_status", "uploading")
   if (complete.error) throw new Error("SCORECARD_EVIDENCE_FINALIZE_FAILED")
-  return { stored: true as const, evidenceId, adapterKey: options.adapterKey, sourceKey: options.sourceKey }
+  return {
+    stored: true as const,
+    evidenceId,
+    adapterKey: options.adapterKey,
+    sourceKey: options.sourceKey,
+    seasonId: authorization.context.seasonId,
+    divisionNumber: authorization.context.divisionNumber,
+  }
 }
