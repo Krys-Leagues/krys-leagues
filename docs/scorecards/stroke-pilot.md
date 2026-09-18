@@ -2,6 +2,8 @@
 
 This pilot is additive and local-only. It does not activate the Railway bot or install either migration.
 
+The Production reconciliation preserves the authenticated Stroke Player Dashboard reader and UI while retiring the former static PNG, manual division-send, and game-reminder workflow. Approved Stroke channel IDs remain server configuration for the persistent live boards.
+
 ## Authoritative flow
 
 1. `loadAuthoritativeStrokeBoards` selects the newest approved managed Stroke roster, its occupied roster-slot divisions, roster-scoped schedule, authoritative results, and Stroke standings.
