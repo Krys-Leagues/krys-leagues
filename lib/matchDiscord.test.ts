@@ -259,3 +259,50 @@ test("completed Match winners alone receive green name and HW styling", async ()
   assert.match(source, /color: player2Won \? winnerGreen : "#f8fafc"/)
   assert.doesNotMatch(source, />=/)
 })
+
+test("long player names keep protected columns without truncation", async () => {
+  const source = await readFile("lib/matchDiscordSnapshot.tsx", "utf8")
+  const longNamePayload: PublicMatchPayload = {
+    ...payload,
+    current: {
+      ...payload.current,
+      standings: [
+        { ...payload.current.standings[0]!, player_screen_name: "WILMA_FINGERDOO" },
+        { ...payload.current.standings[1]!, player_screen_name: "PRINCESS_BANKSHOT" },
+      ],
+      schedule: [{
+        season_number: 58,
+        division_number: 1,
+        game_number: 1,
+        player1_display_name: "WILMA_FINGERDOO",
+        player2_display_name: "PRINCESS_BANKSHOT",
+        course: "Quixote Valley Easy",
+      }],
+    },
+  }
+  const snapshot = prepareMatchDiscordSnapshot(longNamePayload, 1, [{
+    division_number: 1,
+    game_number: 1,
+    player1_display_name: "WILMA_FINGERDOO",
+    player2_display_name: "PRINCESS_BANKSHOT",
+    course: "Quixote Valley Easy",
+    player1_holes_won: 7,
+    player2_holes_won: 4,
+  }])
+
+  assert.equal(snapshot.assignments[0]?.player1_display_name, "WILMA_FINGERDOO")
+  assert.equal(snapshot.assignments[0]?.player2_display_name, "PRINCESS_BANKSHOT")
+  assert.equal(snapshot.assignments[0]?.player1_holes_won, 7)
+  assert.equal(snapshot.assignments[0]?.player2_holes_won, 4)
+  assert.equal(snapshot.assignments[0]?.course, "Quixote Valley Easy")
+
+  assert.match(source, /const playerNameStyle/)
+  assert.match(source, /cell\("18%", "flex-start"\)/)
+  assert.match(source, /fontSize: \(name\?\.length \|\| 0\) > 18 \? 14 : \(name\?\.length \|\| 0\) > 13 \? 16 : 18/)
+  assert.match(source, /wordBreak: "break-all"/)
+  assert.match(source, /cell\("20%", "flex-start"\)[\s\S]*?assignment\.course/)
+  assert.match(source, /cell\("14%"\)[\s\S]*?COMPLETED[\s\S]*?NOT PLAYED/)
+  assert.doesNotMatch(source, /textOverflow|ellipsis|slice\(|substring\(/)
+  assert.match(source, /playerNameStyle\(assignment\.player1_display_name, player1Won\)/)
+  assert.match(source, /playerNameStyle\(assignment\.player2_display_name, player2Won\)/)
+})
