@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs"
 import test from "node:test"
 
 const read = (path: string) => readFileSync(path, "utf8")
-const migrationPath = "supabase/migrations/20260917124646_player_dashboard_match_reader.sql"
+const migrationPath = "supabase/migrations/20260918014650_player_dashboard_stroke_reader.sql"
 
 test("Player Dashboard remains available only from the signed-in player's own profile", () => {
   const profile = read("app/players/[id]/page.tsx")
@@ -68,6 +68,28 @@ test("dashboard returns only the caller's Match fixtures and safe display fields
   assert.doesNotMatch(sql, /'email'|'auth_user_id'|'discord_id'|'player_id'/)
 })
 
+test("current approved Stroke roster determines self-only membership", () => {
+  const sql = read(migrationPath)
+
+  assert.match(sql, /public\.stroke_roster_versions/)
+  assert.match(sql, /roster\.status = 'approved'/)
+  assert.match(sql, /public\.stroke_division_roster_slots/)
+  assert.match(sql, /public\.resolve_canonical_player_id\(slot\.player_id\) = v_player_id/)
+  assert.match(sql, /'stroke', v_stroke/)
+  assert.doesNotMatch(sql, /players\.division|player_league_memberships/)
+})
+
+test("dashboard returns only the caller's Stroke fixtures and exact Stroke scores", () => {
+  const sql = read(migrationPath)
+
+  assert.match(sql, /fixture\.roster_version_id = roster\.id/)
+  assert.match(sql, /fixture\.player1_id = slot\.player_id or fixture\.player2_id = slot\.player_id/)
+  assert.match(sql, /player_score/)
+  assert.match(sql, /opponent_score/)
+  assert.match(sql, /when \(case when fixture\.caller_is_player_one then fixture\.player1_score else fixture\.player2_score end\)[\s\S]*</)
+  assert.match(sql, /'strokes', coalesce\(standing\.strokes, 0\)/)
+})
+
 test("reader adds no broad access and client never exposes raw database errors", () => {
   const sql = read(migrationPath)
   const client = read("app/player-dashboard/PlayerDashboardClient.tsx")
@@ -86,6 +108,16 @@ test("dashboard gates Join Now behind authoritative global membership coverage",
   assert.match(client, /membershipView === "authoritative-empty"[\s\S]*<GlobalJoinState/)
   assert.match(client, /function GlobalJoinState\(\)[\s\S]*href="\/join"[\s\S]*JOIN NOW/)
   assert.match(client, /Your current league information is still being connected\./)
+})
+
+test("dashboard validates and renders the protected Stroke league payload", () => {
+  const client = read("app/player-dashboard/PlayerDashboardClient.tsx")
+
+  assert.match(client, /activeLeague === "stroke"[\s\S]*<StrokeDashboardCard/)
+  assert.match(client, /typeof payload\.leagues\?\.stroke\?\.rostered === "boolean"/)
+  assert.match(client, /Public Stroke/)
+  assert.match(client, /STROKE DIVISION/)
+  assert.doesNotMatch(client, /\.from\("stroke_|\.from\("players"|\.from\("schedule"|\.from\("results"/)
 })
 
 test("reader failure uses the friendly error branch before membership rendering", () => {

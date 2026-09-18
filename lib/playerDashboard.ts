@@ -36,6 +36,43 @@ export type MatchDashboardLeague = {
   results: MatchDashboardResult[]
 }
 
+export type StrokeDashboardAssignment = {
+  game_number: number
+  opponent_screen_name: string | null
+  course: string | null
+  status: "completed" | "remaining"
+  completed: boolean
+  due_date: string | null
+}
+
+export type StrokeDashboardResult = {
+  game_number: number
+  opponent_screen_name: string | null
+  course: string | null
+  player_score: number
+  opponent_score: number
+  outcome: "win" | "loss" | "draw"
+}
+
+export type StrokeDashboardLeague = {
+  rostered: boolean
+  season_number: number | null
+  season_due_date: string | null
+  division_number: number | null
+  starting_rank: number | null
+  current_rank: number | null
+  displayed_rank: number | null
+  played: number
+  wins: number
+  losses: number
+  draws: number
+  points: number
+  strokes: number
+  remaining_count: number
+  assignments: StrokeDashboardAssignment[]
+  results: StrokeDashboardResult[]
+}
+
 export type DashboardLeagueKey = "match" | "stroke" | "pyp" | "amateur-pro" | "doubles" | "skins"
 
 export type DashboardLeagueState = {
@@ -44,6 +81,7 @@ export type DashboardLeagueState = {
 
 export type DashboardLeagueStates = Partial<Record<DashboardLeagueKey, DashboardLeagueState>> & {
   match: MatchDashboardLeague
+  stroke: StrokeDashboardLeague
 }
 
 export type DashboardLeagueOption = {
@@ -99,6 +137,18 @@ const MATCH_DIVISION_ACCENTS: Record<number, string> = {
 
 export function matchDivisionAccent(divisionNumber: number) {
   return MATCH_DIVISION_ACCENTS[divisionNumber] || "#cbd5e1"
+}
+
+const STROKE_DIVISION_ACCENTS: Record<number, string> = {
+  1: "#fb923c",
+  2: "#60a5fa",
+  3: "#4ade80",
+  4: "#facc15",
+  5: "#c084fc",
+}
+
+export function strokeDivisionAccent(divisionNumber: number) {
+  return STROKE_DIVISION_ACCENTS[divisionNumber] || "#cbd5e1"
 }
 
 export function formatDashboardDate(value: string | null) {

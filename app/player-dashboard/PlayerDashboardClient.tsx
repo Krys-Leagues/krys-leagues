@@ -10,11 +10,14 @@ import {
   formatDashboardDate,
   matchDivisionAccent,
   selectedDashboardLeague,
+  strokeDivisionAccent,
   type DashboardLeagueKey,
   type DashboardLeagueOption,
   type MatchDashboardAssignment,
   type MatchDashboardLeague,
   type PlayerDashboardPayload,
+  type StrokeDashboardAssignment,
+  type StrokeDashboardLeague,
 } from "@/lib/playerDashboard"
 import { supabase } from "@/lib/supabase"
 import styles from "./player-dashboard.module.css"
@@ -86,6 +89,7 @@ export default function PlayerDashboardClient() {
   }
 
   const match = dashboard?.leagues.match ?? null
+  const stroke = dashboard?.leagues.stroke ?? null
   const availableLeagues = dashboard ? currentDashboardLeagues(dashboard.leagues) : []
   const activeLeague = selectedDashboardLeague(selectedLeague, availableLeagues)
   const membershipView = dashboard ? dashboardMembershipView(dashboard.leagues) : null
@@ -113,7 +117,7 @@ export default function PlayerDashboardClient() {
           </section>
         ) : message ? (
           <div className={styles.stateCard} role="alert">{message}</div>
-        ) : dashboard && match ? (
+        ) : dashboard && match && stroke ? (
           <>
             <section className={styles.playerCard}>
               <span>PLAYER</span>
@@ -134,12 +138,16 @@ export default function PlayerDashboardClient() {
 
                 {activeLeague === "match" ? (
                   <MatchDashboardCard match={match} />
+                ) : activeLeague === "stroke" ? (
+                  <StrokeDashboardCard stroke={stroke} />
                 ) : (
                   <FutureLeagueCard league={availableLeagues.find((league) => league.key === activeLeague) ?? null} />
                 )}
 
                 <section className={styles.actionGrid}>
-                  <Link href="/match-play" className={styles.actionButton}>Public Match Play</Link>
+                  <Link href={activeLeague === "stroke" ? "/stroke" : "/match-play"} className={styles.actionButton}>
+                    {activeLeague === "stroke" ? "Public Stroke" : "Public Match Play"}
+                  </Link>
                   <PlayerProfileNavLink className={styles.actionButton}>Player Profile</PlayerProfileNavLink>
                   <Link href="/standings" className={styles.actionButton}>View Standings</Link>
                   <Link href="/records" className={styles.actionButton}>View Records</Link>
@@ -322,7 +330,126 @@ function MatchDashboardCard({ match }: { match: MatchDashboardLeague }) {
   )
 }
 
+function StrokeDashboardCard({ stroke }: { stroke: StrokeDashboardLeague }) {
+  if (!stroke.rostered || stroke.division_number === null) {
+    return (
+      <section className={styles.matchCard}>
+        <div className={styles.matchIdentity}>
+          <p>STROKE</p>
+          <h2>{stroke.season_number === null ? "Current season" : `Season ${stroke.season_number}`}</h2>
+        </div>
+        <div className={styles.notRostered}>You are not currently rostered in Stroke.</div>
+      </section>
+    )
+  }
+
+  const accent = strokeDivisionAccent(stroke.division_number)
+  const deadline = formatDashboardDate(stroke.season_due_date)
+  const remainingAssignments = stroke.assignments.filter((assignment) => !assignment.completed)
+
+  return (
+    <section className={styles.matchCard} style={{ "--match-accent": accent } as CSSProperties}>
+      <div className={styles.matchIdentity}>
+        <p>STROKE</p>
+        <h2>Season {stroke.season_number ?? "—"}</h2>
+        {deadline && <span>Season deadline: {deadline}</span>}
+      </div>
+
+      <h3 className={styles.divisionHeading}>STROKE DIVISION {stroke.division_number}</h3>
+
+      <section className={styles.dashboardSection} aria-labelledby="stroke-current-standing">
+        <div className={styles.sectionTitle}>
+          <p>CURRENT STANDING</p>
+          <h4 id="stroke-current-standing">My Stroke totals</h4>
+        </div>
+        <div className={styles.statGrid}>
+          <Stat label="Rank" value={stroke.displayed_rank ?? "—"} />
+          <Stat label="Record" value={`${stroke.wins}-${stroke.losses}-${stroke.draws}`} />
+          <Stat label="Played" value={stroke.played} />
+          <Stat label="Points" value={stroke.points} />
+          <Stat label="Strokes" value={stroke.strokes} />
+        </div>
+      </section>
+
+      <section className={styles.dashboardSection} aria-labelledby="stroke-course-assignments">
+        <div className={styles.sectionTitle}>
+          <p>MY COURSE ASSIGNMENTS</p>
+          <h4 id="stroke-course-assignments">My Stroke schedule</h4>
+        </div>
+        {stroke.assignments.length === 0 ? (
+          <p className={styles.empty}>No Stroke course assignments are currently published.</p>
+        ) : (
+          <div className={styles.assignmentList}>
+            {stroke.assignments.map((assignment) => <StrokeAssignmentRow assignment={assignment} key={`${assignment.game_number}:${assignment.opponent_screen_name}`} />)}
+          </div>
+        )}
+      </section>
+
+      <section className={styles.dashboardSection} aria-labelledby="stroke-results">
+        <div className={styles.sectionTitle}>
+          <p>MY RESULTS</p>
+          <h4 id="stroke-results">Completed Stroke games</h4>
+        </div>
+        {stroke.results.length === 0 ? (
+          <p className={styles.empty}>No completed Stroke results are recorded yet.</p>
+        ) : (
+          <div className={styles.resultList}>
+            {stroke.results.map((result) => (
+              <article className={styles.resultRow} key={`${result.game_number}:${result.opponent_screen_name}`}>
+                <div>
+                  <span>GAME {result.game_number}</span>
+                  <strong>vs {result.opponent_screen_name || "Opponent unavailable"}</strong>
+                  <small>{result.course || "Course not set"}</small>
+                </div>
+                <div className={styles.resultScore}>
+                  <strong>{result.player_score}–{result.opponent_score}</strong>
+                  <span>{result.outcome.toUpperCase()}</span>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section className={styles.dashboardSection} aria-labelledby="stroke-remaining">
+        <div className={styles.sectionTitle}>
+          <p>REMAINING</p>
+          <h4 id="stroke-remaining">{stroke.remaining_count} game{stroke.remaining_count === 1 ? "" : "s"} remaining</h4>
+        </div>
+        {remainingAssignments.length === 0 ? (
+          <p className={styles.empty}>No remaining Stroke games.</p>
+        ) : (
+          <ul className={styles.remainingList}>
+            {remainingAssignments.map((assignment) => (
+              <li key={`${assignment.game_number}:${assignment.opponent_screen_name}`}>
+                Game {assignment.game_number} · {assignment.opponent_screen_name || "Opponent unavailable"} · {assignment.course || "Course not set"}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    </section>
+  )
+}
+
 function AssignmentRow({ assignment }: { assignment: MatchDashboardAssignment }) {
+  const dueDate = formatDashboardDate(assignment.due_date)
+  return (
+    <article className={styles.assignmentRow}>
+      <div className={styles.gameNumber}>GAME {assignment.game_number}</div>
+      <div className={styles.assignmentMain}>
+        <strong>vs {assignment.opponent_screen_name || "Opponent unavailable"}</strong>
+        <span>{assignment.course || "Course not set"}</span>
+        {dueDate && <small>Season deadline: {dueDate}</small>}
+      </div>
+      <span className={`${styles.status} ${assignment.completed ? styles.complete : styles.remaining}`}>
+        {assignment.completed ? "Completed" : "Remaining"}
+      </span>
+    </article>
+  )
+}
+
+function StrokeAssignmentRow({ assignment }: { assignment: StrokeDashboardAssignment }) {
   const dueDate = formatDashboardDate(assignment.due_date)
   return (
     <article className={styles.assignmentRow}>
@@ -350,4 +477,7 @@ function isPlayerDashboardPayload(value: unknown): value is PlayerDashboardPaylo
     && typeof payload.leagues?.match?.rostered === "boolean"
     && Array.isArray(payload.leagues.match.assignments)
     && Array.isArray(payload.leagues.match.results)
+    && typeof payload.leagues?.stroke?.rostered === "boolean"
+    && Array.isArray(payload.leagues.stroke.assignments)
+    && Array.isArray(payload.leagues.stroke.results)
 }

@@ -2,12 +2,18 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
+import { strokeDiscordControlDivisions, type StrokeDiscordMode } from "@/lib/strokeDiscord"
 import { supabase } from "@/lib/supabase"
 
 type SeasonRow = {
   id: string
   season_number: number
   is_active: boolean
+}
+
+type RosterRow = {
+  season_id: string
+  division_count: number
 }
 
 type ScheduleMatch = {
@@ -39,6 +45,7 @@ type DeletedResultRow = {
 export default function StrokeResultsPage() {
   const router = useRouter()
   const [seasons, setSeasons] = useState<SeasonRow[]>([])
+  const [rosters, setRosters] = useState<RosterRow[]>([])
   const [seasonId, setSeasonId] = useState("")
   const [divisionNumber, setDivisionNumber] = useState("")
   const [scheduledMatches, setScheduledMatches] = useState<ScheduleMatch[]>([])
@@ -51,6 +58,8 @@ export default function StrokeResultsPage() {
   const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState("")
   const [message, setMessage] = useState("")
+  const [discordSending, setDiscordSending] = useState("")
+  const [discordMessage, setDiscordMessage] = useState("")
 
   useEffect(() => {
     void loadSeasons()
@@ -84,7 +93,7 @@ export default function StrokeResultsPage() {
     if (candidateSeasons.length > 0) {
       const { data: rosterData, error: rosterError } = await supabase
         .from("stroke_roster_versions")
-        .select("season_id")
+        .select("season_id, division_count")
         .in("season_id", candidateSeasons.map((item) => item.id))
         .eq("status", "approved")
 
@@ -94,10 +103,10 @@ export default function StrokeResultsPage() {
         return
       }
 
-      const managedSeasonIds = new Set(
-        (rosterData || []).map((roster) => roster.season_id as string)
-      )
+      const loadedRosters = (rosterData || []) as RosterRow[]
+      const managedSeasonIds = new Set(loadedRosters.map((roster) => roster.season_id))
       loadedSeasons = candidateSeasons.filter((item) => managedSeasonIds.has(item.id))
+      setRosters(loadedRosters)
     }
 
     const requestedSeasonId = new URLSearchParams(window.location.search)
@@ -307,9 +316,43 @@ export default function StrokeResultsPage() {
     setDeleting(false)
   }
 
+  async function handleDiscordSend(targetDivision: number, mode: StrokeDiscordMode) {
+    const sendKey = `${mode}-${targetDivision}`
+    if (discordSending) return
+
+    setDiscordSending(sendKey)
+    setDiscordMessage("")
+    setError("")
+    try {
+      const response = await fetch("/api/admin/stroke/discord", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ divisionNumber: targetDivision, mode }),
+      })
+      const responseBody = await response.json().catch(() => null) as { error?: string } | null
+      if (!response.ok) throw new Error(responseBody?.error || "The Stroke Discord send failed.")
+      setDiscordMessage(
+        mode === "reminder"
+          ? `Stroke D${targetDivision} game reminder sent to Discord.`
+          : `Stroke D${targetDivision} update sent to Discord.`,
+      )
+    } catch (sendError) {
+      setError(sendError instanceof Error ? sendError.message : "The Stroke Discord send failed.")
+    } finally {
+      setDiscordSending("")
+    }
+  }
+
   const divisions = useMemo(
     () => Array.from(new Set(scheduledMatches.map((fixture) => fixture.division_number))).sort((a, b) => a - b),
     [scheduledMatches]
+  )
+  const selectedRoster = rosters.find((roster) => roster.season_id === seasonId) || null
+  const authoritativeCurrentSeasonId = seasons[0]?.id || null
+  const discordDivisions = strokeDiscordControlDivisions(
+    authoritativeCurrentSeasonId,
+    seasonId || null,
+    selectedRoster?.division_count ?? null,
   )
   const visibleMatches = useMemo(
     () => scheduledMatches.filter((fixture) => fixture.division_number === Number(divisionNumber)),
@@ -380,6 +423,42 @@ export default function StrokeResultsPage() {
               </div>
             </div>
           </section>
+
+          {discordDivisions.length > 0 && (
+            <section style={discordSection}>
+              <h2 style={sectionTitle}>Manual Discord Updates</h2>
+              <p style={discordHelp}>Send only the division that changed. Game reminders include only authoritative unplayed assignments.</p>
+              <div style={discordGrid}>
+                {discordDivisions.map((division) => {
+                  const hasRemainingAssignments = scheduledMatches.some(
+                    (fixture) => fixture.division_number === division && !hasCompletedResult(fixture.id),
+                  )
+                  return (
+                    <div key={division} style={discordDivisionCard}>
+                      <strong>Stroke D{division}</strong>
+                      <button
+                        type="button"
+                        onClick={() => void handleDiscordSend(division, "division")}
+                        disabled={Boolean(discordSending)}
+                        style={discordButton}
+                      >
+                        {discordSending === `division-${division}` ? "SENDING..." : `SEND D${division} TO DISCORD`}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void handleDiscordSend(division, "reminder")}
+                        disabled={Boolean(discordSending) || !hasRemainingAssignments}
+                        style={{ ...discordButton, ...reminderButton, opacity: hasRemainingAssignments ? 1 : 0.55 }}
+                      >
+                        {discordSending === `reminder-${division}` ? "SENDING..." : `SEND D${division} GAME REMINDER`}
+                      </button>
+                    </div>
+                  )
+                })}
+              </div>
+              {discordMessage && <p role="status" style={successText}>{discordMessage}</p>}
+            </section>
+          )}
 
           <section style={section}>
             <h2 style={sectionTitle}>Match</h2>
@@ -478,3 +557,9 @@ const successText: React.CSSProperties = { marginTop: 16, color: "#86efac", whit
 const existingResultNotice: React.CSSProperties = { padding: 12, color: "#fde68a", background: "#2a1f05", border: "1px solid #92400e", borderRadius: 8 }
 const destructiveArea: React.CSSProperties = { marginTop: 24, paddingTop: 18, borderTop: "1px solid #7f1d1d" }
 const deleteButton: React.CSSProperties = { padding: "11px 16px", background: "transparent", color: "#fca5a5", border: "1px solid #b91c1c", borderRadius: 9, fontWeight: 800, cursor: "pointer" }
+const discordSection: React.CSSProperties = { marginTop: 28, padding: 18, border: "1px solid #1d4ed8", borderRadius: 14, background: "#071226" }
+const discordHelp: React.CSSProperties = { color: "#cbd5e1", lineHeight: 1.5 }
+const discordGrid: React.CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }
+const discordDivisionCard: React.CSSProperties = { display: "grid", gap: 10, padding: 14, border: "1px solid #334155", borderRadius: 12, background: "#0f172a" }
+const discordButton: React.CSSProperties = { minHeight: 44, padding: "10px 12px", border: "1px solid #60a5fa", borderRadius: 9, color: "#eff6ff", background: "#1d4ed8", fontWeight: 900, cursor: "pointer" }
+const reminderButton: React.CSSProperties = { borderColor: "#f59e0b", background: "#92400e" }
