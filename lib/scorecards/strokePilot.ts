@@ -38,6 +38,17 @@ export type StrokePilotResult = {
   standings: StrokeBoardStanding[]
 }
 
+export function parseStrokeScorecardPilotDivisions(value: string | null | undefined) {
+  const tokens = value?.split(",").map((token) => token.trim().toUpperCase()).filter(Boolean) || []
+  if (tokens.length === 0 || tokens.some((token) => !/^D[1-5]$/.test(token))) return []
+  return [...new Set(tokens.map((token) => Number(token.slice(1))))].sort((left, right) => left - right)
+}
+
+export function filterStrokePilotBoards(boards: StrokeDivisionBoard[], configuredDivisions: number[]) {
+  const enabled = new Set(configuredDivisions)
+  return boards.filter((board) => enabled.has(board.division))
+}
+
 export function occupiedStrokeDivisions(rows: Array<{ division_number: number }>) {
   return [...new Set(rows.map((row) => Number(row.division_number)).filter((division) => Number.isInteger(division) && division > 0))]
     .sort((left, right) => left - right)

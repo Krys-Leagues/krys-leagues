@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises"
 import test from "node:test"
 
 import { calculateScorecardTotals, resolvePlayedDate } from "./core.ts"
-import { canSubmitStrokeScorecard, completeMockStrokePilot, occupiedStrokeDivisions, strokeGameState, type StrokeDivisionBoard } from "./strokePilot.ts"
+import { canSubmitStrokeScorecard, completeMockStrokePilot, filterStrokePilotBoards, occupiedStrokeDivisions, parseStrokeScorecardPilotDivisions, strokeGameState, type StrokeDivisionBoard } from "./strokePilot.ts"
 
 const initial: StrokeDivisionBoard = {
   seasonId: "11111111-1111-4111-8111-111111111111",
@@ -17,6 +17,23 @@ const initial: StrokeDivisionBoard = {
 test("occupied approved roster slots alone determine active Stroke divisions", () => {
   assert.deepEqual(occupiedStrokeDivisions([{ division_number: 4 }, { division_number: 1 }, { division_number: 2 }, { division_number: 3 }, { division_number: 1 }]), [1, 2, 3, 4])
   assert.equal(occupiedStrokeDivisions([{ division_number: 1 }, { division_number: 4 }]).includes(5), false)
+})
+
+test("D1-only pilot configuration cannot initialize D2-D5", () => {
+  const boards = [1, 2, 3, 4].map((division) => ({ ...initial, division }))
+  assert.deepEqual(parseStrokeScorecardPilotDivisions("D1"), [1])
+  assert.deepEqual(filterStrokePilotBoards(boards, parseStrokeScorecardPilotDivisions("D1")).map((board) => board.division), [1])
+  assert.deepEqual(parseStrokeScorecardPilotDivisions("D1,D2,D3,D4"), [1, 2, 3, 4])
+  assert.deepEqual(parseStrokeScorecardPilotDivisions("D1,unexpected"), [])
+  assert.deepEqual(parseStrokeScorecardPilotDivisions(undefined), [])
+})
+
+test("D5 remains dependent on an authoritative occupied D5 board", () => {
+  const occupiedBoards = [1, 2, 3, 4].map((division) => ({ ...initial, division }))
+  assert.deepEqual(
+    filterStrokePilotBoards(occupiedBoards, parseStrokeScorecardPilotDivisions("D1,D2,D3,D4,D5")).map((board) => board.division),
+    [1, 2, 3, 4],
+  )
 })
 
 test("game state advances only from durable evidence or an authoritative result", () => {
@@ -56,7 +73,8 @@ test("board coordinator and admin workspace preserve the required security and f
   assert.match(server, /occupiedStrokeDivisions\(slots\)/)
   assert.doesNotMatch(server, /is_active/)
   assert.match(route, /verifyScorecardBridgeRequest/)
-  assert.match(route, /Board is not an occupied current Stroke division/)
+  assert.match(route, /STROKE_SCORECARD_PILOT_DIVISIONS/)
+  assert.match(route, /Board is not enabled for the current Stroke pilot/)
   assert.match(admin, /boardSync[\s\S]*retry_required/)
   assert.match(manage, /GP[\s\S]*STROKES[\s\S]*PTS/)
   assert.match(manage, /MANUAL SCORING/)
@@ -64,4 +82,3 @@ test("board coordinator and admin workspace preserve the required security and f
   assert.match(migration, /revoke all[\s\S]*anon, authenticated/)
   assert.doesNotMatch(migration, /grant select[^;]+authenticated/i)
 })
-
