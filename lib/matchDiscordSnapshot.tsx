@@ -21,6 +21,7 @@ const cell = (width: string, justifyContent: "flex-start" | "center" = "center")
 
 export function createMatchDivisionImage(snapshot: MatchDiscordSnapshot) {
   const accent = DIVISION_ACCENTS[snapshot.division_number] || "#f8fafc"
+  const winnerGreen = "#4ade80"
   const height = 420 + snapshot.assignments.length * 84 + snapshot.standings.length * 62
 
   return new ImageResponse(
@@ -59,32 +60,43 @@ export function createMatchDivisionImage(snapshot: MatchDiscordSnapshot) {
           <div style={{ display: "flex", padding: "14px 18px", borderRadius: 12, background: "#0f172a", color: "#cbd5e1", fontSize: 20 }}>
             Course assignments are not published yet.
           </div>
-        ) : snapshot.assignments.map((assignment) => (
-          <div key={`${assignment.game_number}-${assignment.player1_display_name}-${assignment.player2_display_name}`} style={{ display: "flex", alignItems: "center", minHeight: 76, marginBottom: 8, padding: "10px 16px", borderLeft: `5px solid ${accent}`, borderRadius: 10, background: "#0f172a", fontSize: 18 }}>
-            <div style={{ ...cell("11%", "flex-start"), color: accent, fontWeight: 900 }}>GAME {assignment.game_number}</div>
-            <div style={{ display: "flex", width: "47%", alignItems: "center" }}>
-              <div style={{ ...cell("32%", "flex-start"), fontWeight: 800 }}>{assignment.player1_display_name || "Player 1"}</div>
-              {assignment.completed ? (
-                <div style={{ ...cell("13%"), padding: "7px 5px", borderRadius: 8, background: "#1e293b", color: accent, fontWeight: 900 }}>
-                  {assignment.player1_holes_won} HW
+        ) : snapshot.assignments.map((assignment) => {
+          const player1Won = assignment.completed
+            && assignment.player1_holes_won !== null
+            && assignment.player2_holes_won !== null
+            && assignment.player1_holes_won > assignment.player2_holes_won
+          const player2Won = assignment.completed
+            && assignment.player1_holes_won !== null
+            && assignment.player2_holes_won !== null
+            && assignment.player2_holes_won > assignment.player1_holes_won
+
+          return (
+            <div key={`${assignment.game_number}-${assignment.player1_display_name}-${assignment.player2_display_name}`} style={{ display: "flex", alignItems: "center", minHeight: 76, marginBottom: 8, padding: "10px 16px", borderLeft: `5px solid ${accent}`, borderRadius: 10, background: "#0f172a", fontSize: 18 }}>
+              <div style={{ ...cell("11%", "flex-start"), color: accent, fontWeight: 900 }}>GAME {assignment.game_number}</div>
+              <div style={{ display: "flex", width: "47%", alignItems: "center" }}>
+                <div style={{ ...cell("32%", "flex-start"), color: player1Won ? winnerGreen : "#f8fafc", fontWeight: 800 }}>{assignment.player1_display_name || "Player 1"}</div>
+                {assignment.completed ? (
+                  <div style={{ ...cell("13%"), padding: "7px 5px", borderRadius: 8, background: "#1e293b", color: player1Won ? winnerGreen : "#f8fafc", fontWeight: 900 }}>
+                    {assignment.player1_holes_won} HW
+                  </div>
+                ) : <div style={cell("13%")} />}
+                <div style={{ ...cell("10%"), color: accent, fontWeight: 900 }}>VS</div>
+                {assignment.completed ? (
+                  <div style={{ ...cell("13%"), padding: "7px 5px", borderRadius: 8, background: "#1e293b", color: player2Won ? winnerGreen : "#f8fafc", fontWeight: 900 }}>
+                    {assignment.player2_holes_won} HW
+                  </div>
+                ) : <div style={cell("13%")} />}
+                <div style={{ ...cell("32%", "flex-start"), paddingLeft: 8, color: player2Won ? winnerGreen : "#f8fafc", fontWeight: 800 }}>{assignment.player2_display_name || "Player 2"}</div>
+              </div>
+              <div style={{ ...cell("25%", "flex-start"), paddingLeft: 10, color: "#cbd5e1" }}>{assignment.course || "Course TBA"}</div>
+              <div style={{ ...cell("17%"), justifyContent: "flex-end" }}>
+                <div style={{ display: "flex", padding: "7px 10px", border: `1px solid ${assignment.completed ? accent : "#475569"}`, borderRadius: 999, color: assignment.completed ? accent : "#94a3b8", fontSize: 15, fontWeight: 900 }}>
+                  {assignment.completed ? "COMPLETED" : "NOT PLAYED"}
                 </div>
-              ) : <div style={cell("13%")} />}
-              <div style={{ ...cell("10%"), color: accent, fontWeight: 900 }}>VS</div>
-              {assignment.completed ? (
-                <div style={{ ...cell("13%"), padding: "7px 5px", borderRadius: 8, background: "#1e293b", color: accent, fontWeight: 900 }}>
-                  {assignment.player2_holes_won} HW
-                </div>
-              ) : <div style={cell("13%")} />}
-              <div style={{ ...cell("32%", "flex-start"), paddingLeft: 8, fontWeight: 800 }}>{assignment.player2_display_name || "Player 2"}</div>
-            </div>
-            <div style={{ ...cell("25%", "flex-start"), paddingLeft: 10, color: "#cbd5e1" }}>{assignment.course || "Course TBA"}</div>
-            <div style={{ ...cell("17%"), justifyContent: "flex-end" }}>
-              <div style={{ display: "flex", padding: "7px 10px", border: `1px solid ${assignment.completed ? accent : "#475569"}`, borderRadius: 999, color: assignment.completed ? accent : "#94a3b8", fontSize: 15, fontWeight: 900 }}>
-                {assignment.completed ? "COMPLETED" : "NOT PLAYED"}
               </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", marginTop: 24 }}>

@@ -248,3 +248,14 @@ test("snapshot source contains required presentation fields and no private ident
     /snapshot\.(?:email|auth_user_id|player_id|discord_id|admin_notes|private_metadata)/i,
   )
 })
+
+test("completed Match winners alone receive green name and HW styling", async () => {
+  const source = await readFile("lib/matchDiscordSnapshot.tsx", "utf8")
+
+  assert.match(source, /const winnerGreen = "#4ade80"/)
+  assert.match(source, /assignment\.completed[\s\S]*assignment\.player1_holes_won > assignment\.player2_holes_won/)
+  assert.match(source, /assignment\.completed[\s\S]*assignment\.player2_holes_won > assignment\.player1_holes_won/)
+  assert.match(source, /color: player1Won \? winnerGreen : "#f8fafc"/)
+  assert.match(source, /color: player2Won \? winnerGreen : "#f8fafc"/)
+  assert.doesNotMatch(source, />=/)
+})
