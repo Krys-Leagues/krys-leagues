@@ -1,7 +1,7 @@
 import { getAceStage, getCourseChallenge, getPrestigeStage } from "@/lib/courseChallenges/catalog"
 import { aceStageRewardDefinitions, levelRewardDefinitions, prestigeStageRewardDefinitions } from "@/lib/courseChallenges/rewards"
 import { aceCrossCreditRows, aceProgress, type AceSubmissionRecord } from "@/lib/courseChallenges/ace"
-import { isEligibleGameMode } from "@/lib/courseChallenges/gameMode"
+import { courseChallengeGameModeError, normalizeCourseChallengeGameMode } from "@/lib/courseChallenges/gameMode"
 import { createCourseChallengesServiceClient, requireCourseChallengeAdmin } from "@/lib/courseChallenges/server"
 import { createServerSupabaseClient } from "@/lib/supabase/server"
 import { sha256Hex } from "@/lib/all-time/normal-records"
@@ -113,7 +113,7 @@ export async function PATCH(request: Request) {
   const authorization = await requireCourseChallengeAdmin()
   if (authorization.response) return authorization.response
   try {
-    const body = await request.json() as { id?: string; action?: "approve" | "reject" | "return_to_review"; reviewNotes?: string; gameMode?: "solo" | "multiplayer" }
+    const body = await request.json() as { id?: string; action?: "approve" | "reject" | "return_to_review" | "verify_game_mode"; reviewNotes?: string; gameMode?: "solo" | "multiplayer" }
     if (!body.id || !body.action) return Response.json({ error: "Submission ID and review action are required." }, { status: 400 })
     const service = createCourseChallengesServiceClient()
     const submission = await service.from("course_challenge_submissions").select("id,player_id,course_slug,challenge_key,level_number,ace_stage_number,prestige_stage_number,difficulty,status,hole_scores,relative_to_par,created_at,review_notes,all_time_processing_status,proof_image_sha256").eq("id", body.id).maybeSingle()
@@ -125,6 +125,14 @@ export async function PATCH(request: Request) {
       const reopened = await sessionClient.rpc("return_course_challenge_submission_to_review", { p_submission_id: body.id, p_review_notes: body.reviewNotes?.trim() || null })
       if (reopened.error) throw reopened.error
       return Response.json({ message: "Submission returned to review. Its proof and previous review history were preserved." })
+    }
+    if (body.action === "verify_game_mode") {
+      const verifiedGameMode = normalizeCourseChallengeGameMode(body.gameMode)
+      if (!verifiedGameMode) return Response.json({ error: "Select Solo or Multiplayer to save the admin verification." }, { status: 400 })
+      const update = await service.from("course_challenge_submissions").update({ admin_verified_game_mode: verifiedGameMode, admin_game_mode_verified_by: authorization.user?.id || null, admin_game_mode_verified_at: new Date().toISOString() }).eq("id", body.id).in("status", ["pending", "needs_review"]).select("id").maybeSingle()
+      if (update.error) throw update.error
+      if (!update.data) return Response.json({ error: "This submission is no longer awaiting review. Refresh the queue." }, { status: 409 })
+      return Response.json({ message: `Admin game mode saved as ${verifiedGameMode.toUpperCase()}.`, gameMode: verifiedGameMode })
     }
     if (body.action === "reject" && currentStatus === "approved") return Response.json({ error: "This submission has already been approved." }, { status: 409 })
     if (body.action === "reject" && currentStatus === "rejected") return Response.json({ error: "This submission has already been rejected." }, { status: 409 })
@@ -156,8 +164,9 @@ export async function PATCH(request: Request) {
       const blocking = classified.find(({ classification }) => classification.blocking)
       if (blocking) return Response.json({ error: "This verified scorecard was already used in the same Course Challenge track. Level and Ace Track cross-credit remains allowed, but same-track reuse is blocked." }, { status: 409 })
     }
-    const verifiedGameMode = body.gameMode || (challengeKey === "prestige" || challengeKey === "ace" || Number(submissionRow.level_number) >= 3 ? "multiplayer" : null)
-    if (!isEligibleGameMode(Number(submissionRow.level_number), verifiedGameMode, challengeKey)) return Response.json({ error: "Select verified Solo or Multiplayer before approving this Course Challenge card." }, { status: 400 })
+    const verifiedGameMode = normalizeCourseChallengeGameMode(body.gameMode)
+    const gameModeError = courseChallengeGameModeError(Number(submissionRow.level_number), verifiedGameMode, challengeKey)
+    if (gameModeError) return Response.json({ error: gameModeError }, { status: 400 })
     const level = course?.levels.find((item) => item.level === Number(submissionRow.level_number))
     const code = submissionRow.difficulty === "Easy" ? (level?.easyCode || course?.easyCode) : (level?.hardCode || course?.hardCode)
     if (!code) return Response.json({ error: "The Course Challenge has no authoritative All-Time course mapping." }, { status: 409 })

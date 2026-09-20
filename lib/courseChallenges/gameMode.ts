@@ -1,9 +1,21 @@
 export type CourseChallengeGameMode = "solo" | "multiplayer"
+export type CourseChallengeKey = "level" | "ace" | "prestige"
 
-export function allowedGameModes(level: number, challengeKey: "level" | "ace" | "prestige" = "level"): CourseChallengeGameMode[] {
+export function allowedGameModes(level: number, challengeKey: CourseChallengeKey = "level"): CourseChallengeGameMode[] {
   return challengeKey === "ace" || challengeKey === "prestige" || level >= 3 ? ["multiplayer"] : ["solo", "multiplayer"]
 }
 
-export function isEligibleGameMode(level: number, mode: string | null | undefined, challengeKey: "level" | "ace" | "prestige" = "level") {
+export function normalizeCourseChallengeGameMode(mode: string | null | undefined): CourseChallengeGameMode | null {
+  return mode === "solo" || mode === "multiplayer" ? mode : null
+}
+
+export function isEligibleGameMode(level: number, mode: string | null | undefined, challengeKey: CourseChallengeKey = "level") {
   return typeof mode === "string" && allowedGameModes(level, challengeKey).includes(mode as CourseChallengeGameMode)
+}
+
+export function courseChallengeGameModeError(level: number, mode: string | null | undefined, challengeKey: CourseChallengeKey = "level") {
+  const normalized = normalizeCourseChallengeGameMode(mode)
+  if (!normalized) return "Select verified Solo or Multiplayer before approving this Course Challenge card."
+  if (!isEligibleGameMode(level, normalized, challengeKey)) return "This Course Challenge requirement must be verified as Multiplayer before approval."
+  return null
 }
