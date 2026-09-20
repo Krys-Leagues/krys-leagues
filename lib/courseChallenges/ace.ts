@@ -6,6 +6,7 @@ export type AceSubmissionRecord = {
   course_slug?: unknown
   challenge_key?: unknown
   level_number?: unknown
+  ace_stage_number?: unknown
   created_at?: unknown
   difficulty?: unknown
   hole_scores?: unknown
@@ -40,6 +41,15 @@ export function uniqueAceHoleNumbers(rows: ReadonlyArray<AceSubmissionRecord>, c
   for (const row of rows) for (const hole of aceHoleNumbers(row.hole_scores)) holes.add(hole)
   if (currentScores) for (const hole of aceHoleNumbers(currentScores)) holes.add(hole)
   return [...holes].sort((left, right) => left - right)
+}
+
+export function aceCrossCreditRows(rows: ReadonlyArray<AceSubmissionRecord>, crossCreditedSubmissionIds: ReadonlySet<string>, currentSubmissionId: string, aceStageNumber: number): AceSubmissionRecord[] {
+  return rows.filter((row) => {
+    if (row.challenge_key === "ace") return true
+    if (row.challenge_key !== "level" || Number(row.ace_stage_number) !== aceStageNumber) return false
+    const id = row.id === undefined || row.id === null ? "" : String(row.id)
+    return id === currentSubmissionId || crossCreditedSubmissionIds.has(id)
+  })
 }
 
 function isCompleteScorecard(value: unknown): value is number[] {
