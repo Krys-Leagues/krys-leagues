@@ -10,6 +10,7 @@ const routes = [
   { route: "/players", asset: "/approved-pages/player-profiles-approved.jpg", files: ["app/players/page.tsx", "app/players/page.module.css", "lib/artworkPageMaps.ts"], links: ["loadCanonicalPublicPlayers", "filteredPlayers", "Search players by screen name", "/players/"], legacy: ["No active players found", "style={directory}"] },
   { route: "/records", asset: "/approved-pages/overall-leaderboards-approved.jpg", files: ["app/leaderboards/page.tsx", "app/records/page.tsx", "lib/artworkPageMaps.ts"], links: ["redirect(\"/records\")", "/records/single", "/records/combined"], legacy: ["Player Dashboard", "Season 59", "landingGrid"] },
   { route: "/kwt", asset: "/approved-pages/kwt-hub-approved.png", files: ["app/kwt/page.tsx", "app/kwt/upcoming/page.tsx", "app/kwt/records/page.tsx", "lib/artworkPageMaps.ts"], links: ["kwt-hub-approved.png", "Current Tournament", "/kwt/upcoming", "/champions?league=kwt&from=kwt", "/kwt/records"], legacy: ["kwt-hub-approved.jpg"] },
+  { route: "/kwt/history", asset: "/approved-pages/kwt-hub-approved.png", files: ["app/kwt/history/page.tsx", "lib/kwtHistoryServer.ts", "lib/kwtHistory.ts"], links: ["KWT Score History", "historical_kwt_scorecards", "get_public_player_canonical_identity", "href=\"/kwt\""], legacy: ["/access-denied"] },
   { route: "/tournaments", asset: "/approved-pages/bracket-tournaments-approved.png", files: ["app/tournaments/page.tsx", "app/tournaments/current/page.tsx", "app/tournaments/history/page.tsx", "app/tournaments/BracketRegistrationOverlay.tsx", "lib/artworkPageMaps.ts"], links: ["bracket-tournaments-approved.png", "/majors?from=tournaments", "/tournaments/current", "/tournaments/current#live-preview", "/invitationals", "/tournaments/history"], legacy: ["bracket-tournaments-approved.jpg", "/admin/krys-tourney"] },
   { route: "/champions", asset: "/approved-pages/hall-of-champions-approved.jpg", files: ["app/champions/page.tsx", "lib/championScope.ts"], links: ["hall-of-champions-approved.jpg", "resolveHallScope", "from === \"tournaments\"", "Browse Trophy Categories"], legacy: ["Player Dashboard", "Season 59"] },
   { route: "/join", asset: "/approved-pages/join-leagues-approved.jpg", files: ["app/join/page.tsx", "lib/artworkPageMaps.ts"], links: ["join-leagues-approved.jpg", "/register?league=match", "/register?league=stroke", "/register?league=pyp", "/register?league=doubles", "/register?league=pro", "/register?league=cups"], legacy: ["community-records-leaderboards", "/register?league=community"] },
@@ -23,7 +24,11 @@ const routes = [
   { route: "/league-play", asset: "/approved-pages/league-play-approved.png", files: ["app/league-play/page.tsx", "lib/artworkPageMaps.ts"], links: ["league-play-approved.png", "/stroke", "/match-play", "/doubles", "/amateur-pro", "/skins", "/pyp"], legacy: ["Choose a league to view schedules"] },
 ]
 
-const results = routes.map((item) => {
+const requestedRoute = process.argv.find((argument) => argument.startsWith("--route="))?.slice("--route=".length)
+const routesToCheck = requestedRoute ? routes.filter((item) => item.route === requestedRoute) : routes
+if (requestedRoute && routesToCheck.length === 0) throw new Error(`Unknown public route: ${requestedRoute}`)
+
+const results = routesToCheck.map((item) => {
   const source = item.files.map(read).join("\n")
   const missingFiles = item.files.filter((path) => !exists(path))
   const missingLinks = item.links.filter((fragment) => !source.includes(fragment))
@@ -48,6 +53,10 @@ const markdown = [
   "",
 ].join("\n")
 
-const report = resolve(root, "docs/public-site-recovery/rapid-route-smoke-manifest.md")
-writeFileSync(report, markdown)
-console.log(JSON.stringify({ routes: results.length, report: "docs/public-site-recovery/rapid-route-smoke-manifest.md", status: "PASS" }))
+if (requestedRoute) {
+  console.log(JSON.stringify({ route: requestedRoute, status: "PASS" }))
+} else {
+  const report = resolve(root, "docs/public-site-recovery/rapid-route-smoke-manifest.md")
+  writeFileSync(report, markdown)
+  console.log(JSON.stringify({ routes: results.length, report: "docs/public-site-recovery/rapid-route-smoke-manifest.md", status: "PASS" }))
+}

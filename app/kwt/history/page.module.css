@@ -1,0 +1,236 @@
+.page {
+  min-height: 100vh;
+  padding: clamp(18px, 4vw, 52px);
+  color: #f9f7ff;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(116, 72, 188, 0.28), transparent 36rem),
+    linear-gradient(160deg, #07030f 0%, #10071e 48%, #05020b 100%);
+}
+
+.shell {
+  width: min(100%, 1320px);
+  margin: 0 auto;
+}
+
+.back,
+.clear {
+  display: inline-flex;
+  align-items: center;
+  min-height: 42px;
+  color: #fff;
+  font-weight: 850;
+  text-decoration: none;
+  border: 1px solid rgba(188, 132, 255, 0.68);
+  border-radius: 999px;
+  background: rgba(27, 13, 48, 0.92);
+}
+
+.back {
+  padding: 9px 17px;
+}
+
+.header {
+  margin: clamp(28px, 5vw, 56px) 0 26px;
+}
+
+.eyebrow,
+.kicker {
+  margin: 0;
+  color: #74eaff;
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+}
+
+.header h1 {
+  margin: 8px 0;
+  font-size: clamp(2.35rem, 6vw, 5rem);
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+}
+
+.header > p:last-child {
+  max-width: 720px;
+  margin: 15px 0 0;
+  color: #c9c1dc;
+  font-size: clamp(1rem, 2vw, 1.2rem);
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: minmax(150px, 0.65fr) minmax(130px, 0.55fr) minmax(240px, 1.4fr) auto auto;
+  gap: 13px;
+  align-items: end;
+  padding: clamp(16px, 2.6vw, 24px);
+  border: 1px solid rgba(137, 96, 196, 0.58);
+  border-radius: 20px;
+  background: rgba(19, 11, 35, 0.9);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.24);
+}
+
+.filters label {
+  display: grid;
+  gap: 8px;
+}
+
+.filters label span {
+  color: #d4c9e8;
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.filters select,
+.filters input,
+.filters button {
+  min-height: 46px;
+  border-radius: 11px;
+  font: inherit;
+}
+
+.filters select,
+.filters input {
+  width: 100%;
+  padding: 0 13px;
+  color: #fff;
+  border: 1px solid #4b3d69;
+  background: #0a0714;
+}
+
+.filters button {
+  padding: 0 18px;
+  color: #09040f;
+  font-weight: 950;
+  border: 0;
+  background: linear-gradient(135deg, #8deeff, #bd8cff);
+  cursor: pointer;
+}
+
+.clear {
+  justify-content: center;
+  padding: 0 16px;
+}
+
+.history {
+  margin-top: 22px;
+  overflow: hidden;
+  border: 1px solid rgba(137, 96, 196, 0.58);
+  border-radius: 20px;
+  background: rgba(13, 8, 25, 0.94);
+}
+
+.sectionHeading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
+  padding: clamp(18px, 3vw, 28px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sectionHeading h2 {
+  margin: 6px 0 0;
+  font-size: clamp(1.45rem, 3vw, 2.25rem);
+}
+
+.sectionHeading > span {
+  color: #c5b9da;
+  white-space: nowrap;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.tableWrap table {
+  width: 100%;
+  min-width: 1050px;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.tableWrap th,
+.tableWrap td {
+  padding: 14px 13px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.075);
+}
+
+.tableWrap thead th {
+  color: #a99bbf;
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  background: #0b0714;
+}
+
+.tableWrap tbody th {
+  max-width: 240px;
+  color: #fff;
+  overflow-wrap: anywhere;
+}
+
+.tableWrap tbody tr:hover {
+  background: rgba(151, 98, 220, 0.09);
+}
+
+.numeric,
+.score,
+.total,
+.placement {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.score {
+  color: #8feaff;
+  font-weight: 850;
+}
+
+.total {
+  color: #d9a7ff;
+  font-size: 1.02rem;
+  font-weight: 950;
+}
+
+.placement {
+  color: #f4d484;
+  font-weight: 850;
+}
+
+.empty {
+  margin: 0;
+  padding: 36px 24px;
+  color: #c9c1dc;
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .search {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 560px) {
+  .page {
+    padding: 16px 12px 32px;
+  }
+
+  .filters {
+    grid-template-columns: 1fr;
+  }
+
+  .search {
+    grid-column: auto;
+  }
+
+  .sectionHeading {
+    align-items: start;
+    flex-direction: column;
+  }
+}
