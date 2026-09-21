@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabase"
+import { adminManagedLeagueRequest } from "@/lib/admin/managedLeagueClient"
 
 type SeasonRow = {
   id: string
@@ -70,40 +70,13 @@ export default function StrokeResultsPage() {
     setLoading(true)
     setError("")
 
-    const { data, error: seasonError } = await supabase
-      .from("seasons")
-      .select("id, season_number, is_active")
-      .eq("league_type", "stroke")
-      .is("division", null)
-      .order("is_active", { ascending: false })
-      .order("season_number", { ascending: false })
-
-    if (seasonError) {
-      setError(`Could not load Stroke seasons: ${seasonError.message}`)
+    const response = await adminManagedLeagueRequest<{ seasons: SeasonRow[]; fixtures: ScheduleMatch[]; results: ResultRow[] }>("results_load", { league: "stroke" })
+    if (response.error || !response.data) {
+      setError(`Could not load Stroke seasons: ${response.error?.message || "No data returned."}`)
       setLoading(false)
       return
     }
-
-    const candidateSeasons = (data || []) as SeasonRow[]
-    let loadedSeasons: SeasonRow[] = []
-
-    if (candidateSeasons.length > 0) {
-      const { data: rosterData, error: rosterError } = await supabase
-        .from("stroke_roster_versions")
-        .select("season_id")
-        .in("season_id", candidateSeasons.map((item) => item.id))
-        .eq("status", "approved")
-
-      if (rosterError) {
-        setError(`Could not load managed Stroke seasons: ${rosterError.message}`)
-        setLoading(false)
-        return
-      }
-
-      const loadedRosters = (rosterData || []) as RosterRow[]
-      const managedSeasonIds = new Set(loadedRosters.map((roster) => roster.season_id))
-      loadedSeasons = candidateSeasons.filter((item) => managedSeasonIds.has(item.id))
-    }
+    const loadedSeasons = response.data.seasons
 
     const requestedSeasonId = new URLSearchParams(window.location.search)
       .get("seasonId")
@@ -123,45 +96,14 @@ export default function StrokeResultsPage() {
     setLoading(true)
     setError("")
 
-    const { data, error: fixtureError } = await supabase
-      .from("schedule")
-      .select("id, season_id, division_number, division, game_number, game, course, player1, player2, player1_name, player2_name, player1_id, player2_id")
-      .eq("league_type", "stroke")
-      .eq("season_id", selectedSeasonId)
-      .not("roster_version_id", "is", null)
-      .not("division_number", "is", null)
-      .not("game_number", "is", null)
-      .not("player1_id", "is", null)
-      .not("player2_id", "is", null)
-      .order("division_number", { ascending: true })
-      .order("game_number", { ascending: true })
-      .order("id", { ascending: true })
-
-    if (fixtureError) {
-      setError(`Could not load managed Stroke fixtures: ${fixtureError.message}`)
+    const response = await adminManagedLeagueRequest<{ fixtures: ScheduleMatch[]; results: ResultRow[] }>("results_load", { league: "stroke", seasonId: selectedSeasonId })
+    if (response.error || !response.data) {
+      setError(`Could not load managed Stroke fixtures: ${response.error?.message || "No data returned."}`)
       setLoading(false)
       return
     }
-
-    const fixtures = (data || []) as ScheduleMatch[]
-    const fixtureIds = fixtures.map((fixture) => fixture.id)
-    let resultRows: ResultRow[] = []
-
-    if (fixtureIds.length > 0) {
-      const { data: resultData, error: resultError } = await supabase
-        .from("results")
-        .select("schedule_id, player1_score, player2_score")
-        .eq("league_type", "stroke")
-        .in("schedule_id", fixtureIds)
-
-      if (resultError) {
-        setError(`Could not load Stroke results: ${resultError.message}`)
-        setLoading(false)
-        return
-      }
-
-      resultRows = (resultData || []) as ResultRow[]
-    }
+    const fixtures = response.data.fixtures
+    const resultRows = response.data.results
 
     const availableDivisions = Array.from(
       new Set(fixtures.map((fixture) => fixture.division_number))
@@ -241,11 +183,11 @@ export default function StrokeResultsPage() {
     setError("")
     setMessage("")
 
-    const { error: saveError } = await supabase.rpc("save_stroke_result", {
+    const { error: saveError } = await adminManagedLeagueRequest("rpc", { name: "save_stroke_result", args: {
       p_schedule_id: selectedMatch.id,
       p_player1_score: player1Score,
       p_player2_score: player2Score,
-    })
+    } })
 
     if (saveError) {
       setError(`Result save failed: ${saveError.message}`)
@@ -254,10 +196,10 @@ export default function StrokeResultsPage() {
     }
 
     try {
-      const { error: standingsError } = await supabase.rpc("rebuild_stroke_standings", {
+      const { error: standingsError } = await adminManagedLeagueRequest("rpc", { name: "rebuild_stroke_standings", args: {
         p_season_id: selectedMatch.season_id,
         p_division_number: selectedMatch.division_number,
-      })
+      } })
 
       if (standingsError) throw standingsError
 
@@ -291,11 +233,9 @@ export default function StrokeResultsPage() {
     setError("")
     setMessage("")
 
-    const { data, error: deleteError } = await supabase
-      .rpc("delete_stroke_result", {
+    const { data, error: deleteError } = await adminManagedLeagueRequest<DeletedResultRow>("rpc", { name: "delete_stroke_result", args: {
         p_schedule_id: selectedMatch.id,
-      })
-      .single()
+      } })
 
     if (deleteError) {
       setError(`Result deletion failed: ${deleteError.message}`)

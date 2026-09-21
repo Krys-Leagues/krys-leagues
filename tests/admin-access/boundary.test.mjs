@@ -61,6 +61,20 @@ for (const route of ["app/api/admin/pyp/route.ts", "app/api/admin/managed-season
   })
 }
 
+for (const page of ["app/admin/stroke/results/page.tsx", "app/admin/match/results/page.tsx"]) {
+  test(`${page} uses the managed-league server boundary`, () => {
+    const source = read(page)
+    assert.doesNotMatch(source, /supabase\.(from|rpc)\(/)
+    assert.match(source, /adminManagedLeagueRequest/)
+  })
+}
+
+test("managed-league route authorizes before protected access", () => {
+  const source = read("app/api/admin/managed-league/route.ts")
+  const postSource = source.slice(source.indexOf("export async function POST"))
+  assert.ok(postSource.indexOf("authorizeSiteAdminMutation()") < postSource.indexOf("createAdminServiceClient()"))
+})
+
 for (const route of [
   "app/api/admin/player-matching/route.ts",
   "app/api/admin/player-tracker/route.ts",

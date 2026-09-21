@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { matchDiscordControlDivisions } from "@/lib/matchDiscord"
 import type { PublicMatchPayload } from "@/lib/publicMatch"
-import { supabase } from "@/lib/supabase"
+import { adminManagedLeagueRequest } from "@/lib/admin/managedLeagueClient"
 
 type SeasonRow = {
   id: string
@@ -74,55 +74,21 @@ export default function MatchResultsPage() {
     setLoading(true)
     setError("")
 
-    const [seasonResult, publicMatchResult] = await Promise.all([
-      supabase
-        .from("seasons")
-        .select("id, season_number, is_active")
-        .eq("league_type", "match")
-        .is("division", null)
-        .order("is_active", { ascending: false })
-        .order("season_number", { ascending: false }),
-      supabase.rpc("get_public_match_play"),
-    ])
-
-    const { data, error: seasonError } = seasonResult
-
-    if (seasonError) {
-      setError(`Could not load Match seasons: ${seasonError.message}`)
+    const response = await adminManagedLeagueRequest<{ seasons: SeasonRow[]; publicMatch: PublicMatchPayload | null; fixtures: ScheduleMatch[]; results: ResultRow[] }>("results_load", { league: "match" })
+    if (response.error || !response.data) {
+      setError(`Could not load Match seasons: ${response.error?.message || "No data returned."}`)
       setLoading(false)
       return
     }
-
-    if (publicMatchResult.error || !publicMatchResult.data) {
+    if (!response.data.publicMatch) {
       setError("Could not load the authoritative current Match season.")
       setLoading(false)
       return
     }
-
-    const authoritativeMatch = publicMatchResult.data as PublicMatchPayload
+    const authoritativeMatch = response.data.publicMatch
     setPublicMatch(authoritativeMatch)
 
-    const candidateSeasons = (data || []) as SeasonRow[]
-    let loadedSeasons: SeasonRow[] = []
-
-    if (candidateSeasons.length > 0) {
-      const { data: rosterData, error: rosterError } = await supabase
-        .from("match_roster_versions")
-        .select("season_id")
-        .in("season_id", candidateSeasons.map((item) => item.id))
-        .in("status", ["approved", "locked"])
-
-      if (rosterError) {
-        setError(`Could not load managed Match seasons: ${rosterError.message}`)
-        setLoading(false)
-        return
-      }
-
-      const managedSeasonIds = new Set(
-        (rosterData || []).map((roster) => roster.season_id as string)
-      )
-      loadedSeasons = candidateSeasons.filter((item) => managedSeasonIds.has(item.id))
-    }
+    const loadedSeasons = response.data.seasons
 
     const requestedSeasonId = new URLSearchParams(window.location.search)
       .get("seasonId")
@@ -145,58 +111,14 @@ export default function MatchResultsPage() {
     setLoading(true)
     setError("")
 
-    const { data: rosterData, error: rosterError } = await supabase
-      .from("match_roster_versions")
-      .select("id")
-      .eq("season_id", selectedSeasonId)
-      .eq("status", "approved")
-      .maybeSingle()
-
-    if (rosterError || !rosterData) {
-      setError(rosterError ? `Could not load the approved Match roster: ${rosterError.message}` : "An approved Match roster is required for result entry.")
+    const response = await adminManagedLeagueRequest<{ fixtures: ScheduleMatch[]; results: ResultRow[] }>("results_load", { league: "match", seasonId: selectedSeasonId })
+    if (response.error || !response.data) {
+      setError(`Could not load managed Match fixtures: ${response.error?.message || "No data returned."}`)
       setLoading(false)
       return
     }
-
-    const { data, error: fixtureError } = await supabase
-      .from("schedule")
-      .select("id, season_id, division_number, division, game_number, game, course, player1, player2, player1_name, player2_name, player1_id, player2_id")
-      .eq("league_type", "match")
-      .eq("season_id", selectedSeasonId)
-      .eq("match_roster_version_id", rosterData.id)
-      .not("division_number", "is", null)
-      .not("game_number", "is", null)
-      .not("player1_id", "is", null)
-      .not("player2_id", "is", null)
-      .order("division_number", { ascending: true })
-      .order("game_number", { ascending: true })
-      .order("id", { ascending: true })
-
-    if (fixtureError) {
-      setError(`Could not load managed Match fixtures: ${fixtureError.message}`)
-      setLoading(false)
-      return
-    }
-
-    const fixtures = (data || []) as ScheduleMatch[]
-    const fixtureIds = fixtures.map((fixture) => fixture.id)
-    let resultRows: ResultRow[] = []
-
-    if (fixtureIds.length > 0) {
-      const { data: resultData, error: resultError } = await supabase
-        .from("results")
-        .select("schedule_id, player1_hw, player2_hw")
-        .eq("league_type", "match")
-        .in("schedule_id", fixtureIds)
-
-      if (resultError) {
-        setError(`Could not load Match results: ${resultError.message}`)
-        setLoading(false)
-        return
-      }
-
-      resultRows = (resultData || []) as ResultRow[]
-    }
+    const fixtures = response.data.fixtures
+    const resultRows = response.data.results
 
     const availableDivisions = Array.from(
       new Set(fixtures.map((fixture) => fixture.division_number))
@@ -276,11 +198,11 @@ export default function MatchResultsPage() {
     setError("")
     setMessage("")
 
-    const { error: saveError } = await supabase.rpc("save_match_result", {
+    const { error: saveError } = await adminManagedLeagueRequest("rpc", { name: "save_match_result", args: {
       p_schedule_id: selectedMatch.id,
       p_player1_hw: player1Score,
       p_player2_hw: player2Score,
-    })
+    } })
 
     if (saveError) {
       setError(`Result save failed: ${saveError.message}`)
@@ -289,10 +211,10 @@ export default function MatchResultsPage() {
     }
 
     try {
-      const { error: standingsError } = await supabase.rpc("rebuild_match_standings", {
+      const { error: standingsError } = await adminManagedLeagueRequest("rpc", { name: "rebuild_match_standings", args: {
         p_season_id: selectedMatch.season_id,
         p_division_number: selectedMatch.division_number,
-      })
+      } })
       if (standingsError) throw standingsError
       await loadFixtures(selectedMatch.season_id)
       setMessage("Match result saved. Standings were recalculated.")
@@ -324,11 +246,9 @@ export default function MatchResultsPage() {
     setError("")
     setMessage("")
 
-    const { data, error: deleteError } = await supabase
-      .rpc("delete_match_result", {
+    const { data, error: deleteError } = await adminManagedLeagueRequest<DeletedResultRow>("rpc", { name: "delete_match_result", args: {
         p_schedule_id: selectedMatch.id,
-      })
-      .single()
+      } })
 
     if (deleteError) {
       setError(`Result deletion failed: ${deleteError.message}`)
