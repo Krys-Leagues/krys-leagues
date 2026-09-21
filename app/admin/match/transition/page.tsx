@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabase"
+import { adminManagedLeagueRequest } from "@/lib/admin/managedLeagueClient"
 import { logActivity } from "@/lib/activityLog"
 
 type Entry = { player_id: string; player_screen_name: string; division_number: number; division_rank: number; completed_game_count: number }
@@ -82,113 +82,51 @@ export default function MatchTransitionPage() {
     const requestedId = new URLSearchParams(window.location.search).get("scorecardId")?.trim() || ""
     if (!requestedId) { setError("An approved Final Scorecard ID is required."); setLoading(false); return }
     setScorecardId(requestedId)
-    const { data: scorecard, error: scorecardError } = await supabase.from("match_final_scorecards")
-      .select("id, season_id, status").eq("id", requestedId).maybeSingle()
-    if (scorecardError || !scorecard || scorecard.status !== "approved") {
-      setError(scorecardError?.message || "An approved Final Scorecard is required."); setLoading(false); return
-    }
+    const response = await adminManagedLeagueRequest<{
+      scorecard: { id: string; season_id: string; status: string }
+      sourceSeason: { season_number: number }
+      entries: Entry[]
+      decisions: Decision[]
+      candidateSeasons: Season[]
+      rosters: { id: string; season_id: string; division_count: number; source_final_scorecard_id: string | null }[]
+      slots: Omit<ProposalSlot, "roster_version_id" | "target_season_id" | "target_division_count" | "movement_reason">[]
+      players: Player[]
+    }>("transition_load", { league: "match", scorecardId: requestedId })
+    if (response.error || !response.data) { setError(response.error?.message || "Could not load transition data."); setLoading(false); return }
+    const { scorecard, sourceSeason, entries: loadedEntries, decisions: loadedDecisions, candidateSeasons, rosters, slots, players: loadedPlayers } = response.data
     setSourceSeasonId(scorecard.season_id)
-    const { data: sourceSeason, error: sourceError } = await supabase.from("seasons")
-      .select("season_number").eq("id", scorecard.season_id).maybeSingle()
-    if (sourceError || !sourceSeason) { setError(sourceError?.message || "Source season not found."); setLoading(false); return }
     setSourceSeasonNumber(sourceSeason.season_number)
-
-    const [entryResponse, decisionResponse, seasonResponse, playerResponse] = await Promise.all([
-      supabase.from("match_final_scorecard_entries")
-        .select("player_id, player_screen_name, division_number, division_rank, completed_game_count")
-        .eq("scorecard_id", requestedId).order("division_number").order("division_rank"),
-      supabase.from("match_final_scorecard_player_decisions").select("player_id, decision").eq("final_scorecard_id", requestedId),
-      supabase.from("seasons").select("id, season_number, start_date, end_date, game1_course, game2_course, game3_course").eq("league_type", "match")
-        .is("division", null).eq("season_number", sourceSeason.season_number + 1),
-      supabase.from("players").select("id, screen_name").eq("active", true).order("screen_name"),
-    ])
-    const loadError = entryResponse.error || decisionResponse.error || seasonResponse.error || playerResponse.error
-    if (loadError) { setError(loadError.message); setLoading(false); return }
-    const loadedEntries = (entryResponse.data || []) as Entry[]
-    const loadedPlayers = (playerResponse.data || []) as Player[]
-    const candidateSeasons = (seasonResponse.data || []) as Season[]
-    let loadedSeasons: Season[] = []
-    let loadedTargetDivisionCount: number | null = null
-    let loadedProposal: ProposalSlot[] = []
-    if (candidateSeasons.length > 0) {
-      const { data: rosterData, error: rosterError } = await supabase
-        .from("match_roster_versions")
-        .select("id, season_id, division_count, source_final_scorecard_id")
-        .in("season_id", candidateSeasons.map((season) => season.id))
-        .in("status", ["draft", "approved"])
-      if (rosterError) { setError(rosterError.message); setLoading(false); return }
-      const managedIds = new Set((rosterData || []).map((roster) => roster.season_id as string))
-      loadedSeasons = candidateSeasons.filter((season) => managedIds.has(season.id))
-      if (loadedSeasons.length > 1) {
-        setError("Multiple eligible managed Match target seasons were found. Resolve the ambiguity before continuing.")
-        setLoading(false)
-        return
-      }
-      if (loadedSeasons.length === 1) {
-        const targetRoster = (rosterData || []).find((roster) => roster.season_id === loadedSeasons[0].id)
-        if (targetRoster?.division_count) loadedTargetDivisionCount = Number(targetRoster.division_count)
-        if (targetRoster?.source_final_scorecard_id === requestedId) {
-          const { data: slotData, error: slotError } = await supabase
-            .from("match_division_roster_slots")
-            .select("division_number, slot_number, player_id, player_screen_name")
-            .eq("roster_version_id", targetRoster.id)
-            .order("division_number").order("slot_number")
-          if (slotError) { setError(slotError.message); setLoading(false); return }
-          loadedProposal = withVisibleMovementLabels(((slotData || []) as Omit<ProposalSlot, "roster_version_id" | "target_season_id" | "target_division_count" | "movement_reason">[]).map((slot) => ({
-            ...slot, roster_version_id: targetRoster.id, target_season_id: loadedSeasons[0].id,
-            target_division_count: Number(targetRoster.division_count), movement_reason: null,
-          })), loadedEntries)
-        }
-      }
-    }
+    const loadedSeasons = candidateSeasons.filter((season) => rosters.some((roster) => roster.season_id === season.id))
+    if (loadedSeasons.length > 1) { setError("Multiple eligible managed Match target seasons were found. Resolve the ambiguity before continuing."); setLoading(false); return }
+    const targetRoster = loadedSeasons.length === 1 ? rosters.find((roster) => roster.season_id === loadedSeasons[0].id) : null
+    const loadedProposal = targetRoster?.source_final_scorecard_id === requestedId
+      ? withVisibleMovementLabels(slots.map((slot) => ({ ...slot, roster_version_id: targetRoster.id, target_season_id: loadedSeasons[0].id, target_division_count: Number(targetRoster.division_count), movement_reason: null })), loadedEntries)
+      : []
     setEntries(loadedEntries)
-    setDecisions(new Map(((decisionResponse.data || []) as Decision[]).map((item) => [item.player_id, item.decision])))
+    setDecisions(new Map(loadedDecisions.map((item) => [item.player_id, item.decision])))
     setTargetSeasons(loadedSeasons); setTargetSeasonId(loadedSeasons[0]?.id || "")
     const sourceDivisionCount = String(Math.max(1, ...loadedEntries.map((entry) => entry.division_number)))
     if (loadedSeasons.length === 1) {
       const targetSeason = loadedSeasons[0]
-      setDivisionCount(String(loadedTargetDivisionCount || sourceDivisionCount))
-      setStartDate(targetSeason.start_date || "")
-      setEndDate(targetSeason.end_date || "")
-      setGame1Course(targetSeason.game1_course || "")
-      setGame2Course(targetSeason.game2_course || "")
-      setGame3Course(targetSeason.game3_course || "")
+      setDivisionCount(String(targetRoster?.division_count || sourceDivisionCount)); setStartDate(targetSeason.start_date || ""); setEndDate(targetSeason.end_date || "")
+      setGame1Course(targetSeason.game1_course || ""); setGame2Course(targetSeason.game2_course || ""); setGame3Course(targetSeason.game3_course || "")
       window.sessionStorage.removeItem(transitionDraftKey(scorecard.season_id))
     } else {
       let savedDraft: Partial<TransitionDraft> = {}
-      try {
-        savedDraft = JSON.parse(window.sessionStorage.getItem(transitionDraftKey(scorecard.season_id)) || "{}") as Partial<TransitionDraft>
-      } catch {
-        window.sessionStorage.removeItem(transitionDraftKey(scorecard.season_id))
-      }
-      setDivisionCount(typeof savedDraft.divisionCount === "string" ? savedDraft.divisionCount : sourceDivisionCount)
-      setStartDate(typeof savedDraft.startDate === "string" ? savedDraft.startDate : "")
-      setEndDate(typeof savedDraft.endDate === "string" ? savedDraft.endDate : "")
-      setGame1Course(typeof savedDraft.game1Course === "string" ? savedDraft.game1Course : "")
-      setGame2Course(typeof savedDraft.game2Course === "string" ? savedDraft.game2Course : "")
-      setGame3Course(typeof savedDraft.game3Course === "string" ? savedDraft.game3Course : "")
+      try { savedDraft = JSON.parse(window.sessionStorage.getItem(transitionDraftKey(scorecard.season_id)) || "{}") as Partial<TransitionDraft> } catch { window.sessionStorage.removeItem(transitionDraftKey(scorecard.season_id)) }
+      setDivisionCount(typeof savedDraft.divisionCount === "string" ? savedDraft.divisionCount : sourceDivisionCount); setStartDate(typeof savedDraft.startDate === "string" ? savedDraft.startDate : ""); setEndDate(typeof savedDraft.endDate === "string" ? savedDraft.endDate : "")
+      setGame1Course(typeof savedDraft.game1Course === "string" ? savedDraft.game1Course : ""); setGame2Course(typeof savedDraft.game2Course === "string" ? savedDraft.game2Course : ""); setGame3Course(typeof savedDraft.game3Course === "string" ? savedDraft.game3Course : "")
     }
-    const entryIds = new Set(loadedEntries.map((entry) => entry.player_id))
-    const validPlayerIds = new Set(loadedPlayers.map((player) => player.id))
-    try {
-      const savedPlayerIds = JSON.parse(window.sessionStorage.getItem(transitionPlayersKey(scorecard.season_id)) || "[]")
-      if (Array.isArray(savedPlayerIds)) {
-        setNewPlayerIds(Array.from(new Set(savedPlayerIds.filter((id): id is string => typeof id === "string" && validPlayerIds.has(id) && !entryIds.has(id)))))
-      }
-    } catch {
-      window.sessionStorage.removeItem(transitionPlayersKey(scorecard.season_id))
-    }
-    setPlayers(loadedPlayers)
-    setProposal(loadedProposal)
-    transitionStorageReady.current = true
-    setLoading(false)
+    const entryIds = new Set(loadedEntries.map((entry) => entry.player_id)); const validPlayerIds = new Set(loadedPlayers.map((player) => player.id))
+    try { const savedPlayerIds = JSON.parse(window.sessionStorage.getItem(transitionPlayersKey(scorecard.season_id)) || "[]"); if (Array.isArray(savedPlayerIds)) setNewPlayerIds(Array.from(new Set(savedPlayerIds.filter((id): id is string => typeof id === "string" && validPlayerIds.has(id) && !entryIds.has(id))))) } catch { window.sessionStorage.removeItem(transitionPlayersKey(scorecard.season_id)) }
+    setPlayers(loadedPlayers); setProposal(loadedProposal); transitionStorageReady.current = true; setLoading(false)
   }
 
   async function setDecision(playerId: string, decision: Decision["decision"]) {
     setSavingDecision(playerId); setError(""); setMessage("")
-    const { error: saveError } = await supabase.rpc("set_match_return_decision", {
+    const { error: saveError } = await adminManagedLeagueRequest("rpc", { name: "set_match_return_decision", args: {
       p_final_scorecard_id: scorecardId, p_player_id: playerId, p_decision: decision,
-    })
+    } })
     if (saveError) { setError(saveError.message); setSavingDecision(""); return }
     setDecisions((current) => new Map(current).set(playerId, decision)); setSavingDecision("")
   }
@@ -219,7 +157,7 @@ export default function MatchTransitionPage() {
     if (!game3Course.trim()) { setError("Enter the Game 3 course."); return }
 
     setCreatingSeason(true); setError(""); setMessage("")
-    const { data, error: createError } = await supabase.rpc("create_match_season_with_roster", {
+    const { data, error: createError } = await adminManagedLeagueRequest("rpc", { name: "create_match_season_with_roster", args: {
       p_season_number: seasonNumber,
       p_division_count: parsedCount,
       p_start_date: startDate,
@@ -228,7 +166,7 @@ export default function MatchTransitionPage() {
       p_game1_course: game1Course.trim(),
       p_game2_course: game2Course.trim(),
       p_game3_course: game3Course.trim(),
-    }).single()
+    } })
 
     if (createError || !data) {
       const errorMessage = createError?.message || "No season data was returned."
@@ -256,10 +194,10 @@ export default function MatchTransitionPage() {
       setError("Choose the target season and a division count from 1 through 20."); return
     }
     setGenerating(true); setError(""); setMessage("")
-    const { data, error: generateError } = await supabase.rpc("generate_match_next_season_proposal", {
+    const { data, error: generateError } = await adminManagedLeagueRequest("rpc", { name: "generate_match_next_season_proposal", args: {
       p_final_scorecard_id: scorecardId, p_target_season_id: targetSeasonId,
       p_target_division_count: parsedCount, p_new_player_ids: newPlayerIds,
-    })
+    } })
     if (generateError) { setError(generateError.message); setGenerating(false); return }
     setProposal(withVisibleMovementLabels((data || []) as ProposalSlot[], entries)); setMessage("Draft next-season roster generated. It is not official until separately approved.")
     setGenerating(false)

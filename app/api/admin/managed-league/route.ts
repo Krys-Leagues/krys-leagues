@@ -80,6 +80,32 @@ export async function POST(request: Request) {
       for (const player of [...(activePlayers.data || []), ...(rosterPlayers.data || [])]) playerMap.set(player.id, player)
       return json({ data: { season: season.data, roster: selected, state: state.data, slots: slots.data || [], overrides: overrides.data, players: Array.from(playerMap.values()).sort((a, b) => a.screen_name.localeCompare(b.screen_name)) } })
     }
+    if (action === "transition_load") {
+      if (league !== "stroke" && league !== "match") return fail("Managed league is required.")
+      const client = createAdminServiceClient()
+      const scorecardId = String(body.scorecardId || "")
+      const scorecard = await client.from(`${league}_final_scorecards`).select("id, season_id, status").eq("id", scorecardId).maybeSingle()
+      if (scorecard.error) throw scorecard.error
+      if (!scorecard.data || scorecard.data.status !== "approved") return fail("An approved Final Scorecard is required.", 400)
+      const sourceSeason = await client.from("seasons").select("season_number").eq("id", scorecard.data.season_id).maybeSingle()
+      if (sourceSeason.error) throw sourceSeason.error
+      if (!sourceSeason.data) return fail("Source season not found.", 404)
+      const [entries, decisions, candidateSeasons, players] = await Promise.all([
+        client.from(`${league}_final_scorecard_entries`).select("player_id, player_screen_name, division_number, division_rank, completed_game_count").eq("scorecard_id", scorecardId).order("division_number").order("division_rank"),
+        client.from(`${league}_final_scorecard_player_decisions`).select("player_id, decision").eq("final_scorecard_id", scorecardId),
+        client.from("seasons").select("id, season_number, start_date, end_date, game1_course, game2_course, game3_course").eq("league_type", league).is("division", null).eq("season_number", sourceSeason.data.season_number + 1),
+        client.from("players").select("id, screen_name").eq("active", true).order("screen_name"),
+      ])
+      const loadError = [entries, decisions, candidateSeasons, players].find((item) => item.error)?.error
+      if (loadError) throw loadError
+      const rosterTable = `${league}_roster_versions`
+      const rosters = candidateSeasons.data?.length ? await client.from(rosterTable).select("id, season_id, division_count, source_final_scorecard_id").in("season_id", candidateSeasons.data.map((season) => season.id)).in("status", ["draft", "approved"]) : { data: [], error: null }
+      if (rosters.error) throw rosters.error
+      const target = (rosters.data || []).find((roster) => roster.source_final_scorecard_id === scorecardId)
+      const slots = target ? await client.from(`${league}_division_roster_slots`).select("division_number, slot_number, player_id, player_screen_name").eq("roster_version_id", target.id).order("division_number").order("slot_number") : { data: [], error: null }
+      if (slots.error) throw slots.error
+      return json({ data: { scorecard: scorecard.data, sourceSeason: sourceSeason.data, entries: entries.data || [], decisions: decisions.data || [], candidateSeasons: candidateSeasons.data || [], rosters: rosters.data || [], slots: slots.data || [], players: players.data || [] } })
+    }
     if (action === "results_load") {
       if (league !== "stroke" && league !== "match") return fail("Managed league is required.")
       const client = createAdminServiceClient()
