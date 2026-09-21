@@ -15,19 +15,22 @@ type Submission = {
   allTimeProcessingStatus: string; allTimeProcessingResult: Record<string, unknown> | null;
 }
 
-type QueueProps = { includeRejected?: boolean; reviewDesk?: boolean }
+type QueueProps = { showRejectedSection?: boolean; reviewDesk?: boolean }
 
-export default function CourseChallengeReviewQueue({ includeRejected = false, reviewDesk = false }: QueueProps) {
+export default function CourseChallengeReviewQueue({ showRejectedSection = false, reviewDesk = false }: QueueProps) {
   const [submissions, setSubmissions] = useState<Submission[]>([])
+  const [rejectedSubmissions, setRejectedSubmissions] = useState<Submission[]>([])
   const [pendingCount, setPendingCount] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [rejectedLoading, setRejectedLoading] = useState(false)
+  const [rejectedLoaded, setRejectedLoaded] = useState(false)
   const [message, setMessage] = useState("")
   const [busyId, setBusyId] = useState<string | null>(null)
   const [modes, setModes] = useState<Record<string, CourseChallengeGameMode>>({})
   const [preview, setPreview] = useState<{ url: string; label: string } | null>(null)
 
   const load = useCallback(async () => {
-    const response = await fetch(`/api/admin/course-challenges${includeRejected ? "?includeRejected=1" : ""}`, { cache: "no-store" })
+    const response = await fetch("/api/admin/course-challenges", { cache: "no-store" })
     const payload = await response.json() as { submissions?: Submission[]; pendingCount?: number; error?: string }
     if (!response.ok) { setMessage(payload.error || "Course Challenge reviews could not be loaded."); setLoading(false); return }
     const loadedSubmissions = payload.submissions || []
@@ -43,7 +46,21 @@ export default function CourseChallengeReviewQueue({ includeRejected = false, re
     setPendingCount(payload.pendingCount ?? 0)
     setMessage("")
     setLoading(false)
-  }, [includeRejected])
+  }, [])
+
+  const loadRejected = useCallback(async () => {
+    setRejectedLoading(true)
+    const response = await fetch("/api/admin/course-challenges?status=rejected", { cache: "no-store" })
+    const payload = await response.json() as { submissions?: Submission[]; error?: string }
+    if (!response.ok) {
+      setMessage(payload.error || "Rejected Course Challenge cards could not be loaded.")
+      setRejectedLoading(false)
+      return
+    }
+    setRejectedSubmissions(payload.submissions || [])
+    setRejectedLoaded(true)
+    setRejectedLoading(false)
+  }, [])
 
   useEffect(() => {
     let active = true
@@ -61,7 +78,10 @@ export default function CourseChallengeReviewQueue({ includeRejected = false, re
     const payload = await response.json() as { error?: string; message?: string }
     setMessage(response.ok ? payload.message || "Review saved." : payload.error || "Review failed.")
     setBusyId(null)
-    if (response.ok) await load()
+    if (response.ok) {
+      await load()
+      if (rejectedLoaded) await loadRejected()
+    }
   }
 
   async function verifyGameMode(submission: Submission, mode: CourseChallengeGameMode) {
@@ -85,14 +105,15 @@ export default function CourseChallengeReviewQueue({ includeRejected = false, re
     setBusyId(null)
   }
 
-  const activeLabel = useMemo(() => reviewDesk ? "Pending reviews" : "Review queue", [reviewDesk])
+  const activeLabel = useMemo(() => reviewDesk ? "Pending reviews" : "Active reviews", [reviewDesk])
   return <section style={{ display: "grid", gap: 18 }}>
     <div style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
       <div><h2 style={{ margin: 0 }}>Course Challenge {reviewDesk ? "Review Desk" : "Review Queue"}</h2><p style={{ color: "#fef3c7", fontWeight: 800 }}>{activeLabel}: {pendingCount}</p></div>
       <span style={{ color: "#94a3b8", fontSize: 13 }}>Refreshes every 20 seconds</span>
     </div>
     {message && <p role="status" style={{ padding: 12, border: "1px solid #f59e0b66", borderRadius: 10, color: "#fde68a", whiteSpace: "pre-line" }}>{message}</p>}
-    {loading ? <p>Loading reviews…</p> : submissions.length === 0 ? <p>No {includeRejected ? "Course Challenge cards" : "pending Course Challenge submissions"}.</p> : submissions.map((submission) => <ReviewCard key={submission.id} submission={submission} mode={modes[submission.id]} setMode={(value) => verifyGameMode(submission, value)} busy={busyId === submission.id} onReview={review} onPreview={setPreview} />)}
+    {loading ? <p>Loading reviews…</p> : submissions.length === 0 ? <p>No pending Course Challenge submissions.</p> : submissions.map((submission) => <ReviewCard key={submission.id} submission={submission} mode={modes[submission.id]} setMode={(value) => verifyGameMode(submission, value)} busy={busyId === submission.id} onReview={review} onPreview={setPreview} />)}
+    {showRejectedSection && <details style={rejectedSection} onToggle={() => { if (!rejectedLoaded) void loadRejected() }}><summary style={rejectedSummary}>REJECTED CARDS{rejectedLoaded ? ` (${rejectedSubmissions.length})` : ""}</summary>{rejectedLoading ? <p>Loading rejected cards…</p> : !rejectedLoaded ? <p style={muted}>Expand to inspect rejected cards.</p> : rejectedSubmissions.length === 0 ? <p style={muted}>No rejected cards.</p> : rejectedSubmissions.map((submission) => <ReviewCard key={submission.id} submission={submission} mode={modes[submission.id]} setMode={(value) => verifyGameMode(submission, value)} busy={busyId === submission.id} onReview={review} onPreview={setPreview} />)}</details>}
     {preview && <div role="dialog" aria-modal="true" onClick={() => setPreview(null)} style={modalBackdrop}><div onClick={(event) => event.stopPropagation()} style={modalPanel}><button type="button" onClick={() => setPreview(null)} style={closeButton}>Close</button><img src={preview.url} alt={preview.label} style={{ maxWidth: "100%", maxHeight: "80vh", objectFit: "contain" }} /></div></div>}
   </section>
 }
@@ -132,6 +153,8 @@ function buttonStyle(background: string): React.CSSProperties { return { border:
 function modeOption(selected: boolean): React.CSSProperties { return { display: "flex", alignItems: "center", justifyContent: "center", gap: 8, minWidth: 150, padding: "12px 16px", border: `2px solid ${selected ? "#fbbf24" : "#64748b"}`, borderRadius: 10, background: selected ? "#78350f" : "#111827", color: selected ? "#fef3c7" : "#e2e8f0", fontWeight: 900, cursor: "pointer" } }
 
 const card: React.CSSProperties = { border: "1px solid #334155", borderRadius: 16, padding: 18, background: "#0f172a", display: "grid", gap: 10 }
+const rejectedSection: React.CSSProperties = { border: "1px solid #475569", borderRadius: 14, padding: 14, background: "#0b1220", display: "grid", gap: 12 }
+const rejectedSummary: React.CSSProperties = { cursor: "pointer", color: "#cbd5e1", fontWeight: 900, letterSpacing: "0.06em" }
 const header: React.CSSProperties = { display: "flex", flexWrap: "wrap", justifyContent: "space-between", gap: 10 }
 const muted: React.CSSProperties = { color: "#cbd5e1", margin: 0 }
 const summary: React.CSSProperties = { color: "#e2e8f0", margin: 0 }

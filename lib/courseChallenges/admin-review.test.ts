@@ -12,7 +12,7 @@ test("admin review hotfix keeps review actions, mode selection, and private hist
   assert.match(api, /p_admin_verified_game_mode/)
   assert.match(api, /course_challenge_submission_review_events/)
   assert.match(api, /course_challenge_submissions.*proof_image_sha256/)
-  assert.match(queue, /includeRejected/)
+  assert.match(queue, /showRejectedSection/)
   assert.match(queue, /PAST CARDS/)
   assert.match(queue, /possibleDuplicate/)
   assert.match(queue, /GAME MODE/)
@@ -32,6 +32,34 @@ test("admin review hotfix keeps review actions, mode selection, and private hist
   assert.match(api, /admin_game_mode_verified_at: new Date\(\)\.toISOString\(\)/)
   assert.match(api, /p_admin_verified_game_mode: verifiedGameMode/)
   assert.doesNotMatch(api, /body\.gameMode \|\| \(challengeKey/)
+})
+
+test("active review queue excludes rejected and approved cards while rejected cards stay separate", () => {
+  const api = read("app/api/admin/course-challenges/route.ts")
+  const queue = read("components/admin/course-challenges/CourseChallengeReviewQueue.tsx")
+  const page = read("app/admin/course-challenges/page.tsx")
+  const getHandler = api.match(/export async function GET\([\s\S]*?\n}\n\nasync function signProof/)?.[0]
+
+  assert.match(api, /const statuses = params\.get\("status"\) === "rejected" \? \["rejected"\] : \["pending", "needs_review"\]/)
+  assert.doesNotMatch(api, /includeRejected/)
+  assert.match(api, /pendingQuery[\s\S]*\.in\("status", \["pending", "needs_review"\]\)/)
+  assert.match(queue, /fetch\("\/api\/admin\/course-challenges", \{ cache: "no-store" \}\)/)
+  assert.match(queue, /fetch\("\/api\/admin\/course-challenges\?status=rejected", \{ cache: "no-store" \}\)/)
+  assert.match(queue, /showRejectedSection/)
+  assert.match(queue, /REJECTED CARDS/)
+  assert.match(queue, /rejectedSubmissions\.length/)
+  assert.match(queue, /onToggle=/)
+  assert.match(queue, /rejectedLoaded/)
+  assert.match(queue, /if \(rejectedLoaded\) await loadRejected\(\)/)
+  assert.match(queue, /return_to_review/)
+  assert.match(page, /<CourseChallengeReviewQueue showRejectedSection \/>/)
+  assert.ok(getHandler, "the admin GET handler must be present")
+  assert.doesNotMatch(getHandler || "", /\.update\(|\.delete\(|\.insert\(/)
+
+  const statusesFor = (status: string | null) => status === "rejected" ? ["rejected"] : ["pending", "needs_review"]
+  assert.deepEqual(statusesFor(null), ["pending", "needs_review"])
+  assert.deepEqual(statusesFor("rejected"), ["rejected"])
+  assert.deepEqual(statusesFor("approved"), ["pending", "needs_review"])
 })
 
 test("admin review migration is additive and retry-safe", () => {
