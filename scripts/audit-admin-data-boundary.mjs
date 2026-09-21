@@ -9,7 +9,7 @@ const adminOnly = process.argv.includes("--admin")
 const protectedTables = [
   "players", "player_league_memberships", "player_tournament_entries", "player_identity_links", "player_aliases",
   "schedule", "handicap_rounds", "player_career_events", "all_time_", "climbers_", "course_challenge_",
-  "historical_", "major_", "stroke_", "match_", "pyp_", "kwt_", "trophy", "scorecard", "league_",
+  "historical_", "major_", "stroke_", "match_", "pyp_", "kwt_", "solo_", "trophy", "scorecard", "league_",
 ]
 const protectedRpcPrefixes = /^(set_|save_|create_|update_|delete_|approve_|record_|preview_|commit_|merge_|mark_|generate_|rebuild_|configure_|release_|finalize_|close_|reopen_|resize_|add_|remove_|publish_|apply_|correct_|void_|assign_|remember_|admin_)/
 const publicRpc = /^(get_public_|current_user_|is_current_user_)/

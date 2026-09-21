@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabase"
+import { soloAdminLoad, soloAdminRpc } from "@/lib/admin/soloAdminClient"
 
 const today = () => new Date().toLocaleDateString("en-CA")
 
@@ -20,7 +20,7 @@ export default function SoloSeasonPage() {
     const id = new URLSearchParams(window.location.search).get("seasonId") || ""
     setRequested(id)
     if (!id) return
-    void supabase.from("seasons").select("season_number,league_type,start_date,end_date").eq("id", id).maybeSingle().then(({ data, error }) => {
+    void soloAdminLoad<{ season_number: number; league_type: string; start_date: string | null; end_date: string | null }>("season_load", { seasonId: id }).then(({ data, error }) => {
       if (error || !data || data.league_type !== "solo") {
         setMessage(error?.message || "The requested Solo season was not found. No fallback season was loaded.")
         return
@@ -38,12 +38,12 @@ export default function SoloSeasonPage() {
     if (start && end && end < start) return setMessage("End date cannot be before start date.")
     setBusy(true)
     if (requested) {
-      const { error } = await supabase.rpc("update_solo_season_dates", { p_season_id: requested, p_start_date: start || null, p_end_date: end || null })
+      const { error } = await soloAdminRpc("update_solo_season_dates", { p_season_id: requested, p_start_date: start || null, p_end_date: end || null })
       setBusy(false)
       setMessage(error?.message || "Solo season dates saved. Blank historical dates are stored as unknown.")
       return
     }
-    const { data, error } = await supabase.rpc("create_solo_season_with_roster", { p_season_number: seasonNumber, p_start_date: start || null, p_end_date: end || null }).single()
+    const { data, error } = await soloAdminRpc("create_solo_season_with_roster", { p_season_number: seasonNumber, p_start_date: start || null, p_end_date: end || null })
     setBusy(false)
     if (error || !data) return setMessage(error?.message || "Solo season could not be created.")
     router.push(`/admin/solo/setup?seasonId=${encodeURIComponent((data as { season_id: string }).season_id)}`)

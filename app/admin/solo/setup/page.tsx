@@ -3,7 +3,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabase"
+import { soloAdminRpc, soloAdminTable } from "@/lib/admin/soloAdminClient"
 import { SOLO_DIVISIONS, SOLO_DIVISION_PRESENTATION, type SoloDivision } from "@/lib/solo"
 
 type Player = { id: string; screen_name: string; active?: boolean; status?: string | null }
@@ -66,9 +66,9 @@ export default function SoloSetupPage() {
       return
     }
     const [{ data: s, error: se }, { data: r, error: re }, { data: p, error: pe }] = await Promise.all([
-      supabase.from("seasons").select("season_number,league_type").eq("id", id).maybeSingle(),
-      supabase.from("solo_roster_versions").select("id,status").eq("season_id", id).in("status", ["draft", "approved", "locked"]).order("version_number", { ascending: false }).limit(1).maybeSingle(),
-      supabase.from("solo_player_pool").select("player_id").eq("season_id", id),
+      soloAdminTable<Season>("seasons").select("season_number,league_type").eq("id", id).maybeSingle(),
+      soloAdminTable<Roster>("solo_roster_versions").select("id,status").eq("season_id", id).in("status", ["draft", "approved", "locked"]).order("version_number", { ascending: false }).maybeSingle(),
+      soloAdminTable<PoolEntry[]>("solo_player_pool").select("player_id").eq("season_id", id),
     ])
     if (se || re || pe || !s || s.league_type !== "solo" || !r) {
       setMessage(se?.message || re?.message || pe?.message || "Managed Solo season setup was not found.")
@@ -77,10 +77,10 @@ export default function SoloSetupPage() {
     }
     const poolIds = ((p || []) as PoolEntry[]).map((entry) => entry.player_id)
     const poolPlayerQuery = poolIds.length
-      ? supabase.from("players").select("id,screen_name").in("id", poolIds).order("screen_name")
+      ? soloAdminTable<Player[]>("players").select("id,screen_name").in("id", poolIds).order("screen_name")
       : null
     const [{ data: e, error: ee }, { data: poolPlayers, error: poolError }] = await Promise.all([
-      supabase.from("solo_roster_entries").select("player_id,player_screen_name,division,display_order").eq("roster_version_id", r.id).order("display_order"),
+      soloAdminTable<Entry[]>("solo_roster_entries").select("player_id,player_screen_name,division,display_order").eq("roster_version_id", r.id).order("display_order"),
       poolPlayerQuery
         ? historical ? poolPlayerQuery : poolPlayerQuery.eq("active", true)
         : Promise.resolve({ data: [] as Player[], error: null }),
@@ -111,8 +111,8 @@ export default function SoloSetupPage() {
     let cancelled = false
     setSearchingExisting(true)
     const request = historicalEntry
-      ? supabase.rpc("search_solo_historical_global_players", { p_season_id: seasonId, p_search: search })
-      : supabase.rpc("search_solo_existing_global_players", { p_season_id: seasonId, p_search: search })
+      ? soloAdminRpc("search_solo_historical_global_players", { p_season_id: seasonId, p_search: search })
+      : soloAdminRpc("search_solo_existing_global_players", { p_season_id: seasonId, p_search: search })
     void request.then(({ data, error }) => {
       if (cancelled) return
       setSearchingExisting(false)
@@ -137,8 +137,8 @@ export default function SoloSetupPage() {
     let cancelled = false
     setSearchingNew(true)
     const request = historicalEntry
-      ? supabase.rpc("search_solo_historical_global_players", { p_season_id: seasonId, p_search: search })
-      : supabase.rpc("search_solo_existing_global_players", { p_season_id: seasonId, p_search: search })
+      ? soloAdminRpc("search_solo_historical_global_players", { p_season_id: seasonId, p_search: search })
+      : soloAdminRpc("search_solo_existing_global_players", { p_season_id: seasonId, p_search: search })
     void request.then(({ data, error }) => {
       if (cancelled) return
       setSearchingNew(false)
@@ -159,9 +159,9 @@ export default function SoloSetupPage() {
     }
     let cancelled = false
     const request = historicalEntry
-      ? supabase.rpc("find_solo_historical_player_by_discord_id", { p_season_id: seasonId, p_discord_id: discord })
-      : supabase.rpc("find_solo_player_by_discord_id", { p_season_id: seasonId, p_discord_id: discord })
-    void request.maybeSingle().then(({ data, error }) => {
+      ? soloAdminRpc("find_solo_historical_player_by_discord_id", { p_season_id: seasonId, p_discord_id: discord })
+      : soloAdminRpc("find_solo_player_by_discord_id", { p_season_id: seasonId, p_discord_id: discord })
+    void request.then(({ data, error }) => {
       if (cancelled) return
       if (error) {
         setDiscordMatch(null)
@@ -212,9 +212,9 @@ export default function SoloSetupPage() {
     }
     setBusy(true)
     const request = historicalEntry
-      ? supabase.rpc("add_existing_player_to_solo_historical_pool", { p_season_id: seasonId, p_player_id: player.id })
-      : supabase.rpc("add_existing_player_to_solo_pool", { p_season_id: seasonId, p_player_id: player.id })
-    const { data, error } = await request.single()
+      ? soloAdminRpc("add_existing_player_to_solo_historical_pool", { p_season_id: seasonId, p_player_id: player.id })
+      : soloAdminRpc("add_existing_player_to_solo_pool", { p_season_id: seasonId, p_player_id: player.id })
+    const { data, error } = await request
     setBusy(false)
     if (error || !data) {
       const errorMessage = friendlyError(error?.message || "", "Player could not be added to the Solo pool.")
@@ -243,15 +243,15 @@ export default function SoloSetupPage() {
     if (!/^\d{17,20}$/.test(discord)) return setNewPlayerMessage("Enter a valid numeric Discord ID.")
     if (discordMatch) return setNewPlayerMessage("Existing player found. Use the canonical player shown below.")
     setBusy(true)
-    const { data, error } = await supabase.rpc("create_solo_canonical_player", { p_season_id: seasonId, p_screen_name: name, p_discord_id: discord }).single()
+    const { data, error } = await soloAdminRpc("create_solo_canonical_player", { p_season_id: seasonId, p_screen_name: name, p_discord_id: discord })
     setBusy(false)
     if (error || !data) {
       const normalizedError = (error?.message || "").toLowerCase()
       if (normalizedError.includes("discord") && (normalizedError.includes("already") || normalizedError.includes("duplicate") || normalizedError.includes("unique"))) {
         const request = historicalEntry
-          ? supabase.rpc("find_solo_historical_player_by_discord_id", { p_season_id: seasonId, p_discord_id: discord })
-          : supabase.rpc("find_solo_player_by_discord_id", { p_season_id: seasonId, p_discord_id: discord })
-        const { data: existing } = await request.maybeSingle()
+          ? soloAdminRpc("find_solo_historical_player_by_discord_id", { p_season_id: seasonId, p_discord_id: discord })
+          : soloAdminRpc("find_solo_player_by_discord_id", { p_season_id: seasonId, p_discord_id: discord })
+        const { data: existing } = await request
         if (existing) {
           setDiscordMatch(existing as DiscordMatch)
           setNewPlayerMessage("Existing player found for this Discord ID.")
@@ -273,7 +273,7 @@ export default function SoloSetupPage() {
     setMessage("")
     setBusy(true)
     const payload = entries.map(({ player_id, division, display_order }) => ({ player_id, division, display_order }))
-    const { error } = await supabase.rpc("save_solo_roster", { p_roster_version_id: roster.id, p_entries: payload })
+    const { error } = await soloAdminRpc("save_solo_roster", { p_roster_version_id: roster.id, p_entries: payload })
     setBusy(false)
     if (error) return setMessage(friendlyError(error.message, "Solo roster draft could not be saved."))
     setSavedFingerprint(rosterFingerprint(entries))
@@ -283,7 +283,7 @@ export default function SoloSetupPage() {
     if (!roster) return
     if (dirty) return setMessage("Save the Solo roster draft before approving it.")
     setBusy(true)
-    const { error } = await supabase.rpc("approve_solo_roster_version", { p_roster_version_id: roster.id, p_approval_note: null })
+    const { error } = await soloAdminRpc("approve_solo_roster_version", { p_roster_version_id: roster.id, p_approval_note: null })
     setBusy(false)
     setMessage(error ? friendlyError(error.message, "Solo roster could not be approved.") : "Solo roster approved.")
     if (!error) await load()
