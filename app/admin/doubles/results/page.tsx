@@ -85,23 +85,23 @@ export default function DoublesResultsPage() {
 
     setLoading(true)
 
-    const { data, error } = await supabase
-      .from("schedule")
-      .select("*")
-      .eq("league_type", LEAGUE_TYPE)
-      .eq("division", division)
-      .eq("season_number", seasonNumber)
-      .order("game", { ascending: true })
+    const response = await fetch("/api/admin/doubles/results-schedule", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ division, seasonNumber }),
+      cache: "no-store",
+    })
+    const payload = await response.json() as { data?: ScheduleMatch[]; error?: string }
 
     setLoading(false)
 
-    if (error) {
-      alert(error.message)
+    if (!response.ok) {
+      alert(payload.error || "Could not load matches")
       setMatches([])
       return
     }
 
-    setMatches((data || []) as ScheduleMatch[])
+    setMatches(payload.data || [])
   }
 
   async function saveResult(match: ScheduleMatch) {

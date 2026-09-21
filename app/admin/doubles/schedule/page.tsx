@@ -144,21 +144,16 @@ export default function DoublesSchedulePage() {
       { game: "3", player1: team2, player2: team3, course: course3 },
     ]
 
-    const payload = matches.map((m) => ({
-      league_type: LEAGUE_TYPE,
-      division,
-      season_number: seasonNumber,
-      game: m.game,
-      course: m.course,
-      player1: m.player1,
-      player2: m.player2,
-    }))
+    const scheduleResponse = await fetch("/api/admin/doubles/schedule", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ division, seasonNumber, matches }),
+    })
+    const scheduleResult = await scheduleResponse.json() as { error?: string }
 
-    const { error: scheduleError } = await supabase.from("schedule").insert(payload)
-
-    if (scheduleError) {
+    if (!scheduleResponse.ok) {
       setLoading(false)
-      alert(scheduleError.message)
+      alert(scheduleResult.error || "Could not save schedule")
       return
     }
 

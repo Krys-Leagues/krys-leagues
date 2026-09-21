@@ -45,20 +45,22 @@ export default function DoublesTeamsPage() {
   async function loadPlayers() {
     setLoadError("")
 
-    const { data, error } = await supabase
-      .from("players")
-      .select("*")
-      .eq("active", true)
-      .order("id", { ascending: true })
+    const response = await fetch("/api/admin/doubles/teams", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ division }),
+      cache: "no-store",
+    })
+    const payload = await response.json() as { data?: Player[]; error?: string }
 
-    if (error) {
-      setLoadError(error.message)
+    if (!response.ok) {
+      setLoadError(payload.error || "Could not load players")
       setPlayers([])
       return
     }
 
     const normalized =
-      data
+      payload.data
         ?.map((p: any) => ({
           id: String(p.id),
           display_name: String(
