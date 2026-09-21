@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
-import { supabase } from "@/lib/supabase"
+import { recoveryAdminRpc, recoveryAdminStorage } from "@/lib/admin/recoveryAdminClient"
 import { PROFILE_BACKGROUND_BUCKET, loadApprovedProfileBackgrounds, profileBackgroundObjectPath, profileBackgroundPublicUrl, validateProfileBackgroundFile, type ApprovedProfileBackground } from "@/lib/profileBackgrounds"
 
 export default function ProfileBackgroundImporterPage() {
@@ -25,11 +25,11 @@ export default function ProfileBackgroundImporterPage() {
       const validation = await validateProfileBackgroundFile(file)
       if (validation) throw new Error(validation)
       storagePath = profileBackgroundObjectPath(file)
-      const { error: uploadError } = await supabase.storage.from(PROFILE_BACKGROUND_BUCKET).upload(storagePath, file, { contentType: file.type, upsert: false })
+      const { error: uploadError } = await recoveryAdminStorage("upload", storagePath, file)
       if (uploadError) throw new Error(uploadError.message)
-      const { error: recordError } = await supabase.rpc("admin_create_player_profile_background", { p_display_name: displayName.trim(), p_storage_path: storagePath, p_active: active })
+      const { error: recordError } = await recoveryAdminRpc("admin_create_player_profile_background", { p_display_name: displayName.trim(), p_storage_path: storagePath, p_active: active })
       if (recordError) {
-        await supabase.storage.from(PROFILE_BACKGROUND_BUCKET).remove([storagePath])
+        await recoveryAdminStorage("remove", storagePath)
         throw new Error(recordError.message)
       }
       setBackgrounds(await loadApprovedProfileBackgrounds())

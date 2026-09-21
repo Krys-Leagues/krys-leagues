@@ -11,6 +11,7 @@ import { loadPlayerIdentityLinks, type PlayerIdentityLink } from "@/lib/importer
 import { loadPlayers, type PlayerRecord } from "@/lib/importer/loadPlayers"
 import { matchPlayers, type PlayerMatch } from "@/lib/importer/matchPlayers"
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser"
+import { recoveryAdminRpc } from "@/lib/admin/recoveryAdminClient"
 
 const supabase = createBrowserSupabaseClient()
 
@@ -155,7 +156,7 @@ export default function HistoricalKwtImportPage() {
           ...row,
           canonicalPlayerId: effective(historicalKwtNameKey(row.historicalName))!.playerId,
         }))
-        const { error } = await supabase.rpc("commit_historical_kwt_preview", {
+        const { error } = await recoveryAdminRpc("commit_historical_kwt_preview", {
           p_source_filename: source.fileName,
           p_source_sha256: source.sourceSha256,
           p_parser_version: HISTORICAL_KWT_PARSER_VERSION,

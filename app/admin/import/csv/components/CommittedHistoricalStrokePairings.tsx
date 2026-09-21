@@ -11,7 +11,7 @@ import {
   type PairingAppearance,
   type PairingState,
 } from "@/lib/importer/historicalStrokePairings"
-import { supabase } from "@/lib/supabase"
+import { recoveryAdminRpc, recoveryAdminTable } from "@/lib/admin/recoveryAdminClient"
 
 type HistoricalImport = {
   id: string
@@ -50,13 +50,13 @@ export default function CommittedHistoricalStrokePairings({ initialImportId }: {
 
   const loadImport = useCallback(async (importId: string) => {
     if (!importId) return
-    const { data: standingData, error: standingError } = await supabase.from("historical_stroke_standings")
+    const { data: standingData, error: standingError } = await recoveryAdminTable("historical_stroke_standings")
       .select("id,historical_stroke_import_id,division_number,historical_display_name,source_position")
       .eq("historical_stroke_import_id", importId).order("division_number").order("source_position")
     if (standingError) throw standingError
     const standings = (standingData ?? []) as StandingRow[]
     const standingIds = standings.map((standing) => standing.id)
-    const appearanceQuery = supabase.from("historical_stroke_course_appearances")
+    const appearanceQuery = recoveryAdminTable("historical_stroke_course_appearances")
       .select("id,historical_stroke_standing_id,course_order,historical_course_name,played,score,raw_score_token,outcome")
       .order("course_order")
     const { data: appearanceData, error: appearanceError } = standingIds.length
@@ -81,7 +81,7 @@ export default function CommittedHistoricalStrokePairings({ initialImportId }: {
         outcome: appearance.outcome,
       }
     })
-    const { data: assignmentData, error: assignmentError } = await supabase.from("historical_stroke_opponent_assignments")
+    const { data: assignmentData, error: assignmentError } = await recoveryAdminTable("historical_stroke_opponent_assignments")
       .select("historical_stroke_course_appearance_id,opponent_kind,opponent_historical_stroke_standing_id,admin_note")
       .eq("historical_stroke_import_id", importId)
     if (assignmentError) throw assignmentError
@@ -94,7 +94,7 @@ export default function CommittedHistoricalStrokePairings({ initialImportId }: {
 
   useEffect(() => {
     let cancelled = false
-    supabase.from("historical_stroke_imports")
+    recoveryAdminTable("historical_stroke_imports")
       .select("id,season_number,historical_label,source_filename,validated_preview")
       .order("season_number", { ascending: false })
       .then(({ data, error }) => {
@@ -130,7 +130,7 @@ export default function CommittedHistoricalStrokePairings({ initialImportId }: {
   async function save() {
     setSaving(true)
     setMessage("")
-    const { error } = await supabase.rpc("save_historical_stroke_pairing_review", {
+    const { error } = await recoveryAdminRpc("save_historical_stroke_pairing_review", {
       p_historical_stroke_import_id: selectedImportId,
       p_expected_assignments: serializePairingState(savedState),
       p_assignments: serializePairingState(draftState),

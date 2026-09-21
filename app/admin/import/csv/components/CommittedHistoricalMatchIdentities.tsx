@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 
 import { historicalStandingIdentityRpcArgs } from "@/lib/importer/historicalMatchIdentity"
 import { loadPlayers, type PlayerRecord } from "@/lib/importer/loadPlayers"
-import { supabase } from "@/lib/supabase"
+import { recoveryAdminRpc, recoveryAdminTable } from "@/lib/admin/recoveryAdminClient"
 import ExistingPlayerPicker from "./ExistingPlayerPicker"
 
 type HistoricalImport = { id: string; season_number: number; historical_label: string }
@@ -34,14 +34,14 @@ export default function CommittedHistoricalMatchIdentities({ initialImportId }: 
   const [loading, setLoading] = useState(true)
 
   const fetchImports = useCallback(async () => {
-    const { data, error } = await supabase.from("historical_match_imports").select("id,season_number,historical_label").order("season_number", { ascending: false })
+    const { data, error } = await recoveryAdminTable("historical_match_imports").select("id,season_number,historical_label").order("season_number", { ascending: false })
     if (error) throw error
     return (data ?? []) as HistoricalImport[]
   }, [])
 
   const fetchStandings = useCallback(async (importId: string) => {
     if (!importId) return []
-    const { data, error } = await supabase.from("historical_match_standings")
+    const { data, error } = await recoveryAdminTable("historical_match_standings")
       .select("id,division_number,source_final_rank,historical_display_name,canonical_player_id,played,wins,losses,draws,points,holes_won")
       .eq("historical_match_import_id", importId).order("division_number").order("source_final_rank")
     if (error) throw error
@@ -68,7 +68,7 @@ export default function CommittedHistoricalMatchIdentities({ initialImportId }: 
     setBusyStandingId(standing.id)
     setMessage("")
     const note = playerId ? `Explicitly linked to existing player ${playerName || playerId} in Historical Match identity review.` : "Explicitly cleared in Historical Match identity review."
-    const { error } = await supabase.rpc("set_historical_match_standing_identity", historicalStandingIdentityRpcArgs(standing.id, playerId, note))
+    const { error } = await recoveryAdminRpc("set_historical_match_standing_identity", historicalStandingIdentityRpcArgs(standing.id, playerId, note))
     setBusyStandingId(null)
     if (error) { setMessage(error.message); return }
     setSearchingStandingId(null)

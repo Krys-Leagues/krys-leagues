@@ -13,7 +13,7 @@ import {
   type HistoricalStrokeIdentityDecisions,
   type HistoricalStrokeIdentityReview,
 } from "@/lib/importer/historicalStrokeCommit"
-import { supabase } from "@/lib/supabase"
+import { recoveryAdminRpc, recoveryAdminTable } from "@/lib/admin/recoveryAdminClient"
 
 type Props = {
   preview: Preview
@@ -91,8 +91,7 @@ export default function HistoricalStrokePreview({
   }
 
   async function applyReviewedIdentities(importId: string) {
-    const { data, error } = await supabase
-      .from("historical_stroke_standings")
+    const { data, error } = await recoveryAdminTable<StandingRow[]>("historical_stroke_standings")
       .select("id, division_number, source_row_number, historical_display_name, player_id")
       .eq("historical_stroke_import_id", importId)
     if (error) throw error
@@ -115,7 +114,7 @@ export default function HistoricalStrokePreview({
       const note = manual?.canonicalPlayerId
         ? manual.resolutionNote ?? "Explicit Historical Stroke identity approval."
         : "Reused unique verified Global Player alias during Historical Stroke import."
-      const { error: identityError } = await supabase.rpc("set_historical_stroke_standing_identity", {
+      const { error: identityError } = await recoveryAdminRpc("set_historical_stroke_standing_identity", {
         p_historical_stroke_standing_id: row.id,
         p_player_id: playerId,
         p_resolution_note: note,
@@ -136,7 +135,7 @@ export default function HistoricalStrokePreview({
     setIdentityFailures([])
     try {
       const payload = buildHistoricalStrokeCommitPayload(preview, sourceFilename, sourceSha256, previewFingerprint)
-      const { data, error } = await supabase.rpc("commit_historical_stroke_preview", payload)
+      const { data, error } = await recoveryAdminRpc("commit_historical_stroke_preview", payload)
       if (error) throw error
       const result = (Array.isArray(data) ? data[0] : data) as HistoricalStrokeCommitResult | null
       if (!result) throw new Error("The commit RPC returned no result.")

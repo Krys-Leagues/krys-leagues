@@ -14,7 +14,7 @@ import {
   HISTORICAL_MATCH_PARSER_VERSION,
   type HistoricalMatchIdentityDecisions,
 } from "@/lib/importer/historicalMatchCommit"
-import { supabase } from "@/lib/supabase"
+import { recoveryAdminRpc } from "@/lib/admin/recoveryAdminClient"
 import {
   buildVerifiedAliasMemoryRequests,
   rememberVerifiedPlayerAliases,
@@ -118,7 +118,7 @@ export default function HistoricalMatchPreview({
     setCommitResult(null)
     setIdentityMemoryResult(null)
     const payload = buildHistoricalMatchCommitPayload(preview, effectiveDecisions, sourceFilename, sourceSha256, previewFingerprint, sourceReference)
-    const { data, error } = await supabase.rpc("commit_historical_match_preview", payload)
+    const { data, error } = await recoveryAdminRpc("commit_historical_match_preview", payload)
     setConfirming(false)
     if (error) {
       setCommitting(false)
@@ -147,7 +147,7 @@ export default function HistoricalMatchPreview({
     setRememberingIdentities(true)
     const memoryResult = await rememberVerifiedPlayerAliases(
       memoryRequests,
-      async (request) => supabase.rpc("remember_verified_player_alias", request)
+      async (request) => recoveryAdminRpc("remember_verified_player_alias", request)
     )
     setIdentityMemoryResult(memoryResult)
     setRememberingIdentities(false)
@@ -162,7 +162,7 @@ export default function HistoricalMatchPreview({
     setRememberingIdentities(true)
     const retry = await rememberVerifiedPlayerAliases(
       requests,
-      async (request) => supabase.rpc("remember_verified_player_alias", request)
+      async (request) => recoveryAdminRpc("remember_verified_player_alias", request)
     )
     setIdentityMemoryResult({
       created: identityMemoryResult.created + retry.created,
