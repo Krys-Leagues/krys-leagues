@@ -129,6 +129,7 @@ export default function PlayersAdminPage() {
   const [savingRecognition, setSavingRecognition] = useState(false)
   const [recognitionError, setRecognitionError] = useState("")
   const [successMessage, setSuccessMessage] = useState("")
+  const [pageError, setPageError] = useState("")
 
   useEffect(() => {
     loadPlayers()
@@ -148,37 +149,40 @@ export default function PlayersAdminPage() {
 
   async function loadPlayers() {
     setLoading(true)
+    setPageError("")
 
-    const [playersResult, membershipsResult, tournamentsResult, identityLinksResult] = await Promise.all([
-      supabase
-        .from("players")
-        .select("id, screen_name, discord_id, discord_name, status, active, avatar_path, is_server_booster, has_krys_server_tag, profile_badges")
-        .order("screen_name", { ascending: true }),
-      supabase
-        .from("player_league_memberships")
-        .select("player_id, league_type, season_number, division")
-        .order("season_number", { ascending: false }),
-      supabase
-        .from("player_tournament_entries")
-        .select("player_id, tournament_type, bracket, status")
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("player_identity_links")
-        .select("historical_player_id, canonical_player_id"),
-    ])
+    try {
+      const response = await fetch("/api/admin/players", { cache: "no-store" })
+      const payload = await response.json() as {
+        players?: Player[]
+        leagueMemberships?: LeagueMembership[]
+        tournamentEntries?: TournamentEntry[]
+        identityLinks?: IdentityLink[]
+        error?: string
+      }
+      if (!response.ok) throw new Error(payload.error || "Global Players could not be loaded.")
 
-    setLoading(false)
-
-    const loadError = playersResult.error || membershipsResult.error || tournamentsResult.error || identityLinksResult.error
-    if (loadError) {
-      alert(loadError.message)
-      return
+      setPlayers(payload.players || [])
+      setLeagueMemberships(payload.leagueMemberships || [])
+      setTournamentEntries(payload.tournamentEntries || [])
+      setIdentityLinks(payload.identityLinks || [])
+    } catch (error) {
+      setPageError(error instanceof Error ? error.message : "Global Players could not be loaded.")
+    } finally {
+      setLoading(false)
     }
+  }
 
-    setPlayers(playersResult.data || [])
-    setLeagueMemberships(membershipsResult.data || [])
-    setTournamentEntries(tournamentsResult.data || [])
-    setIdentityLinks(identityLinksResult.data || [])
+  async function postPlayerAction(body: Record<string, unknown>) {
+    const response = await fetch("/api/admin/players", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      cache: "no-store",
+    })
+    const payload = await response.json() as { error?: string; importedCount?: number }
+    if (!response.ok) throw new Error(payload.error || "Global Players action failed.")
+    return payload
   }
 
   function formatLeagueName(leagueType: string) {
@@ -330,20 +334,13 @@ export default function PlayersAdminPage() {
     }
 
     setCreatingPlayer(true)
-
-    const { error } = await supabase.from("players").insert([
-      {
-        screen_name: newPlayerName.trim(),
-        active: true,
-        status: "active",
-      },
-    ])
-
-    setCreatingPlayer(false)
-
-    if (error) {
-      alert(error.message)
+    try {
+      await postPlayerAction({ action: "create_player", screenName: newPlayerName.trim() })
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Player could not be added.")
       return
+    } finally {
+      setCreatingPlayer(false)
     }
 
     setNewPlayerName("")
@@ -379,45 +376,19 @@ export default function PlayersAdminPage() {
     }
 
     setSavingLeague(true)
-
-    const { data: existingMemberships, error: checkError } = await supabase
-      .from("player_league_memberships")
-      .select("id")
-      .eq("player_id", leaguePlayer.id)
-      .eq("league_type", league)
-      .eq("season_number", CURRENT_SEASON)
-      .eq("division", division)
-
-    if (checkError) {
+    try {
+      await postPlayerAction({
+        action: "add_league_membership",
+        playerId: leaguePlayer.id,
+        leagueType: league,
+        seasonNumber: CURRENT_SEASON,
+        division,
+      })
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "League registration failed.")
+      return
+    } finally {
       setSavingLeague(false)
-      alert(checkError.message)
-      return
-    }
-
-    if (existingMemberships && existingMemberships.length > 0) {
-      setSavingLeague(false)
-      alert(
-        `${leaguePlayer.screen_name} is already registered for ${division} in Season ${CURRENT_SEASON}.`
-      )
-      return
-    }
-
-    const { error } = await supabase
-      .from("player_league_memberships")
-      .insert([
-        {
-          player_id: leaguePlayer.id,
-          league_type: league,
-          season_number: CURRENT_SEASON,
-          division,
-        },
-      ])
-
-    setSavingLeague(false)
-
-    if (error) {
-      alert(error.message)
-      return
     }
 
     setLeaguePlayer(null)
@@ -445,46 +416,18 @@ export default function PlayersAdminPage() {
     }
 
     setSavingTournament(true)
-
-    const { data: existingEntries, error: checkError } = await supabase
-      .from("player_tournament_entries")
-      .select("id")
-      .eq("player_id", tourneyPlayer.id)
-      .eq("tournament_type", tournamentType)
-      .eq("bracket", tournamentBracket)
-      .eq("status", "registered")
-
-    if (checkError) {
+    try {
+      await postPlayerAction({
+        action: "add_tournament_entry",
+        playerId: tourneyPlayer.id,
+        tournamentType,
+        bracket: tournamentBracket,
+      })
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Tournament registration failed.")
+      return
+    } finally {
       setSavingTournament(false)
-      alert(checkError.message)
-      return
-    }
-
-    if (existingEntries && existingEntries.length > 0) {
-      setSavingTournament(false)
-      alert(
-        `${tourneyPlayer.screen_name} is already registered for ${tournamentType} - ${tournamentBracket}.`
-      )
-      return
-    }
-
-    const { error } = await supabase
-      .from("player_tournament_entries")
-      .insert([
-        {
-          player_id: tourneyPlayer.id,
-          player_name: tourneyPlayer.screen_name,
-          tournament_type: tournamentType,
-          bracket: tournamentBracket,
-          status: "registered",
-        },
-      ])
-
-    setSavingTournament(false)
-
-    if (error) {
-      alert(error.message)
-      return
     }
 
     setTourneyPlayer(null)
@@ -502,21 +445,13 @@ export default function PlayersAdminPage() {
 
     setSavingStatus(true)
 
-    const shouldBeActive = playerStatus === "active"
-
-    const { error } = await supabase
-      .from("players")
-      .update({
-        status: playerStatus,
-        active: shouldBeActive,
-      })
-      .eq("id", statusPlayer.id)
-
-    setSavingStatus(false)
-
-    if (error) {
-      alert(error.message)
+    try {
+      await postPlayerAction({ action: "update_status", playerId: statusPlayer.id, status: playerStatus })
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Player status update failed.")
       return
+    } finally {
+      setSavingStatus(false)
     }
 
     await loadPlayers()
@@ -530,71 +465,11 @@ export default function PlayersAdminPage() {
     setImporting(true)
 
     try {
-      const { data: scheduleData } = await supabase
-        .from("schedule")
-        .select("player1, player2")
-
-      const { data: handicapData } = await supabase
-        .from("handicap_rounds")
-        .select("player_name")
-
-      const { data: careerData } = await supabase
-        .from("player_career_events")
-        .select("player_name")
-
-      const uniqueImportMap = new Map<string, string>()
-
-      function addName(value: unknown) {
-        const clean = String(value || "").trim()
-        if (!clean) return
-
-        const key = normalizeName(clean)
-
-        if (!uniqueImportMap.has(key)) {
-          uniqueImportMap.set(key, clean)
-        }
-      }
-
-      scheduleData?.forEach((row) => {
-        addName(row.player1)
-        addName(row.player2)
-      })
-
-      handicapData?.forEach((row) => {
-        addName(row.player_name)
-      })
-
-      careerData?.forEach((row) => {
-        addName(row.player_name)
-      })
-
-      const allNames = Array.from(uniqueImportMap.values())
-
-      const { data: existing } = await supabase
-        .from("players")
-        .select("screen_name")
-
-      const existingSet = new Set(
-        (existing || []).map((p) => normalizeName(p.screen_name))
-      )
-
-      const newPlayers = allNames
-        .filter((name) => !existingSet.has(normalizeName(name)))
-        .map((name) => ({
-          screen_name: name,
-          active: true,
-          status: "active",
-        }))
-
-      if (newPlayers.length > 0) {
-        await supabase.from("players").insert(newPlayers)
-      }
-
+      const result = await postPlayerAction({ action: "import_existing_players" })
       await loadPlayers()
-
-      alert(`Imported ${newPlayers.length} players ✔`)
-    } catch {
-      alert("Import failed")
+      alert(`Imported ${result.importedCount || 0} players ✔`)
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Import failed")
     }
 
     setImporting(false)
@@ -668,6 +543,7 @@ export default function PlayersAdminPage() {
       </div>
 
       {successMessage && <p role="status" style={successNotice}>{successMessage}</p>}
+      {pageError && <p role="alert" style={modalError}>{pageError}</p>}
 
       <div style={{ marginTop: 16 }}>
         <div style={filterRow}>
