@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabase"
+import { adminManagedLeagueRequest } from "@/lib/admin/managedLeagueClient"
 import { logActivity } from "@/lib/activityLog"
 
 const LEAGUE_TYPE = "stroke"
@@ -60,8 +60,7 @@ export default function StrokeSeasonPage() {
 
     setSaving(true)
 
-    const { data: createdSeason, error: createError } = await supabase
-      .rpc("create_stroke_season_with_roster", {
+    const { data: createdSeason, error: createError } = await adminManagedLeagueRequest("rpc", { name: "create_stroke_season_with_roster", args: {
         p_season_number: number,
         p_division_count: count,
         p_start_date: startDate,
@@ -70,8 +69,7 @@ export default function StrokeSeasonPage() {
         p_game1_course: game1Course.trim(),
         p_game2_course: game2Course.trim(),
         p_game3_course: game3Course.trim(),
-      })
-      .single()
+      } })
 
     if (createError || !createdSeason) {
       const errorMessage = createError?.message || "No season data was returned."

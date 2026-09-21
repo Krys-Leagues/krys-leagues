@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabase"
+import { adminManagedLeagueRequest } from "@/lib/admin/managedLeagueClient"
 
 type Player = {
   id: string
@@ -192,13 +192,15 @@ export default function StrokeSetup() {
     selectedSeasonId: string,
     reportAsSetupError = false
   ) {
-    const { data, error } = await supabase
-      .from("stroke_schedule_state")
-      .select(
-        "change_revision, generated_revision, reviewed_revision, posted_revision"
-      )
-      .eq("season_id", selectedSeasonId)
-      .maybeSingle()
+    const response = await adminManagedLeagueRequest<{
+      state: ScheduleStateRow | null
+    }>("setup_load", {
+      league: "stroke",
+      seasonId: selectedSeasonId,
+      division: divisionNumber,
+    })
+    const data = response.data?.state ?? null
+    const error = response.error
 
     if (error) {
       const message = `Could not load schedule workflow state: ${error.message}`
@@ -214,7 +216,7 @@ export default function StrokeSetup() {
       return false
     }
 
-    setScheduleState((data as ScheduleStateRow | null) || null)
+    setScheduleState(data)
     return true
   }
 
@@ -243,27 +245,13 @@ export default function StrokeSetup() {
       return
     }
 
-    const { data: seasonData, error: seasonError } = await supabase
-      .from("seasons")
-      .select(
-        "id, league_type, season_number, start_date, due_date, end_date, game1_course, game2_course, game3_course"
-      )
-      .eq("id", requestedSeasonId)
-      .maybeSingle()
-
-    if (seasonError) {
-      setSetupError(`Could not load the season: ${seasonError.message}`)
+    const response = await adminManagedLeagueRequest<{ season: SeasonRow; roster: RosterVersionRow; state: ScheduleStateRow | null; slots: RosterSlotRow[]; overrides: CourseOverrideRow | null; players: Player[] }>("setup_load", { league: "stroke", seasonId: requestedSeasonId, division: requestedDivision })
+    if (response.error || !response.data) {
+      setSetupError(`Could not load the season: ${response.error?.message || "No data returned."}`)
       setLoadingSetup(false)
       return
     }
-
-    if (!seasonData) {
-      setSetupError("The requested season was not found.")
-      setLoadingSetup(false)
-      return
-    }
-
-    const selectedSeason = seasonData as SeasonRow
+    const { season: selectedSeason, roster: selectedRoster, state, slots, overrides, players: loadedPlayers } = response.data
 
     if (selectedSeason.league_type !== "stroke") {
       setSetupError("The requested season is not a Stroke season.")
@@ -271,33 +259,7 @@ export default function StrokeSetup() {
       return
     }
 
-    const { data: rosterData, error: rosterError } = await supabase
-      .from("stroke_roster_versions")
-      .select("id, division_count, status")
-      .eq("season_id", requestedSeasonId)
-      .in("status", ["draft", "approved", "locked"])
-
-    if (rosterError) {
-      setSetupError(`Could not load the Stroke roster: ${rosterError.message}`)
-      setLoadingSetup(false)
-      return
-    }
-
-    const rosterVersions = (rosterData || []) as RosterVersionRow[]
-    const selectedRoster =
-      rosterVersions.find((roster) => roster.status === "draft") ||
-      rosterVersions.find((roster) => roster.status === "approved") ||
-      rosterVersions.find((roster) => roster.status === "locked")
-
-    if (!selectedRoster) {
-      setSetupError("No draft or official Stroke roster was found for this season.")
-      setLoadingSetup(false)
-      return
-    }
-
-    if (!(await loadScheduleState(requestedSeasonId, true))) {
-      return
-    }
+    setScheduleState(state)
 
     if (requestedDivision > selectedRoster.division_count) {
       setSetupError(
@@ -307,22 +269,6 @@ export default function StrokeSetup() {
       return
     }
 
-    const { data: slotData, error: slotError } = await supabase
-      .from("stroke_division_roster_slots")
-      .select(
-        "id, slot_number, player_id, player_screen_name, slot_status"
-      )
-      .eq("roster_version_id", selectedRoster.id)
-      .eq("division_number", requestedDivision)
-      .order("slot_number", { ascending: true })
-
-    if (slotError) {
-      setSetupError(`Could not load roster slots: ${slotError.message}`)
-      setLoadingSetup(false)
-      return
-    }
-
-    const slots = (slotData || []) as RosterSlotRow[]
     const expectedSlotNumbers = [1, 2, 3, 4]
     const hasExactlyFourSlots =
       slots.length === 4 &&
@@ -338,63 +284,6 @@ export default function StrokeSetup() {
       return
     }
 
-    const { data: overrideData, error: overrideError } = await supabase
-      .from("stroke_division_course_overrides")
-      .select(
-        "game1_course_override, game2_course_override, game3_course_override"
-      )
-      .eq("season_id", requestedSeasonId)
-      .eq("division_number", requestedDivision)
-      .maybeSingle()
-
-    if (overrideError) {
-      setSetupError(`Could not load course overrides: ${overrideError.message}`)
-      setLoadingSetup(false)
-      return
-    }
-
-    const overrides = overrideData as CourseOverrideRow | null
-    const currentPlayerIds = slots
-      .map((slot) => slot.player_id)
-      .filter((playerId): playerId is string => Boolean(playerId))
-
-    const { data: activePlayerData, error: activePlayerError } = await supabase
-      .from("players")
-      .select("id, screen_name")
-      .eq("active", true)
-      .order("screen_name")
-
-    if (activePlayerError) {
-      setSetupError(`Could not load players: ${activePlayerError.message}`)
-      setLoadingSetup(false)
-      return
-    }
-
-    let rosterPlayerData: Player[] = []
-
-    if (currentPlayerIds.length > 0) {
-      const { data, error } = await supabase
-        .from("players")
-        .select("id, screen_name")
-        .in("id", currentPlayerIds)
-
-      if (error) {
-        setSetupError(`Could not load roster players: ${error.message}`)
-        setLoadingSetup(false)
-        return
-      }
-
-      rosterPlayerData = (data || []) as Player[]
-    }
-
-    const playerMap = new Map<string, Player>()
-    ;([...(activePlayerData || []), ...rosterPlayerData] as Player[]).forEach(
-      (player) => playerMap.set(player.id, player)
-    )
-
-    const loadedPlayers = Array.from(playerMap.values()).sort((a, b) =>
-      a.screen_name.localeCompare(b.screen_name)
-    )
     setPlayers(loadedPlayers)
     setSeasonId(selectedSeason.id)
     setRosterVersionId(selectedRoster.id)
@@ -473,17 +362,19 @@ export default function StrokeSetup() {
     setRosterSaveError(false)
     setRosterMessage("")
 
-    const { data, error } = await supabase.rpc(
-      "set_stroke_division_roster_slots",
-      {
+    const response = await adminManagedLeagueRequest<SavedRosterSlotRow[]>("rpc", {
+      name: "set_stroke_division_roster_slots",
+      args: {
         p_roster_version_id: rosterVersionId,
         p_division_number: divisionNumber,
         p_slot1_player_id: slotPlayerIds[0],
         p_slot2_player_id: slotPlayerIds[1],
         p_slot3_player_id: slotPlayerIds[2],
         p_slot4_player_id: slotPlayerIds[3],
-      }
-    )
+      },
+    })
+    const data = response.data
+    const error = response.error
 
     if (error) {
       setRosterSaveError(true)
@@ -550,15 +441,18 @@ export default function StrokeSetup() {
     setCourseSaveError(false)
     setCourseMessage("")
 
-    const { data, error } = await supabase
-      .rpc("set_stroke_division_course_overrides", {
+    const response = await adminManagedLeagueRequest<SavedCourseOverrideRow>("rpc", {
+      name: "set_stroke_division_course_overrides",
+      args: {
         p_season_id: seasonId,
         p_division_number: divisionNumber,
         p_game1_course: game1Override,
         p_game2_course: game2Override,
         p_game3_course: game3Override,
-      })
-      .single()
+      },
+    })
+    const data = response.data
+    const error = response.error
 
     if (error || !data) {
       setCourseSaveError(true)
@@ -599,12 +493,14 @@ export default function StrokeSetup() {
     setWorkflowError(false)
     setWorkflowMessage("")
 
-    const { error } = await supabase
-      .rpc("approve_stroke_roster_version", {
+    const response = await adminManagedLeagueRequest("rpc", {
+      name: "approve_stroke_roster_version",
+      args: {
         p_roster_version_id: rosterVersionId,
         p_approval_note: null,
-      })
-      .single()
+      },
+    })
+    const error = response.error
 
     if (error) {
       setWorkflowError(true)
@@ -628,11 +524,14 @@ export default function StrokeSetup() {
     setWorkflowError(false)
     setWorkflowMessage("")
 
-    const { data, error } = await supabase
-      .rpc("generate_stroke_schedule", {
+    const response = await adminManagedLeagueRequest<GeneratedScheduleRow>("rpc", {
+      name: "generate_stroke_schedule",
+      args: {
         p_season_id: seasonId,
-      })
-      .single()
+      },
+    })
+    const data = response.data
+    const error = response.error
 
     if (error || !data) {
       setWorkflowError(true)
@@ -645,7 +544,7 @@ export default function StrokeSetup() {
       return
     }
 
-    const result = data as GeneratedScheduleRow
+    const result = data
     await loadScheduleState(seasonId)
     setWorkflowError(false)
     setWorkflowMessage(

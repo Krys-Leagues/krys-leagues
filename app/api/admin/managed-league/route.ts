@@ -9,7 +9,7 @@ const RPCS = new Set([
   "approve_match_final_scorecard", "approve_match_roster_version", "approve_stroke_final_scorecard", "approve_stroke_roster_version",
   "create_match_season_with_roster", "create_stroke_season_with_roster", "delete_match_result", "delete_stroke_result",
   "generate_match_final_scorecard", "generate_match_next_season_proposal", "generate_match_schedule", "generate_stroke_final_scorecard",
-  "generate_stroke_next_season_proposal", "generate_stroke_schedule", "rebuild_match_standings", "rebuild_stroke_standings",
+  "generate_stroke_next_season_proposal", "generate_stroke_schedule", "rebuild_match_standings", "rebuild_stroke_standings", "review_match_schedule", "review_stroke_schedule",
   "resize_match_season_divisions", "resize_stroke_season_divisions", "save_match_result", "save_stroke_result",
   "set_match_division_course_overrides", "set_match_division_roster_slots", "set_match_return_decision", "set_stroke_division_course_overrides",
   "set_stroke_division_roster_slots", "set_stroke_return_decision", "update_match_season_details", "update_stroke_season_details",
@@ -42,6 +42,43 @@ export async function POST(request: Request) {
       const rosters = seasons.data?.length ? await client.from(rosterTable).select("season_id, status").in("season_id", seasons.data.map((season) => season.id)).in("status", ["draft", "approved", "locked"]) : { data: [], error: null }
       if (rosters.error) throw rosters.error
       return json({ data: { seasons: seasons.data || [], rosters: rosters.data || [] } })
+    }
+    if (action === "season_edit_load") {
+      if (league !== "stroke" && league !== "match") return fail("Managed league is required.")
+      const client = createAdminServiceClient()
+      const seasons = await client.from("seasons").select("id, season_number, is_active, is_locked, start_date, due_date, end_date, game1_course, game2_course, game3_course").ilike("league_type", league).is("division", null).order("is_active", { ascending: false }).order("season_number", { ascending: false })
+      if (seasons.error) throw seasons.error
+      const table = `${league}_roster_versions`
+      const rosters = seasons.data?.length ? await client.from(table).select("id, season_id, division_count, status").in("season_id", seasons.data.map((season) => season.id)).in("status", ["draft", "approved", "locked"]) : { data: [], error: null }
+      if (rosters.error) throw rosters.error
+      return json({ data: { seasons: seasons.data || [], rosters: rosters.data || [] } })
+    }
+    if (action === "setup_load") {
+      if (league !== "stroke" && league !== "match") return fail("Managed league is required.")
+      const client = createAdminServiceClient()
+      const seasonId = String(body.seasonId || "").trim()
+      const division = Number(body.division)
+      const season = await client.from("seasons").select("id, league_type, season_number, start_date, due_date, end_date, game1_course, game2_course, game3_course").eq("id", seasonId).maybeSingle()
+      if (season.error) throw season.error
+      const rosterTable = `${league}_roster_versions`
+      const rosters = await client.from(rosterTable).select("id, division_count, status").eq("season_id", seasonId).in("status", ["draft", "approved", "locked"])
+      if (rosters.error) throw rosters.error
+      const selected = (rosters.data || []).find((item) => item.status === "draft") || (rosters.data || []).find((item) => item.status === "approved") || (rosters.data || []).find((item) => item.status === "locked")
+      if (!season.data || !selected) return fail("Managed roster was not found.", 404)
+      const [state, slots, overrides, activePlayers] = await Promise.all([
+        client.from(`${league}_schedule_state`).select("change_revision, generated_revision, reviewed_revision, posted_revision").eq("season_id", seasonId).maybeSingle(),
+        client.from(`${league}_division_roster_slots`).select("id, slot_number, player_id, player_screen_name, slot_status").eq("roster_version_id", selected.id).eq("division_number", division).order("slot_number", { ascending: true }),
+        client.from(`${league}_division_course_overrides`).select("game1_course_override, game2_course_override, game3_course_override").eq("season_id", seasonId).eq("division_number", division).maybeSingle(),
+        client.from("players").select("id, screen_name").eq("active", true).order("screen_name"),
+      ])
+      const error = [state, slots, overrides, activePlayers].find((item) => item.error)?.error
+      if (error) throw error
+      const ids = (slots.data || []).map((slot) => slot.player_id).filter((id): id is string => Boolean(id))
+      const rosterPlayers = ids.length ? await client.from("players").select("id, screen_name").in("id", ids) : { data: [], error: null }
+      if (rosterPlayers.error) throw rosterPlayers.error
+      const playerMap = new Map<string, { id: string; screen_name: string }>()
+      for (const player of [...(activePlayers.data || []), ...(rosterPlayers.data || [])]) playerMap.set(player.id, player)
+      return json({ data: { season: season.data, roster: selected, state: state.data, slots: slots.data || [], overrides: overrides.data, players: Array.from(playerMap.values()).sort((a, b) => a.screen_name.localeCompare(b.screen_name)) } })
     }
     if (action === "results_load") {
       if (league !== "stroke" && league !== "match") return fail("Managed league is required.")
@@ -135,6 +172,31 @@ export async function POST(request: Request) {
         }
       }
       return json({ data: { seasons: seasons.data || [], rosters: rosters.data || [], standings: standings.data || [], playerNames, scorecard: selected, entries, totalFixtures, completedFixtures } })
+    }
+    if (action === "schedule_load") {
+      if (league !== "stroke" && league !== "match") return fail("Managed league is required.")
+      const client = createAdminServiceClient()
+      const seasonId = String(body.seasonId || "").trim()
+      if (!seasonId) return fail("A season is required.")
+      const season = await client.from("seasons").select("id, league_type, season_number, start_date, due_date, end_date, game1_course, game2_course, game3_course").eq("id", seasonId).maybeSingle()
+      if (season.error) throw season.error
+      const rosterTable = `${league}_roster_versions`
+      const rosters = await client.from(rosterTable).select("id, division_count, status").eq("season_id", seasonId).in("status", ["draft", "approved", "locked"])
+      if (rosters.error) throw rosters.error
+      const selected = (rosters.data || []).find((item) => item.status === "approved") || (rosters.data || []).find((item) => item.status === "locked") || (rosters.data || []).find((item) => item.status === "draft")
+      if (!season.data || !selected) return fail("Managed roster was not found.", 404)
+      const [state, fixtures, slots, overrides] = await Promise.all([
+        client.from(`${league}_schedule_state`).select("change_revision, generated_revision, reviewed_revision, posted_revision").eq("season_id", seasonId).maybeSingle(),
+        client.from("schedule").select("id, division_number, division, game_number, game, course, player1, player2, player1_name, player2_name, player1_id, player2_id, status, due_date").eq("league_type", league).eq("season_id", seasonId).order("division_number", { ascending: true }).order("game_number", { ascending: true }).order("id", { ascending: true }),
+        client.from(`${league}_division_roster_slots`).select("division_number, slot_number, player_id, player_screen_name").eq("roster_version_id", selected.id).order("division_number", { ascending: true }).order("slot_number", { ascending: true }),
+        client.from(`${league}_division_course_overrides`).select("division_number, game1_course_override, game2_course_override, game3_course_override").eq("season_id", seasonId).order("division_number", { ascending: true }),
+      ])
+      const error = [state, fixtures, slots, overrides].find((item) => item.error)?.error
+      if (error) throw error
+      const ids = (fixtures.data || []).map((fixture) => fixture.id)
+      const results = ids.length ? await client.from("results").select(league === "stroke" ? "schedule_id, player1_score, player2_score" : "schedule_id, player1_hw, player2_hw").eq("league_type", league).in("schedule_id", ids) : { data: [], error: null }
+      if (results.error) throw results.error
+      return json({ data: { season: season.data, roster: selected, scheduleState: state.data, fixtures: fixtures.data || [], slots: slots.data || [], overrides: overrides.data || [], results: results.data || [] } })
     }
     if (action === "rpc") return json({ data: await runRpc(authorization, body) })
     return fail("Unsupported managed-league admin action.")

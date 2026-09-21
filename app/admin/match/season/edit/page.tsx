@@ -4,7 +4,7 @@
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabase"
+import { adminManagedLeagueRequest } from "@/lib/admin/managedLeagueClient"
 import { ManagedSeasonDangerZone } from "@/components/admin/ManagedSeasonDangerZone"
 
 type SeasonRow = {
@@ -81,23 +81,13 @@ export default function EditCurrentMatchSeasonPage() {
       setLoading(true)
       setErrorMessage("")
 
-      const { data: seasonData, error: seasonError } = await supabase
-        .from("seasons")
-        .select(
-          "id, season_number, is_active, is_locked, start_date, due_date, end_date, game1_course, game2_course, game3_course"
-        )
-        .ilike("league_type", LEAGUE_TYPE)
-        .is("division", null)
-        .order("is_active", { ascending: false })
-        .order("season_number", { ascending: false })
-
-      if (seasonError) {
-        setErrorMessage(`Could not load Match seasons: ${seasonError.message}`)
+      const response = await adminManagedLeagueRequest<{ seasons: SeasonRow[]; rosters: RosterVersionRow[] }>("season_edit_load", { league: LEAGUE_TYPE })
+      if (response.error || !response.data) {
+        setErrorMessage(`Could not load Match seasons: ${response.error?.message || "No data returned."}`)
         setLoading(false)
         return
       }
-
-      const loadedSeasons = (seasonData || []) as SeasonRow[]
+      const loadedSeasons = response.data.seasons
 
       if (loadedSeasons.length === 0) {
         setSeasons([])
@@ -107,22 +97,6 @@ export default function EditCurrentMatchSeasonPage() {
         return
       }
 
-      const { data: rosterData, error: rosterError } = await supabase
-        .from("match_roster_versions")
-        .select("id, season_id, division_count, status")
-        .in(
-          "season_id",
-          loadedSeasons.map((season) => season.id)
-        )
-        .in("status", ["draft", "approved", "locked"])
-
-      if (rosterError) {
-        setErrorMessage(
-          `Could not load Match roster versions: ${rosterError.message}`
-        )
-        setLoading(false)
-        return
-      }
 
       const requestedSeasonId = new URLSearchParams(window.location.search)
         .get("seasonId")
@@ -131,7 +105,7 @@ export default function EditCurrentMatchSeasonPage() {
         (season) => season.id === requestedSeasonId
       )
 
-      const loadedRosters = (rosterData || []) as RosterVersionRow[]
+      const loadedRosters = response.data.rosters
       const currentSeasonIds = new Set(loadedRosters.filter((roster) => roster.status !== "locked").map((roster) => roster.season_id))
       const defaultSeason = loadedSeasons.find((season) => !season.is_locked && currentSeasonIds.has(season.id)) || loadedSeasons[0]
       setSeasons(loadedSeasons)
@@ -269,12 +243,10 @@ export default function EditCurrentMatchSeasonPage() {
 
     try {
       if (requestedDivisionCount !== selectedRoster.division_count) {
-        const { data: resizeData, error: resizeError } = await supabase
-          .rpc("resize_match_season_divisions", {
+        const { data: resizeData, error: resizeError } = await adminManagedLeagueRequest<ResizedRoster>("rpc", { name: "resize_match_season_divisions", args: {
             p_season_id: selectedSeason.id,
             p_new_division_count: requestedDivisionCount,
-          })
-          .single()
+          } })
 
         if (resizeError || !resizeData) {
           throw new Error(
@@ -297,16 +269,14 @@ export default function EditCurrentMatchSeasonPage() {
         setScheduleStaleMessage(resizeMadeScheduleStale)
       }
 
-      const { data, error } = await supabase
-        .rpc("update_match_season_details", {
+      const { data, error } = await adminManagedLeagueRequest<SavedSeasonDetails>("rpc", { name: "update_match_season_details", args: {
           p_season_id: selectedSeason.id,
           p_start_date: startDate,
           p_end_date: endDate,
           p_game1_course: game1Course.trim(),
           p_game2_course: game2Course.trim(),
           p_game3_course: game3Course.trim(),
-        })
-        .single()
+        } })
 
       if (error || !data) {
         throw new Error(error?.message || "No saved season data was returned.")
