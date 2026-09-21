@@ -6,11 +6,12 @@ const read = (path: string) => readFileSync(path, "utf8")
 
 test("normal All-Time admin surfaces keep entry, history, and Climbers separate", () => {
   const hub = read("app/admin/records/page.tsx")
+  const entryRoute = read("app/api/admin/records/entry/route.ts")
   assert.match(hub, /\/admin\/records\/entry/)
   assert.match(hub, /\/admin\/records\/history/)
   assert.match(hub, /\/admin\/records\/backfill/)
   assert.match(hub, /\/admin\/records\/climbers/)
-  assert.match(read("app/admin/records/entry/page.tsx"), /record_all_time_normal_entry/)
+  assert.match(entryRoute, /record_all_time_normal_entry/)
   assert.match(read("app/admin/records/history/page.tsx"), /correct_all_time_record_entry/)
   assert.match(read("app/admin/records/history/page.tsx"), /void_all_time_record_entry/)
   assert.match(read("app/admin/records/backfill/page.tsx"), /preview_all_time_late_backfill_entry/)
@@ -53,6 +54,7 @@ test("batch backfill UI preserves raw cards and explicit chronology safeguards",
 
 test("normal entry preview protects lower-is-better records and describes Climbers", () => {
   const page = read("app/admin/records/entry/page.tsx")
+  const route = read("app/api/admin/records/entry/route.ts")
   assert.match(page, /CURRENT ALL-TIME PB/)
   assert.match(page, /NEED TO BEAT/)
   assert.match(page, /BETTER — passes/)
@@ -62,8 +64,9 @@ test("normal entry preview protects lower-is-better records and describes Climbe
   assert.match(page, /from\("climbers_seasons"\)/)
   assert.match(page, /no active season \(0 points\)/)
   assert.match(page, /entryKeyRef/)
-  assert.match(page, /preview_all_time_verified_period_entry_v3/)
-  assert.match(page, /record_all_time_verified_period_entry_v3/)
+  assert.match(route, /preview_all_time_verified_period_entry_v3/)
+  assert.match(route, /record_all_time_verified_period_entry_v3/)
+  assert.match(route, /record_all_time_normal_entry/)
   assert.match(page, /Climbers points will be calculated after save using the verified source order/)
   assert.doesNotMatch(page, /0 points · pending replay/)
   assert.doesNotMatch(page, /preview_all_time_late_backfill/)

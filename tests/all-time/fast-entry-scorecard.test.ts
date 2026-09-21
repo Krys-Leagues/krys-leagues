@@ -35,13 +35,14 @@ test("fast-entry actions are distinct and duplicate saves are guarded", () => {
 
 test("verified-period intake preserves source-backed ordering and reports replay results", () => {
   const page = read("app/admin/records/entry/page.tsx")
+  const route = read("app/api/admin/records/entry/route.ts")
   assert.match(page, /AUTHORITATIVE BACKLOG CHRONOLOGY/)
   assert.match(page, /admin entry time is never used/)
   assert.match(page, /p_authoritative_submitted_date: verifiedDate/)
   assert.match(page, /p_authoritative_submission_order: Number\(verifiedOrder\)/)
   assert.match(page, /p_verified_source_batch_id: verifiedSourceBatchRef\.current/)
-  assert.match(page, /preview_all_time_verified_period_entry_v3/)
-  assert.match(page, /record_all_time_verified_period_entry_v3/)
+  assert.match(route, /preview_all_time_verified_period_entry_v3/)
+  assert.match(route, /record_all_time_verified_period_entry_v3/)
   assert.match(page, /protected legacy period accepts only its next documented order/i)
   assert.match(page, /Climbers points will be calculated after save using the verified source order/)
   assert.match(page, /saved\.climbers_points \?\? points/)

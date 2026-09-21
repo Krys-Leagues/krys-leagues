@@ -24,6 +24,20 @@ const emptyHoles = () => Array.from({ length: 18 }, () => "")
 const parseScore = (value: string) => /^-?\d+$/.test(value.trim()) ? Number(value) : null
 const errorMessage = (caught: unknown, fallback: string) => caught instanceof Error ? caught.message : caught && typeof caught === "object" && "message" in caught ? String(caught.message) : fallback
 
+type AdminEntryAction = "preview_verified_period" | "record_verified_period" | "record_normal_entry"
+
+async function callAdminEntryRpc(action: AdminEntryAction, args: Record<string, unknown>) {
+  const response = await fetch("/api/admin/records/entry", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action, args }),
+    cache: "no-store",
+  })
+  const payload = await response.json() as { data?: unknown; error?: string }
+  if (!response.ok) throw new Error(payload.error || "The protected All-Time entry action failed.")
+  return { data: payload.data }
+}
+
 function validHolePars(course: Course | null): course is Course & { par: number; hole_pars: number[] } {
   if (!course || !Array.isArray(course.hole_pars) || course.hole_pars.length !== 18) return false
   const totalPar = typeof course.par === "number" ? course.par : null
@@ -183,8 +197,7 @@ export default function NormalRecordsEntryPage() {
         setPreviewFingerprint(fingerprint)
       } else {
         if (!selectedVerifiedSeason) throw new Error(`No ${period === "previous" ? "previous" : "two-periods-ago"} Climbers period is available for this entry.`)
-        const result = await supabase.rpc("preview_all_time_verified_period_entry_v3", { p_period_id: selectedVerifiedSeason.id, p_course_id: selectedCourse.id, p_player_id: selectedPlayer.id, p_entry_key: entryKeyRef.current, p_fingerprint: fingerprint, p_score: score, p_hole_strokes: entryType === "full_card" ? parsedHoles : null, p_entry_type: entryType, p_source_label: source.trim(), p_provenance_reference: reference.trim() || null, p_notes: notes.trim() || null, p_authoritative_submitted_at: null, p_authoritative_submitted_date: verifiedDate, p_authoritative_submission_order: Number(verifiedOrder), p_authoritative_time_precision: "date_ordered", p_verified_source_batch_id: verifiedSourceBatchRef.current })
-        if (result.error) throw result.error
+        const result = await callAdminEntryRpc("preview_verified_period", { p_period_id: selectedVerifiedSeason.id, p_course_id: selectedCourse.id, p_player_id: selectedPlayer.id, p_entry_key: entryKeyRef.current, p_fingerprint: fingerprint, p_score: score, p_hole_strokes: entryType === "full_card" ? parsedHoles : null, p_entry_type: entryType, p_source_label: source.trim(), p_provenance_reference: reference.trim() || null, p_notes: notes.trim() || null, p_authoritative_submitted_at: null, p_authoritative_submitted_date: verifiedDate, p_authoritative_submission_order: Number(verifiedOrder), p_authoritative_time_precision: "date_ordered", p_verified_source_batch_id: verifiedSourceBatchRef.current })
         const preview = result.data as VerifiedPeriodPreview
         if (preview.action === "already_saved") throw new Error("Duplicate prevented: this exact verified-period entry is already saved.")
         setPeriodPreview(preview)
@@ -225,9 +238,8 @@ export default function NormalRecordsEntryPage() {
     try {
       const fingerprint = await fingerprintForEntry(); if (fingerprint !== previewFingerprint) throw new Error("The entry changed after preview; run a fresh protected preview.")
       const result = isVerifiedPeriod
-        ? await supabase.rpc("record_all_time_verified_period_entry_v3", { p_period_id: selectedVerifiedSeason?.id, p_course_id: selectedCourse.id, p_player_id: selectedPlayer.id, p_entry_key: entryKeyRef.current, p_fingerprint: fingerprint, p_score: score, p_hole_strokes: entryType === "full_card" ? parsedHoles : null, p_entry_type: entryType, p_source_label: source.trim(), p_provenance_reference: reference.trim() || null, p_notes: notes.trim() || null, p_confirmation_token: periodPreview?.confirmation_token, p_authoritative_submitted_at: null, p_authoritative_submitted_date: verifiedDate, p_authoritative_submission_order: Number(verifiedOrder), p_authoritative_time_precision: "date_ordered", p_verified_source_batch_id: verifiedSourceBatchRef.current })
-        : await supabase.rpc("record_all_time_normal_entry", { p_course_id: selectedCourse.id, p_player_id: selectedPlayer.id, p_entry_key: entryKeyRef.current, p_fingerprint: fingerprint, p_score: score, p_hole_strokes: entryType === "full_card" ? parsedHoles : null, p_entry_type: entryType, p_source_label: source.trim(), p_provenance_reference: reference.trim() || null, p_notes: notes.trim() || null })
-      if (result.error) throw result.error
+        ? await callAdminEntryRpc("record_verified_period", { p_period_id: selectedVerifiedSeason?.id, p_course_id: selectedCourse.id, p_player_id: selectedPlayer.id, p_entry_key: entryKeyRef.current, p_fingerprint: fingerprint, p_score: score, p_hole_strokes: entryType === "full_card" ? parsedHoles : null, p_entry_type: entryType, p_source_label: source.trim(), p_provenance_reference: reference.trim() || null, p_notes: notes.trim() || null, p_confirmation_token: periodPreview?.confirmation_token, p_authoritative_submitted_at: null, p_authoritative_submitted_date: verifiedDate, p_authoritative_submission_order: Number(verifiedOrder), p_authoritative_time_precision: "date_ordered", p_verified_source_batch_id: verifiedSourceBatchRef.current })
+        : await callAdminEntryRpc("record_normal_entry", { p_course_id: selectedCourse.id, p_player_id: selectedPlayer.id, p_entry_key: entryKeyRef.current, p_fingerprint: fingerprint, p_score: score, p_hole_strokes: entryType === "full_card" ? parsedHoles : null, p_entry_type: entryType, p_source_label: source.trim(), p_provenance_reference: reference.trim() || null, p_notes: notes.trim() || null })
       const saved = (result.data ?? {}) as SavedEntryResult
       if (saved.action === "already_saved") { setError("Duplicate prevented: this exact entry is already saved. No second observation or scorecard attachment was created."); return }
       const savedClassification = periodPreview?.all_time_classification ?? classification ?? "—"
