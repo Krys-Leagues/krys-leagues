@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabase"
+import { loadAdminProfileData } from "@/lib/admin/careerAdminClient"
 import TrophyMedia from "@/components/TrophyMedia"
 
 type Player = {
@@ -78,36 +78,14 @@ export default function PlayerProfilePage() {
 
     setLoading(true)
 
-    const { data: playerData } = await supabase
-      .from("players")
-      .select("id, screen_name, discord_id, discord_name, discord_username, status, active")
-      .eq("id", playerId)
-      .single()
+    const response = await loadAdminProfileData<{ player: Player | null; memberships: Membership[]; trophies: Trophy[]; results: ResultRow[] }>(playerId)
+    const playerData = response.data?.player || null
 
     setPlayer(playerData)
 
-    const { data: membershipData } = await supabase
-      .from("player_league_memberships")
-      .select("id, league_type, season_number, division")
-      .eq("player_id", playerId)
-      .order("season_number", { ascending: false })
-
-    setMemberships(membershipData || [])
-
-    const { data: trophyData } = await supabase
-      .from("player_trophies")
-      .select("*")
-      .eq("player_id", playerId)
-      .order("created_at", { ascending: false })
-
-    setTrophies(trophyData || [])
-
-    const { data: resultData } = await supabase
-      .from("results")
-      .select("id, player1_id, player2_id, winner, is_draw")
-      .or(`player1_id.eq.${playerId},player2_id.eq.${playerId}`)
-
-    const results = (resultData || []) as ResultRow[]
+    setMemberships(response.data?.memberships || [])
+    setTrophies(response.data?.trophies || [])
+    const results = response.data?.results || []
 
     const matchesPlayed = results.length
     const draws = results.filter((result) => result.is_draw).length
