@@ -73,3 +73,35 @@ test("duplicate evidence is track-aware and verified Level cards receive automat
   assert.match(api, /unique ace holes/)
   assert.match(submissions, /aceStageAtSubmission|ace_stage_number: challengeKey === "ace" \? requestedAceStage : aceState\.nextStage\?\.stage/)
 })
+
+test("Ace review cards hide game mode and approval ignores stored mode values", () => {
+  const api = read("app/api/admin/course-challenges/route.ts")
+  const queue = read("components/admin/course-challenges/CourseChallengeReviewQueue.tsx")
+  const gameMode = read("lib/courseChallenges/gameMode.ts")
+  assert.match(queue, /submission\.challengeKey === "ace" \? null/)
+  assert.match(queue, /submission\.challengeKey !== "ace" && <fieldset/)
+  assert.match(queue, /submission\.challengeKey !== "ace" && <p style=\{muted\}>Stored Game Mode/)
+  assert.match(api, /challenge_key === "ace"\) return Response\.json\(\{ error: "Ace Track does not use game-mode verification\."/)
+  assert.match(api, /challengeKey === "ace" \? null : normalizeCourseChallengeGameMode\(body\.gameMode\)/)
+  assert.match(gameMode, /if \(challengeKey === "ace"\) return null/)
+})
+
+test("GOLDENBRETT pending Ace Wader can proceed without Solo or Multiplayer", () => {
+  const api = read("app/api/admin/course-challenges/route.ts")
+  const sql = read("course_challenges_admin_review_hotfix.sql")
+  const guard = read("course_challenges_self_approval_guard.sql")
+  const book = read("components/course-challenges/CourseChallengeBook.tsx")
+  const guide = read("components/course-challenges/CourseChallengesGuide.tsx")
+  for (const source of [sql, guard]) {
+    assert.match(source, /if v_submission\.challenge_key = 'ace' then/)
+    assert.match(source, /v_mode := null/)
+    assert.match(source, /challenge_key = 'prestige'/)
+    assert.doesNotMatch(source, /v_submission\.challenge_key = 'ace' or v_submission\.level_number >= 3/)
+    assert.match(source, /case when v_submission\.challenge_key = 'ace' then v_submission\.admin_verified_game_mode/)
+  }
+  assert.match(api, /challengeKey === "ace" \? null : normalizeCourseChallengeGameMode/)
+  assert.doesNotMatch(book, /Levels 3–5, Course Pro, Course Master, and Ace use the established Multiplayer review rule/)
+  assert.match(book, /Levels 3–5, Course Pro, and Course Master use the established Multiplayer review rule/)
+  assert.doesNotMatch(guide, /Ace cards follow the established Multiplayer review rule/)
+  assert.match(guide, /Ace cards are evaluated only by their unique-hole requirements/)
+})

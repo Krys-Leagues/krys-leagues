@@ -127,6 +127,7 @@ export async function PATCH(request: Request) {
       return Response.json({ message: "Submission returned to review. Its proof and previous review history were preserved." })
     }
     if (body.action === "verify_game_mode") {
+      if (submission.data.challenge_key === "ace") return Response.json({ error: "Ace Track does not use game-mode verification." }, { status: 400 })
       const verifiedGameMode = normalizeCourseChallengeGameMode(body.gameMode)
       if (!verifiedGameMode) return Response.json({ error: "Select Solo or Multiplayer to save the admin verification." }, { status: 400 })
       const update = await service.from("course_challenge_submissions").update({ admin_verified_game_mode: verifiedGameMode, admin_game_mode_verified_by: authorization.user?.id || null, admin_game_mode_verified_at: new Date().toISOString() }).eq("id", body.id).in("status", ["pending", "needs_review"]).select("id").maybeSingle()
@@ -164,7 +165,7 @@ export async function PATCH(request: Request) {
       const blocking = classified.find(({ classification }) => classification.blocking)
       if (blocking) return Response.json({ error: "This verified scorecard was already used in the same Course Challenge track. Level and Ace Track cross-credit remains allowed, but same-track reuse is blocked." }, { status: 409 })
     }
-    const verifiedGameMode = normalizeCourseChallengeGameMode(body.gameMode)
+    const verifiedGameMode = challengeKey === "ace" ? null : normalizeCourseChallengeGameMode(body.gameMode)
     const gameModeError = courseChallengeGameModeError(Number(submissionRow.level_number), verifiedGameMode, challengeKey)
     if (gameModeError) return Response.json({ error: gameModeError }, { status: 400 })
     const level = course?.levels.find((item) => item.level === Number(submissionRow.level_number))
@@ -182,7 +183,7 @@ export async function PATCH(request: Request) {
       : null
     const reviewEvent = await service.from("course_challenge_submission_review_events").insert({ submission_id: submissionRow.id, action: "approved", from_status: "approved", to_status: "approved", reviewer_id: authorization.user?.id || null, notes: body.reviewNotes?.trim() || null, metadata: { count_toward_ace_track: Boolean(aceCredit && aceCredit.status !== "not_eligible" && aceCredit.uniqueHoles.length), automatic_ace_cross_credit: true, ace_cross_credit: aceCredit } })
     if (reviewEvent.error) throw reviewEvent.error
-    const result = approval.data as { all_time?: Record<string, unknown>; action?: string; game_mode?: string } | null
+    const result = approval.data as { all_time?: Record<string, unknown>; action?: string; game_mode?: string | null } | null
     return Response.json({ message: formatApprovalMessage(result?.all_time, result?.game_mode, progress, aceCredit), processing: result })
   } catch (caught) { return Response.json({ error: caught instanceof Error ? caught.message : "Course Challenge review failed." }, { status: 503 }) }
 }
@@ -271,22 +272,24 @@ async function applyAceCrossCredit(service: ReturnType<typeof createCourseChalle
   return { status: "awarded", stage: stage.label, uniqueHoles, rewardLabels: rewards.map((reward) => reward.label), submissionId }
 }
 
-function formatApprovalMessage(allTime: Record<string, unknown> | undefined, gameMode: string | undefined, progress: { complete: boolean; rewardLabels: string[] }, aceCredit?: { status: string; stage: string | null; uniqueHoles: number[]; rewardLabels: string[] } | null) {
+function formatApprovalMessage(allTime: Record<string, unknown> | undefined, gameMode: string | null | undefined, progress: { complete: boolean; rewardLabels: string[] }, aceCredit?: { status: string; stage: string | null; uniqueHoles: number[]; rewardLabels: string[] } | null) {
   const classification = String(allTime?.classification || allTime?.action || "")
   const score = formatRelativeScore(allTime?.submitted_score)
   const previous = formatRelativeScore(allTime?.old_pb_score)
   const points = Number(allTime?.climbers_points || 0)
   const passed = Array.isArray(allTime?.passed_player_ids) ? allTime?.passed_player_ids.length : points
-  const modeLine = `Mode: ${gameMode === "solo" ? "Solo" : "Multiplayer"}`
+  const modeLine = gameMode ? `Mode: ${gameMode === "solo" ? "Solo" : "Multiplayer"}` : ""
   const allTimeLine = gameMode === "solo"
     ? "All-Time: Not eligible — Solo round"
-    : classification === "FIRST"
+    : gameMode === "multiplayer" && classification === "FIRST"
     ? `All-Time: New first score: ${score}`
-    : classification === "BETTER"
+    : gameMode === "multiplayer" && classification === "BETTER"
       ? `All-Time: New PB: ${score}\nPrevious PB: ${previous}`
-      : classification === "EQUAL"
+      : gameMode === "multiplayer" && classification === "EQUAL"
         ? `All-Time: Existing PB remains ${previous}\nSubmitted score: ${score}`
-        : `All-Time: Existing PB remains ${previous}\nSubmitted score: ${score}`
+        : gameMode === "multiplayer"
+          ? `All-Time: Existing PB remains ${previous}\nSubmitted score: ${score}`
+          : "All-Time: Not eligible — this challenge does not use Game Mode"
   const climbersLine = gameMode === "solo"
     ? "Climbers: Not eligible"
     : classification === "FIRST"
@@ -296,7 +299,7 @@ function formatApprovalMessage(allTime: Record<string, unknown> | undefined, gam
       : "Climbers: No event"
   const rewardLine = progress.complete && progress.rewardLabels.length ? `\nCourse Challenges: ${progress.rewardLabels.join(", ")} awarded.` : ""
   const aceLine = aceCredit?.status === "awarded" ? `\nAce Track: ${aceCredit.rewardLabels.join(", ")} awarded (${aceCredit.uniqueHoles.length} unique ace holes).` : aceCredit?.status === "eligible" ? `\nAce Track: ${aceCredit.stage || "current stage"} remains in review (${aceCredit.uniqueHoles.length} unique ace holes).` : ""
-  return `COURSE CHALLENGE APPROVED\n${modeLine}\n\n${allTimeLine}\n\n${climbersLine}${rewardLine}${aceLine}`
+  return `COURSE CHALLENGE APPROVED\n${modeLine ? `${modeLine}\n\n` : ""}${allTimeLine}\n\n${climbersLine}${rewardLine}${aceLine}`
 }
 
 function formatRelativeScore(value: unknown) {

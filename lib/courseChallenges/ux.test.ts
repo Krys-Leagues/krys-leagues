@@ -52,6 +52,15 @@ test("scorecard hotfix removes manual metadata inputs and supports compact signe
   assert.match(book, /focusNext\(index\)/)
 })
 
+test("Ace submission help names only the challenge types that require Multiplayer", () => {
+  const book = read("components/course-challenges/CourseChallengeBook.tsx")
+  const guide = read("components/course-challenges/CourseChallengesGuide.tsx")
+  assert.match(book, /Levels 3–5, Course Pro, and Course Master use the established Multiplayer review rule/)
+  assert.doesNotMatch(book, /Course Master, and Ace use the established Multiplayer review rule/)
+  assert.match(guide, /Levels 3–5: Multiplayer Game Mode is required/)
+  assert.doesNotMatch(guide, /Ace cards follow the established Multiplayer review rule/)
+})
+
 test("fresh and repair SQL preserve private review fallback for missing proof metadata", () => {
   const foundation = read("course_challenges_foundation.sql")
   const repair = read("course_challenges_tester_ux_hotfix.sql")

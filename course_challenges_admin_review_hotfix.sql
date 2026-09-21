@@ -139,9 +139,13 @@ begin
     );
   end if;
 
-  if v_submission.challenge_key = 'ace' or v_submission.level_number >= 3 then
+  if v_submission.challenge_key = 'ace' then
+    -- Ace Track does not use game mode. Preserve any historical audit value,
+    -- but do not let it affect eligibility or approval.
+    v_mode := null;
+  elsif v_submission.challenge_key = 'prestige' or v_submission.level_number >= 3 then
     if v_mode <> 'multiplayer' then
-      raise exception 'Levels 3–5 and the Ace Challenge require verified Multiplayer Game Mode';
+      raise exception 'Levels 3–5, Course Pro, and Course Master require verified Multiplayer Game Mode';
     end if;
   elsif v_submission.level_number in (1,2) then
     if v_mode not in ('solo','multiplayer') then
@@ -157,7 +161,7 @@ begin
   for update;
   if not found then raise exception 'The Course Challenge difficulty does not match the selected All-Time course'; end if;
 
-  if v_mode = 'multiplayer' then
+  if v_submission.challenge_key <> 'ace' and v_mode = 'multiplayer' then
     v_provenance := 'course-challenge-submission:' || p_submission_id::text;
     v_all_time := public.apply_all_time_entry(
       p_course_id,
@@ -187,9 +191,9 @@ begin
       reviewed_at = clock_timestamp(),
       reviewed_by = v_user_id,
       review_notes = coalesce(nullif(btrim(p_review_notes), ''), review_notes),
-      admin_verified_game_mode = v_mode,
-      admin_game_mode_verified_by = v_user_id,
-      admin_game_mode_verified_at = clock_timestamp(),
+      admin_verified_game_mode = case when v_submission.challenge_key = 'ace' then v_submission.admin_verified_game_mode else v_mode end,
+      admin_game_mode_verified_by = case when v_submission.challenge_key = 'ace' then v_submission.admin_game_mode_verified_by else v_user_id end,
+      admin_game_mode_verified_at = case when v_submission.challenge_key = 'ace' then v_submission.admin_game_mode_verified_at else clock_timestamp() end,
       all_time_processing_status = 'processed',
       all_time_processing_result = v_all_time,
       all_time_processed_at = coalesce(all_time_processed_at, clock_timestamp())
@@ -200,14 +204,14 @@ begin
   ) values (
     p_submission_id, 'approved', v_previous_status, 'approved', v_user_id,
     nullif(btrim(p_review_notes), ''),
-    jsonb_build_object('admin_verified_game_mode', v_mode, 'all_time', v_all_time)
+    jsonb_build_object('admin_verified_game_mode', case when v_submission.challenge_key = 'ace' then v_submission.admin_verified_game_mode else v_mode end, 'all_time', v_all_time)
   );
 
   return jsonb_build_object(
     'action', 'processed',
     'submission_id', p_submission_id,
     'all_time', v_all_time,
-    'game_mode', v_mode
+    'game_mode', case when v_submission.challenge_key = 'ace' then null else v_mode end
   );
 end;
 $function$;

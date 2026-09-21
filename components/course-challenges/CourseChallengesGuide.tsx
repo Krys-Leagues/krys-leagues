@@ -53,7 +53,7 @@ export default function CourseChallengesGuide({ includeScorecardHelp = false }: 
         <li>Ace Legend — Ace all 9 different holes.</li>
       </ul>
       <p>A hole only counts once toward your unique-hole Ace progress, even if you ace it again later.</p>
-      <p>Ace cards follow the established Multiplayer review rule; admins verify the private proof and reject Practice Mode.</p>
+      <p>Ace cards are evaluated only by their unique-hole requirements; admins verify the private proof.</p>
     </section>
 
     <section className={styles.guideSection}>
