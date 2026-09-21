@@ -1,7 +1,3 @@
--- Enforce canonical-player self-approval prevention for every approval RPC call.
--- Reject/withdraw behavior remains unchanged.
-begin;
-
 create or replace function public.approve_course_challenge_submission(
   p_submission_id uuid,
   p_course_id uuid,
@@ -134,8 +130,3 @@ begin
   );
 end;
 $function$;
-
-revoke all on function public.approve_course_challenge_submission(uuid,uuid,text,text,text) from public, anon, authenticated;
-grant execute on function public.approve_course_challenge_submission(uuid,uuid,text,text,text) to authenticated;
-
-commit;

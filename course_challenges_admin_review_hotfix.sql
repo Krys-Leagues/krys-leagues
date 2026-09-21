@@ -130,12 +130,15 @@ begin
     raise exception 'This Course Challenge submission is not reviewable';
   end if;
   if v_submission.status = 'approved' and v_submission.all_time_processing_status = 'processed'
-     and v_submission.admin_verified_game_mode is not null then
+     and (
+       v_submission.challenge_key = 'ace'
+       or v_submission.admin_verified_game_mode is not null
+     ) then
     return jsonb_build_object(
       'action', 'already_processed',
       'submission_id', p_submission_id,
       'all_time', coalesce(v_submission.all_time_processing_result, '{}'::jsonb),
-      'game_mode', v_submission.admin_verified_game_mode
+      'game_mode', case when v_submission.challenge_key = 'ace' then null else v_submission.admin_verified_game_mode end
     );
   end if;
 

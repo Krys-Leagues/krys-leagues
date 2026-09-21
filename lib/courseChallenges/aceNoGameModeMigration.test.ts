@@ -4,7 +4,7 @@ import { test } from "node:test"
 
 const root = new URL("../../", import.meta.url)
 const read = (path: string) => readFileSync(new URL(path, root), "utf8")
-const migration = read("supabase/migrations/20260921145230_course_challenges_ace_no_game_mode_rpc_fix.sql")
+const migration = read("supabase/migrations/20260921151121_course_challenges_ace_idempotency_fix.sql")
 
 test("Ace RPC migration is narrow and matches the reviewed corrected function", () => {
   const reviewed = read("course_challenges_admin_review_hotfix.sql")
@@ -30,4 +30,30 @@ test("Ace approval explicitly ignores game mode while preserving non-Ace multipl
   assert.match(migration, /if v_submission\.challenge_key <> 'ace' and v_mode = 'multiplayer' then/i)
   assert.match(migration, /admin_verified_game_mode = case when v_submission\.challenge_key = 'ace' then v_submission\.admin_verified_game_mode else v_mode end/i)
   assert.match(migration, /'game_mode', case when v_submission\.challenge_key = 'ace' then null else v_mode end/i)
+})
+
+test("Ace idempotency returns null game mode for every stored-mode state", () => {
+  const idempotency = migration.match(/if v_submission\.status = 'approved'[\s\S]*?end if;/i)?.[0]
+  assert.ok(idempotency, "migration must keep the idempotency branch")
+  assert.match(idempotency, /v_submission\.all_time_processing_status = 'processed'/i)
+  assert.match(idempotency, /v_submission\.challenge_key = 'ace'\s+or\s+v_submission\.admin_verified_game_mode is not null/i)
+  assert.match(idempotency, /'action', 'already_processed'/i)
+  assert.match(idempotency, /'game_mode', case when v_submission\.challenge_key = 'ace' then null else v_submission\.admin_verified_game_mode end/i)
+  assert.doesNotMatch(idempotency, /and v_submission\.admin_verified_game_mode is not null\s+then/i)
+  assert.ok(migration.indexOf("'action', 'already_processed'") < migration.indexOf("public.apply_all_time_entry"))
+})
+
+test("Ace idempotency regression truth table preserves non-Ace behavior", () => {
+  const result = (challengeKey: string, storedMode: string | null) => {
+    const alreadyProcessed = challengeKey === "ace" || storedMode !== null
+    return alreadyProcessed
+      ? { action: "already_processed", gameMode: challengeKey === "ace" ? null : storedMode }
+      : null
+  }
+
+  assert.deepEqual(result("ace", "solo"), { action: "already_processed", gameMode: null })
+  assert.deepEqual(result("ace", "multiplayer"), { action: "already_processed", gameMode: null })
+  assert.deepEqual(result("ace", null), { action: "already_processed", gameMode: null })
+  assert.deepEqual(result("level", "multiplayer"), { action: "already_processed", gameMode: "multiplayer" })
+  assert.equal(result("level", null), null)
 })
