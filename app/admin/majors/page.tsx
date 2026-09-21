@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useCallback, useEffect, useState } from "react"
 import { MAJOR_ENTRY_STATUSES, MAJOR_EVENT_STATUSES, formatMajorDate, toDateTimeLocal, type MajorEntry, type MajorEvent } from "@/lib/majors"
-import { supabase } from "@/lib/supabase"
+import { majorAdminRequest } from "@/lib/admin/majorAdminClient"
 
 type EventDraft = Omit<MajorEvent, "created_at" | "updated_at">
 
@@ -18,14 +18,14 @@ export default function MajorsAdminPage() {
   const [saving, setSaving] = useState(false)
 
   const loadEntries = useCallback(async (eventId: string) => {
-    const response = await supabase.from("major_entries").select("*").eq("major_event_id", eventId).order("registered_at")
-    setEntries((response.data as MajorEntry[] | null) || [])
+    const response = await majorAdminRequest<MajorEntry[]>("entries_load", { majorEventId: eventId })
+    setEntries(response.data || [])
     if (response.error) setMessage(response.error.message)
   }, [])
 
   const loadEvents = useCallback(async (preferredId?: string) => {
-    const response = await supabase.from("major_events").select("*").order("slug")
-    const loaded = (response.data as MajorEvent[] | null) || []
+    const response = await majorAdminRequest<MajorEvent[]>("events_load")
+    const loaded = response.data || []
     const nextId = preferredId || loaded[0]?.id || ""
     const nextEvent = loaded.find((event) => event.id === nextId) || null
     setEvents(loaded)
@@ -56,7 +56,7 @@ export default function MajorsAdminPage() {
     if (!draft) return
     setSaving(true)
     setMessage("")
-    const response = await supabase.rpc("save_major_event", {
+    const response = await majorAdminRequest("rpc", { name: "save_major_event", args: {
       p_id: draft.id,
       p_slug: draft.slug,
       p_name: draft.name,
@@ -72,7 +72,7 @@ export default function MajorsAdminPage() {
       p_stream_label: draft.stream_label || "",
       p_stream_scheduled_at: draft.stream_scheduled_at,
       p_stream_is_live: draft.stream_is_live,
-    })
+    } })
     setSaving(false)
     if (response.error) return setMessage(response.error.message)
     setMessage("Major saved.")
@@ -81,7 +81,7 @@ export default function MajorsAdminPage() {
 
   async function addPlayer() {
     if (!draft || !playerId.trim()) return
-    const response = await supabase.rpc("admin_register_major_player", { p_major_event_id: draft.id, p_player_id: playerId.trim() })
+    const response = await majorAdminRequest("rpc", { name: "admin_register_major_player", args: { p_major_event_id: draft.id, p_player_id: playerId.trim() } })
     if (response.error) return setMessage(response.error.message)
     setPlayerId("")
     setMessage("Player registered.")
@@ -89,7 +89,7 @@ export default function MajorsAdminPage() {
   }
 
   async function updateEntryStatus(entryId: string, status: MajorEntry["status"]) {
-    const response = await supabase.rpc("set_major_entry_status", { p_entry_id: entryId, p_status: status })
+    const response = await majorAdminRequest("rpc", { name: "set_major_entry_status", args: { p_entry_id: entryId, p_status: status } })
     if (response.error) return setMessage(response.error.message)
     if (draft) await loadEntries(draft.id)
   }
