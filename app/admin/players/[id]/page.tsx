@@ -2,10 +2,9 @@
 
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabase"
 import PlayerProfileHero from "@/components/PlayerProfileHero"
 import TrophyMedia from "@/components/TrophyMedia"
-import { getCanonicalPlayerAvatar, PLAYER_AVATAR_BUCKET, playerAvatarObjectPath, validatePlayerAvatarFile } from "@/lib/playerAvatars"
+import { validatePlayerAvatarFile } from "@/lib/playerAvatars"
 
 type Player = {
   id: string
@@ -33,14 +32,6 @@ type Trophy = {
   season: string | null
   week: string | null
   image_url: string | null
-}
-
-type ResultRow = {
-  id: string
-  player1_id: string | null
-  player2_id: string | null
-  winner: string | null
-  is_draw: boolean | null
 }
 
 type CareerStats = {
@@ -103,18 +94,13 @@ export default function PlayerProfilePage() {
     setLoading(true)
     setFormerNamesError("")
 
-    const { data: identityData, error: identityError } = await supabase.rpc(
-      "get_public_player_canonical_identity",
-      { p_player_id: playerId }
-    )
-
-    if (identityError) {
+    const response = await fetch(`/api/admin/players/${playerId}`, { cache: "no-store" })
+    const payload = await response.json() as { player?: Player; identity?: CanonicalIdentity; avatarPath?: string | null; memberships?: Membership[]; trophies?: Trophy[]; careerStats?: CareerStats; error?: string }
+    if (!response.ok) {
       setFormerNames([])
-      setFormerNamesError(`Could not load former names: ${identityError.message}`)
+      setFormerNamesError(`Could not load player profile: ${payload.error || "request failed"}`)
     } else {
-      const identity = (
-        Array.isArray(identityData) ? identityData[0] : identityData
-      ) as CanonicalIdentity | null
+      const identity = payload.identity || null
       const currentCanonicalName =
         identity?.canonical_screen_name || ""
 
@@ -135,61 +121,11 @@ export default function PlayerProfilePage() {
       )
     }
 
-    const identity = (Array.isArray(identityData) ? identityData[0] : identityData) as CanonicalIdentity | null
-    const canonicalPlayerId = identity?.canonical_player_id || playerId
-    const [{ data: playerData }, avatarResult] = await Promise.all([
-      supabase.from("players").select("id, screen_name, discord_id, discord_name, discord_username, status, active").eq("id", canonicalPlayerId).single(),
-      getCanonicalPlayerAvatar(canonicalPlayerId)
-        .then((avatar) => ({ avatar, error: "" }))
-        .catch((error: unknown) => ({ avatar: null, error: error instanceof Error ? error.message : "Avatar could not be loaded" })),
-    ])
-    setPlayer(playerData)
-    if (avatarResult.error) setAvatarError(`Could not load avatar: ${avatarResult.error}`)
-    else setAvatarPath(avatarResult.avatar?.avatarPath || null)
-
-    const { data: membershipData } = await supabase
-      .from("player_league_memberships")
-      .select("id, league_type, season_number, division")
-      .eq("player_id", playerId)
-      .order("season_number", { ascending: false })
-
-    setMemberships(membershipData || [])
-
-    const { data: trophyData } = await supabase
-      .from("player_trophies")
-      .select("*")
-      .eq("player_id", playerId)
-      .order("created_at", { ascending: false })
-
-    setTrophies(trophyData || [])
-
-    const { data: resultData } = await supabase
-      .from("results")
-      .select("id, player1_id, player2_id, winner, is_draw")
-      .or(`player1_id.eq.${playerId},player2_id.eq.${playerId}`)
-
-    const results = (resultData || []) as ResultRow[]
-
-    const matchesPlayed = results.length
-    const draws = results.filter((result) => result.is_draw).length
-
-    const wins = results.filter((result) => {
-      if (!playerData?.screen_name) return false
-      return result.winner === playerData.screen_name
-    }).length
-
-    const losses = matchesPlayed - wins - draws
-
-    const winPercent =
-      matchesPlayed > 0 ? `${Math.round((wins / matchesPlayed) * 100)}%` : "0%"
-
-    setCareerStats({
-      matchesPlayed,
-      wins,
-      losses,
-      draws,
-      winPercent,
-    })
+    setPlayer(payload.player || null)
+    setAvatarPath(payload.avatarPath || null)
+    setMemberships(payload.memberships || [])
+    setTrophies(payload.trophies || [])
+    setCareerStats(payload.careerStats || { matchesPlayed: 0, wins: 0, losses: 0, draws: 0, winPercent: "0%" })
 
     setLoading(false)
   }
@@ -208,28 +144,22 @@ export default function PlayerProfilePage() {
   async function saveAvatar() {
     if (!player || !avatarFile) return
     setAvatarBusy(true); setAvatarError(""); setAvatarMessage("")
-    const nextPath = playerAvatarObjectPath(player.id, avatarFile)
-    const { error: uploadError } = await supabase.storage.from(PLAYER_AVATAR_BUCKET).upload(nextPath, avatarFile, { contentType: avatarFile.type, upsert: false })
-    if (uploadError) { setAvatarBusy(false); setAvatarError(uploadError.message); return }
-    const { error: saveError } = await supabase.rpc("set_site_player_avatar_path", { p_player_id: player.id, p_avatar_path: nextPath })
-    if (saveError) {
-      await supabase.storage.from(PLAYER_AVATAR_BUCKET).remove([nextPath])
-      setAvatarBusy(false); setAvatarError(saveError.message); return
-    }
-    const previousPath = avatarPath
-    setAvatarPath(nextPath); await chooseAvatar(null); setAvatarBusy(false)
-    setAvatarMessage(previousPath ? "Avatar replaced." : "Avatar uploaded.")
-    if (previousPath && previousPath !== nextPath) await supabase.storage.from(PLAYER_AVATAR_BUCKET).remove([previousPath])
+    const form = new FormData(); form.set("action", "save_avatar"); form.set("avatar", avatarFile)
+    const response = await fetch(`/api/admin/players/${player.id}`, { method: "POST", body: form, cache: "no-store" })
+    const payload = await response.json() as { avatarPath?: string; error?: string }
+    if (!response.ok) { setAvatarBusy(false); setAvatarError(payload.error || "Avatar could not be saved."); return }
+    setAvatarPath(payload.avatarPath || null); await chooseAvatar(null); setAvatarBusy(false)
+    setAvatarMessage(avatarPath ? "Avatar replaced." : "Avatar uploaded.")
   }
 
   async function removeAvatar() {
     if (!player || !avatarPath) return
     setAvatarBusy(true); setAvatarError(""); setAvatarMessage("")
-    const previousPath = avatarPath
-    const { error: removeReferenceError } = await supabase.rpc("set_site_player_avatar_path", { p_player_id: player.id, p_avatar_path: null })
-    if (removeReferenceError) { setAvatarBusy(false); setAvatarError(removeReferenceError.message); return }
+    const form = new FormData(); form.set("action", "remove_avatar")
+    const response = await fetch(`/api/admin/players/${player.id}`, { method: "POST", body: form, cache: "no-store" })
+    const payload = await response.json() as { error?: string }
+    if (!response.ok) { setAvatarBusy(false); setAvatarError(payload.error || "Avatar could not be removed."); return }
     setAvatarPath(null); setAvatarBusy(false); setAvatarMessage("Avatar removed.")
-    await supabase.storage.from(PLAYER_AVATAR_BUCKET).remove([previousPath])
   }
 
     if (loading) {

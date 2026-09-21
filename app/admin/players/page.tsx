@@ -2,7 +2,6 @@
 
 import React, { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabase"
 import PlayerAvatar from "@/components/PlayerAvatar"
 
 type Player = {
@@ -180,7 +179,7 @@ export default function PlayersAdminPage() {
       body: JSON.stringify(body),
       cache: "no-store",
     })
-    const payload = await response.json() as { error?: string; importedCount?: number }
+    const payload = await response.json() as { error?: string; importedCount?: number; data?: unknown }
     if (!response.ok) throw new Error(payload.error || "Global Players action failed.")
     return payload
   }
@@ -253,16 +252,17 @@ export default function PlayersAdminPage() {
     if (!recognitionPlayer) return
     setSavingRecognition(true)
     setRecognitionError("")
-    const { data, error } = await supabase.rpc("set_site_player_profile_recognition", {
-      p_player_id: recognitionPlayer.id,
-      p_is_server_booster: recognitionBooster,
-      p_has_krys_server_tag: recognitionServerTag,
-      p_profile_badges: recognitionBadges,
-    })
+    let payload: { data?: { is_server_booster: boolean; has_krys_server_tag: boolean; profile_badges: string[] }; error?: string }
+    try {
+      payload = await postPlayerAction({ action: "set_profile_recognition", playerId: recognitionPlayer.id, isServerBooster: recognitionBooster, hasKrysServerTag: recognitionServerTag, profileBadges: recognitionBadges }) as typeof payload
+    } catch (error) {
+      setSavingRecognition(false)
+      setRecognitionError(error instanceof Error ? error.message : "Recognition settings could not be saved.")
+      return
+    }
     setSavingRecognition(false)
-    if (error) { setRecognitionError(error.message); return }
 
-    const saved = (Array.isArray(data) ? data[0] : data) as {
+    const saved = payload.data as {
       is_server_booster: boolean
       has_krys_server_tag: boolean
       profile_badges: string[]
@@ -298,17 +298,14 @@ export default function PlayersAdminPage() {
 
     setSavingDiscord(true)
     setDiscordError("")
-    const { error: saveError } = await supabase.rpc("set_site_player_discord_identity", {
-      p_player_id: discordPlayer.id,
-      p_discord_id: trimmedDiscordId,
-      p_discord_name: discordName.trim() || null,
-    })
-    setSavingDiscord(false)
-
-    if (saveError) {
-      setDiscordError(saveError.message)
+    try {
+      await postPlayerAction({ action: "set_discord_identity", playerId: discordPlayer.id, discordId: trimmedDiscordId, discordName: discordName.trim() || null })
+    } catch (error) {
+      setSavingDiscord(false)
+      setDiscordError(error instanceof Error ? error.message : "Discord identity could not be saved.")
       return
     }
+    setSavingDiscord(false)
 
     const savedPlayerName = discordPlayer.screen_name
     setDiscordPlayer(null)

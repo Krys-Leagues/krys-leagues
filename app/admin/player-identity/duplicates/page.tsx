@@ -2,9 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabase"
 import PlayerAvatar from "@/components/PlayerAvatar"
-import { prepareCanonicalAvatarForMerge, removeOldPlayerAvatarObjects } from "@/lib/playerAvatars"
 
 type Candidate = {
   id: string
@@ -165,13 +163,19 @@ export default function DuplicatePlayerReviewPage() {
   async function loadCandidates() {
     setLoading(true)
     setError("")
-    const { data, error: loadError } = await supabase.rpc("get_site_player_duplicate_candidates")
+    const response = await fetch("/api/admin/players/merge", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "duplicate_candidates" }),
+      cache: "no-store",
+    })
+    const payload = await response.json() as { data?: CandidatePairRow[]; error?: string }
     setLoading(false)
-    if (loadError) {
-      setError(loadError.message)
+    if (!response.ok) {
+      setError(payload.error || "Duplicate candidates could not be loaded.")
       return
     }
-    setRows((data || []) as CandidatePairRow[])
+    setRows((payload.data || []) as CandidatePairRow[])
   }
 
   useEffect(() => {
@@ -227,22 +231,24 @@ export default function DuplicatePlayerReviewPage() {
     setBusy(true)
     setError("")
     const mergeIds=selected.filter((id)=>id!==keepId)
-    const [{data,error:previewError},{data:avatarData,error:avatarError}]=await Promise.all([
-      supabase.rpc("preview_site_player_identity_merge",{p_keep_player_id:keepId,p_merge_player_ids:mergeIds}),
-      supabase.rpc("preview_site_player_avatar_merge",{p_keep_player_id:keepId,p_merge_player_ids:mergeIds}),
-    ])
+    const response = await fetch("/api/admin/players/merge", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "preview", keepPlayerId: keepId, mergePlayerIds: mergeIds }),
+      cache: "no-store",
+    })
+    const payload = await response.json() as { data?: Record<string, unknown>; avatar?: Record<string, unknown>; error?: string }
     setBusy(false)
-    if (previewError || avatarError) {
-      setError(previewError?.message || avatarError?.message || "Merge preview failed.")
+    if (!response.ok) {
+      setError(payload.error || "Merge preview failed.")
       return
     }
-    const saved = Array.isArray(data) ? data[0] : data
+    const saved = payload.data
     if (!saved) {
       setError("The merge preview returned no information.")
       return
     }
-    const avatarPreview=Array.isArray(avatarData)?avatarData[0]:avatarData
-    setPreview({...saved,...avatarPreview} as MergePreview)
+    setPreview({...saved,...payload.avatar} as MergePreview)
     setSelectedAvatarPath("")
     setPreviewGroupId(group.id)
   }
@@ -251,32 +257,25 @@ export default function DuplicatePlayerReviewPage() {
     if (!preview) return
     setBusy(true)
     setError("")
-    let preparedAvatar
-    try {
-      preparedAvatar = await prepareCanonicalAvatarForMerge({
+    const response = await fetch("/api/admin/players/merge", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "merge",
         keepPlayerId: preview.keep_player_id,
-        candidates: preview.avatar_candidates,
+        mergePlayerIds: preview.merging_players.map((player) => player.id),
         selectedAvatarPath: selectedAvatarPath || undefined,
-      })
-    } catch (avatarError) {
-      setBusy(false)
-      setError(avatarError instanceof Error ? avatarError.message : "Avatar preservation failed")
-      return
-    }
-    const { error: mergeError } = await supabase.rpc("merge_site_player_identities_with_avatar", {
-      p_keep_player_id: preview.keep_player_id,
-      p_merge_player_ids: preview.merging_players.map((player) => player.id),
-      p_selected_avatar_path: preparedAvatar.sourceAvatarPath,
-      p_canonical_avatar_path: preparedAvatar.canonicalAvatarPath,
+      }),
+      cache: "no-store",
     })
+    const payload = await response.json() as { cleanupError?: string; error?: string }
     setBusy(false)
-    if (mergeError) { setError(mergeError.message); return }
-    const cleanupError = await removeOldPlayerAvatarObjects(preparedAvatar.oldAvatarPaths)
+    if (!response.ok) { setError(payload.error || "Player identity merge failed."); return }
     setPreview(null)
     setSelectedByGroup((value) => ({ ...value, [previewGroupId]: [] }))
     setKeepByGroup((value) => ({ ...value, [previewGroupId]: "" }))
-    setMessage(cleanupError
-      ? `Selected identities were merged. Old avatar cleanup needs review: ${cleanupError}`
+    setMessage(payload.cleanupError
+      ? `Selected identities were merged. Old avatar cleanup needs review: ${payload.cleanupError}`
       : "Selected identities were merged into the canonical player.")
     await loadCandidates()
   }
@@ -296,12 +295,16 @@ export default function DuplicatePlayerReviewPage() {
     }
     setBusy(true)
     setError("")
-    const { error: saveError } = await supabase.rpc("mark_site_players_not_match", {
-      p_player_ids: selected,
+    const response = await fetch("/api/admin/players/merge", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "mark_different", keepPlayerId: selected[0], mergePlayerIds: selected.slice(1) }),
+      cache: "no-store",
     })
+    const payload = await response.json() as { error?: string }
     setBusy(false)
-    if (saveError) {
-      setError(saveError.message)
+    if (!response.ok) {
+      setError(payload.error || "The identity distinction could not be saved.")
       return
     }
     setMessage("The selected players were recorded as different people.")

@@ -201,6 +201,30 @@ export async function POST(request: Request) {
       return json({ ok: true, ...(await importExistingPlayers(client)) })
     }
 
+    if (action === "set_profile_recognition") {
+      const playerId = requiredString(body.playerId, "Player ID")
+      const result = await client.rpc("set_site_player_profile_recognition", {
+        p_player_id: playerId,
+        p_is_server_booster: body.isServerBooster === true,
+        p_has_krys_server_tag: body.hasKrysServerTag === true,
+        p_profile_badges: Array.isArray(body.profileBadges) ? body.profileBadges : [],
+      })
+      if (result.error) throw result.error
+      return json({ data: Array.isArray(result.data) ? result.data[0] : result.data })
+    }
+
+    if (action === "set_discord_identity") {
+      const playerId = requiredString(body.playerId, "Player ID")
+      const discordId = requiredString(body.discordId, "Discord ID")
+      const result = await client.rpc("set_site_player_discord_identity", {
+        p_player_id: playerId,
+        p_discord_id: discordId,
+        p_discord_name: String(body.discordName || "").trim() || null,
+      })
+      if (result.error) throw result.error
+      return json({ data: Array.isArray(result.data) ? result.data[0] : result.data })
+    }
+
     return json({ error: "Unsupported Global Players action." }, 400)
   } catch (error) {
     return json({ error: error instanceof Error ? error.message : "Global Players action failed." }, 503)

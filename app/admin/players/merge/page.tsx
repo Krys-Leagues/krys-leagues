@@ -2,9 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { supabase } from "@/lib/supabase"
 import PlayerAvatar from "@/components/PlayerAvatar"
-import { prepareCanonicalAvatarForMerge, removeOldPlayerAvatarObjects } from "@/lib/playerAvatars"
 
 type Player = {
   id: string
@@ -46,19 +44,16 @@ export default function MergePlayersPage() {
 
   async function loadPlayers() {
     setLoading(true)
-    const { data, error } = await supabase
-      .from("players")
-      .select("id, screen_name, status, active")
-      .eq("active", true)
-      .order("screen_name", { ascending: true })
+    const response = await fetch("/api/admin/players", { cache: "no-store" })
+    const payload = await response.json() as { players?: Player[]; error?: string }
     setLoading(false)
 
-    if (error) {
-      setMergeError(error.message)
+    if (!response.ok) {
+      setMergeError(payload.error || "Players could not be loaded.")
       return
     }
 
-    setPlayers(data || [])
+    setPlayers(payload.players || [])
   }
 
   const removePlayer = useMemo(
@@ -85,12 +80,16 @@ export default function MergePlayersPage() {
     }
 
     setMerging(true);setMergeError("")
-    const {data:avatarPreviewData,error:avatarPreviewError}=await supabase.rpc("preview_site_player_avatar_merge",{
-      p_keep_player_id:keepPlayer.id,p_merge_player_ids:[removePlayer.id],
+    const previewResponse = await fetch("/api/admin/players/merge", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "preview", keepPlayerId: keepPlayer.id, mergePlayerIds: [removePlayer.id] }),
+      cache: "no-store",
     })
+    const previewPayload = await previewResponse.json() as { avatar?: { avatar_candidates?: AvatarCandidate[]; avatar_conflict?: boolean }; error?: string }
     setMerging(false)
-    if(avatarPreviewError){setMergeError(avatarPreviewError.message);return}
-    const avatarPreview=Array.isArray(avatarPreviewData)?avatarPreviewData[0]:avatarPreviewData
+    if(!previewResponse.ok){setMergeError(previewPayload.error || "Merge preview failed.");return}
+    const avatarPreview=previewPayload.avatar
     const reviewedCandidates=(avatarPreview?.avatar_candidates || []) as AvatarCandidate[]
     setAvatarCandidates(reviewedCandidates)
     if(avatarPreview?.avatar_conflict && !selectedAvatarPath){setAvatarConflict(true);return}
@@ -105,22 +104,22 @@ export default function MergePlayersPage() {
     setMergeResult(null)
 
     try {
-      const preparedAvatar = await prepareCanonicalAvatarForMerge({
-        keepPlayerId: keepPlayer.id,
-        candidates: reviewedCandidates,
-        selectedAvatarPath: selectedAvatarPath || undefined,
+      const response = await fetch("/api/admin/players/merge", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "merge",
+          keepPlayerId: keepPlayer.id,
+          mergePlayerIds: [removePlayer.id],
+          selectedAvatarPath: selectedAvatarPath || undefined,
+        }),
+        cache: "no-store",
       })
-      const { data, error } = await supabase.rpc("merge_site_player_identities_with_avatar", {
-        p_keep_player_id: keepPlayer.id,
-        p_merge_player_ids: [removePlayer.id],
-        p_selected_avatar_path: preparedAvatar.sourceAvatarPath,
-        p_canonical_avatar_path: preparedAvatar.canonicalAvatarPath,
-      })
+      const payload = await response.json() as { data?: { canonical_player_id?: string; canonical_screen_name?: string }; cleanupError?: string; error?: string }
+      if (!response.ok) throw new Error(payload.error || "Merge failed.")
 
-      if (error) throw new Error(error.message)
-
-      const saved = Array.isArray(data) ? data[0] : data
-      if (!saved) throw new Error("The merge completed without returning confirmation")
+      const saved = payload.data
+      if (!saved?.canonical_player_id || !saved.canonical_screen_name) throw new Error("The merge completed without returning confirmation")
 
       setMergeResult({
         kept_player_id: saved.canonical_player_id,
@@ -131,8 +130,7 @@ export default function MergePlayersPage() {
         affected_stroke_season_numbers: [],
         affected_season_count: 0,
       })
-      const cleanupError = await removeOldPlayerAvatarObjects(preparedAvatar.oldAvatarPaths)
-      if (cleanupError) setMergeError(`Merge succeeded, but old avatar cleanup needs review: ${cleanupError}`)
+      if (payload.cleanupError) setMergeError(`Merge succeeded, but old avatar cleanup needs review: ${payload.cleanupError}`)
       setRemovePlayerId("")
       setKeepPlayerId("")
       setAvatarCandidates([]);setSelectedAvatarPath("");setAvatarConflict(false)
