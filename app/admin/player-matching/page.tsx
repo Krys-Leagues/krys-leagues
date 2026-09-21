@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabase"
 
 type Player = {
   id: string
@@ -247,40 +246,18 @@ export default function PlayerMatchingPage() {
     setSelectedMemberId("")
     setCurrentPlayerIndex(0)
 
-    const [
-      { data: playerData, error: playerError },
-      { data: memberData, error: memberError },
-    ] = await Promise.all([
-      supabase
-        .from("players")
-        .select("id, screen_name, discord_id")
-        .eq("active", true)
-        .is("discord_id", null)
-        .order("screen_name"),
-
-      supabase
-        .from("discord_members")
-        .select(
-          "id, discord_id, discord_name, player_id"
-        )
-        .is("player_id", null)
-        .order("discord_name"),
-    ])
+    const response = await fetch("/api/admin/player-matching", { cache: "no-store" })
+    const payload = await response.json().catch(() => ({})) as { players?: Player[]; members?: DiscordMember[]; error?: string }
 
     setLoading(false)
 
-    if (playerError) {
-      alert(playerError.message)
+    if (!response.ok) {
+      alert(payload.error || "Player matching data could not be loaded.")
       return
     }
 
-    if (memberError) {
-      alert(memberError.message)
-      return
-    }
-
-    setPlayers(playerData || [])
-    setMembers(memberData || [])
+    setPlayers(payload.players || [])
+    setMembers(payload.members || [])
   }
 
   const currentPlayer =
@@ -396,15 +373,16 @@ export default function PlayerMatchingPage() {
 
     setSaving(true)
 
-    const { error: linkError } = await supabase.rpc("set_site_player_discord_identity", {
-      p_player_id: currentPlayer.id,
-      p_discord_id: selectedMember.discord_id,
-      p_discord_name: selectedMember.discord_name,
+    const response = await fetch("/api/admin/player-matching", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "link_discord_identity", playerId: currentPlayer.id, discordId: selectedMember.discord_id, discordName: selectedMember.discord_name }),
     })
+    const payload = await response.json().catch(() => ({})) as { error?: string }
 
-    if (linkError) {
+    if (!response.ok) {
       setSaving(false)
-      alert(linkError.message)
+      alert(payload.error || "Discord identity could not be linked.")
       return
     }
 

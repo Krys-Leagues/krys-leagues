@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { supabase } from "@/lib/supabase"
 
 type WaitlistPlayer = {
   id: string
@@ -52,21 +51,18 @@ export default function WaitlistAdminPage() {
     setLoading(true)
     setErrorMessage("")
 
-    const { data, error } = await supabase
-      .from("player_waitlist")
-      .select("*")
-      .in("status", ["waiting", "pending"])
-      .order("created_at", { ascending: false })
+    const response = await fetch("/api/admin/waitlist", { cache: "no-store" })
+    const payload = await response.json().catch(() => ({})) as { data?: WaitlistPlayer[]; error?: string }
 
     setLoading(false)
 
-    if (error) {
-      setErrorMessage(error.message)
+    if (!response.ok) {
+      setErrorMessage(payload.error || "Waitlist could not be loaded.")
       setWaitlist([])
       return
     }
 
-    const rows = (data || []) as WaitlistPlayer[]
+    const rows = payload.data || []
     setWaitlist(rows)
 
     const defaults: Record<string, string> = {}
@@ -86,28 +82,11 @@ export default function WaitlistAdminPage() {
     setSavingId(player.id)
     setErrorMessage("")
 
-    const { error: playerError } = await supabase.from("players").insert({
-      screen_name: player.screen_name,
-      league_type: league,
-      division,
-      discord_id: player.discord_id,
-      discord_username: player.discord_username,
-      discord_avatar: player.discord_avatar,
-    })
+    const response = await fetch("/api/admin/waitlist", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "approve", id: player.id, division }) })
+    const payload = await response.json().catch(() => ({})) as { error?: string }
 
-    if (playerError) {
-      setErrorMessage(playerError.message)
-      setSavingId(null)
-      return
-    }
-
-    const { error: deleteError } = await supabase
-      .from("player_waitlist")
-      .delete()
-      .eq("id", player.id)
-
-    if (deleteError) {
-      setErrorMessage(deleteError.message)
+    if (!response.ok) {
+      setErrorMessage(payload.error || "Waitlist approval failed.")
       setSavingId(null)
       return
     }
@@ -120,13 +99,11 @@ export default function WaitlistAdminPage() {
     setSavingId(player.id)
     setErrorMessage("")
 
-    const { error } = await supabase
-      .from("player_waitlist")
-      .delete()
-      .eq("id", player.id)
+    const response = await fetch("/api/admin/waitlist", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "remove", id: player.id }) })
+    const payload = await response.json().catch(() => ({})) as { error?: string }
 
-    if (error) {
-      setErrorMessage(error.message)
+    if (!response.ok) {
+      setErrorMessage(payload.error || "Waitlist removal failed.")
       setSavingId(null)
       return
     }

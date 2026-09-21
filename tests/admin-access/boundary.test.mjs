@@ -22,6 +22,37 @@ test("protected merge route authorizes before service-role client creation", () 
   assert.ok(source.indexOf("authorizeSiteAdminMutation()") < source.indexOf("createAdminIdentityClient()"))
 })
 
+for (const [page, endpoint] of [
+  ["app/admin/player-matching/page.tsx", "/api/admin/player-matching"],
+  ["app/admin/player-tracker/page.tsx", "/api/admin/player-tracker"],
+  ["app/admin/waitlist/page.tsx", "/api/admin/waitlist"],
+  ["components/admin/ManagedLeaguePlayersPage.tsx", "/api/admin/managed-league-players"],
+]) {
+  test(`${page} uses its protected server route`, () => {
+    const source = read(page)
+    assert.doesNotMatch(source, /supabase\.(from|rpc)\(/)
+    assert.match(source, new RegExp(endpoint.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")))
+  })
+}
+
+for (const route of [
+  "app/api/admin/player-matching/route.ts",
+  "app/api/admin/player-tracker/route.ts",
+  "app/api/admin/waitlist/route.ts",
+  "app/api/admin/managed-league-players/route.ts",
+]) {
+  test(`${route} authorizes before protected access`, () => {
+    const source = read(route)
+    assert.ok(source.indexOf("authorizeSiteAdminMutation()") >= 0)
+    const authIndex = source.indexOf("authorizeSiteAdminMutation()")
+    const protectedIndex = Math.min(...["createAdminServiceClient()", ".from(\"players\")", ".from(\"player_waitlist\")"].map((marker) => {
+      const index = source.indexOf(marker)
+      return index < 0 ? Number.MAX_SAFE_INTEGER : index
+    }))
+    assert.ok(authIndex < protectedIndex)
+  })
+}
+
 test("site-admin contract is centralized and identity independent", () => {
   const source = read("lib/auth/siteAdminMutation.test.ts")
   assert.match(source, /401/)

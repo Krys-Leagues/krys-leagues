@@ -2,12 +2,10 @@
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { supabase } from "@/lib/supabase"
 
 type SeasonRow = { id: string; season_number: number; league_type: string | null }
 type RosterRow = { id: string; division_count: number; status: "draft" | "approved" | "locked" }
 type SlotRow = { player_id: string | null; player_screen_name: string | null; division_number: number; slot_number: number }
-type PlayerState = { id: string; active: boolean }
 
 export function ManagedLeaguePlayersPage({
   leagueKey,
@@ -36,31 +34,15 @@ export function ManagedLeaguePlayersPage({
         return
       }
 
-      const { data: seasonData, error: seasonError } = await supabase
-        .from("seasons")
-        .select("id, season_number, league_type")
-        .eq("id", seasonId)
-        .maybeSingle()
-      if (seasonError || !seasonData || seasonData.league_type?.trim().toLowerCase() !== leagueKey) {
-        setError(seasonError?.message || `The requested managed ${leagueName} season was not found.`)
+      const response = await fetch(`/api/admin/managed-league-players?seasonId=${encodeURIComponent(seasonId)}&leagueKey=${encodeURIComponent(leagueKey)}`, { cache: "no-store" })
+      const payload = await response.json().catch(() => ({})) as { error?: string; season?: SeasonRow; roster?: RosterRow | null; slots?: SlotRow[]; playerStates?: Record<string, boolean> }
+      if (!response.ok || !payload.season) {
+        setError(payload.error || `The requested managed ${leagueName} season was not found.`)
         setLoading(false)
         return
       }
-
-      const { data: rosterData, error: rosterError } = await supabase
-        .from(rosterTable)
-        .select("id, division_count, status")
-        .eq("season_id", seasonId)
-        .in("status", ["draft", "approved", "locked"])
-        .order("created_at", { ascending: false })
-      if (rosterError) {
-        setError(`Could not load the ${leagueName} roster: ${rosterError.message}`)
-        setLoading(false)
-        return
-      }
-
-      const rosters = (rosterData || []) as RosterRow[]
-      const selectedRoster = rosters.find((item) => item.status === "draft") || rosters.find((item) => item.status === "approved") || rosters.find((item) => item.status === "locked") || null
+      const seasonData = payload.season
+      const selectedRoster = payload.roster || null
       if (!selectedRoster) {
         setError(`No managed ${leagueName} roster belongs to this season.`)
         setSeason(seasonData as SeasonRow)
@@ -68,33 +50,8 @@ export function ManagedLeaguePlayersPage({
         return
       }
 
-      const { data: slotData, error: slotError } = await supabase
-        .from(slotTable)
-        .select("player_id, player_screen_name, division_number, slot_number")
-        .eq("roster_version_id", selectedRoster.id)
-        .not("player_id", "is", null)
-        .order("division_number", { ascending: true })
-        .order("slot_number", { ascending: true })
-      if (slotError) {
-        setError(`Could not load the ${leagueName} roster players: ${slotError.message}`)
-        setLoading(false)
-        return
-      }
-
-      const loadedSlots = (slotData || []) as SlotRow[]
-      const playerIds = Array.from(new Set(loadedSlots.flatMap((slot) => slot.player_id ? [slot.player_id] : [])))
-      const states = new Map<string, boolean>()
-      if (playerIds.length > 0) {
-        const { data: playerData, error: playerError } = await supabase
-          .from("players")
-          .select("id, active")
-          .in("id", playerIds)
-        if (playerError) {
-          setError(`Roster loaded, but player status could not be read: ${playerError.message}`)
-        } else {
-          for (const player of (playerData || []) as PlayerState[]) states.set(player.id, player.active)
-        }
-      }
+      const loadedSlots = (payload.slots || []) as SlotRow[]
+      const states = new Map<string, boolean>(Object.entries(payload.playerStates || {}))
 
       setSeason(seasonData as SeasonRow)
       setRoster(selectedRoster)
