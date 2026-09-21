@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabase"
+import { adminManagedLeagueRequest } from "@/lib/admin/managedLeagueClient"
 
 type SeasonRow = {
   id: string
@@ -65,39 +65,19 @@ export default function MatchStandingsPage() {
     async function loadManagedSeasons() {
       setLoading(true)
       setScorecardError("")
-      const { data: seasonData, error: seasonError } = await supabase
-        .from("seasons")
-        .select("id, season_number, is_active, due_date, end_date")
-        .eq("league_type", "match")
-        .is("division", null)
-        .order("is_active", { ascending: false })
-        .order("season_number", { ascending: false })
-
-      if (seasonError) {
-        setScorecardError(`Could not load Match seasons: ${seasonError.message}`)
+      const response = await adminManagedLeagueRequest<{ seasons: SeasonRow[]; rosters: RosterRow[] }>("standings_load", { league: "match" })
+      if (response.error || !response.data) {
+        setScorecardError(`Could not load Match seasons: ${response.error?.message || "No data returned."}`)
         setLoading(false)
         return
       }
-
-      const candidateSeasons = (seasonData || []) as SeasonRow[]
+      const candidateSeasons = response.data.seasons
       if (candidateSeasons.length === 0) {
         setLoading(false)
         return
       }
 
-      const { data: rosterData, error: rosterError } = await supabase
-        .from("match_roster_versions")
-        .select("id, season_id, division_count, status")
-        .in("season_id", candidateSeasons.map((item) => item.id))
-        .in("status", ["draft", "approved", "locked"])
-
-      if (rosterError) {
-        setScorecardError(`Could not load managed Match rosters: ${rosterError.message}`)
-        setLoading(false)
-        return
-      }
-
-      const loadedRosters = (rosterData || []) as RosterRow[]
+      const loadedRosters = response.data.rosters
       const managedIds = new Set(loadedRosters.map((item) => item.season_id))
       const loadedSeasons = candidateSeasons.filter((item) => managedIds.has(item.id))
       const requestedSeasonId = new URLSearchParams(window.location.search)
@@ -164,38 +144,15 @@ export default function MatchStandingsPage() {
 
   async function loadStandings(activeSeason: SeasonRow, activeDivision: number, requestId: number) {
     setLoading(true)
-    const { data, error } = await supabase
-      .from("season_standings")
-      .select("player_id, points, wins, losses, ties, strokes, rank")
-      .eq("league_type", "match")
-      .eq("division", `Match D${activeDivision}`)
-      .eq("season_number", activeSeason.season_number)
-      .order("rank", { ascending: true })
-
+    const response = await adminManagedLeagueRequest<{ standings: SeasonStandingRow[]; playerNames: Array<{ player_id: string; player_screen_name: string }> }>("standings_load", { league: "match", seasonId: activeSeason.id, division: activeDivision })
     if (requestId !== loadVersion.current) return
-    if (error) {
-      setScorecardError(`Could not load standings: ${error.message}`)
+    if (response.error || !response.data) {
+      setScorecardError(`Could not load standings: ${response.error?.message || "No data returned."}`)
       setLoading(false)
       return
     }
-
-    const savedRows = (data || []) as SeasonStandingRow[]
-    let playerMap = new Map<string, string>()
-    if (selectedRoster) {
-      const { data: slotData, error: slotError } = await supabase
-        .from("match_division_roster_slots")
-        .select("player_id, player_screen_name")
-        .eq("roster_version_id", selectedRoster.id)
-        .eq("division_number", activeDivision)
-        .not("player_id", "is", null)
-      if (requestId !== loadVersion.current) return
-      if (slotError) {
-        setScorecardError(`Could not load roster player snapshots: ${slotError.message}`)
-        setLoading(false)
-        return
-      }
-      playerMap = new Map((slotData || []).map((slot) => [String(slot.player_id), String(slot.player_screen_name)]))
-    }
+    const savedRows = response.data.standings
+    const playerMap = new Map(response.data.playerNames.map((player) => [String(player.player_id), String(player.player_screen_name)]))
 
     setStandings(savedRows.map((row) => ({
       player: playerMap.get(row.player_id) || "Unknown Player",
@@ -214,21 +171,14 @@ export default function MatchStandingsPage() {
   async function loadFinalScorecard(activeSeason: SeasonRow, requestId: number) {
     setScorecardLoading(true)
     setScorecardError("")
-    const { data: scorecardData, error: scorecardLoadError } = await supabase
-      .from("match_final_scorecards")
-      .select("id, season_id, source_roster_version_id, status, approved_at, approval_note")
-      .eq("season_id", activeSeason.id)
-      .in("status", ["draft", "approved"])
-
+    const response = await adminManagedLeagueRequest<{ scorecard: ScorecardRow | null; entries: ScorecardEntryRow[]; totalFixtures: number; completedFixtures: number }>("standings_load", { league: "match", seasonId: activeSeason.id, division: 1 })
     if (requestId !== loadVersion.current) return
-    if (scorecardLoadError) {
-      setScorecardError(`Could not load Final Scorecard: ${scorecardLoadError.message}`)
+    if (response.error || !response.data) {
+      setScorecardError(`Could not load Final Scorecard: ${response.error?.message || "No data returned."}`)
       setScorecardLoading(false)
       return
     }
-
-    const scorecards = (scorecardData || []) as ScorecardRow[]
-    const selected = scorecards.find((item) => item.status === "approved") || scorecards.find((item) => item.status === "draft") || null
+    const selected = response.data.scorecard
     if (!selected) {
       setScorecard(null)
       setEntries([])
@@ -238,55 +188,10 @@ export default function MatchStandingsPage() {
       return
     }
 
-    const [entryResponse, fixtureResponse] = await Promise.all([
-      supabase
-        .from("match_final_scorecard_entries")
-        .select("id, division_number, division_rank, player_id, player_screen_name, completed_game_count, wins, losses, ties, points, holes_won, game1_course, game1_outcome, game1_hw, game2_course, game2_outcome, game2_hw, game3_course, game3_outcome, game3_hw")
-        .eq("scorecard_id", selected.id)
-        .order("division_number", { ascending: true })
-        .order("division_rank", { ascending: true }),
-      supabase
-        .from("schedule")
-        .select("id")
-        .eq("league_type", "match")
-        .eq("season_id", activeSeason.id)
-        .eq("match_roster_version_id", selected.source_roster_version_id),
-    ])
-
-    if (requestId !== loadVersion.current) return
-    if (entryResponse.error || fixtureResponse.error) {
-      setScorecardError(
-        entryResponse.error
-          ? `Could not load Final Scorecard entries: ${entryResponse.error.message}`
-          : `Could not load fixture progress: ${fixtureResponse.error?.message}`
-      )
-      setScorecardLoading(false)
-      return
-    }
-
-    const fixtureIds = (fixtureResponse.data || []).map((fixture) => fixture.id)
-    let completedCount = 0
-    if (fixtureIds.length > 0) {
-      const { data: resultData, error: resultError } = await supabase
-        .from("results")
-        .select("schedule_id, player1_hw, player2_hw")
-        .eq("league_type", "match")
-        .in("schedule_id", fixtureIds)
-      if (requestId !== loadVersion.current) return
-      if (resultError) {
-        setScorecardError(`Could not load result progress: ${resultError.message}`)
-        setScorecardLoading(false)
-        return
-      }
-      completedCount = (resultData || []).filter(
-        (result) => result.player1_hw !== null && result.player2_hw !== null
-      ).length
-    }
-
     setScorecard(selected)
-    setEntries((entryResponse.data || []) as ScorecardEntryRow[])
-    setTotalFixtures(fixtureIds.length)
-    setCompletedFixtures(completedCount)
+    setEntries(response.data.entries)
+    setTotalFixtures(response.data.totalFixtures)
+    setCompletedFixtures(response.data.completedFixtures)
     setApprovalNote(selected.approval_note || "")
     setScorecardLoading(false)
   }
@@ -296,9 +201,9 @@ export default function MatchStandingsPage() {
     setGenerating(true)
     setScorecardError("")
     setScorecardMessage("")
-    const { error } = await supabase.rpc("generate_match_final_scorecard", {
+    const { error } = await adminManagedLeagueRequest("rpc", { name: "generate_match_final_scorecard", args: {
       p_season_id: selectedSeason.id,
-    })
+    } })
     if (error) {
       setScorecardError(`Final Scorecard generation failed: ${error.message}`)
       setGenerating(false)
@@ -315,10 +220,10 @@ export default function MatchStandingsPage() {
     setApproving(true)
     setScorecardError("")
     setScorecardMessage("")
-    const { error } = await supabase.rpc("approve_match_final_scorecard", {
+    const { error } = await adminManagedLeagueRequest("rpc", { name: "approve_match_final_scorecard", args: {
       p_final_scorecard_id: scorecard.id,
       p_approval_note: approvalNote,
-    })
+    } })
     if (error) {
       setScorecardError(`Final Scorecard approval failed: ${error.message}`)
       setApproving(false)

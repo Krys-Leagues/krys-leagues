@@ -79,6 +79,63 @@ export async function POST(request: Request) {
       }
       return json({ data: { seasons: managed, fixtures, results, publicMatch } })
     }
+    if (action === "standings_load") {
+      if (league !== "stroke" && league !== "match") return fail("Managed league is required.")
+      const client = createAdminServiceClient()
+      const seasons = await client.from("seasons").select("id, season_number, is_active, due_date, end_date").eq("league_type", league).is("division", null).order("is_active", { ascending: false }).order("season_number", { ascending: false })
+      if (seasons.error) throw seasons.error
+      const seasonIds = (seasons.data || []).map((season) => season.id)
+      const rosterTable = `${league}_roster_versions`
+      const rosters = seasonIds.length ? await client.from(rosterTable).select("id, season_id, division_count, status").in("season_id", seasonIds).in("status", ["draft", "approved", "locked"]) : { data: [], error: null }
+      if (rosters.error) throw rosters.error
+      const seasonId = String(body.seasonId || "").trim()
+      if (!seasonId) return json({ data: { seasons: seasons.data || [], rosters: rosters.data || [] } })
+      const activeSeason = (seasons.data || []).find((season) => season.id === seasonId)
+      const roster = (rosters.data || []).find((item) => item.season_id === seasonId && item.status !== "locked") || (rosters.data || []).find((item) => item.season_id === seasonId)
+      if (!activeSeason || !roster) return fail("Managed season was not found.", 404)
+      const division = Number(body.division || 1)
+      const standings = await client.from("season_standings").select("player_id, points, wins, losses, ties, strokes, rank").eq("league_type", league).eq("division", `${league === "stroke" ? "Stroke" : "Match"} D${division}`).eq("season_number", activeSeason.season_number).order("rank", { ascending: true })
+      if (standings.error) throw standings.error
+      const playerIds = (standings.data || []).map((row) => row.player_id)
+      let playerNames: unknown[] = []
+      if (league === "stroke" && playerIds.length) {
+        const players = await client.from("players").select("id, screen_name").in("id", playerIds)
+        if (players.error) throw players.error
+        playerNames = players.data || []
+      }
+      if (league === "match") {
+        const slots = await client.from("match_division_roster_slots").select("player_id, player_screen_name").eq("roster_version_id", roster.id).eq("division_number", division).not("player_id", "is", null)
+        if (slots.error) throw slots.error
+        playerNames = slots.data || []
+      }
+      const scorecards = await client.from(`${league}_final_scorecards`).select("id, season_id, source_roster_version_id, status, approved_at, approval_note").eq("season_id", seasonId).in("status", ["draft", "approved"])
+      if (scorecards.error) throw scorecards.error
+      const selected = (scorecards.data || []).find((item) => item.status === "approved") || (scorecards.data || []).find((item) => item.status === "draft") || null
+      let entries: unknown[] = []
+      let totalFixtures = 0
+      let completedFixtures = 0
+      if (selected) {
+        const entrySelect = league === "stroke"
+          ? "id, division_number, division_rank, player_id, player_screen_name, completed_game_count, wins, losses, ties, points, strokes"
+          : "id, division_number, division_rank, player_id, player_screen_name, completed_game_count, wins, losses, ties, points, holes_won, game1_course, game1_outcome, game1_hw, game2_course, game2_outcome, game2_hw, game3_course, game3_outcome, game3_hw"
+        const scoreEntries = await client.from(`${league}_final_scorecard_entries`).select(entrySelect).eq("scorecard_id", selected.id).order("division_number", { ascending: true }).order("division_rank", { ascending: true })
+        if (scoreEntries.error) throw scoreEntries.error
+        entries = scoreEntries.data || []
+        const fixtures = await client.from("schedule").select("id").eq("league_type", league).eq("season_id", seasonId).eq(league === "stroke" ? "roster_version_id" : "match_roster_version_id", selected.source_roster_version_id)
+        if (fixtures.error) throw fixtures.error
+        const ids = (fixtures.data || []).map((row) => row.id)
+        totalFixtures = ids.length
+        if (ids.length) {
+          const results = await client.from("results").select(league === "stroke" ? "schedule_id, player1_score, player2_score" : "schedule_id, player1_hw, player2_hw").eq("league_type", league).in("schedule_id", ids)
+          if (results.error) throw results.error
+          completedFixtures = (results.data || []).filter((result) => {
+            const row = result as Record<string, unknown>
+            return league === "stroke" ? row.player1_score !== null && row.player2_score !== null : row.player1_hw !== null && row.player2_hw !== null
+          }).length
+        }
+      }
+      return json({ data: { seasons: seasons.data || [], rosters: rosters.data || [], standings: standings.data || [], playerNames, scorecard: selected, entries, totalFixtures, completedFixtures } })
+    }
     if (action === "rpc") return json({ data: await runRpc(authorization, body) })
     return fail("Unsupported managed-league admin action.")
   } catch (error) {

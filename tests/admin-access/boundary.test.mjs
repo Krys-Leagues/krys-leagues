@@ -61,7 +61,12 @@ for (const route of ["app/api/admin/pyp/route.ts", "app/api/admin/managed-season
   })
 }
 
-for (const page of ["app/admin/stroke/results/page.tsx", "app/admin/match/results/page.tsx"]) {
+for (const page of [
+  "app/admin/stroke/results/page.tsx",
+  "app/admin/match/results/page.tsx",
+  "app/admin/stroke/standings/page.tsx",
+  "app/admin/match/standings/page.tsx",
+]) {
   test(`${page} uses the managed-league server boundary`, () => {
     const source = read(page)
     assert.doesNotMatch(source, /supabase\.(from|rpc)\(/)
