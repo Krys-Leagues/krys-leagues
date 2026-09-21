@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
-import { supabase } from "@/lib/supabase"
+import { loadAdminCareerData } from "@/lib/admin/careerAdminClient"
 
 type Player = {
   id: string
@@ -58,33 +58,11 @@ export default function CareerAdminPage() {
     setLoading(true)
     setMessage("")
 
-    const [
-      playersResponse,
-      resultsResponse,
-      membershipsResponse,
-      trophiesResponse,
-    ] = await Promise.all([
-      supabase
-        .from("players")
-        .select("id, screen_name, status, active")
-        .order("screen_name", { ascending: true }),
-
-      supabase
-        .from("results")
-        .select(
-          "id, player1_id, player2_id, winner, is_draw, league_type, division, season_number"
-        ),
-
-      supabase
-        .from("player_league_memberships")
-        .select("id, player_id, league_type, division, season_number"),
-
-      supabase
-        .from("player_trophies")
-        .select(
-          "id, player_id, trophy_title, placement, event_name, division, season"
-        ),
-    ])
+    const response = await loadAdminCareerData<{ players: Player[]; results: Result[]; memberships: Membership[]; trophies: Trophy[] }>()
+    const playersResponse = { data: response.data?.players || [], error: response.error }
+    const resultsResponse = { data: response.data?.results || [], error: response.error }
+    const membershipsResponse = { data: response.data?.memberships || [], error: response.error }
+    const trophiesResponse = { data: response.data?.trophies || [], error: response.error }
 
     const firstError =
       playersResponse.error ||
