@@ -9,7 +9,7 @@ import { formatClimbersPeriodRange } from "@/lib/all-time/climbers-period-displa
 import { classifyRecord, climbersPoints, deriveFullCardStats, sha256Hex, type FullCardStats, type NormalEntryType, type RecordClassification } from "@/lib/all-time/normal-records"
 import { compareRelativeScoreToPb, formatPb } from "@/lib/all-time/pb-precheck"
 import { nextHoleAfterCompleteInput, parsePositiveHoleScore, sanitizeHoleScoreInput } from "@/lib/all-time/score-input"
-import { supabase } from "@/lib/supabase"
+import { adminRecordsRequest } from "@/lib/admin/recordsClient"
 
 type Period = "current" | "previous" | "two_periods_ago"
 type Course = { id: string; code: string; display_name: string; difficulty: "Easy" | "Hard"; par: number | null; hole_pars: number[] | null }
@@ -60,15 +60,12 @@ export default function NormalRecordsEntryPage() {
 
   useEffect(() => {
     void (async () => {
-      const [courseResult, seasonResult] = await Promise.all([
-        supabase.from("all_time_courses").select("id,code,display_name,difficulty,par,hole_pars").eq("active", true).in("difficulty", ["Easy", "Hard"]).order("display_name"),
-        supabase.from("climbers_seasons").select("id,starts_at,ends_at,status").neq("status", "upcoming").order("starts_at", { ascending: false }),
-      ])
-      if (courseResult.error) setError(courseResult.error.message)
-      const seasons = (seasonResult.data ?? []) as Season[], now = Date.now()
+      const result = await adminRecordsRequest<{ courses: Course[]; seasons: Season[] }>("entry_catalog")
+      if (result.error) setError(result.error.message)
+      const seasons = result.data?.seasons ?? [], now = Date.now()
       const current = seasons.find((item) => item.status === "active" && new Date(item.starts_at).getTime() <= now && new Date(item.ends_at).getTime() > now) ?? null
       const completed = seasons.filter((item) => new Date(item.ends_at).getTime() <= now).sort((a, b) => new Date(b.ends_at).getTime() - new Date(a.ends_at).getTime())
-      setCourses((courseResult.data ?? []) as Course[]); setSeason(current); setPreviousSeason(completed[0] ?? null); setTwoPeriodsAgoSeason(completed[1] ?? null); setLoading(false)
+      setCourses(result.data?.courses ?? []); setSeason(current); setPreviousSeason(completed[0] ?? null); setTwoPeriodsAgoSeason(completed[1] ?? null); setLoading(false)
     })()
   }, [])
 
@@ -121,13 +118,10 @@ export default function NormalRecordsEntryPage() {
     let cancelled = false
     void (async () => {
       setError(""); setBest(null); setCourseBests([]); setBestLoading(true)
-      const [bestResult, allResult] = await Promise.all([
-        supabase.from("all_time_best_records").select("player_id,score").eq("course_id", courseId).eq("player_id", playerId).maybeSingle(),
-        supabase.from("all_time_best_records").select("player_id,score").eq("course_id", courseId),
-      ])
+      const result = await adminRecordsRequest<{ best: Best | null; courseBests: Best[] }>("entry_bests", { courseId, playerId })
       if (cancelled) return
-      if (bestResult.error || allResult.error) setError(bestResult.error?.message || allResult.error?.message || "Current All-Time records could not be loaded.")
-      setBest((bestResult.data as Best | null) ?? null); setCourseBests((allResult.data ?? []) as Best[]); setBestLoading(false)
+      if (result.error) setError(result.error.message || "Current All-Time records could not be loaded.")
+      setBest(result.data?.best ?? null); setCourseBests(result.data?.courseBests ?? []); setBestLoading(false)
     })()
     return () => { cancelled = true }
   }, [courseId, playerId])

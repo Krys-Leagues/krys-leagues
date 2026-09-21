@@ -6,6 +6,7 @@ const read = (path: string) => readFileSync(path, "utf8")
 
 test("All-Time batch scorecard uses the compact reusable player-row layout", () => {
   const page = read("app/admin/records/backfill/page.tsx")
+  const recordsRoute = read("app/api/admin/records/route.ts")
   const grid = read("components/admin/records/CompactScorecardGrid.tsx")
 
   assert.match(page, /CompactScorecardGrid/)
@@ -26,10 +27,12 @@ test("All-Time batch page keeps the protected batch RPCs", () => {
 
 test("scorecard rows expose immediate read-only PB pre-checks without using save RPCs", () => {
   const page = read("app/admin/records/backfill/page.tsx")
+  const recordsRoute = read("app/api/admin/records/route.ts")
   const grid = read("components/admin/records/CompactScorecardGrid.tsx")
   const entry = read("app/admin/records/entry/page.tsx")
 
-  assert.match(page, /from\("all_time_best_records"\)/)
+  assert.match(page, /adminRecordsRequest[\s\S]{0,120}backfill_best/)
+  assert.match(recordsRoute, /all_time_best_records/)
   assert.match(page, /Current PB lookup failed; no write occurred/)
   assert.match(grid, /CURRENT ALL-TIME PB/)
   assert.match(grid, /NEED TO BEAT/)

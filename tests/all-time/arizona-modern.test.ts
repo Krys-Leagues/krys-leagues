@@ -455,6 +455,7 @@ test("complete catalog preserves exact historical aliases and does not invent Gl
 
 test("admin All-Time course choices use active catalog rows without an SBE special case", () => {
   const singlePage = readFileSync("app/admin/records/single/page.tsx", "utf8")
+  const recordsRoute = readFileSync("app/api/admin/records/route.ts", "utf8")
   const sharedLoader = readFileSync("app/api/admin/records/arizona-modern/_shared.ts", "utf8")
   const allTimePage = readFileSync("app/admin/records/all-time/page.tsx", "utf8")
   const allTimePreview = readFileSync("app/api/admin/records/all-time/preview/route.ts", "utf8")
@@ -465,7 +466,8 @@ test("admin All-Time course choices use active catalog rows without an SBE speci
   ].filter((course) => course.active && (course.difficulty === "Easy" || course.difficulty === "Hard"))
 
   assert.deepEqual(choices.map((course) => course.code), ["GLE", "GLH"])
-  assert.match(singlePage, /from\("all_time_courses"\)[\s\S]{0,200}\.eq\("active", true\)/)
+  assert.match(singlePage, /adminRecordsRequest[\s\S]{0,120}single_catalog/)
+  assert.match(recordsRoute, /from\("all_time_courses"\)[\s\S]{0,180}\.eq\("active", true\)/)
   assert.ok((sharedLoader.match(/\.eq\("active", true\)/g) ?? []).length >= 2)
   assert.match(allTimePage, /export \{ default \} from "\.\.\/arizona-modern\/page"/)
   assert.match(allTimePreview, /arizona-modern\/preview\/route/)
@@ -475,7 +477,7 @@ test("admin All-Time course choices use active catalog rows without an SBE speci
 
 test("Single Course Records loads each leaderboard by canonical course UUID", () => {
   const page = readFileSync("app/admin/records/single/page.tsx", "utf8")
-  const scopedQueries = page.match(/\.eq\("course_id", selected\.id\)/g) ?? []
+  const route = readFileSync("app/api/admin/records/route.ts", "utf8")
   const courses = {
     twentyEasy: "00000000-0000-0000-0000-000000000020",
     otherEasy: "00000000-0000-0000-0000-000000000021",
@@ -489,7 +491,8 @@ test("Single Course Records loads each leaderboard by canonical course UUID", ()
   ]
   const forCourse = (courseId: string) => bestRows.filter((row) => row.course_id === courseId)
 
-  assert.equal(scopedQueries.length, 2)
+  assert.match(page, /single_records/)
+  assert.ok((route.match(/\.eq\("course_id", courseId\)/g) ?? []).length >= 2)
   assert.equal(forCourse(courses.twentyEasy).length, 132)
   assert.equal(forCourse(courses.otherEasy).length, 3)
   assert.equal(forCourse(courses.hard).length, 2)

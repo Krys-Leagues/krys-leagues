@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { AdminGlassCard, AdminRecordsHero, AdminRecordsShell, adminRecordsStyles as styles } from "@/components/admin/records/AdminRecordsUI"
 import { deriveFullCardStats, entryTypeLabel, observationStatus } from "@/lib/all-time/normal-records"
-import { supabase } from "@/lib/supabase"
+import { adminRecordsRequest } from "@/lib/admin/recordsClient"
 
 type Course = { id: string; code: string; display_name: string; difficulty: "Easy" | "Hard"; par: number | null; hole_pars: number[] | null }
 type Player = { id: string; screen_name: string }
@@ -19,14 +19,9 @@ export default function RecordsHistoryPage() {
 
   async function load() {
     setLoading(true); setError("")
-    const [courseResult, playerResult, rowResult] = await Promise.all([
-      supabase.from("all_time_courses").select("id,code,display_name,difficulty,par,hole_pars").eq("active", true).in("difficulty", ["Easy", "Hard"]).order("display_name"),
-      supabase.from("players").select("id,screen_name").eq("active", true).order("screen_name"),
-      supabase.from("all_time_record_observations").select("id,card_batch_id,course_id,player_id,historical_player_name,score,entry_type,hole_strokes,source_label,provenance_reference,notes,observed_at,updated_at,recorded_at,recorded_by,authoritative_submitted_at,authoritative_submitted_date,authoritative_submission_order,authoritative_time_precision,voided_at,voided_by,void_reason,corrected_at").order("observed_at", { ascending: false }),
-    ])
-    const queryError = courseResult.error || playerResult.error || rowResult.error
-    if (queryError) setError(queryError.message)
-    setCourses((courseResult.data ?? []) as Course[]); setPlayers((playerResult.data ?? []) as Player[]); setRows((rowResult.data ?? []) as Observation[]); setLoading(false)
+    const result = await adminRecordsRequest<{ courses: Course[]; players: Player[]; rows: Observation[] }>("history_load")
+    if (result.error) setError(result.error.message)
+    setCourses(result.data?.courses ?? []); setPlayers(result.data?.players ?? []); setRows(result.data?.rows ?? []); setLoading(false)
   }
   useEffect(() => { const timer = window.setTimeout(() => void load(), 0); return () => window.clearTimeout(timer) }, [])
 
@@ -54,15 +49,15 @@ export default function RecordsHistoryPage() {
     setBusy(true); setError("")
     let result
     if (batchCard) {
-      result = await supabase.rpc("correct_all_time_late_backfill_batch_entry", { p_observation_id: selected.id, p_expected_updated_at: selected.updated_at, p_new_hole_strokes: correctedHoles, p_reason: reason.trim() })
+      result = await adminRecordsRequest("history_rpc", { name: "correct_all_time_late_backfill_batch_entry", args: { p_observation_id: selected.id, p_expected_updated_at: selected.updated_at, p_new_hole_strokes: correctedHoles, p_reason: reason.trim() } })
     } else if (selected.entry_type === "late_backfill") {
       let submittedAt: string | null = null, submittedDate = lateDate, submittedOrder: number | null = null
       if (latePrecision === "exact") { const parsed = new Date(lateTimestamp); if (!/^\d{4}-\d{2}-\d{2}T.+(?:Z|[+-]\d{2}:\d{2})$/.test(lateTimestamp) || Number.isNaN(parsed.getTime())) { setError("Enter an authoritative ISO 8601 timestamp with timezone."); setBusy(false); return }; submittedAt = parsed.toISOString(); submittedDate = submittedAt.slice(0, 10) }
       else if (!/^\d{4}-\d{2}-\d{2}$/.test(lateDate) || lateDate < "2026-08-15" || lateDate > "2026-08-28" || !/^\d+$/.test(lateOrder) || Number(lateOrder) < 1) { setError("Date-only correction must target Aug 15–Aug 28, 2026 with a positive source-backed order."); setBusy(false); return }
       else submittedOrder = Number(lateOrder)
       if (submittedDate < "2026-08-15" || submittedDate > "2026-08-28") { setError("Late/backdated corrections must target Aug 15–Aug 28, 2026."); setBusy(false); return }
-      result = await supabase.rpc("correct_all_time_late_backfill_entry", { p_observation_id: selected.id, p_expected_updated_at: selected.updated_at, p_new_score: correctedScore, p_authoritative_submitted_at: submittedAt, p_authoritative_submitted_date: latePrecision === "exact" ? null : submittedDate, p_authoritative_submission_order: submittedOrder, p_authoritative_time_precision: latePrecision, p_reason: reason.trim() })
-    } else result = await supabase.rpc("correct_all_time_record_entry", { p_observation_id: selected.id, p_expected_updated_at: selected.updated_at, p_new_score: correctedScore, p_new_hole_strokes: fullCard ? correctedHoles : null, p_reason: reason.trim() })
+      result = await adminRecordsRequest("history_rpc", { name: "correct_all_time_late_backfill_entry", args: { p_observation_id: selected.id, p_expected_updated_at: selected.updated_at, p_new_score: correctedScore, p_authoritative_submitted_at: submittedAt, p_authoritative_submitted_date: latePrecision === "exact" ? null : submittedDate, p_authoritative_submission_order: submittedOrder, p_authoritative_time_precision: latePrecision, p_reason: reason.trim() } })
+    } else result = await adminRecordsRequest("history_rpc", { name: "correct_all_time_record_entry", args: { p_observation_id: selected.id, p_expected_updated_at: selected.updated_at, p_new_score: correctedScore, p_new_hole_strokes: fullCard ? correctedHoles : null, p_reason: reason.trim() } })
     if (result.error) setError(result.error.message); else { setMessage("Entry corrected and the derived best was recalculated from active history."); setSelected(null); setMode(null); await load() }
     setBusy(false)
   }
@@ -70,8 +65,8 @@ export default function RecordsHistoryPage() {
     if (!selected || !reason.trim()) { setError("A void reason is required."); return }
     setBusy(true); setError("")
     const result = selected.entry_type === "late_backfill"
-      ? await supabase.rpc("void_all_time_late_backfill_entry", { p_observation_id: selected.id, p_expected_updated_at: selected.updated_at, p_reason: reason.trim() })
-      : await supabase.rpc("void_all_time_record_entry", { p_observation_id: selected.id, p_expected_updated_at: selected.updated_at, p_reason: reason.trim() })
+      ? await adminRecordsRequest("history_rpc", { name: "void_all_time_late_backfill_entry", args: { p_observation_id: selected.id, p_expected_updated_at: selected.updated_at, p_reason: reason.trim() } })
+      : await adminRecordsRequest("history_rpc", { name: "void_all_time_record_entry", args: { p_observation_id: selected.id, p_expected_updated_at: selected.updated_at, p_reason: reason.trim() } })
     if (result.error) setError(result.error.message); else { setMessage("Entry voided with its provenance and audit trail preserved; derived best was recalculated."); setSelected(null); setMode(null); await load() }
     setBusy(false)
   }

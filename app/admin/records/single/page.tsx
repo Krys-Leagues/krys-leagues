@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { AdminGlassCard, AdminRecordsHero, AdminRecordsShell, adminRecordsStyles as styles } from "@/components/admin/records/AdminRecordsUI"
 import { denseRanks } from "@/lib/all-time/dense-rank"
-import { supabase } from "@/lib/supabase"
+import { adminRecordsRequest } from "@/lib/admin/recordsClient"
 
 type SingleRecord = {
   id: string
@@ -59,7 +59,7 @@ export default function SingleRecordsPage() {
     let cancelled = false
     const timeout = window.setTimeout(() => void (async () => {
       try {
-        const courseResult = await supabase.from("all_time_courses").select("id, code, display_name, difficulty").eq("active", true).in("difficulty", ["Easy", "Hard"]).order("display_name")
+        const courseResult = await adminRecordsRequest<AllTimeCourse[]>("single_catalog")
         if (courseResult.error) throw courseResult.error
         if (cancelled) return
         const catalog = (courseResult.data ?? []) as AllTimeCourse[]
@@ -80,19 +80,15 @@ export default function SingleRecordsPage() {
     const timeout = window.setTimeout(() => void (async () => {
       setLoading(true); setError(""); setRecords([])
       try {
-        const [bestResult, unresolvedResult] = await Promise.all([
-          supabase.from("all_time_best_records").select("id, course_id, score, historical_player_name, player:players(screen_name)").eq("course_id", selected.id),
-          supabase.from("all_time_record_observations").select("id, course_id, score, historical_player_name").eq("course_id", selected.id).in("identity_status", ["unresolved", "ambiguous"]),
-        ])
-        if (bestResult.error) throw bestResult.error
-        if (unresolvedResult.error) throw unresolvedResult.error
+        const recordsResult = await adminRecordsRequest<{ best: BestRecordRow[]; unresolved: UnresolvedObservationRow[] }>("single_records", { courseId: selected.id })
+        if (recordsResult.error) throw recordsResult.error
         if (cancelled) return
-        const linked = ((bestResult.data ?? []) as BestRecordRow[]).map((row) => {
+        const linked = (recordsResult.data?.best ?? []).map((row) => {
           const player = Array.isArray(row.player) ? row.player[0] : row.player
           return { id: row.id, course_id: selected.id, course_code: selected.code, player_name: player?.screen_name ?? row.historical_player_name, historical_player_name: row.historical_player_name, identity_linked: Boolean(player), score: row.score }
         })
         const unresolvedBest = new Map<string, SingleRecord>()
-        for (const row of (unresolvedResult.data ?? []) as UnresolvedObservationRow[]) {
+        for (const row of recordsResult.data?.unresolved ?? []) {
           const existing = unresolvedBest.get(row.historical_player_name)
           if (!existing || row.score < existing.score) unresolvedBest.set(row.historical_player_name, { id: row.id, course_id: selected.id, course_code: selected.code, player_name: row.historical_player_name, historical_player_name: row.historical_player_name, identity_linked: false, score: row.score })
         }

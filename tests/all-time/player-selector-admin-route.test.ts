@@ -32,11 +32,16 @@ test("admin Global Player choices support punctuation-safe screen-name search", 
 })
 
 test("All-Time selector uses the protected admin lookup and keeps PB/period readers", async () => {
-  const [page, route] = await Promise.all([readFile(pagePath, "utf8"), readFile(routePath, "utf8")])
+  const [page, route, recordsRoute] = await Promise.all([
+    readFile(pagePath, "utf8"),
+    readFile(routePath, "utf8"),
+    readFile("app/api/admin/records/route.ts", "utf8"),
+  ])
 
   assert.match(page, /fetch\(`\/api\/admin\/records\/player-search\?q=/)
   assert.doesNotMatch(page, /from\(["']players["']\)/)
-  assert.match(page, /all_time_best_records/)
+  assert.match(page, /adminRecordsRequest[\s\S]{0,120}entry_bests/)
+  assert.match(recordsRoute, /all_time_best_records/)
   assert.match(page, /value="current"/)
   assert.match(page, /value="previous"/)
   assert.match(page, /value="two_periods_ago"/)

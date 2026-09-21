@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { AdminRecordsHero, AdminRecordsShell, adminRecordsStyles as styles } from "@/components/admin/records/AdminRecordsUI"
-import { supabase } from "@/lib/supabase"
+import { adminRecordsRequest } from "@/lib/admin/recordsClient"
 
 type Player = {
   id: string
@@ -71,20 +71,10 @@ export default function CombinedRecordsPage() {
   async function loadData() {
     setLoading(true)
 
-    const { data: playerData } = await supabase
-      .from("players")
-      .select("id, screen_name")
-      .eq("active", true)
-      .order("screen_name", { ascending: true })
+    const result = await adminRecordsRequest<{ players: Player[]; records: CombinedRecord[] }>("combined_load")
 
-    const { data: recordData } = await supabase
-      .from("combined_course_records")
-      .select("*")
-      .order("course_name", { ascending: true })
-      .order("combined_score", { ascending: true })
-
-    setPlayers(playerData || [])
-    setRecords(recordData || [])
+    setPlayers(result.data?.players || [])
+    setRecords(result.data?.records || [])
 
     setLoading(false)
   }
@@ -131,11 +121,7 @@ export default function CombinedRecordsPage() {
 
     setSaving(true)
 
-    const { error } = await supabase
-      .from("combined_course_records")
-      .upsert(
-        [
-          {
+    const result = await adminRecordsRequest("combined_save", { record: {
             player_id: selectedPlayer.id,
             player_name: selectedPlayer.screen_name,
             course_name: courseName,
@@ -144,17 +130,12 @@ export default function CombinedRecordsPage() {
             combined_score: combinedScore,
             played_at: playedAt || null,
             notes: notes || null,
-          },
-        ],
-        {
-          onConflict: "player_name,course_name",
-        }
-      )
+          } })
 
     setSaving(false)
 
-    if (error) {
-      alert(error.message)
+    if (result.error) {
+      alert(result.error.message)
       return
     }
 

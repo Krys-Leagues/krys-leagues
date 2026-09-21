@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { AdminGlassCard, AdminRecordsHero, AdminRecordsShell, adminRecordsStyles as styles } from "@/components/admin/records/AdminRecordsUI"
-import { supabase } from "@/lib/supabase"
+import { adminRecordsRequest } from "@/lib/admin/recordsClient"
 import {
   CLIMBERS_BASELINE_CUTOFF,
   CLIMBERS_BASELINE_IMPORT_KEY,
@@ -31,22 +31,11 @@ export default function ClimbersAdminPage() {
 
   async function load() {
     setLoading(true); setError("")
-    const [seasonResult, eventResult, passResult, ytdResult, playerResult, courseResult, baselineMarkerResult, baselineSourceResult, baselineResult] = await Promise.all([
-      supabase.from("climbers_seasons").select("id,label,starts_at,ends_at,status").order("starts_at", { ascending: false }),
-      supabase.from("climbers_events").select("id,season_id,player_id,course_id,difficulty,old_pb_score,new_pb_score,points,calculation_version,source_label,provenance_reference,created_at,voided_at").order("created_at", { ascending: false }),
-      supabase.from("climbers_event_passes").select("event_id,passed_player_id"),
-      supabase.from("climbers_year_to_date").select("player_id,points,event_count").order("points", { ascending: false }),
-      supabase.from("players").select("id,screen_name").order("screen_name"),
-      supabase.from("all_time_courses").select("id,code,display_name,difficulty").eq("active", true).in("difficulty", ["Easy", "Hard"]),
-      supabase.from("climbers_legacy_baseline_imports").select("import_key,cutoff_at,applied_at").eq("import_key", CLIMBERS_BASELINE_IMPORT_KEY).maybeSingle(),
-      supabase.from("climbers_legacy_baseline_source_rows").select("source_name,ytd_points,period_points,canonical_player_id,identity_status").eq("import_key", CLIMBERS_BASELINE_IMPORT_KEY),
-      supabase.from("climbers_legacy_baselines").select("canonical_player_id").eq("import_key", CLIMBERS_BASELINE_IMPORT_KEY),
-    ])
-    const queryError = seasonResult.error || eventResult.error || passResult.error || ytdResult.error || playerResult.error || courseResult.error || baselineMarkerResult.error || baselineSourceResult.error || baselineResult.error
-    if (queryError) setError(queryError.message)
-    const nextSeasons = (seasonResult.data ?? []) as Season[]
-    setSeasons(nextSeasons); setEvents((eventResult.data ?? []) as Event[]); setPasses((passResult.data ?? []) as Pass[]); setYtd((ytdResult.data ?? []) as Ytd[]); setPlayers((playerResult.data ?? []) as Player[]); setCourses((courseResult.data ?? []) as Course[]); setSeasonId((current) => current || nextSeasons.find((season) => season.status === "active")?.id || nextSeasons[0]?.id || ""); setLoading(false)
-    setBaselineMarker((baselineMarkerResult.data ?? null) as ClimbersBaselineImportMarker | null); setBaselineSourceRows((baselineSourceResult.data ?? []) as ClimbersBaselineSourceRow[]); setActiveBaselinePlayers((baselineResult.data ?? []).length)
+    const result = await adminRecordsRequest<{ seasons: Season[]; events: Event[]; passes: Pass[]; ytd: Ytd[]; players: Player[]; courses: Course[]; baselineMarker: ClimbersBaselineImportMarker | null; baselineSourceRows: ClimbersBaselineSourceRow[]; baselines: unknown[] }>("climbers_load", { baselineImportKey: CLIMBERS_BASELINE_IMPORT_KEY })
+    if (result.error) setError(result.error.message)
+    const nextSeasons = result.data?.seasons ?? []
+    setSeasons(nextSeasons); setEvents(result.data?.events ?? []); setPasses(result.data?.passes ?? []); setYtd(result.data?.ytd ?? []); setPlayers(result.data?.players ?? []); setCourses(result.data?.courses ?? []); setSeasonId((current) => current || nextSeasons.find((season) => season.status === "active")?.id || nextSeasons[0]?.id || ""); setLoading(false)
+    setBaselineMarker(result.data?.baselineMarker ?? null); setBaselineSourceRows(result.data?.baselineSourceRows ?? []); setActiveBaselinePlayers((result.data?.baselines ?? []).length)
   }
   useEffect(() => { const timer = window.setTimeout(() => void load(), 0); return () => window.clearTimeout(timer) }, [])
 
@@ -57,11 +46,11 @@ export default function ClimbersAdminPage() {
 
   async function createSeason() {
     const start = new Date(), end = new Date(start.getTime() + 14 * 24 * 60 * 60 * 1000), label = `Climbers · ${start.toISOString().slice(0, 10)}`
-    setBusy(true); const result = await supabase.rpc("create_climbers_season", { p_label: label, p_starts_at: start.toISOString(), p_ends_at: end.toISOString() }); if (result.error) setError(result.error.message); else { setMessage("New 14-day Climbers season created."); await load() } setBusy(false)
+    setBusy(true); const result = await adminRecordsRequest("climbers_rpc", { name: "create_climbers_season", args: { p_label: label, p_starts_at: start.toISOString(), p_ends_at: end.toISOString() } }); if (result.error) setError(result.error.message); else { setMessage("New 14-day Climbers season created."); await load() } setBusy(false)
   }
   async function finalizeSeason() {
     if (!season || !window.confirm(`Finalize ${season.label}? Finalized Climbers events are protected from ordinary All-Time corrections.`)) return
-    setBusy(true); const result = await supabase.rpc("finalize_climbers_season", { p_season_id: season.id }); if (result.error) setError(result.error.message); else { setMessage("Climbers season finalized; ties remain ties."); await load() } setBusy(false)
+    setBusy(true); const result = await adminRecordsRequest("climbers_rpc", { name: "finalize_climbers_season", args: { p_season_id: season.id } }); if (result.error) setError(result.error.message); else { setMessage("Climbers season finalized; ties remain ties."); await load() } setBusy(false)
   }
   const baselineSummary = useMemo(() => summarizeClimbersBaseline(baselineSourceRows), [baselineSourceRows])
   const baselineValidation = useMemo(() => validateClimbersBaselineForActivation(baselineMarker, baselineSummary), [baselineMarker, baselineSummary])

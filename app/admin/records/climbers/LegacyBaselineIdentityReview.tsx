@@ -5,8 +5,8 @@ import { useEffect, useMemo, useState } from "react"
 import ExistingPlayerPicker from "@/app/admin/import/csv/components/ExistingPlayerPicker"
 import type { GlobalPlayerDirectoryEntry } from "@/lib/identity/globalPlayerDirectory"
 import { loadGlobalPlayerDirectory, normalizeGlobalPlayerSearch } from "@/lib/identity/globalPlayerDirectory"
-import { rememberVerifiedPlayerAliases } from "@/lib/importer/rememberVerifiedPlayerAliases"
-import { supabase } from "@/lib/supabase"
+import { rememberVerifiedPlayerAliases, type VerifiedAliasMemoryRpcResult } from "@/lib/importer/rememberVerifiedPlayerAliases"
+import { adminRecordsRequest } from "@/lib/admin/recordsClient"
 import {
   CLIMBERS_BASELINE_RESOLVED_SOURCE_NAMES,
   CLIMBERS_BASELINE_REVIEW_ROWS,
@@ -105,7 +105,10 @@ export default function LegacyBaselineIdentityReview() {
     try {
       const memory = await rememberVerifiedPlayerAliases(
         [{ p_player_id: player.id, p_alias: row.sourceName }],
-        async (request) => supabase.rpc("remember_verified_player_alias", request),
+        async (request) => {
+          const result = await adminRecordsRequest("climbers_rpc", { name: "remember_verified_player_alias", args: request })
+          return { data: result.data as VerifiedAliasMemoryRpcResult | VerifiedAliasMemoryRpcResult[] | null, error: result.error ? { message: result.error.message } : null }
+        },
       )
       if (memory.conflicts.length || memory.failures.length) {
         throw new Error(memory.conflicts[0]?.message || memory.failures[0]?.message || "The identity confirmation was rejected.")
