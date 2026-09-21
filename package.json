@@ -16,7 +16,7 @@
     "test:monthly-import": "node --experimental-strip-types --test lib/importer/adapters/monthlyWebsiteAdapter.test.ts",
     "test:trophy-import": "node --experimental-strip-types --test lib/trophies/trophyImport.test.ts lib/trophies/trophyMedia.test.ts lib/trophies/pendingTrophyAssignments.test.ts",
     "test:all-time": "node --experimental-strip-types --test tests/all-time/*.test.ts",
-    "audit:admin-access": "node scripts/audit-admin-data-boundary.mjs --changed",
+    "audit:admin-access": "node scripts/audit-admin-data-boundary.mjs --admin",
     "audit:database-permissions": "node scripts/audit-database-permissions.mjs",
     "inventory:admin-access": "node scripts/generate-admin-access-inventory.mjs",
     "test:admin-access": "node --test tests/admin-access/*.test.mjs",

@@ -4,6 +4,7 @@ import { join, relative, sep } from "node:path"
 
 const root = process.cwd()
 const changedOnly = process.argv.includes("--changed")
+const adminOnly = process.argv.includes("--admin")
 
 const protectedTables = [
   "players", "player_league_memberships", "player_tournament_entries", "player_identity_links", "player_aliases",
@@ -54,6 +55,12 @@ function addedLines() {
 
 function sourceFiles() {
   const all = [...walk(join(root, "app")), ...walk(join(root, "components")), ...walk(join(root, "lib"))]
+  if (adminOnly) {
+    return all.filter((path) => {
+      const file = relative(root, path).split(sep).join("/")
+      return file.startsWith("app/admin/") || file.startsWith("components/admin/")
+    })
+  }
   if (!changedOnly) return all
   const changed = changedFiles()
   return all.filter((path) => changed.has(relative(root, path).split(sep).join("/")) || changed.has(relative(root, path)))
@@ -106,9 +113,9 @@ for (const file of migrationChanges) {
 }
 
 const unique = [...new Set(failures)].sort()
-console.log(JSON.stringify({ mode: changedOnly ? "changed-files" : "full-source", findings: unique }, null, 2))
+console.log(JSON.stringify({ mode: adminOnly ? "absolute-admin" : changedOnly ? "changed-files" : "full-source", findings: unique }, null, 2))
 
-if (changedOnly && unique.length > 0) {
+if ((changedOnly || adminOnly) && unique.length > 0) {
   console.error(`Admin data boundary audit failed with ${unique.length} finding(s).`)
   process.exitCode = 1
 }
