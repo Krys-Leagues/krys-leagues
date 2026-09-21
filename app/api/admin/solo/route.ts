@@ -11,6 +11,29 @@ export async function POST(request: Request) {
   try {
     const body = await request.json() as Record<string, unknown>
     const action = String(body.action || "")
+    if (action === "hub_load") {
+      const seasons = await createAdminServiceClient().from("seasons").select("id, season_number, is_active").eq("league_type", "solo").is("division", null).order("season_number", { ascending: false })
+      if (seasons.error) throw seasons.error
+      const rosters = seasons.data?.length ? await createAdminServiceClient().from("solo_roster_versions").select("season_id, status").in("season_id", seasons.data.map((s) => s.id)).in("status", ["draft", "approved", "locked"]) : { data: [], error: null }
+      if (rosters.error) throw rosters.error
+      return NextResponse.json({ data: { seasons: seasons.data || [], rosters: rosters.data || [] } }, { headers: { "Cache-Control": "no-store" } })
+    }
+    if (action === "standings_load") {
+      const id = String(body.seasonId || "")
+      const client = createAdminServiceClient()
+      const [season, weeks, roster, snapshots] = await Promise.all([
+        client.from("seasons").select("season_number,league_type").eq("id", id).maybeSingle(),
+        client.from("solo_weeks").select("id,week_number,status,course_code").eq("season_id", id).order("week_number"),
+        client.from("solo_roster_versions").select("id").eq("season_id", id).eq("status", "approved").maybeSingle(),
+        client.from("solo_week_snapshots").select("id").eq("season_id", id).eq("is_current", true),
+      ])
+      if (season.error || weeks.error || roster.error || snapshots.error) throw season.error || weeks.error || roster.error || snapshots.error
+      const snapshotIds = (snapshots.data || []).map((row) => row.id)
+      const entries = roster.data ? await client.from("solo_roster_entries").select("player_id,player_screen_name,division,display_order").eq("roster_version_id", roster.data.id).order("display_order") : { data: [], error: null }
+      const frozen = snapshotIds.length ? await client.from("solo_week_snapshot_entries").select("week_id,player_id,easy_stroke_score,hard_stroke_score").in("snapshot_id", snapshotIds) : { data: [], error: null }
+      if (entries.error || frozen.error) throw entries.error || frozen.error
+      return NextResponse.json({ data: { season: season.data, weeks: weeks.data || [], roster: roster.data, entries: entries.data || [], frozen: frozen.data || [] } }, { headers: { "Cache-Control": "no-store" } })
+    }
     if (action === "query") {
       const allowed = new Set(["seasons", "solo_roster_versions", "solo_player_pool", "players", "solo_roster_entries", "solo_weeks", "solo_live_best_attempts", "solo_score_attempts"])
       const table = String(body.table || "")
