@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabase"
+import { adminPypRequest } from "@/lib/admin/pypClient"
 import { logActivity } from "@/lib/activityLog"
 
 type Entry = { player_id: string; player_screen_name: string; division_number: number; division_rank: number; completed_game_count: number }
@@ -79,67 +79,16 @@ export default function PYPTransitionPage() {
     const requestedId = new URLSearchParams(window.location.search).get("scorecardId")?.trim() || ""
     if (!requestedId) { setError("An approved Final Scorecard ID is required."); setLoading(false); return }
     setScorecardId(requestedId)
-    const { data: scorecard, error: scorecardError } = await supabase.from("pyp_final_scorecards")
-      .select("id, season_id, status").eq("id", requestedId).maybeSingle()
-    if (scorecardError || !scorecard || scorecard.status !== "approved") {
-      setError(scorecardError?.message || "An approved Final Scorecard is required."); setLoading(false); return
-    }
+    const response = await adminPypRequest<{ scorecard: { id: string; season_id: string; status: string }; sourceSeason: Season | null; entries: Entry[]; decisions: Decision[]; seasons: Season[]; players: Player[]; roster: { id: string; season_id: string; division_count: number } | null; slots: Array<Omit<ProposalSlot, "roster_version_id" | "target_season_id" | "target_division_count" | "movement_reason">> }>("transition_load", { scorecardId: requestedId })
+    if (response.error || !response.data || response.data.scorecard.status !== "approved" || !response.data.sourceSeason) { setError(response.error?.message || "An approved Final Scorecard is required."); setLoading(false); return }
+    const { scorecard, sourceSeason, entries: loadedEntries, decisions: loadedDecisions, seasons: candidateSeasons, players: loadedPlayers, roster: targetRoster, slots: slotData } = response.data
     setSourceSeasonId(scorecard.season_id)
-    const { data: sourceSeason, error: sourceError } = await supabase.from("seasons")
-      .select("season_number").eq("id", scorecard.season_id).maybeSingle()
-    if (sourceError || !sourceSeason) { setError(sourceError?.message || "Source season not found."); setLoading(false); return }
     setSourceSeasonNumber(sourceSeason.season_number)
-
-    const [entryResponse, decisionResponse, seasonResponse, playerResponse] = await Promise.all([
-      supabase.from("pyp_final_scorecard_entries")
-        .select("player_id, player_screen_name, division_number, division_rank, completed_game_count")
-        .eq("scorecard_id", requestedId).order("division_number").order("division_rank"),
-      supabase.from("pyp_final_scorecard_player_decisions").select("player_id, decision").eq("final_scorecard_id", requestedId),
-      supabase.from("seasons").select("id, season_number, start_date, end_date").eq("league_type", "pyp")
-        .is("division", null).eq("season_number", sourceSeason.season_number + 1),
-      supabase.from("players").select("id, screen_name").eq("active", true).order("screen_name"),
-    ])
-    const loadError = entryResponse.error || decisionResponse.error || seasonResponse.error || playerResponse.error
-    if (loadError) { setError(loadError.message); setLoading(false); return }
-    const loadedEntries = (entryResponse.data || []) as Entry[]
-    const loadedPlayers = (playerResponse.data || []) as Player[]
-    const candidateSeasons = (seasonResponse.data || []) as Season[]
-    let loadedSeasons: Season[] = []
-    let loadedTargetDivisionCount: number | null = null
-    let loadedProposal: ProposalSlot[] = []
-    if (candidateSeasons.length > 0) {
-      const { data: rosterData, error: rosterError } = await supabase
-        .from("pyp_roster_versions")
-        .select("id, season_id, division_count, source_final_scorecard_id")
-        .in("season_id", candidateSeasons.map((season) => season.id))
-        .in("status", ["draft", "approved"])
-      if (rosterError) { setError(rosterError.message); setLoading(false); return }
-      const managedIds = new Set((rosterData || []).map((roster) => roster.season_id as string))
-      loadedSeasons = candidateSeasons.filter((season) => managedIds.has(season.id))
-      if (loadedSeasons.length > 1) {
-        setError("Multiple eligible managed PYP target seasons were found. Resolve the ambiguity before continuing.")
-        setLoading(false)
-        return
-      }
-      if (loadedSeasons.length === 1) {
-        const targetRoster = (rosterData || []).find((roster) => roster.season_id === loadedSeasons[0].id)
-        if (targetRoster?.division_count) loadedTargetDivisionCount = Number(targetRoster.division_count)
-        if (targetRoster?.source_final_scorecard_id === requestedId) {
-          const { data: slotData, error: slotError } = await supabase
-            .from("pyp_division_roster_slots")
-            .select("division_number, slot_number, player_id, player_screen_name")
-            .eq("roster_version_id", targetRoster.id)
-            .order("division_number").order("slot_number")
-          if (slotError) { setError(slotError.message); setLoading(false); return }
-          loadedProposal = withVisibleMovementLabels(((slotData || []) as Omit<ProposalSlot, "roster_version_id" | "target_season_id" | "target_division_count" | "movement_reason">[]).map((slot) => ({
-            ...slot, roster_version_id: targetRoster.id, target_season_id: loadedSeasons[0].id,
-            target_division_count: Number(targetRoster.division_count), movement_reason: null,
-          })), loadedEntries)
-        }
-      }
-    }
+    const loadedSeasons = targetRoster ? candidateSeasons.filter((season) => season.id === targetRoster.season_id) : []
+    const loadedTargetDivisionCount = targetRoster?.division_count || null
+    const loadedProposal = targetRoster ? withVisibleMovementLabels(slotData.map((slot) => ({ ...slot, roster_version_id: targetRoster.id, target_season_id: targetRoster.season_id, target_division_count: Number(targetRoster.division_count), movement_reason: null })), loadedEntries) : []
     setEntries(loadedEntries)
-    setDecisions(new Map(((decisionResponse.data || []) as Decision[]).map((item) => [item.player_id, item.decision])))
+    setDecisions(new Map(loadedDecisions.map((item) => [item.player_id, item.decision])))
     setTargetSeasons(loadedSeasons); setTargetSeasonId(loadedSeasons[0]?.id || "")
     const sourceDivisionCount = String(Math.max(1, ...loadedEntries.map((entry) => entry.division_number)))
     if (loadedSeasons.length === 1) {
@@ -177,9 +126,9 @@ export default function PYPTransitionPage() {
 
   async function setDecision(playerId: string, decision: Decision["decision"]) {
     setSavingDecision(playerId); setError(""); setMessage("")
-    const { error: saveError } = await supabase.rpc("set_pyp_return_decision", {
+    const { error: saveError } = await adminPypRequest("rpc", { name: "set_pyp_return_decision", args: {
       p_final_scorecard_id: scorecardId, p_player_id: playerId, p_decision: decision,
-    })
+    } })
     if (saveError) { setError(saveError.message); setSavingDecision(""); return }
     setDecisions((current) => new Map(current).set(playerId, decision)); setSavingDecision("")
   }
@@ -207,13 +156,13 @@ export default function PYPTransitionPage() {
     if (endDate < startDate) { setError("End date cannot be before the start date."); return }
 
     setCreatingSeason(true); setError(""); setMessage("")
-    const { data, error: createError } = await supabase.rpc("create_pyp_season_with_roster", {
+    const { data, error: createError } = await adminPypRequest<{ season_id: string; season_number: number; division_count: number }>("rpc", { name: "create_pyp_season_with_roster", args: {
       p_season_number: seasonNumber,
       p_division_count: parsedCount,
       p_start_date: startDate,
       p_due_date: endDate,
       p_end_date: endDate,
-    }).single()
+    } })
 
     if (createError || !data) {
       const errorMessage = createError?.message || "No season data was returned."
@@ -241,10 +190,10 @@ export default function PYPTransitionPage() {
       setError("Choose the target season and a division count from 1 through 20."); return
     }
     setGenerating(true); setError(""); setMessage("")
-    const { data, error: generateError } = await supabase.rpc("generate_pyp_next_season_proposal", {
+    const { data, error: generateError } = await adminPypRequest<ProposalSlot[]>("rpc", { name: "generate_pyp_next_season_proposal", args: {
       p_final_scorecard_id: scorecardId, p_target_season_id: targetSeasonId,
       p_target_division_count: parsedCount, p_new_player_ids: newPlayerIds,
-    })
+    } })
     if (generateError) { setError(generateError.message); setGenerating(false); return }
     setProposal(withVisibleMovementLabels((data || []) as ProposalSlot[], entries)); setMessage("Draft next-season roster generated. It is not official until separately approved.")
     setGenerating(false)

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabase"
+import { adminPypRequest } from "@/lib/admin/pypClient"
 
 type Slot = { slot_number: number; player_id: string | null; player_screen_name: string | null }
 type Player = { id: string; screen_name: string }
@@ -50,31 +50,13 @@ export default function PypSetupPage() {
       return
     }
 
-    const { data: seasonData, error: seasonError } = await supabase
-      .from("seasons")
-      .select("season_number, start_date, end_date, league_type")
-      .eq("id", selectedSeasonId)
-      .maybeSingle()
-    if (seasonError || !seasonData || seasonData.league_type !== "pyp") {
-      setMessage(seasonError?.message || "Managed PYP season not found.")
+    const response = await adminPypRequest<{ season: Season; roster: Roster & { id: string }; slots: Slot[]; players: Player[] }>("setup_load", { seasonId: selectedSeasonId, division: requestedDivision })
+    if (response.error || !response.data) {
+      setMessage(response.error?.message || "Managed PYP season not found.")
       setLoading(false)
       return
     }
-
-    const { data: rosterData, error: rosterError } = await supabase
-      .from("pyp_roster_versions")
-      .select("id, division_count, status")
-      .eq("season_id", selectedSeasonId)
-      .in("status", ["draft", "approved", "locked"])
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle()
-    if (rosterError || !rosterData) {
-      setMessage(rosterError?.message || "PYP roster not found.")
-      setLoading(false)
-      return
-    }
-
+    const { season: seasonData, roster: rosterData, slots, players: loadedPlayers } = response.data
     const roster = rosterData as Roster
     if (requestedDivision > roster.division_count) {
       setMessage(`Division must be between 1 and ${roster.division_count}.`)
@@ -82,43 +64,21 @@ export default function PypSetupPage() {
       return
     }
 
-    const { data: slotData, error: slotError } = await supabase
-      .from("pyp_division_roster_slots")
-      .select("slot_number, player_id, player_screen_name")
-      .eq("roster_version_id", roster.id)
-      .eq("division_number", requestedDivision)
-      .order("slot_number")
-    const slots = (slotData || []) as Slot[]
-    if (slotError || slots.length !== 4 || slots.some((slot, index) => slot.slot_number !== index + 1)) {
-      setMessage(slotError?.message || "Exactly four persistent roster slots were not found.")
+    const typedSlots = (slots || []) as Slot[]
+    if (typedSlots.length !== 4 || typedSlots.some((slot, index) => slot.slot_number !== index + 1)) {
+      setMessage("Exactly four persistent roster slots were not found.")
       setLoading(false)
       return
     }
-
-    const selectedIds = slots.map((slot) => slot.player_id).filter((id): id is string => Boolean(id))
-    const [{ data: activePlayers, error: activeError }, rosterPlayersResult] = await Promise.all([
-      supabase.from("players").select("id, screen_name").eq("active", true).order("screen_name"),
-      selectedIds.length > 0
-        ? supabase.from("players").select("id, screen_name").in("id", selectedIds)
-        : Promise.resolve({ data: [] as Player[], error: null }),
-    ])
-    if (activeError || rosterPlayersResult.error) {
-      setMessage(activeError?.message || rosterPlayersResult.error?.message || "Could not load players.")
-      setLoading(false)
-      return
-    }
-
-    const playerMap = new Map<string, Player>()
-    for (const player of [...((activePlayers || []) as Player[]), ...((rosterPlayersResult.data || []) as Player[])]) playerMap.set(player.id, player)
-    setPlayers(Array.from(playerMap.values()).sort((a, b) => a.screen_name.localeCompare(b.screen_name)))
+    setPlayers(loadedPlayers)
     setSeasonId(selectedSeasonId)
     setSeason(seasonData as Season)
     setDivision(requestedDivision)
     setRosterId(roster.id)
     setDivisionCount(roster.division_count)
     setRosterStatus(roster.status)
-    setSlotPlayerIds(slots.map((slot) => slot.player_id))
-    setLoadedSlotPlayerIds(slots.map((slot) => slot.player_id))
+    setSlotPlayerIds(typedSlots.map((slot) => slot.player_id))
+    setLoadedSlotPlayerIds(typedSlots.map((slot) => slot.player_id))
     setLoading(false)
   }, [])
 
@@ -157,14 +117,14 @@ export default function PypSetupPage() {
   async function saveRoster() {
     setBusy(true)
     setMessage("")
-    const { data, error } = await supabase.rpc("set_pyp_division_roster_slots", {
+    const { data, error } = await adminPypRequest<Slot[]>("rpc", { name: "set_pyp_division_roster_slots", args: {
       p_roster_version_id: rosterId,
       p_division_number: division,
       p_slot1_player_id: slotPlayerIds[0],
       p_slot2_player_id: slotPlayerIds[1],
       p_slot3_player_id: slotPlayerIds[2],
       p_slot4_player_id: slotPlayerIds[3],
-    })
+    } })
     setBusy(false)
     if (error) {
       setMessage(error.message)
@@ -189,7 +149,7 @@ export default function PypSetupPage() {
     }
     setBusy(true)
     setMessage("")
-    const { error } = await supabase.rpc("approve_pyp_roster_version", { p_roster_version_id: rosterId, p_approval_note: null })
+    const { error } = await adminPypRequest("rpc", { name: "approve_pyp_roster_version", args: { p_roster_version_id: rosterId, p_approval_note: null } })
     setBusy(false)
     if (error) setMessage(error.message)
     else {

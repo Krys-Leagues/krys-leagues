@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabase"
+import { adminPypRequest } from "@/lib/admin/pypClient"
 import { ManagedSeasonDangerZone } from "@/components/admin/ManagedSeasonDangerZone"
 
 type ManagedSeason = { id: string; season_number: number; is_active: boolean; is_locked: boolean; start_date: string | null; end_date: string | null; division_count: number | null; status: string | null }
@@ -27,38 +27,21 @@ export default function PypEditSeasonPage() {
 
   async function loadSeasons(preferredId?: string) {
     setLoading(true)
-    const { data: seasonData, error: seasonError } = await supabase
-      .from("seasons")
-      .select("id, season_number, is_active, is_locked, start_date, end_date")
-      .ilike("league_type", "pyp")
-      .is("division", null)
-      .order("season_number", { ascending: false })
-
-    if (seasonError) {
-      setMessage(`Could not load PYP seasons: ${seasonError.message}`)
+    const response = await adminPypRequest<{ seasons: Array<Omit<ManagedSeason, "division_count" | "status">>; rosters: Array<{ season_id: string; division_count: number; status: string }> }>("season_edit_load")
+    if (response.error || !response.data) {
+      setMessage(`Could not load PYP seasons: ${response.error?.message || "No data returned."}`)
       setLoading(false)
       return
     }
 
-    const source = seasonData || []
+    const source = response.data.seasons || []
     if (source.length === 0) {
       setSeasons([])
       setLoading(false)
       return
     }
 
-    const { data: rosterData, error: rosterError } = await supabase
-      .from("pyp_roster_versions")
-      .select("season_id, division_count, status")
-      .in("season_id", source.map((season) => season.id))
-      .in("status", ["draft", "approved", "locked"])
-      .order("created_at", { ascending: false })
-
-    if (rosterError) {
-      setMessage(`Could not load PYP rosters: ${rosterError.message}`)
-      setLoading(false)
-      return
-    }
+    const rosterData = response.data.rosters
 
     const rosterBySeason = new Map<string, { division_count: number; status: string }>()
     for (const roster of rosterData || []) {
@@ -119,19 +102,19 @@ export default function PypEditSeasonPage() {
       const currentSeason = seasons.find((season) => season.id === seasonId)
       let scheduleChangesDetected = false
       if (currentSeason?.division_count && count !== currentSeason.division_count) {
-        const { data, error } = await supabase.rpc("resize_pyp_season_divisions", {
+        const { data, error } = await adminPypRequest<ResizedRoster>("rpc", { name: "resize_pyp_season_divisions", args: {
           p_season_id: seasonId,
           p_new_division_count: count,
-        }).single()
+        } })
         if (error || !data) throw new Error(error?.message || "No resized PYP roster was returned.")
         scheduleChangesDetected = Boolean((data as ResizedRoster).schedule_changes_detected)
       }
 
-      const { data, error } = await supabase.rpc("update_pyp_season_details", {
-        p_season_id: seasonId,
-        p_start_date: startDate,
-        p_end_date: endDate,
-      }).single()
+      const { data, error } = await adminPypRequest<SavedSeasonDetails>("rpc", { name: "update_pyp_season_details", args: {
+          p_season_id: seasonId,
+          p_start_date: startDate,
+          p_end_date: endDate,
+      } })
       if (error || !data) throw new Error(error?.message || "No saved PYP season details were returned.")
       const saved = data as SavedSeasonDetails
       scheduleChangesDetected = scheduleChangesDetected || saved.schedule_changes_detected

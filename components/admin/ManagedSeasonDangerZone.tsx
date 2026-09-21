@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabase"
+import { adminManagedSeasonRequest } from "@/lib/admin/managedSeasonClient"
 
 type DeletionPreview = {
   division_count: number
@@ -42,9 +42,7 @@ export function ManagedSeasonDangerZone({
     if (loading) return
     setLoading(true)
     setError("")
-    const { data, error: previewError } = await supabase
-      .rpc(historical ? "preview_historical_season_deletion" : "preview_managed_season_deletion", { p_season_id: seasonId })
-      .single()
+    const { data, error: previewError } = await adminManagedSeasonRequest<DeletionPreview>("preview", { seasonId, historical })
     setLoading(false)
     if (previewError || !data) {
       setError(previewError?.message || "Could not preview season deletion.")
@@ -58,9 +56,7 @@ export function ManagedSeasonDangerZone({
     if (loading || !preview?.deletion_allowed) return
     setLoading(true)
     setError("")
-    const { error: deleteError } = await supabase.rpc(historical ? "delete_historical_season" : "delete_managed_season", {
-      p_season_id: seasonId,
-    })
+    const { error: deleteError } = await adminManagedSeasonRequest("delete", { seasonId, historical })
     setLoading(false)
     if (deleteError) {
       setError(deleteError.message)

@@ -35,6 +35,32 @@ for (const [page, endpoint] of [
   })
 }
 
+for (const page of [
+  "app/admin/pyp/setup/page.tsx",
+  "app/admin/pyp/season/page.tsx",
+  "app/admin/pyp/season/edit/page.tsx",
+  "app/admin/pyp/schedule/page.tsx",
+  "app/admin/pyp/results/page.tsx",
+  "app/admin/pyp/standings/page.tsx",
+  "app/admin/pyp/transition/page.tsx",
+]) {
+  test(`${page} has no direct protected Supabase access`, () => {
+    const source = read(page)
+    assert.doesNotMatch(source, /supabase\.(from|rpc)\(/)
+    assert.match(source, /adminPypRequest/)
+  })
+}
+
+for (const route of ["app/api/admin/pyp/route.ts", "app/api/admin/managed-season/route.ts"]) {
+  test(`${route} authorizes before managed-league protected access`, () => {
+    const source = read(route)
+    const postSource = source.slice(source.indexOf("export async function POST"))
+    const authIndex = postSource.indexOf("authorizeSiteAdminMutation()")
+    assert.ok(authIndex >= 0)
+    assert.ok(authIndex < postSource.indexOf("authorization.supabase"))
+  })
+}
+
 for (const route of [
   "app/api/admin/player-matching/route.ts",
   "app/api/admin/player-tracker/route.ts",

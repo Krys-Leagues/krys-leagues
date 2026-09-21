@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabase"
+import { adminPypRequest } from "@/lib/admin/pypClient"
 
 const DRAFT_KEY = "pyp-season-create-draft"
 type Draft = { seasonNumber: string; divisionCount: string; startDate: string; endDate: string }
@@ -54,13 +54,13 @@ export default function PypSeasonPage() {
     if (endDate < startDate) return setMessage("End date cannot be before the start date.")
 
     setSaving(true)
-    const { data, error } = await supabase.rpc("create_pyp_season_with_roster", {
+    const { data, error } = await adminPypRequest<{ season_id: string; first_division_number: number }>("rpc", { name: "create_pyp_season_with_roster", args: {
       p_season_number: number,
       p_division_count: divisions,
       p_start_date: startDate,
       p_due_date: endDate,
       p_end_date: endDate,
-    }).single()
+    } })
     setSaving(false)
 
     if (error || !data) {

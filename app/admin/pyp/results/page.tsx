@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabase"
+import { adminPypRequest } from "@/lib/admin/pypClient"
 
 type Fixture = { id: string; division_number: number; game_number: number; pyp_home_player_screen_name: string; pyp_away_player_screen_name: string }
 type Difficulty = "Easy" | "Hard" | ""
@@ -33,17 +33,14 @@ export default function PypResultsPage() {
 
   const load = useCallback(async (id: string) => {
     setLoading(true)
-    const [{ data: fixtureData, error: fixtureError }, { data: resultData, error: resultError }] = await Promise.all([
-      supabase.from("schedule").select("id,division_number,game_number,pyp_home_player_screen_name,pyp_away_player_screen_name").eq("league_type", "pyp").eq("season_id", id).not("pyp_roster_version_id", "is", null).order("division_number").order("game_number"),
-      supabase.from("pyp_managed_results").select("id,schedule_id,course1_name,course1_difficulty,course1_home_hw,course1_away_hw,course2_name,course2_difficulty,course2_home_hw,course2_away_hw,home_total_hw,away_total_hw,is_draw").eq("season_id", id),
-    ])
+    const response = await adminPypRequest<{ fixtures: Fixture[]; results: Result[] }>("results_load", { seasonId: id })
     setLoading(false)
-    if (fixtureError || resultError) {
-      setMessage(fixtureError?.message || resultError?.message || "Could not load PYP fixtures.")
+    if (response.error || !response.data) {
+      setMessage(response.error?.message || "Could not load PYP fixtures.")
       return
     }
-    setFixtures((fixtureData || []) as Fixture[])
-    setResults((resultData || []) as Result[])
+    setFixtures(response.data.fixtures)
+    setResults(response.data.results)
   }, [])
 
   useEffect(() => {
@@ -90,7 +87,7 @@ export default function PypResultsPage() {
       const course2Away = parseHw(c2Away, `Course 2 ${fixture.pyp_away_player_screen_name} HW`)
       setBusy(true)
       setMessage("")
-      const { error } = await supabase.rpc("save_pyp_result", {
+      const { error } = await adminPypRequest("rpc", { name: "save_pyp_result", args: {
         p_schedule_id: fixture.id,
         p_course1_name: course1,
         p_course1_difficulty: difficulty1,
@@ -100,9 +97,9 @@ export default function PypResultsPage() {
         p_course2_difficulty: difficulty2,
         p_course2_home_hw: course2Home,
         p_course2_away_hw: course2Away,
-      })
+      } })
       if (error) { setBusy(false); setMessage(error.message); return }
-      const { error: standingsError } = await supabase.rpc("rebuild_pyp_standings", { p_season_id: seasonId, p_division_number: fixture.division_number })
+      const { error: standingsError } = await adminPypRequest("rpc", { name: "rebuild_pyp_standings", args: { p_season_id: seasonId, p_division_number: fixture.division_number } })
       setBusy(false)
       if (standingsError) {
         setMessage(`Result saved, but standings rebuild failed: ${standingsError.message}`)
@@ -121,7 +118,7 @@ export default function PypResultsPage() {
     if (!fixture || !existing || !window.confirm("Delete this saved PYP result?")) return
     setBusy(true)
     setMessage("")
-    const { error } = await supabase.rpc("delete_pyp_result", { p_schedule_id: fixture.id })
+    const { error } = await adminPypRequest("rpc", { name: "delete_pyp_result", args: { p_schedule_id: fixture.id } })
     setBusy(false)
     if (error) { setMessage(error.message); return }
     setMessage("PYP result deleted and standings rebuilt.")
