@@ -27,7 +27,7 @@ import {
   loadProtectedAdminGlobalPlayers,
   type ProtectedAdminGlobalPlayer,
 } from "@/lib/identity/adminGlobalPlayerClient"
-import { supabase } from "@/lib/supabase"
+import { majorAdminRead, majorAdminRpc, majorAdminTableMutation } from "@/lib/admin/majorAdminClient"
 import styles from "./page.module.css"
 
 type AdminSection = "setup" | `day-${1 | 2 | 3 | 4}` | "weekend" | "results" | "testers"
@@ -59,23 +59,23 @@ export default function MajorSchedulingAdminPage() {
 
   const loadSchedule = useCallback(async (id: string) => {
     if (!id) return
-    const dayResult = await supabase.from("major_play_days").select("*").eq("major_event_id", id).order("day_number")
+    const dayResult = await majorAdminRead<MajorPlayDay[]>("major_play_days", { select: "*", eq: { major_event_id: id }, order: { column: "day_number" } })
     const loadedDays = (dayResult.data as MajorPlayDay[] | null) || []
     const dayIds = loadedDays.map((day) => day.id)
     const [slotResult, standardTimeResult, entryResult, weekendResult, groupResult, placementResult, testerResult] = await Promise.all([
-      dayIds.length ? supabase.from("major_time_slots").select("*").in("play_day_id", dayIds).order("starts_at") : Promise.resolve({ data: [], error: null }),
-      supabase.from("major_standard_signup_times").select("*").eq("major_event_id", id).eq("is_active", true).order("local_time"),
-      supabase.from("major_entries").select("*").eq("major_event_id", id).order("player_screen_name_snapshot"),
-      supabase.from("major_entry_weekend_status").select("*").eq("major_event_id", id),
-      supabase.from("major_schedule_groups").select("*").eq("major_event_id", id).order("group_label"),
-      supabase.from("major_final_placements").select("*").eq("major_event_id", id),
-      supabase.rpc("get_major_test_testers", { p_major_event_id: id }),
+      dayIds.length ? majorAdminRead<MajorTimeSlot[]>("major_time_slots", { select: "*", in: { play_day_id: dayIds }, order: { column: "starts_at" } }) : Promise.resolve({ data: [] as MajorTimeSlot[], error: null }),
+      majorAdminRead<MajorStandardSignupTime[]>("major_standard_signup_times", { select: "*", eq: { major_event_id: id, is_active: true }, order: { column: "local_time" } }),
+      majorAdminRead<MajorEntry[]>("major_entries", { select: "*", eq: { major_event_id: id }, order: { column: "player_screen_name_snapshot" } }),
+      majorAdminRead<MajorWeekendStatus[]>("major_entry_weekend_status", { select: "*", eq: { major_event_id: id } }),
+      majorAdminRead<MajorScheduleGroup[]>("major_schedule_groups", { select: "*", eq: { major_event_id: id }, order: { column: "group_label" } }),
+      majorAdminRead<MajorFinalPlacement[]>("major_final_placements", { select: "*", eq: { major_event_id: id } }),
+      majorAdminRpc("get_major_test_testers", { p_major_event_id: id }),
     ])
     const loadedEntries = (entryResult.data as MajorEntry[] | null) || []
     const loadedGroups = (groupResult.data as MajorScheduleGroup[] | null) || []
     const [choiceResult, memberResult] = await Promise.all([
-      loadedEntries.length ? supabase.from("major_entry_day_choices").select("*").in("entry_id", loadedEntries.map((entry) => entry.id)) : Promise.resolve({ data: [], error: null }),
-      loadedGroups.length ? supabase.from("major_schedule_group_members").select("*").in("group_id", loadedGroups.map((group) => group.id)) : Promise.resolve({ data: [], error: null }),
+      loadedEntries.length ? majorAdminRead<MajorDayChoice[]>("major_entry_day_choices", { select: "*", in: { entry_id: loadedEntries.map((entry) => entry.id) } }) : Promise.resolve({ data: [] as MajorDayChoice[], error: null }),
+      loadedGroups.length ? majorAdminRead<MajorScheduleGroupMember[]>("major_schedule_group_members", { select: "*", in: { group_id: loadedGroups.map((group) => group.id) } }) : Promise.resolve({ data: [] as MajorScheduleGroupMember[], error: null }),
     ])
     setDays(loadedDays)
     setSlots((slotResult.data as MajorTimeSlot[] | null) || [])
@@ -92,7 +92,7 @@ export default function MajorSchedulingAdminPage() {
 
   const reloadEvents = useCallback(async (preferred?: string) => {
     const [result, playerDirectoryResult] = await Promise.all([
-      supabase.from("major_events").select("*").order("slug"),
+      majorAdminRead<MajorEvent[]>("major_events", { select: "*", order: { column: "slug" } }),
       loadProtectedAdminGlobalPlayers()
         .then((data) => ({ data, error: null }))
         .catch((error: Error) => ({ data: [], error })),
@@ -124,7 +124,7 @@ export default function MajorSchedulingAdminPage() {
 
   async function saveOpening(form: HTMLFormElement) {
     const data = new FormData(form)
-    const result = await supabase.rpc("configure_major_signup_release", {
+    const result = await majorAdminRpc("configure_major_signup_release", {
       p_major_event_id: eventId,
       p_release_1_capacity: Number(data.get("capacity")),
       p_public_signup_opens_at: data.get("public_open") ? new Date(String(data.get("public_open"))).toISOString() : null,
@@ -139,13 +139,13 @@ export default function MajorSchedulingAdminPage() {
 
   async function saveLockHours(form: HTMLFormElement) {
     const hours = Number(new FormData(form).get("lock_hours"))
-    const result = await supabase.rpc("set_major_schedule_lock_hours", { p_major_event_id: eventId, p_hours_before_first_slot: hours })
+    const result = await majorAdminRpc("set_major_schedule_lock_hours", { p_major_event_id: eventId, p_hours_before_first_slot: hours })
     if (showResult(result.error, `Player changes now lock ${hours} hours before each day's first time.`)) await reloadEvents(eventId)
   }
 
   async function releaseSpots(form: HTMLFormElement) {
     const amount = Number(new FormData(form).get("release"))
-    const result = await supabase.rpc("release_additional_major_spots", { p_major_event_id: eventId, p_additional_spots: amount })
+    const result = await majorAdminRpc("release_additional_major_spots", { p_major_event_id: eventId, p_additional_spots: amount })
     if (showResult(result.error, `${amount} additional spots released. No third release is available.`)) await reloadEvents(eventId)
   }
 
@@ -160,13 +160,13 @@ export default function MajorSchedulingAdminPage() {
       play_date: String(data.get("date")),
       choices_locked: data.get("locked") === "on",
     }
-    const result = await supabase.from("major_play_days").upsert(row, { onConflict: "major_event_id,day_number" })
+    const result = await majorAdminTableMutation("play_day_upsert", { row })
     if (showResult(result.error, `${DAY_NAMES[dayNumber - 1].short} settings saved.`)) await loadSchedule(eventId)
   }
 
   async function saveStandardTime(form: HTMLFormElement, standardTime?: MajorStandardSignupTime) {
     const data = new FormData(form)
-    const result = await supabase.rpc("save_major_standard_signup_time", {
+    const result = await majorAdminRpc("save_major_standard_signup_time", {
       p_id: standardTime?.id || null,
       p_major_event_id: eventId,
       p_local_time: String(data.get("time")),
@@ -180,19 +180,19 @@ export default function MajorSchedulingAdminPage() {
 
   async function removeStandardTime(standardTime: MajorStandardSignupTime) {
     if (!window.confirm("Remove this time from the standard template? Day slots will not change until you apply the template. Selected day slots will be preserved and disabled rather than deleted.")) return
-    const result = await supabase.rpc("remove_major_standard_signup_time", { p_id: standardTime.id, p_major_event_id: eventId })
+    const result = await majorAdminRpc("remove_major_standard_signup_time", { p_id: standardTime.id, p_major_event_id: eventId })
     if (showResult(result.error, "Time removed from the template. Apply the template to retire its unused day slots safely.")) await loadSchedule(eventId)
   }
 
   async function copyThursdayTimes() {
-    const result = await supabase.rpc("copy_major_thursday_times_to_standard", { p_major_event_id: eventId })
+    const result = await majorAdminRpc("copy_major_thursday_times_to_standard", { p_major_event_id: eventId })
     const count = Number(result.data || 0)
     if (showResult(result.error, count ? `${count} Thursday signup time${count === 1 ? " was" : "s were"} added to the standard template.` : "Thursday's available times are already in the standard template.")) await loadSchedule(eventId)
   }
 
   async function applyStandardTimes() {
     if (!window.confirm("Apply the standard times to all four days? Independent day overrides stay untouched. Any selected template slot that must be replaced will be disabled and preserved.")) return
-    const result = await supabase.rpc("apply_major_standard_signup_times", { p_major_event_id: eventId })
+    const result = await majorAdminRpc("apply_major_standard_signup_times", { p_major_event_id: eventId })
     const summary = result.data as { created?: number; updated?: number; linked_existing?: number; removed_unused?: number; protected_disabled?: number } | null
     const protectedCount = summary?.protected_disabled || 0
     const success = `Standard times applied to all four days. ${summary?.created || 0} created, ${summary?.updated || 0} updated, ${summary?.linked_existing || 0} existing linked, ${summary?.removed_unused || 0} unused removed.${protectedCount ? ` ${protectedCount} selected or room-linked slot${protectedCount === 1 ? " was" : "s were"} preserved and disabled.` : ""}`
@@ -202,7 +202,7 @@ export default function MajorSchedulingAdminPage() {
   async function addSlot(day: MajorPlayDay, form: HTMLFormElement) {
     const data = new FormData(form)
     const localStartsAt = `${day.play_date}T${String(data.get("time"))}`
-    const result = await supabase.rpc("create_major_time_slot", { p_play_day_id: day.id, p_local_starts_at: localStartsAt, p_label: String(data.get("label") || "") })
+    const result = await majorAdminRpc("create_major_time_slot", { p_play_day_id: day.id, p_local_starts_at: localStartsAt, p_label: String(data.get("label") || "") })
     if (showResult(result.error, "Time added and the lock deadline recalculated.")) {
       form.reset()
       await loadSchedule(eventId)
@@ -221,7 +221,7 @@ export default function MajorSchedulingAdminPage() {
       const startsAt = majorEventLocalTimeToIso(`${day.play_date}T${String(data.get("time"))}`, selectedEvent.schedule_timezone)
       const selectedCount = choices.filter((choice) => choice.time_slot_id === slot.id).length
       if (startsAt !== slot.starts_at && selectedCount > 0 && !window.confirm(`${selectedCount} ${selectedCount === 1 ? "player has" : "players have"} selected this time. Editing it keeps them in this slot at the new time. Continue?`)) return
-      const result = await supabase.from("major_time_slots").update({ starts_at: startsAt, label: String(data.get("label") || "").trim() || null, standard_signup_time_id: null }).eq("id", slot.id)
+      const result = await majorAdminTableMutation("time_slot_update", { id: slot.id, values: { starts_at: startsAt, label: String(data.get("label") || "").trim() || null, standard_signup_time_id: null } })
       if (showResult(result.error, "Signup time updated and the day lock deadline recalculated.")) await loadSchedule(eventId)
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Could not convert that event-local time.")
@@ -230,7 +230,7 @@ export default function MajorSchedulingAdminPage() {
 
   async function setSlotAvailability(slot: MajorTimeSlot, available: boolean, playerCount: number) {
     if (!available && playerCount > 0 && !window.confirm(`${playerCount} ${playerCount === 1 ? "player has" : "players have"} selected this time. Disabling it preserves their selections, but they must be moved with the administrator override. Disable it?`)) return
-    const result = await supabase.from("major_time_slots").update({ is_available: available, standard_signup_time_id: null }).eq("id", slot.id)
+      const result = await majorAdminTableMutation("time_slot_update", { id: slot.id, values: { is_available: available, standard_signup_time_id: null } })
     if (showResult(result.error, available ? "Signup time enabled and available to players." : "Signup time disabled. Existing selections were preserved.")) await loadSchedule(eventId)
   }
 
@@ -240,13 +240,13 @@ export default function MajorSchedulingAdminPage() {
       return
     }
     if (!window.confirm("Remove this unused signup time? This cannot be undone.")) return
-    const result = await supabase.from("major_time_slots").delete().eq("id", slot.id)
+      const result = await majorAdminTableMutation("time_slot_delete", { id: slot.id })
     if (showResult(result.error, "Unused signup time removed and the day lock deadline recalculated.")) await loadSchedule(eventId)
   }
 
   async function movePlayer(entryId: string, dayId: string, slotId: string) {
     if (!slotId) return
-    const result = await supabase.rpc("admin_set_major_day_choice", { p_entry_id: entryId, p_play_day_id: dayId, p_time_slot_id: slotId })
+    const result = await majorAdminRpc("admin_set_major_day_choice", { p_entry_id: entryId, p_play_day_id: dayId, p_time_slot_id: slotId })
     if (showResult(result.error, "Player time updated with administrator override.")) await loadSchedule(eventId)
   }
 
@@ -259,7 +259,7 @@ export default function MajorSchedulingAdminPage() {
       setMessage(`${roomLabel} is already used on ${DAY_NAMES[day.day_number - 1].short}. Choose a different room label.`)
       return
     }
-    const result = await supabase.rpc("save_major_schedule_group", {
+    const result = await majorAdminRpc("save_major_schedule_group", {
       p_id: group?.id || null,
       p_major_event_id: eventId,
       p_play_day_id: day.id,
@@ -283,7 +283,7 @@ export default function MajorSchedulingAdminPage() {
       return
     }
     for (const group of dayGroups) {
-      const result = await supabase.rpc("save_major_schedule_group", {
+      const result = await majorAdminRpc("save_major_schedule_group", {
         p_id: group.id,
         p_major_event_id: group.major_event_id,
         p_play_day_id: group.play_day_id,
@@ -309,25 +309,25 @@ export default function MajorSchedulingAdminPage() {
 
   async function deleteGroup(id: string) {
     if (!window.confirm("Delete this room? Its players will return to the unassigned list for this time.")) return
-    const result = await supabase.rpc("delete_major_schedule_group", { p_group_id: id })
+    const result = await majorAdminRpc("delete_major_schedule_group", { p_group_id: id })
     if (showResult(result.error, "Room deleted.")) await loadSchedule(eventId)
   }
 
   async function setWeekendStatus(entryId: string, status: MajorWeekendStatus["competition_status"]) {
-    const result = await supabase.rpc("set_major_weekend_status", { p_entry_id: entryId, p_status: status })
+    const result = await majorAdminRpc("set_major_weekend_status", { p_entry_id: entryId, p_status: status })
     if (showResult(result.error, "Private weekend decision saved. Player times remain unchanged.")) await loadSchedule(eventId)
   }
 
   async function publishWeekendField() {
     if (!window.confirm("Publish all staged Main / Secondary decisions and eligible weekend rooms to players now?")) return
-    const result = await supabase.rpc("publish_major_weekend_field", { p_major_event_id: eventId })
+    const result = await majorAdminRpc("publish_major_weekend_field", { p_major_event_id: eventId })
     if (showResult(result.error, "Weekend field published. Players can now see their field and published weekend rooms.")) await reloadEvents(eventId)
   }
 
   async function savePlacement(entryId: string, form: HTMLFormElement) {
     const data = new FormData(form)
     const placementValue = String(data.get("placement") || "")
-    const result = await supabase.rpc("save_major_final_placement", {
+    const result = await majorAdminRpc("save_major_final_placement", {
       p_entry_id: entryId,
       p_weekend_field: String(data.get("field")),
       p_field_placement: placementValue ? Number(placementValue) : null,
@@ -342,7 +342,7 @@ export default function MajorSchedulingAdminPage() {
   async function saveInformation(form: HTMLFormElement) {
     const data = new FormData(form)
     const value = (name: string) => String(data.get(name) || "")
-    const result = await supabase.rpc("save_major_event_information", {
+    const result = await majorAdminRpc("save_major_event_information", {
       p_major_event_id: eventId,
       p_signup_instructions: value("signup"),
       p_scheduling_instructions: value("scheduling"),
@@ -357,19 +357,19 @@ export default function MajorSchedulingAdminPage() {
   }
 
   async function addTester(playerId: string) {
-    const result = await supabase.rpc("add_major_test_tester", { p_major_event_id: eventId, p_player_id: playerId })
+    const result = await majorAdminRpc("add_major_test_tester", { p_major_event_id: eventId, p_player_id: playerId })
     const saved = showResult(result.error, "Trusted TEST player added from Global Players.")
     if (saved) await loadSchedule(eventId)
     return saved
   }
 
   async function removeTester(playerId: string) {
-    const result = await supabase.rpc("remove_major_test_tester", { p_major_event_id: eventId, p_player_id: playerId })
+    const result = await majorAdminRpc("remove_major_test_tester", { p_major_event_id: eventId, p_player_id: playerId })
     if (showResult(result.error, "Trusted TEST player removed. Existing TEST history was preserved.")) await loadSchedule(eventId)
   }
 
   async function setTestListing(listed: boolean) {
-    const result = await supabase.rpc("set_major_test_event_listing", { p_major_event_id: eventId, p_listed: listed })
+    const result = await majorAdminRpc("set_major_test_event_listing", { p_major_event_id: eventId, p_listed: listed })
     if (showResult(result.error, listed ? "TEST event listed for trusted testers." : "TEST event hidden from the Majors listing.")) await reloadEvents(eventId)
   }
 

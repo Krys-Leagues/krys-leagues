@@ -15,7 +15,7 @@ import {
   loadProtectedAdminGlobalPlayers,
   type ProtectedAdminGlobalPlayer,
 } from "@/lib/identity/adminGlobalPlayerClient"
-import { supabase } from "@/lib/supabase"
+import { majorAdminRead, majorAdminRpc } from "@/lib/admin/majorAdminClient"
 
 export default function MajorScoringAdminPage() {
   const [events, setEvents] = useState<MajorEvent[]>([])
@@ -51,8 +51,8 @@ export default function MajorScoringAdminPage() {
 
   const loadSession = useCallback(async (id: string) => {
     const [participantResponse, scoreResponse] = await Promise.all([
-      supabase.from("major_scoring_participants").select("*").eq("session_id", id).order("position"),
-      supabase.from("major_hole_scores").select("*").eq("session_id", id).order("hole_number"),
+      majorAdminRead<MajorScoringParticipant[]>("major_scoring_participants", { select: "*", eq: { session_id: id }, order: { column: "position" } }),
+      majorAdminRead<MajorHoleScore[]>("major_hole_scores", { select: "*", eq: { session_id: id }, order: { column: "hole_number" } }),
     ])
     const loadedParticipants = (participantResponse.data as MajorScoringParticipant[] | null) || []
     const loadedScores = (scoreResponse.data as MajorHoleScore[] | null) || []
@@ -70,11 +70,11 @@ export default function MajorScoringAdminPage() {
 
   const loadFoundation = useCallback(async () => {
     const [eventResponse, playerResponse, sessionResponse] = await Promise.all([
-      supabase.from("major_events").select("*").order("slug"),
+      majorAdminRead<MajorEvent[]>("major_events", { select: "*", order: { column: "slug" } }),
       loadProtectedAdminGlobalPlayers()
         .then((data) => ({ data, error: null }))
         .catch((error: Error) => ({ data: [], error })),
-      supabase.from("major_scoring_sessions").select("*").order("updated_at", { ascending: false }),
+      majorAdminRead<MajorScoringSession[]>("major_scoring_sessions", { select: "*", order: { column: "updated_at", ascending: false } }),
     ])
     const loadedEvents = (eventResponse.data as MajorEvent[] | null) || []
     const loadedSessions = (sessionResponse.data as MajorScoringSession[] | null) || []
@@ -121,7 +121,7 @@ export default function MajorScoringAdminPage() {
     const ids = newPlayerIds.slice(0, mode)
     if (!newEventId || !newLabel.trim() || ids.some((id) => !id)) return setMessage("Choose an event, label, and every player.")
     setBusy(true)
-    const response = await supabase.rpc("create_major_scoring_session", {
+    const response = await majorAdminRpc("create_major_scoring_session", {
       p_major_event_id: newEventId,
       p_label: newLabel.trim(),
       p_player_ids: ids,
@@ -136,7 +136,7 @@ export default function MajorScoringAdminPage() {
   async function saveSession() {
     if (!selectedSession) return
     setBusy(true)
-    const response = await supabase.rpc("update_major_scoring_session", {
+    const response = await majorAdminRpc("update_major_scoring_session", {
       p_session_id: selectedSession.id,
       p_label: label,
       p_current_hole: hole,
@@ -156,7 +156,7 @@ export default function MajorScoringAdminPage() {
       const raw = holeInputs[participant.id]?.trim() || ""
       const existing = scores.some((score) => score.participant_id === participant.id && score.hole_number === hole)
       if (!raw && existing) {
-        const clearResponse = await supabase.rpc("clear_major_hole_score", { p_session_id: selectedSession.id, p_participant_id: participant.id, p_hole_number: hole })
+        const clearResponse = await majorAdminRpc("clear_major_hole_score", { p_session_id: selectedSession.id, p_participant_id: participant.id, p_hole_number: hole })
         if (clearResponse.error) { setBusy(false); return setMessage(clearResponse.error.message) }
       }
     }
@@ -165,7 +165,7 @@ export default function MajorScoringAdminPage() {
       return raw ? [{ participant_id: participant.id, strokes: Number(raw) }] : []
     })
     if (filled.length) {
-      const response = await supabase.rpc("save_major_hole_scores", { p_session_id: selectedSession.id, p_hole_number: hole, p_scores: filled })
+      const response = await majorAdminRpc("save_major_hole_scores", { p_session_id: selectedSession.id, p_hole_number: hole, p_scores: filled })
       if (response.error) { setBusy(false); return setMessage(response.error.message) }
     }
     setBusy(false)
@@ -176,7 +176,7 @@ export default function MajorScoringAdminPage() {
   async function saveTheme() {
     if (!selectedEvent) return
     setBusy(true)
-    const response = await supabase.rpc("save_major_scorecard_theme", {
+    const response = await majorAdminRpc("save_major_scorecard_theme", {
       p_major_event_id: selectedEvent.id,
       p_background_url: themeBackground,
       p_accent_color: themeAccent,
