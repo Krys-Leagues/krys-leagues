@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { supabase } from "@/lib/supabase"
+import { adminPypRequest } from "@/lib/admin/pypClient"
 
 type PypSeason = { id: string; season_number: number; is_active: boolean }
 type PypRoster = { season_id: string; status: string }
@@ -13,34 +13,14 @@ export default function PypAdminPage() {
 
   useEffect(() => {
     async function loadManagedSeason() {
-      const { data: seasonData, error: seasonError } = await supabase
-        .from("seasons")
-        .select("id, season_number, is_active")
-        .eq("league_type", "pyp")
-        .is("division", null)
-        .order("is_active", { ascending: false })
-        .order("season_number", { ascending: false })
-
-      if (seasonError) {
-        setLoadError(`Could not load the current PYP season: ${seasonError.message}`)
+      const response = await adminPypRequest<{ seasons: PypSeason[]; rosters: PypRoster[] }>("hub_load")
+      if (response.error || !response.data) {
+        setLoadError(`Could not load the current PYP season: ${response.error?.message || "No data returned."}`)
         return
       }
-
-      const seasons = (seasonData || []) as PypSeason[]
+      const seasons = response.data.seasons
       if (seasons.length === 0) return
-
-      const { data: rosterData, error: rosterError } = await supabase
-        .from("pyp_roster_versions")
-        .select("season_id, status")
-        .in("season_id", seasons.map((season) => season.id))
-        .in("status", ["draft", "approved", "locked"])
-
-      if (rosterError) {
-        setLoadError(`Could not load the current PYP roster: ${rosterError.message}`)
-        return
-      }
-
-      const rosters = (rosterData || []) as PypRoster[]
+      const rosters = response.data.rosters
       const managedIds = new Set(rosters.map((roster) => roster.season_id))
       const currentIds = new Set(rosters.filter((roster) => roster.status !== "locked").map((roster) => roster.season_id))
       const requestedSeasonId = new URLSearchParams(window.location.search).get("seasonId")

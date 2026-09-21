@@ -33,6 +33,16 @@ export async function POST(request: Request) {
     const body = await request.json() as Record<string, unknown>
     const action = String(body.action || "")
     const league = String(body.league || "")
+    if (action === "hub_load") {
+      if (league !== "stroke" && league !== "match") return fail("Managed league is required.")
+      const client = createAdminServiceClient()
+      const seasons = await client.from("seasons").select("id, season_number, is_active").eq("league_type", league).is("division", null).order("is_active", { ascending: false }).order("season_number", { ascending: false })
+      if (seasons.error) throw seasons.error
+      const rosterTable = `${league}_roster_versions`
+      const rosters = seasons.data?.length ? await client.from(rosterTable).select("season_id, status").in("season_id", seasons.data.map((season) => season.id)).in("status", ["draft", "approved", "locked"]) : { data: [], error: null }
+      if (rosters.error) throw rosters.error
+      return json({ data: { seasons: seasons.data || [], rosters: rosters.data || [] } })
+    }
     if (action === "results_load") {
       if (league !== "stroke" && league !== "match") return fail("Managed league is required.")
       const client = createAdminServiceClient()

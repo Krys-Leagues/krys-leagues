@@ -42,6 +42,14 @@ export async function POST(request: Request) {
     const client = createAdminServiceClient()
     const seasonId = String(body.seasonId || "").trim()
 
+    if (action === "hub_load") {
+      const seasons = await client.from("seasons").select("id, season_number, is_active").eq("league_type", "pyp").is("division", null).order("is_active", { ascending: false }).order("season_number", { ascending: false })
+      if (seasons.error) throw seasons.error
+      const rosters = seasons.data?.length ? await client.from("pyp_roster_versions").select("season_id, status").in("season_id", seasons.data.map((season) => season.id)).in("status", ["draft", "approved", "locked"]) : { data: [], error: null }
+      if (rosters.error) throw rosters.error
+      return json({ data: { seasons: seasons.data || [], rosters: rosters.data || [] } })
+    }
+
     if (action === "setup_load") {
       const division = Number(body.division)
       const [season, roster] = await Promise.all([

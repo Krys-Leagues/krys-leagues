@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { supabase } from "@/lib/supabase"
+import { adminManagedLeagueRequest } from "@/lib/admin/managedLeagueClient"
 
 type MatchSeason = {
   id: string
@@ -21,34 +21,14 @@ export default function MatchAdminPage() {
 
   useEffect(() => {
     async function loadCurrentManagedSeason() {
-      const { data: seasonData, error: seasonError } = await supabase
-        .from("seasons")
-        .select("id, season_number, is_active")
-        .eq("league_type", "match")
-        .is("division", null)
-        .order("is_active", { ascending: false })
-        .order("season_number", { ascending: false })
-
-      if (seasonError) {
-        setScheduleLinkError(`Could not load the current Match season: ${seasonError.message}`)
+      const response = await adminManagedLeagueRequest<{ seasons: MatchSeason[]; rosters: MatchRoster[] }>("hub_load", { league: "match" })
+      if (response.error || !response.data) {
+        setScheduleLinkError(`Could not load the current Match season: ${response.error?.message || "No data returned."}`)
         return
       }
-
-      const seasons = (seasonData || []) as MatchSeason[]
+      const seasons = response.data.seasons
       if (seasons.length === 0) return
-
-      const { data: rosterData, error: rosterError } = await supabase
-        .from("match_roster_versions")
-        .select("season_id, status")
-        .in("season_id", seasons.map((season) => season.id))
-        .in("status", ["draft", "approved", "locked"])
-
-      if (rosterError) {
-        setScheduleLinkError(`Could not load the current Match roster: ${rosterError.message}`)
-        return
-      }
-
-      const rosters = (rosterData || []) as MatchRoster[]
+      const rosters = response.data.rosters
       const managedSeasonIds = new Set(rosters.map((roster) => roster.season_id))
       const currentSeasonIds = new Set(rosters.filter((roster) => roster.status !== "locked").map((roster) => roster.season_id))
       const requestedSeasonId = new URLSearchParams(window.location.search).get("seasonId")
