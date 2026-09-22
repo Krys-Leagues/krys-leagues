@@ -22,6 +22,26 @@ test("protected merge route authorizes before service-role client creation", () 
   assert.ok(source.indexOf("authorizeSiteAdminMutation()") < source.indexOf("createAdminIdentityClient()"))
 })
 
+test("protected merge RPCs preserve the authenticated admin context", () => {
+  const source = read("app/api/admin/players/merge/route.ts")
+  const helper = read("lib/identity/adminPlayerMergeServer.ts")
+  assert.match(source, /const rpcClient = authorization\.supabase/)
+  for (const rpc of [
+    "get_site_player_duplicate_candidates",
+    "preview_site_player_identity_merge",
+    "mark_site_players_not_match",
+    "merge_site_player_identities_with_avatar",
+  ]) {
+    assert.match(source, new RegExp(`rpcClient\\.rpc\\("${rpc}"`))
+  }
+  assert.match(source, /previewAvatarMerge\(rpcClient/)
+  assert.match(helper, /client\.rpc\("preview_site_player_avatar_merge"/)
+  assert.doesNotMatch(source, /const client = createAdminIdentityClient\(\)/)
+  assert.match(source, /const storageClient = createAdminIdentityClient\(\)/)
+  assert.match(source, /typeof error === "object"[\s\S]*?typeof error\.message === "string"/)
+  assert.match(source, /safeErrorMessage\(error\)/)
+})
+
 for (const [page, endpoint] of [
   ["app/admin/player-matching/page.tsx", "/api/admin/player-matching"],
   ["app/admin/player-tracker/page.tsx", "/api/admin/player-tracker"],

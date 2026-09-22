@@ -24,6 +24,12 @@ function requiredIds(value: unknown) {
   return value.map((id) => id.trim())
 }
 
+function safeErrorMessage(error: unknown) {
+  if (error instanceof Error) return error.message
+  if (typeof error === "object" && error !== null && "message" in error && typeof error.message === "string") return error.message
+  return "Player identity action failed."
+}
+
 export async function POST(request: Request) {
   const authorization = await authorizeSiteAdminMutation()
   if (!authorization.authorized) return authorization.response
@@ -31,10 +37,10 @@ export async function POST(request: Request) {
   try {
     const body = await request.json() as Record<string, unknown>
     const action = requiredString(body.action, "Action")
-    const client = createAdminIdentityClient()
+    const rpcClient = authorization.supabase
 
     if (action === "duplicate_candidates") {
-      const result = await client.rpc("get_site_player_duplicate_candidates")
+      const result = await rpcClient.rpc("get_site_player_duplicate_candidates")
       if (result.error) throw result.error
       return NextResponse.json({ data: result.data }, { headers: { "Cache-Control": "no-store" } })
     }
@@ -45,36 +51,37 @@ export async function POST(request: Request) {
 
     if (action === "preview") {
       const [identity, avatar] = await Promise.all([
-        client.rpc("preview_site_player_identity_merge", { p_keep_player_id: keepPlayerId, p_merge_player_ids: mergePlayerIds }),
-        previewAvatarMerge(client, keepPlayerId, mergePlayerIds),
+        rpcClient.rpc("preview_site_player_identity_merge", { p_keep_player_id: keepPlayerId, p_merge_player_ids: mergePlayerIds }),
+        previewAvatarMerge(rpcClient, keepPlayerId, mergePlayerIds),
       ])
       if (identity.error) throw identity.error
       return NextResponse.json({ data: Array.isArray(identity.data) ? identity.data[0] : identity.data, avatar }, { headers: { "Cache-Control": "no-store" } })
     }
 
     if (action === "mark_different") {
-      const result = await client.rpc("mark_site_players_not_match", { p_player_ids: [keepPlayerId, ...mergePlayerIds] })
+      const result = await rpcClient.rpc("mark_site_players_not_match", { p_player_ids: [keepPlayerId, ...mergePlayerIds] })
       if (result.error) throw result.error
       return NextResponse.json({ data: result.data })
     }
 
     if (action === "merge") {
-      const avatarPreview = await previewAvatarMerge(client, keepPlayerId, mergePlayerIds)
+      const avatarPreview = await previewAvatarMerge(rpcClient, keepPlayerId, mergePlayerIds)
       const candidates = (avatarPreview?.avatar_candidates || []) as AvatarCandidate[]
-      const prepared = await prepareCanonicalAvatarForMerge(client, keepPlayerId, candidates, typeof body.selectedAvatarPath === "string" ? body.selectedAvatarPath : undefined)
-      const result = await client.rpc("merge_site_player_identities_with_avatar", {
+      const storageClient = createAdminIdentityClient()
+      const prepared = await prepareCanonicalAvatarForMerge(storageClient, keepPlayerId, candidates, typeof body.selectedAvatarPath === "string" ? body.selectedAvatarPath : undefined)
+      const result = await rpcClient.rpc("merge_site_player_identities_with_avatar", {
         p_keep_player_id: keepPlayerId,
         p_merge_player_ids: mergePlayerIds,
         p_selected_avatar_path: prepared.sourceAvatarPath,
         p_canonical_avatar_path: prepared.canonicalAvatarPath,
       })
       if (result.error) throw result.error
-      const cleanupError = await removeOldPlayerAvatarObjects(client, prepared.oldAvatarPaths)
+      const cleanupError = await removeOldPlayerAvatarObjects(storageClient, prepared.oldAvatarPaths)
       return NextResponse.json({ data: Array.isArray(result.data) ? result.data[0] : result.data, cleanupError })
     }
 
     return NextResponse.json({ error: "Unsupported player identity action." }, { status: 400 })
   } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : "Player identity action failed." }, { status: 400 })
+    return NextResponse.json({ error: safeErrorMessage(error) }, { status: 400 })
   }
 }

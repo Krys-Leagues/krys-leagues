@@ -40,11 +40,14 @@ test("Global Players POST protects every table mutation action", () => {
 
 test("existing protected Discord and profile-recognition RPCs remain intact", () => {
   const page = read("app/admin/players/page.tsx")
+  const route = read("app/api/admin/players/route.ts")
 
-  assert.match(page, /supabase\.rpc\("set_site_player_discord_identity"/)
-  assert.match(page, /supabase\.rpc\("set_site_player_profile_recognition"/)
-  assert.match(page, /p_discord_id: trimmedDiscordId/)
-  assert.match(page, /p_profile_badges: recognitionBadges/)
+  assert.match(page, /postPlayerAction\(\{ action: "set_discord_identity"/)
+  assert.match(page, /postPlayerAction\(\{ action: "set_profile_recognition"/)
+  assert.match(route, /client\.rpc\("set_site_player_discord_identity"/)
+  assert.match(route, /client\.rpc\("set_site_player_profile_recognition"/)
+  assert.match(route, /p_discord_id: discordId/)
+  assert.match(route, /p_profile_badges: Array\.isArray\(body\.profileBadges\)/)
 })
 
 test("admin Players fix contains no grants, RLS, SQL, or unrelated page behavior changes", () => {
