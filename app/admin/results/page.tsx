@@ -113,13 +113,13 @@ export default function ResultsPage() {
 
     setMatchesLoading(true)
 
-    const { data: scheduleData, error: scheduleError } = await supabase
-      .from("schedule")
-      .select("game, course, player1, player2, player1_id, player2_id")
-      .eq("league_type", leagueType)
-      .eq("division", division)
-      .eq("season_number", seasonNumber)
-      .eq("game", game)
+    const scheduleResponse = await fetch("/api/admin/results/schedule", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ leagueType, division, seasonNumber, game }),
+      cache: "no-store",
+    })
+    const schedulePayload = await scheduleResponse.json() as { data?: ScheduleMatch[]; error?: string }
 
     const { data: resultData, error: resultError } = await supabase
       .from("results")
@@ -131,9 +131,9 @@ export default function ResultsPage() {
 
     setMatchesLoading(false)
 
-    if (scheduleError) {
+    if (!scheduleResponse.ok) {
       setScheduledMatches([])
-      alert("Schedule load error: " + scheduleError.message)
+      alert("Schedule load error: " + (schedulePayload.error || "Unknown error"))
       return
     }
 
@@ -144,7 +144,7 @@ export default function ResultsPage() {
     }
 
     const allMatches =
-      scheduleData?.filter(
+      schedulePayload.data?.filter(
         (row: any) => row.player1 && row.player2 && row.player1_id && row.player2_id
       ) || []
 
