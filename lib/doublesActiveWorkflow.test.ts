@@ -16,6 +16,8 @@ const boardWorkerRoute = fs.readFileSync(new URL("../app/api/admin/doubles/board
 const finalScorecardRoute = fs.readFileSync(new URL("../app/api/admin/doubles/final-scorecard/route.ts", import.meta.url), "utf8")
 const roleSyncRoute = fs.readFileSync(new URL("../app/api/admin/doubles/role-sync/route.ts", import.meta.url), "utf8")
 const completionSql = fs.readFileSync(new URL("../doubles_completion_runtime.sql", import.meta.url), "utf8")
+const scorecardRoute = fs.readFileSync(new URL("../app/api/doubles/scorecard/route.ts", import.meta.url), "utf8")
+const scorecardSql = fs.readFileSync(new URL("../doubles_scorecard_components.sql", import.meta.url), "utf8")
 
 test("active Doubles admin routes authorize before canonical reads/writes", () => {
   for (const route of source) {
@@ -39,6 +41,19 @@ test("Doubles runtime completion keeps lifecycle, worker, and role sync mutation
   assert.match(finalScorecardRoute, /authorizeSiteAdminMutation/)
   assert.match(roleSyncRoute, /league_discord_role_sync_outbox/)
   assert.match(roleSyncRoute, /identity_state/)
+})
+
+test("Doubles scorecard flow is component-scoped and commits only after both verified cards", () => {
+  assert.match(scorecardSql, /unique \(fixture_id, component_key\)/)
+  assert.match(scorecardSql, /evidence_storage_path/)
+  assert.match(scorecardSql, /doubles_scorecard_commits/)
+  assert.match(scorecardRoute, /authorizeDoublesParticipant/)
+  assert.match(scorecardRoute, /course1/)
+  assert.match(scorecardRoute, /course2/)
+  assert.match(scorecardRoute, /Both course components must be verified before commit/)
+  assert.match(scorecardRoute, /save_doubles_managed_result/)
+  assert.match(scorecardRoute, /rebuild_doubles_managed_standings/)
+  assert.doesNotMatch(scorecardRoute, /card_date.*new Date|parse.*card_date/i)
 })
 
 test("active workflow SQL keeps privileged mutations database-authorized", () => {
