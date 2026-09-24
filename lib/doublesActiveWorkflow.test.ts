@@ -9,6 +9,8 @@ const files = [
   "app/api/admin/doubles/legacy-mapping/route.ts",
 ]
 const source = files.map((file) => fs.readFileSync(new URL(`../${file}`, import.meta.url), "utf8"))
+const arrangeRoute = fs.readFileSync(new URL("../app/api/doubles/arrange/route.ts", import.meta.url), "utf8")
+const participantServer = fs.readFileSync(new URL("../lib/doublesParticipantServer.ts", import.meta.url), "utf8")
 
 test("active Doubles admin routes authorize before canonical reads/writes", () => {
   for (const route of source) {
@@ -26,4 +28,12 @@ test("active workflow SQL keeps privileged mutations database-authorized", () =>
   assert.match(sql, /revoke all on function public\.create_doubles_managed_fixture/)
   assert.match(sql, /grant execute on function public\.list_doubles_admin_roster/)
   assert.match(sql, /list_doubles_legacy_mapping_review/)
+})
+
+test("participant Arrange route resolves the session identity before service-side access", () => {
+  assert.match(arrangeRoute, /authorizeDoublesParticipant\(fixtureId\)/)
+  assert.match(participantServer, /Only the four scheduled Doubles players may access this fixture/)
+  assert.match(arrangeRoute, /player_master_availability/)
+  assert.match(arrangeRoute, /doubles_fixture_chat/)
+  assert.match(arrangeRoute, /onConflict: "fixture_id,recipient_player_id,reminder_key"/)
 })

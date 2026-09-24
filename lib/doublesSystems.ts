@@ -1,5 +1,18 @@
 export type AvailabilityWindow = { startMinute: number; endMinute: number }
 
+export type DoublesBoardGameState = "NOT PLAYED" | "COMPLETED"
+export type DoublesFixtureParticipants = {
+  homePlayer1Id: string
+  homePlayer2Id: string
+  awayPlayer1Id: string
+  awayPlayer2Id: string
+}
+
+export function fixtureParticipantIds(participants: DoublesFixtureParticipants) {
+  const ids = [participants.homePlayer1Id, participants.homePlayer2Id, participants.awayPlayer1Id, participants.awayPlayer2Id]
+  return ids.every((id) => typeof id === "string" && id.trim() !== "") && new Set(ids).size === 4 ? ids : null
+}
+
 export function intersectAvailability(groups: AvailabilityWindow[][]) {
   if (!groups.length) return []
   return groups.reduce<AvailabilityWindow[]>((current, next) => current.flatMap((left) => next.flatMap((right) => {
@@ -10,7 +23,7 @@ export function intersectAvailability(groups: AvailabilityWindow[][]) {
 }
 
 export function canFixtureParticipant(playerId: string, participantIds: string[]) {
-  return participantIds.includes(playerId)
+  return participantIds.length === 4 && new Set(participantIds).size === 4 && participantIds.includes(playerId)
 }
 
 export function nextArrangeState(current: "NOT ARRANGED" | "PROPOSED" | "COUNTERED" | "ACCEPTED", action: "propose" | "counter" | "accept") {
@@ -32,6 +45,53 @@ export function boardRetry(attempts: number, errorKind: "temporary" | "not_found
 
 export function roleSyncKey(playerId: string, leagueKey: string, desiredState: "GRANTED" | "REVOKED") {
   return `${playerId}:${leagueKey}:${desiredState}`
+}
+
+export function buildDoublesBoardGame(input: {
+  gameNumber: number
+  homeTeamName: string
+  homePlayers: string[]
+  awayTeamName: string
+  awayPlayers: string[]
+  course: string
+  hasAuthoritativeResult: boolean
+}) {
+  const state: DoublesBoardGameState = input.hasAuthoritativeResult ? "COMPLETED" : "NOT PLAYED"
+  return Object.freeze({
+    gameNumber: input.gameNumber,
+    home: { teamName: input.homeTeamName, players: [...input.homePlayers] },
+    away: { teamName: input.awayTeamName, players: [...input.awayPlayers] },
+    course: input.course,
+    state,
+  })
+}
+
+export function buildLeagueRoleDesiredState(input: {
+  activeMemberships: Array<{ playerId: string; leagueKey: string }>
+  leagueKey: string
+  knownPlayerIds: string[]
+}) {
+  const active = new Set(input.activeMemberships.filter((membership) => membership.leagueKey === input.leagueKey).map((membership) => membership.playerId))
+  return input.knownPlayerIds.map((playerId) => ({
+    playerId,
+    leagueKey: input.leagueKey,
+    desiredState: active.has(playerId) ? "GRANTED" as const : "REVOKED" as const,
+    idempotencyKey: roleSyncKey(playerId, input.leagueKey, active.has(playerId) ? "GRANTED" : "REVOKED"),
+  }))
+}
+
+export function canFinalizeDoublesSeason(input: {
+  managed: boolean
+  rosterApproved: boolean
+  fixturesCount: number
+  incompleteFixtures: number
+  finalScorecardRequired: boolean
+  finalScorecardApproved: boolean
+  existingSnapshot: boolean
+}) {
+  if (!input.managed || !input.rosterApproved || input.fixturesCount < 1 || input.incompleteFixtures > 0) return false
+  if (input.finalScorecardRequired && !input.finalScorecardApproved) return false
+  return !input.existingSnapshot
 }
 
 export function buildFinalSnapshot(input: { seasonId: string; division: string; teams: unknown[]; fixtures: unknown[]; results: unknown[]; standings: unknown[] }) {
