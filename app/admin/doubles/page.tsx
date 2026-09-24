@@ -30,6 +30,11 @@ export default function DoublesAdminPage() {
           <span>Generate, approve and finalize immutable team history.</span>
         </Link>
 
+        <Link href="/admin/doubles/boards" style={card}>
+          <strong>Live Boards</strong>
+          <span>Inspect retry state and perform explicit recovery.</span>
+        </Link>
+
         <Link href="/admin/players" style={card}>
           <strong>Players</strong>
           <span>Open the global player manager.</span>

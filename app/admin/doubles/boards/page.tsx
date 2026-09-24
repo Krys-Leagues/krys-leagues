@@ -1,0 +1,12 @@
+"use client"
+
+import { useState } from "react"
+
+export default function DoublesBoardsPage() {
+  const [seasonId, setSeasonId] = useState(""); const [division, setDivision] = useState("Doubles D1"); const [mappingId, setMappingId] = useState(""); const [state, setState] = useState<unknown>(null); const [message, setMessage] = useState("")
+  async function load() { const response = await fetch(`/api/admin/doubles/boards?season_id=${encodeURIComponent(seasonId)}&division=${encodeURIComponent(division)}`, { cache: "no-store" }); const body = await response.json(); if (!response.ok) { setMessage(body.error || "Board load failed"); return }; setState(body); setMappingId(body.mapping?.id || "") }
+  async function action(actionName: "retry" | "rebind") { const body = actionName === "rebind" ? { action: actionName, mapping_id: mappingId, channel_id: window.prompt("Existing Discord channel ID") || "", message_id: window.prompt("Existing Discord message ID") || "" } : { action: actionName, mapping_id: mappingId }; const response = await fetch("/api/admin/doubles/boards", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }); const result = await response.json(); setMessage(response.ok ? `Board ${actionName} queued` : result.error || "Board action failed"); if (response.ok) await load() }
+  return <main style={{ padding: 24, background: "black", color: "white", minHeight: "100vh" }}><h1>Doubles Live Boards</h1><p style={{ color: "#aaa" }}>Team-based board state and explicit recovery. Missing Discord messages never create automatic replacements.</p><input style={input} placeholder="Season ID" value={seasonId} onChange={(event) => setSeasonId(event.target.value)} /> <input style={input} placeholder="Division" value={division} onChange={(event) => setDivision(event.target.value)} /> <button style={button} onClick={() => void load()}>Load</button>{state && <pre style={{ marginTop: 20, whiteSpace: "pre-wrap", background: "#111", padding: 16 }}>{JSON.stringify(state, null, 2)}</pre>}{mappingId && <div style={{ display: "flex", gap: 8 }}><button style={button} onClick={() => void action("retry")}>Retry</button><button style={button} onClick={() => void action("rebind")}>Explicit Rebind</button></div>}{message && <p style={{ color: "#fbbf24" }}>{message}</p>}</main>
+}
+const input = { padding: 10, marginRight: 8, background: "#111", color: "white", border: "1px solid #444" }
+const button = { padding: 10, background: "#1e293b", color: "white", border: "1px solid #64748b", borderRadius: 6 }
