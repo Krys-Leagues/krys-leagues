@@ -90,6 +90,17 @@ begin
 end;
 $function$;
 
+create or replace function public.list_doubles_legacy_mapping_review()
+returns jsonb
+language plpgsql security definer set search_path to '' as $function$
+begin
+  if auth.uid() is null or not public.is_current_user_site_admin() then
+    raise exception 'Site-admin authorization is required' using errcode='42501';
+  end if;
+  return coalesce((select jsonb_agg(to_jsonb(m) order by m.status,m.created_at) from public.doubles_legacy_canonical_mapping_review m), '[]'::jsonb);
+end;
+$function$;
+
 revoke all on function public.update_doubles_global_team(uuid,text,uuid,uuid) from public, anon, authenticated;
 revoke all on function public.create_doubles_managed_fixture(uuid,text,integer,uuid,uuid,text,timestamptz) from public, anon, authenticated;
 grant execute on function public.update_doubles_global_team(uuid,text,uuid,uuid) to authenticated;
@@ -100,5 +111,7 @@ revoke all on function public.list_doubles_admin_results(uuid) from public, anon
 grant execute on function public.list_doubles_admin_roster(uuid) to authenticated;
 grant execute on function public.list_doubles_admin_fixtures(uuid,text) to authenticated;
 grant execute on function public.list_doubles_admin_results(uuid) to authenticated;
+revoke all on function public.list_doubles_legacy_mapping_review() from public, anon, authenticated;
+grant execute on function public.list_doubles_legacy_mapping_review() to authenticated;
 
 commit;

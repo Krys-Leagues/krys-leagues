@@ -6,6 +6,7 @@ const files = [
   "app/api/admin/doubles/roster/route.ts",
   "app/api/admin/doubles/schedule/route.ts",
   "app/api/admin/doubles/results/route.ts",
+  "app/api/admin/doubles/legacy-mapping/route.ts",
 ]
 const source = files.map((file) => fs.readFileSync(new URL(`../${file}`, import.meta.url), "utf8"))
 
@@ -24,4 +25,5 @@ test("active workflow SQL keeps privileged mutations database-authorized", () =>
   assert.match(sql, /is_current_user_site_admin\(\)/g)
   assert.match(sql, /revoke all on function public\.create_doubles_managed_fixture/)
   assert.match(sql, /grant execute on function public\.list_doubles_admin_roster/)
+  assert.match(sql, /list_doubles_legacy_mapping_review/)
 })
