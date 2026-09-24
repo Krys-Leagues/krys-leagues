@@ -48,6 +48,8 @@ test("Doubles scorecard flow is component-scoped and commits only after both ver
   assert.match(scorecardSql, /evidence_storage_path/)
   assert.match(scorecardSql, /doubles_scorecard_commits/)
   assert.match(scorecardRoute, /authorizeDoublesParticipant/)
+  assert.match(scorecardRoute, /doubles-scorecard-evidence/)
+  assert.match(scorecardRoute, /upsert: false/)
   assert.match(scorecardRoute, /course1/)
   assert.match(scorecardRoute, /course2/)
   assert.match(scorecardRoute, /Both course components must be verified before commit/)

@@ -7,6 +7,23 @@ import { buildDoublesScorecardCommit, scorecardCommitKey } from "@/lib/doublesSc
 const componentKeys = new Set(["course1", "course2"])
 
 export async function POST(request: Request) {
+  if (request.headers.get("content-type")?.toLowerCase().startsWith("multipart/form-data")) {
+    const form = await request.formData()
+    const fixtureId = String(form.get("fixture_id") || "")
+    const componentKey = String(form.get("component_key") || "") as "course1" | "course2"
+    const evidenceId = String(form.get("evidence_id") || "")
+    const file = form.get("file")
+    if (!fixtureId || !componentKeys.has(componentKey) || !evidenceId || !(file instanceof File)) return NextResponse.json({ error: "Fixture, component, evidence and image are required" }, { status: 400 })
+    const authorization = await authorizeDoublesParticipant(fixtureId)
+    if (!authorization.authorized) return NextResponse.json({ error: authorization.message }, { status: authorization.status })
+    const reserved = await authorization.client.from("doubles_scorecard_components").select("id,evidence_storage_path,status").eq("id", evidenceId).eq("fixture_id", fixtureId).eq("component_key", componentKey).eq("uploader_player_id", authorization.participantId).eq("status", "RESERVED").maybeSingle()
+    if (reserved.error || !reserved.data) return NextResponse.json({ error: "Reserved private evidence was not found" }, { status: 409 })
+    const upload = await authorization.client.storage.from("doubles-scorecard-evidence").upload(reserved.data.evidence_storage_path, file, { contentType: file.type || "application/octet-stream", upsert: false })
+    if (upload.error) return NextResponse.json({ error: "Private evidence upload failed; reservation remains recoverable" }, { status: 503 })
+    const received = await authorization.client.from("doubles_scorecard_components").update({ status: "RECEIVED", original_filename: file.name, content_type: file.type || "application/octet-stream" }).eq("id", evidenceId).select("id,fixture_id,component_key,course,status,original_filename,content_type,created_at").single()
+    if (received.error) return NextResponse.json({ error: "Evidence was uploaded but review state could not be recorded" }, { status: 503 })
+    return NextResponse.json({ component: received.data })
+  }
   let body: { action?: string; fixture_id?: string; component_key?: "course1" | "course2"; original_filename?: string; content_type?: string; card_date_text?: string; home_strokes?: number[]; away_strokes?: number[] }
   try { body = await request.json() } catch { return NextResponse.json({ error: "Invalid scorecard request" }, { status: 400 }) }
   if (!body.fixture_id || !body.component_key || !componentKeys.has(body.component_key)) return NextResponse.json({ error: "Exact fixture and course component are required" }, { status: 400 })
