@@ -25,6 +25,11 @@ export default function DoublesAdminPage() {
           <span>View current Doubles standings.</span>
         </Link>
 
+        <Link href="/admin/doubles/final-scorecard" style={card}>
+          <strong>Final Scorecard / Lifecycle</strong>
+          <span>Generate, approve and finalize immutable team history.</span>
+        </Link>
+
         <Link href="/admin/players" style={card}>
           <strong>Players</strong>
           <span>Open the global player manager.</span>

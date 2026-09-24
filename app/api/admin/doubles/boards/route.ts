@@ -9,13 +9,15 @@ export async function GET(request: Request) {
   const client = createDoublesRuntimeClient()
   const seasonId = params.get("season_id")
   const division = params.get("division")
-  const [mapping, fixtures, standings] = await Promise.all([
+  const [mapping, fixtures, results, standings, lifecycle] = await Promise.all([
     client.from("doubles_board_mappings").select("*").eq("season_id", seasonId).eq("division", division).maybeSingle(),
     client.from("doubles_managed_fixtures").select("*").eq("season_id", seasonId).eq("division", division).order("game_number"),
+    client.from("doubles_managed_results").select("*").in("fixture_id", (await client.from("doubles_managed_fixtures").select("id").eq("season_id", seasonId).eq("division", division)).data?.map((row) => row.id) || []),
     client.from("doubles_managed_standings").select("*").eq("season_id", seasonId).eq("division", division).order("rank"),
+    client.from("doubles_season_lifecycle").select("season_id,state,updated_at").eq("season_id", seasonId).maybeSingle(),
   ])
-  if (mapping.error || fixtures.error || standings.error) return NextResponse.json({ error: "Doubles board state is unavailable." }, { status: 503 })
-  return NextResponse.json({ mapping: mapping.data, fixtures: fixtures.data ?? [], standings: standings.data ?? [] })
+  if (mapping.error || fixtures.error || results.error || standings.error || lifecycle.error) return NextResponse.json({ error: "Doubles board state is unavailable." }, { status: 503 })
+  return NextResponse.json({ mapping: mapping.data, fixtures: fixtures.data ?? [], results: results.data ?? [], standings: standings.data ?? [], lifecycle: lifecycle.data })
 }
 
 export async function POST(request: Request) {

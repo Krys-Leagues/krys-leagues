@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
 import test from "node:test"
 import fs from "node:fs"
-import { boardRetry, buildDoublesBoardGame, buildFinalSnapshot, buildLeagueRoleDesiredState, canFinalizeDoublesSeason, canFixtureParticipant, fixtureParticipantIds, intersectAvailability, nextArrangeState, reminderRecipients, roleSyncKey } from "./doublesSystems.ts"
+import { boardRetry, buildDoublesBoardGame, buildFinalSnapshot, buildLeagueRoleDesiredState, canFinalizeDoublesSeason, canFixtureParticipant, claimDoublesBoardTask, classifyDoublesDiscordFailure, finalScorecardReadiness, fixtureParticipantIds, intersectAvailability, nextArrangeState, recoverStaleDoublesBoardTask, reminderRecipients, roleSyncKey } from "./doublesSystems.ts"
 
 const sql = fs.readFileSync(new URL("../doubles_nonproduction_systems.sql", import.meta.url), "utf8")
 
@@ -65,7 +65,23 @@ test("role desired state is league-scoped and idempotent", () => {
   ])
 })
 
-test("finalization guard does not invent a Final Scorecard prerequisite", () => {
-  assert.equal(canFinalizeDoublesSeason({ managed: true, rosterApproved: true, fixturesCount: 4, incompleteFixtures: 0, finalScorecardRequired: false, finalScorecardApproved: false, existingSnapshot: false }), true)
-  assert.equal(canFinalizeDoublesSeason({ managed: true, rosterApproved: true, fixturesCount: 4, incompleteFixtures: 1, finalScorecardRequired: false, finalScorecardApproved: false, existingSnapshot: false }), false)
+test("finalization guard requires the approved Doubles Final Scorecard", () => {
+  assert.equal(canFinalizeDoublesSeason({ managed: true, rosterApproved: true, fixturesCount: 4, incompleteFixtures: 0, finalScorecardRequired: true, finalScorecardApproved: true, existingSnapshot: false }), true)
+  assert.equal(canFinalizeDoublesSeason({ managed: true, rosterApproved: true, fixturesCount: 4, incompleteFixtures: 0, finalScorecardRequired: false, finalScorecardApproved: false, existingSnapshot: false }), false)
+  assert.equal(canFinalizeDoublesSeason({ managed: true, rosterApproved: true, fixturesCount: 4, incompleteFixtures: 1, finalScorecardRequired: true, finalScorecardApproved: true, existingSnapshot: false }), false)
+})
+
+test("Doubles board worker claims, recovers stale claims, and classifies NotFound without replacement", () => {
+  const now = new Date("2026-09-24T12:00:00Z")
+  assert.equal(claimDoublesBoardTask({ status: "PENDING", availableAt: now, now, attempts: 0 }), true)
+  assert.equal(recoverStaleDoublesBoardTask({ status: "CLAIMED", claimedAt: new Date("2026-09-24T11:40:00Z"), now }), true)
+  assert.equal(classifyDoublesDiscordFailure({ status: 404, code: "UNKNOWN_MESSAGE" }), "not_found")
+  assert.equal(classifyDoublesDiscordFailure({ status: 503 }), "temporary")
+  assert.equal(claimDoublesBoardTask({ status: "NOT_FOUND", availableAt: now, now, attempts: 0 }), false)
+})
+
+test("Doubles finalization requires the approved team Final Scorecard", () => {
+  assert.equal(finalScorecardReadiness({ managed: true, rosterApproved: true, fixtures: 4, incomplete: 0, standingsCurrent: true, approved: true, existingSnapshot: false }), true)
+  assert.equal(finalScorecardReadiness({ managed: true, rosterApproved: true, fixtures: 4, incomplete: 0, standingsCurrent: true, approved: false, existingSnapshot: false }), false)
+  assert.equal(finalScorecardReadiness({ managed: true, rosterApproved: true, fixtures: 4, incomplete: 0, standingsCurrent: true, approved: true, existingSnapshot: true }), false)
 })

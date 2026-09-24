@@ -12,6 +12,10 @@ const source = files.map((file) => fs.readFileSync(new URL(`../${file}`, import.
 const arrangeRoute = fs.readFileSync(new URL("../app/api/doubles/arrange/route.ts", import.meta.url), "utf8")
 const participantServer = fs.readFileSync(new URL("../lib/doublesParticipantServer.ts", import.meta.url), "utf8")
 const boardRoute = fs.readFileSync(new URL("../app/api/admin/doubles/boards/route.ts", import.meta.url), "utf8")
+const boardWorkerRoute = fs.readFileSync(new URL("../app/api/admin/doubles/boards/worker/route.ts", import.meta.url), "utf8")
+const finalScorecardRoute = fs.readFileSync(new URL("../app/api/admin/doubles/final-scorecard/route.ts", import.meta.url), "utf8")
+const roleSyncRoute = fs.readFileSync(new URL("../app/api/admin/doubles/role-sync/route.ts", import.meta.url), "utf8")
+const completionSql = fs.readFileSync(new URL("../doubles_completion_runtime.sql", import.meta.url), "utf8")
 
 test("active Doubles admin routes authorize before canonical reads/writes", () => {
   for (const route of source) {
@@ -20,6 +24,21 @@ test("active Doubles admin routes authorize before canonical reads/writes", () =
     assert.ok(route.indexOf("authorization.supabase") > auth)
     assert.doesNotMatch(route, /doubles_teams|\.from\("schedule"\)|\.from\("results"\)/)
   }
+})
+
+test("Doubles runtime completion keeps lifecycle, worker, and role sync mutations narrow", () => {
+  assert.match(completionSql, /generate_doubles_final_scorecard/)
+  assert.match(completionSql, /approve_doubles_final_scorecard/)
+  assert.match(completionSql, /finalize_doubles_season/)
+  assert.match(completionSql, /is_current_user_site_admin/)
+  assert.match(completionSql, /revoke all on function public\.finalize_doubles_season/)
+  assert.match(boardWorkerRoute, /action === "claim"/)
+  assert.match(boardWorkerRoute, /action === "ack"/)
+  assert.match(boardWorkerRoute, /action === "fail"/)
+  assert.doesNotMatch(boardWorkerRoute, /create.*replacement|replacement.*message/i)
+  assert.match(finalScorecardRoute, /authorizeSiteAdminMutation/)
+  assert.match(roleSyncRoute, /league_discord_role_sync_outbox/)
+  assert.match(roleSyncRoute, /identity_state/)
 })
 
 test("active workflow SQL keeps privileged mutations database-authorized", () => {

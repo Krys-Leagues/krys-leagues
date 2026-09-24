@@ -1,6 +1,7 @@
 export type AvailabilityWindow = { startMinute: number; endMinute: number }
 
 export type DoublesBoardGameState = "NOT PLAYED" | "COMPLETED"
+export type DoublesBoardTaskState = "PENDING" | "CLAIMED" | "DONE" | "RETRYABLE" | "EXHAUSTED" | "NOT_FOUND"
 export type DoublesFixtureParticipants = {
   homePlayer1Id: string
   homePlayer2Id: string
@@ -41,6 +42,32 @@ export function boardRetry(attempts: number, errorKind: "temporary" | "not_found
   if (errorKind === "not_found") return { state: "NOT_FOUND" as const, delayMs: null }
   if (errorKind === "permanent" || attempts >= 5) return { state: "EXHAUSTED" as const, delayMs: null }
   return { state: "RETRYABLE" as const, delayMs: Math.min(60 * 60 * 1000, 2 ** attempts * 60 * 1000) }
+}
+
+export function claimDoublesBoardTask(input: { status: DoublesBoardTaskState; availableAt: Date; now: Date; attempts: number; maxAttempts?: number }) {
+  const maxAttempts = input.maxAttempts ?? 5
+  if (input.status === "DONE" || input.status === "EXHAUSTED" || input.status === "NOT_FOUND") return false
+  if (input.attempts >= maxAttempts) return false
+  return input.status === "PENDING" || input.status === "RETRYABLE" || input.availableAt <= input.now
+}
+
+export function recoverStaleDoublesBoardTask(input: { status: DoublesBoardTaskState; claimedAt: Date | null; now: Date; staleAfterMs?: number }) {
+  if (input.status !== "CLAIMED" || !input.claimedAt) return false
+  return input.now.getTime() - input.claimedAt.getTime() >= (input.staleAfterMs ?? 10 * 60 * 1000)
+}
+
+export function classifyDoublesDiscordFailure(error: { status?: number; code?: string; message?: string }) {
+  if (error.status === 404 || error.code === "UNKNOWN_MESSAGE" || error.code === "UNKNOWN_CHANNEL") return "not_found" as const
+  if (error.status !== undefined && error.status >= 400 && error.status < 500) return "permanent" as const
+  return "temporary" as const
+}
+
+export function doublesBoardTaskPayload(input: { seasonId: string; division: string; games: unknown[]; standings: unknown[] }) {
+  return Object.freeze({ adapter: "doubles", seasonId: input.seasonId, division: input.division, games: input.games, standings: input.standings })
+}
+
+export function finalScorecardReadiness(input: { managed: boolean; rosterApproved: boolean; fixtures: number; incomplete: number; standingsCurrent: boolean; approved: boolean; existingSnapshot: boolean }) {
+  return input.managed && input.rosterApproved && input.fixtures > 0 && input.incomplete === 0 && input.standingsCurrent && input.approved && !input.existingSnapshot
 }
 
 export function roleSyncKey(playerId: string, leagueKey: string, desiredState: "GRANTED" | "REVOKED") {
@@ -90,7 +117,7 @@ export function canFinalizeDoublesSeason(input: {
   existingSnapshot: boolean
 }) {
   if (!input.managed || !input.rosterApproved || input.fixturesCount < 1 || input.incompleteFixtures > 0) return false
-  if (input.finalScorecardRequired && !input.finalScorecardApproved) return false
+  if (!input.finalScorecardRequired || !input.finalScorecardApproved) return false
   return !input.existingSnapshot
 }
 
