@@ -11,6 +11,7 @@ const files = [
 const source = files.map((file) => fs.readFileSync(new URL(`../${file}`, import.meta.url), "utf8"))
 const arrangeRoute = fs.readFileSync(new URL("../app/api/doubles/arrange/route.ts", import.meta.url), "utf8")
 const participantServer = fs.readFileSync(new URL("../lib/doublesParticipantServer.ts", import.meta.url), "utf8")
+const boardRoute = fs.readFileSync(new URL("../app/api/admin/doubles/boards/route.ts", import.meta.url), "utf8")
 
 test("active Doubles admin routes authorize before canonical reads/writes", () => {
   for (const route of source) {
@@ -36,4 +37,11 @@ test("participant Arrange route resolves the session identity before service-sid
   assert.match(arrangeRoute, /player_master_availability/)
   assert.match(arrangeRoute, /doubles_fixture_chat/)
   assert.match(arrangeRoute, /onConflict: "fixture_id,recipient_player_id,reminder_key"/)
+})
+
+test("board recovery exposes explicit retry and rebind without automatic replacement", () => {
+  assert.match(boardRoute, /authorizeSiteAdminMutation\(\)/)
+  assert.match(boardRoute, /body\.action === "retry"/)
+  assert.match(boardRoute, /body\.action === "rebind"/)
+  assert.doesNotMatch(boardRoute, /create.*message|create.*board/i)
 })
