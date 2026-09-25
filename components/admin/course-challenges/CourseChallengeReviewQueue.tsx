@@ -9,7 +9,7 @@ type PastCard = { id: string; challengeKey: "level" | "ace" | "prestige"; level:
 type Requirement = { requirement?: { label?: string }; status?: string; passed?: boolean | null; reason?: string }
 type Submission = {
   id: string; playerId: string; isOwnSubmission: boolean; playerName: string; courseSlug: string; courseName: string; challengeKey: "level" | "ace" | "prestige"; level: number; aceStage?: number | null; aceLabel?: string | null; prestigeStage?: number | null; prestigeLabel?: string | null; difficulty: "Easy" | "Hard";
-  proofPhotoUrl: string | null; holeScores: number[]; pars: number[] | null; calculatedTotal: number; relativeToPar: number; requirements: Requirement[]; status: string;
+  proofPhotoUrl: string | null; holeScores: number[]; reviewedHoleScores: number[] | null; pars: number[] | null; calculatedTotal: number; relativeToPar: number; requirements: Requirement[]; status: string;
   reviewReason: string | null; reviewNotes: string | null; roundDate: string | null; roundTime: string | null; gameMode: string | null; adminVerifiedGameMode: string | null;
   enteredFinalScore: number | null; finalScoreCheck: string | null; createdAt: string | null; aceStageAtSubmission: number | null; possibleDuplicate: boolean; crossTrackReuse: boolean; duplicateMatches: DuplicateMatch[]; pastCards: PastCard[]; reviewEvents: ReviewEvent[];
   allTimeProcessingStatus: string; allTimeProcessingResult: Record<string, unknown> | null;
@@ -69,12 +69,12 @@ export default function CourseChallengeReviewQueue({ showRejectedSection = false
     return () => { active = false; window.clearTimeout(initial); window.clearInterval(timer) }
   }, [load])
 
-  async function review(submission: Submission, action: "approve" | "reject" | "return_to_review") {
+  async function review(submission: Submission, action: "approve" | "reject" | "return_to_review", reviewedScores?: number[]) {
     const mode = submission.challengeKey === "ace" ? null : modes[submission.id] || normalizeCourseChallengeGameMode(submission.adminVerifiedGameMode)
     const modeError = courseChallengeGameModeError(submission.level, mode, submission.challengeKey)
     if (action === "approve" && modeError) { setMessage(modeError); return }
     setBusyId(submission.id)
-    const response = await fetch("/api/admin/course-challenges", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: submission.id, action, gameMode: mode }) })
+    const response = await fetch("/api/admin/course-challenges", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: submission.id, action, gameMode: mode, reviewedScores }) })
     const payload = await response.json() as { error?: string; message?: string }
     setMessage(response.ok ? payload.message || "Review saved." : payload.error || "Review failed.")
     setBusyId(null)
@@ -118,7 +118,8 @@ export default function CourseChallengeReviewQueue({ showRejectedSection = false
   </section>
 }
 
-function ReviewCard({ submission, mode, setMode, busy, onReview, onPreview }: { submission: Submission; mode?: CourseChallengeGameMode; setMode: (value: CourseChallengeGameMode) => Promise<void>; busy: boolean; onReview: (submission: Submission, action: "approve" | "reject" | "return_to_review") => Promise<void>; onPreview: (preview: { url: string; label: string }) => void }) {
+function ReviewCard({ submission, mode, setMode, busy, onReview, onPreview }: { submission: Submission; mode?: CourseChallengeGameMode; setMode: (value: CourseChallengeGameMode) => Promise<void>; busy: boolean; onReview: (submission: Submission, action: "approve" | "reject" | "return_to_review", reviewedScores?: number[]) => Promise<void>; onPreview: (preview: { url: string; label: string }) => void }) {
+  const [verifiedScores, setVerifiedScores] = useState<string[]>(() => submission.holeScores.length === 18 ? submission.holeScores.map(String) : Array.from({ length: 18 }, () => ""))
   const stageLabel = submission.challengeKey === "ace" ? submission.aceLabel || "Ace Track" : submission.challengeKey === "prestige" ? submission.prestigeLabel || "Prestige" : `Level ${submission.level}`
   const modeError = courseChallengeGameModeError(submission.level, mode, submission.challengeKey)
   return <article style={card}>
@@ -128,7 +129,7 @@ function ReviewCard({ submission, mode, setMode, busy, onReview, onPreview }: { 
     {submission.proofPhotoUrl && <button type="button" onClick={() => onPreview({ url: submission.proofPhotoUrl || "", label: "Private scorecard evidence" })} style={proofButton}><img src={submission.proofPhotoUrl} alt="Private scorecard evidence thumbnail" style={{ maxWidth: "100%", maxHeight: 340, objectFit: "contain", background: "#020617" }} /><span>Open original private proof</span></button>}
     <p style={muted}>Submitted {submission.createdAt ? new Date(submission.createdAt).toLocaleString() : "—"} · Round date/time: {submission.roundDate || "needs review"} {submission.roundTime || "needs review"}</p>
     <p style={summary}>Player final score: <strong>{formatScore(submission.enteredFinalScore)}</strong> · System relative score: <strong>{formatScore(submission.relativeToPar)}</strong> · Final score check: <strong>{submission.finalScoreCheck || "needs review"}</strong></p>
-    <div style={{ overflowX: "auto" }}><table style={table}><thead><tr>{submission.holeScores.map((_, index) => <th key={index} style={cell}>H{index + 1}</th>)}<th style={cell}>Total</th><th style={cell}>To par</th></tr></thead><tbody><tr>{submission.holeScores.map((score, index) => <td key={index} style={cell}>{score}<small style={{ display: "block", color: "#a5b4fc" }}>P{submission.pars?.[index] ?? "—"}</small></td>)}<td style={cell}>{submission.calculatedTotal}</td><td style={cell}>{formatScore(submission.relativeToPar)}</td></tr></tbody></table></div>
+    {submission.holeScores.length === 18 ? <div style={{ overflowX: "auto" }}><table style={table}><thead><tr>{submission.holeScores.map((_, index) => <th key={index} style={cell}>H{index + 1}</th>)}<th style={cell}>Total</th><th style={cell}>To par</th></tr></thead><tbody><tr>{submission.holeScores.map((score, index) => <td key={index} style={cell}>{score}<small style={{ display: "block", color: "#a5b4fc" }}>P{submission.pars?.[index] ?? "—"}</small></td>)}<td style={cell}>{submission.calculatedTotal}</td><td style={cell}>{formatScore(submission.relativeToPar)}</td></tr></tbody></table></div> : <fieldset style={verifiedFieldset}><legend>ADMIN VERIFIED CARD VALUES</legend><p style={muted}>Read the private image above and record the 18 strokes once. Players no longer enter score data.</p><div style={verifiedGrid}>{verifiedScores.map((value, index) => <label key={index} style={verifiedCell}>H{index + 1}<input inputMode="numeric" value={value} onChange={(event) => setVerifiedScores((current) => current.map((item, itemIndex) => itemIndex === index ? event.target.value.replace(/[^0-9]/g, "").slice(0, 2) : item))} aria-label={`Verified hole ${index + 1} score`} /></label>)}</div></fieldset>}
     <ul style={{ marginTop: 10 }}>{submission.requirements.map((item, index) => <li key={index}>{item.requirement?.label || "Requirement"}: {item.status || "needs review"}{item.reason ? ` — ${item.reason}` : ""}</li>)}</ul>
     {submission.reviewReason && <p style={reviewReason}>Review reason: {submission.reviewReason}</p>}
     {submission.challengeKey !== "ace" && <p style={muted}>Stored Game Mode: {submission.gameMode || "not supplied by player"} · Admin verified: {submission.adminVerifiedGameMode?.toUpperCase() || "not verified"}</p>}
@@ -138,7 +139,7 @@ function ReviewCard({ submission, mode, setMode, busy, onReview, onPreview }: { 
       {submission.challengeKey === "level" && <fieldset style={aceFieldset}><legend>ACE TRACK</legend>{submission.aceStageAtSubmission ? <small style={muted}>Qualifying ace holes on this verified Level card are credited automatically to Ace Stage {submission.aceStageAtSubmission}. No duplicate override or second upload is required.</small> : <small style={muted}>No Ace stage was open when this card was submitted.</small>}</fieldset>}
       {submission.isOwnSubmission && <p style={selfApprovalWarning}>You cannot approve your own Course Challenge submission.</p>}
       {!submission.isOwnSubmission && modeError && <p role="alert" style={modeError.includes("Multiplayer") && mode === "solo" ? modeWarning : modeNote}>{modeError}</p>}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}><button type="button" disabled={busy || submission.isOwnSubmission || Boolean(modeError)} onClick={() => void onReview(submission, "approve")} style={buttonStyle("#047857")}>APPROVE</button><button type="button" disabled={busy} onClick={() => void onReview(submission, "reject")} style={buttonStyle("#991b1b")}>REJECT</button></div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}><button type="button" disabled={busy || submission.isOwnSubmission || Boolean(modeError)} onClick={() => void onReview(submission, "approve", submission.holeScores.length === 18 ? undefined : verifiedScores.map(Number))} style={buttonStyle("#047857")}>APPROVE</button><button type="button" disabled={busy} onClick={() => void onReview(submission, "reject")} style={buttonStyle("#991b1b")}>REJECT</button></div>
     </div>}
     {submission.allTimeProcessingStatus === "processed" && submission.allTimeProcessingResult && <p style={result}>All-Time/Climbers processed: {String(submission.allTimeProcessingResult.classification || submission.allTimeProcessingResult.action || "complete")}</p>}
   </article>
@@ -166,6 +167,9 @@ const result: React.CSSProperties = { color: "#86efac", border: "1px solid #1665
 const proofButton: React.CSSProperties = { display: "grid", gap: 5, justifyItems: "start", border: "1px solid #475569", borderRadius: 10, padding: 8, background: "#020617", color: "#c4b5fd", cursor: "pointer" }
 const table: React.CSSProperties = { width: "100%", borderCollapse: "collapse" }
 const cell: React.CSSProperties = { padding: 6, textAlign: "center", whiteSpace: "nowrap" }
+const verifiedFieldset: React.CSSProperties = { display: "grid", gap: 10, border: "1px solid #f59e0b", borderRadius: 10, padding: 12, background: "#1c1917" }
+const verifiedGrid: React.CSSProperties = { display: "grid", gridTemplateColumns: "repeat(6,minmax(48px,1fr))", gap: 6 }
+const verifiedCell: React.CSSProperties = { display: "grid", gap: 3, color: "#fde68a", fontSize: 11 }
 const modeFieldset: React.CSSProperties = { display: "grid", gap: 10, border: "1px solid #64748b", borderRadius: 12, padding: 14, background: "#020617" }
 const modeLegend: React.CSSProperties = { padding: "0 6px", color: "#f8fafc", fontWeight: 900, letterSpacing: "0.08em" }
 const modeOptions: React.CSSProperties = { display: "flex", flexWrap: "wrap", gap: 10 }

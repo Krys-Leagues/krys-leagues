@@ -10,7 +10,7 @@ export async function loadCourseChallengeProfile(client: { from: (table: string)
   const prestigeQuery = client.from("course_challenge_prestige_progress").select("course_slug,stage_number,easy_status,hard_status,completed_at,updated_at").eq("player_id", playerId)
   // Every approved Course Challenge card is also Ace evidence. Normal Level cards
   // must not be excluded from this read path.
-  const aceQuery = client.from("course_challenge_submissions").select("course_slug,challenge_key,level_number,difficulty,hole_scores,requirements_evaluation,status").eq("player_id", playerId).eq("status", "approved")
+  const aceQuery = client.from("course_challenge_submissions").select("course_slug,challenge_key,level_number,difficulty,hole_scores,reviewed_hole_scores,requirements_evaluation,reviewed_requirements_evaluation,status").eq("player_id", playerId).eq("status", "approved")
   const [{ data: progress, error: progressError }, { data: rewards, error: rewardError }, { data: selection, error: selectionError }, { data: aceRows, error: aceError }, { data: prestige, error: prestigeError }] = await Promise.all([progressQuery, rewardQuery, selectionQuery, aceQuery, prestigeQuery])
   if (progressError) throw progressError
   if (rewardError) throw rewardError
@@ -27,7 +27,7 @@ export async function loadCourseChallengeProfile(client: { from: (table: string)
     const courseProgress = filteredProgress.filter((row: { course_slug: string }) => row.course_slug === course.slug)
     const courseRewards = filteredRewards.filter((row) => row.courseSlug === course.slug)
     const coursePrestige = (prestige || []).filter((row: { course_slug: string }) => row.course_slug === course.slug)
-    const ace = aceProgress(course, (aceRows || []).filter((row: { course_slug: string }) => row.course_slug === course.slug) as AceSubmissionRecord[])
+    const ace = aceProgress(course, (aceRows || []).filter((row: { course_slug: string }) => row.course_slug === course.slug).map((row: { reviewed_hole_scores?: unknown; hole_scores?: unknown; reviewed_requirements_evaluation?: unknown; requirements_evaluation?: unknown }) => ({ ...row, hole_scores: row.reviewed_hole_scores || row.hole_scores, requirements_evaluation: row.reviewed_requirements_evaluation || row.requirements_evaluation })) as AceSubmissionRecord[])
     return {
       slug: course.slug,
       name: course.name,

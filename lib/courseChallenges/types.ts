@@ -133,8 +133,8 @@ export type CourseChallengeSubmissionPayload = {
   aceStage?: number
   prestigeStage?: number
   proofPhotoPath: string
-  scores: number[]
-  finalScore: number
+  scores?: number[]
+  finalScore?: number
   roundDate?: string | null
   roundTime?: string | null
   gameMode?: "solo" | "multiplayer" | null

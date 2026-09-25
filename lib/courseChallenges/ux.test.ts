@@ -38,18 +38,16 @@ test("full book conceals unearned reward artwork and preserves Ace Track wording
   assert.match(book, /Replace \/ Change/)
 })
 
-test("scorecard hotfix removes manual metadata inputs and supports compact signed entry", () => {
+test("Course Challenge player flow is private-image only", () => {
   const book = read("components/course-challenges/CourseChallengeBook.tsx")
   assert.doesNotMatch(book, /type="date"/)
   assert.doesNotMatch(book, /type="time"/)
   assert.doesNotMatch(book, /<select/)
-  assert.match(book, /maxLength=\{2\}/)
-  assert.match(book, /handleScoreKeyDown/)
-  assert.match(book, /calculatedFinalScore/)
-  assert.match(book, /finalScore: calculatedFinalScore/)
-  assert.match(book, /CALCULATED FINAL SCORE/)
-  assert.doesNotMatch(book, /finalScoreField/)
-  assert.match(book, /focusNext\(index\)/)
+  assert.match(book, /Submit your scorecard photo/)
+  assert.match(book, /No score typing is needed/)
+  assert.doesNotMatch(book, /data-course-challenge-hole-index/)
+  assert.doesNotMatch(book, /CALCULATED FINAL SCORE/)
+  assert.doesNotMatch(book, /finalScore: calculatedFinalScore/)
 })
 
 test("Ace submission help names only the challenge types that require Multiplayer", () => {
@@ -159,20 +157,29 @@ test("prestige rewards remain at the bottom of every selected view and backgroun
   assert.match(styles, /background-attachment: scroll/)
   assert.match(styles, /background-size: 100% auto/)
 })
-test("scorecard entry reuses the All-Time HOLE/PAR/SCORE pattern", () => {
+test("admin review retains the old HOLE/PAR/SCORE display for historical cards", () => {
   const book = read("components/course-challenges/CourseChallengeBook.tsx")
-  const styles = read("components/admin/records/NormalScorecard.module.css")
-  assert.match(book, /NormalScorecard\.module\.css/)
-  assert.match(book, /className=\{scorecardStyles\.scorecard\}/)
-  assert.match(book, /<th scope="row">HOLE<\/th>/)
-  assert.match(book, /<th scope="row">PAR<\/th>/)
-  assert.match(book, /<th scope="row">SCORE<\/th>/)
-  assert.match(book, /scorecardStyles\.parCell/)
-  assert.match(book, /data-course-challenge-hole-index/)
-  assert.match(styles, /width: 100%/)
-  assert.match(styles, /min-width: 930px/)
-  assert.match(styles, /width: 40px/)
-  assert.match(styles, /height: 42px/)
+  const queue = read("components/admin/course-challenges/CourseChallengeReviewQueue.tsx")
+  assert.doesNotMatch(book, /HOLE · PAR · SCORE/)
+  assert.match(queue, /ADMIN VERIFIED CARD VALUES/)
+  assert.match(queue, /Players no longer enter score data/)
+  assert.match(queue, /Open original private proof/)
+})
+
+test("image-only submission keeps review security, history, and additive score compatibility", () => {
+  const route = read("app/api/course-challenges/submissions/route.ts")
+  const admin = read("app/api/admin/course-challenges/route.ts")
+  const migration = read("supabase/migrations/20260925100000_course_challenges_image_only_submission.sql")
+  assert.match(route, /proof_photo_path: body\.proofPhotoPath/)
+  assert.doesNotMatch(route, /scores: numericScores/)
+  assert.match(route, /hole_scores: null/)
+  assert.match(admin, /reviewedScores/)
+  assert.match(admin, /Record all 18 positive whole-number scores verified from the private image/)
+  assert.match(migration, /alter column hole_scores drop not null/)
+  assert.match(migration, /reviewed_hole_scores jsonb/)
+  assert.match(migration, /set search_path to ''/)
+  assert.match(migration, /is_current_user_site_admin/)
+  assert.doesNotMatch(migration, /delete from public\.course_challenge_submissions/)
 })
 
 test("welcome guide explains the purpose, progression, hints, and profile rewards", () => {
