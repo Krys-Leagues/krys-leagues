@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { createDoublesRuntimeClient } from "@/lib/doublesParticipantServer"
 import { applyDoublesArrangeMutation } from "@/lib/doublesArrangeRuntime"
-import { previewInteractionResponse, verifyInteractionSignature, verifySignedInteractionId } from "@/lib/doublesDiscordRuntime"
+import { NEXT_SEASON_DOUBLES_DISCORD_ENABLED, previewInteractionResponse, verifyInteractionSignature, verifySignedInteractionId } from "@/lib/doublesDiscordRuntime"
 
 type Interaction = { data?: { custom_id?: string }; user?: { id?: string }; member?: { user?: { id?: string } }; message?: { channel_id?: string } }
 
@@ -13,7 +13,7 @@ export async function POST(request: Request) {
   const customId = body.data?.custom_id || ""
   const preview = previewInteractionResponse(customId)
   if (preview) return NextResponse.json(preview)
-  if (process.env.NEXT_SEASON_DOUBLES_DISCORD_ENABLED !== "true") return NextResponse.json({ error: "Next-season Doubles Discord runtime is disabled" }, { status: 403 })
+  if (!NEXT_SEASON_DOUBLES_DISCORD_ENABLED || process.env.NEXT_SEASON_DOUBLES_DISCORD_ENABLED !== "true") return NextResponse.json({ error: "Next-season Doubles Discord runtime is disabled" }, { status: 403 })
   const signed = verifySignedInteractionId(customId, process.env.DISCORD_INTERACTION_HMAC_SECRET || "")
   if (!signed) return NextResponse.json({ error: "Invalid or expired interaction state" }, { status: 403 })
   const discordId = body.user?.id || body.member?.user?.id
@@ -26,7 +26,12 @@ export async function POST(request: Request) {
   const members = await client.from("doubles_season_team_members").select("player_id").eq("season_id", fixture.data.season_id).in("season_team_id", [fixture.data.home_season_team_id, fixture.data.away_season_team_id]).eq("role", "member").is("effective_to", null)
   const participantIds = [...new Set((members.data || []).map((row) => row.player_id as string))]
   if (members.error || participantIds.length !== 4 || !participantIds.includes(player.data.id)) return NextResponse.json({ error: "Only the four scheduled Doubles players may interact" }, { status: 403 })
-  if (signed.action === "scorecard") return NextResponse.json({ type: 4, data: { content: "Open the secure fixture scorecard upload page to submit privately.", flags: 64 } })
+  if (signed.action === "scorecard") {
+    const protocol = request.headers.get("x-forwarded-proto") || "https"
+    const host = request.headers.get("x-forwarded-host") || request.headers.get("host") || "krysleagues.com"
+    const uploadUrl = `${protocol}://${host}/doubles/scorecard?fixture_id=${encodeURIComponent(signed.fixtureId)}`
+    return NextResponse.json({ type: 4, data: { content: `Submit privately here: ${uploadUrl}`, flags: 64 } })
+  }
   const proposedFor = signed.proposedFor || new URL(request.url).searchParams.get("proposed_for")
   if (!proposedFor) return NextResponse.json({ error: "A signed proposed time is required" }, { status: 400 })
   try {

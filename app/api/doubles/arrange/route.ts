@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server"
 import { authorizeDoublesParticipant } from "@/lib/doublesParticipantServer"
 import { applyDoublesArrangeMutation } from "@/lib/doublesArrangeRuntime"
+import { createDoublesDiscordEventStore } from "@/lib/doublesDiscordEventSupabaseStore"
+import { enqueueDoublesDiscordEvent } from "@/lib/doublesDiscordEventDispatcher"
+import { DOUBLES_DISCORD_TEST_CHANNEL_ID, NEXT_SEASON_DOUBLES_DISCORD_ENABLED } from "@/lib/doublesDiscordRuntime"
 
 // Shared mutation helper preserves the durable reminder uniqueness contract:
 // onConflict: "fixture_id,recipient_player_id,reminder_key".
@@ -51,6 +54,7 @@ export async function POST(request: Request) {
     if (!body.proposed_for || Number.isNaN(Date.parse(body.proposed_for))) return jsonError("A valid proposed game time is required")
     try {
       const result = await applyDoublesArrangeMutation({ client, fixtureId: body.fixture_id, participantId, participantIds, action: body.action as "propose" | "counter" | "accept", proposedFor: body.proposed_for })
+      await enqueueDoublesDiscordEvent({ eventStore: createDoublesDiscordEventStore(client), enabled: NEXT_SEASON_DOUBLES_DISCORD_ENABLED && process.env.NEXT_SEASON_DOUBLES_DISCORD_ENABLED === "true", event: { eventType: result.matchSet ? "MATCH_SET" : "ARRANGE_UPDATED", seasonId: authorization.fixture.season_id, division: authorization.fixture.division, fixtureId: body.fixture_id, channelId: DOUBLES_DISCORD_TEST_CHANNEL_ID, arrangementState: result.arrangement?.state } })
       return NextResponse.json(result)
     } catch (error) {
       return jsonError(error instanceof Error ? error.message : "Arrange mutation failed", 400)

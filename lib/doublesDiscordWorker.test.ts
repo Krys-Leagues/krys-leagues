@@ -43,6 +43,19 @@ test("MATCH SET creates one thread and duplicate event reuses it", async () => {
   assert.deepEqual(h.calls.filter((call) => call === "send-starter"), ["send-starter"])
 })
 
+test("MATCH SET invites exact participants and completed result archives once", async () => {
+  const calls: string[] = []
+  let fixture: FixtureDiscordMapping | null = { fixtureId: "fixture-2", threadId: "thread-2", threadChannelId: DOUBLES_DISCORD_TEST_CHANNEL_ID, starterMessageId: "starter", matchImageMessageId: "image", submitComponentMessageId: "submit", state: "MATCH_SET" }
+  const store: DiscordWorkerStore = { getDivision: async () => null, saveDivision: async () => undefined, getFixture: async () => fixture, saveFixture: async (next) => { fixture = next } }
+  const transport: DiscordWorkerTransport = { createMessage: async () => ({ messageId: "board", channelId: DOUBLES_DISCORD_TEST_CHANNEL_ID }), editMessage: async () => undefined, createThread: async () => ({ threadId: "thread-new", channelId: DOUBLES_DISCORD_TEST_CHANNEL_ID }), sendThreadStarter: async () => ({ messageId: "starter" }), archiveThread: async (threadId) => { calls.push(`archive:${threadId}`) }, deleteMessage: async () => undefined, addThreadParticipant: async (threadId, userId) => { calls.push(`invite:${threadId}:${userId}`) } }
+  const worker = new DoublesDiscordWorker(store, transport)
+  const created = await worker.process({ enabled: true, seasonId: "season", division: "ELITE", channelId: DOUBLES_DISCORD_TEST_CHANNEL_ID, fixtureId: "fixture-2", arrangementState: "MATCH SET", participantIds: ["p1", "p2", "p3", "p4"], threadPayload: {} }, "MATCH_SET")
+  assert.equal(created.status, "REUSED")
+  await worker.process({ enabled: true, seasonId: "season", division: "ELITE", channelId: DOUBLES_DISCORD_TEST_CHANNEL_ID, fixtureId: "fixture-2", boardPayload: {} }, "RESULT_COMPLETED")
+  assert.deepEqual(calls, ["archive:thread-2"])
+  assert.equal(fixture?.state, "ARCHIVED")
+})
+
 test("scorecard handoff creates exactly one signed action without player IDs", () => {
   const row = buildSubmitScorecardComponent({ fixtureId: "fixture-1", secret: "secret", expiresAt: Date.now() + 60_000 })
   assert.equal(row.components.length, 1)

@@ -1,4 +1,5 @@
 import { boardMessagePlan, boardReplacementPlan, createSignedInteractionId, fixtureThreadPlan, type DivisionDiscordMapping, type FixtureDiscordMapping } from "./doublesDiscordRuntime.ts"
+import { resolveDoublesDiscordChannel } from "./doublesDiscordTransport.ts"
 
 export type WorkerEvent = "ARRANGE_UPDATED" | "MATCH_SET" | "BOARD_REFRESH" | "SCORECARD_UPDATED" | "RESULT_COMPLETED"
 
@@ -20,6 +21,7 @@ export type DiscordWorkerTransport = {
   sendThreadStarter: (threadId: string, payload: unknown) => Promise<{ messageId: string }>
   archiveThread: (threadId: string) => Promise<void>
   deleteMessage: (channelId: string, messageId: string) => Promise<void>
+  addThreadParticipant?: (threadId: string, userId: string) => Promise<void>
 }
 
 export type DoublesDiscordWorkerInput = {
@@ -34,6 +36,7 @@ export type DoublesDiscordWorkerInput = {
   arrangePayload?: unknown
   threadPayload?: unknown
   threadName?: string
+  participantIds?: string[]
 }
 
 export class DoublesDiscordWorker {
@@ -47,8 +50,13 @@ export class DoublesDiscordWorker {
 
   async process(input: DoublesDiscordWorkerInput, event: WorkerEvent) {
     if (!input.enabled && !input.testMode) return { status: "DISABLED" as const }
+    if (input.channelId !== resolveDoublesDiscordChannel(input.division)) throw new Error("Doubles Discord worker destination does not match the authoritative division route")
     if (event === "ARRANGE_UPDATED") return this.updateArrange(input)
-    if (event === "BOARD_REFRESH" || event === "SCORECARD_UPDATED" || event === "RESULT_COMPLETED") return this.refreshBoard(input, event === "RESULT_COMPLETED")
+    if (event === "BOARD_REFRESH" || event === "SCORECARD_UPDATED" || event === "RESULT_COMPLETED") {
+      const board = await this.refreshBoard(input, event === "RESULT_COMPLETED")
+      if (event === "RESULT_COMPLETED" && input.fixtureId) await this.completeThread(input.fixtureId)
+      return board
+    }
     if (event === "MATCH_SET") return this.ensureThread(input)
     return { status: "IGNORED" as const }
   }
@@ -99,9 +107,19 @@ export class DoublesDiscordWorker {
     const thread = await this.transport.createThread(input.channelId, input.threadName || `Doubles · ${input.division} · ${input.fixtureId}`)
     const initial = { fixtureId: input.fixtureId, threadId: thread.threadId, threadChannelId: thread.channelId, starterMessageId: null, matchImageMessageId: null, submitComponentMessageId: null, state: input.testMode ? "TEST" as const : "MATCH_SET" as const }
     await this.store.saveFixture(initial)
+    if (this.transport.addThreadParticipant) {
+      for (const participantId of input.participantIds || []) await this.transport.addThreadParticipant(thread.threadId, participantId)
+    }
     const starter = await this.transport.sendThreadStarter(thread.threadId, input.threadPayload)
     const completed = { ...initial, starterMessageId: starter.messageId, matchImageMessageId: starter.messageId, submitComponentMessageId: starter.messageId }
     await this.store.saveFixture(completed)
     return { status: "CREATED" as const, threadId: thread.threadId, starterMessageId: starter.messageId }
+  }
+
+  private async completeThread(fixtureId: string) {
+    const current = await this.store.getFixture(fixtureId)
+    if (!current?.threadId || current.state === "ARCHIVED") return
+    await this.transport.archiveThread(current.threadId)
+    await this.store.saveFixture({ ...current, state: "ARCHIVED", submitComponentMessageId: null })
   }
 }
