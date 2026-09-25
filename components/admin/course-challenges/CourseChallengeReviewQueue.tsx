@@ -2,6 +2,10 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { courseChallengeGameModeError, normalizeCourseChallengeGameMode, type CourseChallengeGameMode } from "@/lib/courseChallenges/gameMode"
+import { getAceStage, getCourseChallenge, getCourseChallengeLevel, getPrestigeStage } from "@/lib/courseChallenges/catalog"
+import type { CourseChallengeRequirement } from "@/lib/courseChallenges/types"
+import CourseChallengeScorecardEntry from "./CourseChallengeScorecardEntry"
+import reviewStyles from "./CourseChallengeReviewQueue.module.css"
 
 type ReviewEvent = { id: string; action: string; from_status: string | null; to_status: string; reviewer_id: string | null; notes: string | null; created_at: string }
 type DuplicateMatch = { id: string; challengeKey: "level" | "ace" | "prestige"; level: number | null; aceStage: number | null; difficulty: string | null; status: string; createdAt: string; disposition: string; blocking: boolean }
@@ -119,18 +123,28 @@ export default function CourseChallengeReviewQueue({ showRejectedSection = false
 }
 
 function ReviewCard({ submission, mode, setMode, busy, onReview, onPreview }: { submission: Submission; mode?: CourseChallengeGameMode; setMode: (value: CourseChallengeGameMode) => Promise<void>; busy: boolean; onReview: (submission: Submission, action: "approve" | "reject" | "return_to_review", reviewedScores?: number[]) => Promise<void>; onPreview: (preview: { url: string; label: string }) => void }) {
-  const [verifiedScores, setVerifiedScores] = useState<string[]>(() => submission.holeScores.length === 18 ? submission.holeScores.map(String) : Array.from({ length: 18 }, () => ""))
+  const initialScores = submission.reviewedHoleScores || submission.holeScores
+  const [verifiedScores, setVerifiedScores] = useState<string[]>(() => initialScores.length === 18 ? initialScores.map(String) : Array.from({ length: 18 }, () => ""))
   const stageLabel = submission.challengeKey === "ace" ? submission.aceLabel || "Ace Track" : submission.challengeKey === "prestige" ? submission.prestigeLabel || "Prestige" : `Level ${submission.level}`
   const modeError = courseChallengeGameModeError(submission.level, mode, submission.challengeKey)
+  const challenge = getCourseChallenge(submission.courseSlug)
+  const challengeDefinition = challenge && (submission.challengeKey === "ace" ? getAceStage(challenge, submission.aceStage || submission.level) : submission.challengeKey === "prestige" ? getPrestigeStage(challenge, submission.prestigeStage || submission.level) : getCourseChallengeLevel(challenge, submission.level))
+  const requirements: CourseChallengeRequirement[] = challengeDefinition ? (submission.difficulty === "Easy" ? challengeDefinition.easyRequirements : challengeDefinition.hardRequirements) : []
+  const requirementsStatus = challengeDefinition?.requirementsStatus || "pending_review"
   return <article style={card}>
     <header style={header}><div><h3 style={{ margin: 0 }}>{submission.playerName} · {submission.courseName}</h3><p style={muted}>{stageLabel} · {submission.difficulty} · {submission.status.toUpperCase()}</p></div><strong style={{ color: submission.status === "rejected" ? "#fca5a5" : "#fde68a" }}>{submission.status}</strong></header>
     {submission.possibleDuplicate && <div style={warning}><strong>SAME-TRACK DUPLICATE — APPROVAL BLOCKED</strong><span>This image already has an approved use in the same logical track. Cross-track Level/Ace reuse remains allowed.</span>{submission.duplicateMatches.filter((match) => match.blocking).map((match) => <small key={match.id}>Previous: {match.challengeKey === "ace" ? `Ace ${match.aceStage || "Track"}` : match.challengeKey === "prestige" ? "Prestige" : `Level ${match.level}`} · {match.difficulty} · {match.status} · {new Date(match.createdAt).toLocaleString()}</small>)}</div>}
     {submission.crossTrackReuse && <div style={information}><strong>ALLOWED CROSS-TRACK USE</strong><span>This card was previously used for a Level or Ace Track and is also eligible for the other track. This is not a blocking duplicate.</span></div>}
-    {submission.proofPhotoUrl && <button type="button" onClick={() => onPreview({ url: submission.proofPhotoUrl || "", label: "Private scorecard evidence" })} style={proofButton}><img src={submission.proofPhotoUrl} alt="Private scorecard evidence thumbnail" style={{ maxWidth: "100%", maxHeight: 340, objectFit: "contain", background: "#020617" }} /><span>Open original private proof</span></button>}
-    <p style={muted}>Submitted {submission.createdAt ? new Date(submission.createdAt).toLocaleString() : "—"} · Round date/time: {submission.roundDate || "needs review"} {submission.roundTime || "needs review"}</p>
-    <p style={summary}>Player final score: <strong>{formatScore(submission.enteredFinalScore)}</strong> · System relative score: <strong>{formatScore(submission.relativeToPar)}</strong> · Final score check: <strong>{submission.finalScoreCheck || "needs review"}</strong></p>
-    {submission.holeScores.length === 18 ? <div style={{ overflowX: "auto" }}><table style={table}><thead><tr>{submission.holeScores.map((_, index) => <th key={index} style={cell}>H{index + 1}</th>)}<th style={cell}>Total</th><th style={cell}>To par</th></tr></thead><tbody><tr>{submission.holeScores.map((score, index) => <td key={index} style={cell}>{score}<small style={{ display: "block", color: "#a5b4fc" }}>P{submission.pars?.[index] ?? "—"}</small></td>)}<td style={cell}>{submission.calculatedTotal}</td><td style={cell}>{formatScore(submission.relativeToPar)}</td></tr></tbody></table></div> : <fieldset style={verifiedFieldset}><legend>ADMIN VERIFIED CARD VALUES</legend><p style={muted}>Read the private image above and record the 18 strokes once. Players no longer enter score data.</p><div style={verifiedGrid}>{verifiedScores.map((value, index) => <label key={index} style={verifiedCell}>H{index + 1}<input inputMode="numeric" value={value} onChange={(event) => setVerifiedScores((current) => current.map((item, itemIndex) => itemIndex === index ? event.target.value.replace(/[^0-9]/g, "").slice(0, 2) : item))} aria-label={`Verified hole ${index + 1} score`} /></label>)}</div></fieldset>}
-    <ul style={{ marginTop: 10 }}>{submission.requirements.map((item, index) => <li key={index}>{item.requirement?.label || "Requirement"}: {item.status || "needs review"}{item.reason ? ` — ${item.reason}` : ""}</li>)}</ul>
+    <p style={muted}>Submitted {submission.createdAt ? new Date(submission.createdAt).toLocaleString() : "—"} · Date/time is visually verified from the private scorecard image during review.</p>
+    <div className={reviewStyles.workspace}>
+      <div className={reviewStyles.proofPane}>
+        <span className={reviewStyles.eyebrow}>PRIVATE SCORECARD PROOF</span>
+        {submission.proofPhotoUrl ? <button type="button" onClick={() => onPreview({ url: submission.proofPhotoUrl || "", label: "Private scorecard evidence" })} style={proofButton}><img src={submission.proofPhotoUrl} alt="Private scorecard evidence" className={reviewStyles.proofImage} /><span>Open original private proof</span></button> : <p style={muted}>Private proof is unavailable for this submission.</p>}
+        <p style={summary}>Historical entered score: <strong>{formatScore(submission.enteredFinalScore)}</strong> · Stored relative score: <strong>{formatScore(submission.relativeToPar)}</strong></p>
+      </div>
+      <CourseChallengeScorecardEntry pars={submission.pars} existingScores={initialScores} requirements={requirements} requirementsStatus={requirementsStatus} disabled={busy || submission.status === "rejected"} onScoresChange={setVerifiedScores} />
+    </div>
+    {submission.requirements.length > 0 && <details style={storedRequirements}><summary>STORED REVIEW SNAPSHOT</summary><ul style={{ marginTop: 10 }}>{submission.requirements.map((item, index) => <li key={index}>{item.requirement?.label || "Requirement"}: {item.status || "needs review"}{item.reason ? ` — ${item.reason}` : ""}</li>)}</ul></details>}
     {submission.reviewReason && <p style={reviewReason}>Review reason: {submission.reviewReason}</p>}
     {submission.challengeKey !== "ace" && <p style={muted}>Stored Game Mode: {submission.gameMode || "not supplied by player"} · Admin verified: {submission.adminVerifiedGameMode?.toUpperCase() || "not verified"}</p>}
     <PastCards submission={submission} onPreview={onPreview} />
@@ -139,7 +153,7 @@ function ReviewCard({ submission, mode, setMode, busy, onReview, onPreview }: { 
       {submission.challengeKey === "level" && <fieldset style={aceFieldset}><legend>ACE TRACK</legend>{submission.aceStageAtSubmission ? <small style={muted}>Qualifying ace holes on this verified Level card are credited automatically to Ace Stage {submission.aceStageAtSubmission}. No duplicate override or second upload is required.</small> : <small style={muted}>No Ace stage was open when this card was submitted.</small>}</fieldset>}
       {submission.isOwnSubmission && <p style={selfApprovalWarning}>You cannot approve your own Course Challenge submission.</p>}
       {!submission.isOwnSubmission && modeError && <p role="alert" style={modeError.includes("Multiplayer") && mode === "solo" ? modeWarning : modeNote}>{modeError}</p>}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}><button type="button" disabled={busy || submission.isOwnSubmission || Boolean(modeError)} onClick={() => void onReview(submission, "approve", submission.holeScores.length === 18 ? undefined : verifiedScores.map(Number))} style={buttonStyle("#047857")}>APPROVE</button><button type="button" disabled={busy} onClick={() => void onReview(submission, "reject")} style={buttonStyle("#991b1b")}>REJECT</button></div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}><button type="button" data-course-challenge-approval disabled={busy || submission.isOwnSubmission || Boolean(modeError) || verifiedScores.some((score) => !Number.isInteger(Number(score)) || Number(score) <= 0)} onClick={() => void onReview(submission, "approve", verifiedScores.map(Number))} style={buttonStyle("#047857")}>APPROVE</button><button type="button" disabled={busy} onClick={() => void onReview(submission, "reject")} style={buttonStyle("#991b1b")}>REJECT</button></div>
     </div>}
     {submission.allTimeProcessingStatus === "processed" && submission.allTimeProcessingResult && <p style={result}>All-Time/Climbers processed: {String(submission.allTimeProcessingResult.classification || submission.allTimeProcessingResult.action || "complete")}</p>}
   </article>
@@ -165,11 +179,7 @@ const information: React.CSSProperties = { display: "grid", gap: 5, color: "#dbe
 const selfApprovalWarning: React.CSSProperties = { color: "#fecaca", background: "#450a0a", border: "1px solid #f87171", borderRadius: 8, padding: 10, fontWeight: 800, margin: 0 }
 const result: React.CSSProperties = { color: "#86efac", border: "1px solid #166534", borderRadius: 8, padding: 10, margin: 0 }
 const proofButton: React.CSSProperties = { display: "grid", gap: 5, justifyItems: "start", border: "1px solid #475569", borderRadius: 10, padding: 8, background: "#020617", color: "#c4b5fd", cursor: "pointer" }
-const table: React.CSSProperties = { width: "100%", borderCollapse: "collapse" }
-const cell: React.CSSProperties = { padding: 6, textAlign: "center", whiteSpace: "nowrap" }
-const verifiedFieldset: React.CSSProperties = { display: "grid", gap: 10, border: "1px solid #f59e0b", borderRadius: 10, padding: 12, background: "#1c1917" }
-const verifiedGrid: React.CSSProperties = { display: "grid", gridTemplateColumns: "repeat(6,minmax(48px,1fr))", gap: 6 }
-const verifiedCell: React.CSSProperties = { display: "grid", gap: 3, color: "#fde68a", fontSize: 11 }
+const storedRequirements: React.CSSProperties = { borderTop: "1px solid #334155", paddingTop: 10 }
 const modeFieldset: React.CSSProperties = { display: "grid", gap: 10, border: "1px solid #64748b", borderRadius: 12, padding: 14, background: "#020617" }
 const modeLegend: React.CSSProperties = { padding: "0 6px", color: "#f8fafc", fontWeight: 900, letterSpacing: "0.08em" }
 const modeOptions: React.CSSProperties = { display: "flex", flexWrap: "wrap", gap: 10 }
