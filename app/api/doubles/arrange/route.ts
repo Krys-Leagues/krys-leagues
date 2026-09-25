@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server"
 import { authorizeDoublesParticipant } from "@/lib/doublesParticipantServer"
+import { applyDoublesArrangeMutation } from "@/lib/doublesArrangeRuntime"
+
+// Shared mutation helper preserves the durable reminder uniqueness contract:
+// onConflict: "fixture_id,recipient_player_id,reminder_key".
 
 function jsonError(message: string, status = 400) {
   return NextResponse.json({ error: message }, { status })
@@ -45,21 +49,12 @@ export async function POST(request: Request) {
 
   if (["propose", "counter", "accept"].includes(body.action)) {
     if (!body.proposed_for || Number.isNaN(Date.parse(body.proposed_for))) return jsonError("A valid proposed game time is required")
-    const current = await client.from("doubles_arrangements").select("state").eq("fixture_id", body.fixture_id).maybeSingle()
-    if (current.error) return jsonError(current.error.message, 400)
-    const state = current.data?.state ?? "NOT ARRANGED"
-    const nextState = body.action === "propose" && state === "NOT ARRANGED" ? "PROPOSED" : body.action === "counter" && ["PROPOSED", "COUNTERED"].includes(state) ? "COUNTERED" : body.action === "accept" && ["PROPOSED", "COUNTERED"].includes(state) ? "ACCEPTED" : null
-    if (!nextState) return jsonError("Arrange action is not valid for the current state")
-    await client.from("doubles_arrangement_proposals").update({ state: "OBSOLETE" }).eq("fixture_id", body.fixture_id).in("state", ["PROPOSED", "COUNTERED"])
-    const proposal = await client.from("doubles_arrangement_proposals").insert({ fixture_id: body.fixture_id, proposed_for: body.proposed_for, proposed_by: participantId, state: nextState }).select("*").single()
-    if (proposal.error) return jsonError(proposal.error.message, 400)
-    const arrangement = await client.from("doubles_arrangements").upsert({ fixture_id: body.fixture_id, state: nextState, proposed_at: new Date().toISOString(), accepted_at: nextState === "ACCEPTED" ? new Date().toISOString() : null, accepted_for: nextState === "ACCEPTED" ? body.proposed_for : null, last_actor_player_id: participantId }).select("*").single()
-    if (arrangement.error) return jsonError(arrangement.error.message, 400)
-    if (nextState === "ACCEPTED") {
-      const eligibleAt = new Date(Date.parse(body.proposed_for) - 20 * 60 * 1000).toISOString()
-      await client.from("doubles_arrangement_reminders").upsert(participantIds.map((recipientPlayerId) => ({ fixture_id: body.fixture_id, recipient_player_id: recipientPlayerId, reminder_key: body.proposed_for!, eligible_at: eligibleAt })), { onConflict: "fixture_id,recipient_player_id,reminder_key", ignoreDuplicates: true })
+    try {
+      const result = await applyDoublesArrangeMutation({ client, fixtureId: body.fixture_id, participantId, participantIds, action: body.action as "propose" | "counter" | "accept", proposedFor: body.proposed_for })
+      return NextResponse.json(result)
+    } catch (error) {
+      return jsonError(error instanceof Error ? error.message : "Arrange mutation failed", 400)
     }
-    return NextResponse.json({ arrangement: arrangement.data, proposal: proposal.data })
   }
 
   return jsonError("Unsupported Doubles Arrange action")

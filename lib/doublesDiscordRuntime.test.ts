@@ -1,6 +1,6 @@
 import test from "node:test"
 import assert from "node:assert/strict"
-import { DOUBLES_DISCORD_TEST_CHANNEL_ID, arrangeMessagePlan, boardMessagePlan, boardReplacementPlan, cleanupTestArtifacts, currentSeasonGate, fixtureThreadPlan, previewInteractionResponse, validatePreviewChannel, validatePreviewInteraction } from "./doublesDiscordRuntime.ts"
+import { DOUBLES_DISCORD_TEST_CHANNEL_ID, arrangeMessagePlan, boardMessagePlan, boardReplacementPlan, cleanupTestArtifacts, createSignedInteractionId, currentSeasonGate, fixtureThreadPlan, previewInteractionResponse, validatePreviewChannel, validatePreviewInteraction, verifySignedInteractionId } from "./doublesDiscordRuntime.ts"
 
 const mapping = { seasonId: "next", division: "ELITE", arrangeChannelId: DOUBLES_DISCORD_TEST_CHANNEL_ID, arrangeMessageId: "arrange-1", boardChannelId: DOUBLES_DISCORD_TEST_CHANNEL_ID, boardMessageId: "board-1", status: "TEST" as const }
 
@@ -30,6 +30,14 @@ test("preview interactions are safe and expose no player IDs", () => {
   assert.deepEqual(validatePreviewInteraction("preview:next-season:doubles:accept"), { action: "accept" })
   assert.equal(validatePreviewInteraction("preview:next-season:doubles:fixture-uuid:accept"), null)
   assert.deepEqual(previewInteractionResponse("preview:next-season:doubles:scorecard"), { type: 4, data: { content: "Preview only — no league data changed.", flags: 64 } })
+})
+
+test("signed live interaction state contains only opaque fixture/action state and expires safely", () => {
+  const id = createSignedInteractionId({ fixtureId: "fixture-opaque", action: "accept", proposedFor: "2026-10-03T14:00:00.000Z", expiresAt: Date.now() + 60_000 }, "secret")
+  assert.match(id, /^doubles:live:/)
+  assert.deepEqual(verifySignedInteractionId(id, "secret")?.action, "accept")
+  assert.equal(verifySignedInteractionId(id, "wrong-secret"), null)
+  assert.equal(verifySignedInteractionId(createSignedInteractionId({ fixtureId: "fixture-opaque", action: "accept", expiresAt: Date.now() - 1 }, "secret"), "secret"), null)
 })
 
 test("cleanup is narrow to known next-season test artifacts", () => {

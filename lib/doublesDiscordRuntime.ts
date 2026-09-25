@@ -69,6 +69,30 @@ export function validatePreviewInteraction(customId: string) {
   return { action }
 }
 
+export function createSignedInteractionId(input: { fixtureId: string; action: "propose" | "counter" | "accept" | "scorecard"; expiresAt: number; proposedFor?: string }, secret: string) {
+  const payload = Buffer.from(JSON.stringify(input)).toString("base64url")
+  const signature = createHmac("sha256", secret).update(payload).digest("base64url")
+  return `doubles:live:${payload}.${signature}`
+}
+
+export function verifySignedInteractionId(customId: string, secret: string, now = Date.now()) {
+  if (!customId.startsWith("doubles:live:") || !secret) return null
+  const encoded = customId.slice("doubles:live:".length)
+  const [payload, signature] = encoded.split(".")
+  if (!payload || !signature) return null
+  const expected = createHmac("sha256", secret).update(payload).digest("base64url")
+  const left = Buffer.from(expected)
+  const right = Buffer.from(signature)
+  if (left.length !== right.length || !timingSafeEqual(left, right)) return null
+  try {
+    const parsed = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as { fixtureId?: string; action?: string; expiresAt?: number }
+    if (!parsed.fixtureId || !parsed.expiresAt || parsed.expiresAt < now || !["propose", "counter", "accept", "scorecard"].includes(parsed.action || "")) return null
+    return parsed as { fixtureId: string; action: "propose" | "counter" | "accept" | "scorecard"; expiresAt: number; proposedFor?: string }
+  } catch {
+    return null
+  }
+}
+
 export function previewInteractionResponse(customId: string) {
   const interaction = validatePreviewInteraction(customId)
   if (!interaction) return null
