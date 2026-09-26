@@ -84,18 +84,20 @@ test("review desk and site-wide alert use the same protected queue", () => {
   assert.match(submissions, /notification_kind: "discord_review_needed"/)
 })
 
-test("duplicate evidence is track-aware and verified Level cards receive automatic idempotent Ace credit", () => {
+test("duplicate evidence is track-aware and visual Ace review preserves idempotent cross-credit", () => {
   const api = read("app/api/admin/course-challenges/route.ts")
   const queue = read("components/admin/course-challenges/CourseChallengeReviewQueue.tsx")
   const submissions = read("app/api/course-challenges/submissions/route.ts")
   assert.match(queue, /SAME-TRACK DUPLICATE — APPROVAL BLOCKED/)
   assert.match(queue, /ALLOWED CROSS-TRACK USE/)
-  assert.match(queue, /credited automatically/)
+  assert.match(queue, /check the Ace condition above/)
   assert.match(queue, /courseChallengeGameModeError/)
-  assert.doesNotMatch(queue, /type="checkbox"/)
+  assert.match(queue, /visualReview/)
+  assert.match(queue, /possibleDuplicate/)
   assert.doesNotMatch(api, /body\.countTowardAceTrack/)
   assert.match(api, /classifyDuplicateCard/)
   assert.match(api, /applyAceCrossCredit/)
+  assert.match(api, /applyVisualAceCredit/)
   assert.match(api, /aceCrossCreditRows/)
   assert.match(api, /ignoreDuplicates: true/)
   assert.match(api, /unique ace holes/)

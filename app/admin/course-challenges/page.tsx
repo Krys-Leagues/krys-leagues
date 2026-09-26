@@ -6,7 +6,7 @@ export default function CourseChallengesAdminPage() {
     <div style={content}>
       <nav style={nav}><Link href="/admin" style={link}>← Admin Dashboard</Link><Link href="/" style={link}>← Player Site</Link></nav>
       <h1>Course Challenge Review Queue</h1>
-      <p style={intro}>Approve only after checking the player, course, difficulty, Level, private proof, entered H1–H18, authoritative pars, calculated total, and every requirement. Public viewers never receive proof photos or review details.</p>
+      <p style={intro}>Approve only after visually checking the player, course, difficulty, challenge requirement, private proof image, visible date/time, game mode, and any reuse warnings. Do not transcribe scores. Public viewers never receive proof photos or review details.</p>
       <CourseChallengeReviewQueue showRejectedSection />
     </div>
   </main>

@@ -1,30 +1,12 @@
 .workspace { display:grid; grid-template-columns:minmax(260px,.85fr) minmax(360px,1.15fr); gap:16px; align-items:start; }
 .proofPane { position:sticky; top:16px; display:grid; gap:10px; padding:12px; border:1px solid #475569; border-radius:12px; background:#020617; }
 .proofImage { width:100%; max-height:560px; object-fit:contain; background:#020617; border-radius:8px; }
-.entryPanel { display:grid; gap:12px; border:1px solid #475569; border-radius:12px; padding:14px; background:#111827; }
-.entryHeader { display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:8px; }
-.entryHeader h4 { margin:2px 0 0; letter-spacing:.08em; }
+.reviewChecklist { display:grid; gap:12px; align-content:start; padding:16px; border:1px solid #475569; border-radius:12px; background:#111827; }
+.reviewChecklist label { display:flex; gap:10px; align-items:flex-start; color:#f8fafc; font-weight:700; }
+.reviewChecklist input[type="checkbox"] { width:18px; height:18px; accent-color:#10b981; flex:none; }
+.reviewFacts { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; padding-top:4px; }
+.reviewFacts span { display:grid; gap:3px; color:#94a3b8; font-size:11px; letter-spacing:.06em; }
+.reviewFacts b { color:#f8fafc; font-size:13px; letter-spacing:normal; }
 .eyebrow { color:#fbbf24; font-size:11px; font-weight:900; letter-spacing:.1em; }
-.entryHint,.keyboardHint { color:#cbd5e1; font-size:13px; margin:0; }
-.scorecardTable { display:grid; gap:4px; }
-.scorecardHead,.scoreRow,.resultGrid { display:grid; grid-template-columns:minmax(86px,1fr) 72px minmax(100px,1fr); gap:8px; align-items:center; }
-.scorecardHead { padding:0 10px 5px; color:#94a3b8; font-size:11px; font-weight:900; letter-spacing:.08em; }
-.scoreRow,.scoreRowActive { display:grid; grid-template-columns:minmax(86px,1fr) 72px minmax(100px,1fr); gap:8px; align-items:center; padding:6px 10px; border:1px solid #334155; border-radius:8px; background:#0f172a; }
-.scoreRowActive { border-color:#f59e0b; background:#1c1917; box-shadow:0 0 0 1px #f59e0b33; }
-.holeNumber { font-weight:800; }
-.parValue { color:#fbbf24; font-weight:900; text-align:center; }
-.scoreInput { width:100%; min-height:38px; border:1px solid #64748b; border-radius:7px; background:#020617; color:#f8fafc; padding:6px 9px; font-size:16px; font-weight:800; text-align:center; }
-.scoreInput:focus { outline:2px solid #fbbf24; outline-offset:1px; }
-.liveResult,.requirementPreview { display:grid; gap:8px; border:1px solid #475569; border-radius:9px; padding:10px; background:#020617; }
-.resultGrid { grid-template-columns:repeat(4,minmax(0,1fr)); color:#cbd5e1; font-size:12px; }
-.resultGrid span { display:grid; gap:2px; }
-.resultGrid b { color:#f8fafc; font-size:15px; }
-.requirementPreview > strong { color:#fde68a; letter-spacing:.08em; }
-.requirementPreview > p,.overallResult { margin:0; color:#cbd5e1; font-size:13px; }
-.requirementPassed,.requirementFailed,.requirementPending { display:flex; justify-content:space-between; gap:8px; padding:7px 8px; border-radius:7px; font-size:13px; }
-.requirementPassed { color:#bbf7d0; background:#064e3b; }
-.requirementFailed { color:#fecaca; background:#450a0a; }
-.requirementPending { color:#fde68a; background:#451a03; }
-.blockedNotice { margin:0; padding:10px; border:1px solid #f87171; border-radius:8px; color:#fecaca; background:#450a0a; }
 @media (max-width:900px) { .workspace { grid-template-columns:1fr; } .proofPane { position:static; } }
-@media (max-width:560px) { .scorecardHead,.scoreRow,.scoreRowActive { grid-template-columns:minmax(72px,1fr) 52px minmax(82px,1fr); padding-left:6px; padding-right:6px; } .resultGrid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media (max-width:560px) { .reviewFacts { grid-template-columns:1fr; } }
