@@ -59,6 +59,7 @@ export default function StrokeStandingsPage() {
   const [approvalNote, setApprovalNote] = useState("")
   const [scorecardError, setScorecardError] = useState("")
   const [scorecardMessage, setScorecardMessage] = useState("")
+  const [rebuildingStandings, setRebuildingStandings] = useState(false)
 
   useEffect(() => {
     async function loadManagedSeasons() {
@@ -286,6 +287,27 @@ export default function StrokeStandingsPage() {
     setGenerating(false)
   }
 
+  async function rebuildStandings() {
+    if (!selectedSeason) return
+    setRebuildingStandings(true)
+    setScorecardError("")
+    setScorecardMessage("")
+    const response = await fetch("/api/admin/stroke/manage", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "rebuild_standings", seasonId: selectedSeason.id, division: Number(divisionNumber) }),
+    })
+    const payload = await response.json() as { error?: string }
+    if (!response.ok) {
+      setScorecardError(payload.error || "Stroke standings rebuild failed.")
+      setRebuildingStandings(false)
+      return
+    }
+    await refreshSelectedData(selectedSeason, Number(divisionNumber))
+    setScorecardMessage("Stroke standings rebuilt from the authoritative roster and saved results.")
+    setRebuildingStandings(false)
+  }
+
   async function approveFinalScorecard() {
     if (!scorecard || scorecard.status !== "draft" || !selectedSeason) return
     if (!window.confirm("Approve and permanently freeze this Final Scorecard?")) return
@@ -357,6 +379,13 @@ export default function StrokeStandingsPage() {
             style={button}
           >
             {loading ? "Loading..." : "Refresh"}
+          </button>
+          <button
+            onClick={() => void rebuildStandings()}
+            disabled={rebuildingStandings || !selectedSeason}
+            style={{ ...button, borderColor: "#facc15", color: "#facc15" }}
+          >
+            {rebuildingStandings ? "Rebuilding..." : "Rebuild Standings"}
           </button>
         </div>
 
