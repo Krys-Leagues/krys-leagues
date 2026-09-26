@@ -20,7 +20,7 @@ test("admin review hotfix keeps review actions, mode selection, and private hist
   assert.match(queue, />MULTIPLAYER</)
   assert.match(queue, /adminVerifiedGameMode/)
   assert.match(queue, /courseChallengeGameModeError/)
-  assert.match(queue, /Your selection is saved immediately and rechecked on approval/)
+  assert.match(queue, /missing player-supplied mode does not block approval/)
   assert.match(queue, /action: "verify_game_mode"/)
   assert.match(queue, /adminVerifiedGameMode: payload\.gameMode \|\| mode/)
   assert.doesNotMatch(queue, /const lockedMode/)

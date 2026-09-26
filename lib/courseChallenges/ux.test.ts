@@ -45,7 +45,7 @@ test("Course Challenge player flow is private-image only", () => {
   assert.doesNotMatch(book, /<select/)
   assert.match(book, /Submit your scorecard photo/)
   assert.match(book, /Your submission will be reviewed by an admin/)
-  assert.match(book, /Scorecard submitted — waiting for admin approval/)
+  assert.match(book, /SCORECARD SUBMITTED\\nWAITING FOR ADMIN APPROVAL/)
   assert.doesNotMatch(book, /data-course-challenge-hole-index/)
   assert.doesNotMatch(book, /CALCULATED FINAL SCORE/)
   assert.doesNotMatch(book, /finalScore: calculatedFinalScore/)
@@ -215,7 +215,7 @@ test("image-only submission keeps review security, history, and additive score c
   assert.match(noPrejudgeMigration, /Practice Mode cards cannot be approved/)
   assert.match(noPrejudgeMigration, /v_visual_only := v_hole_scores is null and v_relative_to_par is null/)
   assert.match(noPrejudgeMigration, /set search_path to ''/)
-  assert.match(route, /Scorecard submitted — waiting for admin approval/)
+  assert.match(route, /SCORECARD SUBMITTED\\nWAITING FOR ADMIN APPROVAL/)
 })
 
 test("welcome guide explains the purpose, progression, hints, and profile rewards", () => {

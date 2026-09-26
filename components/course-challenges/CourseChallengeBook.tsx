@@ -222,7 +222,7 @@ function SubmissionForm({ course, level, challengeKey, aceStage, prestigeStage, 
       const response = await fetch("/api/course-challenges/submissions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ courseSlug: course.slug, level, challengeKey, aceStage, prestigeStage, difficulty, proofPhotoPath: storagePath }) })
       const payload = await response.json() as { error?: string; message?: string }
       if (!response.ok) throw new Error(payload.error || "Course Challenge submission failed.")
-      onSubmitted(payload.message || "Scorecard submitted — waiting for admin approval.")
+      onSubmitted(payload.message || "SCORECARD SUBMITTED\nWAITING FOR ADMIN APPROVAL")
     } catch (caught) { setError(caught instanceof Error ? caught.message : "Course Challenge submission failed.") } finally { setBusy(false) }
   }
 

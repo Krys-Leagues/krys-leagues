@@ -140,7 +140,7 @@
 .field input, .field select { width: 100%; border: 1px solid #ffffff2b; border-radius: 9px; padding: 10px; background: #020617; color: #fff; font: inherit; }
 .fieldWide { grid-column: 1 / -1; }
 .photoPreview { width: 100%; max-height: 280px; object-fit: contain; border: 1px solid #ffffff22; border-radius: 12px; background: #020617; }
-.notice { border: 1px solid #f59e0b55; border-radius: 12px; padding: 12px; background: #451a0388; color: #fde68a; line-height: 1.5; }
+.notice { border: 1px solid #f59e0b55; border-radius: 12px; padding: 12px; background: #451a0388; color: #fde68a; line-height: 1.5; white-space: pre-line; }
 .profileRewardNotice { display: grid; gap: 4px; border: 1px solid #34d39977; border-radius: 14px; padding: 13px 15px; background: #064e3b99; color: #d1fae5; }
 .profileRewardNotice strong { color: #6ee7b7; letter-spacing: .08em; }
 .success { border-color: #34d39966; background: #064e3b88; color: #bbf7d0; }
