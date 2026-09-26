@@ -16,8 +16,7 @@ type RosterRow = {
   division_count: number
   status: "draft" | "approved" | "locked"
 }
-type SeasonStandingRow = { player_id: string; points: number; wins: number; losses: number; ties: number; strokes: number; rank: number }
-type PlayerRow = { id: string; screen_name: string }
+type SeasonStandingRow = { player_id: string; player_screen_name: string; points: number; wins: number; losses: number; ties: number; strokes: number; rank: number }
 type Standing = { player: string; player_id: string; played: number; wins: number; draws: number; losses: number; points: number; strokes: number; rank: number }
 type ScorecardRow = { id: string; season_id: string; source_roster_version_id: string; status: "draft" | "approved" | "cancelled"; approved_at: string | null; approval_note: string | null }
 type ScorecardEntryRow = { id: string; division_number: number; division_rank: number; player_id: string; player_screen_name: string; completed_game_count: number; wins: number; losses: number; ties: number; points: number; strokes: number }
@@ -164,40 +163,19 @@ export default function StrokeStandingsPage() {
 
   async function loadStandings(activeSeason: SeasonRow, activeDivision: number, requestId: number) {
     setLoading(true)
-    const { data, error } = await supabase
-      .from("season_standings")
-      .select("player_id, points, wins, losses, ties, strokes, rank")
-      .eq("league_type", "stroke")
-      .eq("division", `Stroke D${activeDivision}`)
-      .eq("season_number", activeSeason.season_number)
-      .order("rank", { ascending: true })
+    const response = await fetch(`/api/admin/stroke/standings?seasonId=${encodeURIComponent(activeSeason.id)}&divisionNumber=${activeDivision}`, { cache: "no-store" })
+    const payload = await response.json() as { standings?: SeasonStandingRow[]; error?: string }
 
     if (requestId !== loadVersion.current) return
-    if (error) {
-      setScorecardError(`Could not load standings: ${error.message}`)
+    if (!response.ok) {
+      setScorecardError(`Could not load standings: ${payload.error || "Unknown error"}`)
       setLoading(false)
       return
     }
 
-    const savedRows = (data || []) as SeasonStandingRow[]
-    const playerIds = savedRows.map((row) => row.player_id)
-    let playerMap = new Map<string, string>()
-    if (playerIds.length > 0) {
-      const { data: playerData, error: playerError } = await supabase
-        .from("players")
-        .select("id, screen_name")
-        .in("id", playerIds)
-      if (requestId !== loadVersion.current) return
-      if (playerError) {
-        setScorecardError(`Could not load standing player names: ${playerError.message}`)
-        setLoading(false)
-        return
-      }
-      playerMap = new Map(((playerData || []) as PlayerRow[]).map((player) => [player.id, player.screen_name]))
-    }
-
+    const savedRows = payload.standings || []
     setStandings(savedRows.map((row) => ({
-      player: playerMap.get(row.player_id) || "Unknown Player",
+      player: row.player_screen_name || "Unknown Player",
       player_id: row.player_id,
       played: Number(row.wins || 0) + Number(row.losses || 0) + Number(row.ties || 0),
       wins: Number(row.wins || 0),
