@@ -187,11 +187,19 @@ test("player scorecard actions stack cleanly on narrow screens", () => {
   assert.match(book, /SUBMIT SCORECARD/)
   assert.match(book, /REPLACE \/ CHANGE/)
   assert.match(book, />CANCEL<\/button>/)
-  assert.match(styles, /\.buttonRow \{ display: grid; grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/)
+  assert.match(book, /data-preview-selected=/)
+  assert.match(book, /preview && <button type="button" className=\{styles\.secondaryButton\}[^\n]+REPLACE \/ CHANGE<\/button>/)
+  assert.match(styles, /\.buttonRow \{ display: grid; grid-template-columns: repeat\(auto-fit, minmax\(220px, 1fr\)\)/)
+  assert.match(styles, /\.buttonRow > \* \{ min-width: 0; width: 100%; \}/)
+  assert.match(styles, /@media \(max-width: 1100px\)/)
   assert.match(styles, /\.buttonRow \{ grid-template-columns: 1fr; \}/)
   assert.match(styles, /\.buttonRow \.submitButton \{ order: -1; \}/)
-  assert.match(styles, /\.dropPreviewActions \{ display: grid/)
+  assert.match(styles, /\.dropZone\[data-preview-selected="true"\] \{ aspect-ratio: auto; min-height: 0;/)
+  assert.doesNotMatch(book, /dropPreviewActions/)
   assert.match(styles, /min-height: 48px/)
+
+  const layoutForWidth = (width: number) => width <= 1100 ? "stack" : "auto-fit"
+  assert.deepEqual([1366, 1024, 834, 768, 430, 390].map(layoutForWidth), ["auto-fit", "stack", "stack", "stack", "stack", "stack"])
 })
 
 test("image-only submission keeps review security, history, and additive score compatibility", () => {

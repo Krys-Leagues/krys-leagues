@@ -26,12 +26,14 @@
 .backLinkButton { border: 0; padding: 0; background: transparent; color: #c4b5fd; font: inherit; font-weight: 800; cursor: pointer; }
 .backLink:hover, .backLink:focus-visible, .backLinkButton:hover, .backLinkButton:focus-visible { color: #f9a8d4; text-decoration: underline; text-underline-offset: 4px; }
 .eyebrow { margin: 0; color: #c4b5fd; font-size: .76rem; font-weight: 900; letter-spacing: .18em; text-transform: uppercase; }
-.buttonRow { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; align-items: stretch; width: 100%; }
+.buttonRow { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; align-items: stretch; width: 100%; }
+.buttonRow > * { min-width: 0; width: 100%; }
 .primaryButton, .secondaryButton, .submitButton, .lockedButton {
   min-width: 0; min-height: 48px; border: 1px solid #ffffff2b; border-radius: 12px; padding: 11px 15px; color: #fff; font: inherit; font-weight: 900; cursor: pointer; overflow-wrap: anywhere;
 }
 .primaryButton, .submitButton { background: linear-gradient(135deg, #7c3aed, #db2777); }
 .secondaryButton, .lockedButton { background: #0f172acc; }
+.tertiaryButton { min-width: 0; min-height: 48px; border: 1px solid #ffffff20; border-radius: 12px; padding: 11px 15px; background: transparent; color: #cbd5e1; font: inherit; font-weight: 800; cursor: pointer; overflow-wrap: anywhere; }
 .lockedButton { cursor: not-allowed; color: #94a3b8; }
 .courseList { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 16px; width: min(760px, 100%); margin: 8px auto 0; }
 .courseCard { position: relative; overflow: hidden; min-height: 230px; border: 1px solid #ffffff2b; border-radius: 22px; background: #0f172a; box-shadow: 0 20px 60px #0005; perspective: 1200px; }
@@ -149,6 +151,10 @@
 .profileCourseRow { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; align-items: center; border-top: 1px solid #ffffff14; padding-top: 12px; }
 .profileStickers { display: flex; flex-wrap: wrap; gap: 8px; }
 .profileSticker { border: 1px solid #fbbf2444; border-radius: 999px; padding: 6px 9px; color: #fde68a; font-size: .75rem; font-weight: 800; }
+@media (max-width: 1100px) {
+  .buttonRow { grid-template-columns: 1fr; }
+  .buttonRow .submitButton { order: -1; }
+}
 @media (max-width: 720px) {
   .courseList { grid-template-columns: 1fr; width: min(360px, 100%); }
   .courseCard, .courseCardContent { min-height: 218px; }
@@ -161,8 +167,6 @@
   .reward > img, .rewardMark, .rewardSilhouette { width: min(100%, 124px); height: 124px; }
   .aceStageRail { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .sideGrid, .formGrid { grid-template-columns: 1fr; }
-  .buttonRow { grid-template-columns: 1fr; }
-  .buttonRow .submitButton { order: -1; }
   .levelRail { grid-template-columns: repeat(5, minmax(74px, 1fr)); overflow-x: auto; }
   .levelTab { min-height: 64px; padding: 8px; }
 }
@@ -172,15 +176,14 @@
 }
 .courseNameLink { color: #fff; text-decoration: none; }
 .courseNameLink:hover, .courseNameLink:focus-visible { color: #f9a8d4; text-decoration: underline; text-underline-offset: 5px; }
-.dropZone { position: relative; display: grid; place-items: center; gap: 8px; width: min(100%, 620px); aspect-ratio: 3 / 1; min-height: 120px; border: 2px dashed #a78bfa99; border-radius: 16px; padding: 20px; background: #02061799; color: #f8fafc; text-align: center; cursor: pointer; transition: border-color .15s ease, background .15s ease; }
+.dropZone { position: relative; display: grid; place-items: center; gap: 8px; width: min(100%, 620px); aspect-ratio: 3 / 1; min-height: 120px; box-sizing: border-box; border: 2px dashed #a78bfa99; border-radius: 16px; padding: 20px; background: #02061799; color: #f8fafc; text-align: center; cursor: pointer; transition: border-color .15s ease, background .15s ease; }
+.dropZone[data-preview-selected="true"] { aspect-ratio: auto; min-height: 0; align-content: start; }
 .dropZone:hover, .dropZone:focus-visible, .dropZoneActive { border-color: #f9a8d4; background: #312e81aa; outline: none; }
 .dropZone > strong { font-size: 1.05rem; letter-spacing: .08em; }
 .dropZone > span { color: #cbd5e1; }
 .hiddenFileInput { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
-.dropPreview { display: grid; gap: 12px; justify-items: center; width: 100%; }
-.dropPreview .photoPreview { max-height: 220px; }
-.dropPreviewActions { display: grid; gap: 10px; justify-items: center; width: 100%; }
-.dropPreviewActions .secondaryButton { width: min(100%, 300px); }
+.dropPreview { display: grid; gap: 12px; justify-items: center; width: 100%; min-width: 0; }
+.dropPreview .photoPreview { display: block; max-width: 100%; max-height: min(42vh, 320px); object-fit: contain; }
 .formHelp { border: 1px solid #ffffff20; border-radius: 12px; padding: 11px 14px; background: #02061766; color: #cbd5e1; }
 .formHelp summary { cursor: pointer; color: #fff; font-weight: 900; }
 .formHelp p { margin: 10px 0 0; line-height: 1.5; }
