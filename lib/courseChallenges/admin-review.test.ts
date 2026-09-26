@@ -131,7 +131,7 @@ test("GOLDENBRETT pending Ace Wader can proceed without Solo or Multiplayer", ()
   }
   assert.match(api, /challengeKey === "ace" \? null : normalizeCourseChallengeGameMode/)
   assert.doesNotMatch(book, /Levels 3–5, Course Pro, Course Master, and Ace use the established Multiplayer review rule/)
-  assert.match(book, /Levels 3–5, Course Pro, and Course Master use the established Multiplayer review rule/)
+  assert.match(book, /Your submission will be reviewed by an admin/)
   assert.doesNotMatch(guide, /Ace cards follow the established Multiplayer review rule/)
   assert.match(guide, /Ace cards are evaluated only by their unique-hole requirements/)
 })

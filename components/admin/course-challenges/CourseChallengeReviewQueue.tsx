@@ -30,6 +30,8 @@ export default function CourseChallengeReviewQueue({ showRejectedSection = false
   const [busyId, setBusyId] = useState<string | null>(null)
   const [modes, setModes] = useState<Record<string, CourseChallengeGameMode>>({})
   const [preview, setPreview] = useState<{ url: string; label: string } | null>(null)
+  const [previewScale, setPreviewScale] = useState(1)
+  const [previewRotation, setPreviewRotation] = useState(0)
 
   const load = useCallback(async () => {
     const response = await fetch("/api/admin/course-challenges", { cache: "no-store" })
@@ -74,9 +76,9 @@ export default function CourseChallengeReviewQueue({ showRejectedSection = false
   async function review(submission: Submission, action: "approve" | "reject" | "return_to_review", visualReview?: VisualReview) {
     const mode = submission.challengeKey === "ace" ? null : modes[submission.id] || normalizeCourseChallengeGameMode(submission.adminVerifiedGameMode)
     const modeError = courseChallengeGameModeError(submission.level, mode, submission.challengeKey)
-    if (action === "approve" && modeError) { setMessage(modeError); return }
+    if (action === "approve" && mode && modeError) { setMessage(modeError); return }
     setBusyId(submission.id)
-    const response = await fetch("/api/admin/course-challenges", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: submission.id, action, gameMode: mode, visualReview }) })
+    const response = await fetch("/api/admin/course-challenges", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: submission.id, action, gameMode: mode, visualOnly: action === "approve" }) })
     const payload = await response.json() as { error?: string; message?: string }
     setMessage(response.ok ? payload.message || "Review saved." : payload.error || "Review failed.")
     setBusyId(null)
@@ -84,6 +86,19 @@ export default function CourseChallengeReviewQueue({ showRejectedSection = false
       await load()
       if (rejectedLoaded) await loadRejected()
     }
+  }
+
+  function openPreview(next: { url: string; label: string }) {
+    setPreview(next)
+    setPreviewScale(1)
+    setPreviewRotation(0)
+  }
+
+  function togglePreviewFullscreen() {
+    const image = document.querySelector<HTMLElement>("[data-course-challenge-proof-viewer]")
+    if (!image) return
+    if (document.fullscreenElement) void document.exitFullscreen()
+    else void image.requestFullscreen()
   }
 
   async function verifyGameMode(submission: Submission, mode: CourseChallengeGameMode) {
@@ -114,19 +129,16 @@ export default function CourseChallengeReviewQueue({ showRejectedSection = false
       <span style={{ color: "#94a3b8", fontSize: 13 }}>Refreshes every 20 seconds</span>
     </div>
     {message && <p role="status" style={{ padding: 12, border: "1px solid #f59e0b66", borderRadius: 10, color: "#fde68a", whiteSpace: "pre-line" }}>{message}</p>}
-    {loading ? <p>Loading reviews…</p> : submissions.length === 0 ? <p>No pending Course Challenge submissions.</p> : submissions.map((submission) => <ReviewCard key={submission.id} submission={submission} mode={modes[submission.id]} setMode={(value) => verifyGameMode(submission, value)} busy={busyId === submission.id} onReview={review} onPreview={setPreview} />)}
-    {showRejectedSection && <details style={rejectedSection} onToggle={() => { if (!rejectedLoaded) void loadRejected() }}><summary style={rejectedSummary}>REJECTED CARDS{rejectedLoaded ? ` (${rejectedSubmissions.length})` : ""}</summary>{rejectedLoading ? <p>Loading rejected cards…</p> : !rejectedLoaded ? <p style={muted}>Expand to inspect rejected cards.</p> : rejectedSubmissions.length === 0 ? <p style={muted}>No rejected cards.</p> : rejectedSubmissions.map((submission) => <ReviewCard key={submission.id} submission={submission} mode={modes[submission.id]} setMode={(value) => verifyGameMode(submission, value)} busy={busyId === submission.id} onReview={review} onPreview={setPreview} />)}</details>}
-    {preview && <div role="dialog" aria-modal="true" onClick={() => setPreview(null)} style={modalBackdrop}><div onClick={(event) => event.stopPropagation()} style={modalPanel}><button type="button" onClick={() => setPreview(null)} style={closeButton}>Close</button><img src={preview.url} alt={preview.label} style={{ maxWidth: "100%", maxHeight: "80vh", objectFit: "contain" }} /></div></div>}
+    {loading ? <p>Loading reviews…</p> : submissions.length === 0 ? <p>No pending Course Challenge submissions.</p> : submissions.map((submission) => <ReviewCard key={submission.id} submission={submission} mode={modes[submission.id]} setMode={(value) => verifyGameMode(submission, value)} busy={busyId === submission.id} onReview={review} onPreview={openPreview} />)}
+    {showRejectedSection && <details style={rejectedSection} onToggle={() => { if (!rejectedLoaded) void loadRejected() }}><summary style={rejectedSummary}>REJECTED CARDS{rejectedLoaded ? ` (${rejectedSubmissions.length})` : ""}</summary>{rejectedLoading ? <p>Loading rejected cards…</p> : !rejectedLoaded ? <p style={muted}>Expand to inspect rejected cards.</p> : rejectedSubmissions.length === 0 ? <p style={muted}>No rejected cards.</p> : rejectedSubmissions.map((submission) => <ReviewCard key={submission.id} submission={submission} mode={modes[submission.id]} setMode={(value) => verifyGameMode(submission, value)} busy={busyId === submission.id} onReview={review} onPreview={openPreview} />)}</details>}
+    {preview && <div role="dialog" aria-modal="true" onClick={() => setPreview(null)} style={modalBackdrop}><div data-course-challenge-proof-viewer onClick={(event) => event.stopPropagation()} style={modalPanel}><div style={viewerToolbar}><button type="button" onClick={() => setPreviewScale((value) => Math.max(0.5, value - 0.25))} style={viewerButton}>Zoom out</button><button type="button" onClick={() => { setPreviewScale(1); setPreviewRotation(0) }} style={viewerButton}>Fit / reset</button><button type="button" onClick={() => setPreviewScale((value) => Math.min(3, value + 0.25))} style={viewerButton}>Zoom in</button><button type="button" onClick={() => setPreviewRotation((value) => (value + 90) % 360)} style={viewerButton}>Rotate</button><button type="button" onClick={togglePreviewFullscreen} style={viewerButton}>Full screen</button><button type="button" onClick={() => setPreview(null)} style={closeButton}>Close</button></div><div style={viewerCanvas}><img src={preview.url} alt={preview.label} style={{ maxWidth: "100%", maxHeight: "78vh", objectFit: "contain", transform: `scale(${previewScale}) rotate(${previewRotation}deg)`, transformOrigin: "center center", cursor: previewScale > 1 ? "grab" : "default" }} /></div></div></div>}
   </section>
 }
 
 function ReviewCard({ submission, mode, setMode, busy, onReview, onPreview }: { submission: Submission; mode?: CourseChallengeGameMode; setMode: (value: CourseChallengeGameMode) => Promise<void>; busy: boolean; onReview: (submission: Submission, action: "approve" | "reject" | "return_to_review", visualReview?: VisualReview) => Promise<void>; onPreview: (preview: { url: string; label: string }) => void }) {
-  const [requirementVerified, setRequirementVerified] = useState(false)
   const requiresAceVerification = submission.challengeKey === "ace" || Boolean(submission.aceStageAtSubmission)
-  const [aceConditionVerified, setAceConditionVerified] = useState(false)
   const stageLabel = submission.challengeKey === "ace" ? submission.aceLabel || "Ace Track" : submission.challengeKey === "prestige" ? submission.prestigeLabel || "Prestige" : `Level ${submission.level}`
   const modeError = courseChallengeGameModeError(submission.level, mode, submission.challengeKey)
-  const reviewBlocked = !requirementVerified || (requiresAceVerification && !aceConditionVerified)
   return <article style={card}>
     <header style={header}><div><h3 style={{ margin: 0 }}>{submission.playerName} · {submission.courseName}</h3><p style={muted}>{stageLabel} · {submission.difficulty} · {submission.status.toUpperCase()}</p></div><strong style={{ color: submission.status === "rejected" ? "#fca5a5" : "#fde68a" }}>{submission.status}</strong></header>
     {submission.possibleDuplicate && <div style={warning}><strong>SAME-TRACK DUPLICATE — APPROVAL BLOCKED</strong><span>This image already has an approved use in the same logical track. Cross-track Level/Ace reuse remains allowed.</span>{submission.duplicateMatches.filter((match) => match.blocking).map((match) => <small key={match.id}>Previous: {match.challengeKey === "ace" ? `Ace ${match.aceStage || "Track"}` : match.challengeKey === "prestige" ? "Prestige" : `Level ${match.level}`} · {match.difficulty} · {match.status} · {new Date(match.createdAt).toLocaleString()}</small>)}</div>}
@@ -141,8 +153,8 @@ function ReviewCard({ submission, mode, setMode, busy, onReview, onPreview }: { 
       <div className={reviewStyles.reviewChecklist}>
         <span className={reviewStyles.eyebrow}>VISUAL REVIEW CHECKLIST</span>
         <p style={muted}>Review the image itself. No scores, total, date, time, or ace count need to be transcribed.</p>
-        <label><input type="checkbox" checked={requirementVerified} disabled={busy || submission.status === "rejected"} onChange={(event) => setRequirementVerified(event.target.checked)} /> Challenge requirement is visibly met</label>
-        <label><input type="checkbox" checked={aceConditionVerified} disabled={busy || submission.status === "rejected" || !requiresAceVerification} onChange={(event) => setAceConditionVerified(event.target.checked)} /> {requiresAceVerification ? "Ace condition is visibly met" : "No separate Ace condition for this submission"}</label>
+        <p style={muted}>Challenge requirement: use the image and the reference below as guidance. The authorized admin makes the final decision.</p>
+        <p style={muted}>{requiresAceVerification ? "Ace condition: visually inspect the card when applicable." : "Ace condition: not separately flagged for this submission."}</p>
         <div className={reviewStyles.reviewFacts}><span>PLAYER <b>{submission.playerName}</b></span><span>COURSE <b>{submission.courseName}</b></span><span>TRACK <b>{stageLabel}</b></span><span>DIFFICULTY <b>{submission.difficulty}</b></span><span>DATE/TIME <b>VISUALLY VERIFIED FROM IMAGE</b></span><span>GAME MODE <b>{submission.challengeKey === "ace" ? "NOT REQUIRED" : mode ? mode.toUpperCase() : "ADMIN VERIFICATION REQUIRED"}</b></span></div>
       </div>
     </div>
@@ -154,8 +166,8 @@ function ReviewCard({ submission, mode, setMode, busy, onReview, onPreview }: { 
       {submission.challengeKey !== "ace" && <fieldset disabled={busy} style={modeFieldset}><legend style={modeLegend}>GAME MODE</legend><div style={modeOptions}><label style={modeOption(mode === "solo")}><input type="radio" name={`mode-${submission.id}`} checked={mode === "solo"} onChange={() => void setMode("solo")} /> <span>SOLO</span></label><label style={modeOption(mode === "multiplayer")}><input type="radio" name={`mode-${submission.id}`} checked={mode === "multiplayer"} onChange={() => void setMode("multiplayer")} /> <span>MULTIPLAYER</span></label></div><small style={muted}>Admin verification is required. Your selection is saved immediately and rechecked on approval.</small></fieldset>}
       {submission.challengeKey === "level" && <fieldset style={aceFieldset}><legend>ACE TRACK</legend>{submission.aceStageAtSubmission ? <small style={muted}>If the card visibly satisfies Ace Stage {submission.aceStageAtSubmission}, check the Ace condition above. No duplicate override or second upload is required.</small> : <small style={muted}>No Ace stage was open when this card was submitted.</small>}</fieldset>}
       {submission.isOwnSubmission && <p style={selfApprovalWarning}>You cannot approve your own Course Challenge submission.</p>}
-      {!submission.isOwnSubmission && modeError && <p role="alert" style={modeError.includes("Multiplayer") && mode === "solo" ? modeWarning : modeNote}>{modeError}</p>}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}><button type="button" data-course-challenge-approval disabled={busy || submission.isOwnSubmission || Boolean(modeError) || reviewBlocked || submission.possibleDuplicate} onClick={() => void onReview(submission, "approve", { requirementVerified, aceConditionVerified })} style={buttonStyle("#047857")}>APPROVE</button><button type="button" disabled={busy} onClick={() => void onReview(submission, "reject")} style={buttonStyle("#991b1b")}>REJECT / NEEDS CORRECTION</button></div>
+      {!submission.isOwnSubmission && modeError && mode && <p role="alert" style={modeError.includes("Multiplayer") && mode === "solo" ? modeWarning : modeNote}>{modeError}</p>}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}><button type="button" data-course-challenge-approval disabled={busy || submission.isOwnSubmission || Boolean(mode && modeError) || submission.possibleDuplicate} onClick={() => void onReview(submission, "approve")} style={buttonStyle("#047857")}>APPROVE</button><button type="button" disabled={busy} onClick={() => void onReview(submission, "reject")} style={buttonStyle("#991b1b")}>REJECT / NEEDS CORRECTION</button></div>
     </div>}
     {submission.allTimeProcessingStatus === "processed" && submission.allTimeProcessingResult && <p style={result}>All-Time/Climbers processed: {String(submission.allTimeProcessingResult.classification || submission.allTimeProcessingResult.action || "complete")}</p>}
   </article>
@@ -196,3 +208,6 @@ const thumbnailPlaceholder: React.CSSProperties = { height: 90, display: "grid",
 const modalBackdrop: React.CSSProperties = { position: "fixed", inset: 0, zIndex: 100, display: "grid", placeItems: "center", padding: 24, background: "#000c" }
 const modalPanel: React.CSSProperties = { position: "relative", maxWidth: "min(1000px, 100%)", maxHeight: "90vh", padding: 36, borderRadius: 14, background: "#0f172a" }
 const closeButton: React.CSSProperties = { position: "absolute", top: 8, right: 8, border: "1px solid #64748b", borderRadius: 7, padding: "5px 9px", background: "#1e293b", color: "white", cursor: "pointer" }
+const viewerToolbar: React.CSSProperties = { display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 10, paddingRight: 52 }
+const viewerButton: React.CSSProperties = { border: "1px solid #64748b", borderRadius: 7, padding: "6px 9px", background: "#1e293b", color: "white", cursor: "pointer" }
+const viewerCanvas: React.CSSProperties = { maxWidth: "min(1000px, 90vw)", maxHeight: "78vh", overflow: "auto", display: "grid", placeItems: "center", background: "#020617", borderRadius: 8, padding: 12 }

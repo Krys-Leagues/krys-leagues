@@ -62,7 +62,7 @@ export async function POST(request: Request) {
     if (insert.error) throw insert.error
     await service.from("course_challenge_submission_review_events").insert({ submission_id: insert.data?.id, action: "submitted", from_status: null, to_status: status, metadata: { source: "player_submission" } })
     await notifyCourseChallengeReview(service, String(insert.data?.id), course.name, level, difficulty)
-    return Response.json({ id: insert.data?.id, status, message: "Scorecard received. An authorized admin will verify the private proof and Game Mode before progression." }, { status: 201 })
+    return Response.json({ id: insert.data?.id, status, message: "Scorecard submitted — waiting for admin approval." }, { status: 201 })
   } catch (caught) { return Response.json({ error: caught instanceof Error ? caught.message : "Course Challenge submission failed." }, { status: 503 }) }
 }
 

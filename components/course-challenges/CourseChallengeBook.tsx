@@ -164,7 +164,7 @@ function ChallengeSide({ course, difficulty, requirements, requirementsPending, 
   const code = difficulty === "Easy" ? course.easyCode : course.hardCode
   return <article className={styles.sideCard}>
     <div className={styles.sideHeading}><h3>{difficulty} Course</h3><span>{code}</span></div>
-    {requirementsPending ? <p>Final approved requirements are pending Krys review. The scorecard flow is wired, but automatic challenge approval remains off.</p> : <ul className={styles.requirementList}>{requirements.map((requirement) => <li key={requirement.id}>{requirement.label}{requirement.reviewRequired && <small> · admin/photo review required</small>}{requirement.helpText && <details><summary>Optional PB tip</summary><small>{requirement.helpText}</small></details>}</li>)}</ul>}
+    {requirementsPending ? <p>Final approved requirements are pending Krys review. An authorized admin reviews each submitted card.</p> : <ul className={styles.requirementList}>{requirements.map((requirement) => <li key={requirement.id}>{requirement.label}{requirement.reviewRequired && <small> · admin/photo review required</small>}{requirement.helpText && <details><summary>Optional PB tip</summary><small>{requirement.helpText}</small></details>}</li>)}</ul>}
     <button type="button" className={styles.submitButton} onClick={onSubmit}>Submit {difficulty} scorecard</button>
   </article>
 }
@@ -222,14 +222,14 @@ function SubmissionForm({ course, level, challengeKey, aceStage, prestigeStage, 
       const response = await fetch("/api/course-challenges/submissions", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ courseSlug: course.slug, level, challengeKey, aceStage, prestigeStage, difficulty, proofPhotoPath: storagePath }) })
       const payload = await response.json() as { error?: string; message?: string }
       if (!response.ok) throw new Error(payload.error || "Course Challenge submission failed.")
-      onSubmitted(payload.message || "Scorecard received for review.")
+      onSubmitted(payload.message || "Scorecard submitted — waiting for admin approval.")
     } catch (caught) { setError(caught instanceof Error ? caught.message : "Course Challenge submission failed.") } finally { setBusy(false) }
   }
 
   const challengeLabel = challengeKey === "ace" ? "ACE TRACK" : challengeKey === "prestige" ? (prestigeStage === 1 ? "COURSE PRO" : "COURSE MASTER") : "LEVEL " + level
   return <section className={styles.submissionPanel} aria-label={challengeLabel + " " + difficulty + " scorecard submission"}>
-    <div><p className={styles.eyebrow}>{challengeLabel} · {difficulty.toUpperCase()}</p><h3>Submit your scorecard photo</h3><p className={styles.helper}>No score typing is needed. An authorized admin reviews the private card image, including the visible date/time and challenge requirements.</p></div>
-      <details className={styles.formHelp}><summary>Rules / Help</summary><p>Drag your scorecard photo here or tap to choose one. Make sure all scorecard details, including the date and time, are visible and readable. Recommended: crop the photo so the scorecard fills the image.</p><p>Do not type hole scores, a total score, the date, time, or Game Mode. Levels 1–2 accept Solo or Multiplayer; Levels 3–5, Course Pro, and Course Master use the established Multiplayer review rule. Ace Track is evaluated only by its actual Ace requirements. An admin verifies the private proof before approval.</p></details>
+    <div><p className={styles.eyebrow}>{challengeLabel} · {difficulty.toUpperCase()}</p><h3>Submit your scorecard photo</h3><p className={styles.helper}>Upload a clear current scorecard with the date, time, and game mode visible. Your submission will be reviewed by an admin.</p></div>
+      <details className={styles.formHelp}><summary>Rules / Help</summary><p>Drag your scorecard photo here or tap to choose one. Make sure all scorecard details, including the date, time, and game mode, are visible and readable. Recommended: crop the photo so the scorecard fills the image.</p></details>
     <div className={styles.dropZone + (dragActive ? " " + styles.dropZoneActive : "")} role="button" tabIndex={0} onClick={() => fileInputRef.current?.click()} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); fileInputRef.current?.click() } }} onDragEnter={(event) => { event.preventDefault(); setDragActive(true) }} onDragOver={(event) => event.preventDefault()} onDragLeave={() => setDragActive(false)} onDrop={(event) => { event.preventDefault(); setDragActive(false); chooseFile(event.dataTransfer.files?.[0] || null) }}>
       <input ref={fileInputRef} className={styles.hiddenFileInput} type="file" accept="image/*" onChange={(event) => chooseFile(event.target.files?.[0] || null)} />
       {preview ? <div className={styles.dropPreview}><img className={styles.photoPreview} src={preview} alt="Selected scorecard preview" /><div className={styles.dropPreviewActions}><strong>Scorecard photo selected</strong><button type="button" className={styles.secondaryButton} onClick={(event) => { event.stopPropagation(); fileInputRef.current?.click() }}>Replace / Change</button></div></div> : <><strong>DRAG YOUR SCORECARD HERE</strong><span>or tap to choose a photo</span></>}
