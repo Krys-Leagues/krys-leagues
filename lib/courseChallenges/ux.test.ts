@@ -58,6 +58,7 @@ test("Course Challenge help keeps the public submission message simple", () => {
   assert.doesNotMatch(book, /Do not type hole scores/)
   assert.match(guide, /Levels 3–5: Multiplayer Game Mode is required/)
   assert.doesNotMatch(guide, /Ace cards follow the established Multiplayer review rule/)
+  assert.doesNotMatch(guide, /enter H1–H18|calculates the final score from the authoritative course pars/)
 })
 
 test("fresh and repair SQL preserve private review fallback for missing proof metadata", () => {

@@ -26,7 +26,7 @@ export default function CourseChallengesGuide({ includeScorecardHelp = false }: 
         <li>Levels 3–5: Multiplayer Game Mode is required.</li>
         <li>Ace Track is available from Level 1 and progresses alongside Levels 1–5; verified Level scorecards may also count qualifying aces.</li>
         <li>Ace progress is cumulative by unique holes: Wader 1, Chaser 3, Hunter 6, and Legend all 9. Practice Mode does not qualify.</li>
-        <li>Upload the scorecard and enter H1–H18. The website checks the Level requirements automatically.</li>
+        <li>Upload one clear current scorecard photo for each challenge. An authorized admin reviews the private card.</li>
         <li>Verified Easy + verified Hard completes the Level, earns the reward, and unlocks the next Level.</li>
       </ul>
     </section>
@@ -76,7 +76,7 @@ export default function CourseChallengesGuide({ includeScorecardHelp = false }: 
 
     {includeScorecardHelp && <section className={styles.guideSection}>
       <h3>SCORECARD HELP</h3>
-      <p>Make sure the scorecard numbers and final score are clearly readable. Upload the photo, then enter H1–H18; the website calculates the final score from the authoritative course pars.</p>
+      <p>Make sure the scorecard details are clearly readable. Upload the photo and wait for an authorized admin to review the private card.</p>
       <p><strong>Recommended:</strong> crop the photo so the scorecard fills the image. Cropping is optional.</p>
       <p>The scorecard should show the round date and time. If date/time or Solo/Multiplayer evidence is unclear, Admin Review can verify the proof. Do not enter date, time, or Game Mode manually.</p>
     </section>}
