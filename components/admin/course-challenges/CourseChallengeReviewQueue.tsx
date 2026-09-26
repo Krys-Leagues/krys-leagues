@@ -10,15 +10,13 @@ type PastCard = { id: string; challengeKey: "level" | "ace" | "prestige"; level:
 type Requirement = { requirement?: { label?: string }; status?: string; passed?: boolean | null; reason?: string }
 type Submission = {
   id: string; playerId: string; isOwnSubmission: boolean; playerName: string; courseSlug: string; courseName: string; challengeKey: "level" | "ace" | "prestige"; level: number; aceStage?: number | null; aceLabel?: string | null; prestigeStage?: number | null; prestigeLabel?: string | null; difficulty: "Easy" | "Hard";
-  proofPhotoUrl: string | null; holeScores: number[]; reviewedHoleScores: number[] | null; pars: number[] | null; calculatedTotal: number; relativeToPar: number; requirements: Requirement[]; status: string;
+  proofPhotoUrl: string | null; holeScores: number[]; reviewedHoleScores: number[] | null; pars: number[] | null; calculatedTotal: number; relativeToPar: number; requirements: Requirement[]; levelRequirements: Array<{ label?: string }>; aceRequirements: Array<{ label?: string }>; status: string;
   reviewReason: string | null; reviewNotes: string | null; roundDate: string | null; roundTime: string | null; gameMode: string | null; adminVerifiedGameMode: string | null;
   enteredFinalScore: number | null; finalScoreCheck: string | null; createdAt: string | null; aceStageAtSubmission: number | null; possibleDuplicate: boolean; crossTrackReuse: boolean; duplicateMatches: DuplicateMatch[]; pastCards: PastCard[]; reviewEvents: ReviewEvent[];
   allTimeProcessingStatus: string; allTimeProcessingResult: Record<string, unknown> | null;
 }
 
 type QueueProps = { showRejectedSection?: boolean; reviewDesk?: boolean }
-type VisualReview = { requirementVerified: boolean; aceConditionVerified: boolean }
-
 export default function CourseChallengeReviewQueue({ showRejectedSection = false, reviewDesk = false }: QueueProps) {
   const [submissions, setSubmissions] = useState<Submission[]>([])
   const [rejectedSubmissions, setRejectedSubmissions] = useState<Submission[]>([])
@@ -73,12 +71,12 @@ export default function CourseChallengeReviewQueue({ showRejectedSection = false
     return () => { active = false; window.clearTimeout(initial); window.clearInterval(timer) }
   }, [load])
 
-  async function review(submission: Submission, action: "approve" | "reject" | "return_to_review", visualReview?: VisualReview) {
+  async function review(submission: Submission, action: "approve" | "reject" | "return_to_review", approveAce = false) {
     const mode = submission.challengeKey === "ace" ? null : modes[submission.id] || normalizeCourseChallengeGameMode(submission.adminVerifiedGameMode)
     const modeError = courseChallengeGameModeError(submission.level, mode, submission.challengeKey)
     if (action === "approve" && mode && modeError) { setMessage(modeError); return }
     setBusyId(submission.id)
-    const response = await fetch("/api/admin/course-challenges", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: submission.id, action, gameMode: mode, visualOnly: action === "approve" }) })
+    const response = await fetch("/api/admin/course-challenges", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: submission.id, action, gameMode: mode, visualOnly: action === "approve", approveAce }) })
     const payload = await response.json() as { error?: string; message?: string }
     setMessage(response.ok ? payload.message || "Review saved." : payload.error || "Review failed.")
     setBusyId(null)
@@ -135,10 +133,13 @@ export default function CourseChallengeReviewQueue({ showRejectedSection = false
   </section>
 }
 
-function ReviewCard({ submission, mode, setMode, busy, onReview, onPreview }: { submission: Submission; mode?: CourseChallengeGameMode; setMode: (value: CourseChallengeGameMode) => Promise<void>; busy: boolean; onReview: (submission: Submission, action: "approve" | "reject" | "return_to_review", visualReview?: VisualReview) => Promise<void>; onPreview: (preview: { url: string; label: string }) => void }) {
+function ReviewCard({ submission, mode, setMode, busy, onReview, onPreview }: { submission: Submission; mode?: CourseChallengeGameMode; setMode: (value: CourseChallengeGameMode) => Promise<void>; busy: boolean; onReview: (submission: Submission, action: "approve" | "reject" | "return_to_review", approveAce?: boolean) => Promise<void>; onPreview: (preview: { url: string; label: string }) => void }) {
   const requiresAceVerification = submission.challengeKey === "ace" || Boolean(submission.aceStageAtSubmission)
   const stageLabel = submission.challengeKey === "ace" ? submission.aceLabel || "Ace Track" : submission.challengeKey === "prestige" ? submission.prestigeLabel || "Prestige" : `Level ${submission.level}`
   const modeError = courseChallengeGameModeError(submission.level, mode, submission.challengeKey)
+  const primaryRequirements = submission.challengeKey === "ace" ? submission.aceRequirements : submission.challengeKey === "prestige" ? submission.levelRequirements : submission.levelRequirements
+  const primaryRequirementTitle = submission.challengeKey === "ace" ? "ACE TRACK REQUIREMENT" : submission.challengeKey === "prestige" ? `${stageLabel.toUpperCase()} REQUIREMENT` : "LEVEL REQUIREMENT"
+  const canApproveAce = submission.challengeKey === "level" && submission.aceRequirements.length > 0
   return <article style={card}>
     <header style={header}><div><h3 style={{ margin: 0 }}>{submission.playerName} · {submission.courseName}</h3><p style={muted}>{stageLabel} · {submission.difficulty} · {submission.status.toUpperCase()}</p></div><strong style={{ color: submission.status === "rejected" ? "#fca5a5" : "#fde68a" }}>{submission.status}</strong></header>
     {submission.possibleDuplicate && <div style={warning}><strong>SAME-TRACK DUPLICATE — APPROVAL BLOCKED</strong><span>This image already has an approved use in the same logical track. Cross-track Level/Ace reuse remains allowed.</span>{submission.duplicateMatches.filter((match) => match.blocking).map((match) => <small key={match.id}>Previous: {match.challengeKey === "ace" ? `Ace ${match.aceStage || "Track"}` : match.challengeKey === "prestige" ? "Prestige" : `Level ${match.level}`} · {match.difficulty} · {match.status} · {new Date(match.createdAt).toLocaleString()}</small>)}</div>}
@@ -153,8 +154,9 @@ function ReviewCard({ submission, mode, setMode, busy, onReview, onPreview }: { 
       <div className={reviewStyles.reviewChecklist}>
         <span className={reviewStyles.eyebrow}>VISUAL REVIEW CHECKLIST</span>
         <p style={muted}>Review the image itself. No scores, total, date, time, or ace count need to be transcribed.</p>
-        <p style={muted}>Challenge requirement: use the image and the reference below as guidance. The authorized admin makes the final decision.</p>
-        <p style={muted}>{requiresAceVerification ? "Ace condition: visually inspect the card when applicable." : "Ace condition: not separately flagged for this submission."}</p>
+        <div style={requirementPanel}><strong>{primaryRequirementTitle}</strong>{primaryRequirements.length > 0 ? <ul style={requirementList}>{primaryRequirements.map((requirement, index) => <li key={index}>{requirement.label || "Configured requirement"}</li>)}</ul> : <p style={muted}>No configured requirement text is available for this submission.</p>}</div>
+        {submission.challengeKey === "level" && <div style={requirementPanel}><strong>ACE TRACK REQUIREMENT</strong>{submission.aceRequirements.length > 0 ? <ul style={requirementList}>{submission.aceRequirements.map((requirement, index) => <li key={index}>{requirement.label || "Configured Ace requirement"}</li>)}</ul> : <p style={muted}>No Ace approval is available for this submission.</p>}</div>}
+        <p style={muted}>The authorized admin makes the final visual decision using the private scorecard image and these configured requirements.</p>
         <div className={reviewStyles.reviewFacts}><span>PLAYER <b>{submission.playerName}</b></span><span>COURSE <b>{submission.courseName}</b></span><span>TRACK <b>{stageLabel}</b></span><span>DIFFICULTY <b>{submission.difficulty}</b></span><span>DATE/TIME <b>VISUALLY VERIFIED FROM IMAGE</b></span><span>GAME MODE <b>{submission.challengeKey === "ace" ? "NOT REQUIRED" : mode ? mode.toUpperCase() : "ADMIN VERIFICATION REQUIRED"}</b></span></div>
       </div>
     </div>
@@ -164,10 +166,10 @@ function ReviewCard({ submission, mode, setMode, busy, onReview, onPreview }: { 
     <PastCards submission={submission} onPreview={onPreview} />
     {submission.status === "rejected" ? <button type="button" disabled={busy} onClick={() => void onReview(submission, "return_to_review")} style={buttonStyle("#92400e")}>RETURN TO REVIEW</button> : <div style={{ display: "grid", gap: 10 }}>
       {submission.challengeKey !== "ace" && <fieldset disabled={busy} style={modeFieldset}><legend style={modeLegend}>GAME MODE</legend><div style={modeOptions}><label style={modeOption(mode === "solo")}><input type="radio" name={`mode-${submission.id}`} checked={mode === "solo"} onChange={() => void setMode("solo")} /> <span>SOLO</span></label><label style={modeOption(mode === "multiplayer")}><input type="radio" name={`mode-${submission.id}`} checked={mode === "multiplayer"} onChange={() => void setMode("multiplayer")} /> <span>MULTIPLAYER</span></label></div><small style={muted}>Admin verification is required. Your selection is saved immediately and rechecked on approval.</small></fieldset>}
-      {submission.challengeKey === "level" && <fieldset style={aceFieldset}><legend>ACE TRACK</legend>{submission.aceStageAtSubmission ? <small style={muted}>If the card visibly satisfies Ace Stage {submission.aceStageAtSubmission}, check the Ace condition above. No duplicate override or second upload is required.</small> : <small style={muted}>No Ace stage was open when this card was submitted.</small>}</fieldset>}
+      {submission.challengeKey === "level" && <fieldset style={aceFieldset}><legend>ACE TRACK</legend>{canApproveAce ? <small style={muted}>Optional: approve this same image for the displayed Ace requirement. No duplicate upload is required.</small> : <small style={muted}>No Ace stage was open when this card was submitted.</small>}</fieldset>}
       {submission.isOwnSubmission && <p style={selfApprovalWarning}>You cannot approve your own Course Challenge submission.</p>}
       {!submission.isOwnSubmission && modeError && mode && <p role="alert" style={modeError.includes("Multiplayer") && mode === "solo" ? modeWarning : modeNote}>{modeError}</p>}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}><button type="button" data-course-challenge-approval disabled={busy || submission.isOwnSubmission || Boolean(mode && modeError) || submission.possibleDuplicate} onClick={() => void onReview(submission, "approve")} style={buttonStyle("#047857")}>APPROVE</button><button type="button" disabled={busy} onClick={() => void onReview(submission, "reject")} style={buttonStyle("#991b1b")}>REJECT / NEEDS CORRECTION</button></div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}><button type="button" data-course-challenge-approval disabled={busy || submission.isOwnSubmission || Boolean(mode && modeError) || submission.possibleDuplicate} onClick={() => void onReview(submission, "approve", submission.challengeKey === "ace")} style={buttonStyle("#047857")}>{submission.challengeKey === "ace" ? "APPROVE ACE" : "APPROVE LEVEL"}</button>{canApproveAce && <button type="button" disabled={busy || submission.isOwnSubmission || Boolean(mode && modeError) || submission.possibleDuplicate} onClick={() => void onReview(submission, "approve", true)} style={buttonStyle("#0f766e")}>APPROVE LEVEL + ACE</button>}<button type="button" disabled={busy} onClick={() => void onReview(submission, "reject")} style={buttonStyle("#991b1b")}>REJECT / NEEDS CORRECTION</button></div>
     </div>}
     {submission.allTimeProcessingStatus === "processed" && submission.allTimeProcessingResult && <p style={result}>All-Time/Climbers processed: {String(submission.allTimeProcessingResult.classification || submission.allTimeProcessingResult.action || "complete")}</p>}
   </article>
@@ -193,6 +195,8 @@ const selfApprovalWarning: React.CSSProperties = { color: "#fecaca", background:
 const result: React.CSSProperties = { color: "#86efac", border: "1px solid #166534", borderRadius: 8, padding: 10, margin: 0 }
 const proofButton: React.CSSProperties = { display: "grid", gap: 5, justifyItems: "start", border: "1px solid #475569", borderRadius: 10, padding: 8, background: "#020617", color: "#c4b5fd", cursor: "pointer" }
 const storedRequirements: React.CSSProperties = { borderTop: "1px solid #334155", paddingTop: 10 }
+const requirementPanel: React.CSSProperties = { display: "grid", gap: 6, border: "1px solid #475569", borderRadius: 10, padding: 11, background: "#111827", color: "#f8fafc" }
+const requirementList: React.CSSProperties = { margin: 0, paddingLeft: 20, color: "#fde68a" }
 const modeFieldset: React.CSSProperties = { display: "grid", gap: 10, border: "1px solid #64748b", borderRadius: 12, padding: 14, background: "#020617" }
 const modeLegend: React.CSSProperties = { padding: "0 6px", color: "#f8fafc", fontWeight: 900, letterSpacing: "0.08em" }
 const modeOptions: React.CSSProperties = { display: "flex", flexWrap: "wrap", gap: 10 }

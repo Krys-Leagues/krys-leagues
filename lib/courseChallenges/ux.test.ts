@@ -35,7 +35,7 @@ test("full book conceals unearned reward artwork and preserves Ace Track wording
   assert.match(book, /ACE TRACK/)
   assert.match(book, /DRAG YOUR SCORECARD HERE/)
   assert.match(book, /or tap to choose a photo/)
-  assert.match(book, /Replace \/ Change/)
+  assert.match(book, /REPLACE \/ CHANGE/)
 })
 
 test("Course Challenge player flow is private-image only", () => {
@@ -168,7 +168,8 @@ test("admin review is a protected visual-only decision with no score transcripti
   assert.doesNotMatch(queue, /ADMIN VERIFIED CARD/)
   assert.match(queue, /Date\/time is visually verified from the private scorecard image/)
   assert.match(queue, /VISUAL REVIEW CHECKLIST/)
-  assert.match(queue, /Challenge requirement: use the image/)
+  assert.match(queue, /LEVEL REQUIREMENT/)
+  assert.match(queue, /ACE TRACK REQUIREMENT/)
   assert.match(queue, /REJECT \/ NEEDS CORRECTION/)
   assert.match(queue, /visualOnly/)
   assert.match(queue, /Open original private proof/)
@@ -177,6 +178,19 @@ test("admin review is a protected visual-only decision with no score transcripti
   assert.match(queue, /Full screen/)
   assert.match(styles, /grid-template-columns:minmax\(260px/)
   assert.match(styles, /@media \(max-width:900px\)/)
+})
+
+test("player scorecard actions stack cleanly on narrow screens", () => {
+  const book = read("components/course-challenges/CourseChallengeBook.tsx")
+  const styles = read("components/course-challenges/course-challenges.module.css")
+  assert.match(book, /SUBMIT SCORECARD/)
+  assert.match(book, /REPLACE \/ CHANGE/)
+  assert.match(book, />CANCEL<\/button>/)
+  assert.match(styles, /\.buttonRow \{ display: grid; grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/)
+  assert.match(styles, /\.buttonRow \{ grid-template-columns: 1fr; \}/)
+  assert.match(styles, /\.buttonRow \.submitButton \{ order: -1; \}/)
+  assert.match(styles, /\.dropPreviewActions \{ display: grid/)
+  assert.match(styles, /min-height: 48px/)
 })
 
 test("image-only submission keeps review security, history, and additive score compatibility", () => {
