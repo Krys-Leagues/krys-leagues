@@ -502,20 +502,17 @@ export default function PlayersAdminPage() {
 
     setSavingStatus(true)
 
-    const shouldBeActive = playerStatus === "active"
-
-    const { error } = await supabase
-      .from("players")
-      .update({
-        status: playerStatus,
-        active: shouldBeActive,
-      })
-      .eq("id", statusPlayer.id)
+    const response = await fetch("/api/admin/player-status", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ playerId: statusPlayer.id, status: playerStatus }),
+    })
+    const result = await response.json().catch(() => null)
 
     setSavingStatus(false)
 
-    if (error) {
-      alert(error.message)
+    if (!response.ok) {
+      alert(result?.error || "Unable to update player status")
       return
     }
 
