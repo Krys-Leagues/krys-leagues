@@ -116,6 +116,9 @@ export default function PlayersAdminPage() {
   const [statusPlayer, setStatusPlayer] = useState<Player | null>(null)
   const [playerStatus, setPlayerStatus] = useState("active")
   const [savingStatus, setSavingStatus] = useState(false)
+  const [protectedStatusPlayerId, setProtectedStatusPlayerId] = useState("")
+  const [protectedStatus, setProtectedStatus] = useState("active")
+  const [savingProtectedStatus, setSavingProtectedStatus] = useState(false)
 
   const [discordPlayer, setDiscordPlayer] = useState<Player | null>(null)
   const [discordId, setDiscordId] = useState("")
@@ -523,6 +526,28 @@ export default function PlayersAdminPage() {
     alert(`Player status updated to ${playerStatus} ✔`)
   }
 
+  async function saveProtectedPlayerStatus() {
+    if (!protectedStatusPlayerId.trim()) return
+
+    setSavingProtectedStatus(true)
+
+    const response = await fetch("/api/admin/player-status", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ playerId: protectedStatusPlayerId.trim(), status: protectedStatus }),
+    })
+    const result = await response.json().catch(() => null)
+
+    setSavingProtectedStatus(false)
+
+    if (!response.ok) {
+      alert(result?.error || "Unable to update player status")
+      return
+    }
+
+    alert(`Player status updated to ${protectedStatus} ✔`)
+  }
+
   async function importPlayers() {
     setImporting(true)
 
@@ -661,6 +686,34 @@ export default function PlayersAdminPage() {
           style={{ ...button, background: "#16a34a" }}
         >
           {importing ? "Importing..." : "Import Existing Players"}
+        </button>
+      </div>
+
+      <div style={{ ...controls, alignItems: "center", marginTop: 12 }}>
+        <label htmlFor="protected-status-player-id">Protected status update</label>
+        <input
+          id="protected-status-player-id"
+          aria-label="Canonical player ID for protected status update"
+          value={protectedStatusPlayerId}
+          onChange={(event) => setProtectedStatusPlayerId(event.target.value)}
+          placeholder="Canonical player UUID"
+          style={{ ...searchInput, margin: 0, maxWidth: 360 }}
+        />
+        <select
+          aria-label="Protected player status"
+          value={protectedStatus}
+          onChange={(event) => setProtectedStatus(event.target.value)}
+          style={actionsSelect}
+        >
+          {PLAYER_STATUSES.map((status) => <option key={status} value={status}>{status}</option>)}
+        </select>
+        <button
+          type="button"
+          onClick={saveProtectedPlayerStatus}
+          disabled={savingProtectedStatus || !protectedStatusPlayerId.trim()}
+          style={button}
+        >
+          {savingProtectedStatus ? "Saving..." : "Update Status"}
         </button>
       </div>
 
