@@ -70,6 +70,12 @@ test("board coordinator and admin workspace preserve the required security and f
     readFile("supabase/migrations/20260918183000_stroke_live_board_pilot.sql", "utf8"),
   ])
   assert.match(server, /stroke_roster_versions[\s\S]*eq\("status", "approved"\)/)
+  assert.match(server, /select\("id,division_number,game_number,player1_id,player2_id,player1_name,player2_name,course,due_date"\)/)
+  assert.match(server, /dueDate: fixture\.due_date/)
+  assert.match(route, /dueDate: game\.dueDate/)
+  assert.match(server, /playerOne: names\.get\(fixture\.player1_id\)/)
+  assert.match(server, /playerTwo: names\.get\(fixture\.player2_id\)/)
+  assert.doesNotMatch(server, /\.update\([\s\S]*due_date/)
   assert.match(server, /occupiedStrokeDivisions\(slots\)/)
   assert.doesNotMatch(server, /is_active/)
   assert.match(route, /verifyScorecardBridgeRequest/)

@@ -9,6 +9,7 @@ export type StrokeBoardGame = {
   state: StrokeGameState
   playerOneScore: number | null
   playerTwoScore: number | null
+  dueDate?: string | null
   reviewEvidenceId?: string | null
 }
 

@@ -11,7 +11,7 @@ import {
 
 type RosterRow = { id: string; season_id: string; division_count: number; status: string; created_at: string }
 type SlotRow = { division_number: number; player_id: string; player_screen_name: string }
-type FixtureRow = { id: string; division_number: number; game_number: number; player1_id: string; player2_id: string; player1_name: string | null; player2_name: string | null; course: string | null }
+type FixtureRow = { id: string; division_number: number; game_number: number; player1_id: string; player2_id: string; player1_name: string | null; player2_name: string | null; course: string | null; due_date: string | null }
 type ResultRow = { schedule_id: string; player1_score: number | null; player2_score: number | null }
 type ContextRow = { id: string; source_key: string }
 type EvidenceRow = { id: string; context_id: string }
@@ -26,7 +26,7 @@ export async function loadAuthoritativeStrokeBoards(client: SupabaseClient): Pro
   const [seasonResponse, slotsResponse, fixtureResponse] = await Promise.all([
     client.from("seasons").select("id,season_number").eq("id", roster.season_id).eq("league_type", "stroke").single(),
     client.from("stroke_division_roster_slots").select("division_number,player_id,player_screen_name").eq("roster_version_id", roster.id),
-    client.from("schedule").select("id,division_number,game_number,player1_id,player2_id,player1_name,player2_name,course").eq("league_type", "stroke").eq("season_id", roster.season_id).eq("roster_version_id", roster.id),
+    client.from("schedule").select("id,division_number,game_number,player1_id,player2_id,player1_name,player2_name,course,due_date").eq("league_type", "stroke").eq("season_id", roster.season_id).eq("roster_version_id", roster.id),
   ])
   if (seasonResponse.error || slotsResponse.error || fixtureResponse.error) throw new Error("STROKE_CURRENT_BOARD_SOURCE_UNAVAILABLE")
   const slots = (slotsResponse.data || []) as SlotRow[]
@@ -69,6 +69,7 @@ export async function loadAuthoritativeStrokeBoards(client: SupabaseClient): Pro
           playerOne: names.get(fixture.player1_id) || fixture.player1_name || "Player 1",
           playerTwo: names.get(fixture.player2_id) || fixture.player2_name || "Player 2",
           course: fixture.course || "Course pending",
+          dueDate: fixture.due_date,
           state: strokeGameState({ completed, hasActiveEvidence: Boolean(contextId && evidenceByContext.has(contextId)) }),
           playerOneScore: completed ? Number(result!.player1_score) : null,
           playerTwoScore: completed ? Number(result!.player2_score) : null,

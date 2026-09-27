@@ -58,6 +58,7 @@ export async function POST(request: Request) {
           sourceKey: game.sourceKey, gameNumber: game.gameNumber, playerOne: game.playerOne,
           playerTwo: game.playerTwo, course: game.course, state: game.state,
           playerOneScore: game.playerOneScore, playerTwoScore: game.playerTwoScore,
+          dueDate: game.dueDate,
         })),
         standings: board.standings,
         messageId: mappingByKey.get(`${board.seasonId}:${board.division}`)?.discord_message_id || null,
