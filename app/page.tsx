@@ -53,7 +53,7 @@ export default function HomePage() {
               <image href="/krys-leagues-logo.png" x="29.8" y="31.8" width="12.4" height="12.4" clipPath="url(#masters-logo-clip)" opacity="0.94" preserveAspectRatio="xMidYMid slice" />
             </svg>
             <span className="artwork-navigation__masters-copy">
-              <strong>THE MASTERS</strong>
+              <strong>WELCOME TO THE MASTERS</strong>
               <small>REGISTER NOW</small>
             </span>
             <span className="artwork-navigation__masters-arrow" aria-hidden="true">→</span>
