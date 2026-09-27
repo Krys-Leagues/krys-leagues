@@ -71,6 +71,127 @@
   display: block;
 }
 
+.artwork-navigation__masters-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(46%, 720px);
+  min-height: clamp(68px, 5.4vw, 90px);
+  box-sizing: border-box;
+  margin-inline: auto;
+  padding: 0.75em clamp(64px, 8vw, 104px);
+  overflow: hidden;
+  isolation: isolate;
+  border: 1px solid rgba(241, 207, 104, 0.95);
+  border-radius: clamp(16px, 1.6vw, 24px);
+  color: #fff6d2;
+  background:
+    radial-gradient(circle at 8% 18%, rgba(255, 186, 214, 0.35) 0 0.7%, transparent 5%),
+    radial-gradient(circle at 92% 78%, rgba(255, 177, 210, 0.22) 0 0.8%, transparent 5%),
+    linear-gradient(110deg, #061b13 0%, #0b3825 38%, #123d2a 68%, #04170f 100%);
+  box-shadow:
+    0 0 0 1px rgba(93, 186, 115, 0.24),
+    0 0 15px rgba(224, 190, 80, 0.62),
+    0 0 34px rgba(25, 111, 65, 0.42),
+    inset 0 0 22px rgba(255, 239, 158, 0.12),
+    inset 0 -14px 24px rgba(0, 0, 0, 0.26);
+  text-decoration: none;
+  transition: filter 140ms ease, transform 140ms ease, box-shadow 140ms ease;
+}
+
+.artwork-navigation__masters-link::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 4% 42%, rgba(255, 212, 229, 0.62) 0 1px, transparent 2px),
+    radial-gradient(circle at 10% 23%, rgba(255, 177, 211, 0.46) 0 2px, transparent 3px),
+    radial-gradient(circle at 89% 19%, rgba(255, 212, 229, 0.45) 0 1px, transparent 2px),
+    radial-gradient(circle at 96% 47%, rgba(244, 172, 207, 0.38) 0 2px, transparent 3px),
+    linear-gradient(90deg, rgba(19, 93, 53, 0.26), transparent 48%, rgba(5, 31, 19, 0.42));
+  opacity: 0.9;
+}
+
+.artwork-navigation__masters-link::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  z-index: 0;
+  pointer-events: none;
+  border: 1px solid rgba(255, 226, 133, 0.42);
+  border-radius: clamp(12px, 1.3vw, 18px);
+  box-shadow: inset 0 0 14px rgba(255, 245, 177, 0.11);
+}
+
+.artwork-navigation__masters-jacket {
+  position: absolute;
+  left: clamp(10px, 1.5vw, 22px);
+  z-index: 1;
+  width: clamp(52px, 5.2vw, 76px);
+  height: clamp(52px, 5.2vw, 76px);
+  overflow: visible;
+  filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.65)) drop-shadow(0 0 8px rgba(230, 196, 84, 0.5));
+}
+
+.artwork-navigation__masters-jacket path:first-of-type {
+  fill: url(#masters-jacket-green);
+  stroke: #e6c451;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+
+.artwork-navigation__masters-jacket path:not(:first-of-type) {
+  fill: none;
+  stroke: #f1d477;
+  stroke-width: 1.35;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.artwork-navigation__masters-jacket circle {
+  fill: #f1d477;
+}
+
+.artwork-navigation__masters-copy {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  min-width: 0;
+  gap: 0.22em;
+  justify-items: center;
+  text-align: center;
+  line-height: 1;
+}
+
+.artwork-navigation__masters-copy strong {
+  color: #fff8d5;
+  font-size: clamp(16px, 1.8vw, 27px);
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-shadow: 0 2px 0 #071c12, 0 0 9px rgba(255, 225, 133, 0.42);
+}
+
+.artwork-navigation__masters-copy small {
+  color: #f0cd66;
+  font-size: clamp(9px, 0.82vw, 12px);
+  font-weight: 900;
+  letter-spacing: 0.24em;
+  text-shadow: 0 0 7px rgba(244, 205, 96, 0.42);
+}
+
+.artwork-navigation__masters-arrow {
+  position: absolute;
+  right: clamp(12px, 1.7vw, 24px);
+  z-index: 1;
+  color: #ffe79a;
+  font-size: clamp(24px, 2.4vw, 36px);
+  line-height: 1;
+  text-shadow: 0 0 9px rgba(235, 203, 94, 0.78);
+}
+
 .artwork-navigation__featured-course-link span {
   color: #ffd75a;
   font-size: 1.15em;
@@ -144,12 +265,14 @@
 }
 
 .artwork-navigation__featured-course-link:hover,
+.artwork-navigation__masters-link:hover,
 .artwork-navigation__admin-link:hover {
   filter: brightness(1.18);
   transform: translateY(-1px);
 }
 
 .artwork-navigation__featured-course-link:focus-visible,
+.artwork-navigation__masters-link:focus-visible,
 .artwork-navigation__admin-link:focus-visible {
   outline: 3px solid #fff;
   outline-offset: 3px;
@@ -343,6 +466,34 @@
     min-height: 52px;
     padding-inline: 0.8em;
     font-size: clamp(13px, 4vw, 18px);
+  }
+
+  .artwork-navigation__masters-link {
+    width: min(92%, 720px);
+    min-height: 72px;
+    padding-inline: 54px;
+    border-radius: 18px;
+  }
+
+  .artwork-navigation__masters-jacket {
+    left: 9px;
+    width: 50px;
+    height: 50px;
+  }
+
+  .artwork-navigation__masters-copy strong {
+    font-size: clamp(14px, 4.4vw, 20px);
+    letter-spacing: 0.1em;
+  }
+
+  .artwork-navigation__masters-copy small {
+    font-size: clamp(8px, 2.6vw, 11px);
+    letter-spacing: 0.16em;
+  }
+
+  .artwork-navigation__masters-arrow {
+    right: 10px;
+    font-size: 26px;
   }
 
   .artwork-navigation__back-link {
