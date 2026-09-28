@@ -49,3 +49,18 @@ export async function GET() {
     identityLinks: identityLinksResult.data || [],
   }, { headers: { "Cache-Control": "no-store" } })
 }
+
+export async function POST(request: Request) {
+  const authorization = await authorizeSiteAdminMutation()
+  if (!authorization.authorized) return authorization.response
+
+  const body = await request.json().catch(() => null) as { screenName?: unknown } | null
+  const screenName = typeof body?.screenName === "string" ? body.screenName.trim() : ""
+  if (!screenName) return Response.json({ error: "Screen name is required" }, { status: 400 })
+
+  const { data, error } = await authorization.supabase.rpc("admin_create_player", { p_screen_name: screenName })
+  if (error) return Response.json({ error: error.message }, { status: 400 })
+
+  const player = Array.isArray(data) ? data[0] : data
+  return Response.json({ player }, { headers: { "Cache-Control": "no-store" } })
+}

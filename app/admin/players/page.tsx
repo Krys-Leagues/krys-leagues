@@ -318,18 +318,17 @@ export default function PlayersAdminPage() {
 
     setCreatingPlayer(true)
 
-    const { error } = await supabase.from("players").insert([
-      {
-        screen_name: newPlayerName.trim(),
-        active: true,
-        status: "active",
-      },
-    ])
+    const response = await fetch("/api/admin/players", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ screenName: newPlayerName.trim() }),
+    })
+    const result = await response.json().catch(() => null) as { error?: string } | null
 
     setCreatingPlayer(false)
 
-    if (error) {
-      alert(error.message)
+    if (!response.ok) {
+      alert(result?.error || "Unable to add player")
       return
     }
 
@@ -592,8 +591,13 @@ export default function PlayersAdminPage() {
           status: "active",
         }))
 
-      if (newPlayers.length > 0) {
-        await supabase.from("players").insert(newPlayers)
+      for (const player of newPlayers) {
+        const response = await fetch("/api/admin/players", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ screenName: player.screen_name }),
+        })
+        if (!response.ok) throw new Error("Protected player import failed")
       }
 
       await loadPlayers()

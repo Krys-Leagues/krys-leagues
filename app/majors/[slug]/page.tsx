@@ -24,6 +24,8 @@ export default function MajorDetailPage() {
   const [saving, setSaving] = useState(false)
   const [reviewing, setReviewing] = useState(false)
   const [signupStatus, setSignupStatus] = useState<MajorSignupStatus | null>(null)
+  const [playerResolution, setPlayerResolution] = useState<"matched" | "no_match" | "conflict" | null>(null)
+  const [screenName, setScreenName] = useState("")
   const [currentTime, setCurrentTime] = useState(0)
 
   const loadEvent = useCallback(async () => {
@@ -45,16 +47,20 @@ export default function MajorDetailPage() {
     setSignupStatus(statusResult.data as MajorSignupStatus | null)
     const user = await supabase.auth.getUser()
     if (user.data.user) {
-      const [result, waitlistResult] = await Promise.all([
+      const [result, waitlistResult, resolutionResult] = await Promise.all([
         supabase.rpc("get_my_major_signup_schedule", { p_major_event_id: loadedEvent.id }),
         supabase.rpc("get_major_waitlist_status", { p_major_event_id: loadedEvent.id }),
+        supabase.rpc("resolve_current_discord_player_login"),
       ])
       const mine = (result.data as MajorDayChoice[] | null) || []
       setSchedule(mine)
       setChoices(Object.fromEntries(mine.map((choice) => [choice.play_day_id, choice.time_slot_id])))
       setWaitlistStatus((waitlistResult.data as MajorWaitlistStatus | null) || null)
+      const resolution = Array.isArray(resolutionResult.data) ? resolutionResult.data[0] : resolutionResult.data
+      setPlayerResolution((resolution?.resolution_status as "matched" | "no_match" | "conflict" | undefined) || null)
     } else {
       setWaitlistStatus(null)
+      setPlayerResolution(null)
     }
     setMessage(eventResult.error?.message || entryResult.error?.message || dayResult.error?.message || slotResult.error?.message || "")
     setCurrentTime(Date.now())
@@ -84,9 +90,14 @@ export default function MajorDetailPage() {
     const selected = days.map((day) => choices[day.id]).filter(Boolean)
     if (days.length !== 4 || selected.length !== 4) { setSaving(false); setMessage("Choose one time for each of the four tournament days."); return }
     const useWaitlist = event.slug === "masters" && signupStatus?.state === "full"
-    const result = useWaitlist
-      ? await supabase.rpc("join_major_waitlist_with_slots", { p_major_event_id: event.id, p_time_slot_ids: selected })
-      : await supabase.rpc("signup_for_major_with_slots", { p_major_event_id: event.id, p_time_slot_ids: selected })
+    if (playerResolution === "conflict") { setSaving(false); setMessage("This Discord identity needs administrator review before registration."); return }
+    if (playerResolution === "no_match" && !screenName.trim()) { setSaving(false); setMessage("Enter your Krys Leagues screen name to continue."); return }
+    const result = await supabase.rpc("join_major_with_new_discord_player", {
+      p_major_event_id: event.id,
+      p_time_slot_ids: selected,
+      p_screen_name: screenName.trim() || null,
+      p_join_waitlist: useWaitlist,
+    })
     setSaving(false)
     if (result.error) { setMessage(result.error.message); return }
     setMessage(useWaitlist ? "You are on the Masters wait list and your preferred times are saved." : "You are registered and all four day choices are saved.")
@@ -154,6 +165,7 @@ export default function MajorDetailPage() {
         <p className={styles.signupExplainer}>Your Thursday, Friday, Saturday, and Sunday choices are independent. You do not have to choose the same time every day. Room assignments are made later.</p>
         <p className={styles.timezone}>Times shown in: <strong>{localTimeZone}</strong></p>
         {event.signup_instructions && <p className={styles.description}>{event.signup_instructions}</p>}
+        {playerResolution === "no_match" && <label className={styles.notice}>Krys Leagues screen name<input value={screenName} onChange={(event) => setScreenName(event.target.value)} placeholder="Your exact player name" autoComplete="nickname" /></label>}
         <p className={styles.cutNotice}>Choose one independent time for Thursday, Friday, Saturday, and Sunday. After Friday’s Round 2, players in both weekend fields continue Saturday and Sunday; every saved weekend time remains intact.</p>
         {schedule.length > 0 && <p className={styles.assignment}>{event.weekend_status_published_at ? <>Weekend status: <strong>{weekendStatus === "main" ? "Masters Main Event" : weekendStatus === "secondary" ? secondaryFieldName : "Weekend field status pending"}</strong></> : <strong>Weekend field status pending</strong>}</p>}
         {signupState === "upcoming" && <p className={styles.notice}>Public signup opens {formatMajorDate(signupStatus?.public_signup_opens_at || null)}. Priority access is not active for this first Major.</p>}

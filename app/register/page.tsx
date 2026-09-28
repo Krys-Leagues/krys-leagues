@@ -55,34 +55,13 @@ function RegisterContent() {
 
     setStatus("Saving...");
 
-    const discordName =
-      user.user_metadata?.full_name ||
-      user.user_metadata?.name ||
-      user.user_metadata?.preferred_username ||
-      user.user_metadata?.user_name ||
-      "Discord User";
-
     const discordId = getAuthenticatedDiscordId(user);
     if (!discordId) return setStatus("Discord identity could not be verified. Please sign out and sign in with Discord again.");
 
-    const { data: existing, error: existingError } = await supabase
-      .from("player_waitlist")
-      .select("id")
-      .eq("discord_id", discordId)
-      .eq("league_type", leagueKey)
-      .in("status", ["waiting", "pending"])
-      .limit(1);
-
-    if (existingError) return setStatus(`Error: ${existingError.message || "We couldn't check your existing waitlist registration."}`);
-    if (existing?.length) return setStatus(waitlistDuplicateMessage(league.waitlistLabel));
-
-    const { error } = await supabase.from("player_waitlist").insert({
-      screen_name: screenName.trim(),
-      league_type: leagueKey,
-      discord_id: discordId,
-      discord_username: discordName,
-      notes: notes.trim() || null,
-      status: "waiting",
+    const { error } = await supabase.rpc("register_current_discord_player", {
+      p_screen_name: screenName.trim(),
+      p_league_type: leagueKey,
+      p_notes: notes.trim() || null,
     });
 
     if (error) {

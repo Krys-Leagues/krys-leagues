@@ -44,7 +44,7 @@ test("public and admin Masters surfaces expose the wait-list flow", async () => 
     readFile(publicPagePath, "utf8"),
     readFile(adminPagePath, "utf8"),
   ])
-  assert.match(publicPage, /join_major_waitlist_with_slots/u)
+  assert.match(publicPage, /join_major_with_new_discord_player/u)
   assert.match(publicPage, /JOIN WAIT LIST/u)
   assert.match(publicPage, /position/u)
   assert.match(adminPage, /get_major_waitlist/u)
