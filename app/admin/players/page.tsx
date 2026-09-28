@@ -152,36 +152,20 @@ export default function PlayersAdminPage() {
   async function loadPlayers() {
     setLoading(true)
 
-    const [playersResult, membershipsResult, tournamentsResult, identityLinksResult] = await Promise.all([
-      supabase
-        .from("players")
-        .select("id, screen_name, discord_id, discord_name, status, active, avatar_path, is_server_booster, has_krys_server_tag, profile_badges")
-        .order("screen_name", { ascending: true }),
-      supabase
-        .from("player_league_memberships")
-        .select("player_id, league_type, season_number, division")
-        .order("season_number", { ascending: false }),
-      supabase
-        .from("player_tournament_entries")
-        .select("player_id, tournament_type, bracket, status")
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("player_identity_links")
-        .select("historical_player_id, canonical_player_id"),
-    ])
+    const response = await fetch("/api/admin/players", { cache: "no-store" })
+    const payload = await response.json().catch(() => null)
 
     setLoading(false)
 
-    const loadError = playersResult.error || membershipsResult.error || tournamentsResult.error || identityLinksResult.error
-    if (loadError) {
-      alert(loadError.message)
+    if (!response.ok) {
+      alert(payload?.error || "Unable to load Global Players")
       return
     }
 
-    setPlayers(playersResult.data || [])
-    setLeagueMemberships(membershipsResult.data || [])
-    setTournamentEntries(tournamentsResult.data || [])
-    setIdentityLinks(identityLinksResult.data || [])
+    setPlayers(payload?.players || [])
+    setLeagueMemberships(payload?.leagueMemberships || [])
+    setTournamentEntries(payload?.tournamentEntries || [])
+    setIdentityLinks(payload?.identityLinks || [])
   }
 
   function formatLeagueName(leagueType: string) {
