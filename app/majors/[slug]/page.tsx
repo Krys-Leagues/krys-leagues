@@ -4,7 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { useParams } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
-import { formatMajorDate, formatMajorDeadline, formatMajorLocalTime, isMajorDayLocked, isMastersScorecardTheme, type MajorDayChoice, type MajorEntry, type MajorEvent, type MajorPlayDay, type MajorSignupStatus, type MajorTimeSlot } from "@/lib/majors"
+import { formatMajorDate, formatMajorDeadline, formatMajorLocalTime, isMajorDayLocked, isMastersScorecardTheme, type MajorDayChoice, type MajorEntry, type MajorEvent, type MajorPlayDay, type MajorSignupStatus, type MajorTimeSlot, type MajorWaitlistStatus } from "@/lib/majors"
 import { createDiscordAuthCallbackUrl } from "@/lib/authReturnTo"
 import { meaningfulMajorSlotLabel, PLAYER_LOCAL_TIME_HEADING } from "@/lib/mastersSignupDisplay"
 import { supabase } from "@/lib/supabase"
@@ -18,6 +18,7 @@ export default function MajorDetailPage() {
   const [slots, setSlots] = useState<MajorTimeSlot[]>([])
   const [choices, setChoices] = useState<Record<string, string>>({})
   const [schedule, setSchedule] = useState<MajorDayChoice[]>([])
+  const [waitlistStatus, setWaitlistStatus] = useState<MajorWaitlistStatus | null>(null)
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState("")
   const [saving, setSaving] = useState(false)
@@ -44,10 +45,16 @@ export default function MajorDetailPage() {
     setSignupStatus(statusResult.data as MajorSignupStatus | null)
     const user = await supabase.auth.getUser()
     if (user.data.user) {
-      const result = await supabase.rpc("get_my_major_signup_schedule", { p_major_event_id: loadedEvent.id })
+      const [result, waitlistResult] = await Promise.all([
+        supabase.rpc("get_my_major_signup_schedule", { p_major_event_id: loadedEvent.id }),
+        supabase.rpc("get_major_waitlist_status", { p_major_event_id: loadedEvent.id }),
+      ])
       const mine = (result.data as MajorDayChoice[] | null) || []
       setSchedule(mine)
       setChoices(Object.fromEntries(mine.map((choice) => [choice.play_day_id, choice.time_slot_id])))
+      setWaitlistStatus((waitlistResult.data as MajorWaitlistStatus | null) || null)
+    } else {
+      setWaitlistStatus(null)
     }
     setMessage(eventResult.error?.message || entryResult.error?.message || dayResult.error?.message || slotResult.error?.message || "")
     setCurrentTime(Date.now())
@@ -76,10 +83,13 @@ export default function MajorDetailPage() {
     if (!user.data.user) { setSaving(false); await signIn(); return }
     const selected = days.map((day) => choices[day.id]).filter(Boolean)
     if (days.length !== 4 || selected.length !== 4) { setSaving(false); setMessage("Choose one time for each of the four tournament days."); return }
-    const result = await supabase.rpc("signup_for_major_with_slots", { p_major_event_id: event.id, p_time_slot_ids: selected })
+    const useWaitlist = event.slug === "masters" && signupStatus?.state === "full"
+    const result = useWaitlist
+      ? await supabase.rpc("join_major_waitlist_with_slots", { p_major_event_id: event.id, p_time_slot_ids: selected })
+      : await supabase.rpc("signup_for_major_with_slots", { p_major_event_id: event.id, p_time_slot_ids: selected })
     setSaving(false)
     if (result.error) { setMessage(result.error.message); return }
-    setMessage("You are registered and all four day choices are saved.")
+    setMessage(useWaitlist ? "You are on the Masters wait list and your preferred times are saved." : "You are registered and all four day choices are saved.")
     setReviewing(false)
     await loadEvent()
   }
@@ -90,7 +100,8 @@ export default function MajorDetailPage() {
   const masters = isMastersScorecardTheme(event)
   const testEvent = event.is_test_event
   const signupState = signupStatus?.state || (event.signup_open ? "open" : "closed")
-  const signupDisabled = schedule.length > 0 ? !event.signup_open : signupState !== "open" && signupState !== "priority"
+  const waitlistAvailable = masters && signupState === "full" && !waitlistStatus?.entry_id
+  const signupDisabled = schedule.length > 0 ? !event.signup_open : !(signupState === "open" || signupState === "priority" || waitlistAvailable)
   const weekendStatus = schedule[0]?.weekend_competition_status || "pending"
   const secondaryFieldName = event.secondary_trophy_display_name || "Secondary Trophy Field"
   const localTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -147,7 +158,9 @@ export default function MajorDetailPage() {
         {schedule.length > 0 && <p className={styles.assignment}>{event.weekend_status_published_at ? <>Weekend status: <strong>{weekendStatus === "main" ? "Masters Main Event" : weekendStatus === "secondary" ? secondaryFieldName : "Weekend field status pending"}</strong></> : <strong>Weekend field status pending</strong>}</p>}
         {signupState === "upcoming" && <p className={styles.notice}>Public signup opens {formatMajorDate(signupStatus?.public_signup_opens_at || null)}. Priority access is not active for this first Major.</p>}
         {signupState === "priority" && <p className={styles.notice}>Priority signup is open for eligible previous-Major players. Public signup opens {formatMajorDate(signupStatus?.public_signup_opens_at || null)}.</p>}
-        {signupState === "full" && schedule.length === 0 && <p className={styles.notice}>The current field is full.</p>}
+        {signupState === "full" && schedule.length === 0 && !waitlistStatus?.entry_id && <p className={styles.notice}>The current field is full. Choose preferred times below to join the wait list.</p>}
+        {waitlistStatus?.state === "waiting" && <p className={styles.notice}>You are on the Masters wait list — position {waitlistStatus.position || "pending"}. Your preferred times are saved.</p>}
+        {waitlistStatus?.state === "promoted" && <p className={styles.notice}>Your Masters wait-list entry was promoted to the confirmed field.</p>}
         {days.length !== 4 ? <p className={styles.notice}>Tournament staff is still configuring the four-day schedule.</p> : <div className={styles.days}>{days.map((day) => {
           const mine = schedule.find((choice) => choice.play_day_id === day.id)
           const daySlots = slots.filter((slot) => slot.play_day_id === day.id)
@@ -167,11 +180,11 @@ export default function MajorDetailPage() {
             {locked && <p className={styles.locked}>{firstScheduledTimeHasBegun ? "Selection locked" : "Selection locked — tournament admins can still help"}</p>}
           </fieldset>
         })}</div>}
-        {days.length === 4 && !reviewing && <button onClick={() => setReviewing(true)} disabled={saving || signupDisabled || !allFourSelected} className={styles.primaryButton}>{schedule.length ? "REVIEW MY UPDATED TIMES" : "REVIEW MY 4 DAY SIGNUP"}</button>}
-        {reviewing && <section className={styles.signupReview}><p className={styles.eyebrow}>You’re almost in</p><h3>Confirm your four playing times</h3><div>{days.map((day) => {
+        {days.length === 4 && !reviewing && !waitlistStatus?.entry_id && <button onClick={() => setReviewing(true)} disabled={saving || signupDisabled || !allFourSelected} className={styles.primaryButton}>{schedule.length ? "REVIEW MY UPDATED TIMES" : waitlistAvailable ? "REVIEW MY WAIT-LIST TIMES" : "REVIEW MY 4 DAY SIGNUP"}</button>}
+        {reviewing && <section className={styles.signupReview}><p className={styles.eyebrow}>{waitlistAvailable ? "Join the queue" : "You’re almost in"}</p><h3>Confirm your four playing times</h3><div>{days.map((day) => {
           const slot = slots.find((item) => item.id === choices[day.id])
           return <p key={day.id}><span>{DAY_LABELS[day.day_number - 1].day}</span><strong>{slot ? <>{formatMajorLocalDate(slot.starts_at, localTimeZone)}<small>{formatMajorLocalTime(slot.starts_at, localTimeZone)}</small></> : "Not selected"}</strong></p>
-        })}</div><p className={styles.reviewHelp}>These are preferred scheduling times. Each day stays independently editable until that day’s lock deadline.</p><div className={styles.reviewActions}><button type="button" className={styles.secondaryButton} onClick={() => setReviewing(false)}>Change a time</button><button type="button" onClick={signup} disabled={saving || signupDisabled || !allFourSelected} className={styles.primaryButton}>{saving ? "Saving…" : schedule.length ? "CONFIRM UPDATED TIMES" : testEvent ? "CONFIRM MY TEST ENTRY" : masters ? "CONFIRM MY MASTERS ENTRY" : "CONFIRM MY MAJOR ENTRY"}</button></div></section>}
+        })}</div><p className={styles.reviewHelp}>{waitlistAvailable ? "Your choices are preferences only and do not reserve a confirmed Masters spot." : "These are preferred scheduling times. Each day stays independently editable until that day’s lock deadline."}</p><div className={styles.reviewActions}><button type="button" className={styles.secondaryButton} onClick={() => setReviewing(false)}>Change a time</button><button type="button" onClick={signup} disabled={saving || signupDisabled || !allFourSelected} className={styles.primaryButton}>{saving ? "Saving…" : waitlistAvailable ? "JOIN WAIT LIST" : schedule.length ? "CONFIRM UPDATED TIMES" : testEvent ? "CONFIRM MY TEST ENTRY" : masters ? "CONFIRM MY MASTERS ENTRY" : "CONFIRM MY MAJOR ENTRY"}</button></div></section>}
         {publishedRooms.length > 0 && <section className={styles.roomSection}><p className={styles.eyebrow}>Your published rooms</p><h3>Who you’re playing with</h3><div className={styles.roomGrid}>{publishedRooms.map(({ day, assignment }) => assignment && <article key={day.id} className={styles.roomCard}><header><span>{DAY_LABELS[day.day_number - 1].day}</span><strong>{DAY_LABELS[day.day_number - 1].round}</strong></header><p className={styles.roomTime}>{assignment.starts_at ? formatMajorLocalTime(assignment.starts_at, localTimeZone) : "Time pending"}<small>{localTimeZone}</small></p><h4>{assignment.group_label}</h4><div className={styles.roomRoster}>{assignment.room_roster?.map((member) => <span key={member.player_id}>{member.player_screen_name_snapshot}</span>)}</div>{assignment.assignment_location && <div className={styles.roomDetail}><small>Course / lobby</small><strong>{assignment.assignment_location}</strong></div>}{assignment.group_instructions && <div className={styles.roomDetail}><small>Instructions</small><p>{assignment.group_instructions}</p></div>}</article>)}</div></section>}
       </section>}
       {message && <p className={styles.notice}>{message}</p>}

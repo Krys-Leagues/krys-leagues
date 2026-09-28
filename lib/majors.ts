@@ -234,6 +234,38 @@ export type MajorDayChoice = {
   room_roster?: MajorRoomRosterMember[]
 }
 
+export type MajorWaitlistChoice = {
+  play_day_id: string
+  time_slot_id: string
+  play_date?: string
+  day_label?: string
+  starts_at?: string
+  slot_label?: string | null
+}
+
+export type MajorWaitlistStatus = {
+  entry_id: string | null
+  state: "waiting" | "promoted" | "removed" | null
+  position: number | null
+  joined_at?: string
+  choices: MajorWaitlistChoice[]
+}
+
+export type MajorWaitlistEntry = {
+  id: string
+  major_event_id: string
+  player_id: string
+  screen_name: string
+  joined_at: string
+  state: "waiting" | "promoted" | "removed"
+  promoted_at: string | null
+  promoted_by: string | null
+  removed_at: string | null
+  removed_by: string | null
+  notes: string | null
+  choices: MajorWaitlistChoice[]
+}
+
 export type MajorRoomRosterMember = {
   player_id: string
   player_screen_name_snapshot: string
