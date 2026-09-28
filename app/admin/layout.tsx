@@ -16,22 +16,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const checkAdminAccess = useCallback(async (showLoading = true) => {
     if (showLoading) setAccess("loading")
 
-    const { data, error } = await supabase.auth.getSession()
-    const session = data.session
-
-    if (error || !session) {
-      setAccess("signed_out")
-      return
-    }
-
     try {
       const response = await fetch("/api/auth/admin-authorization", {
         method: "GET",
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
+        credentials: "include",
         cache: "no-store",
       })
+
+      if (response.status === 401) {
+        setAccess("signed_out")
+        return
+      }
 
       if (!response.ok) {
         setAccess("denied")

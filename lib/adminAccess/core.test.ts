@@ -53,8 +53,8 @@ test("the independently protected admin authorization endpoint remains reachable
 
 test("site-admin authorization does not depend on the Solo-admin RPC", async () => {
   const endpoint = await readFile("app/api/auth/admin-authorization/route.ts", "utf8")
-  const siteAdminCheck = endpoint.indexOf("if (authorized)")
-  const soloRpc = endpoint.indexOf('"is_current_user_solo_admin"')
+  const siteAdminCheck = endpoint.lastIndexOf("if (authorized)")
+  const soloRpc = endpoint.lastIndexOf('"is_current_user_solo_admin"')
   assert.ok(siteAdminCheck >= 0)
   assert.ok(soloRpc > siteAdminCheck)
 })
@@ -68,4 +68,21 @@ test("proxy authorizes site admins before consulting optional Solo-admin state",
   assert.ok(siteAdminBranch > siteAdminRpc)
   assert.ok(soloRpc > siteAdminBranch)
   assert.doesNotMatch(proxy, /Promise\.all\(\[\s*\n?\s*session\.supabase\.rpc\("is_current_user_site_admin"\)/)
+})
+
+test("admin layout uses the protected cookie-backed authorization path", async () => {
+  const layout = await readFile("app/admin/layout.tsx", "utf8")
+  const endpoint = await readFile("app/api/auth/admin-authorization/route.ts", "utf8")
+  const page = await readFile("app/admin/players/page.tsx", "utf8")
+  const loadStart = page.indexOf("async function loadPlayers()")
+  const loadEnd = page.indexOf("function formatLeagueName")
+  const initialListLoader = page.slice(loadStart, loadEnd)
+
+  assert.doesNotMatch(layout, /supabase\.auth\.getSession\(\)/)
+  assert.match(layout, /fetch\("\/api\/auth\/admin-authorization"/)
+  assert.match(layout, /credentials: "include"/)
+  assert.match(endpoint, /authorizeSiteAdminMutation/)
+  assert.match(endpoint, /createServerSupabaseClient/)
+  assert.doesNotMatch(initialListLoader, /from\(["']players["']\)/)
+  assert.match(initialListLoader, /fetch\("\/api\/admin\/players"/)
 })
