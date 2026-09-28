@@ -17,7 +17,7 @@ test("admin Add Player uses protected server authorization and RPC", async () =>
 })
 
 test("new-player migration protects canonical creation and participation", async () => {
-  const migration = await source("supabase/migrations/20260928143000_new_player_identity_and_masters_access.sql")
+  const migration = await source("supabase/migrations/20260928150000_new_player_identity_and_masters_access.sql")
   assert.match(migration, /create or replace function public\.admin_create_player/)
   assert.match(migration, /if not public\.is_current_user_site_admin\(\)/)
   assert.match(migration, /security definer[\s\S]*set search_path to ''/i)
