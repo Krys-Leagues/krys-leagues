@@ -1,6 +1,6 @@
 import assert from "node:assert/strict"
 import test from "node:test"
-import { getAuthenticatedDiscordId, getDiscordPlayerLoginDestination } from "./discordPlayerLogin.ts"
+import { getAuthenticatedDiscordId, getAuthenticatedDiscordName, getDiscordPlayerLoginDestination } from "./discordPlayerLogin.ts"
 
 const canonicalId = "11111111-1111-1111-1111-111111111111"
 
@@ -57,4 +57,16 @@ test("Discord snowflakes remain strings and never fall back to the Supabase user
     provider: "email",
     identity_data: { provider_id: "not-discord" },
   }] }), "")
+})
+
+test("new-player Masters flow can use the authenticated Discord display name", () => {
+  assert.equal(getAuthenticatedDiscordName({
+    user_metadata: { global_name: "New Golfer", preferred_username: "new_golfer" },
+    identities: [{ provider: "discord", identity_data: { provider_id: "123" } }],
+  }), "New Golfer")
+  assert.equal(getAuthenticatedDiscordName({
+    user_metadata: { preferred_username: "new_golfer" },
+    identities: [{ provider: "discord", identity_data: { username: "discord_user" } }],
+  }), "new_golfer")
+  assert.equal(getAuthenticatedDiscordName({ user_metadata: {}, identities: [] }), "")
 })

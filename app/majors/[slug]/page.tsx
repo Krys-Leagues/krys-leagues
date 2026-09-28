@@ -6,6 +6,7 @@ import { useParams } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
 import { formatMajorDate, formatMajorDeadline, formatMajorLocalTime, isMajorDayLocked, isMastersScorecardTheme, type MajorDayChoice, type MajorEntry, type MajorEvent, type MajorPlayDay, type MajorSignupStatus, type MajorTimeSlot, type MajorWaitlistStatus } from "@/lib/majors"
 import { createDiscordAuthCallbackUrl } from "@/lib/authReturnTo"
+import { getAuthenticatedDiscordName } from "@/lib/discordPlayerLogin"
 import { meaningfulMajorSlotLabel, PLAYER_LOCAL_TIME_HEADING } from "@/lib/mastersSignupDisplay"
 import { supabase } from "@/lib/supabase"
 import styles from "./page.module.css"
@@ -25,7 +26,6 @@ export default function MajorDetailPage() {
   const [reviewing, setReviewing] = useState(false)
   const [signupStatus, setSignupStatus] = useState<MajorSignupStatus | null>(null)
   const [playerResolution, setPlayerResolution] = useState<"matched" | "no_match" | "conflict" | null>(null)
-  const [screenName, setScreenName] = useState("")
   const [currentTime, setCurrentTime] = useState(0)
 
   const loadEvent = useCallback(async () => {
@@ -91,11 +91,12 @@ export default function MajorDetailPage() {
     if (days.length !== 4 || selected.length !== 4) { setSaving(false); setMessage("Choose one time for each of the four tournament days."); return }
     const useWaitlist = event.slug === "masters" && signupStatus?.state === "full"
     if (playerResolution === "conflict") { setSaving(false); setMessage("This Discord identity needs administrator review before registration."); return }
-    if (playerResolution === "no_match" && !screenName.trim()) { setSaving(false); setMessage("Enter your Krys Leagues screen name to continue."); return }
+    const newPlayerName = playerResolution === "no_match" ? getAuthenticatedDiscordName(user.data.user) : null
+    if (playerResolution === "no_match" && !newPlayerName) { setSaving(false); setMessage("Your Discord identity did not provide a usable player name. Contact an administrator before registering."); return }
     const result = await supabase.rpc("join_major_with_new_discord_player", {
       p_major_event_id: event.id,
       p_time_slot_ids: selected,
-      p_screen_name: screenName.trim() || null,
+      p_screen_name: newPlayerName,
       p_join_waitlist: useWaitlist,
     })
     setSaving(false)
@@ -165,7 +166,7 @@ export default function MajorDetailPage() {
         <p className={styles.signupExplainer}>Your Thursday, Friday, Saturday, and Sunday choices are independent. You do not have to choose the same time every day. Room assignments are made later.</p>
         <p className={styles.timezone}>Times shown in: <strong>{localTimeZone}</strong></p>
         {event.signup_instructions && <p className={styles.description}>{event.signup_instructions}</p>}
-        {playerResolution === "no_match" && <label className={styles.notice}>Krys Leagues screen name<input value={screenName} onChange={(event) => setScreenName(event.target.value)} placeholder="Your exact player name" autoComplete="nickname" /></label>}
+        {playerResolution === "no_match" && <p className={styles.notice}>Your Discord name will be used as your initial Krys Leagues screen name for this entry.</p>}
         <p className={styles.cutNotice}>Choose one independent time for Thursday, Friday, Saturday, and Sunday. After Friday’s Round 2, players in both weekend fields continue Saturday and Sunday; every saved weekend time remains intact.</p>
         {schedule.length > 0 && <p className={styles.assignment}>{event.weekend_status_published_at ? <>Weekend status: <strong>{weekendStatus === "main" ? "Masters Main Event" : weekendStatus === "secondary" ? secondaryFieldName : "Weekend field status pending"}</strong></> : <strong>Weekend field status pending</strong>}</p>}
         {signupState === "upcoming" && <p className={styles.notice}>Public signup opens {formatMajorDate(signupStatus?.public_signup_opens_at || null)}. Priority access is not active for this first Major.</p>}

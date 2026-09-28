@@ -40,3 +40,12 @@ test("player registration and Masters use the transactional protected paths", as
   assert.doesNotMatch(masters, /rpc\("signup_for_major_with_slots"/)
   assert.match(masters, /resolution_status/)
 })
+
+test("Masters no-match path uses Discord name automatically without a dead-end input", async () => {
+  const masters = await source("app/majors/[slug]/page.tsx")
+  assert.match(masters, /getAuthenticatedDiscordName\(user\.data\.user\)/)
+  assert.match(masters, /p_screen_name: newPlayerName/)
+  assert.match(masters, /Your Discord name will be used as your initial Krys Leagues screen name/)
+  assert.doesNotMatch(masters, /Enter your Krys Leagues screen name to continue\./)
+  assert.doesNotMatch(masters, /placeholder="Your exact player name"/)
+})

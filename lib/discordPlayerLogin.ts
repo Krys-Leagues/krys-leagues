@@ -15,6 +15,24 @@ export function getAuthenticatedDiscordId(user: {
   return typeof value === "string" ? value.trim() : ""
 }
 
+export function getAuthenticatedDiscordName(user: {
+  user_metadata?: Record<string, unknown>
+  identities?: Array<{
+    provider?: string
+    identity_data?: Record<string, unknown>
+  }>
+}) {
+  const discordIdentity = user.identities?.find((identity) => identity.provider === "discord")
+  const sources = [user.user_metadata, discordIdentity?.identity_data]
+  for (const source of sources) {
+    for (const key of ["global_name", "preferred_username", "username", "name"]) {
+      const value = source?.[key]
+      if (typeof value === "string" && value.trim()) return value.trim()
+    }
+  }
+  return ""
+}
+
 export function getDiscordPlayerLoginDestination(
   resolution: DiscordPlayerLoginResolution,
   requestedDestination: string | null,
