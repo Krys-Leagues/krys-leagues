@@ -4,7 +4,7 @@ import CourseChallengeReviewQueue from "@/components/admin/course-challenges/Cou
 export default function CourseChallengesAdminPage() {
   return <main style={page}>
     <div style={content}>
-      <nav style={nav}><Link href="/admin" style={link}>← Admin Dashboard</Link><Link href="/" style={link}>← Player Site</Link></nav>
+      <nav style={nav}><Link href="/admin" style={link}>← Admin Dashboard</Link><Link href="/admin/course-challenges/games" style={link}>Game History</Link><Link href="/" style={link}>← Player Site</Link></nav>
       <h1>Course Challenge Review Queue</h1>
       <p style={intro}>Approve only after visually checking the player, course, difficulty, challenge requirement, private proof image, visible date/time, game mode, and any reuse warnings. Do not transcribe scores. Public viewers never receive proof photos or review details.</p>
       <CourseChallengeReviewQueue showRejectedSection />
