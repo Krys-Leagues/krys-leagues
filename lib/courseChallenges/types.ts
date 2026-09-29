@@ -17,7 +17,6 @@ export type CourseChallengeRequirementKind =
   | "par_or_better_count"
   | "birdie_count"
   | "eagle_count"
-  | "unique_ace_hole_count"
 
 export type RequirementOperator = "eq" | "lte" | "gte"
 

@@ -13,7 +13,7 @@ import CourseChallengesGuide from "./CourseChallengesGuide"
 import CourseChallengeRewardSelector from "./CourseChallengeRewardSelector"
 import DiscordSignInButton from "@/components/auth/DiscordSignInButton"
 
-type ProgressPayload = { completedLevels?: number[]; levelProgress?: Array<{ courseSlug?: string; level: number; easyStatus: string; hardStatus: string; completedAt: string | null; updatedAt: string | null }>; rewards?: Array<{ rewardKey: string; label: string; level: number | null; kind: "sticker" | "badge" }>; courses?: Array<{ slug: string; uniqueAceHoles?: number; completedAceStages?: number[]; completedPrestigeStages?: number[] }> }
+type ProgressPayload = { completedLevels?: number[]; levelProgress?: Array<{ courseSlug?: string; level: number; easyStatus: string; hardStatus: string; completedAt: string | null; updatedAt: string | null }>; rewards?: Array<{ rewardKey: string; label: string; level: number | null; kind: "sticker" | "badge" }>; courses?: Array<{ slug: string; completedAceStages?: number[]; currentAceStage?: number | null; completedPrestigeStages?: number[] }> }
 type CatalogPayload = { available?: boolean; error?: string }
 type SubmissionState = { challengeKey: "level" | "ace" | "prestige"; level: number; aceStage?: number; prestigeStage?: number; difficulty: CourseChallengeDifficulty }
 
@@ -24,7 +24,6 @@ export default function CourseChallengeBook({ course, autoOpen = false }: { cour
   const [message, setMessage] = useState("")
   const [profileRewardMessage, setProfileRewardMessage] = useState("")
   const [submission, setSubmission] = useState<SubmissionState | null>(null)
-  const [uniqueAceHoles, setUniqueAceHoles] = useState(0)
   const [completedAceStages, setCompletedAceStages] = useState<number[]>([])
   const [completedPrestigeStages, setCompletedPrestigeStages] = useState<number[]>([])
   const [bookPhase, setBookPhase] = useState<"closed" | "opening" | "open">(autoOpen ? "opening" : "closed")
@@ -39,7 +38,6 @@ export default function CourseChallengeBook({ course, autoOpen = false }: { cour
       setCompletedLevels(profile.completedLevels || [])
       setRewards(profile.rewards || [])
       const courseProfile = profile.courses?.find((item) => item.slug === course.slug)
-      setUniqueAceHoles(courseProfile?.uniqueAceHoles || 0)
       setCompletedAceStages(courseProfile?.completedAceStages || [])
       setCompletedPrestigeStages(courseProfile?.completedPrestigeStages || [])
       if (catalog.error) setMessage(catalog.error)
@@ -141,7 +139,7 @@ export default function CourseChallengeBook({ course, autoOpen = false }: { cour
           {currentPrestigeStage ? <><div className={styles.sideGrid}><ChallengeSide course={course} difficulty="Easy" requirements={currentPrestigeStage.easyRequirements} requirementsPending={currentPrestigeStage.requirementsStatus === "pending_review"} onSubmit={() => setSubmission({ challengeKey: "prestige", level: currentPrestigeStage.stage, prestigeStage: currentPrestigeStage.stage, difficulty: "Easy" })} /><ChallengeSide course={course} difficulty="Hard" requirements={currentPrestigeStage.hardRequirements} requirementsPending={currentPrestigeStage.requirementsStatus === "pending_review"} onSubmit={() => setSubmission({ challengeKey: "prestige", level: currentPrestigeStage.stage, prestigeStage: currentPrestigeStage.stage, difficulty: "Hard" })} /></div>{submission?.challengeKey === "prestige" && <SubmissionForm course={course} level={currentPrestigeStage.stage} challengeKey="prestige" prestigeStage={submission.prestigeStage} difficulty={submission.difficulty} onCancel={() => setSubmission(null)} onSubmitted={(result) => { setMessage(result); setSubmission(null) }} />}</> : <p className={styles.success}>{completedPrestigeStages.length === prestigeStages.length ? "Course Master complete — all advanced challenges are verified." : "Complete Level 5 to unlock Course Pro."}</p>}
         </section>}
         {aceStages.length > 0 && <section className={styles.levelCard} aria-label="Ace Track">
-          <div className={styles.levelHeader}><div><h2>ACE TRACK</h2><p>Available from Level 1 · {uniqueAceHoles} of 9 unique ace holes</p></div><span className={styles.statusChip}>{aceUnlocked ? currentAceStage ? currentAceStage.label : "Complete" : "Unavailable"}</span></div>
+          <div className={styles.levelHeader}><div><h2>ACE TRACK</h2><p>Available from Level 1 · Per-card Easy/Hard hole-in-one requirements · Wader is Easy-only</p></div><span className={styles.statusChip}>{aceUnlocked ? currentAceStage ? currentAceStage.label : "Complete" : "Unavailable"}</span></div>
           <div className={styles.aceStageRail}>{aceStages.map((stage) => <div className={styles.aceStage} data-complete={completedAceStages.includes(stage.stage)} data-current={aceUnlocked && currentAceStage?.stage === stage.stage} key={stage.rewardKey}><strong>{stage.label}</strong><small>{stage.easyRequirements[0]?.label}</small></div>)}</div>
           {!aceUnlocked ? <p className={styles.helper}>This course does not currently publish an Ace Track.</p> : currentAceStage ? <>
             <div className={styles.sideGrid}>
@@ -149,7 +147,7 @@ export default function CourseChallengeBook({ course, autoOpen = false }: { cour
               <ChallengeSide course={course} difficulty="Hard" requirements={currentAceStage.hardRequirements} requirementsPending={currentAceStage.requirementsStatus === "pending_review"} onSubmit={() => setSubmission({ challengeKey: "ace", level: 3, aceStage: currentAceStage.stage, difficulty: "Hard" })} />
             </div>
             {submission?.challengeKey === "ace" && <SubmissionForm course={course} level={3} challengeKey="ace" aceStage={submission.aceStage} difficulty={submission.difficulty} onCancel={() => setSubmission(null)} onSubmitted={(result) => { setMessage(result); setSubmission(null) }} />}
-          </> : <p className={styles.success}>Ace Legend complete — all 9 unique ace holes are in your verified track.</p>}
+          </> : <p className={styles.success}>Ace Legend complete — all four Ace stages are complete.</p>}
         </section>}
           </section>
         </div>

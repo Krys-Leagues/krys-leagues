@@ -48,7 +48,10 @@ export async function POST(request: Request) {
     // any verified score data needed by legacy downstream credit is recorded by
     // an authorized admin after visual review, never by the player.
     const aceRows = await loadAceEligibleRows(service, identity.playerId, course.slug)
-    const aceState = aceProgress(course, aceRows)
+    const aceProgressRows = await service.from("course_challenge_ace_progress").select("stage_number,completed_at").eq("player_id", identity.playerId).eq("course_slug", course.slug)
+    if (aceProgressRows.error) throw aceProgressRows.error
+    const storedAceStages = (aceProgressRows.data || []).filter((row) => row.completed_at).map((row) => Number(row.stage_number))
+    const aceState = aceProgress(course, aceRows, storedAceStages)
     const currentAceStage = aceState?.nextStage || null
     if (challengeKey === "ace" && (!currentAceStage || (body.aceStage !== undefined && Number(body.aceStage) !== currentAceStage.stage))) return Response.json({ error: "Submit the currently open Ace Track stage." }, { status: 409 })
     const reviewReasons = [

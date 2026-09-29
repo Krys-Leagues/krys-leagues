@@ -106,26 +106,25 @@ function cherryPrestigeStages(): CourseChallengePrestigeStage[] {
   ]
 }
 
-type AceStageSpec = { key: "wader" | "chaser" | "hunter" | "legend"; label: string; target: number }
+type AceStageSpec = { key: "wader" | "chaser" | "hunter" | "legend"; label: string; easy: number; hard: number | null }
 function aceStages(slug: string, specs: AceStageSpec[], assetPath: (name: string) => string) {
   return specs.map((spec, index) => {
-    const requirement = req(slug + "-ace-" + spec.key + "-unique-holes", spec.target + " unique ace hole" + (spec.target === 1 ? "" : "s") + " cumulatively", "unique_ace_hole_count", "gte", spec.target)
     return {
       stage: (index + 1) as 1 | 2 | 3 | 4,
       key: spec.key,
       label: "Ace " + spec.label,
-      easyRequirements: [requirement],
-      hardRequirements: [{ ...requirement, id: slug + "-ace-" + spec.key + "-unique-holes-hard" }],
+      easyRequirements: [hio(index + 1, "easy", spec.easy)],
+      hardRequirements: spec.hard === null ? [] : [hio(index + 1, "hard", spec.hard)],
       requirementsStatus: "ready" as const,
       rewardKey: "course-challenge:" + slug + ":ace-" + spec.key,
       rewardAsset: assetPath(slug + "-ace-" + spec.key + ".png"),
-      requiresHard: true,
+      requiresHard: spec.hard !== null,
     }
   })
 }
 
-const touristAceStages = aceStages("tourist-trap", [{ key: "wader", label: "Wader", target: 1 }, { key: "chaser", label: "Chaser", target: 3 }, { key: "hunter", label: "Hunter", target: 6 }, { key: "legend", label: "Legend", target: 9 }], asset)
-const cherryAceStages = aceStages("cherry-blossom", [{ key: "wader", label: "Wader", target: 1 }, { key: "chaser", label: "Chaser", target: 3 }, { key: "hunter", label: "Hunter", target: 6 }, { key: "legend", label: "Legend", target: 9 }], cherryAsset)
+const touristAceStages = aceStages("tourist-trap", [{ key: "wader", label: "Wader", easy: 2, hard: null }, { key: "chaser", label: "Chaser", easy: 3, hard: 1 }, { key: "hunter", label: "Hunter", easy: 6, hard: 1 }, { key: "legend", label: "Legend", easy: 10, hard: 3 }], asset)
+const cherryAceStages = aceStages("cherry-blossom", [{ key: "wader", label: "Wader", easy: 3, hard: null }, { key: "chaser", label: "Chaser", easy: 6, hard: 2 }, { key: "hunter", label: "Hunter", easy: 10, hard: 5 }, { key: "legend", label: "Legend", easy: 12, hard: 8 }], cherryAsset)
 export const COURSE_CHALLENGE_COURSES: CourseChallengeCourse[] = [
   {
     slug: "tourist-trap",
@@ -170,5 +169,4 @@ export function isPrestigeStageUnlocked(course: CourseChallengeCourse, stage: nu
   return completedPrestigeStages.includes(stage - 1)
 }
 export function isAceChallengeUnlocked(course: CourseChallengeCourse, completedLevels: number[]) { void completedLevels; return Boolean(course.aceStages?.length) }
-export function aceStageForUniqueHoleCount(course: CourseChallengeCourse, uniqueHoleCount: number) { return course.aceStages?.find((stage) => (stage.easyRequirements[0]?.target || Number.MAX_SAFE_INTEGER) > uniqueHoleCount) ?? null }
 export function courseChallengeRewardLabel(course: CourseChallengeCourse, level: number, kind: "sticker" | "badge") { return kind === "sticker" ? course.name + " Level " + level + " sticker" : course.name + " Level " + level + " badge" }

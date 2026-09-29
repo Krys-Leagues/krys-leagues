@@ -18,14 +18,12 @@ test("course challenge metrics use one complete 18-hole card and authoritative p
   assert.equal(metrics.lastHoleScore, 8)
   assert.equal(metrics.strokeOuts, 0)
 })
-
 test("pending challenge definitions never auto-pass", () => {
   const result = evaluateCourseChallengeRequirements(touristScores, touristPars, [], "pending_review")
   assert.equal(result.status, "needs_review")
   assert.equal(result.requirements[0].passed, null)
 })
-
-test("Tourist Trap Levels 1 through 5 contain approved cumulative requirements", () => {
+test("Tourist Trap Levels 1 through 5 contain approved requirements", () => {
   assert.equal(tourist.levels.every((level) => level.requirementsStatus === "ready"), true)
   assert.deepEqual(tourist.levels.map((level) => level.easyRequirements.length), [3, 5, 5, 5, 5])
   assert.deepEqual(tourist.levels.map((level) => level.hardRequirements.length), [3, 5, 5, 6, 9])
@@ -140,8 +138,8 @@ test("Tourist Trap and Cherry Blossom expose the full four-stage Ace Track", () 
   assert.equal(isAceChallengeUnlocked(tourist, []), true)
   assert.equal(isAceChallengeUnlocked(tourist, [1, 2]), true)
   assert.equal(isAceChallengeUnlocked(tourist, [1, 2, 3]), true)
-  assert.deepEqual(tourist.aceStages?.map((stage) => [stage.key, stage.easyRequirements[0].target, stage.hardRequirements[0].target]), [["wader", 1, 1], ["chaser", 3, 3], ["hunter", 6, 6], ["legend", 9, 9]])
-  assert.deepEqual(cherry.aceStages?.map((stage) => [stage.key, stage.easyRequirements[0].target, stage.hardRequirements[0].target]), [["wader", 1, 1], ["chaser", 3, 3], ["hunter", 6, 6], ["legend", 9, 9]])
+  assert.deepEqual(tourist.aceStages?.map((stage) => [stage.key, stage.easyRequirements[0]?.target, stage.hardRequirements[0]?.target]), [["wader", 2, undefined], ["chaser", 3, 1], ["hunter", 6, 1], ["legend", 10, 3]])
+  assert.deepEqual(cherry.aceStages?.map((stage) => [stage.key, stage.easyRequirements[0]?.target, stage.hardRequirements[0]?.target]), [["wader", 3, undefined], ["chaser", 6, 2], ["hunter", 10, 5], ["legend", 12, 8]])
   assert.deepEqual(aceStageRewardDefinitions(tourist).map((reward) => reward.rewardKey), [
     "course-challenge:tourist-trap:ace-wader",
     "course-challenge:tourist-trap:ace-chaser",
@@ -150,11 +148,4 @@ test("Tourist Trap and Cherry Blossom expose the full four-stage Ace Track", () 
   ])
   assert.equal(levelIsComplete("approved", "pending"), false)
   assert.equal(levelIsComplete("approved", "approved"), true)
-})
-
-test("unique Ace hole requirements evaluate from the cumulative unique-hole count", () => {
-  const requirement = tourist.aceStages?.[1].easyRequirements[0]
-  assert.ok(requirement)
-  assert.equal(evaluateCourseChallengeRequirements([1, ...touristPars.slice(1)], touristPars, [requirement], "ready", { uniqueAceHoles: 3 }).status, "auto_pass")
-  assert.equal(evaluateCourseChallengeRequirements([1, ...touristPars.slice(1)], touristPars, [requirement], "ready", { uniqueAceHoles: 2 }).status, "auto_fail")
 })

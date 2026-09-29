@@ -12,8 +12,6 @@ export type AceRecalculationReport = {
   courseSlug: string
   courseName: string
   storedCompletedStages: number[]
-  storedUniqueAceHoles: number[]
-  recalculatedUniqueAceHoles: number[]
   newlyEarnedStages: number[]
   evidenceCards: ReturnType<typeof recalculateAceTrack>["evidenceCards"]
   skippedCards: ReturnType<typeof recalculateAceTrack>["skippedCards"]
@@ -32,7 +30,6 @@ export function buildAceRecalculationReport({ rows, storedRows, playerNames }: {
     const course = getCourseChallenge(courseSlug)
     if (!course) continue
     const courseRows = rows.filter((row) => row.player_id === playerId && row.course_slug === courseSlug)
-    const currentAceRows = courseRows.filter((row) => row.challenge_key === "ace" && row.status === "approved")
     const storedCompletedStages = storedRows
       .filter((row) => row.player_id === playerId && row.course_slug === courseSlug && row.completed_at)
       .map((row) => Number(row.stage_number))
@@ -45,8 +42,6 @@ export function buildAceRecalculationReport({ rows, storedRows, playerNames }: {
       courseSlug,
       courseName: course.name,
       storedCompletedStages: [...new Set(storedCompletedStages)],
-      storedUniqueAceHoles: recalculateAceTrack(course, currentAceRows).uniqueHoles,
-      recalculatedUniqueAceHoles: recalculated.uniqueHoles,
       newlyEarnedStages: recalculated.newlyEarnedStages,
       evidenceCards: recalculated.evidenceCards,
       skippedCards: recalculated.skippedCards,

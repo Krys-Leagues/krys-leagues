@@ -1,6 +1,6 @@
 import { getAceStage, getCourseChallenge, getPrestigeStage } from "@/lib/courseChallenges/catalog"
 import { aceStageRewardDefinitions, levelRewardDefinitions, prestigeStageRewardDefinitions } from "@/lib/courseChallenges/rewards"
-import { aceCrossCreditRows, aceProgress, type AceSubmissionRecord } from "@/lib/courseChallenges/ace"
+import { aceCrossCreditRows, aceProgress, nextSequentialAceStage, type AceSubmissionRecord } from "@/lib/courseChallenges/ace"
 import { courseChallengeGameModeError, normalizeCourseChallengeGameMode } from "@/lib/courseChallenges/gameMode"
 import { createCourseChallengesServiceClient, requireCourseChallengeAdmin } from "@/lib/courseChallenges/server"
 import { createServerSupabaseClient } from "@/lib/supabase/server"
@@ -206,11 +206,17 @@ export async function PATCH(request: Request) {
       fingerprintPayload = { source: "course_challenge", submissionId: submissionRow.id, courseId: courseRow.data.id, playerId: submissionRow.player_id, holeScores: verifiedScoreList, relativeToPar: metrics.relativeToPar }
     }
     const fingerprint = await sha256Hex(JSON.stringify(fingerprintPayload))
+    if (visualOnly && approveAce && (challengeKey === "ace" || challengeKey === "level")) {
+      const aceProgressRows = await service.from("course_challenge_ace_progress").select("stage_number,completed_at").eq("player_id", String(submissionRow.player_id)).eq("course_slug", String(submissionRow.course_slug))
+      if (aceProgressRows.error) throw aceProgressRows.error
+      const currentStage = nextSequentialAceStage(course!, (aceProgressRows.data || []).filter((row) => row.completed_at).map((row) => Number(row.stage_number)))
+      if (challengeKey === "ace" && (!currentStage || Number(submissionRow.ace_stage_number || submissionRow.level_number) !== currentStage.stage)) return Response.json({ error: "Only the currently open Ace Track stage can be approved." }, { status: 409 })
+    }
     const approval = await sessionClient.rpc("approve_course_challenge_submission", { p_submission_id: body.id, p_course_id: courseRow.data.id, p_fingerprint: fingerprint, p_review_notes: body.reviewNotes?.trim() || null, p_admin_verified_game_mode: verifiedGameMode })
     if (approval.error) throw approval.error
     const progress = await updateProgressAndRewards(service, String(submissionRow.player_id), String(submissionRow.course_slug), Number(submissionRow.level_number), String(submissionRow.difficulty), challengeKey, authorization.user?.id || null)
     const aceCredit = visualOnly && approveAce && (challengeKey === "level" || challengeKey === "ace")
-      ? await applyVisualAceCredit(service, String(submissionRow.player_id), String(submissionRow.course_slug), Number(submissionRow.ace_stage_number || submissionRow.level_number || 0), authorization.user?.id || null)
+      ? await applyVisualAceCredit(service, String(submissionRow.player_id), String(submissionRow.course_slug), Number(submissionRow.ace_stage_number || submissionRow.level_number || 0), String(submissionRow.difficulty), authorization.user?.id || null)
       : challengeKey === "level"
         ? await applyAceCrossCredit(service, String(submissionRow.id), String(submissionRow.player_id), String(submissionRow.course_slug), Number(submissionRow.ace_stage_number || 0), authorization.user?.id || null)
       : null
@@ -228,7 +234,9 @@ async function updateProgressAndRewards(service: ReturnType<typeof createCourseC
     const course = getCourseChallenge(courseSlug)
     if (!course) return { complete: false, rewardLabels: [] as string[] }
     const aceRows = await loadAceEligibleRows(service, playerId, courseSlug)
-    const aceState = aceProgress(course, aceRows)
+    const stored = await service.from("course_challenge_ace_progress").select("stage_number,completed_at").eq("player_id", playerId).eq("course_slug", courseSlug)
+    if (stored.error) throw stored.error
+    const aceState = aceProgress(course, aceRows, (stored.data || []).filter((row) => row.completed_at).map((row) => Number(row.stage_number)))
     for (const stageNumber of aceState.completedStages) {
       const stageProgress = await service.from("course_challenge_ace_progress").upsert({ player_id: playerId, course_slug: courseSlug, stage_number: stageNumber, easy_status: "approved", hard_status: "approved", completed_at: new Date().toISOString(), updated_at: new Date().toISOString() }, { onConflict: "player_id,course_slug,stage_number" })
       if (stageProgress.error) throw stageProgress.error
@@ -284,8 +292,11 @@ async function loadAceEligibleRows(service: ReturnType<typeof createCourseChalle
 
 async function applyAceCrossCredit(service: ReturnType<typeof createCourseChallengesServiceClient>, submissionId: string, playerId: string, courseSlug: string, aceStageNumber: number, reviewerId: string | null) {
   const course = getCourseChallenge(courseSlug)
-  const stage = course?.aceStages?.find((item) => item.stage === aceStageNumber)
-  if (!course || !stage) return { status: "not_eligible", stage: null, uniqueHoles: [] as number[], rewardLabels: [] as string[] }
+  const stored = await service.from("course_challenge_ace_progress").select("stage_number,completed_at").eq("player_id", playerId).eq("course_slug", courseSlug)
+  if (stored.error) throw stored.error
+  const nextStage = course ? nextSequentialAceStage(course, (stored.data || []).filter((row) => row.completed_at).map((row) => Number(row.stage_number))) : null
+  const stage = nextStage && nextStage.stage === aceStageNumber ? nextStage : null
+  if (!course || !stage) return { status: "not_eligible", stage: null, rewardLabels: [] as string[] }
   const rows = await service.from("course_challenge_submissions").select("id,challenge_key,level_number,ace_stage_number,difficulty,hole_scores,reviewed_hole_scores,status,created_at").eq("player_id", playerId).eq("course_slug", courseSlug).eq("status", "approved")
   if (rows.error) throw rows.error
   const rowIds = (rows.data || []).map((row) => String(row.id))
@@ -293,31 +304,33 @@ async function applyAceCrossCredit(service: ReturnType<typeof createCourseChalle
   if (events.error) throw events.error
   const aceEnabled = new Set((events.data || []).filter((event) => Boolean((event.metadata as Record<string, unknown> | null)?.count_toward_ace_track)).map((event) => String(event.submission_id)))
   const eligibleRows = aceCrossCreditRows((rows.data || []).map((row) => ({ ...row, hole_scores: row.reviewed_hole_scores || row.hole_scores })) as AceSubmissionRecord[], aceEnabled, submissionId, aceStageNumber)
-  const uniqueHoles = aceProgress(course, eligibleRows).uniqueHoles
-  const target = Number(stage.easyRequirements[0]?.target || Number.MAX_SAFE_INTEGER)
-  const complete = uniqueHoles.length >= target
+  const aceState = aceProgress(course, eligibleRows, (stored.data || []).filter((row) => row.completed_at).map((row) => Number(row.stage_number)))
+  const complete = aceState.completedStages.includes(stage.stage)
   const progress = await service.from("course_challenge_ace_progress").upsert({ player_id: playerId, course_slug: courseSlug, stage_number: aceStageNumber, easy_status: complete ? "approved" : "pending", hard_status: complete ? "approved" : "pending", completed_at: complete ? new Date().toISOString() : null, updated_at: new Date().toISOString() }, { onConflict: "player_id,course_slug,stage_number" })
   if (progress.error) throw progress.error
-  if (!complete) return { status: "eligible", stage: stage.label, uniqueHoles, rewardLabels: [] as string[] }
+  if (!complete) return { status: "eligible", stage: stage.label, rewardLabels: [] as string[] }
   const rewards = aceStageRewardDefinitions({ ...course, aceStages: [stage] }).map((reward) => ({ player_id: playerId, reward_key: reward.rewardKey, label: reward.label, kind: reward.kind, course_slug: courseSlug, level: null, awarded_by: reviewerId }))
   const award = await service.from("course_challenge_rewards").upsert(rewards, { onConflict: "player_id,reward_key", ignoreDuplicates: true })
   if (award.error) throw award.error
-  return { status: "awarded", stage: stage.label, uniqueHoles, rewardLabels: rewards.map((reward) => reward.label), submissionId }
+  return { status: "awarded", stage: stage.label, rewardLabels: rewards.map((reward) => reward.label), submissionId }
 }
 
-async function applyVisualAceCredit(service: ReturnType<typeof createCourseChallengesServiceClient>, playerId: string, courseSlug: string, aceStageNumber: number, reviewerId: string | null) {
+async function applyVisualAceCredit(service: ReturnType<typeof createCourseChallengesServiceClient>, playerId: string, courseSlug: string, aceStageNumber: number, difficulty: string, reviewerId: string | null) {
   const course = getCourseChallenge(courseSlug)
-  const stage = course?.aceStages?.find((item) => item.stage === aceStageNumber)
-  if (!course || !stage) return { status: "not_eligible", stage: null, uniqueHoles: [] as number[], rewardLabels: [] as string[] }
+  const stored = await service.from("course_challenge_ace_progress").select("stage_number,completed_at").eq("player_id", playerId).eq("course_slug", courseSlug)
+  if (stored.error) throw stored.error
+  const nextStage = course ? nextSequentialAceStage(course, (stored.data || []).filter((row) => row.completed_at).map((row) => Number(row.stage_number))) : null
+  const stage = nextStage && nextStage.stage === aceStageNumber ? nextStage : null
+  if (!course || !stage || (!stage.requiresHard && difficulty !== "Easy")) return { status: "not_eligible", stage: null, rewardLabels: [] as string[] }
   const progress = await service.from("course_challenge_ace_progress").upsert({ player_id: playerId, course_slug: courseSlug, stage_number: aceStageNumber, easy_status: "approved", hard_status: "approved", completed_at: new Date().toISOString(), updated_at: new Date().toISOString() }, { onConflict: "player_id,course_slug,stage_number" })
   if (progress.error) throw progress.error
   const rewards = aceStageRewardDefinitions({ ...course, aceStages: [stage] }).map((reward) => ({ player_id: playerId, reward_key: reward.rewardKey, label: reward.label, kind: reward.kind, course_slug: courseSlug, level: null, awarded_by: reviewerId }))
   const award = await service.from("course_challenge_rewards").upsert(rewards, { onConflict: "player_id,reward_key", ignoreDuplicates: true })
   if (award.error) throw award.error
-  return { status: "awarded", stage: stage.label, uniqueHoles: [] as number[], rewardLabels: rewards.map((reward) => reward.label), submissionId: null }
+  return { status: "awarded", stage: stage.label, rewardLabels: rewards.map((reward) => reward.label), submissionId: null }
 }
 
-function formatApprovalMessage(allTime: Record<string, unknown> | undefined, gameMode: string | null | undefined, progress: { complete: boolean; rewardLabels: string[] }, aceCredit?: { status: string; stage: string | null; uniqueHoles: number[]; rewardLabels: string[] } | null) {
+function formatApprovalMessage(allTime: Record<string, unknown> | undefined, gameMode: string | null | undefined, progress: { complete: boolean; rewardLabels: string[] }, aceCredit?: { status: string; stage: string | null; rewardLabels: string[] } | null) {
   if (allTime?.action === "visual_review_only") {
     const rewardLine = progress.complete && progress.rewardLabels.length ? `\nCourse Challenges: ${progress.rewardLabels.join(", ")} awarded.` : ""
     const aceLine = aceCredit?.status === "awarded" ? `\nAce Track: ${aceCredit.rewardLabels.join(", ")} awarded by visual review.` : ""
@@ -348,7 +361,7 @@ function formatApprovalMessage(allTime: Record<string, unknown> | undefined, gam
       ? `Climbers: ${passed} player${passed === 1 ? "" : "s"} passed\n${points} point${points === 1 ? "" : "s"} earned`
       : "Climbers: No event"
   const rewardLine = progress.complete && progress.rewardLabels.length ? `\nCourse Challenges: ${progress.rewardLabels.join(", ")} awarded.` : ""
-  const aceLine = aceCredit?.status === "awarded" ? `\nAce Track: ${aceCredit.rewardLabels.join(", ")} awarded (${aceCredit.uniqueHoles.length} unique ace holes).` : aceCredit?.status === "eligible" ? `\nAce Track: ${aceCredit.stage || "current stage"} remains in review (${aceCredit.uniqueHoles.length} unique ace holes).` : ""
+  const aceLine = aceCredit?.status === "awarded" ? `\nAce Track: ${aceCredit.rewardLabels.join(", ")} awarded.` : aceCredit?.status === "eligible" ? `\nAce Track: ${aceCredit.stage || "current stage"} remains in review.` : ""
   return `COURSE CHALLENGE APPROVED\n${modeLine ? `${modeLine}\n\n` : ""}${allTimeLine}\n\n${climbersLine}${rewardLine}${aceLine}`
 }
 

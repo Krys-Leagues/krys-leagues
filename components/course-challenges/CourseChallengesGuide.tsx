@@ -25,7 +25,7 @@ export default function CourseChallengesGuide({ includeScorecardHelp = false }: 
         <li>Levels 1–2: Solo or Multiplayer Game Mode qualifies.</li>
         <li>Levels 3–5: Multiplayer Game Mode is required.</li>
         <li>Ace Track is available from Level 1 and progresses alongside Levels 1–5; verified Level scorecards may also count qualifying aces.</li>
-        <li>Ace progress is cumulative by unique holes: Wader 1, Chaser 3, Hunter 6, and Legend all 9. Practice Mode does not qualify.</li>
+        <li>Ace progress uses the actual hole-in-one count on each verified card. Wader is Easy-only; later stages require the configured Easy and Hard card counts. Practice Mode does not qualify.</li>
         <li>Upload one clear current scorecard photo for each challenge. An authorized admin reviews the private card.</li>
         <li>Verified Easy + verified Hard completes the Level, earns the reward, and unlocks the next Level.</li>
       </ul>
@@ -45,15 +45,8 @@ export default function CourseChallengesGuide({ includeScorecardHelp = false }: 
       <h3>ACE TRACK</h3>
       <p>Your Ace Track is available from Level 1 and runs alongside your regular Level challenges. You do not need a separate Ace-only card when a verified Level scorecard supplies qualifying aces.</p>
       <p>A verified Level scorecard can count toward both your Level challenge and your Ace Track at the same time.</p>
-      <p>Ace progress is based on different holes you have aced:</p>
-      <ul className={styles.guideList}>
-        <li>Ace Wader — Ace 1 unique hole.</li>
-        <li>Ace Chaser — Ace 3 different unique holes.</li>
-        <li>Ace Hunter — Ace 6 different unique holes.</li>
-        <li>Ace Legend — Ace all 9 different holes.</li>
-      </ul>
-      <p>A hole only counts once toward your unique-hole Ace progress, even if you ace it again later.</p>
-      <p>Ace cards are evaluated only by their unique-hole requirements; admins verify the private proof.</p>
+      <p>Ace progress is based on the actual hole-in-one count on each verified card:</p>
+      <p>Each stage uses the configured Easy and Hard hole-in-one counts for that course. Wader is Easy-only; later stages require the configured Easy and Hard card counts. Admins verify the private proof.</p>
     </section>
 
     <section className={styles.guideSection}>
