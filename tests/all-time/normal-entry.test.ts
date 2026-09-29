@@ -70,7 +70,7 @@ test("normal entry preview protects lower-is-better records and describes Climbe
   assert.doesNotMatch(page, /HISTORICAL PB PENDING DATE\/ORDER/)
 })
 
-test("final intake is one-player, authoritative-par, and session-based", () => {
+test("final intake is one-player, period-based, and session-based", () => {
   const page = read("app/admin/records/entry/page.tsx")
   assert.match(page, /data-testid="normal-one-player-scorecard"/)
   assert.match(page, /<th scope="row">PAR<\/th>/)
@@ -87,13 +87,12 @@ test("final intake is one-player, authoritative-par, and session-based", () => {
   assert.match(page, /TWO PERIODS AGO/)
   assert.match(page, /two_periods_ago/)
   assert.match(page, /setTwoPeriodsAgoSeason/)
-  assert.match(page, /AUTHORITATIVE BACKLOG CHRONOLOGY/)
-  assert.match(page, /Source-post date/)
-  assert.match(page, /Period posting\/source order/)
+  assert.match(page, /VERIFIED GROUP ORDER/)
+  assert.match(page, /automatic posting order/)
   assert.match(page, /formatClimbersPeriodRange/)
   assert.doesNotMatch(page, /new Date\(selectedVerifiedSeason\.starts_at\)\.toLocaleDateString/)
-  assert.match(page, /p_authoritative_submitted_date/)
-  assert.match(page, /p_authoritative_submission_order/)
+  assert.match(page, /p_authoritative_submitted_date: verifiedDateForRequest/)
+  assert.match(page, /p_authoritative_submission_order: null/)
   assert.doesNotMatch(page, /HISTORICAL PB PENDING DATE\/ORDER/)
   assert.doesNotMatch(page, /ADD PLAYER|PREVIEW ENTIRE CARD|FRONT 9|BACK 9|P1|P2|P3/)
 })
