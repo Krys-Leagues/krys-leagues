@@ -1,5 +1,3 @@
-import { supabase } from "@/lib/supabase"
-
 type PlayerRow = {
   id: string
   screen_name: string
@@ -66,27 +64,22 @@ export function globalPlayerIdentitySummary(player: GlobalPlayerDirectoryEntry) 
 }
 
 export async function loadGlobalPlayerDirectory() {
-  const [playersResult, linksResult, aliasesResult] = await Promise.all([
-    supabase
-      .from("players")
-      .select("id, screen_name, discord_id, discord_name, discord_username, status, active")
-      .order("screen_name"),
-    supabase
-      .from("player_identity_links")
-      .select("historical_player_id, canonical_player_id"),
-    supabase
-      .from("player_aliases")
-      .select("player_id, alias, source")
-      .eq("verified", true)
-      .order("alias"),
-  ])
+  const response = await fetch("/api/admin/players", {
+    cache: "no-store",
+    credentials: "same-origin",
+    headers: { Accept: "application/json" },
+  })
+  const payload = await response.json().catch(() => null) as {
+    players?: PlayerRow[]
+    identityLinks?: IdentityLinkRow[]
+    aliases?: AliasRow[]
+    error?: string
+  } | null
+  if (!response.ok) throw new Error(payload?.error || "Global Players could not be loaded.")
 
-  const error = playersResult.error || linksResult.error || aliasesResult.error
-  if (error) throw error
-
-  const players = (playersResult.data || []) as PlayerRow[]
+  const players = payload?.players || []
   const links = new Map(
-    ((linksResult.data || []) as IdentityLinkRow[]).map((link) => [
+    (payload?.identityLinks || []).map((link) => [
       link.historical_player_id,
       link.canonical_player_id,
     ]),
@@ -94,7 +87,7 @@ export async function loadGlobalPlayerDirectory() {
   const aliasesByCanonicalId = new Map<string, Set<string>>()
   const identityAliasesByCanonicalId = new Map<string, Array<{ name: string; source: string | null }>>()
 
-  for (const alias of (aliasesResult.data || []) as AliasRow[]) {
+  for (const alias of payload?.aliases || []) {
     const canonicalId = resolveCanonicalId(alias.player_id, links)
     const aliases = aliasesByCanonicalId.get(canonicalId) || new Set<string>()
     aliases.add(alias.alias)

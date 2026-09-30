@@ -41,6 +41,24 @@ test("protected membership data paths replace browser-direct membership reads", 
   }
 })
 
+test("admin identity directories use the protected server-side player payload", () => {
+  const directory = read("lib/identity/globalPlayerDirectory.ts")
+  const adminPlayers = read("app/api/admin/players/route.ts")
+  const consumers = [
+    read("app/admin/trophies/page.tsx"),
+    read("app/admin/kwt-import/discord-season-9/KwtDiscordIdentityReview.tsx"),
+    read("app/admin/records/climbers/LegacyBaselineIdentityReview.tsx"),
+    read("app/admin/import/competitions/KwtLibraryImporter.tsx"),
+  ]
+
+  assert.match(directory, /fetch\("\/api\/admin\/players"/)
+  assert.doesNotMatch(directory, /\.from\("(?:players|player_aliases|player_identity_links)"\)/)
+  assert.match(adminPlayers, /from\("player_aliases"\)/)
+  assert.match(adminPlayers, /identityLinks:/)
+  assert.match(adminPlayers, /aliases:/)
+  for (const consumer of consumers) assert.match(consumer, /loadGlobalPlayerDirectory/)
+})
+
 test("admin navigation never opens managed Stroke pages without required context", () => {
   const commandCenter = read("app/admin/command-center/page.tsx")
   const transition = read("app/admin/stroke/transition/page.tsx")

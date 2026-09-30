@@ -14,7 +14,7 @@ export async function GET() {
     return NextResponse.json({ error: error instanceof Error ? error.message : "Admin Global Players server access is not configured." }, { status: 503 })
   }
 
-  const [playersResult, membershipsResult, tournamentsResult, identityLinksResult] = await Promise.all([
+  const [playersResult, membershipsResult, tournamentsResult, identityLinksResult, aliasesResult] = await Promise.all([
     adminDataClient
       .from("players")
       .select("id, screen_name, discord_id, discord_name, discord_username, discord_avatar, status, active, division, avatar_path, is_server_booster, has_krys_server_tag, profile_badges")
@@ -30,9 +30,14 @@ export async function GET() {
     adminDataClient
       .from("player_identity_links")
       .select("historical_player_id, canonical_player_id"),
+    adminDataClient
+      .from("player_aliases")
+      .select("player_id, alias, source")
+      .eq("verified", true)
+      .order("alias", { ascending: true }),
   ])
 
-  const error = playersResult.error || membershipsResult.error || tournamentsResult.error || identityLinksResult.error
+  const error = playersResult.error || membershipsResult.error || tournamentsResult.error || identityLinksResult.error || aliasesResult.error
   if (error) return NextResponse.json({ error: error.message }, { status: 400 })
 
   return NextResponse.json({
@@ -40,6 +45,7 @@ export async function GET() {
     leagueMemberships: membershipsResult.data || [],
     tournamentEntries: tournamentsResult.data || [],
     identityLinks: identityLinksResult.data || [],
+    aliases: aliasesResult.data || [],
   }, { headers: { "Cache-Control": "no-store" } })
 }
 
