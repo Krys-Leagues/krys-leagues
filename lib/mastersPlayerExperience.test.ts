@@ -19,6 +19,7 @@ const migration = readFileSync(new URL("../supabase/migrations/20260930190131_ma
 const mastersPage = readFileSync(new URL("../app/majors/[slug]/page.tsx", import.meta.url), "utf8")
 const scoringPage = readFileSync(new URL("../app/majors/[slug]/scoring/page.tsx", import.meta.url), "utf8")
 const scorecardPhoto = readFileSync(new URL("../components/majors/MajorRoomScorecardPhoto.tsx", import.meta.url), "utf8")
+const sharedViewer = readFileSync(new URL("../components/scorecards/ScorecardZoomViewer.tsx", import.meta.url), "utf8")
 const adminScheduling = readFileSync(new URL("../app/admin/majors/scheduling/page.tsx", import.meta.url), "utf8")
 
 function round(overrides: Partial<MajorPlayerScoringRound> = {}): MajorPlayerScoringRound {
@@ -192,6 +193,14 @@ test("shared room proof renders only an uploaded API image and has an honest emp
   assert.match(scorecardPhoto, /aria-modal="true"/)
   assert.match(scorecardPhoto, /Close enlarged scorecard/)
   assert.match(scorecardPhoto, /event\.key === "Escape"/)
+  assert.match(scorecardPhoto, /ScorecardZoomControls/)
+  assert.match(scorecardPhoto, /ScorecardPanViewport/)
+  assert.match(scorecardPhoto, /masters-room-scorecard-viewer/)
+  assert.match(sharedViewer, /Zoom in/)
+  assert.match(sharedViewer, /Zoom out/)
+  assert.match(sharedViewer, /Fit \/ reset/)
+  assert.match(sharedViewer, /setPointerCapture/)
+  assert.match(sharedViewer, /PointerEvent/)
   assert.match(scorecardPhoto, /No room scorecard has been uploaded yet\./)
   assert.match(scorecardPhoto, /SUBMIT ROOM SCORECARD PHOTO/)
   assert.doesNotMatch(scorecardPhoto, /masters-large-scorecard|placeholder|approved-pages\/the masters/i)

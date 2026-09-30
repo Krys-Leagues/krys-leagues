@@ -3,6 +3,7 @@
 import Image from "next/image"
 import { useCallback, useEffect, useRef, useState } from "react"
 
+import { ScorecardPanViewport, ScorecardZoomControls, useScorecardImageView } from "@/components/scorecards/ScorecardZoomViewer"
 import type { MajorRoomScorecardPayload } from "@/lib/majorRoomScorecard"
 import styles from "./MajorRoomScorecardPhoto.module.css"
 
@@ -16,6 +17,7 @@ export default function MajorRoomScorecardPhoto({ playDayId }: { playDayId: stri
   const [expanded, setExpanded] = useState(false)
   const previewButton = useRef<HTMLButtonElement | null>(null)
   const closeButton = useRef<HTMLButtonElement | null>(null)
+  const imageView = useScorecardImageView()
 
   const load = useCallback(async () => {
     const response = await fetch(`/api/majors/room-scorecard?${new URLSearchParams({ playDayId })}`, { cache: "no-store" })
@@ -122,18 +124,19 @@ export default function MajorRoomScorecardPhoto({ playDayId }: { playDayId: stri
               <div className={styles.modalCard}>
                 <div className={styles.modalHeading}>
                   <h2 id={`room-scorecard-expanded-${playDayId}`}>{payload.context.group_label} ROOM SCORECARD</h2>
+                  <div className={styles.modalControls} aria-label="Scorecard image controls">
+                    <ScorecardZoomControls controller={imageView} buttonClassName={styles.modalControl} />
+                  </div>
                   <button ref={closeButton} type="button" className={styles.modalClose} onClick={closeExpanded} aria-label="Close enlarged scorecard">×</button>
                 </div>
-                <div className={styles.modalImageFrame}>
-                  <Image
-                    src={payload.proof.image_url}
-                    alt={`Enlarged shared scorecard for ${payload.context.group_label}`}
-                    width={1800}
-                    height={1200}
-                    sizes="100vw"
-                    unoptimized
-                  />
-                </div>
+                <ScorecardPanViewport
+                  controller={imageView}
+                  src={payload.proof.image_url}
+                  alt={`Enlarged shared scorecard for ${payload.context.group_label}`}
+                  className={styles.modalImageFrame}
+                  imageClassName={styles.modalImage}
+                  testId="masters-room-scorecard-viewer"
+                />
               </div>
             </div>
           )}
