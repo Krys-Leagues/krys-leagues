@@ -71,7 +71,7 @@ export default function CourseChallengeReviewQueue({ showRejectedSection = false
     return () => { active = false; window.clearTimeout(initial); window.clearInterval(timer) }
   }, [load])
 
-  async function review(submission: Submission, action: "approve" | "reject" | "return_to_review", approveAce = false) {
+  async function review(submission: Submission, action: "approve" | "reject" | "does_not_qualify_for_ace" | "return_to_review", approveAce = false) {
     const mode = submission.challengeKey === "ace" ? null : modes[submission.id] || normalizeCourseChallengeGameMode(submission.adminVerifiedGameMode)
     const modeError = courseChallengeGameModeError(submission.level, mode, submission.challengeKey)
     if (action === "approve" && mode && modeError) { setMessage(modeError); return }
@@ -133,7 +133,7 @@ export default function CourseChallengeReviewQueue({ showRejectedSection = false
   </section>
 }
 
-function ReviewCard({ submission, mode, setMode, busy, onReview, onPreview }: { submission: Submission; mode?: CourseChallengeGameMode; setMode: (value: CourseChallengeGameMode) => Promise<void>; busy: boolean; onReview: (submission: Submission, action: "approve" | "reject" | "return_to_review", approveAce?: boolean) => Promise<void>; onPreview: (preview: { url: string; label: string }) => void }) {
+function ReviewCard({ submission, mode, setMode, busy, onReview, onPreview }: { submission: Submission; mode?: CourseChallengeGameMode; setMode: (value: CourseChallengeGameMode) => Promise<void>; busy: boolean; onReview: (submission: Submission, action: "approve" | "reject" | "does_not_qualify_for_ace" | "return_to_review", approveAce?: boolean) => Promise<void>; onPreview: (preview: { url: string; label: string }) => void }) {
   const requiresAceVerification = submission.challengeKey === "ace" || Boolean(submission.aceStageAtSubmission)
   const stageLabel = submission.challengeKey === "ace" ? submission.aceLabel || "Ace Track" : submission.challengeKey === "prestige" ? submission.prestigeLabel || "Prestige" : `Level ${submission.level}`
   const modeError = courseChallengeGameModeError(submission.level, mode, submission.challengeKey)
@@ -169,7 +169,7 @@ function ReviewCard({ submission, mode, setMode, busy, onReview, onPreview }: { 
       {submission.challengeKey === "level" && <fieldset style={aceFieldset}><legend>ACE TRACK</legend>{canApproveAce ? <small style={muted}>Optional: approve this same image for the displayed Ace requirement. No duplicate upload is required.</small> : <small style={muted}>No Ace stage was open when this card was submitted.</small>}</fieldset>}
       {submission.isOwnSubmission && <p style={selfApprovalWarning}>You cannot approve your own Course Challenge submission.</p>}
       {!submission.isOwnSubmission && modeError && mode && <p role="alert" style={modeError.includes("Multiplayer") && mode === "solo" ? modeWarning : modeNote}>{modeError}</p>}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}><button type="button" data-course-challenge-approval disabled={busy || submission.isOwnSubmission || Boolean(mode && modeError) || submission.possibleDuplicate} onClick={() => void onReview(submission, "approve", submission.challengeKey === "ace")} style={buttonStyle("#047857")}>{submission.challengeKey === "ace" ? "APPROVE ACE" : "APPROVE LEVEL"}</button>{canApproveAce && <button type="button" disabled={busy || submission.isOwnSubmission || Boolean(mode && modeError) || submission.possibleDuplicate} onClick={() => void onReview(submission, "approve", true)} style={buttonStyle("#0f766e")}>APPROVE LEVEL + ACE</button>}<button type="button" disabled={busy} onClick={() => void onReview(submission, "reject")} style={buttonStyle("#991b1b")}>REJECT / NEEDS CORRECTION</button></div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}><button type="button" data-course-challenge-approval disabled={busy || submission.isOwnSubmission || Boolean(mode && modeError) || submission.possibleDuplicate} onClick={() => void onReview(submission, "approve", submission.challengeKey === "ace")} style={buttonStyle("#047857")}>{submission.challengeKey === "ace" ? "APPROVE ACE" : "APPROVE LEVEL"}</button>{canApproveAce && <button type="button" disabled={busy || submission.isOwnSubmission || Boolean(mode && modeError) || submission.possibleDuplicate} onClick={() => void onReview(submission, "approve", true)} style={buttonStyle("#0f766e")}>APPROVE LEVEL + ACE</button>}{submission.challengeKey === "ace" && <button type="button" disabled={busy} onClick={() => void onReview(submission, "does_not_qualify_for_ace")} style={buttonStyle("#9f1239")}>DOES NOT QUALIFY FOR ACE</button>}<button type="button" disabled={busy} onClick={() => void onReview(submission, "reject")} style={buttonStyle("#991b1b")}>REJECT / NEEDS CORRECTION</button></div>
     </div>}
     {submission.allTimeProcessingStatus === "processed" && submission.allTimeProcessingResult && <p style={result}>All-Time/Climbers processed: {String(submission.allTimeProcessingResult.classification || submission.allTimeProcessingResult.action || "complete")}</p>}
   </article>

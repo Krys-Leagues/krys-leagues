@@ -109,6 +109,31 @@ test("duplicate evidence is track-aware and visual Ace review preserves idempote
   assert.match(submissions, /aceStageAtSubmission|ace_stage_number: challengeKey === "ace" \? requestedAceStage : aceState\.nextStage\?\.stage/)
 })
 
+test("Level-only approval cannot manufacture an Ace review or same-track usage", () => {
+  const api = read("app/api/admin/course-challenges/route.ts")
+  const submissions = read("app/api/course-challenges/submissions/route.ts")
+  assert.match(api, /levelAceCrossCreditDecision/)
+  assert.match(api, /levelAceDecision === "visual_review"/)
+  assert.match(api, /levelAceDecision === "automatic_credit"/)
+  assert.match(api, /count_toward_ace_track: countsTowardAce/)
+  assert.match(api, /automatic_ace_cross_credit: !visualOnly && countsTowardAce/)
+  assert.match(api, /visual_ace_review: visualOnly && approveAce/)
+  assert.doesNotMatch(api, /challengeKey === "level"\s*\? await applyAceCrossCredit/)
+  assert.doesNotMatch(api, /from\("course_challenge_submissions"\)\.insert/)
+  assert.equal((submissions.match(/from\("course_challenge_submissions"\)\.insert/g) || []).length, 1)
+})
+
+test("Ace review can be closed as not qualifying without altering an approved Level", () => {
+  const api = read("app/api/admin/course-challenges/route.ts")
+  const queue = read("components/admin/course-challenges/CourseChallengeReviewQueue.tsx")
+  assert.match(api, /body\.action === "does_not_qualify_for_ace"/)
+  assert.match(api, /submission\.data\.challenge_key !== "ace"/)
+  assert.match(api, /action: "rejected"[\s\S]*resolution: "does_not_qualify_for_ace"/)
+  assert.match(api, /Any separately approved Level remains unchanged/)
+  assert.match(queue, /DOES NOT QUALIFY FOR ACE/)
+  assert.match(queue, /onReview\(submission, "does_not_qualify_for_ace"\)/)
+})
+
 test("Ace review cards hide game mode and approval ignores stored mode values", () => {
   const api = read("app/api/admin/course-challenges/route.ts")
   const queue = read("components/admin/course-challenges/CourseChallengeReviewQueue.tsx")

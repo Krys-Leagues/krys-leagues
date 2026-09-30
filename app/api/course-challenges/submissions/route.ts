@@ -1,5 +1,5 @@
 import { getCourseChallenge, getCourseChallengeLevel, getPrestigeStage, isAceChallengeUnlocked, isRegularTrackComplete } from "@/lib/courseChallenges/catalog"
-import { aceProgress, type AceSubmissionRecord } from "@/lib/courseChallenges/ace"
+import { aceProgress, reviewEventCountsTowardAceTrack, type AceSubmissionRecord } from "@/lib/courseChallenges/ace"
 import { eligibleRoundDate, audienceForCanonicalPlayer } from "@/lib/courseChallenges/release"
 import { createCourseChallengesServiceClient, getCourseChallengeIdentity } from "@/lib/courseChallenges/server"
 import type { CourseChallengeDifficulty, CourseChallengeSubmissionPayload } from "@/lib/courseChallenges/types"
@@ -86,7 +86,7 @@ async function loadAceEligibleRows(service: ReturnType<typeof createCourseChalle
   const ids = (submissions.data || []).map((row) => String(row.id))
   const events = ids.length ? await service.from("course_challenge_submission_review_events").select("submission_id,metadata").in("submission_id", ids) : { data: [], error: null }
   if (events.error) throw events.error
-  const crossCredited = new Set((events.data || []).filter((event) => Boolean((event.metadata as Record<string, unknown> | null)?.count_toward_ace_track)).map((event) => String(event.submission_id)))
+  const crossCredited = new Set((events.data || []).filter((event) => reviewEventCountsTowardAceTrack(event.metadata)).map((event) => String(event.submission_id)))
   return (submissions.data || []).filter((row) => row.challenge_key === "ace" || (Number(row.ace_stage_number) > 0 && crossCredited.has(String(row.id)))).map((row) => ({ ...row, hole_scores: row.reviewed_hole_scores || row.hole_scores, requirements_evaluation: row.reviewed_requirements_evaluation || row.requirements_evaluation })) as AceSubmissionRecord[]
 }
 

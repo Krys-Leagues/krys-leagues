@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
 import test from "node:test"
 import { getCourseChallenge } from "./catalog.ts"
-import { aceCount, aceCrossCreditRows, aceProgress, nextSequentialAceStage, sequentialCompletedStages } from "./ace.ts"
+import { aceCardQualification, aceCount, aceCrossCreditRows, aceProgress, aceStageSideProgress, levelAceCrossCreditDecision, nextSequentialAceStage, reviewEventCountsTowardAceTrack, sequentialCompletedStages } from "./ace.ts"
 
 const tourist = getCourseChallenge("tourist-trap")!
 const cherry = getCourseChallenge("cherry-blossom")!
@@ -46,4 +46,31 @@ test("Level/Ace cross-credit is limited to the current stage and current card", 
   const rows = aceCrossCreditRows([current, unrelated], new Set(), current.id!, 1)
   assert.deepEqual(rows.map((item) => item.id), [current.id])
   assert.equal(aceCount(current.hole_scores), 2)
+})
+
+test("structured Level cards below the current Ace threshold receive no Ace credit", () => {
+  const wader = cherry.aceStages![0]
+  assert.equal(aceCardQualification(wader, "Easy", scorecard(2)), "does_not_qualify")
+  assert.equal(levelAceCrossCreditDecision(wader, "Easy", scorecard(2), false, false), "none")
+  assert.deepEqual(aceStageSideProgress(wader, [row(1, "Easy", 2, "level")]), { easyApproved: false, hardApproved: true, complete: false })
+})
+
+test("structured Level cards meeting the current Ace threshold retain automatic cross-credit", () => {
+  const wader = cherry.aceStages![0]
+  assert.equal(aceCardQualification(wader, "Easy", scorecard(3)), "qualifies")
+  assert.equal(levelAceCrossCreditDecision(wader, "Easy", scorecard(3), false, false), "automatic_credit")
+  assert.deepEqual(aceStageSideProgress(wader, [row(1, "Easy", 3, "level")]), { easyApproved: true, hardApproved: true, complete: true })
+})
+
+test("visual-only Level cards require an explicit Ace decision and Wader stays Easy-only", () => {
+  const wader = cherry.aceStages![0]
+  assert.equal(levelAceCrossCreditDecision(wader, "Easy", null, true, false), "none")
+  assert.equal(levelAceCrossCreditDecision(wader, "Easy", null, true, true), "visual_review")
+  assert.equal(levelAceCrossCreditDecision(wader, "Hard", null, true, true), "none")
+})
+
+test("legacy Level-only review metadata does not turn cross-track use into an Ace duplicate", () => {
+  assert.equal(reviewEventCountsTowardAceTrack({ count_toward_ace_track: true, approve_ace: false, automatic_ace_cross_credit: false, ace_cross_credit: { status: "eligible" } }), false)
+  assert.equal(reviewEventCountsTowardAceTrack({ count_toward_ace_track: true, approve_ace: true, ace_cross_credit: { status: "eligible" } }), true)
+  assert.equal(reviewEventCountsTowardAceTrack({ count_toward_ace_track: true, ace_cross_credit: { status: "credited" } }), true)
 })
