@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
 import test from "node:test"
 
-import { loadProtectedAdminPlayers } from "./adminPlayersClient.ts"
+import { loadProtectedAdminPlayerDirectory, loadProtectedAdminPlayers } from "./adminPlayersClient.ts"
 
 test("protected admin player loader uses the authorized no-cache endpoint", async () => {
   const originalFetch = globalThis.fetch
@@ -24,18 +24,32 @@ test("protected admin player loader uses the authorized no-cache endpoint", asyn
         has_krys_server_tag: false,
         profile_badges: [],
       }],
-      leagueMemberships: [],
+      leagueMemberships: [{ id: "membership-1", player_id: "player-1", league_type: "stroke", season_number: 63, division: "D1" }],
       tournamentEntries: [],
       identityLinks: [],
     }), { status: 200, headers: { "Content-Type": "application/json" } })
   }) as typeof fetch
 
   try {
-    const players = await loadProtectedAdminPlayers()
-    assert.equal(players[0]?.screen_name, "Exact_Name")
+    const directory = await loadProtectedAdminPlayerDirectory()
+    assert.equal(directory.players[0]?.screen_name, "Exact_Name")
+    assert.equal(directory.leagueMemberships[0]?.id, "membership-1")
     assert.equal(requests[0]?.input, "/api/admin/players")
     assert.equal(requests[0]?.init?.method, "GET")
     assert.equal(requests[0]?.init?.cache, "no-store")
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+})
+
+test("player-only helper reuses the same protected directory endpoint", async () => {
+  const originalFetch = globalThis.fetch
+  globalThis.fetch = (async () => new Response(JSON.stringify({
+    players: [{ id: "player-1", screen_name: "Exact_Name", discord_id: null, discord_name: null, discord_username: null, discord_avatar: null, status: "active", active: true, division: null, avatar_path: null, is_server_booster: false, has_krys_server_tag: false, profile_badges: [] }],
+    leagueMemberships: [], tournamentEntries: [], identityLinks: [],
+  }), { status: 200, headers: { "Content-Type": "application/json" } })) as typeof fetch
+  try {
+    assert.equal((await loadProtectedAdminPlayers())[0]?.screen_name, "Exact_Name")
   } finally {
     globalThis.fetch = originalFetch
   }

@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
-import { loadProtectedAdminPlayersResult } from "@/lib/adminPlayersClient"
+import { loadProtectedAdminPlayerDirectoryResult } from "@/lib/adminPlayersClient"
 import { supabase } from "@/lib/supabase"
 
 type Player = {
@@ -25,7 +25,7 @@ type Result = {
 
 type Membership = {
   id: string
-  player_id: string
+  player_id: string | null
   league_type: string | null
   division: string | null
   season_number: number | null
@@ -52,6 +52,8 @@ export default function CareerAdminPage() {
   const [message, setMessage] = useState("")
 
   useEffect(() => {
+    // The protected career loader intentionally runs once on mount.
+    // eslint-disable-next-line react-hooks/immutability
     loadCareerData()
   }, [])
 
@@ -60,22 +62,17 @@ export default function CareerAdminPage() {
     setMessage("")
 
     const [
-      playersResponse,
+      directoryResponse,
       resultsResponse,
-      membershipsResponse,
       trophiesResponse,
     ] = await Promise.all([
-      loadProtectedAdminPlayersResult(),
+      loadProtectedAdminPlayerDirectoryResult(),
 
       supabase
         .from("results")
         .select(
           "id, player1_id, player2_id, winner, is_draw, league_type, division, season_number"
         ),
-
-      supabase
-        .from("player_league_memberships")
-        .select("id, player_id, league_type, division, season_number"),
 
       supabase
         .from("player_trophies")
@@ -85,9 +82,8 @@ export default function CareerAdminPage() {
     ])
 
     const firstError =
-      playersResponse.error ||
+      directoryResponse.error ||
       resultsResponse.error ||
-      membershipsResponse.error ||
       trophiesResponse.error
 
     if (firstError) {
@@ -96,11 +92,11 @@ export default function CareerAdminPage() {
       return
     }
 
-    const loadedPlayers = playersResponse.data || []
+    const loadedPlayers = directoryResponse.data?.players || []
 
     setPlayers(loadedPlayers)
     setResults(resultsResponse.data || [])
-    setMemberships(membershipsResponse.data || [])
+    setMemberships(directoryResponse.data?.leagueMemberships || [])
     setTrophies(trophiesResponse.data || [])
 
     if (loadedPlayers.length > 0) {

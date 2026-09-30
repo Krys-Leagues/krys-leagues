@@ -14,14 +14,17 @@ export type AdminPlayer = {
   profile_badges: string[]
 }
 
+export type AdminLeagueMembership = {
+  id: string
+  player_id: string | null
+  league_type: string
+  season_number: number
+  division: string
+}
+
 type AdminPlayersResponse = {
   players?: AdminPlayer[]
-  leagueMemberships?: Array<{
-    player_id: string | null
-    league_type: string
-    season_number: number
-    division: string
-  }>
+  leagueMemberships?: AdminLeagueMembership[]
   tournamentEntries?: Array<{
     player_id: string | null
     tournament_type: string
@@ -76,6 +79,17 @@ export async function loadProtectedAdminPlayers() {
 export async function loadProtectedAdminPlayersResult() {
   try {
     return { data: await loadProtectedAdminPlayers(), error: null }
+  } catch (error) {
+    return {
+      data: null,
+      error: error instanceof Error ? error : new Error("Global Players could not be loaded."),
+    }
+  }
+}
+
+export async function loadProtectedAdminPlayerDirectoryResult() {
+  try {
+    return { data: await loadProtectedAdminPlayerDirectory(), error: null }
   } catch (error) {
     return {
       data: null,

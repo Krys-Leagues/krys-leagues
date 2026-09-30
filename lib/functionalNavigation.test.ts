@@ -15,6 +15,30 @@ test("successful Discord player login opens the protected personalized dashboard
   assert.match(accessDenied, /router\.replace\("\/player-dashboard"\)/)
   assert.match(adminLayout, /router\.replace\("\/player-dashboard"\)/)
   assert.doesNotMatch(callback, /router\.replace\("\/dashboard"\)/)
+  assert.match(read("app/dashboard/page.tsx"), /redirect\("\/player-dashboard"\)/)
+})
+
+test("protected membership data paths replace browser-direct membership reads", () => {
+  const publicProfile = read("app/players/[id]/page.tsx")
+  const publicRoute = read("app/api/players/public-memberships/route.ts")
+  const publicServer = read("lib/publicProfiles/server.ts")
+  const adminPlayers = read("app/api/admin/players/route.ts")
+  const adminConsumers = [
+    read("app/admin/career/page.tsx"),
+    read("app/admin/players/[id]/page.tsx"),
+    read("app/admin/players/[id]/play-profile.tsx"),
+  ]
+
+  assert.match(publicProfile, /fetch\(`\/api\/players\/public-memberships\?playerId=/)
+  assert.doesNotMatch(publicProfile, /from\("player_league_memberships"\)/)
+  assert.match(publicRoute, /loadPublicProfileMemberships/)
+  assert.match(publicServer, /get_public_player_canonical_identity/)
+  assert.match(publicServer, /from\("player_league_memberships"\)/)
+  assert.match(adminPlayers, /select\("id, player_id, league_type, season_number, division"\)/)
+  for (const consumer of adminConsumers) {
+    assert.match(consumer, /loadProtectedAdminPlayerDirectory/)
+    assert.doesNotMatch(consumer, /from\("player_league_memberships"\)/)
+  }
 })
 
 test("admin navigation never opens managed Stroke pages without required context", () => {

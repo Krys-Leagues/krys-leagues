@@ -9,6 +9,13 @@ export type PublicProfileSearchPlayer = {
   avatar_path: string | null
 }
 
+export type PublicProfileMembership = {
+  id: string
+  league_type: string | null
+  division: string | null
+  season_number: number | null
+}
+
 function createPublicProfileReader() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY
@@ -48,4 +55,22 @@ export async function loadPublicProfileSearch(search: string | null) {
     screen_name: player.screen_name,
     avatar_path: player.avatar_path,
   }))
+}
+
+export async function loadPublicProfileMemberships(playerId: string) {
+  const reader = createPublicProfileReader()
+  const identityResponse = await reader.rpc("get_public_player_canonical_identity", { p_player_id: playerId })
+  if (identityResponse.error) throw identityResponse.error
+  const identity = (Array.isArray(identityResponse.data) ? identityResponse.data[0] : identityResponse.data) as { identity_player_ids?: string[] } | null
+  if (!identity) return null
+  const identityPlayerIds = Array.isArray(identity.identity_player_ids) && identity.identity_player_ids.length
+    ? identity.identity_player_ids
+    : [playerId]
+  const membershipsResponse = await reader
+    .from("player_league_memberships")
+    .select("id,league_type,division,season_number")
+    .in("player_id", identityPlayerIds)
+    .order("season_number", { ascending: false })
+  if (membershipsResponse.error) throw membershipsResponse.error
+  return (membershipsResponse.data || []) as PublicProfileMembership[]
 }

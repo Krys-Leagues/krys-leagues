@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import TrophyMedia from "@/components/TrophyMedia"
-import { loadProtectedAdminPlayers } from "@/lib/adminPlayersClient"
+import { loadProtectedAdminPlayerDirectory } from "@/lib/adminPlayersClient"
 
 type Player = {
   id: string
@@ -79,18 +79,11 @@ export default function PlayerProfilePage() {
 
     setLoading(true)
 
-    const protectedPlayers = await loadProtectedAdminPlayers()
-    const playerData = protectedPlayers.find((candidate) => candidate.id === playerId) || null
+    const protectedDirectory = await loadProtectedAdminPlayerDirectory()
+    const playerData = protectedDirectory.players.find((candidate) => candidate.id === playerId) || null
 
     setPlayer(playerData)
-
-    const { data: membershipData } = await supabase
-      .from("player_league_memberships")
-      .select("id, league_type, season_number, division")
-      .eq("player_id", playerId)
-      .order("season_number", { ascending: false })
-
-    setMemberships(membershipData || [])
+    setMemberships(protectedDirectory.leagueMemberships.filter((membership) => membership.player_id === playerId))
 
     const { data: trophyData } = await supabase
       .from("player_trophies")

@@ -294,11 +294,14 @@ export default function PublicPlayerProfilePage() {
     ] = await Promise.all([
       Promise.resolve(publicPlayerResponse),
 
-      supabase
-        .from("player_league_memberships")
-        .select("id, league_type, division, season_number")
-        .in("player_id", identityIds)
-        .order("season_number", { ascending: false }),
+      fetch(`/api/players/public-memberships?playerId=${encodeURIComponent(canonicalId)}`)
+        .then(async response => {
+          const payload = await response.json() as { memberships?: Membership[]; error?: string }
+          return response.ok
+            ? { data: payload.memberships || [], error: null }
+            : { data: [] as Membership[], error: { message: payload.error || "Player league history could not be loaded." } }
+        })
+        .catch(caught => ({ data: [] as Membership[], error: { message: caught instanceof Error ? caught.message : "Player league history could not be loaded." } })),
 
       supabase
         .from("player_trophies")

@@ -6,7 +6,7 @@ import { supabase } from "@/lib/supabase"
 import PlayerProfileHero from "@/components/PlayerProfileHero"
 import TrophyMedia from "@/components/TrophyMedia"
 import { getCanonicalPlayerAvatar, PLAYER_AVATAR_BUCKET, playerAvatarObjectPath, validatePlayerAvatarFile } from "@/lib/playerAvatars"
-import { loadProtectedAdminPlayers } from "@/lib/adminPlayersClient"
+import { loadProtectedAdminPlayerDirectory } from "@/lib/adminPlayersClient"
 
 type Player = {
   id: string
@@ -138,24 +138,17 @@ export default function PlayerProfilePage() {
 
     const identity = (Array.isArray(identityData) ? identityData[0] : identityData) as CanonicalIdentity | null
     const canonicalPlayerId = identity?.canonical_player_id || playerId
-    const [protectedPlayers, avatarResult] = await Promise.all([
-      loadProtectedAdminPlayers(),
+    const [protectedDirectory, avatarResult] = await Promise.all([
+      loadProtectedAdminPlayerDirectory(),
       getCanonicalPlayerAvatar(canonicalPlayerId)
         .then((avatar) => ({ avatar, error: "" }))
         .catch((error: unknown) => ({ avatar: null, error: error instanceof Error ? error.message : "Avatar could not be loaded" })),
     ])
-    const playerData = protectedPlayers.find((candidate) => candidate.id === canonicalPlayerId) || null
+    const playerData = protectedDirectory.players.find((candidate) => candidate.id === canonicalPlayerId) || null
     setPlayer(playerData)
+    setMemberships(protectedDirectory.leagueMemberships.filter((membership) => membership.player_id === canonicalPlayerId))
     if (avatarResult.error) setAvatarError(`Could not load avatar: ${avatarResult.error}`)
     else setAvatarPath(avatarResult.avatar?.avatarPath || null)
-
-    const { data: membershipData } = await supabase
-      .from("player_league_memberships")
-      .select("id, league_type, season_number, division")
-      .eq("player_id", playerId)
-      .order("season_number", { ascending: false })
-
-    setMemberships(membershipData || [])
 
     const { data: trophyData } = await supabase
       .from("player_trophies")

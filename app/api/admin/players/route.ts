@@ -21,7 +21,7 @@ export async function GET() {
       .order("screen_name", { ascending: true }),
     adminDataClient
       .from("player_league_memberships")
-      .select("player_id, league_type, season_number, division")
+      .select("id, player_id, league_type, season_number, division")
       .order("season_number", { ascending: false }),
     adminDataClient
       .from("player_tournament_entries")
