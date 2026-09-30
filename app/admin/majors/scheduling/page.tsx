@@ -20,6 +20,7 @@ import {
   type MajorWeekendStatus,
 } from "@/lib/majors"
 import { formatMastersAdminDateTime, formatMastersAdminTime, formatMastersOfficialDate, mastersAdminTimeZoneLabel } from "@/lib/mastersSignupDisplay"
+import { validateMastersRoomPlayerIds } from "@/lib/mastersRoomScheduling"
 import {
   globalPlayerIdentitySummary,
   globalPlayerMatchesSearch,
@@ -253,6 +254,12 @@ export default function MajorSchedulingAdminPage() {
     const data = new FormData(form)
     const day = days.find((item) => item.id === slot.play_day_id)
     if (!day) return
+    const entryIds = data.getAll("entry").map(String)
+    const rosterError = validateMastersRoomPlayerIds(entryIds)
+    if (rosterError) {
+      setMessage(rosterError)
+      return
+    }
     const roomLabel = String(data.get("label")).trim()
     if (groups.some((item) => item.play_day_id === day.id && item.id !== group?.id && item.group_label.toLocaleLowerCase() === roomLabel.toLocaleLowerCase())) {
       setMessage(`${roomLabel} is already used on ${DAY_NAMES[day.day_number - 1].short}. Choose a different room label.`)
@@ -270,7 +277,7 @@ export default function MajorSchedulingAdminPage() {
       p_admin_notes: String(data.get("notes") || ""),
       p_is_finalized: data.get("finalized") === "on",
       p_is_published: publish,
-      p_entry_ids: data.getAll("entry").map(String),
+      p_entry_ids: entryIds,
     })
     if (showResult(result.error, publish ? `${data.get("label")} published to assigned players.` : `${data.get("label")} saved privately.`)) await loadSchedule(eventId)
   }
@@ -592,14 +599,14 @@ function DayWorkspace({ event, dayNumber, day, slots, entries, groups, members, 
       const slotGroups = groups.filter((group) => group.time_slot_id === slot.id)
       const assignedIds = new Set(members.filter((member) => slotGroups.some((group) => group.id === member.group_id)).map((member) => member.entry_id))
       const count = selectedEntries.length
-      const guidance = count === 1 ? "Needs attention" : count === 2 ? "Workable minimum" : count === 3 ? "Preferred room size" : count > 3 ? "Multiple rooms needed" : "No players yet"
-      const tone = count === 3 ? styles.preferred : count === 2 ? styles.workable : count === 0 ? styles.quiet : styles.attention
+      const guidance = count === 1 ? "Solo room supported" : count === 2 ? "Workable room" : count === 3 ? "Preferred room size" : count === 4 ? "Full four-player room" : count > 4 ? "Split into rooms of up to 4" : "No players yet"
+      const tone = count === 3 || count === 4 ? styles.preferred : count === 2 ? styles.workable : count === 0 ? styles.quiet : styles.attention
       return <article key={slot.id} className={`${styles.timeCard} ${!slot.is_available ? styles.disabledSlot : ""}`}>
         <header><div><p className={styles.slotTime}>{formatMastersAdminTime(slot.starts_at, event.schedule_timezone)}</p><span>{slot.label || name.fallback} · {slot.is_available ? "AVAILABLE" : "DISABLED"}</span></div><div className={`${styles.countBadge} ${tone}`}><strong>{count} {count === 1 ? "player" : "players"}</strong><span>{guidance}</span></div></header>
         <div className={styles.playerChips}>{selectedEntries.length ? selectedEntries.map((entry) => <span key={entry.id}>{entry.player_screen_name_snapshot}</span>) : <em>No one has selected this time.</em>}</div>
         <details className={styles.overridePanel}><summary>Move a player to another time</summary>{selectedEntries.map((entry) => <label key={entry.id}>{entry.player_screen_name_snapshot}<select defaultValue={slot.id} onChange={(e) => void onMovePlayer(entry.id, day.id, e.target.value)}>{daySlots.filter((option) => option.is_available || option.id === slot.id).map((option) => <option key={option.id} value={option.id}>{formatMastersAdminTime(option.starts_at, event.schedule_timezone)}{option.is_available ? "" : " — disabled"}</option>)}</select></label>)}</details>
 
-        <div className={styles.roomBuilder}><div className={styles.roomBuilderHeading}><div><h3>Rooms</h3><p>Target three players; two is workable. Save privately until ready.</p></div><span>{selectedEntries.filter((entry) => !assignedIds.has(entry.id)).length} unassigned</span></div>
+        <div className={styles.roomBuilder}><div className={styles.roomBuilderHeading}><div><h3>Rooms</h3><p>Rooms support 1–4 players; three is preferred. Save privately until ready.</p></div><span>{selectedEntries.filter((entry) => !assignedIds.has(entry.id)).length} unassigned</span></div>
           {slotGroups.map((group) => <RoomForm key={group.id} group={group} slot={slot} dayNumber={dayNumber} selectedEntries={selectedEntries} allGroups={slotGroups} namingGroups={dayGroups} isTestEvent={event.is_test_event} members={members} onSave={onSaveGroup} onDelete={onDeleteGroup} />)}
           <RoomForm group={null} slot={slot} dayNumber={dayNumber} selectedEntries={selectedEntries.filter((entry) => !assignedIds.has(entry.id))} allGroups={slotGroups} namingGroups={dayGroups} isTestEvent={event.is_test_event} members={members} onSave={onSaveGroup} onDelete={onDeleteGroup} />
         </div>
