@@ -3,7 +3,6 @@ import { celebrationRewardLabel, COURSE_CHALLENGE_REACTIONS, type CourseChalleng
 import { aceRewardDefinition, aceStageRewardDefinitions, levelRewardDefinitions, prestigeStageRewardDefinitions } from "@/lib/courseChallenges/rewards"
 import { createCourseChallengesServiceClient, getCourseChallengeIdentity } from "@/lib/courseChallenges/server"
 import { playerAvatarPublicUrl } from "@/lib/playerAvatars"
-import { createServerSupabaseClient } from "@/lib/supabase/server"
 
 type RewardRow = { id: string; player_id: string; reward_key: string; label: string; kind: string; course_slug: string; level: number | null; earned_at: string | null }
 
@@ -73,7 +72,7 @@ export async function GET(request: Request) {
 }
 
 async function getReward(id: string) {
-  const service = await createServerSupabaseClient()
+  const service = createCourseChallengesServiceClient()
   const result = await service.from("course_challenge_rewards").select("id").eq("id", id).maybeSingle()
   if (result.error) throw result.error
   return result.data
@@ -86,7 +85,7 @@ export async function POST(request: Request) {
     const body = await request.json() as { rewardId?: string; reaction?: CourseChallengeReaction }
     if (!body.rewardId || !body.reaction || !COURSE_CHALLENGE_REACTIONS.includes(body.reaction)) return Response.json({ error: "Choose a valid reaction." }, { status: 400 })
     if (!await getReward(body.rewardId)) return Response.json({ error: "Celebration not found." }, { status: 404 })
-    const client = await createServerSupabaseClient()
+    const client = createCourseChallengesServiceClient()
     const result = await client.from("course_challenge_reward_reactions").upsert({ reward_id: body.rewardId, player_id: identity.playerId, reaction: body.reaction }, { onConflict: "reward_id,player_id" })
     if (result.error) throw result.error
     return Response.json({ ok: true })
@@ -101,7 +100,7 @@ export async function DELETE(request: Request) {
     if (!identity) return Response.json({ error: "Sign in with a Player Profile to remove a reaction." }, { status: 401 })
     const rewardId = new URL(request.url).searchParams.get("rewardId")
     if (!rewardId) return Response.json({ error: "Celebration is required." }, { status: 400 })
-    const client = await createServerSupabaseClient()
+    const client = createCourseChallengesServiceClient()
     const result = await client.from("course_challenge_reward_reactions").delete().eq("reward_id", rewardId).eq("player_id", identity.playerId)
     if (result.error) throw result.error
     return Response.json({ ok: true })

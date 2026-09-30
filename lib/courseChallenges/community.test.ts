@@ -22,6 +22,13 @@ test("celebration feed exposes seven days, fixed reactions, and public profile l
   assert.match(route, /current_user_canonical_player_id|getCourseChallengeIdentity/)
 })
 
+test("authenticated celebration reactions keep the reactions table behind the server", () => {
+  const route = read("app/api/course-challenges/celebrations/route.ts")
+  assert.match(route, /export async function POST[\s\S]*getCourseChallengeIdentity\(\)[\s\S]*createCourseChallengesServiceClient\(\)[\s\S]*course_challenge_reward_reactions/)
+  assert.match(route, /export async function DELETE[\s\S]*getCourseChallengeIdentity\(\)[\s\S]*createCourseChallengesServiceClient\(\)[\s\S]*course_challenge_reward_reactions/)
+  assert.doesNotMatch(route, /createServerSupabaseClient/)
+})
+
 test("community route groups each player only at their highest completed level", () => {
   const route = read("app/api/course-challenges/community/route.ts")
   const page = read("components/course-challenges/CourseChallengeCommunity.tsx")
