@@ -34,10 +34,6 @@ export default function ProSchedulePage() {
     width: "260px",
   }
 
-  useEffect(() => {
-    loadPlayers()
-  }, [division])
-
   async function loadPlayers() {
     const { data, error } = await loadProtectedAdminPlayersResult()
 
@@ -49,10 +45,17 @@ export default function ProSchedulePage() {
 
     setPlayers(
       (data || [])
-        .filter((player) => player.active === true && player.division === division)
+        .filter((player) => player.active === true)
         .map((player) => player.screen_name)
+        .sort((a, b) => a.localeCompare(b))
     )
   }
+
+  useEffect(() => {
+    // Initial protected player-directory synchronization.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void loadPlayers()
+  }, [division])
 
   function playerDropdown(value: string, setValue: (value: string) => void) {
     return (
@@ -170,18 +173,18 @@ export default function ProSchedulePage() {
       })
 
       const text = await res.text()
-      let data: any = {}
+      let data: { error?: string } = {}
 
-      if (text) data = JSON.parse(text)
+      if (text) data = JSON.parse(text) as { error?: string }
 
       if (!res.ok) {
         setLoading(false)
         alert("Season saved, Discord failed: " + (data.error || "Unknown"))
         return
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       setLoading(false)
-      alert("Discord error: " + err.message)
+      alert("Discord error: " + (err instanceof Error ? err.message : "Unknown error"))
       return
     }
 
