@@ -3,10 +3,12 @@ import { ArtworkNavigation } from "@/components/navigation/ArtworkNavigation"
 import { mainHubArtwork } from "@/lib/artworkPageMaps"
 import Image from "next/image"
 import Link from "next/link"
+import MastersRoomReminder from "@/components/home/MastersRoomReminder"
 
 export default function HomePage() {
   return (
-    <ArtworkNavigation
+    <>
+      <ArtworkNavigation
       definition={mainHubArtwork}
       hiddenTargetIds={["admin-login"]}
       frameAspectRatio="1664 / 850"
@@ -68,6 +70,8 @@ export default function HomePage() {
           </div>
         </div>
       }
-    />
+      />
+      <MastersRoomReminder />
+    </>
   )
 }
