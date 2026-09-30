@@ -20,7 +20,7 @@ export default function ProAdminPage() {
           <span>Enter scores and results.</span>
         </Link>
 
-        <Link href="/pro-standings" style={card}>
+        <Link href="/amateur-pro-standings" style={card}>
           <strong>Standings</strong>
           <span>View current standings.</span>
         </Link>

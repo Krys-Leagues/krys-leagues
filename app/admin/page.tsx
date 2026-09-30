@@ -27,11 +27,9 @@ const GLOBAL_TOOLS = [
   { name: "Player Tracker", href: "/admin/player-tracker", description: "Track player movement and history" },
   { name: "Records Center", href: "/admin/records", description: "League, course, race and historical records" },
   { name: "All-Time Leaderboards", href: "/admin/leaderboards", description: "Overall rankings across all leagues" },
-  { name: "Race Mode Leaderboards", href: "/admin/race", description: "Race mode rankings and records" },
   { name: "Combined Course Records", href: "/admin/records/combined", description: "Easy + Hard all-time bragging rights" },
   { name: "Handicaps", href: "/admin/handicaps", description: "Player handicap tracking" },
   { name: "Career Stats", href: "/admin/career", description: "Career results across leagues" },
-  { name: "Awards & Badges", href: "/admin/awards", description: "Manage awards, badges and achievements" },
   { name: "Trophy Manager", href: "/admin/trophies", description: "Manage league trophies and displays" },
   { name: "Analytics", href: "/admin/analytics", description: "League statistics and reporting" },
 ]

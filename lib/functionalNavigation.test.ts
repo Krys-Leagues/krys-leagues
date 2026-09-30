@@ -35,3 +35,12 @@ test("the player identity hub exposes the existing protected Discord matcher", (
   assert.match(identityHub, /href="\/admin\/player-matching"/)
   assert.doesNotMatch(identityHub, /<strong>Discord Links<\/strong>\s*<span>Coming Soon<\/span>/)
 })
+
+test("admin navigation does not expose known missing destinations", () => {
+  const admin = read("app/admin/page.tsx")
+  const pro = read("app/admin/pro/page.tsx")
+
+  assert.doesNotMatch(admin, /href: "\/admin\/(?:race|awards)"/)
+  assert.match(pro, /href="\/amateur-pro-standings"/)
+  assert.doesNotMatch(pro, /href="\/pro-standings"/)
+})
