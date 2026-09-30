@@ -28,3 +28,10 @@ test("admin navigation never opens managed Stroke pages without required context
   assert.match(transition, /\/admin\/stroke\/standings\?seasonId=/)
   assert.match(legacyResults, /href="\/admin\/stroke\/manage"/)
 })
+
+test("the player identity hub exposes the existing protected Discord matcher", () => {
+  const identityHub = read("app/admin/player-identity/page.tsx")
+
+  assert.match(identityHub, /href="\/admin\/player-matching"/)
+  assert.doesNotMatch(identityHub, /<strong>Discord Links<\/strong>\s*<span>Coming Soon<\/span>/)
+})

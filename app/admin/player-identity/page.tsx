@@ -33,14 +33,14 @@ export default function PlayerIdentityPage() {
           <span>Aliases are preserved automatically by confirmed identity merges.</span>
         </div>
 
-        <div style={card}>
+        <Link href="/admin/player-matching" style={card}>
           <strong>Discord Links</strong>
-          <span>Coming Soon</span>
-        </div>
+          <span>Review unmatched canonical players and link the verified Discord account.</span>
+        </Link>
 
         <div style={card}>
           <strong>Historical Names</strong>
-          <span>Coming Soon</span>
+          <span>Historical names are preserved as aliases through protected identity merges.</span>
         </div>
 
         <Link href="/admin" style={card}>
