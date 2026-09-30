@@ -79,15 +79,28 @@ using ((select public.is_current_user_site_admin()));
 
 grant select, insert, update, delete on table public.results to authenticated;
 
-create sequence if not exists public.doubles_teams_id_seq;
-select pg_catalog.setval(
-  'public.doubles_teams_id_seq',
-  greatest(coalesce((select max(team.id) from public.doubles_teams as team), 0), 1),
-  exists (select 1 from public.doubles_teams)
-);
-alter sequence public.doubles_teams_id_seq owned by public.doubles_teams.id;
-alter table public.doubles_teams
-  alter column id set default nextval('public.doubles_teams_id_seq'::regclass);
+do $$
+begin
+  if not exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'doubles_teams'
+      and column_name = 'id'
+      and is_identity = 'YES'
+  ) then
+    create sequence if not exists public.doubles_teams_id_seq;
+    perform pg_catalog.setval(
+      'public.doubles_teams_id_seq',
+      greatest(coalesce((select max(team.id) from public.doubles_teams as team), 0), 1),
+      exists (select 1 from public.doubles_teams)
+    );
+    alter sequence public.doubles_teams_id_seq owned by public.doubles_teams.id;
+    alter table public.doubles_teams
+      alter column id set default nextval('public.doubles_teams_id_seq'::regclass);
+  end if;
+end;
+$$;
 
 revoke all privileges on table public.doubles_teams from anon;
 revoke truncate, references, trigger on table public.doubles_teams from authenticated;
