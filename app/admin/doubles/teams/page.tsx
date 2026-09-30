@@ -19,6 +19,13 @@ type Player = {
   display_name: string
 }
 
+type Team = {
+  id: string | number
+  team_name: string
+  player1: string
+  player2: string
+}
+
 export default function DoublesTeamsPage() {
   const [division, setDivision] = useState("Doubles Elite")
   const [teamName, setTeamName] = useState("")
@@ -26,7 +33,7 @@ export default function DoublesTeamsPage() {
   const [player2, setPlayer2] = useState("")
 
   const [players, setPlayers] = useState<Player[]>([])
-  const [teams, setTeams] = useState<any[]>([])
+  const [teams, setTeams] = useState<Team[]>([])
   const [loadError, setLoadError] = useState("")
 
   const inputStyle: React.CSSProperties = {

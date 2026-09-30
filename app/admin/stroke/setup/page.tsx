@@ -185,6 +185,8 @@ export default function StrokeSetup() {
     if (divisions.length === 0) return
 
     if (!divisions.includes(division)) {
+      // Keep the selected division valid when setup data replaces the list.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDivision(divisions[0])
     }
   }, [division, divisions])
