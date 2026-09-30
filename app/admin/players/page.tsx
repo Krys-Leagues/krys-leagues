@@ -40,8 +40,6 @@ type IdentityLink = {
 
 type LeagueKey = "stroke" | "pyp" | "skins" | "kwt"
 
-const CURRENT_SEASON = 59
-
 const LEAGUES: { value: LeagueKey; label: string }[] = [
   { value: "stroke", label: "Stroke" },
   { value: "pyp", label: "PYP" },
@@ -107,6 +105,7 @@ export default function PlayersAdminPage() {
   const [leaguePlayer, setLeaguePlayer] = useState<Player | null>(null)
   const [league, setLeague] = useState<LeagueKey>("stroke")
   const [division, setDivision] = useState("Stroke D1")
+  const [leagueSeason, setLeagueSeason] = useState("")
   const [savingLeague, setSavingLeague] = useState(false)
 
   const [tourneyPlayer, setTourneyPlayer] = useState<Player | null>(null)
@@ -146,8 +145,8 @@ export default function PlayersAdminPage() {
     return player.status || (player.active === false ? "inactive" : "active")
   }
 
-  function isStatusActive(status: string) {
-    return status === "active"
+  function isParticipationEligible(status: string) {
+    return status === "active" || status === "inactive" || status === "archived"
   }
 
   async function loadPlayers() {
@@ -341,14 +340,15 @@ export default function PlayersAdminPage() {
   function openLeagueModal(player: Player) {
     const status = getPlayerStatus(player)
 
-    if (!isStatusActive(status)) {
-      alert("Only active players can be added to leagues.")
+    if (!isParticipationEligible(status)) {
+      alert("This player is not eligible for league participation.")
       return
     }
 
     setLeaguePlayer(player)
     setLeague("stroke")
     setDivision("Stroke D1")
+    setLeagueSeason("")
   }
 
   function changeLeague(value: LeagueKey) {
@@ -357,63 +357,44 @@ export default function PlayersAdminPage() {
   }
 
   async function saveLeagueRegistration() {
-    if (!leaguePlayer || !league || !division) {
-      alert("Missing league info")
+    const seasonNumber = Number(leagueSeason)
+    if (!leaguePlayer || !league || !division || !Number.isInteger(seasonNumber) || seasonNumber < 1) {
+      alert("League, exact season number, and division are required.")
       return
     }
 
     setSavingLeague(true)
 
-    const { data: existingMemberships, error: checkError } = await supabase
-      .from("player_league_memberships")
-      .select("id")
-      .eq("player_id", leaguePlayer.id)
-      .eq("league_type", league)
-      .eq("season_number", CURRENT_SEASON)
-      .eq("division", division)
-
-    if (checkError) {
-      setSavingLeague(false)
-      alert(checkError.message)
-      return
-    }
-
-    if (existingMemberships && existingMemberships.length > 0) {
-      setSavingLeague(false)
-      alert(
-        `${leaguePlayer.screen_name} is already registered for ${division} in Season ${CURRENT_SEASON}.`
-      )
-      return
-    }
-
-    const { error } = await supabase
-      .from("player_league_memberships")
-      .insert([
-        {
-          player_id: leaguePlayer.id,
-          league_type: league,
-          season_number: CURRENT_SEASON,
-          division,
-        },
-      ])
+    const response = await fetch("/api/admin/player-participation", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "league",
+        playerId: leaguePlayer.id,
+        leagueType: league,
+        seasonNumber,
+        division,
+      }),
+    })
+    const payload = await response.json().catch(() => null) as { error?: string } | null
 
     setSavingLeague(false)
 
-    if (error) {
-      alert(error.message)
+    if (!response.ok) {
+      alert(payload?.error || "League registration could not be saved.")
       return
     }
 
     setLeaguePlayer(null)
-
-    alert(`${leaguePlayer.screen_name} added to ${division} ✔`)
+    await loadPlayers()
+    alert(`${leaguePlayer.screen_name} added to ${division} for Season ${seasonNumber} ✔`)
   }
 
   function openTournamentModal(player: Player) {
     const status = getPlayerStatus(player)
 
-    if (!isStatusActive(status)) {
-      alert("Only active players can be added to tournaments.")
+    if (!isParticipationEligible(status)) {
+      alert("This player is not eligible for tournament participation.")
       return
     }
 
@@ -430,49 +411,27 @@ export default function PlayersAdminPage() {
 
     setSavingTournament(true)
 
-    const { data: existingEntries, error: checkError } = await supabase
-      .from("player_tournament_entries")
-      .select("id")
-      .eq("player_id", tourneyPlayer.id)
-      .eq("tournament_type", tournamentType)
-      .eq("bracket", tournamentBracket)
-      .eq("status", "registered")
-
-    if (checkError) {
-      setSavingTournament(false)
-      alert(checkError.message)
-      return
-    }
-
-    if (existingEntries && existingEntries.length > 0) {
-      setSavingTournament(false)
-      alert(
-        `${tourneyPlayer.screen_name} is already registered for ${tournamentType} - ${tournamentBracket}.`
-      )
-      return
-    }
-
-    const { error } = await supabase
-      .from("player_tournament_entries")
-      .insert([
-        {
-          player_id: tourneyPlayer.id,
-          player_name: tourneyPlayer.screen_name,
-          tournament_type: tournamentType,
-          bracket: tournamentBracket,
-          status: "registered",
-        },
-      ])
+    const response = await fetch("/api/admin/player-participation", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "tournament",
+        playerId: tourneyPlayer.id,
+        tournamentType,
+        bracket: tournamentBracket,
+      }),
+    })
+    const payload = await response.json().catch(() => null) as { error?: string } | null
 
     setSavingTournament(false)
 
-    if (error) {
-      alert(error.message)
+    if (!response.ok) {
+      alert(payload?.error || "Tournament registration could not be saved.")
       return
     }
 
     setTourneyPlayer(null)
-
+    await loadPlayers()
     alert(`${tourneyPlayer.screen_name} added to ${tournamentType} ✔`)
   }
 
@@ -860,7 +819,18 @@ export default function PlayersAdminPage() {
             ))}
           </select>
 
-          <p style={hint}>Season auto-applied: S{CURRENT_SEASON}</p>
+          <label style={label}>Exact season number</label>
+          <input
+            value={leagueSeason}
+            onChange={(event) => setLeagueSeason(event.target.value)}
+            inputMode="numeric"
+            type="number"
+            min="1"
+            step="1"
+            placeholder="Example: 63"
+            style={modalInput}
+          />
+          <p style={hint}>Enter the league’s authoritative season number. The system does not guess from historical imports.</p>
 
           <button
             onClick={saveLeagueRegistration}
