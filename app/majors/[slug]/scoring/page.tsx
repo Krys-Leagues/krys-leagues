@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import { useCallback, useEffect, useMemo, useState } from "react"
+import MajorRoomScorecardPhoto from "@/components/majors/MajorRoomScorecardPhoto"
 import { MAJOR_COURSES, formatMajorToPar, majorHoleOutcome, majorRoundDayLabel, type MajorEvent, type MajorPlayerScorecard } from "@/lib/majors"
 import { supabase } from "@/lib/supabase"
 
@@ -70,6 +71,9 @@ export default function MajorPlayerScoringPage() {
       {!round.scoring_entry_open && round.status !== "verified" && <p style={notice}>Score entry is currently closed. An admin opens each round when it is ready.</p>}
       {round.status === "submitted" && <p style={pending}>Awaiting admin verification. Submitted scores cannot be silently changed.</p>}
       {round.status === "verified" && <p style={verified}>Official score verified.</p>}
+      <MajorRoomScorecardPhoto playDayId={round.play_day_id} />
+      <h2>YOUR SCORE</h2>
+      <p style={muted}>Enter only your own score from the shared room photo.</p>
       <div style={grid}>{course.pars.map((par, index) => { const score=Number(values[index]); return <label key={index} style={hole}><span>Hole {index+1}</span><small>Par {par}</small><input type="number" min={1} max={99} value={values[index]} disabled={!round.scoring_entry_open || !["draft","reopened"].includes(round.status || "draft")} onChange={(e)=>setValues((old)=>old.map((v,i)=>i===index?e.target.value:v))} style={input}/><em>{score ? `${formatMajorToPar(score-par)} · ${majorHoleOutcome(score,par)}` : "—"}</em></label>})}</div>
       <div style={actions}><button disabled={busy || !round.scoring_entry_open || !["draft","reopened"].includes(round.status || "draft")} onClick={()=>save(false)} style={secondary}>Save draft</button><button disabled={busy || !round.scoring_entry_open || values.some((v)=>!Number(v)) || !["draft","reopened"].includes(round.status || "draft")} onClick={()=>save(true)} style={primary}>Submit scorecard</button></div>
     </>}

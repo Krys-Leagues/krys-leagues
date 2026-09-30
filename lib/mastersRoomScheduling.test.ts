@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
 import { readFileSync } from "node:fs"
 import test from "node:test"
-import { MASTERS_ROOM_MAX_PLAYERS, validateMastersRoomPlayerIds } from "./mastersRoomScheduling.ts"
+import { isInstructionOnlyPublishedRoomRepublish, MASTERS_ROOM_MAX_PLAYERS, validateMastersRoomPlayerIds } from "./mastersRoomScheduling.ts"
 
 const ids = [
   "11111111-1111-4111-8111-111111111111",
@@ -65,4 +65,33 @@ test("room reload and player schedule render every persisted roster member", () 
   assert.doesNotMatch(player, /room_roster\?\.(?:slice|splice)\(/)
   assert.match(rosterSql, /where room_member\.group_id = g\.id/)
   assert.doesNotMatch(rosterSql, /limit\s+[1-3]\b/i)
+})
+
+test("instruction-only republish is detected only when published room identity, roster, and scheduling stay unchanged", () => {
+  const before = {
+    groupLabel: "KMGM7",
+    competition: "qualifying",
+    location: "Lobby seven",
+    instructions: null,
+    adminNotes: "Private",
+    finalized: true,
+    published: true,
+    entryIds: ids.slice(0, 4),
+  }
+  const after = { ...before, instructions: "Meet in the lobby 10 minutes early.", entryIds: [...before.entryIds].reverse() }
+  assert.equal(isInstructionOnlyPublishedRoomRepublish(before, after), true)
+  assert.equal(isInstructionOnlyPublishedRoomRepublish(before, { ...after, groupLabel: "KMGM8" }), false)
+  assert.equal(isInstructionOnlyPublishedRoomRepublish(before, { ...after, entryIds: ids.slice(0, 3) }), false)
+  assert.equal(isInstructionOnlyPublishedRoomRepublish(before, { ...after, published: false }), false)
+})
+
+test("published instruction-only save uses the narrow RPC and keeps the full save path for other edits", () => {
+  const page = readFileSync(new URL("../app/admin/majors/scheduling/page.tsx", import.meta.url), "utf8")
+  const migration = readFileSync(new URL("../supabase/migrations/20260930175447_masters_room_instructions_shared_scorecard.sql", import.meta.url), "utf8")
+
+  assert.match(page, /isInstructionOnlyPublishedRoomRepublish/)
+  assert.match(page, /republish_major_schedule_group_instructions/)
+  assert.match(page, /Room instructions/)
+  assert.match(migration, /update public\.major_schedule_groups\s+set instructions = nullif\(btrim\(p_instructions\), ''\),\s+updated_at = now\(\)\s+where id = p_group_id/i)
+  assert.doesNotMatch(migration.match(/create or replace function public\.republish_major_schedule_group_instructions[\s\S]*?\$function\$;/i)?.[0] || "", /delete from public\.major_schedule_group_members|update public\.major_entry_day_choices|group_label\s*=/i)
 })

@@ -20,7 +20,7 @@ import {
   type MajorWeekendStatus,
 } from "@/lib/majors"
 import { formatMastersAdminDateTime, formatMastersAdminTime, formatMastersOfficialDate, mastersAdminTimeZoneLabel } from "@/lib/mastersSignupDisplay"
-import { validateMastersRoomPlayerIds } from "@/lib/mastersRoomScheduling"
+import { isInstructionOnlyPublishedRoomRepublish, validateMastersRoomPlayerIds } from "@/lib/mastersRoomScheduling"
 import {
   globalPlayerIdentitySummary,
   globalPlayerMatchesSearch,
@@ -262,20 +262,52 @@ export default function MajorSchedulingAdminPage() {
       return
     }
     const roomLabel = String(data.get("label")).trim()
+    const competition = String(data.get("competition"))
+    const location = String(data.get("location") || "")
+    const instructions = String(data.get("instructions") || "")
+    const adminNotes = String(data.get("notes") || "")
     if (groups.some((item) => item.play_day_id === day.id && item.id !== group?.id && item.group_label.toLocaleLowerCase() === roomLabel.toLocaleLowerCase())) {
       setMessage(`${roomLabel} is already used on ${DAY_NAMES[day.day_number - 1].short}. Choose a different room label.`)
       return
     }
+    const currentEntryIds = group ? members.filter((member) => member.group_id === group.id).map((member) => member.entry_id) : []
+    if (group && isInstructionOnlyPublishedRoomRepublish({
+      groupLabel: group.group_label,
+      competition: group.competition,
+      location: group.location,
+      instructions: group.instructions,
+      adminNotes: group.admin_notes,
+      finalized: group.is_finalized,
+      published: group.is_published,
+      entryIds: currentEntryIds,
+    }, {
+      groupLabel: roomLabel,
+      competition,
+      location,
+      instructions,
+      adminNotes,
+      finalized,
+      published: publish,
+      entryIds,
+    })) {
+      const instructionResult = await supabase.rpc("republish_major_schedule_group_instructions", {
+        p_group_id: group.id,
+        p_instructions: instructions,
+      })
+      if (showResult(instructionResult.error, `${roomLabel} instructions republished without changing players or times.`)) await loadSchedule(eventId)
+      return
+    }
+
     const result = await supabase.rpc("save_major_schedule_group", {
       p_id: group?.id || null,
       p_major_event_id: eventId,
       p_play_day_id: day.id,
       p_time_slot_id: slot.id,
       p_group_label: roomLabel,
-      p_competition: String(data.get("competition")),
-      p_location: String(data.get("location") || ""),
-      p_instructions: String(data.get("instructions") || ""),
-      p_admin_notes: String(data.get("notes") || ""),
+      p_competition: competition,
+      p_location: location,
+      p_instructions: instructions,
+      p_admin_notes: adminNotes,
       p_is_finalized: finalized,
       p_is_published: publish,
       p_entry_ids: entryIds,
@@ -642,7 +674,7 @@ function RoomForm({ group, slot, dayNumber, selectedEntries, allGroups, namingGr
       <label>Room label<input name="label" defaultValue={group?.group_label || suggestedLabel} required /><small>{group ? "Customize if needed." : `Next suggested ${isTestEvent ? "TEST" : "official Krys Mini Golf Majors"} room label; you may override it.`}</small></label>
       <label>Competition<select name="competition" defaultValue={group?.competition || (dayNumber <= 2 ? "qualifying" : "main")}><option value="qualifying">Rounds 1–2 field</option><option value="main">Main Event</option><option value="secondary">Secondary trophy field</option></select></label>
       <label>Course / lobby / location<input name="location" defaultValue={group?.location || ""} /></label>
-      <label>Player instructions<input name="instructions" defaultValue={group?.instructions || ""} /></label>
+      <label>Room instructions<textarea name="instructions" defaultValue={group?.instructions || ""} rows={4} placeholder="Optional instructions shown to every player in this published room" /><small>Blank is allowed. Updating only this field on a published room preserves its roster, time, day, round, and publication state.</small></label>
       <label>Private admin notes<input name="notes" defaultValue={group?.admin_notes || ""} /></label>
     </div>
     <div className={styles.rosterPicker}><strong>{group ? "Players in this room" : "Unassigned players"}</strong>{candidates.length ? candidates.map((entry) => <label key={entry.id}><input type="checkbox" name="entry" value={entry.id} defaultChecked={currentIds.has(entry.id)} onChange={(event) => setSelectedCount(event.currentTarget.form?.querySelectorAll('input[name="entry"]:checked').length || 0)} />{entry.player_screen_name_snapshot}</label>) : <p>No unassigned players at this time.</p>}</div>

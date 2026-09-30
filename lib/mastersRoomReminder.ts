@@ -13,6 +13,7 @@ export type MastersRoomReminderAssignment = {
   dayNumber: MajorPlayDay["day_number"]
   roundLabel: string
   roster: MajorRoomRosterMember[]
+  instructions: string | null
 }
 
 export type MastersRoomReminderDismissals = Record<string, string>
@@ -61,6 +62,7 @@ export function buildPublishedMastersRoomAssignments(
       dayNumber: day.day_number,
       roundLabel: majorRoundDayLabel(day.day_number),
       roster: [...roster],
+      instructions: choice.group_instructions?.trim() || null,
     }]
   }).sort((left, right) => left.startsAt.localeCompare(right.startsAt))
 }
@@ -87,6 +89,7 @@ export function mastersRoomAssignmentFingerprint(assignment: MastersRoomReminder
     officialPlayDate: assignment.officialPlayDate,
     dayNumber: assignment.dayNumber,
     rosterPlayerIds: assignment.roster.map((member) => member.player_id).sort(),
+    ...(assignment.instructions ? { instructions: assignment.instructions } : {}),
   })
 }
 

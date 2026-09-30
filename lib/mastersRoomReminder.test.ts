@@ -42,6 +42,7 @@ function choice(overrides: Partial<MajorDayChoice> = {}): MajorDayChoice {
     starts_at: "2026-10-01T04:00:00.000Z",
     group_label: "KMGM7",
     room_roster: roster(4),
+    group_instructions: null,
     ...overrides,
   }
 }
@@ -80,7 +81,10 @@ test("dismissal persists for the exact assignment and changed assignments auto-o
   const timeChanged = { ...assignment, timeSlotId: "13131313-1313-4131-8131-131313131313", startsAt: "2026-10-01T06:00:00.000Z" }
   const roundChanged = { ...assignment, playDayId: "14141414-1414-4141-8141-141414141414", dayNumber: 2 as const, roundLabel: "Round 2" }
   const rosterChanged = { ...assignment, roster: roster(3) }
-  for (const changed of [roomChanged, timeChanged, roundChanged, rosterChanged]) {
+  const instructionsChanged = { ...assignment, instructions: "Meet in the lobby 10 minutes early." }
+  assert.doesNotMatch(mastersRoomAssignmentFingerprint(assignment), /instructions/)
+  assert.match(mastersRoomAssignmentFingerprint(instructionsChanged), /Meet in the lobby 10 minutes early/)
+  for (const changed of [roomChanged, timeChanged, roundChanged, rosterChanged, instructionsChanged]) {
     assert.notEqual(mastersRoomAssignmentFingerprint(changed), mastersRoomAssignmentFingerprint(assignment))
     assert.equal(shouldAutoOpenMastersRoomReminder(changed, dismissed), true)
   }
@@ -143,6 +147,8 @@ test("the reminder has one global mount with cross-route state, full roster, and
   assert.match(component, /usePathname/)
   assert.match(component, /refreshAssignment\(true\)/)
   assert.match(component, /assignment\.roster\.map/)
+  assert.match(component, /assignment\.instructions &&/)
+  assert.match(component, /ROOM INSTRUCTIONS/)
   assert.doesNotMatch(component, /\.roster\.(?:slice|splice)\(/)
   assert.match(component, /get_my_major_signup_schedule/)
   assert.match(component, /window\.localStorage/)
@@ -150,4 +156,11 @@ test("the reminder has one global mount with cross-route state, full roster, and
   assert.match(css, /max-height: 58dvh/)
   assert.match(css, /bottom: max\(72px/)
   assert.match(css, /pointer-events: none/)
+})
+
+test("published instructions are trimmed and blank instructions stay hidden", () => {
+  const [withInstructions] = buildPublishedMastersRoomAssignments(eventId, [choice({ group_instructions: "  Meet early.  " })], [day])
+  const [blank] = buildPublishedMastersRoomAssignments(eventId, [choice({ group_instructions: "   " })], [day])
+  assert.equal(withInstructions.instructions, "Meet early.")
+  assert.equal(blank.instructions, null)
 })

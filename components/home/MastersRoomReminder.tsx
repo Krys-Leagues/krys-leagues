@@ -145,6 +145,7 @@ export default function MastersRoomReminder() {
       <ul className={styles.roster}>
         {assignment.roster.map((player) => <li key={player.player_id}>{player.player_screen_name_snapshot}</li>)}
       </ul>
+      {assignment.instructions && <section className={styles.instructions}><h3>ROOM INSTRUCTIONS</h3><p>{assignment.instructions}</p></section>}
     </aside>
   )
 }

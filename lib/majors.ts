@@ -119,6 +119,9 @@ export type MajorPlayerScorecard = {
   score_to_par: number | null
   slot_starts_at: string | null
   room_label: string | null
+  room_group_id?: string | null
+  room_instructions?: string | null
+  room_roster?: MajorRoomRosterMember[]
   weekend_field?: "qualifying" | "pending" | "main" | "secondary"
   day_number: 1 | 2 | 3 | 4
   day_label: string
