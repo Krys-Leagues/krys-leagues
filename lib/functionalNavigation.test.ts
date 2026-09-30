@@ -10,12 +10,16 @@ test("successful Discord player login opens the protected personalized dashboard
   const callback = read("app/auth/callback/page.tsx")
   const accessDenied = read("app/access-denied/AccessDeniedActions.tsx")
   const adminLayout = read("app/admin/layout.tsx")
+  const dashboard = read("app/player-dashboard/PlayerDashboardClient.tsx")
 
   assert.match(callback, /router\.replace\("\/player-dashboard"\)/)
   assert.match(accessDenied, /router\.replace\("\/player-dashboard"\)/)
   assert.match(adminLayout, /router\.replace\("\/player-dashboard"\)/)
   assert.doesNotMatch(callback, /router\.replace\("\/dashboard"\)/)
   assert.match(read("app/dashboard/page.tsx"), /redirect\("\/player-dashboard"\)/)
+  assert.match(dashboard, /const publicLeagueHref = activeLeague === "stroke" \? "\/stroke" : "\/match-play"/)
+  assert.match(dashboard, /href=\{publicLeagueHref\}[^>]*>View Standings<\/Link>/)
+  assert.doesNotMatch(dashboard, /href="\/standings"/)
 })
 
 test("protected membership data paths replace browser-direct membership reads", () => {

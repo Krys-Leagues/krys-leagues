@@ -93,6 +93,7 @@ export default function PlayerDashboardClient() {
   const availableLeagues = dashboard ? currentDashboardLeagues(dashboard.leagues) : []
   const activeLeague = selectedDashboardLeague(selectedLeague, availableLeagues)
   const membershipView = dashboard ? dashboardMembershipView(dashboard.leagues) : null
+  const publicLeagueHref = activeLeague === "stroke" ? "/stroke" : "/match-play"
 
   return (
     <main className={styles.page}>
@@ -145,11 +146,11 @@ export default function PlayerDashboardClient() {
                 )}
 
                 <section className={styles.actionGrid}>
-                  <Link href={activeLeague === "stroke" ? "/stroke" : "/match-play"} className={styles.actionButton}>
+                  <Link href={publicLeagueHref} className={styles.actionButton}>
                     {activeLeague === "stroke" ? "Public Stroke" : "Public Match Play"}
                   </Link>
                   <PlayerProfileNavLink className={styles.actionButton}>Player Profile</PlayerProfileNavLink>
-                  <Link href="/standings" className={styles.actionButton}>View Standings</Link>
+                  <Link href={publicLeagueHref} className={styles.actionButton}>View Standings</Link>
                   <Link href="/records" className={styles.actionButton}>View Records</Link>
                 </section>
               </>
