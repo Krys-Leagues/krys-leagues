@@ -5,16 +5,20 @@ create or replace function public.save_major_schedule_group(
   p_location text,p_instructions text,p_admin_notes text,p_is_finalized boolean,p_is_published boolean,p_entry_ids uuid[]
 )
 returns public.major_schedule_groups language plpgsql security definer set search_path to '' as $function$
-declare saved public.major_schedule_groups%rowtype; member_id uuid;
+declare saved public.major_schedule_groups%rowtype; member_id uuid; member_count integer;
 begin
   if not public.is_current_user_site_admin() then raise exception 'Administrator authorization is required.' using errcode='42501'; end if;
   if nullif(btrim(p_group_label),'') is null then raise exception 'A room/group label is required.'; end if;
   if p_competition not in ('qualifying','main','secondary') then raise exception 'Invalid room competition.'; end if;
-  if cardinality(coalesce(p_entry_ids,array[]::uuid[])) not between 1 and 4 then
+  member_count := cardinality(coalesce(p_entry_ids,array[]::uuid[]));
+  if member_count not between 1 and 4 then
     raise exception 'Masters rooms require 1 to 4 players.' using errcode='22023';
   end if;
   if cardinality(p_entry_ids) <> (select count(distinct entry_id) from unnest(p_entry_ids) as entry_id) then
     raise exception 'A player may appear only once in a Masters room.' using errcode='22023';
+  end if;
+  if member_count = 1 and (coalesce(p_is_finalized,false) or coalesce(p_is_published,false)) then
+    raise exception 'A one-player Masters room is incomplete and may only be saved privately without finalizing.' using errcode='22023';
   end if;
   if not exists(select 1 from public.major_play_days where id=p_play_day_id and major_event_id=p_major_event_id)
     or not exists(select 1 from public.major_time_slots where id=p_time_slot_id and play_day_id=p_play_day_id)

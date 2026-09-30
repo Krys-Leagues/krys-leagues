@@ -255,7 +255,8 @@ export default function MajorSchedulingAdminPage() {
     const day = days.find((item) => item.id === slot.play_day_id)
     if (!day) return
     const entryIds = data.getAll("entry").map(String)
-    const rosterError = validateMastersRoomPlayerIds(entryIds)
+    const finalized = data.get("finalized") === "on"
+    const rosterError = validateMastersRoomPlayerIds(entryIds, { finalized, published: publish })
     if (rosterError) {
       setMessage(rosterError)
       return
@@ -275,7 +276,7 @@ export default function MajorSchedulingAdminPage() {
       p_location: String(data.get("location") || ""),
       p_instructions: String(data.get("instructions") || ""),
       p_admin_notes: String(data.get("notes") || ""),
-      p_is_finalized: data.get("finalized") === "on",
+      p_is_finalized: finalized,
       p_is_published: publish,
       p_entry_ids: entryIds,
     })
@@ -598,17 +599,18 @@ function DayWorkspace({ event, dayNumber, day, slots, entries, groups, members, 
       const selectedEntries = selectedChoices.map((choice) => entries.find((entry) => entry.id === choice.entry_id)).filter((entry): entry is MajorEntry => Boolean(entry))
       const slotGroups = groups.filter((group) => group.time_slot_id === slot.id)
       const assignedIds = new Set(members.filter((member) => slotGroups.some((group) => group.id === member.group_id)).map((member) => member.entry_id))
+      const unassignedEntries = selectedEntries.filter((entry) => !assignedIds.has(entry.id))
       const count = selectedEntries.length
-      const guidance = count === 1 ? "Solo room supported" : count === 2 ? "Workable room" : count === 3 ? "Preferred room size" : count === 4 ? "Full four-player room" : count > 4 ? "Split into rooms of up to 4" : "No players yet"
+      const guidance = count === 1 ? "Needs another player" : count === 2 ? "Workable room" : count === 3 ? "Preferred room size" : count === 4 ? "Full four-player room" : count > 4 ? "Split into rooms of up to 4" : "No players yet"
       const tone = count === 3 || count === 4 ? styles.preferred : count === 2 ? styles.workable : count === 0 ? styles.quiet : styles.attention
       return <article key={slot.id} className={`${styles.timeCard} ${!slot.is_available ? styles.disabledSlot : ""}`}>
         <header><div><p className={styles.slotTime}>{formatMastersAdminTime(slot.starts_at, event.schedule_timezone)}</p><span>{slot.label || name.fallback} · {slot.is_available ? "AVAILABLE" : "DISABLED"}</span></div><div className={`${styles.countBadge} ${tone}`}><strong>{count} {count === 1 ? "player" : "players"}</strong><span>{guidance}</span></div></header>
         <div className={styles.playerChips}>{selectedEntries.length ? selectedEntries.map((entry) => <span key={entry.id}>{entry.player_screen_name_snapshot}</span>) : <em>No one has selected this time.</em>}</div>
         <details className={styles.overridePanel}><summary>Move a player to another time</summary>{selectedEntries.map((entry) => <label key={entry.id}>{entry.player_screen_name_snapshot}<select defaultValue={slot.id} onChange={(e) => void onMovePlayer(entry.id, day.id, e.target.value)}>{daySlots.filter((option) => option.is_available || option.id === slot.id).map((option) => <option key={option.id} value={option.id}>{formatMastersAdminTime(option.starts_at, event.schedule_timezone)}{option.is_available ? "" : " — disabled"}</option>)}</select></label>)}</details>
 
-        <div className={styles.roomBuilder}><div className={styles.roomBuilderHeading}><div><h3>Rooms</h3><p>Rooms support 1–4 players; three is preferred. Save privately until ready.</p></div><span>{selectedEntries.filter((entry) => !assignedIds.has(entry.id)).length} unassigned</span></div>
-          {slotGroups.map((group) => <RoomForm key={group.id} group={group} slot={slot} dayNumber={dayNumber} selectedEntries={selectedEntries} allGroups={slotGroups} namingGroups={dayGroups} isTestEvent={event.is_test_event} members={members} onSave={onSaveGroup} onDelete={onDeleteGroup} />)}
-          <RoomForm group={null} slot={slot} dayNumber={dayNumber} selectedEntries={selectedEntries.filter((entry) => !assignedIds.has(entry.id))} allGroups={slotGroups} namingGroups={dayGroups} isTestEvent={event.is_test_event} members={members} onSave={onSaveGroup} onDelete={onDeleteGroup} />
+        <div className={styles.roomBuilder}><div className={styles.roomBuilderHeading}><div><h3>Rooms</h3><p>Rooms support 1–4 players; three is preferred. Save privately until ready.</p></div><span>{unassignedEntries.length} unassigned</span></div>
+          {slotGroups.map((group) => <RoomForm key={`${group.id}:${members.filter((member) => member.group_id === group.id).map((member) => member.entry_id).sort().join(",")}`} group={group} slot={slot} dayNumber={dayNumber} selectedEntries={selectedEntries} allGroups={slotGroups} namingGroups={dayGroups} isTestEvent={event.is_test_event} members={members} onSave={onSaveGroup} onDelete={onDeleteGroup} />)}
+          <RoomForm key={`new:${unassignedEntries.map((entry) => entry.id).sort().join(",")}`} group={null} slot={slot} dayNumber={dayNumber} selectedEntries={unassignedEntries} allGroups={slotGroups} namingGroups={dayGroups} isTestEvent={event.is_test_event} members={members} onSave={onSaveGroup} onDelete={onDeleteGroup} />
         </div>
       </article>
     })}</div></>}
@@ -633,6 +635,7 @@ function RoomForm({ group, slot, dayNumber, selectedEntries, allGroups, namingGr
   const prefix = isTestEvent ? "TEST" : "KMGM"
   const usedNumbers = namingGroups.map((item) => new RegExp(`^${prefix}(\\d+)$`, "i").exec(item.group_label)?.[1]).filter(Boolean).map(Number)
   const suggestedLabel = `${prefix}${Math.max(0, ...usedNumbers) + 1}`
+  const [selectedCount, setSelectedCount] = useState(currentIds.size)
   return <form className={group ? styles.roomCard : styles.newRoomCard} onSubmit={(e) => e.preventDefault()}>
     <div className={styles.roomTitle}><strong>{group?.group_label || "Create another room"}</strong>{group && <span className={group.is_published ? styles.published : styles.private}>{group.is_published ? "Published" : "Private"}</span>}</div>
     <div className={styles.formGrid}>
@@ -642,9 +645,10 @@ function RoomForm({ group, slot, dayNumber, selectedEntries, allGroups, namingGr
       <label>Player instructions<input name="instructions" defaultValue={group?.instructions || ""} /></label>
       <label>Private admin notes<input name="notes" defaultValue={group?.admin_notes || ""} /></label>
     </div>
-    <div className={styles.rosterPicker}><strong>{group ? "Players in this room" : "Unassigned players"}</strong>{candidates.length ? candidates.map((entry) => <label key={entry.id}><input type="checkbox" name="entry" value={entry.id} defaultChecked={currentIds.has(entry.id)} />{entry.player_screen_name_snapshot}</label>) : <p>No unassigned players at this time.</p>}</div>
-    <label className={styles.check}><input type="checkbox" name="finalized" defaultChecked={group?.is_finalized} /> Room composition finalized</label>
-    <div className={styles.roomActions}><button type="button" className={styles.secondaryButton} onClick={(e) => void onSave(slot, e.currentTarget.form!, group, false)}>Save privately</button><button type="button" className={styles.primaryButton} onClick={(e) => void onSave(slot, e.currentTarget.form!, group, true)}>Save & publish</button>{group && <button type="button" className={styles.dangerButton} onClick={() => void onDelete(group.id)}>Delete room</button>}</div>
+    <div className={styles.rosterPicker}><strong>{group ? "Players in this room" : "Unassigned players"}</strong>{candidates.length ? candidates.map((entry) => <label key={entry.id}><input type="checkbox" name="entry" value={entry.id} defaultChecked={currentIds.has(entry.id)} onChange={(event) => setSelectedCount(event.currentTarget.form?.querySelectorAll('input[name="entry"]:checked').length || 0)} />{entry.player_screen_name_snapshot}</label>) : <p>No unassigned players at this time.</p>}</div>
+    {selectedCount === 1 && <p className={styles.slotWarning}><strong>Incomplete room:</strong> assign at least one more player before finalizing or publishing.</p>}
+    <label className={styles.check}><input type="checkbox" name="finalized" defaultChecked={group?.is_finalized && currentIds.size >= 2} disabled={selectedCount < 2} /> Room composition finalized</label>
+    <div className={styles.roomActions}><button type="button" className={styles.secondaryButton} disabled={selectedCount === 0 || selectedCount > 4} onClick={(e) => void onSave(slot, e.currentTarget.form!, group, false)}>Save privately</button><button type="button" className={styles.primaryButton} disabled={selectedCount < 2 || selectedCount > 4} onClick={(e) => void onSave(slot, e.currentTarget.form!, group, true)}>Save & publish</button>{group && <button type="button" className={styles.dangerButton} onClick={() => void onDelete(group.id)}>Delete room</button>}</div>
     {group && <p className={styles.help}>To move someone between rooms, remove and save here first; then add them to the destination room.</p>}
   </form>
 }
