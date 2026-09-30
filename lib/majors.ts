@@ -143,6 +143,11 @@ export type MajorResultsPayload = {
   event: Pick<MajorEvent, "id" | "slug" | "name" | "year" | "is_test_event">
   notice: string
   active_day_number: number | null
+  entrants?: Array<{
+    entry_id: string
+    player_id: string
+    player_screen_name_snapshot: string
+  }>
   rounds: Array<{
     day_number: 1 | 2 | 3 | 4
     label: string
