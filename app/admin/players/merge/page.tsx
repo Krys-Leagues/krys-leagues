@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import PlayerAvatar from "@/components/PlayerAvatar"
 import { prepareCanonicalAvatarForMerge, removeOldPlayerAvatarObjects } from "@/lib/playerAvatars"
+import { loadProtectedAdminPlayersResult } from "@/lib/adminPlayersClient"
 
 type Player = {
   id: string
@@ -46,11 +47,7 @@ export default function MergePlayersPage() {
 
   async function loadPlayers() {
     setLoading(true)
-    const { data, error } = await supabase
-      .from("players")
-      .select("id, screen_name, status, active")
-      .eq("active", true)
-      .order("screen_name", { ascending: true })
+    const { data, error } = await loadProtectedAdminPlayersResult()
     setLoading(false)
 
     if (error) {
@@ -58,7 +55,7 @@ export default function MergePlayersPage() {
       return
     }
 
-    setPlayers(data || [])
+    setPlayers((data || []).filter((player) => player.active === true))
   }
 
   const removePlayer = useMemo(

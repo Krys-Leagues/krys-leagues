@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
+import { loadProtectedAdminPlayersResult } from "@/lib/adminPlayersClient"
 import { supabase } from "@/lib/supabase"
 
 type Player = {
@@ -64,10 +65,7 @@ export default function CareerAdminPage() {
       membershipsResponse,
       trophiesResponse,
     ] = await Promise.all([
-      supabase
-        .from("players")
-        .select("id, screen_name, status, active")
-        .order("screen_name", { ascending: true }),
+      loadProtectedAdminPlayersResult(),
 
       supabase
         .from("results")

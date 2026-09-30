@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import { logActivity } from "@/lib/activityLog"
+import { loadProtectedAdminPlayersResult } from "@/lib/adminPlayersClient"
 
 type Entry = { player_id: string; player_screen_name: string; division_number: number; division_rank: number; completed_game_count: number }
 type Decision = { player_id: string; decision: "returning" | "not_returning" }
@@ -100,12 +101,12 @@ export default function MatchTransitionPage() {
       supabase.from("match_final_scorecard_player_decisions").select("player_id, decision").eq("final_scorecard_id", requestedId),
       supabase.from("seasons").select("id, season_number, start_date, end_date, game1_course, game2_course, game3_course").eq("league_type", "match")
         .is("division", null).eq("season_number", sourceSeason.season_number + 1),
-      supabase.from("players").select("id, screen_name").eq("active", true).order("screen_name"),
+      loadProtectedAdminPlayersResult(),
     ])
     const loadError = entryResponse.error || decisionResponse.error || seasonResponse.error || playerResponse.error
     if (loadError) { setError(loadError.message); setLoading(false); return }
     const loadedEntries = (entryResponse.data || []) as Entry[]
-    const loadedPlayers = (playerResponse.data || []) as Player[]
+    const loadedPlayers = (playerResponse.data || []).filter((player) => player.active === true) as Player[]
     const candidateSeasons = (seasonResponse.data || []) as Season[]
     let loadedSeasons: Season[] = []
     let loadedTargetDivisionCount: number | null = null

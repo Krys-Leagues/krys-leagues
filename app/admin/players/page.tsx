@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import PlayerAvatar from "@/components/PlayerAvatar"
+import { loadProtectedAdminPlayerDirectory } from "@/lib/adminPlayersClient"
 
 type Player = {
   id: string
@@ -152,20 +153,17 @@ export default function PlayersAdminPage() {
   async function loadPlayers() {
     setLoading(true)
 
-    const response = await fetch("/api/admin/players", { cache: "no-store" })
-    const payload = await response.json().catch(() => null)
-
-    setLoading(false)
-
-    if (!response.ok) {
-      alert(payload?.error || "Unable to load Global Players")
-      return
+    try {
+      const payload = await loadProtectedAdminPlayerDirectory()
+      setPlayers(payload.players)
+      setLeagueMemberships(payload.leagueMemberships)
+      setTournamentEntries(payload.tournamentEntries)
+      setIdentityLinks(payload.identityLinks)
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Unable to load Global Players")
+    } finally {
+      setLoading(false)
     }
-
-    setPlayers(payload?.players || [])
-    setLeagueMemberships(payload?.leagueMemberships || [])
-    setTournamentEntries(payload?.tournamentEntries || [])
-    setIdentityLinks(payload?.identityLinks || [])
   }
 
   function formatLeagueName(leagueType: string) {
@@ -575,12 +573,8 @@ export default function PlayersAdminPage() {
 
       const allNames = Array.from(uniqueImportMap.values())
 
-      const { data: existing } = await supabase
-        .from("players")
-        .select("screen_name")
-
       const existingSet = new Set(
-        (existing || []).map((p) => normalizeName(p.screen_name))
+        players.map((player) => normalizeName(player.screen_name))
       )
 
       const newPlayers = allNames

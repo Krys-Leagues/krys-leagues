@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import { SOLO_DIVISIONS, SOLO_DIVISION_PRESENTATION, type SoloDivision } from "@/lib/solo"
+import { loadProtectedAdminPlayersResult } from "@/lib/adminPlayersClient"
 
 type Player = { id: string; screen_name: string; active?: boolean; status?: string | null }
 type DiscordMatch = Player & { discord_id: string; already_in_pool: boolean }
@@ -76,14 +77,9 @@ export default function SoloSetupPage() {
       return
     }
     const poolIds = ((p || []) as PoolEntry[]).map((entry) => entry.player_id)
-    const poolPlayerQuery = poolIds.length
-      ? supabase.from("players").select("id,screen_name").in("id", poolIds).order("screen_name")
-      : null
     const [{ data: e, error: ee }, { data: poolPlayers, error: poolError }] = await Promise.all([
       supabase.from("solo_roster_entries").select("player_id,player_screen_name,division,display_order").eq("roster_version_id", r.id).order("display_order"),
-      poolPlayerQuery
-        ? historical ? poolPlayerQuery : poolPlayerQuery.eq("active", true)
-        : Promise.resolve({ data: [] as Player[], error: null }),
+      loadProtectedAdminPlayersResult(),
     ])
     if (ee || poolError) {
       setMessage(ee?.message || poolError?.message || "Solo player pool could not be loaded.")
@@ -93,7 +89,9 @@ export default function SoloSetupPage() {
     const loadedEntries = (e || []) as Entry[]
     setSeason(s as Season)
     setRoster(r as Roster)
-    setPlayers((poolPlayers || []) as Player[])
+    setPlayers((poolPlayers || []).filter(
+      (player) => poolIds.includes(player.id) && (historical || player.active === true)
+    ) as Player[])
     setEntries(loadedEntries)
     setSavedFingerprint(rosterFingerprint(loadedEntries))
     setLoading(false)

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { AdminGlassCard, AdminRecordsHero, AdminRecordsShell, adminRecordsStyles as styles } from "@/components/admin/records/AdminRecordsUI"
 import { supabase } from "@/lib/supabase"
+import { loadProtectedAdminPlayersResult } from "@/lib/adminPlayersClient"
 import {
   CLIMBERS_BASELINE_CUTOFF,
   CLIMBERS_BASELINE_IMPORT_KEY,
@@ -36,7 +37,7 @@ export default function ClimbersAdminPage() {
       supabase.from("climbers_events").select("id,season_id,player_id,course_id,difficulty,old_pb_score,new_pb_score,points,calculation_version,source_label,provenance_reference,created_at,voided_at").order("created_at", { ascending: false }),
       supabase.from("climbers_event_passes").select("event_id,passed_player_id"),
       supabase.from("climbers_year_to_date").select("player_id,points,event_count").order("points", { ascending: false }),
-      supabase.from("players").select("id,screen_name").order("screen_name"),
+      loadProtectedAdminPlayersResult(),
       supabase.from("all_time_courses").select("id,code,display_name,difficulty").eq("active", true).in("difficulty", ["Easy", "Hard"]),
       supabase.from("climbers_legacy_baseline_imports").select("import_key,cutoff_at,applied_at").eq("import_key", CLIMBERS_BASELINE_IMPORT_KEY).maybeSingle(),
       supabase.from("climbers_legacy_baseline_source_rows").select("source_name,ytd_points,period_points,canonical_player_id,identity_status").eq("import_key", CLIMBERS_BASELINE_IMPORT_KEY),

@@ -4,6 +4,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
+import { loadProtectedAdminPlayersResult } from "@/lib/adminPlayersClient"
 
 type Player = {
   id: string
@@ -359,11 +360,7 @@ export default function MatchSetup() {
       .map((slot) => slot.player_id)
       .filter((playerId): playerId is string => Boolean(playerId))
 
-    const { data: activePlayerData, error: activePlayerError } = await supabase
-      .from("players")
-      .select("id, screen_name")
-      .eq("active", true)
-      .order("screen_name")
+    const { data: allPlayerData, error: activePlayerError } = await loadProtectedAdminPlayersResult()
 
     if (activePlayerError) {
       setSetupError(`Could not load players: ${activePlayerError.message}`)
@@ -371,25 +368,10 @@ export default function MatchSetup() {
       return
     }
 
-    let rosterPlayerData: Player[] = []
-
-    if (currentPlayerIds.length > 0) {
-      const { data, error } = await supabase
-        .from("players")
-        .select("id, screen_name")
-        .in("id", currentPlayerIds)
-
-      if (error) {
-        setSetupError(`Could not load roster players: ${error.message}`)
-        setLoadingSetup(false)
-        return
-      }
-
-      rosterPlayerData = (data || []) as Player[]
-    }
-
     const playerMap = new Map<string, Player>()
-    ;([...(activePlayerData || []), ...rosterPlayerData] as Player[]).forEach(
+    ;((allPlayerData || []).filter(
+      (player) => player.active === true || currentPlayerIds.includes(player.id)
+    ) as Player[]).forEach(
       (player) => playerMap.set(player.id, player)
     )
 

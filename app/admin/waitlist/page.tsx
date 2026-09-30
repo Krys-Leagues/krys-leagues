@@ -1,12 +1,13 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { supabase } from "@/lib/supabase"
 
 type WaitlistPlayer = {
   id: string
+  player_id: string | null
   screen_name: string
   league_type: string | null
+  preferred_division: string | null
   status: string | null
   discord_id: string | null
   discord_username: string | null
@@ -36,6 +37,7 @@ const LEAGUE_LABELS: Record<string, string> = {
 export default function WaitlistAdminPage() {
   const [waitlist, setWaitlist] = useState<WaitlistPlayer[]>([])
   const [divisionChoices, setDivisionChoices] = useState<Record<string, string>>({})
+  const [seasonChoices, setSeasonChoices] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
   const [savingId, setSavingId] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState("")
@@ -52,87 +54,85 @@ export default function WaitlistAdminPage() {
     setLoading(true)
     setErrorMessage("")
 
-    const { data, error } = await supabase
-      .from("player_waitlist")
-      .select("*")
-      .in("status", ["waiting", "pending"])
-      .order("created_at", { ascending: false })
+    const response = await fetch("/api/admin/waitlist", { cache: "no-store" })
+    const payload = await response.json().catch(() => null) as { waitlist?: WaitlistPlayer[]; error?: string } | null
 
     setLoading(false)
 
-    if (error) {
-      setErrorMessage(error.message)
+    if (!response.ok) {
+      setErrorMessage(payload?.error || "Wait-list entries could not be loaded.")
       setWaitlist([])
       return
     }
 
-    const rows = (data || []) as WaitlistPlayer[]
+    const rows = payload?.waitlist || []
     setWaitlist(rows)
 
     const defaults: Record<string, string> = {}
 
     rows.forEach((player) => {
       const league = player.league_type || "match"
-      defaults[player.id] = LEAGUE_DIVISIONS[league]?.[0] || "Match D1"
+      defaults[player.id] = player.preferred_division || LEAGUE_DIVISIONS[league]?.[0] || "Match D1"
     })
 
     setDivisionChoices(defaults)
+    setSeasonChoices(Object.fromEntries(rows.map((player) => [player.id, ""])))
   }
 
   async function approvePlayer(player: WaitlistPlayer) {
     const league = player.league_type || "match"
     const division = divisionChoices[player.id] || LEAGUE_DIVISIONS[league]?.[0]
+    const seasonNumber = Number(seasonChoices[player.id])
+
+    if (!Number.isInteger(seasonNumber) || seasonNumber < 1) {
+      setErrorMessage("Enter the exact season number before approving this player.")
+      return
+    }
 
     setSavingId(player.id)
     setErrorMessage("")
 
-    const { error: playerError } = await supabase.from("players").insert({
-      screen_name: player.screen_name,
-      league_type: league,
-      division,
-      discord_id: player.discord_id,
-      discord_username: player.discord_username,
-      discord_avatar: player.discord_avatar,
+    const response = await fetch("/api/admin/waitlist", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "approve",
+        waitlistId: player.id,
+        division,
+        seasonNumber,
+      }),
     })
+    const payload = await response.json().catch(() => null) as { error?: string } | null
 
-    if (playerError) {
-      setErrorMessage(playerError.message)
-      setSavingId(null)
-      return
-    }
-
-    const { error: deleteError } = await supabase
-      .from("player_waitlist")
-      .delete()
-      .eq("id", player.id)
-
-    if (deleteError) {
-      setErrorMessage(deleteError.message)
+    if (!response.ok) {
+      setErrorMessage(payload?.error || "Player approval failed.")
       setSavingId(null)
       return
     }
 
     setSavingId(null)
-    loadWaitlist()
+    await loadWaitlist()
   }
 
   async function removePlayer(player: WaitlistPlayer) {
     setSavingId(player.id)
     setErrorMessage("")
 
-    const { error } = await supabase
-      .from("player_waitlist")
-      .delete()
-      .eq("id", player.id)
+    const response = await fetch("/api/admin/waitlist", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "remove", waitlistId: player.id }),
+    })
+    const payload = await response.json().catch(() => null) as { error?: string } | null
 
-    if (error) {
-      setErrorMessage(error.message)
+    if (!response.ok) {
+      setErrorMessage(payload?.error || "Player removal failed.")
       setSavingId(null)
       return
     }
 
     setSavingId(null)
-    loadWaitlist()
+    await loadWaitlist()
   }
 
   const filtered = useMemo(() => {
@@ -315,6 +315,22 @@ export default function WaitlistAdminPage() {
                               <option key={d}>{d}</option>
                             ))}
                           </select>
+
+                          <input
+                            type="number"
+                            min={1}
+                            step={1}
+                            inputMode="numeric"
+                            placeholder="Exact season number"
+                            value={seasonChoices[player.id] || ""}
+                            onChange={(e) =>
+                              setSeasonChoices((prev) => ({
+                                ...prev,
+                                [player.id]: e.target.value,
+                              }))
+                            }
+                            style={{ ...inputStyle, width: "100%", marginBottom: 10 }}
+                          />
 
                           <button
                             onClick={() => approvePlayer(player)}

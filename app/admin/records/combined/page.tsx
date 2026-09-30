@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { AdminRecordsHero, AdminRecordsShell, adminRecordsStyles as styles } from "@/components/admin/records/AdminRecordsUI"
+import { loadProtectedAdminPlayersResult } from "@/lib/adminPlayersClient"
 import { supabase } from "@/lib/supabase"
 
 type Player = {
@@ -71,11 +72,7 @@ export default function CombinedRecordsPage() {
   async function loadData() {
     setLoading(true)
 
-    const { data: playerData } = await supabase
-      .from("players")
-      .select("id, screen_name")
-      .eq("active", true)
-      .order("screen_name", { ascending: true })
+    const { data: playerData } = await loadProtectedAdminPlayersResult()
 
     const { data: recordData } = await supabase
       .from("combined_course_records")
@@ -83,7 +80,7 @@ export default function CombinedRecordsPage() {
       .order("course_name", { ascending: true })
       .order("combined_score", { ascending: true })
 
-    setPlayers(playerData || [])
+    setPlayers((playerData || []).filter((player) => player.active === true))
     setRecords(recordData || [])
 
     setLoading(false)

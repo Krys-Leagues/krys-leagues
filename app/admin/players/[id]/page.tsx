@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase"
 import PlayerProfileHero from "@/components/PlayerProfileHero"
 import TrophyMedia from "@/components/TrophyMedia"
 import { getCanonicalPlayerAvatar, PLAYER_AVATAR_BUCKET, playerAvatarObjectPath, validatePlayerAvatarFile } from "@/lib/playerAvatars"
+import { loadProtectedAdminPlayers } from "@/lib/adminPlayersClient"
 
 type Player = {
   id: string
@@ -137,12 +138,13 @@ export default function PlayerProfilePage() {
 
     const identity = (Array.isArray(identityData) ? identityData[0] : identityData) as CanonicalIdentity | null
     const canonicalPlayerId = identity?.canonical_player_id || playerId
-    const [{ data: playerData }, avatarResult] = await Promise.all([
-      supabase.from("players").select("id, screen_name, discord_id, discord_name, discord_username, status, active").eq("id", canonicalPlayerId).single(),
+    const [protectedPlayers, avatarResult] = await Promise.all([
+      loadProtectedAdminPlayers(),
       getCanonicalPlayerAvatar(canonicalPlayerId)
         .then((avatar) => ({ avatar, error: "" }))
         .catch((error: unknown) => ({ avatar: null, error: error instanceof Error ? error.message : "Avatar could not be loaded" })),
     ])
+    const playerData = protectedPlayers.find((candidate) => candidate.id === canonicalPlayerId) || null
     setPlayer(playerData)
     if (avatarResult.error) setAvatarError(`Could not load avatar: ${avatarResult.error}`)
     else setAvatarPath(avatarResult.avatar?.avatarPath || null)

@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { loadProtectedAdminPlayersResult } from "@/lib/adminPlayersClient"
 import { supabase } from "@/lib/supabase"
 // force redeploy
 
@@ -45,11 +46,7 @@ export default function DoublesTeamsPage() {
   async function loadPlayers() {
     setLoadError("")
 
-    const { data, error } = await supabase
-      .from("players")
-      .select("*")
-      .eq("active", true)
-      .order("id", { ascending: true })
+    const { data, error } = await loadProtectedAdminPlayersResult()
 
     if (error) {
       setLoadError(error.message)
@@ -59,15 +56,10 @@ export default function DoublesTeamsPage() {
 
     const normalized =
       data
-        ?.map((p: any) => ({
+        ?.filter((player) => player.active === true)
+        .map((p) => ({
           id: String(p.id),
-          display_name: String(
-            p.screen_name ||
-            p.player_name ||
-            p.name ||
-            p.discord_name ||
-            ""
-          ).trim(),
+          display_name: p.screen_name.trim(),
         }))
         .filter((p) => p.id && p.display_name)
         .sort((a, b) => a.display_name.localeCompare(b.display_name)) || []

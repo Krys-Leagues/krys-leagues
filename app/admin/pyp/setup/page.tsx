@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
+import { loadProtectedAdminPlayersResult } from "@/lib/adminPlayersClient"
 
 type Slot = { slot_number: number; player_id: string | null; player_screen_name: string | null }
 type Player = { id: string; screen_name: string }
@@ -96,20 +97,17 @@ export default function PypSetupPage() {
     }
 
     const selectedIds = slots.map((slot) => slot.player_id).filter((id): id is string => Boolean(id))
-    const [{ data: activePlayers, error: activeError }, rosterPlayersResult] = await Promise.all([
-      supabase.from("players").select("id, screen_name").eq("active", true).order("screen_name"),
-      selectedIds.length > 0
-        ? supabase.from("players").select("id, screen_name").in("id", selectedIds)
-        : Promise.resolve({ data: [] as Player[], error: null }),
-    ])
-    if (activeError || rosterPlayersResult.error) {
-      setMessage(activeError?.message || rosterPlayersResult.error?.message || "Could not load players.")
+    const { data: allPlayers, error: activeError } = await loadProtectedAdminPlayersResult()
+    if (activeError) {
+      setMessage(activeError.message || "Could not load players.")
       setLoading(false)
       return
     }
 
     const playerMap = new Map<string, Player>()
-    for (const player of [...((activePlayers || []) as Player[]), ...((rosterPlayersResult.data || []) as Player[])]) playerMap.set(player.id, player)
+    for (const player of (allPlayers || []).filter(
+      (candidate) => candidate.active === true || selectedIds.includes(candidate.id)
+    ) as Player[]) playerMap.set(player.id, player)
     setPlayers(Array.from(playerMap.values()).sort((a, b) => a.screen_name.localeCompare(b.screen_name)))
     setSeasonId(selectedSeasonId)
     setSeason(seasonData as Season)

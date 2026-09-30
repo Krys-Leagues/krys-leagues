@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import TrophyMedia from "@/components/TrophyMedia"
+import { loadProtectedAdminPlayers } from "@/lib/adminPlayersClient"
 
 type Player = {
   id: string
@@ -78,11 +79,8 @@ export default function PlayerProfilePage() {
 
     setLoading(true)
 
-    const { data: playerData } = await supabase
-      .from("players")
-      .select("id, screen_name, discord_id, discord_name, discord_username, status, active")
-      .eq("id", playerId)
-      .single()
+    const protectedPlayers = await loadProtectedAdminPlayers()
+    const playerData = protectedPlayers.find((candidate) => candidate.id === playerId) || null
 
     setPlayer(playerData)
 

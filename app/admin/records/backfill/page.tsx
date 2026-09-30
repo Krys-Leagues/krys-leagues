@@ -8,6 +8,7 @@ import { sha256Hex } from "@/lib/all-time/normal-records"
 import { parseOptionalRelativeScore } from "@/lib/all-time/pb-precheck"
 import type { BackfillPrecision } from "@/lib/all-time/late-backfill"
 import { supabase } from "@/lib/supabase"
+import { loadProtectedAdminPlayersResult } from "@/lib/adminPlayersClient"
 
 type Course = { id: string; code: string; display_name: string; difficulty: "Easy" | "Hard"; par: number | null; hole_pars: number[] | null }
 type Player = { id: string; screen_name: string }
@@ -38,12 +39,12 @@ export default function LateBackfillPage() {
     void (async () => {
       const [courseResult, playerResult, existingResult] = await Promise.all([
         supabase.from("all_time_courses").select("id,code,display_name,difficulty,par,hole_pars").eq("active", true).in("difficulty", ["Easy", "Hard"]).order("display_name"),
-        supabase.from("players").select("id,screen_name").eq("active", true).order("screen_name"),
+        loadProtectedAdminPlayersResult(),
         supabase.from("all_time_late_backfill_audit").select("card_batch_id,course_id,player_id,submitted_score,authoritative_submitted_date,source_label,status").order("authoritative_submitted_date", { ascending: false }),
       ])
       const queryError = courseResult.error || playerResult.error || existingResult.error
       if (queryError) setError(queryError.message)
-      const nextCourses = (courseResult.data ?? []) as Course[], nextPlayers = (playerResult.data ?? []) as Player[]
+      const nextCourses = (courseResult.data ?? []) as Course[], nextPlayers = (playerResult.data ?? []).filter((player) => player.active === true) as Player[]
       setCourses(nextCourses); setPlayers(nextPlayers); setExisting((existingResult.data ?? []).map((row) => ({ ...row, score: row.submitted_score })) as Existing[])
       setCards([newCard({ courseId: nextCourses[0]?.id ?? "" })]); setQuickCourseId(nextCourses[0]?.id ?? ""); setQuickPlayerId(nextPlayers[0]?.id ?? ""); setLoading(false)
     })()

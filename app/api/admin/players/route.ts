@@ -1,14 +1,7 @@
-import { createClient } from "@supabase/supabase-js"
 import { NextResponse } from "next/server"
 
+import { createAdminDataClient } from "@/lib/adminDataServer"
 import { authorizeSiteAdminMutation } from "@/lib/auth/siteAdminMutation"
-
-function createAdminDataClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY
-  if (!url || !key) throw new Error("Admin Global Players server access is not configured.")
-  return createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } })
-}
 
 export async function GET() {
   const authorization = await authorizeSiteAdminMutation()
@@ -24,7 +17,7 @@ export async function GET() {
   const [playersResult, membershipsResult, tournamentsResult, identityLinksResult] = await Promise.all([
     adminDataClient
       .from("players")
-      .select("id, screen_name, discord_id, discord_name, status, active, avatar_path, is_server_booster, has_krys_server_tag, profile_badges")
+      .select("id, screen_name, discord_id, discord_name, discord_username, discord_avatar, status, active, division, avatar_path, is_server_booster, has_krys_server_tag, profile_badges")
       .order("screen_name", { ascending: true }),
     adminDataClient
       .from("player_league_memberships")

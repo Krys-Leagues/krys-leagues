@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { loadProtectedAdminPlayersResult } from "@/lib/adminPlayersClient"
 import { supabase } from "@/lib/supabase"
 
 const LEAGUE_TYPE = "pro"
@@ -38,12 +39,7 @@ export default function ProSchedulePage() {
   }, [division])
 
   async function loadPlayers() {
-    const { data, error } = await supabase
-      .from("players")
-      .select("screen_name")
-      .eq("active", true)
-      .eq("division", division)
-      .order("screen_name", { ascending: true })
+    const { data, error } = await loadProtectedAdminPlayersResult()
 
     if (error) {
       console.error(error)
@@ -51,7 +47,11 @@ export default function ProSchedulePage() {
       return
     }
 
-    setPlayers(data?.map((p: any) => p.screen_name) || [])
+    setPlayers(
+      (data || [])
+        .filter((player) => player.active === true && player.division === division)
+        .map((player) => player.screen_name)
+    )
   }
 
   function playerDropdown(value: string, setValue: (value: string) => void) {

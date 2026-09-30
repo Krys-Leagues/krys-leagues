@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
+import { loadProtectedAdminPlayersResult } from "@/lib/adminPlayersClient"
 
 type Player = {
   id: string
@@ -251,12 +252,7 @@ export default function PlayerMatchingPage() {
       { data: playerData, error: playerError },
       { data: memberData, error: memberError },
     ] = await Promise.all([
-      supabase
-        .from("players")
-        .select("id, screen_name, discord_id")
-        .eq("active", true)
-        .is("discord_id", null)
-        .order("screen_name"),
+      loadProtectedAdminPlayersResult(),
 
       supabase
         .from("discord_members")
@@ -279,7 +275,9 @@ export default function PlayerMatchingPage() {
       return
     }
 
-    setPlayers(playerData || [])
+    setPlayers((playerData || []).filter(
+      (player) => player.active === true && !player.discord_id
+    ))
     setMembers(memberData || [])
   }
 
