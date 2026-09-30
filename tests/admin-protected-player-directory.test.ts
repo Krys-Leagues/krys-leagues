@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises"
 import test from "node:test"
 
 const protectedPlayerPages = [
+  "components/admin/ManagedLeaguePlayersPage.tsx",
   "app/admin/career/page.tsx",
   "app/admin/doubles/teams/page.tsx",
   "app/admin/match/setup/page.tsx",

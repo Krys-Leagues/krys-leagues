@@ -2,12 +2,12 @@
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
+import { loadProtectedAdminPlayersResult } from "@/lib/adminPlayersClient"
 import { supabase } from "@/lib/supabase"
 
 type SeasonRow = { id: string; season_number: number; league_type: string | null }
 type RosterRow = { id: string; division_count: number; status: "draft" | "approved" | "locked" }
 type SlotRow = { player_id: string | null; player_screen_name: string | null; division_number: number; slot_number: number }
-type PlayerState = { id: string; active: boolean }
 
 export function ManagedLeaguePlayersPage({
   leagueKey,
@@ -85,14 +85,14 @@ export function ManagedLeaguePlayersPage({
       const playerIds = Array.from(new Set(loadedSlots.flatMap((slot) => slot.player_id ? [slot.player_id] : [])))
       const states = new Map<string, boolean>()
       if (playerIds.length > 0) {
-        const { data: playerData, error: playerError } = await supabase
-          .from("players")
-          .select("id, active")
-          .in("id", playerIds)
-        if (playerError) {
-          setError(`Roster loaded, but player status could not be read: ${playerError.message}`)
+        const { data: playerData, error: playerError } = await loadProtectedAdminPlayersResult()
+        if (playerError || !playerData) {
+          setError(`Roster loaded, but player status could not be read: ${playerError?.message || "Global Players could not be loaded."}`)
         } else {
-          for (const player of (playerData || []) as PlayerState[]) states.set(player.id, player.active)
+          const requestedIds = new Set(playerIds)
+          for (const player of playerData) {
+            if (requestedIds.has(player.id)) states.set(player.id, Boolean(player.active))
+          }
         }
       }
 
