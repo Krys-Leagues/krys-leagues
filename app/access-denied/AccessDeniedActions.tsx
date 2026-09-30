@@ -12,7 +12,7 @@ export default function AccessDeniedActions() {
   }
   return (
     <div style={row}>
-      <button type="button" onClick={() => router.replace("/dashboard")} style={primary}>Go to Player Dashboard</button>
+      <button type="button" onClick={() => router.replace("/player-dashboard")} style={primary}>Go to Player Dashboard</button>
       <button type="button" onClick={() => void signOut()} style={secondary}>Sign Out</button>
     </div>
   )

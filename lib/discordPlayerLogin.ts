@@ -38,7 +38,7 @@ export function getDiscordPlayerLoginDestination(
   requestedDestination: string | null,
 ) {
   if (resolution?.resolution_status === "matched" && resolution.canonical_player_id) {
-    return requestedDestination || "/dashboard"
+    return requestedDestination || "/player-dashboard"
   }
 
   if (resolution?.resolution_status === "no_match") {

@@ -8,15 +8,15 @@ test("an exact resolved Discord identity reaches the canonical player's destinat
   assert.equal(getDiscordPlayerLoginDestination({
     resolution_status: "matched",
     canonical_player_id: canonicalId,
-  }, null), "/dashboard")
+  }, null), "/player-dashboard")
 })
 
 test("repeated resolution of one Discord identity remains idempotent", () => {
   const resolution = { resolution_status: "matched" as const, canonical_player_id: canonicalId }
   assert.deepEqual(Array.from({ length: 3 }, () => getDiscordPlayerLoginDestination(resolution, null)), [
-    "/dashboard",
-    "/dashboard",
-    "/dashboard",
+    "/player-dashboard",
+    "/player-dashboard",
+    "/player-dashboard",
   ])
 })
 

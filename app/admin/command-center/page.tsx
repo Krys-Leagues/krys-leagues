@@ -203,9 +203,9 @@ const QUICK_LINKS = [
   { label: "Players", href: "/admin/players" },
   { label: "Handicaps", href: "/admin/handicaps" },
   { label: "Career Stats", href: "/admin/career" },
-  { label: "Stroke Setup", href: "/admin/stroke/setup" },
-  { label: "Stroke Results", href: "/admin/stroke/results" },
-  { label: "Stroke Standings", href: "/admin/stroke/standings" },
+  { label: "Stroke Setup", href: "/admin/stroke/season" },
+  { label: "Stroke Results", href: "/admin/stroke/manage" },
+  { label: "Stroke Standings", href: "/admin/stroke/manage" },
   { label: "Combined Records", href: "/admin/records/combined" },
 ]
 

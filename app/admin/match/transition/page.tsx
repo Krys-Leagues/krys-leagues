@@ -275,7 +275,7 @@ export default function MatchTransitionPage() {
 
   if (loading) return <main style={page}><p>Loading Match transition...</p></main>
   return <main style={page}><div style={container}>
-    <button onClick={() => router.push(sourceSeasonId ? `/admin/match/standings?seasonId=${encodeURIComponent(sourceSeasonId)}` : "/admin/match/standings")} style={secondaryButton}>← Match Standings</button>
+    <button onClick={() => router.push(sourceSeasonId ? `/admin/match/standings?seasonId=${encodeURIComponent(sourceSeasonId)}` : "/admin/match")} style={secondaryButton}>← Match Standings</button>
     <h1>Next-Season Match Transition</h1>
     <p style={warning}>This workflow creates a DRAFT roster. Nothing is official until the separate roster approval.</p>
 

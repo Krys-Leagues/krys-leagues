@@ -265,7 +265,7 @@ export default function StrokeTransitionPage() {
 
   if (loading) return <main style={page}><p>Loading Stroke transition...</p></main>
   return <main style={page}><div style={container}>
-    <button onClick={() => router.push("/admin/stroke/standings")} style={secondaryButton}>← Stroke Standings</button>
+    <button onClick={() => router.push(sourceSeasonId ? `/admin/stroke/standings?seasonId=${encodeURIComponent(sourceSeasonId)}` : "/admin/stroke")} style={secondaryButton}>← Stroke Standings</button>
     <h1>Next-Season Stroke Transition</h1>
     <p style={warning}>This workflow creates a DRAFT roster. Nothing is official until the separate roster approval.</p>
 

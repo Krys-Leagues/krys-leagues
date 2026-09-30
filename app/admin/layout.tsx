@@ -99,7 +99,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <h1>Admin Access Denied</h1>
         <p>This Discord account is not authorized for administration.</p>
         <div style={buttonRow}>
-          <button onClick={() => router.replace("/dashboard")} style={primaryButton}>
+          <button onClick={() => router.replace("/player-dashboard")} style={primaryButton}>
             Go to Player Dashboard
           </button>
           <button onClick={logout} style={secondaryButton}>

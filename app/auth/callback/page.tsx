@@ -70,7 +70,7 @@ function CallbackHandler() {
           return
         }
 
-        router.replace("/dashboard")
+        router.replace("/player-dashboard")
         return
       }
 

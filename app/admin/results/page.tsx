@@ -145,7 +145,7 @@ export default function ResultsPage() {
 
     const allMatches =
       scheduleData?.filter(
-        (row: any) => row.player1 && row.player2 && row.player1_id && row.player2_id
+        (row: ScheduleMatch) => row.player1 && row.player2 && row.player1_id && row.player2_id
       ) || []
 
     const scoredResults = (resultData || []) as ResultRow[]
@@ -189,7 +189,7 @@ export default function ResultsPage() {
     setCourse(match.course || "")
   }
 
-  async function postResultToDiscord(result: any) {
+  async function postResultToDiscord(result: Record<string, unknown>) {
     try {
       const res = await fetch("/api/discord/result-card", {
         method: "POST",
@@ -200,7 +200,7 @@ export default function ResultsPage() {
       })
 
       const text = await res.text()
-      let data: any = {}
+      let data: { error?: string } = {}
 
       if (text) {
         data = JSON.parse(text)
@@ -210,8 +210,8 @@ export default function ResultsPage() {
         alert("Result saved, but Discord failed: " + (data.error || "Unknown error"))
         return
       }
-    } catch (err: any) {
-      alert("Result saved, but Discord failed: " + err.message)
+    } catch (err: unknown) {
+      alert("Result saved, but Discord failed: " + (err instanceof Error ? err.message : "Unknown error"))
     }
   }
 
@@ -483,7 +483,7 @@ export default function ResultsPage() {
       {leagueType === "stroke" && (
         <p style={{ color: "orange" }}>
           Stroke results must be entered on the dedicated managed Stroke Results page at
-          {" "}<a href="/admin/stroke/results" style={{ color: "#60a5fa" }}>/admin/stroke/results</a>.
+          {" "}<a href="/admin/stroke/manage" style={{ color: "#60a5fa" }}>/admin/stroke/manage</a>.
         </p>
       )}
     </main>
