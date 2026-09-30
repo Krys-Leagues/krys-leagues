@@ -60,6 +60,9 @@ export function resolveIdentity({
 
   if (exactRawAliasPlayer) {
     const canonicalId = canonicalPlayerId(exactRawAliasPlayer)
+    const aliasUsesIdentityLink = exactRawVerifiedAliases.some(
+      (alias) => alias.playerId !== canonicalId
+    )
     return {
       importedName,
       normalizedName,
@@ -70,7 +73,9 @@ export function resolveIdentity({
       matchedSource: "historical_alias",
       candidates: [],
       autoLinkEligible: true,
-      autoLinkReason: "verified historical alias",
+      autoLinkReason: aliasUsesIdentityLink
+        ? "verified historical alias via canonical identity link"
+        : "verified historical alias",
     }
   }
 

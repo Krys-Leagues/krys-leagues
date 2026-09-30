@@ -59,13 +59,15 @@ test("profile achievements reuse the existing trophy case and omit private revie
 
 test("public profiles expose a large earned sticker showcase with a secondary course link", () => {
   const page = read("app/players/[id]/page.tsx")
+  const grouping = read("lib/playerProfileCourseChallenges.ts")
   const styles = read("app/players/[id]/page.module.css")
   assert.match(page, /Course Challenge Sticker Showcase/)
   assert.match(page, /get_public_player_canonical_identity/)
   assert.doesNotMatch(page, /from\("players"\)/)
   assert.match(page, /Take Me to Course Challenges/)
   assert.match(page, /courseChallengeRewards\.length > 0/)
-  assert.match(page, /rewards\.filter\(reward => reward\.course_slug === course\.slug\)/)
+  assert.match(page, /groupProfileCourseChallengeRewards\(rewards\)/)
+  assert.match(grouping, /rewards\s*\.filter\(\(reward\) => reward\.course_slug === course\.slug\)/)
   assert.match(styles, /\.courseAchievementMedia/)
   assert.match(styles, /grid-template-columns: repeat\(auto-fit, minmax\(min\(100%, 250px\), 1fr\)\)/)
   assert.match(styles, /\.courseChallengeExploreLink/)

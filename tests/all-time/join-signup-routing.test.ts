@@ -36,8 +36,9 @@ test("Bracket / Cup Players uses the protected cups registration route and never
   assert.match(cupsConfig, /image: null/)
   assert.doesNotMatch(cupsConfig, /match\.png/)
   assert.match(register, /data-registration-experience="bracket-cup"/)
-  assert.match(register, /player_waitlist/)
-  assert.match(register, /league_type: leagueKey/)
+  assert.match(register, /rpc\("register_current_discord_player"/)
+  assert.match(register, /p_league_type: leagueKey/)
+  assert.doesNotMatch(register, /from\("player_waitlist"\)/)
   assert.match(register, /isDuplicateWaitlistError/)
 })
 
