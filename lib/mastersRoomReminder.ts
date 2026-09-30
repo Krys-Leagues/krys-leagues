@@ -17,6 +17,23 @@ export type MastersRoomReminderAssignment = {
 
 export type MastersRoomReminderDismissals = Record<string, string>
 
+const MASTERS_ROOM_REMINDER_EXCLUDED_PATHS = [
+  "/access-denied",
+  "/testing-access",
+] as const
+
+const MASTERS_ROOM_REMINDER_EXCLUDED_PREFIXES = [
+  "/admin",
+  "/auth",
+  "/api",
+] as const
+
+export function shouldRenderMastersRoomReminderOnPath(pathname: string | null) {
+  if (!pathname) return false
+  if (MASTERS_ROOM_REMINDER_EXCLUDED_PATHS.includes(pathname as (typeof MASTERS_ROOM_REMINDER_EXCLUDED_PATHS)[number])) return false
+  return !MASTERS_ROOM_REMINDER_EXCLUDED_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))
+}
+
 export function buildPublishedMastersRoomAssignments(
   eventId: string,
   schedule: MajorDayChoice[],

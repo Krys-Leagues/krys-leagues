@@ -5,6 +5,7 @@ import "../components/navigation/artwork-navigation.css";
 import CourseChallengePendingAlert from "@/components/admin/CourseChallengePendingAlert";
 import MastersLiveAnnouncement from "@/components/announcements/MastersLiveAnnouncement";
 import OptionalSignInWelcome from "@/components/auth/OptionalSignInWelcome";
+import MastersRoomReminder from "@/components/home/MastersRoomReminder";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,7 +33,7 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}<CourseChallengePendingAlert /><OptionalSignInWelcome /><MastersLiveAnnouncement /></body>
+      <body className="min-h-full flex flex-col">{children}<CourseChallengePendingAlert /><OptionalSignInWelcome /><MastersLiveAnnouncement /><MastersRoomReminder /></body>
     </html>
   );
 }

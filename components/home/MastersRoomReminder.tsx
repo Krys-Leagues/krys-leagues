@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useRef, useState } from "react"
+import { usePathname } from "next/navigation"
 import type { MajorDayChoice, MajorPlayDay } from "@/lib/majors"
 import {
   buildPublishedMastersRoomAssignments,
@@ -8,6 +9,7 @@ import {
   MASTERS_ROOM_REMINDER_STORAGE_KEY,
   parseMastersRoomReminderDismissals,
   selectCurrentMastersRoomAssignment,
+  shouldRenderMastersRoomReminderOnPath,
   shouldAutoOpenMastersRoomReminder,
   type MastersRoomReminderAssignment,
 } from "@/lib/mastersRoomReminder"
@@ -57,6 +59,8 @@ async function fetchCurrentMastersRoomAssignment() {
 }
 
 export default function MastersRoomReminder() {
+  const pathname = usePathname()
+  const rendersOnCurrentPath = shouldRenderMastersRoomReminderOnPath(pathname)
   const [assignment, setAssignment] = useState<MastersRoomReminderAssignment | null>(null)
   const [mode, setMode] = useState<ReminderMode>("hidden")
   const [refreshing, setRefreshing] = useState(false)
@@ -77,6 +81,8 @@ export default function MastersRoomReminder() {
   }, [])
 
   useEffect(() => {
+    if (!rendersOnCurrentPath) return
+
     const initialRefresh = window.setTimeout(() => void refreshAssignment(), 0)
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) void refreshAssignment()
@@ -91,9 +97,9 @@ export default function MastersRoomReminder() {
       requestId.current += 1
       listener.subscription.unsubscribe()
     }
-  }, [refreshAssignment])
+  }, [refreshAssignment, rendersOnCurrentPath])
 
-  if (!assignment || mode === "hidden") return null
+  if (!rendersOnCurrentPath || !assignment || mode === "hidden") return null
 
   if (mode === "collapsed") {
     return (

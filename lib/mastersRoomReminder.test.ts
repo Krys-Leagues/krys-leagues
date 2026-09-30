@@ -8,6 +8,7 @@ import {
   mastersRoomAssignmentFingerprint,
   parseMastersRoomReminderDismissals,
   selectCurrentMastersRoomAssignment,
+  shouldRenderMastersRoomReminderOnPath,
   shouldAutoOpenMastersRoomReminder,
 } from "./mastersRoomReminder.ts"
 import { formatMastersPlayerSlot } from "./mastersSignupDisplay.ts"
@@ -91,6 +92,33 @@ test("dismissal storage parsing is safe", () => {
   assert.deepEqual(parseMastersRoomReminderDismissals('{"scope":"fingerprint","bad":2}'), { scope: "fingerprint" })
 })
 
+test("the shared reminder renders on normal routes and stays out of admin, auth, and access-error routes", () => {
+  for (const path of [
+    "/",
+    "/majors/masters",
+    "/player-dashboard",
+    "/players/player-id",
+    "/league-play",
+    "/stroke",
+    "/course-challenges/cherry-blossom",
+    "/records",
+  ]) {
+    assert.equal(shouldRenderMastersRoomReminderOnPath(path), true, path)
+  }
+
+  for (const path of [
+    "/admin",
+    "/admin/majors/scheduling",
+    "/auth/callback",
+    "/access-denied",
+    "/testing-access",
+    "/api/records/public",
+  ]) {
+    assert.equal(shouldRenderMastersRoomReminderOnPath(path), false, path)
+  }
+  assert.equal(shouldRenderMastersRoomReminderOnPath(null), false)
+})
+
 test("homepage room time uses local 12-hour display with timezone and rollover", () => {
   const london = formatMastersPlayerSlot("2026-10-01T04:00:00.000Z", "2026-10-01", "Europe/London")
   assert.equal(london.date, "Thursday, October 1")
@@ -102,18 +130,24 @@ test("homepage room time uses local 12-hour display with timezone and rollover",
   assert.doesNotMatch(`${london.time} ${nextDay.time}`, /UTC|GMT[+-]|\b\d{2}:\d{2}\b/u)
 })
 
-test("homepage mount, close/reopen controls, full roster, and mobile guard remain present", () => {
+test("the reminder has one global mount with cross-route state, full roster, and mobile navigation clearance", () => {
   const home = readFileSync(new URL("../app/page.tsx", import.meta.url), "utf8")
+  const rootLayout = readFileSync(new URL("../app/layout.tsx", import.meta.url), "utf8")
   const component = readFileSync(new URL("../components/home/MastersRoomReminder.tsx", import.meta.url), "utf8")
   const css = readFileSync(new URL("../components/home/MastersRoomReminder.module.css", import.meta.url), "utf8")
 
-  assert.match(home, /<MastersRoomReminder \/>/)
+  assert.doesNotMatch(home, /MastersRoomReminder/)
+  assert.equal(rootLayout.match(/<MastersRoomReminder \/>/g)?.length, 1)
   assert.match(component, /SHOW MASTERS ROOM/)
   assert.match(component, /Close Masters room reminder/)
+  assert.match(component, /usePathname/)
+  assert.match(component, /refreshAssignment\(true\)/)
   assert.match(component, /assignment\.roster\.map/)
   assert.doesNotMatch(component, /\.roster\.(?:slice|splice)\(/)
   assert.match(component, /get_my_major_signup_schedule/)
   assert.match(component, /window\.localStorage/)
   assert.match(css, /@media \(max-width: 600px\)/)
-  assert.match(css, /max-height: 68dvh/)
+  assert.match(css, /max-height: 58dvh/)
+  assert.match(css, /bottom: max\(72px/)
+  assert.match(css, /pointer-events: none/)
 })
