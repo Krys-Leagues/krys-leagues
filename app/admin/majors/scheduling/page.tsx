@@ -521,7 +521,7 @@ function EventSetup({ event, events, days, standardTimes, onSaveOpening, onRelea
     { name: "qualifier", label: "Rounds 1 and 2", value: event.qualifier_information },
     { name: "cut", label: "Friday cut", value: event.cut_information },
     { name: "weekend", label: "Weekend fields", value: event.weekend_information },
-    { name: "rooms", label: "Room and play rules", value: event.room_rules },
+    { name: "rooms", label: event.slug === "masters" ? "Masters rules (event-wide)" : "Event-wide rules", value: event.room_rules },
     { name: "stream", label: "Stream information", value: event.stream_information },
   ]
   return <section className={styles.workspace}>

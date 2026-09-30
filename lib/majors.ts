@@ -94,7 +94,7 @@ export type MajorHoleScore = {
 
 export const MAJOR_COURSES = {
   CBE: { name: "Cherry Blossom Easy", pars: [3,4,3,4,3,3,3,4,3,5,3,4,2,3,3,3,3,7] },
-  CBH: { name: "Cherry Blossom Hard", pars: [3,4,3,4,3,3,3,4,3,8,3,3,2,4,3,4,4,6] },
+  CBH: { name: "Cherry Blossom Hard", pars: [3,4,3,4,3,3,3,4,3,5,3,4,2,3,3,3,3,8] },
 } as const
 
 export type MajorCourseCode = keyof typeof MAJOR_COURSES
@@ -126,6 +126,17 @@ export type MajorPlayerScorecard = {
   day_number: 1 | 2 | 3 | 4
   day_label: string
   holes: Array<{ hole_number: number; par: number; strokes: number }>
+}
+
+export type MajorPlayerScoringRound = Omit<MajorPlayerScorecard, "id" | "status"> & {
+  id: string | null
+  status: MajorScorecardStatus | null
+  play_date: string
+  scoring_entry_open: boolean
+  score_access_state: "hidden" | "upcoming" | "open" | "closed"
+  score_visible_at: string | null
+  room_start_at: string | null
+  round_closes_at: string | null
 }
 
 export type MajorResultsPayload = {
@@ -272,6 +283,19 @@ export type MajorWaitlistEntry = {
 export type MajorRoomRosterMember = {
   player_id: string
   player_screen_name_snapshot: string
+}
+
+export type MajorPublishedRoom = {
+  group_id: string
+  play_day_id: string
+  day_number: 1 | 2 | 3 | 4
+  day_label: string
+  play_date: string
+  starts_at: string
+  group_label: string
+  competition: "qualifying" | "main" | "secondary"
+  roster: MajorRoomRosterMember[]
+  is_my_room: boolean
 }
 
 export type MajorWeekendStatus = {

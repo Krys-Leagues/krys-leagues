@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 import type { MajorRoomScorecardPayload } from "@/lib/majorRoomScorecard"
 import styles from "./MajorRoomScorecardPhoto.module.css"
@@ -13,6 +13,9 @@ export default function MajorRoomScorecardPhoto({ playDayId }: { playDayId: stri
   const [eligible, setEligible] = useState(true)
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState("")
+  const [expanded, setExpanded] = useState(false)
+  const previewButton = useRef<HTMLButtonElement | null>(null)
+  const closeButton = useRef<HTMLButtonElement | null>(null)
 
   const load = useCallback(async () => {
     const response = await fetch(`/api/majors/room-scorecard?${new URLSearchParams({ playDayId })}`, { cache: "no-store" })
@@ -35,6 +38,21 @@ export default function MajorRoomScorecardPhoto({ playDayId }: { playDayId: stri
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void load()
   }, [load])
+
+  useEffect(() => {
+    if (!expanded) return
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") closeExpanded()
+    }
+    window.addEventListener("keydown", closeOnEscape)
+    window.requestAnimationFrame(() => closeButton.current?.focus())
+    return () => window.removeEventListener("keydown", closeOnEscape)
+  }, [expanded])
+
+  function closeExpanded() {
+    setExpanded(false)
+    window.requestAnimationFrame(() => previewButton.current?.focus())
+  }
 
   async function upload(file: File | undefined, replace: boolean) {
     if (!file || !payload) return
@@ -73,7 +91,13 @@ export default function MajorRoomScorecardPhoto({ playDayId }: { playDayId: stri
 
       {payload.proof ? (
         <>
-          <div className={styles.imageFrame}>
+          <button
+            ref={previewButton}
+            type="button"
+            className={styles.previewButton}
+            onClick={() => setExpanded(true)}
+            aria-label="Enlarge shared room scorecard"
+          >
             <Image
               key={payload.proof.image_url}
               src={payload.proof.image_url}
@@ -81,17 +105,42 @@ export default function MajorRoomScorecardPhoto({ playDayId }: { playDayId: stri
               width={1400}
               height={900}
               sizes="(max-width: 900px) 100vw, 1000px"
+              loading="eager"
               unoptimized
             />
+            <span>VIEW SCORECARD</span>
+          </button>
+          <div className={styles.proofActions}>
+            <p className={styles.help}>This one photo is shared with every assigned player. Enter and submit only your own 18-hole score below.</p>
+            <label className={styles.secondaryAction} aria-disabled={busy}>
+              {busy ? "SAVING…" : "REPLACE ROOM SCORECARD PHOTO"}
+              <input type="file" accept={ACCEPTED_IMAGES} disabled={busy} onChange={(event) => void upload(event.target.files?.[0], true)} />
+            </label>
           </div>
-          <p className={styles.help}>This one photo is shared with every assigned player. Enter and submit only your own 18-hole score below.</p>
-          <label className={styles.secondaryAction} aria-disabled={busy}>
-            {busy ? "SAVING…" : "REPLACE ROOM SCORECARD PHOTO"}
-            <input type="file" accept={ACCEPTED_IMAGES} disabled={busy} onChange={(event) => void upload(event.target.files?.[0], true)} />
-          </label>
+          {expanded && (
+            <div className={styles.modalBackdrop} role="dialog" aria-modal="true" aria-labelledby={`room-scorecard-expanded-${playDayId}`} onClick={(event) => { if (event.currentTarget === event.target) closeExpanded() }}>
+              <div className={styles.modalCard}>
+                <div className={styles.modalHeading}>
+                  <h2 id={`room-scorecard-expanded-${playDayId}`}>{payload.context.group_label} ROOM SCORECARD</h2>
+                  <button ref={closeButton} type="button" className={styles.modalClose} onClick={closeExpanded} aria-label="Close enlarged scorecard">×</button>
+                </div>
+                <div className={styles.modalImageFrame}>
+                  <Image
+                    src={payload.proof.image_url}
+                    alt={`Enlarged shared scorecard for ${payload.context.group_label}`}
+                    width={1800}
+                    height={1200}
+                    sizes="100vw"
+                    unoptimized
+                  />
+                </div>
+              </div>
+            </div>
+          )}
         </>
       ) : (
         <div className={styles.empty}>
+          <strong>No room scorecard has been uploaded yet.</strong>
           <p>Any player assigned to this complete published room may upload the shared scorecard photo.</p>
           <label className={styles.primaryAction} aria-disabled={busy}>
             {busy ? "UPLOADING…" : "SUBMIT ROOM SCORECARD PHOTO"}

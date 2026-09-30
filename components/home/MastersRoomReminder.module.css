@@ -146,6 +146,25 @@
   opacity: 0.72;
 }
 
+.scoringDock,
+.scoringCard {
+  position: static;
+  order: -1;
+  align-self: flex-end;
+  margin: 10px max(12px, env(safe-area-inset-right)) 0;
+}
+
+.scoringDock .launcher {
+  min-height: 36px;
+  padding: 7px 12px;
+  font-size: 0.66rem;
+}
+
+.scoringCard {
+  width: min(390px, calc(100vw - 24px));
+  max-height: none;
+}
+
 .close:focus-visible,
 .launcher:focus-visible {
   outline: 3px solid #fff;
@@ -171,11 +190,33 @@
     max-width: calc(100vw - 20px);
     font-size: 0.74rem;
   }
+
+  .scoringDock,
+  .scoringCard {
+    left: auto;
+    bottom: auto;
+    width: auto;
+    max-width: calc(100vw - 20px);
+    margin: 8px 10px 0;
+  }
+
+  .scoringCard {
+    width: calc(100vw - 20px);
+    max-height: none;
+    padding: 18px;
+  }
+
+  .scoringDock .launcher {
+    min-height: 34px;
+    width: auto;
+    padding: 6px 10px;
+    font-size: 0.62rem;
+  }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .card,
-  .launcherDock {
+  .card:not(.scoringCard),
+  .launcherDock:not(.scoringDock) {
     animation: masters-room-arrive 180ms ease-out both;
   }
 }

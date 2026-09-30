@@ -61,6 +61,7 @@ async function fetchCurrentMastersRoomAssignment() {
 export default function MastersRoomReminder() {
   const pathname = usePathname()
   const rendersOnCurrentPath = shouldRenderMastersRoomReminderOnPath(pathname)
+  const isMastersScoringRoute = /^\/majors\/[^/]+\/scoring(?:\/|$)/.test(pathname || "")
   const [assignment, setAssignment] = useState<MastersRoomReminderAssignment | null>(null)
   const [mode, setMode] = useState<ReminderMode>("hidden")
   const [refreshing, setRefreshing] = useState(false)
@@ -103,7 +104,7 @@ export default function MastersRoomReminder() {
 
   if (mode === "collapsed") {
     return (
-      <div className={styles.launcherDock}>
+      <div className={`${styles.launcherDock} ${isMastersScoringRoute ? styles.scoringDock : ""}`}>
         <button
           type="button"
           className={styles.launcher}
@@ -121,7 +122,7 @@ export default function MastersRoomReminder() {
   const localSlot = formatMastersPlayerSlot(assignment.startsAt, assignment.officialPlayDate, localTimeZone)
 
   return (
-    <aside className={styles.card} role="dialog" aria-modal="false" aria-labelledby="masters-room-reminder-title">
+    <aside className={`${styles.card} ${isMastersScoringRoute ? styles.scoringCard : ""}`} role="dialog" aria-modal="false" aria-labelledby="masters-room-reminder-title">
       <button
         type="button"
         className={styles.close}

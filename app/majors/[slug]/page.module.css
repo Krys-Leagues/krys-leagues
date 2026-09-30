@@ -176,6 +176,29 @@
   background: #12070e;
   box-shadow: inset 0 0 34px rgba(0, 0, 0, 0.46), 0 14px 28px rgba(0, 0, 0, 0.32);
 }
+.playerActionArea { position: relative; z-index: 2; display: grid; gap: 12px; margin-top: 18px; padding: 16px; border: 1px solid rgba(240, 126, 172, .62); border-radius: 16px; background: linear-gradient(145deg, rgba(8, 34, 23, .96), rgba(24, 8, 17, .96)); box-shadow: 0 16px 34px rgba(0, 0, 0, .24); }
+.coreActions, .roundScoreActions { display: flex; flex-wrap: wrap; gap: 10px; }
+.coreActions button, .roundScoreActions button { min-height: 44px; padding: 11px 15px; border: 1px solid #d76691; border-radius: 10px; background: #7d2449; color: white; font-weight: 900; letter-spacing: .035em; cursor: pointer; }
+.coreActions button:hover, .coreActions button:focus-visible, .roundScoreActions button:hover, .roundScoreActions button:focus-visible { border-color: #ffc0d8; background: #a83263; outline: 2px solid rgba(255, 255, 255, .35); outline-offset: 2px; }
+.roundScoreActions .scoreOpen { border-color: #6be29f; background: #14663d; }
+.roundScoreActions .scoreUpcoming { border-color: #f4c56e; background: #5c4315; }
+.roundScoreActions .scoreClosed { border-color: #585858; background: #2e2e2e; color: #bdbdbd; cursor: default; }
+.scoreAccessMessage { margin: 0; padding: 12px 14px; border: 1px solid #f4c56e; border-radius: 10px; background: rgba(91, 64, 14, .6); color: #fff0c7; font-weight: 850; line-height: 1.5; }
+.playerPanel { display: grid; gap: 14px; margin-top: 2px; padding: 18px; border: 1px solid rgba(255, 255, 255, .2); border-radius: 14px; background: rgba(2, 11, 7, .9); }
+.playerPanel > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.playerPanel > header h2 { margin: 2px 0 0; font-family: Georgia, serif; }
+.playerPanel > header button { border: 1px solid #6c786f; border-radius: 8px; padding: 8px 11px; background: transparent; color: white; cursor: pointer; }
+.rulesText { margin: 0; white-space: pre-wrap; color: #f5eee9; font-size: 1rem; line-height: 1.7; }
+.roomRoundTabs { display: flex; flex-wrap: wrap; gap: 8px; }
+.roomRoundTabs button { padding: 9px 12px; border: 1px solid #51695d; border-radius: 999px; background: #102219; color: white; font-size: .76rem; font-weight: 900; cursor: pointer; }
+.roomRoundTabs .activeRoomRound { border-color: #f07eac; background: #7d2449; }
+.allRoomsGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.allRoomCard { padding: 15px; border: 1px solid #4f685b; border-radius: 12px; background: rgba(10, 29, 20, .92); }
+.allRoomCard.myRoom { border: 2px solid #f6a7c7; box-shadow: 0 0 0 3px rgba(240, 126, 172, .13); }
+.allRoomCard > header { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.allRoomCard h3 { margin: 0; color: #fff; font-family: Georgia, serif; font-size: 1.28rem; }
+.allRoomCard > header span { padding: 4px 7px; border-radius: 999px; background: #f07eac; color: #250612; font-size: .64rem; font-weight: 950; }
+.eventRoomTime { margin: 7px 0 12px; color: #f7b5cf; font-size: 1.05rem; font-weight: 900; }
 
 .mastersBanner { object-fit: contain; }
 
@@ -369,4 +392,7 @@
   .bench { right: 2%; transform: scale(0.72); }
   .blossomTree { width: 80%; }
   .infoBoxGrid { grid-template-columns: 1fr; gap: 0; }
+  .coreActions, .roundScoreActions { display: grid; grid-template-columns: 1fr; }
+  .allRoomsGrid { grid-template-columns: 1fr; }
+  .playerPanel { padding: 14px; }
 }

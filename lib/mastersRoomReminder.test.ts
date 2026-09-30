@@ -100,6 +100,7 @@ test("the shared reminder renders on normal routes and stays out of admin, auth,
   for (const path of [
     "/",
     "/majors/masters",
+    "/majors/masters/scoring",
     "/player-dashboard",
     "/players/player-id",
     "/league-play",
@@ -149,6 +150,9 @@ test("the reminder has one global mount with cross-route state, full roster, and
   assert.match(component, /assignment\.roster\.map/)
   assert.match(component, /assignment\.instructions &&/)
   assert.match(component, /ROOM INSTRUCTIONS/)
+  assert.match(component, /isMastersScoringRoute/)
+  assert.match(component, /styles\.scoringDock/)
+  assert.match(component, /styles\.scoringCard/)
   assert.doesNotMatch(component, /\.roster\.(?:slice|splice)\(/)
   assert.match(component, /get_my_major_signup_schedule/)
   assert.match(component, /window\.localStorage/)
@@ -156,6 +160,8 @@ test("the reminder has one global mount with cross-route state, full roster, and
   assert.match(css, /max-height: 58dvh/)
   assert.match(css, /bottom: max\(72px/)
   assert.match(css, /pointer-events: none/)
+  assert.match(css, /\.scoringDock,[\s\S]*?position: static/)
+  assert.match(css, /\.scoringDock \.launcher[\s\S]*?min-height: 36px/)
 })
 
 test("published instructions are trimmed and blank instructions stay hidden", () => {

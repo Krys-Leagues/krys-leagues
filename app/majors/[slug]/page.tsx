@@ -2,17 +2,19 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
-import { isMajorDayLocked, isMastersScorecardTheme, type MajorDayChoice, type MajorEntry, type MajorEvent, type MajorPlayDay, type MajorSignupStatus, type MajorTimeSlot, type MajorWaitlistStatus } from "@/lib/majors"
+import { isMajorDayLocked, isMastersScorecardTheme, type MajorDayChoice, type MajorEntry, type MajorEvent, type MajorPlayerScoringRound, type MajorPlayDay, type MajorPublishedRoom, type MajorSignupStatus, type MajorTimeSlot, type MajorWaitlistStatus } from "@/lib/majors"
 import { createDiscordAuthCallbackUrl } from "@/lib/authReturnTo"
 import { getAuthenticatedDiscordName } from "@/lib/discordPlayerLogin"
-import { formatMastersPlayerDateTime, formatMastersPlayerSlot, meaningfulMajorSlotLabel, PLAYER_LOCAL_TIME_HEADING } from "@/lib/mastersSignupDisplay"
+import { mastersRoundAccessState, nextMastersScoreAccessTransition, sortMastersPublishedRooms, visibleMastersScoringRounds } from "@/lib/mastersPlayerExperience"
+import { formatMastersAdminTime, formatMastersPlayerDateTime, formatMastersPlayerSlot, meaningfulMajorSlotLabel, PLAYER_LOCAL_TIME_HEADING } from "@/lib/mastersSignupDisplay"
 import { supabase } from "@/lib/supabase"
 import styles from "./page.module.css"
 
 export default function MajorDetailPage() {
   const { slug } = useParams<{ slug: string }>()
+  const router = useRouter()
   const [event, setEvent] = useState<MajorEvent | null>(null)
   const [entries, setEntries] = useState<MajorEntry[]>([])
   const [days, setDays] = useState<MajorPlayDay[]>([])
@@ -26,6 +28,11 @@ export default function MajorDetailPage() {
   const [reviewing, setReviewing] = useState(false)
   const [signupStatus, setSignupStatus] = useState<MajorSignupStatus | null>(null)
   const [playerResolution, setPlayerResolution] = useState<"matched" | "no_match" | "conflict" | null>(null)
+  const [allPublishedRooms, setAllPublishedRooms] = useState<MajorPublishedRoom[]>([])
+  const [scoringRounds, setScoringRounds] = useState<MajorPlayerScoringRound[]>([])
+  const [playerPanel, setPlayerPanel] = useState<"rooms" | "rules" | null>(null)
+  const [roomListRound, setRoomListRound] = useState<number>(1)
+  const [scoreAccessMessage, setScoreAccessMessage] = useState("")
   const [currentTime, setCurrentTime] = useState(0)
 
   const loadEvent = useCallback(async () => {
@@ -33,9 +40,10 @@ export default function MajorDetailPage() {
     const loadedEvent = eventResult.data as MajorEvent | null
     setEvent(loadedEvent)
     if (!loadedEvent) { setMessage(eventResult.error?.message || "This Major is not available."); setLoading(false); return }
-    const [entryResult, dayResult] = await Promise.all([
+    const [entryResult, dayResult, roomResult] = await Promise.all([
       supabase.from("major_entries").select("*").eq("major_event_id", loadedEvent.id).order("registered_at"),
       supabase.from("major_play_days").select("*").eq("major_event_id", loadedEvent.id).order("day_number"),
+      supabase.rpc("get_public_major_published_rooms", { p_major_event_id: loadedEvent.id }),
     ])
     const loadedDays = (dayResult.data as MajorPlayDay[] | null) || []
     const dayIds = loadedDays.map((day) => day.id)
@@ -45,24 +53,32 @@ export default function MajorDetailPage() {
     setDays(loadedDays)
     setSlots((slotResult.data as MajorTimeSlot[] | null) || [])
     setSignupStatus(statusResult.data as MajorSignupStatus | null)
+    const loadedRooms = sortMastersPublishedRooms((roomResult.data as MajorPublishedRoom[] | null) || [])
+    setAllPublishedRooms(loadedRooms)
+    setRoomListRound((current) => loadedRooms.some((room) => room.day_number === current)
+      ? current
+      : loadedRooms.find((room) => room.is_my_room)?.day_number || loadedRooms[0]?.day_number || 1)
     const user = await supabase.auth.getUser()
     if (user.data.user) {
-      const [result, waitlistResult, resolutionResult] = await Promise.all([
+      const [result, waitlistResult, resolutionResult, scoringResult] = await Promise.all([
         supabase.rpc("get_my_major_signup_schedule", { p_major_event_id: loadedEvent.id }),
         supabase.rpc("get_major_waitlist_status", { p_major_event_id: loadedEvent.id }),
         supabase.rpc("resolve_current_discord_player_login"),
+        supabase.rpc("get_my_major_scorecards", { p_major_event_id: loadedEvent.id }),
       ])
       const mine = (result.data as MajorDayChoice[] | null) || []
       setSchedule(mine)
       setChoices(Object.fromEntries(mine.map((choice) => [choice.play_day_id, choice.time_slot_id])))
       setWaitlistStatus((waitlistResult.data as MajorWaitlistStatus | null) || null)
+      setScoringRounds((scoringResult.data as MajorPlayerScoringRound[] | null) || [])
       const resolution = Array.isArray(resolutionResult.data) ? resolutionResult.data[0] : resolutionResult.data
       setPlayerResolution((resolution?.resolution_status as "matched" | "no_match" | "conflict" | undefined) || null)
     } else {
       setWaitlistStatus(null)
       setPlayerResolution(null)
+      setScoringRounds([])
     }
-    setMessage(eventResult.error?.message || entryResult.error?.message || dayResult.error?.message || slotResult.error?.message || "")
+    setMessage(eventResult.error?.message || entryResult.error?.message || dayResult.error?.message || slotResult.error?.message || roomResult.error?.message || "")
     setCurrentTime(Date.now())
     setLoading(false)
   }, [slug])
@@ -74,9 +90,11 @@ export default function MajorDetailPage() {
   }, [loadEvent])
 
   useEffect(() => {
-    const clock = window.setInterval(() => setCurrentTime(Date.now()), 60_000)
-    return () => window.clearInterval(clock)
-  }, [])
+    const transition = nextMastersScoreAccessTransition(scoringRounds, currentTime)
+    if (transition === null) return
+    const clock = window.setTimeout(() => setCurrentTime(Date.now()), Math.max(25, transition - currentTime + 25))
+    return () => window.clearTimeout(clock)
+  }, [currentTime, scoringRounds])
 
   async function signIn() {
     await supabase.auth.signInWithOAuth({ provider: "discord", options: { redirectTo: createDiscordAuthCallbackUrl("player") } })
@@ -106,6 +124,21 @@ export default function MajorDetailPage() {
     await loadEvent()
   }
 
+  function openRoundScores(round: MajorPlayerScoringRound) {
+    const state = mastersRoundAccessState(round, currentTime)
+    if (state === "upcoming" && round.room_start_at) {
+      const opening = formatMastersPlayerSlot(round.room_start_at, round.play_date, Intl.DateTimeFormat().resolvedOptions().timeZone || event?.schedule_timezone || "America/New_York")
+      setScoreAccessMessage(`YOUR ROUND ${round.day_number} ROOM HAS NOT STARTED YET. Score entry opens at ${opening.date}, ${opening.time}.`)
+      return
+    }
+    if (state === "closed") {
+      setScoreAccessMessage(`ROUND ${round.day_number} SCORE ENTRY IS CLOSED.`)
+      return
+    }
+    if (state !== "open") return
+    router.push(`/majors/${slug}/scoring?round=${round.day_number}&playDayId=${encodeURIComponent(round.play_day_id)}`)
+  }
+
   if (loading) return <main className={styles.loading}>Loading Major…</main>
   if (!event) return <main className={styles.loading}><Link href="/majors">← Four Majors</Link>{slug === "test" ? <><h1>TEST EVENT</h1><p>Authenticated trusted-tester access is required. TEST DATA — NOT OFFICIAL.</p><button onClick={signIn} className={styles.primaryButton}>Sign in with Discord</button></> : <p>{message}</p>}</main>
 
@@ -116,7 +149,7 @@ export default function MajorDetailPage() {
   const signupDisabled = schedule.length > 0 ? !event.signup_open : !(signupState === "open" || signupState === "priority" || waitlistAvailable)
   const weekendStatus = schedule[0]?.weekend_competition_status || "pending"
   const secondaryFieldName = event.secondary_trophy_display_name || "Secondary Trophy Field"
-  const localTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"
+  const localTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || event.schedule_timezone || "America/New_York"
   const allFourSelected = days.length === 4 && days.every((day) => Boolean(choices[day.id]))
   const currentSignupStep = schedule.length > 0 ? 3 : reviewing ? 2 : 1
   const publishedRooms = days
@@ -127,7 +160,7 @@ export default function MajorDetailPage() {
     { title: "Rounds 1 and 2", body: event.qualifier_information },
     { title: "Friday cut", body: event.cut_information },
     { title: "Weekend fields", body: event.weekend_information },
-    { title: "Room and play rules", body: event.room_rules },
+    ...(!masters ? [{ title: "Room and play rules", body: event.room_rules }] : []),
     { title: "Stream information", body: event.stream_information },
   ].filter((block): block is { title: string; body: string } => Boolean(block.body))
 
@@ -150,6 +183,21 @@ export default function MajorDetailPage() {
       </section>
       <div className={styles.brandRow}><Image src="/league-media/BIG LOGO TRANSPARENT.png" width={136} height={136} alt="Krys Leagues" className={styles.logo} priority /><div><h2 className={styles.eventTitle}>{testEvent ? "TEST EVENT" : masters ? "THE MASTERS" : event.name}</h2><p className={styles.eventIdentity}>{testEvent ? "TEST DATA — NOT OFFICIAL" : masters ? "MINI GOLF MASTERS" : "MAJOR CHAMPIONSHIP"}</p><p className={styles.subtitle}>{testEvent ? "The real Major workflow, rehearsed safely" : masters ? "CHERRY BLOSSOM" : "Four-round mini golf championship"}</p></div></div>
       {masters && <div className={styles.mastersFeature}><Image src="/approved-pages/the masters.jpg" alt="Cherry blossom Masters course artwork" fill sizes="(max-width: 700px) 100vw, 1036px" className={styles.mastersBanner} priority /><div className={styles.featureSheen} /></div>}
+      {masters && <section className={styles.playerActionArea} aria-label="Masters player actions">
+        <div className={styles.coreActions}>
+          <button type="button" onClick={() => { setPlayerPanel("rooms"); setScoreAccessMessage("") }}>VIEW MASTERS ROOMS</button>
+          <button type="button" onClick={() => { setPlayerPanel("rules"); setScoreAccessMessage("") }}>MASTERS RULES</button>
+        </div>
+        {visibleMastersScoringRounds(scoringRounds, currentTime).length > 0 && <div className={styles.roundScoreActions}>
+          {visibleMastersScoringRounds(scoringRounds, currentTime).map((round) => {
+            const state = mastersRoundAccessState(round, currentTime)
+            return <button key={round.play_day_id} type="button" disabled={state === "closed"} className={state === "open" ? styles.scoreOpen : state === "closed" ? styles.scoreClosed : styles.scoreUpcoming} onClick={() => openRoundScores(round)}>{state === "closed" ? `ROUND ${round.day_number} CLOSED` : `ROUND ${round.day_number} SCORES`}</button>
+          })}
+        </div>}
+        {scoreAccessMessage && <p className={styles.scoreAccessMessage} role="status">{scoreAccessMessage}</p>}
+        {playerPanel === "rules" && <section className={styles.playerPanel} id="masters-rules"><header><div><p className={styles.eyebrow}>Event-wide</p><h2>MASTERS RULES</h2></div><button type="button" onClick={() => setPlayerPanel(null)} aria-label="Close Masters rules">Close</button></header>{event.room_rules ? <p className={styles.rulesText}>{event.room_rules}</p> : <p className={styles.notice}>Official Masters rules have not been published yet.</p>}</section>}
+        {playerPanel === "rooms" && <section className={styles.playerPanel} id="masters-rooms"><header><div><p className={styles.eyebrow}>Complete published rooms</p><h2>MASTERS ROOMS</h2></div><button type="button" onClick={() => setPlayerPanel(null)} aria-label="Close Masters rooms">Close</button></header><nav className={styles.roomRoundTabs} aria-label="Masters room rounds">{days.map((day) => <button key={day.id} type="button" className={roomListRound === day.day_number ? styles.activeRoomRound : ""} onClick={() => setRoomListRound(day.day_number)}>ROUND {day.day_number}</button>)}</nav><div className={styles.allRoomsGrid}>{allPublishedRooms.filter((room) => room.day_number === roomListRound).map((room) => <article key={room.group_id} className={`${styles.allRoomCard} ${room.is_my_room ? styles.myRoom : ""}`}><header><h3>{room.group_label}</h3>{room.is_my_room && <span>YOUR ROOM</span>}</header><p className={styles.eventRoomTime}>{formatMastersAdminTime(room.starts_at, event.schedule_timezone)}</p><div className={styles.roomRoster}>{room.roster.map((member) => <span key={member.player_id}>{member.player_screen_name_snapshot}</span>)}</div></article>)}</div>{!allPublishedRooms.some((room) => room.day_number === roomListRound) && <p className={styles.notice}>No complete published rooms are available for this round yet.</p>}</section>}
+      </section>}
       <div className={styles.statusRow}><span className={styles.badge}>{event.status}</span><span className={`${styles.badge} ${styles[signupState]}`}>Signup {signupState}</span><span className={styles.capacity}>{signupStatus?.capacity ? `${signupStatus.spots_claimed} / ${signupStatus.capacity} spots claimed` : `${entries.length} claimed · field capacity not set`}</span></div>
       <p className={styles.meta}>{event.year || "Year to be announced"} · {event.starts_at ? formatMastersPlayerDateTime(event.starts_at, localTimeZone) : "To be announced"}</p>
       {event.description && <p className={styles.description}>{event.description}</p>}
