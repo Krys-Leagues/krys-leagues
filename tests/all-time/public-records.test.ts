@@ -100,6 +100,14 @@ test("Player Profile separates Easy/Hard from the paired Combined showcase", () 
   assert.doesNotMatch(profile, /NOT LINKED|identity review|source_rank/i)
 })
 
+test("Player Profile loads the authoritative KWT combined dataset once per request", () => {
+  const api = read("app/api/records/public/route.ts")
+  const combinedProfileBranch = api.slice(api.indexOf('category === "Combined"'))
+  assert.match(api, /loadCombinedRowsForMaps\(supabase, maps\)/)
+  assert.match(api, /const rowsByMap = new Map/)
+  assert.doesNotMatch(combinedProfileBranch, /Promise\.all\(maps\.map[\s\S]*loadCombinedRows\(supabase, baseMap\)/)
+})
+
 test("Player Profile uses white numeric ranks without medals, podium colors, or best-current treatment", () => {
   const profile = read("components/records/PlayerCourseRecords.tsx"), styles = read("components/records/PublicRecordsUI.module.css")
   assert.doesNotMatch(profile, /<svg|profileMedal|Gold, rank|Silver, rank|Bronze, rank/)

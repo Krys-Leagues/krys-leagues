@@ -24,6 +24,20 @@ async function loadCombinedRows(supabase: ReturnType<typeof publicRecordsClient>
   return [...((nonKwt ?? []) as PublicCombinedRecord[]), ...strictKwtPublicRows((kwt ?? []) as StrictKwtCombinedRow[], baseMap)]
 }
 
+async function loadCombinedRowsForMaps(supabase: ReturnType<typeof publicRecordsClient>, baseMaps: string[]) {
+  const rowsByMap = new Map<string, PublicCombinedRecord[]>(baseMaps.map(baseMap => [baseMap, []]))
+  if (!baseMaps.length) return rowsByMap
+  const [{ data: nonKwt, error: nonKwtError }, { data: kwt, error: kwtError }] = await Promise.all([
+    supabase.from("all_time_combined_best_records").select("id, base_map, player_id, easy_score, hard_score, combined_score, historical_player_name, player:players(screen_name)").in("base_map", baseMaps).neq("source_authority", "KWT"),
+    supabase.rpc("get_public_kwt_combined_records"),
+  ])
+  if (nonKwtError) throw nonKwtError
+  if (kwtError) throw kwtError
+  for (const row of (nonKwt ?? []) as PublicCombinedRecord[]) rowsByMap.get(row.base_map)?.push(row)
+  for (const baseMap of baseMaps) rowsByMap.get(baseMap)?.push(...strictKwtPublicRows((kwt ?? []) as StrictKwtCombinedRow[], baseMap))
+  return rowsByMap
+}
+
 export async function GET(request: Request) {
   try {
     const params = new URL(request.url).searchParams, view = params.get("view"), supabase = publicRecordsClient()
@@ -72,8 +86,8 @@ export async function GET(request: Request) {
         for (const { course, result } of results) { if (result.error) throw result.error; const own = rankByScore((result.data ?? []) as PublicSingleRecord[]).find(row => row.player_id === playerId); if (own) rows.push({ key: course.id, rank: own.rank, course: course.base_map, score: own.score }) }
       } else {
         const maps = [...new Set(courses.map(course => course.base_map))]
-        const results = await Promise.all(maps.map(async baseMap => ({ baseMap, rows: await loadCombinedRows(supabase, baseMap) })))
-        for (const { baseMap, rows: mapRows } of results) { const own = rankByCombinedTotal(mapRows).find(row => row.player_id === playerId); if (own) rows.push({ key: baseMap, rank: own.rank, course: baseMap, easyScore: own.easy_score, hardScore: own.hard_score, totalScore: own.combined_score }) }
+        const rowsByMap = await loadCombinedRowsForMaps(supabase, maps)
+        for (const baseMap of maps) { const own = rankByCombinedTotal(rowsByMap.get(baseMap) ?? []).find(row => row.player_id === playerId); if (own) rows.push({ key: baseMap, rank: own.rank, course: baseMap, easyScore: own.easy_score, hardScore: own.hard_score, totalScore: own.combined_score }) }
       }
       return Response.json({ rows: rows.sort((a, b) => (a.rank ?? 9999) - (b.rank ?? 9999) || a.course.localeCompare(b.course)) }, { headers: { "Cache-Control": "public, max-age=30, s-maxage=120" } })
     }
