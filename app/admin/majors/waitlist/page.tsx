@@ -2,7 +2,8 @@
 
 import Link from "next/link"
 import { useCallback, useEffect, useState } from "react"
-import { type MajorEvent, type MajorWaitlistEntry, formatMajorDate } from "@/lib/majors"
+import { type MajorEvent, type MajorWaitlistEntry } from "@/lib/majors"
+import { formatMastersAdminDateTime } from "@/lib/mastersSignupDisplay"
 import { supabase } from "@/lib/supabase"
 
 const MASTERS_EVENT_ID = "c3eb8cee-586d-464b-b3fc-026a975b015e"
@@ -73,7 +74,7 @@ export default function MastersWaitlistAdminPage() {
       <section style={panel}>
         <h2>Queue</h2>
         {entries.length === 0 ? <p style={muted}>The wait list is empty.</p> : <div style={list}>{entries.map((entry) => <article key={entry.id} style={card}>
-          <div><strong>{entry.state === "waiting" ? `#${waiting.findIndex((item) => item.id === entry.id) + 1} · ` : ""}{entry.screen_name}</strong><code style={uuid}>{entry.player_id}</code><span style={muted}>Joined {formatMajorDate(entry.joined_at)} · {entry.state}</span>{entry.choices.length > 0 && <div style={choices}>{entry.choices.map((choice) => <span key={choice.play_day_id}>{choice.day_label || choice.play_date || choice.play_day_id}: {choice.slot_label || (choice.starts_at ? formatMajorDate(choice.starts_at) : choice.time_slot_id)}</span>)}</div>}{entry.notes && <p style={muted}>Note: {entry.notes}</p>}</div>
+          <div><strong>{entry.state === "waiting" ? `#${waiting.findIndex((item) => item.id === entry.id) + 1} · ` : ""}{entry.screen_name}</strong><code style={uuid}>{entry.player_id}</code><span style={muted}>Joined {formatMastersAdminDateTime(entry.joined_at, selectedEvent?.schedule_timezone)} · {entry.state}</span>{entry.choices.length > 0 && <div style={choices}>{entry.choices.map((choice) => <span key={choice.play_day_id}>{choice.day_label || choice.play_date || choice.play_day_id}: {choice.starts_at ? formatMastersAdminDateTime(choice.starts_at, selectedEvent?.schedule_timezone) : choice.time_slot_id}{choice.slot_label ? ` · ${choice.slot_label}` : ""}</span>)}</div>}{entry.notes && <p style={muted}>Note: {entry.notes}</p>}</div>
           {entry.state === "waiting" && <div style={actions}><button type="button" onClick={() => void promote(entry)} disabled={busyId === entry.id} style={promoteButton}>{busyId === entry.id ? "Working…" : "PROMOTE"}</button><button type="button" onClick={() => void remove(entry)} disabled={busyId === entry.id} style={removeButton}>REMOVE</button></div>}
         </article>)}</div>}
       </section>

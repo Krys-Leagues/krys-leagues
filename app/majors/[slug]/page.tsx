@@ -4,10 +4,10 @@ import Link from "next/link"
 import Image from "next/image"
 import { useParams } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
-import { formatMajorDate, formatMajorDeadline, formatMajorLocalTime, isMajorDayLocked, isMastersScorecardTheme, type MajorDayChoice, type MajorEntry, type MajorEvent, type MajorPlayDay, type MajorSignupStatus, type MajorTimeSlot, type MajorWaitlistStatus } from "@/lib/majors"
+import { isMajorDayLocked, isMastersScorecardTheme, type MajorDayChoice, type MajorEntry, type MajorEvent, type MajorPlayDay, type MajorSignupStatus, type MajorTimeSlot, type MajorWaitlistStatus } from "@/lib/majors"
 import { createDiscordAuthCallbackUrl } from "@/lib/authReturnTo"
 import { getAuthenticatedDiscordName } from "@/lib/discordPlayerLogin"
-import { meaningfulMajorSlotLabel, PLAYER_LOCAL_TIME_HEADING } from "@/lib/mastersSignupDisplay"
+import { formatMastersPlayerDateTime, formatMastersPlayerSlot, meaningfulMajorSlotLabel, PLAYER_LOCAL_TIME_HEADING } from "@/lib/mastersSignupDisplay"
 import { supabase } from "@/lib/supabase"
 import styles from "./page.module.css"
 
@@ -116,7 +116,7 @@ export default function MajorDetailPage() {
   const signupDisabled = schedule.length > 0 ? !event.signup_open : !(signupState === "open" || signupState === "priority" || waitlistAvailable)
   const weekendStatus = schedule[0]?.weekend_competition_status || "pending"
   const secondaryFieldName = event.secondary_trophy_display_name || "Secondary Trophy Field"
-  const localTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
+  const localTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"
   const allFourSelected = days.length === 4 && days.every((day) => Boolean(choices[day.id]))
   const currentSignupStep = schedule.length > 0 ? 3 : reviewing ? 2 : 1
   const publishedRooms = days
@@ -151,7 +151,7 @@ export default function MajorDetailPage() {
       <div className={styles.brandRow}><Image src="/league-media/BIG LOGO TRANSPARENT.png" width={136} height={136} alt="Krys Leagues" className={styles.logo} priority /><div><h2 className={styles.eventTitle}>{testEvent ? "TEST EVENT" : masters ? "THE MASTERS" : event.name}</h2><p className={styles.eventIdentity}>{testEvent ? "TEST DATA — NOT OFFICIAL" : masters ? "MINI GOLF MASTERS" : "MAJOR CHAMPIONSHIP"}</p><p className={styles.subtitle}>{testEvent ? "The real Major workflow, rehearsed safely" : masters ? "CHERRY BLOSSOM" : "Four-round mini golf championship"}</p></div></div>
       {masters && <div className={styles.mastersFeature}><Image src="/approved-pages/the masters.jpg" alt="Cherry blossom Masters course artwork" fill sizes="(max-width: 700px) 100vw, 1036px" className={styles.mastersBanner} priority /><div className={styles.featureSheen} /></div>}
       <div className={styles.statusRow}><span className={styles.badge}>{event.status}</span><span className={`${styles.badge} ${styles[signupState]}`}>Signup {signupState}</span><span className={styles.capacity}>{signupStatus?.capacity ? `${signupStatus.spots_claimed} / ${signupStatus.capacity} spots claimed` : `${entries.length} claimed · field capacity not set`}</span></div>
-      <p className={styles.meta}>{event.year || "Year to be announced"} · {formatMajorDate(event.starts_at)}</p>
+      <p className={styles.meta}>{event.year || "Year to be announced"} · {event.starts_at ? formatMastersPlayerDateTime(event.starts_at, localTimeZone) : "To be announced"}</p>
       {event.description && <p className={styles.description}>{event.description}</p>}
       <section className={styles.commitmentCard}>
         <p className={styles.eyebrow}>You are signing up to play four rounds</p>
@@ -164,13 +164,13 @@ export default function MajorDetailPage() {
         <p className={styles.eyebrow}>Your job right now</p>
         <h2>Choose one preferred playing time for each of the four rounds</h2>
         <p className={styles.signupExplainer}>Your Thursday, Friday, Saturday, and Sunday choices are independent. You do not have to choose the same time every day. Room assignments are made later.</p>
-        <p className={styles.timezone}>Times shown in: <strong>{localTimeZone}</strong></p>
+        <p className={styles.timezone}><strong>All dates and times below are shown in your local time.</strong></p>
         {event.signup_instructions && <p className={styles.description}>{event.signup_instructions}</p>}
         {playerResolution === "no_match" && <p className={styles.notice}>Your Discord name will be used as your initial Krys Leagues screen name for this entry.</p>}
         <p className={styles.cutNotice}>Choose one independent time for Thursday, Friday, Saturday, and Sunday. After Friday’s Round 2, players in both weekend fields continue Saturday and Sunday; every saved weekend time remains intact.</p>
         {schedule.length > 0 && <p className={styles.assignment}>{event.weekend_status_published_at ? <>Weekend status: <strong>{weekendStatus === "main" ? "Masters Main Event" : weekendStatus === "secondary" ? secondaryFieldName : "Weekend field status pending"}</strong></> : <strong>Weekend field status pending</strong>}</p>}
-        {signupState === "upcoming" && <p className={styles.notice}>Public signup opens {formatMajorDate(signupStatus?.public_signup_opens_at || null)}. Priority access is not active for this first Major.</p>}
-        {signupState === "priority" && <p className={styles.notice}>Priority signup is open for eligible previous-Major players. Public signup opens {formatMajorDate(signupStatus?.public_signup_opens_at || null)}.</p>}
+        {signupState === "upcoming" && <p className={styles.notice}>Public signup opens {signupStatus?.public_signup_opens_at ? formatMastersPlayerDateTime(signupStatus.public_signup_opens_at, localTimeZone) : "at a time to be announced"}. Priority access is not active for this first Major.</p>}
+        {signupState === "priority" && <p className={styles.notice}>Priority signup is open for eligible previous-Major players. Public signup opens {signupStatus?.public_signup_opens_at ? formatMastersPlayerDateTime(signupStatus.public_signup_opens_at, localTimeZone) : "at a time to be announced"}.</p>}
         {signupState === "full" && schedule.length === 0 && !waitlistStatus?.entry_id && <p className={styles.notice}>The current field is full. Choose preferred times below to join the wait list.</p>}
         {waitlistStatus?.state === "waiting" && <p className={styles.notice}>You are on the Masters wait list — position {waitlistStatus.position || "pending"}. Your preferred times are saved.</p>}
         {waitlistStatus?.state === "promoted" && <p className={styles.notice}>Your Masters wait-list entry was promoted to the confirmed field.</p>}
@@ -185,20 +185,25 @@ export default function MajorDetailPage() {
             <legend><span>{dayName.day}</span>{dayName.round}</legend><p className={styles.dayContext}>Official round date: {formatPlayDate(day.play_date)}</p>
             <p className={styles.availabilityNote}>{PLAYER_LOCAL_TIME_HEADING}</p>
             {daySlots.length ? daySlots.map((slot) => {
-              const dateShift = localDateShift(day.play_date, slot.starts_at, localTimeZone)
+              const localSlot = formatMastersPlayerSlot(slot.starts_at, day.play_date, localTimeZone)
               const slotLabel = meaningfulMajorSlotLabel(slot.label)
-              return <label key={slot.id} className={`${styles.slotLabel} ${choices[day.id] === slot.id ? styles.selected : ""}`}><input type="radio" name={day.id} checked={choices[day.id] === slot.id} onChange={() => { setChoices((old) => ({ ...old, [day.id]: slot.id })); setReviewing(false) }} /><span className={styles.localDateTime}>{slotLabel && <span className={styles.slotDescriptor}>{slotLabel}</span>}<strong>{formatMajorLocalDate(slot.starts_at, localTimeZone)}</strong><b>{formatMajorLocalTime(slot.starts_at, localTimeZone)}</b><small>{event.schedule_timezone !== localTimeZone ? `${formatMajorLocalTime(slot.starts_at, event.schedule_timezone)} · event time` : "Event reference time"}</small>{dateShift && <em>{dateShift}</em>}</span></label>
+              return <label key={slot.id} className={`${styles.slotLabel} ${choices[day.id] === slot.id ? styles.selected : ""}`}><input type="radio" name={day.id} checked={choices[day.id] === slot.id} onChange={() => { setChoices((old) => ({ ...old, [day.id]: slot.id })); setReviewing(false) }} /><span className={styles.localDateTime}>{slotLabel && <span className={styles.slotDescriptor}>{slotLabel}</span>}<strong>{localSlot.date}</strong><b>{localSlot.time}</b>{localSlot.dayShift && <em>{localSlot.dayShift}</em>}</span></label>
             }) : <p className={styles.notice}>No times available yet.</p>}
-            <p className={styles.lockDeadline}>{dayName.day} selections lock:<strong>{day.selection_locks_at ? formatMajorDeadline(day.selection_locks_at, localTimeZone) : "Deadline appears after the first time is scheduled"}</strong><span>{localTimeZone}</span></p>
+            <p className={styles.lockDeadline}>{dayName.day} selections lock:<strong>{day.selection_locks_at ? formatMastersPlayerDateTime(day.selection_locks_at, localTimeZone) : "Deadline appears after the first time is scheduled"}</strong><span>Local time</span></p>
             {locked && <p className={styles.locked}>{firstScheduledTimeHasBegun ? "Selection locked" : "Selection locked — tournament admins can still help"}</p>}
           </fieldset>
         })}</div>}
         {days.length === 4 && !reviewing && !waitlistStatus?.entry_id && <button onClick={() => setReviewing(true)} disabled={saving || signupDisabled || !allFourSelected} className={styles.primaryButton}>{schedule.length ? "REVIEW MY UPDATED TIMES" : waitlistAvailable ? "REVIEW MY WAIT-LIST TIMES" : "REVIEW MY 4 DAY SIGNUP"}</button>}
         {reviewing && <section className={styles.signupReview}><p className={styles.eyebrow}>{waitlistAvailable ? "Join the queue" : "You’re almost in"}</p><h3>Confirm your four playing times</h3><div>{days.map((day) => {
           const slot = slots.find((item) => item.id === choices[day.id])
-          return <p key={day.id}><span>{DAY_LABELS[day.day_number - 1].day}</span><strong>{slot ? <>{formatMajorLocalDate(slot.starts_at, localTimeZone)}<small>{formatMajorLocalTime(slot.starts_at, localTimeZone)}</small></> : "Not selected"}</strong></p>
+          const localSlot = slot ? formatMastersPlayerSlot(slot.starts_at, day.play_date, localTimeZone) : null
+          return <p key={day.id}><span>{DAY_LABELS[day.day_number - 1].day}</span><strong>{localSlot ? <>{localSlot.date}<small>{localSlot.time}</small>{localSlot.dayShift && <em>{localSlot.dayShift}</em>}</> : "Not selected"}</strong></p>
         })}</div><p className={styles.reviewHelp}>{waitlistAvailable ? "Your choices are preferences only and do not reserve a confirmed Masters spot." : "These are preferred scheduling times. Each day stays independently editable until that day’s lock deadline."}</p><div className={styles.reviewActions}><button type="button" className={styles.secondaryButton} onClick={() => setReviewing(false)}>Change a time</button><button type="button" onClick={signup} disabled={saving || signupDisabled || !allFourSelected} className={styles.primaryButton}>{saving ? "Saving…" : waitlistAvailable ? "JOIN WAIT LIST" : schedule.length ? "CONFIRM UPDATED TIMES" : testEvent ? "CONFIRM MY TEST ENTRY" : masters ? "CONFIRM MY MASTERS ENTRY" : "CONFIRM MY MAJOR ENTRY"}</button></div></section>}
-        {publishedRooms.length > 0 && <section className={styles.roomSection}><p className={styles.eyebrow}>Your published rooms</p><h3>Who you’re playing with</h3><div className={styles.roomGrid}>{publishedRooms.map(({ day, assignment }) => assignment && <article key={day.id} className={styles.roomCard}><header><span>{DAY_LABELS[day.day_number - 1].day}</span><strong>{DAY_LABELS[day.day_number - 1].round}</strong></header><p className={styles.roomTime}>{assignment.starts_at ? formatMajorLocalTime(assignment.starts_at, localTimeZone) : "Time pending"}<small>{localTimeZone}</small></p><h4>{assignment.group_label}</h4><div className={styles.roomRoster}>{assignment.room_roster?.map((member) => <span key={member.player_id}>{member.player_screen_name_snapshot}</span>)}</div>{assignment.assignment_location && <div className={styles.roomDetail}><small>Course / lobby</small><strong>{assignment.assignment_location}</strong></div>}{assignment.group_instructions && <div className={styles.roomDetail}><small>Instructions</small><p>{assignment.group_instructions}</p></div>}</article>)}</div></section>}
+        {publishedRooms.length > 0 && <section className={styles.roomSection}><p className={styles.eyebrow}>Your published rooms</p><h3>Who you’re playing with</h3><div className={styles.roomGrid}>{publishedRooms.map(({ day, assignment }) => {
+          if (!assignment) return null
+          const localSlot = assignment.starts_at ? formatMastersPlayerSlot(assignment.starts_at, day.play_date, localTimeZone) : null
+          return <article key={day.id} className={styles.roomCard}><header><span>{DAY_LABELS[day.day_number - 1].day}</span><strong>{DAY_LABELS[day.day_number - 1].round}</strong></header><p className={styles.roomTime}>{localSlot ? <>{localSlot.time}<small>{localSlot.date} · Local time</small>{localSlot.dayShift && <em>{localSlot.dayShift}</em>}</> : "Time pending"}</p><h4>{assignment.group_label}</h4><div className={styles.roomRoster}>{assignment.room_roster?.map((member) => <span key={member.player_id}>{member.player_screen_name_snapshot}</span>)}</div>{assignment.assignment_location && <div className={styles.roomDetail}><small>Course / lobby</small><strong>{assignment.assignment_location}</strong></div>}{assignment.group_instructions && <div className={styles.roomDetail}><small>Instructions</small><p>{assignment.group_instructions}</p></div>}</article>
+        })}</div></section>}
       </section>}
       {message && <p className={styles.notice}>{message}</p>}
     </header>
@@ -226,17 +231,6 @@ const DAY_LABELS = [
 
 const SIGNUP_STEPS = ["Learn about the Major", "Choose 4 times", "Review", "Registered"] as const
 
-function formatMajorLocalDate(value: string, timeZone: string) {
-  return new Intl.DateTimeFormat(undefined, { weekday: "short", month: "short", day: "numeric", timeZone }).format(new Date(value))
-}
-
 function formatPlayDate(value: string) {
   return new Intl.DateTimeFormat(undefined, { weekday: "short", month: "short", day: "numeric", year: "numeric", timeZone: "UTC" }).format(new Date(`${value}T12:00:00Z`))
-}
-
-function localDateShift(playDate: string, startsAt: string, timeZone: string) {
-  const localDate = new Intl.DateTimeFormat("en-CA", { year: "numeric", month: "2-digit", day: "2-digit", timeZone }).format(new Date(startsAt))
-  if (localDate > playDate) return "Next day locally"
-  if (localDate < playDate) return "Previous day locally"
-  return ""
 }

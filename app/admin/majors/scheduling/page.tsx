@@ -3,8 +3,6 @@
 import Link from "next/link"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import {
-  formatMajorDeadline,
-  formatMajorLocalTime,
   isMajorDayLocked,
   majorEventLocalTimeToIso,
   toDateTimeLocal,
@@ -21,6 +19,7 @@ import {
   type MajorTimeSlot,
   type MajorWeekendStatus,
 } from "@/lib/majors"
+import { formatMastersAdminDateTime, formatMastersAdminTime, formatMastersOfficialDate, mastersAdminTimeZoneLabel } from "@/lib/mastersSignupDisplay"
 import {
   globalPlayerIdentitySummary,
   globalPlayerMatchesSearch,
@@ -511,7 +510,7 @@ function EventSetup({ event, events, days, standardTimes, onSaveOpening, onRelea
         </form>
         <div className={styles.deadlineList}>{DAY_NAMES.map((name, index) => {
           const day = days.find((item) => item.day_number === index + 1)
-          return <div key={name.short}><strong>{name.short}</strong><span>{day?.selection_locks_at ? `${formatMajorDeadline(day.selection_locks_at, event.schedule_timezone)} · ${event.schedule_timezone}` : "Add an available time to calculate the deadline"}</span></div>
+          return <div key={name.short}><strong>{name.short}</strong><span>{day?.selection_locks_at ? formatMastersAdminDateTime(day.selection_locks_at, event.schedule_timezone) : "Add an available time to calculate the deadline"}</span></div>
         })}</div>
       </div>
     </div>
@@ -527,7 +526,7 @@ function EventSetup({ event, events, days, standardTimes, onSaveOpening, onRelea
     })}</div></div>
 
     <section className={`${styles.panel} ${styles.standardTimesPanel}`}>
-      <div className={styles.inlineHeading}><div><p className={styles.step}>Define once</p><h3>Standard signup times</h3><p>Enter normal clock times in {event.schedule_timezone}, then explicitly apply them to all four official dates. Each day remains independently editable afterward.</p></div><button type="button" className={styles.secondaryButton} onClick={() => void onCopyThursdayTimes()}>Use Thursday times as template</button></div>
+      <div className={styles.inlineHeading}><div><p className={styles.step}>Define once</p><h3>Standard signup times</h3><p>Enter normal clock times in {mastersAdminTimeZoneLabel(event.schedule_timezone)}, then explicitly apply them to all four official dates. Each day remains independently editable afterward.</p></div><button type="button" className={styles.secondaryButton} onClick={() => void onCopyThursdayTimes()}>Use Thursday times as template</button></div>
       <form className={styles.standardTimeAdd} onSubmit={(e) => { e.preventDefault(); void onSaveStandardTime(e.currentTarget) }}><label>Standard time<input name="time" type="time" required /></label><label>Optional label<input name="label" placeholder="Featured time" /></label><button className={styles.primaryButton}>Add standard time</button></form>
       {standardTimes.length ? <div className={styles.standardTimeList}>{standardTimes.map((standardTime) => <form key={standardTime.id} onSubmit={(e) => { e.preventDefault(); void onSaveStandardTime(e.currentTarget, standardTime) }}><label>Clock time<input name="time" type="time" step="60" defaultValue={standardTime.local_time.slice(0, 5)} required /></label><label>Optional label<input name="label" defaultValue={standardTime.label || ""} /></label><div className={styles.slotActions}><button className={styles.secondaryButton}>Save template time</button><button type="button" className={styles.dangerButton} onClick={() => void onRemoveStandardTime(standardTime)}>Remove from template</button></div></form>)}</div> : <div className={styles.emptyState}><strong>No standard times yet.</strong><p>Add them once, or copy the currently available Thursday times.</p></div>}
       <div className={styles.templateApply}><div><strong>Apply only when ready</strong><p>This synchronizes template-managed slots across Thursday–Sunday. Manual day overrides stay independent. Existing player choices and room-linked slots are never deleted or silently retimed.</p></div><button type="button" className={styles.publishButton} onClick={() => void onApplyStandardTimes()} disabled={days.length !== 4}>Apply standard times to all days</button></div>
@@ -568,24 +567,23 @@ function DayWorkspace({ event, dayNumber, day, slots, entries, groups, members, 
   const published = dayGroups.length > 0 && dayGroups.every((group) => group.is_published)
 
   return <section className={styles.workspace}>
-    <div className={styles.sectionHeading}><div><p className={styles.step}>Day {dayNumber}</p><h2>{name.title}</h2><p>{day.play_date} · Times entered in {event.schedule_timezone}</p></div><div className={styles.lockSummary}><strong>{isMajorDayLocked(day) ? "Player choices locked" : "Player choices open"}</strong><span>{day.selection_locks_at ? `${formatMajorDeadline(day.selection_locks_at, event.schedule_timezone)} · ${event.schedule_timezone}` : "Add a time to calculate the deadline"}</span></div></div>
+    <div className={styles.sectionHeading}><div><p className={styles.step}>Day {dayNumber}</p><h2>{name.title}</h2><p>{formatMastersOfficialDate(day.play_date)} · Times entered in {mastersAdminTimeZoneLabel(event.schedule_timezone)}</p></div><div className={styles.lockSummary}><strong>{isMajorDayLocked(day) ? "Player choices locked" : "Player choices open"}</strong><span>{day.selection_locks_at ? formatMastersAdminDateTime(day.selection_locks_at, event.schedule_timezone) : "Add a time to calculate the deadline"}</span></div></div>
 
-    <div className={styles.dayActions}><form onSubmit={(e) => { e.preventDefault(); void onAddSlot(day, e.currentTarget) }}><label>Add signup time<input name="time" type="time" required /><small>Times entered in: {event.schedule_timezone}. Official date: {day.play_date}.</small></label><label>Optional plain-language label<input name="label" placeholder="Featured time" /></label><button className={styles.primaryButton}>Add signup time</button></form><button type="button" className={styles.publishButton} onClick={() => void onPublishDay(day)}>{published ? `${name.short} rooms published` : `Publish ${name.short} rooms`}</button></div>
+    <div className={styles.dayActions}><form onSubmit={(e) => { e.preventDefault(); void onAddSlot(day, e.currentTarget) }}><label>Add signup time<input name="time" type="time" required /><small>Times entered in {mastersAdminTimeZoneLabel(event.schedule_timezone)}. Official date: {formatMastersOfficialDate(day.play_date)}.</small></label><label>Optional plain-language label<input name="label" placeholder="Featured time" /></label><button className={styles.primaryButton}>Add signup time</button></form><button type="button" className={styles.publishButton} onClick={() => void onPublishDay(day)}>{published ? `${name.short} rooms published` : `Publish ${name.short} rooms`}</button></div>
 
-    <section className={styles.timeManager}><div className={styles.inlineHeading}><div><p className={styles.step}>Times</p><h3>Available signup times</h3><p>Manage any practical number of times independently for this day. Times are entered in {event.schedule_timezone}; UTC is shown only as a reference.</p></div></div>
+    <section className={styles.timeManager}><div className={styles.inlineHeading}><div><p className={styles.step}>Times</p><h3>Available signup times</h3><p>Manage any practical number of times independently for this day. Times are shown in {mastersAdminTimeZoneLabel(event.schedule_timezone)}.</p></div></div>
       {daySlots.length === 0 ? <div className={styles.emptyState}><h3>No times yet</h3><p>Add the first official play time above.</p></div> : <div className={styles.managerGrid}>{daySlots.map((slot) => {
         const playerCount = (choicesBySlot.get(slot.id) || []).length
         const roomCount = groups.filter((group) => group.time_slot_id === slot.id).length
         return <form key={slot.id} className={`${styles.managerCard} ${!slot.is_available ? styles.disabledSlot : ""}`} onSubmit={(e) => { e.preventDefault(); void onEditSlot(slot, e.currentTarget) }}>
-          <header><div><strong>{formatMajorLocalTime(slot.starts_at, event.schedule_timezone)}</strong><span>{slot.is_available ? "Available" : "Disabled"}</span></div><b>{playerCount} selected</b></header>
-          <small>UTC reference: {new Date(slot.starts_at).toISOString()}</small>
-          <label>Event-local time<input name="time" type="time" defaultValue={toMajorEventTimeInput(slot.starts_at, event.schedule_timezone)} required /><small>Keeps the official {name.short} date: {day.play_date}.</small></label>
+          <header><div><strong>{formatMastersAdminTime(slot.starts_at, event.schedule_timezone)}</strong><span>{slot.is_available ? "Available" : "Disabled"}</span></div><b>{playerCount} selected</b></header>
+          <label>{mastersAdminTimeZoneLabel(event.schedule_timezone)} time<input name="time" type="time" defaultValue={toMajorEventTimeInput(slot.starts_at, event.schedule_timezone)} required /><small>Keeps the official {name.short} date: {formatMastersOfficialDate(day.play_date)}.</small></label>
           <label>Optional label<input name="label" defaultValue={slot.label || ""} /></label>
           <div className={styles.slotActions}><button className={styles.secondaryButton}>Save time</button><button type="button" className={slot.is_available ? styles.warningButton : styles.primaryButton} onClick={() => void onSetSlotAvailability(slot, !slot.is_available, playerCount)}>{slot.is_available ? "Disable" : "Enable"}</button><button type="button" className={styles.dangerButton} onClick={() => void onRemoveSlot(slot, playerCount, roomCount)}>Remove unused</button></div>
           {!slot.is_available && playerCount > 0 && <p className={styles.slotWarning}>{playerCount} existing selection{playerCount === 1 ? " is" : "s are"} preserved. Move {playerCount === 1 ? "this player" : "these players"} with the admin override below.</p>}
         </form>
       })}</div>}
-      <p className={styles.deadlineNote}><strong>{name.short} selections lock:</strong> {day.selection_locks_at ? `${formatMajorDeadline(day.selection_locks_at, event.schedule_timezone)} · ${event.schedule_timezone}` : "No available time exists, so no calculated deadline is set."}</p>
+      <p className={styles.deadlineNote}><strong>{name.short} selections lock:</strong> {day.selection_locks_at ? formatMastersAdminDateTime(day.selection_locks_at, event.schedule_timezone) : "No available time exists, so no calculated deadline is set."}</p>
     </section>
 
     {daySlots.length > 0 && <><div className={styles.countSectionHeading}><p className={styles.step}>Players → rooms</p><h3>Signup counts and room builder</h3><p>Counts are guidance only. Signup times have no player capacity.</p></div><div className={styles.slotStack}>{daySlots.map((slot) => {
@@ -597,9 +595,9 @@ function DayWorkspace({ event, dayNumber, day, slots, entries, groups, members, 
       const guidance = count === 1 ? "Needs attention" : count === 2 ? "Workable minimum" : count === 3 ? "Preferred room size" : count > 3 ? "Multiple rooms needed" : "No players yet"
       const tone = count === 3 ? styles.preferred : count === 2 ? styles.workable : count === 0 ? styles.quiet : styles.attention
       return <article key={slot.id} className={`${styles.timeCard} ${!slot.is_available ? styles.disabledSlot : ""}`}>
-        <header><div><p className={styles.slotTime}>{formatMajorLocalTime(slot.starts_at, event.schedule_timezone)}</p><span>{slot.label || name.fallback} · {slot.is_available ? "AVAILABLE" : "DISABLED"}</span></div><div className={`${styles.countBadge} ${tone}`}><strong>{count} {count === 1 ? "player" : "players"}</strong><span>{guidance}</span></div></header>
+        <header><div><p className={styles.slotTime}>{formatMastersAdminTime(slot.starts_at, event.schedule_timezone)}</p><span>{slot.label || name.fallback} · {slot.is_available ? "AVAILABLE" : "DISABLED"}</span></div><div className={`${styles.countBadge} ${tone}`}><strong>{count} {count === 1 ? "player" : "players"}</strong><span>{guidance}</span></div></header>
         <div className={styles.playerChips}>{selectedEntries.length ? selectedEntries.map((entry) => <span key={entry.id}>{entry.player_screen_name_snapshot}</span>) : <em>No one has selected this time.</em>}</div>
-        <details className={styles.overridePanel}><summary>Move a player to another time</summary>{selectedEntries.map((entry) => <label key={entry.id}>{entry.player_screen_name_snapshot}<select defaultValue={slot.id} onChange={(e) => void onMovePlayer(entry.id, day.id, e.target.value)}>{daySlots.filter((option) => option.is_available || option.id === slot.id).map((option) => <option key={option.id} value={option.id}>{formatMajorLocalTime(option.starts_at, event.schedule_timezone)}{option.is_available ? "" : " — disabled"}</option>)}</select></label>)}</details>
+        <details className={styles.overridePanel}><summary>Move a player to another time</summary>{selectedEntries.map((entry) => <label key={entry.id}>{entry.player_screen_name_snapshot}<select defaultValue={slot.id} onChange={(e) => void onMovePlayer(entry.id, day.id, e.target.value)}>{daySlots.filter((option) => option.is_available || option.id === slot.id).map((option) => <option key={option.id} value={option.id}>{formatMastersAdminTime(option.starts_at, event.schedule_timezone)}{option.is_available ? "" : " — disabled"}</option>)}</select></label>)}</details>
 
         <div className={styles.roomBuilder}><div className={styles.roomBuilderHeading}><div><h3>Rooms</h3><p>Target three players; two is workable. Save privately until ready.</p></div><span>{selectedEntries.filter((entry) => !assignedIds.has(entry.id)).length} unassigned</span></div>
           {slotGroups.map((group) => <RoomForm key={group.id} group={group} slot={slot} dayNumber={dayNumber} selectedEntries={selectedEntries} allGroups={slotGroups} namingGroups={dayGroups} isTestEvent={event.is_test_event} members={members} onSave={onSaveGroup} onDelete={onDeleteGroup} />)}
@@ -651,7 +649,7 @@ function WeekendField({ event, entries, weekend, onSetStatus, onPublish }: {
   onSetStatus: (entryId: string, status: MajorWeekendStatus["competition_status"]) => Promise<void>
   onPublish: () => Promise<void>
 }) {
-  return <section className={styles.workspace}><div className={styles.sectionHeading}><div><p className={styles.step}>Friday cut</p><h2>Weekend field</h2><p>Stage decisions privately. Both fields continue Saturday and Sunday.</p></div>{event.weekend_status_published_at ? <span className={styles.complete}>Published {formatMajorDeadline(event.weekend_status_published_at, event.schedule_timezone)}</span> : <button type="button" className={styles.publishButton} onClick={() => void onPublish()}>Publish weekend field</button>}</div>
+  return <section className={styles.workspace}><div className={styles.sectionHeading}><div><p className={styles.step}>Friday cut</p><h2>Weekend field</h2><p>Stage decisions privately. Both fields continue Saturday and Sunday.</p></div>{event.weekend_status_published_at ? <span className={styles.complete}>Published {formatMastersAdminDateTime(event.weekend_status_published_at, event.schedule_timezone)}</span> : <button type="button" className={styles.publishButton} onClick={() => void onPublish()}>Publish weekend field</button>}</div>
     {!event.weekend_status_published_at && <div className={styles.privacyNotice}><strong>Private staging</strong><p>Players see “Weekend field status pending.” Saturday/Sunday field and room details remain hidden until publication.</p></div>}
     <div className={styles.playerTable}>{entries.map((entry) => <label key={entry.id}><span><strong>{entry.player_screen_name_snapshot}</strong><small>{entry.player_id}</small></span><select value={weekend.find((item) => item.entry_id === entry.id)?.competition_status || "pending"} onChange={(e) => void onSetStatus(entry.id, e.target.value as MajorWeekendStatus["competition_status"])}><option value="pending">Pending</option><option value="main">Main Event</option><option value="secondary">{event.secondary_trophy_display_name || "Secondary trophy field"}</option></select></label>)}</div>
   </section>

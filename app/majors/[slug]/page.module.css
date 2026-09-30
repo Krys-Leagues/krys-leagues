@@ -317,6 +317,7 @@
 .signupReview span { color: var(--muted); }
 .signupReview strong { display: grid; gap: 2px; text-align: right; }
 .signupReview strong small { color: var(--accent); font-size: .72rem; }
+.signupReview strong em, .roomTime em { color: #ffe29a; font-size: .68rem; font-style: normal; font-weight: 900; }
 .reviewHelp { color: var(--muted); line-height: 1.5; }
 .reviewActions { display: grid; grid-template-columns: .7fr 1.3fr; gap: 10px; }
 .reviewActions .primaryButton { margin-top: 0; }
