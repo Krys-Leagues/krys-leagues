@@ -150,6 +150,24 @@ with check ((select public.is_current_user_site_admin()));
 
 grant select, insert on table public.bracket_results to authenticated;
 
+revoke truncate, references, trigger on table public.combined_course_records from authenticated;
+
+drop policy if exists "Site admins insert combined course records" on public.combined_course_records;
+drop policy if exists "Site admins update combined course records" on public.combined_course_records;
+
+create policy "Site admins insert combined course records"
+on public.combined_course_records for insert
+to authenticated
+with check ((select public.is_current_user_site_admin()));
+
+create policy "Site admins update combined course records"
+on public.combined_course_records for update
+to authenticated
+using ((select public.is_current_user_site_admin()))
+with check ((select public.is_current_user_site_admin()));
+
+grant select, insert, update on table public.combined_course_records to authenticated;
+
 -- Registration now enters through register_current_discord_player(); the table
 -- itself is an admin-readable queue, not a public data API.
 revoke all privileges on table public.player_waitlist from anon;

@@ -7,7 +7,7 @@ const migrationPath = "supabase/migrations/20260930024801_protect_legacy_admin_l
 test("legacy browser-admin writes require canonical site-admin authorization", async () => {
   const sql = await readFile(migrationPath, "utf8")
 
-  for (const table of ["seasons", "schedule", "results", "doubles_teams", "player_tracker"]) {
+  for (const table of ["seasons", "schedule", "results", "doubles_teams", "player_tracker", "combined_course_records"]) {
     assert.match(sql, new RegExp(`on public\\.${table} for (?:insert|update|delete|all)`, "i"), table)
   }
 
