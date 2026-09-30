@@ -1,9 +1,4 @@
-import { createClient } from "@supabase/supabase-js"
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+import type { SupabaseClient } from "@supabase/supabase-js"
 
 export type PlayerRecord = {
   id: string
@@ -15,7 +10,19 @@ export type PlayerRecord = {
 }
 
 export async function loadPlayers(options: { includeInactive?: boolean } = {}): Promise<PlayerRecord[]> {
-  let query = supabase
+  const response = await fetch("/api/admin/players", {
+    cache: "no-store",
+    credentials: "same-origin",
+    headers: { Accept: "application/json" },
+  })
+  const payload = await response.json().catch(() => null) as { players?: PlayerRecord[]; error?: string } | null
+  if (!response.ok) throw new Error(payload?.error || "Global Players could not be loaded.")
+  const players = payload?.players || []
+  return options.includeInactive ? players : players.filter((player) => player.active)
+}
+
+export async function loadPlayersWithClient(client: SupabaseClient, options: { includeInactive?: boolean } = {}): Promise<PlayerRecord[]> {
+  let query = client
     .from("players")
     .select(`
       id,

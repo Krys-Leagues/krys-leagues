@@ -32,7 +32,7 @@ export async function GET() {
       .select("historical_player_id, canonical_player_id"),
     adminDataClient
       .from("player_aliases")
-      .select("player_id, alias, source")
+      .select("id, player_id, alias, normalized_alias, source, verified")
       .eq("verified", true)
       .order("alias", { ascending: true }),
   ])

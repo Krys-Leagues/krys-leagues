@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 
 import { authorizeSiteAdminMutation } from "@/lib/auth/siteAdminMutation"
+import { createAdminDataClient } from "@/lib/adminDataServer"
 import { runImport } from "@/lib/importer/runImport"
 
 export async function POST(
@@ -13,7 +14,7 @@ export async function POST(
 
     const body = await request.json()
 
-    const result = await runImport(body)
+    const result = await runImport(body, createAdminDataClient())
 
     return NextResponse.json({
       success: true,

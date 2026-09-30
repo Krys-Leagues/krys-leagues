@@ -1,9 +1,4 @@
-import { createClient } from "@supabase/supabase-js"
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+import type { SupabaseClient } from "@supabase/supabase-js"
 
 export type PlayerIdentityLink = {
   historicalPlayerId: string
@@ -11,7 +6,24 @@ export type PlayerIdentityLink = {
 }
 
 export async function loadPlayerIdentityLinks(): Promise<PlayerIdentityLink[]> {
-  const { data, error } = await supabase
+  const response = await fetch("/api/admin/players", {
+    cache: "no-store",
+    credentials: "same-origin",
+    headers: { Accept: "application/json" },
+  })
+  const payload = await response.json().catch(() => null) as {
+    identityLinks?: Array<{ historical_player_id: string; canonical_player_id: string }>
+    error?: string
+  } | null
+  if (!response.ok) throw new Error(payload?.error || "Player identity links could not be loaded.")
+  return (payload?.identityLinks || []).map((row) => ({
+    historicalPlayerId: row.historical_player_id,
+    canonicalPlayerId: row.canonical_player_id,
+  }))
+}
+
+export async function loadPlayerIdentityLinksWithClient(client: SupabaseClient): Promise<PlayerIdentityLink[]> {
+  const { data, error } = await client
     .from("player_identity_links")
     .select("historical_player_id, canonical_player_id")
 

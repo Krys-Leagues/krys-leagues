@@ -1,9 +1,4 @@
-import { createClient } from "@supabase/supabase-js"
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+import type { SupabaseClient } from "@supabase/supabase-js"
 
 export type ImportRow = {
   batchId: string
@@ -13,7 +8,8 @@ export type ImportRow = {
 }
 
 export async function saveImportRows(
-  rows: ImportRow[]
+  rows: ImportRow[],
+  client: SupabaseClient,
 ) {
   if (rows.length === 0) {
     return
@@ -31,7 +27,7 @@ export async function saveImportRows(
         .replace(/[^a-z0-9]/g, "") ?? null,
   }))
 
-  const { error } = await supabase
+  const { error } = await client
     .from("import_rows")
     .insert(payload)
 
