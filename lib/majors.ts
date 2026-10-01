@@ -67,10 +67,17 @@ export type MajorScoringSession = {
   id: string
   major_event_id: string
   label: string
-  participant_count: 2 | 3
+  participant_count: 2 | 3 | 4
   current_hole: number
   is_active: boolean
   is_public: boolean
+  schedule_group_id: string | null
+  play_day_id: string | null
+  course_code: MajorCourseCode | null
+  course_name: string | null
+  hole_pars: number[] | null
+  revision: number
+  fireworks_sequence: number
   created_at: string
   updated_at: string
 }
