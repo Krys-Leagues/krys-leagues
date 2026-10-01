@@ -1,7 +1,7 @@
 .card,
 .launcherDock {
   position: fixed;
-  left: max(16px, env(safe-area-inset-left));
+  right: max(16px, env(safe-area-inset-right));
   bottom: max(16px, env(safe-area-inset-bottom));
   z-index: 80;
   pointer-events: none;
@@ -278,7 +278,7 @@
 
 @media (max-width: 600px) {
   .card {
-    left: 10px;
+    right: 10px;
     bottom: max(72px, calc(12px + env(safe-area-inset-bottom)));
     width: calc(100vw - 20px);
     max-height: 58dvh;
@@ -286,7 +286,7 @@
   }
 
   .launcherDock {
-    left: 10px;
+    right: 10px;
     bottom: max(64px, calc(10px + env(safe-area-inset-bottom)));
   }
 

@@ -15,8 +15,8 @@ export const MASTERS_OFFICIAL_RULES: MastersRuleSection[] = [
   { title: "ROOM SCORECARD", paragraphs: ["After play, ONE PLAYER from the room must upload the Room Scorecard into the Masters system.", "Once uploaded, the Room Scorecard is available to everyone in that room as a reference."] },
   { title: "ENTER YOUR OWN SCORE", paragraphs: ["EVERY PLAYER must enter THEIR OWN 18-hole score.", "Do not enter another player's score.", "ALL PLAYERS MUST ENTER THEIR OWN SCORES WITHIN 3 HOURS OF PLAY."] },
   { title: "DO NOT GIVE UP", paragraphs: ["If your round is not going as well as you would like, please do not give up.", "Ranking points are being earned for later tournaments, so every completed round matters."] },
-  { title: "LIVE MASTERS SCORE TRACKER", paragraphs: ["A live Masters scoreboard will run throughout the event.", "Submitted scores may appear provisionally until an admin verifies them.", "Use VIEW LIVE MASTERS SCORE TRACKER in your Masters gateway."] },
-  { title: "YOUR MASTERS GATEWAY", paragraphs: ["The Masters pop-up is the player's go-to for room, round, local play time, room roster, room instructions, official rules, score entry, live standings, and Contact Admin.", "You may close it with X.", "Use SHOW MASTERS ROOM to reopen it."] },
+  { title: "LIVE MASTERS SCORE TRACKER", paragraphs: ["A live Masters scoreboard will run throughout the event.", "Submitted scores may appear provisionally until an admin verifies them.", "Use the separate public LIVE SCORE TRACKER control to follow the field."] },
+  { title: "YOUR MASTERS GATEWAY", paragraphs: ["The Masters pop-up is the player's go-to for room, round, local play time, room roster, room instructions, official rules, score entry, and Contact Admin.", "You may close it with X.", "Use SHOW MASTERS ROOM to reopen it."] },
   { title: "NEED HELP?", paragraphs: ["Use CONTACT ADMIN in the Masters gateway.", "This immediately alerts the Masters admin team with your room, round, scheduled time, and reported issue."] },
   { title: "SPORTSMANSHIP", paragraphs: ["Be respectful.", "Follow the room instructions.", "Have fun."] },
 ]

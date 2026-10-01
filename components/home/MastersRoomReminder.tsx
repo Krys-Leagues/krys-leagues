@@ -208,7 +208,6 @@ export default function MastersRoomReminder() {
       <nav className={styles.actions} aria-label="Masters gateway actions">
         <Link href={`/majors/masters/scoring?round=${assignment.dayNumber}&playDayId=${encodeURIComponent(assignment.playDayId)}`}>ENTER ROUND {assignment.dayNumber} SCORES</Link>
         <button type="button" onClick={() => setPanel(panel === "rules" ? "room" : "rules")}>{panel === "rules" ? "VIEW MY ROOM" : "VIEW INSTRUCTIONS & RULES"}</button>
-        <Link href="/majors/masters/results">VIEW LIVE MASTERS SCORE TRACKER</Link>
         <button type="button" onClick={() => setPanel(panel === "contact" ? "room" : "contact")}>{panel === "contact" ? "VIEW MY ROOM" : "CONTACT ADMIN"}</button>
       </nav>
     </aside>

@@ -2,10 +2,9 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
 import {
-  MASTERS_LIVE_ANNOUNCEMENT_KEY,
   shouldRenderMastersLiveAnnouncement,
 } from "@/lib/mastersLiveAnnouncement"
 
@@ -13,75 +12,41 @@ import styles from "./MastersLiveAnnouncement.module.css"
 
 export default function MastersLiveAnnouncement() {
   const pathname = usePathname()
-  const [visible, setVisible] = useState(false)
+  const [open, setOpen] = useState(true)
 
-  useEffect(() => {
-    let active = true
-    queueMicrotask(() => {
-      if (!active) return
-      if (!pathname || !shouldRenderMastersLiveAnnouncement(pathname)) {
-        setVisible(false)
-        return
-      }
+  if (!pathname || !shouldRenderMastersLiveAnnouncement(pathname)) return null
 
-      try {
-        setVisible(window.localStorage.getItem(MASTERS_LIVE_ANNOUNCEMENT_KEY) !== "dismissed")
-      } catch {
-        // A storage restriction must not make the public site unusable.
-        setVisible(true)
-      }
-    })
-    return () => {
-      active = false
-    }
-  }, [pathname])
-
-  function rememberDismissal() {
-    try {
-      window.localStorage.setItem(MASTERS_LIVE_ANNOUNCEMENT_KEY, "dismissed")
-    } catch {
-      // The announcement can still navigate or close if browser storage is unavailable.
-    }
+  if (!open) {
+    return (
+      <div className={styles.launcherDock}>
+        <button type="button" className={styles.launcher} onClick={() => setOpen(true)}>
+          VIEW LIVE MASTERS SCORE TRACKER
+        </button>
+      </div>
+    )
   }
-
-  function dismiss() {
-    rememberDismissal()
-    setVisible(false)
-  }
-
-  function goToMasters() {
-    // Keep the link mounted during the click so Next can complete navigation.
-    rememberDismissal()
-  }
-
-  if (!visible) return null
 
   return (
-    <div
-      className={styles.backdrop}
+    <aside
+      className={styles.card}
       role="dialog"
-      aria-modal="true"
+      aria-modal="false"
       aria-labelledby="masters-live-announcement-title"
     >
-      <section className={styles.panel}>
-        <div className={styles.blossom} aria-hidden="true">🌸</div>
-        <p className={styles.eyebrow}>KRYS LEAGUES PRESENTS</p>
-        <h2 id="masters-live-announcement-title">
-          THE MINI-GOLF MASTERS IS LIVE! 🌸⛳ <span className={styles.jacketIcon} aria-hidden="true">🧥</span>
-        </h2>
-        <p className={styles.message}>Players of ALL skill levels are welcome in The Masters.</p>
-        <p className={styles.message}>
-          Signups are now open. Choose your times for all four rounds and come join us for the first Krys Leagues Major!
-        </p>
-        <div className={styles.actions}>
-          <Link href="/majors/masters" onClick={goToMasters} className={styles.primary}>
-            GO TO THE MINI-GOLF MASTERS
-          </Link>
-          <button type="button" onClick={dismiss} className={styles.secondary}>
-            NOT NOW
-          </button>
-        </div>
-      </section>
-    </div>
+      <button
+        type="button"
+        className={styles.close}
+        aria-label="Close Live Masters Score Tracker"
+        onClick={() => setOpen(false)}
+      >
+        ×
+      </button>
+      <p className={styles.eyebrow}>THE MINI-GOLF MASTERS</p>
+      <h2 id="masters-live-announcement-title">LIVE SCORE TRACKER</h2>
+      <p className={styles.message}>Follow the full Masters field and live round results.</p>
+      <Link href="/majors/masters/results" className={styles.primary}>
+        VIEW LIVE MASTERS SCORE TRACKER
+      </Link>
+    </aside>
   )
 }

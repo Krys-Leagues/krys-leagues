@@ -2,11 +2,7 @@ import assert from "node:assert/strict"
 import { readFile } from "node:fs/promises"
 import test from "node:test"
 
-import { MASTERS_LIVE_ANNOUNCEMENT_KEY, shouldRenderMastersLiveAnnouncement } from "./mastersLiveAnnouncement.ts"
-
-test("Masters announcement uses a versioned browser-only campaign key", () => {
-  assert.equal(MASTERS_LIVE_ANNOUNCEMENT_KEY, "krys-leagues:masters-live-announcement-v1")
-})
+import { shouldRenderMastersLiveAnnouncement } from "./mastersLiveAnnouncement.ts"
 
 test("announcement is available on public pages but not private boundary pages", () => {
   assert.equal(shouldRenderMastersLiveAnnouncement("/"), true)
@@ -18,17 +14,27 @@ test("announcement is available on public pages but not private boundary pages",
   assert.equal(shouldRenderMastersLiveAnnouncement("/testing-access"), false)
 })
 
-test("announcement copy, destination, and client-only dismissal are wired", async () => {
+test("public tracker opens on entry and collapse keeps a reusable launcher", async () => {
   const component = await readFile("components/announcements/MastersLiveAnnouncement.tsx", "utf8")
+  assert.match(component, /useState\(true\)/u)
+  assert.match(component, /if \(!open\)[\s\S]*VIEW LIVE MASTERS SCORE TRACKER/u)
+  assert.doesNotMatch(component, /localStorage|sessionStorage/u)
+})
+
+test("public live tracker is independently mounted, public, collapsible, and left-side", async () => {
+  const component = await readFile("components/announcements/MastersLiveAnnouncement.tsx", "utf8")
+  const css = await readFile("components/announcements/MastersLiveAnnouncement.module.css", "utf8")
   const layout = await readFile("app/layout.tsx", "utf8")
 
-  assert.match(component, /THE MINI-GOLF MASTERS IS LIVE! 🌸⛳/u)
-  assert.match(component, /className=\{styles\.jacketIcon\}/u)
-  assert.match(component, /🧥/u)
-  assert.match(component, /Players of ALL skill levels are welcome in The Masters\./u)
-  assert.match(component, /Signups are now open\. Choose your times for all four rounds/u)
-  assert.match(component, /href="\/majors\/masters"/u)
-  assert.match(component, /onClick=\{goToMasters\}/u)
-  assert.match(component, /localStorage/u)
+  assert.match(component, /LIVE SCORE TRACKER/u)
+  assert.match(component, /VIEW LIVE MASTERS SCORE TRACKER/u)
+  assert.match(component, /href="\/majors\/masters\/results"/u)
+  assert.match(component, /setOpen\(false\)/u)
+  assert.match(component, /setOpen\(true\)/u)
+  assert.doesNotMatch(component, /localStorage|sessionStorage|supabase|get_my_major_signup_schedule/u)
+  assert.doesNotMatch(component, /Signups are now open/u)
+  assert.match(css, /\.card,\s*\n\.launcherDock \{[\s\S]*?position: fixed/u)
+  assert.match(css, /left: max\(16px, env\(safe-area-inset-left\)\)/u)
+  assert.doesNotMatch(css, /right: max\(16px, env\(safe-area-inset-right\)\)/u)
   assert.match(layout, /<MastersLiveAnnouncement \/>/u)
 })

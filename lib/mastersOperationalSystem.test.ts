@@ -85,10 +85,13 @@ test("Masters verification is grouped round to room with shared proof and per-pl
   assert.match(summary, /rooms: roomKeys\.size, scores: pending\.length/)
 })
 
-test("homepage and gateway share the one public Masters tracker", () => {
+test("public Masters tracker is separate from the player-only room gateway", () => {
   const home = read("app/page.tsx")
   const gateway = read("components/home/MastersRoomReminder.tsx")
+  const tracker = read("components/announcements/MastersLiveAnnouncement.tsx")
   assert.match(home, />\s*MASTERS LIVE SCORE TRACKER\s*</)
   assert.match(home, /href="\/majors\/masters\/results"/)
-  assert.match(gateway, /href="\/majors\/masters\/results"/)
+  assert.match(tracker, /href="\/majors\/masters\/results"/)
+  assert.doesNotMatch(gateway, /href="\/majors\/masters\/results"/)
+  assert.doesNotMatch(tracker, /get_my_major_signup_schedule|supabase/)
 })
