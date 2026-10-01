@@ -32,6 +32,15 @@ export default function MajorPlayerScoringPage() {
       return
     }
 
+    const user = await supabase.auth.getUser()
+    if (!user.data.user) {
+      setRounds([])
+      setPlayDayId("")
+      setCurrentTime(Date.now())
+      setMessage("")
+      return
+    }
+
     const response = await supabase.rpc("get_my_major_scorecards", { p_major_event_id: loaded.id })
     const cards = (response.data as MajorPlayerScoringRound[] | null) || []
     const query = new URLSearchParams(window.location.search)

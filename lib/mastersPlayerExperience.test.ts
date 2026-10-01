@@ -229,3 +229,11 @@ test("existing individual lifecycle and shared room architecture remain wired", 
   assert.doesNotMatch(migration, /delete from public\.major_player_scorecards/)
   assert.doesNotMatch(migration, /update public\.major_entries|update public\.major_entry_day_choices|update public\.major_schedule_groups/)
 })
+
+test("signed-out scoring stays blocked without calling the protected player RPC", () => {
+  const authCheck = scoringPage.indexOf("supabase.auth.getUser()")
+  const scorecardRpc = scoringPage.indexOf('supabase.rpc("get_my_major_scorecards"')
+  assert.ok(authCheck > -1)
+  assert.ok(authCheck < scorecardRpc)
+  assert.match(scoringPage.slice(authCheck, scorecardRpc), /if \(!user\.data\.user\)/)
+})
