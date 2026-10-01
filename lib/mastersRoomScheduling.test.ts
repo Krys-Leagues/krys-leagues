@@ -39,8 +39,8 @@ test("admin private save and publish both use the validated four-player roster",
   assert.match(page, /p_is_published: publish/)
   assert.match(page, /p_entry_ids: entryIds/)
   assert.match(page, />Save privately</)
-  assert.match(page, /disabled=\{selectedCount < 2 \|\| selectedCount > 4\}[\s\S]{0,200}>Save & publish</)
-  assert.match(page, /disabled=\{selectedCount < 2\} \/> Room composition finalized/)
+  assert.match(page, /disabled=\{hasPreservedHistory \|\| selectedCount < 2 \|\| selectedCount > 4\}[\s\S]{0,200}>Save & publish</)
+  assert.match(page, /disabled=\{selectedCount < 2 \|\| hasPreservedHistory\} \/> Room composition finalized/)
 })
 
 test("database RPC keeps solo rooms private and accepts playable rooms up to four", () => {

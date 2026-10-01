@@ -205,6 +205,18 @@ export type MajorEntry = {
   player_id: string
   player_screen_name_snapshot: string
   status: "registered" | "confirmed" | "waitlisted" | "withdrawn" | "declined"
+  registration_source?: "normal_signup" | "admin_exception"
+  administratively_added_at?: string | null
+  administratively_added_by_user_id?: string | null
+  administratively_added_by_player_id?: string | null
+  administratively_added_by_screen_name_snapshot?: string | null
+  administrative_add_note?: string | null
+  withdrawn_from_status?: "registered" | "confirmed" | null
+  withdrawn_at?: string | null
+  withdrawn_by_user_id?: string | null
+  withdrawn_by_player_id?: string | null
+  withdrawn_by_screen_name_snapshot?: string | null
+  withdrawal_reason?: string | null
   registered_at: string
   updated_at: string
 }

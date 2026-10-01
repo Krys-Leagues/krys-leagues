@@ -89,6 +89,15 @@ test("provisional cards remain visible without changing score aggregation", () =
   assert.equal(player.rounds[2].status, "submitted")
 })
 
+test("a withdrawn entrant with a legitimate submitted round remains visible from card history", () => {
+  const historical = payload([card(1, 1, -8, "verified")], 2)
+  historical.entrants = historical.entrants?.filter((entrant) => entrant.entry_id !== "entry-1")
+  const player = buildMastersLiveRows(historical).find((row) => row.entryId === "entry-1")
+  assert.equal(player?.rounds[1].toPar, -8)
+  assert.equal(player?.rounds[1].status, "verified")
+  assert.equal(player?.rounds[2].toPar, null)
+})
+
 test("easy and hard totals require both rounds and never count missing rounds as zero", () => {
   const rows = buildMastersLiveRows(payload([
     card(1, 1, -8), card(1, 2, -7), card(1, 3, -6),
