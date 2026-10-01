@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
 import MastersOfficialRules from "@/components/majors/MastersOfficialRules"
-import type { MajorDayChoice, MajorPlayDay } from "@/lib/majors"
+import type { MajorDayChoice, MajorPlayerScoringRound, MajorPlayDay } from "@/lib/majors"
 import { MASTERS_HELP_CATEGORIES, type MastersHelpCategory } from "@/lib/mastersRules"
 import {
   buildPublishedMastersRoomAssignments,
@@ -47,18 +47,25 @@ async function fetchCurrentMastersRoomAssignment() {
   const eventId = eventResult.data?.id as string | undefined
   if (!eventId || eventResult.error) return null
 
-  const [scheduleResult, daysResult] = await Promise.all([
+  const [scheduleResult, daysResult, scorecardsResult] = await Promise.all([
     supabase.rpc("get_my_major_signup_schedule", { p_major_event_id: eventId }),
     supabase.from("major_play_days").select("*").eq("major_event_id", eventId).order("day_number"),
+    supabase.rpc("get_my_major_scorecards", { p_major_event_id: eventId }),
   ])
-  if (scheduleResult.error || daysResult.error) return null
+  if (scheduleResult.error || daysResult.error || scorecardsResult.error) return null
 
   const assignments = buildPublishedMastersRoomAssignments(
     eventId,
     (scheduleResult.data as MajorDayChoice[] | null) || [],
     (daysResult.data as MajorPlayDay[] | null) || [],
   )
-  return selectCurrentMastersRoomAssignment(assignments)
+  return selectCurrentMastersRoomAssignment(
+    assignments,
+    ((scorecardsResult.data as MajorPlayerScoringRound[] | null) || []).map((round) => ({
+      play_day_id: round.play_day_id,
+      status: round.status,
+    })),
+  )
 }
 
 export default function MastersRoomReminder() {

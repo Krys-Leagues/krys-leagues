@@ -1,4 +1,4 @@
-import { majorRoundDayLabel, type MajorDayChoice, type MajorPlayDay, type MajorRoomRosterMember } from "./majors.ts"
+import { majorRoundDayLabel, type MajorDayChoice, type MajorPlayDay, type MajorRoomRosterMember, type MajorScorecardStatus } from "./majors.ts"
 
 export const MASTERS_ROOM_REMINDER_STORAGE_KEY = "krys-leagues:masters-room-gateway-visit-v2"
 
@@ -17,6 +17,11 @@ export type MastersRoomReminderAssignment = {
 }
 
 export type MastersRoomReminderDismissals = Record<string, string>
+
+export type MastersRoomRoundProgress = {
+  play_day_id: string
+  status: MajorScorecardStatus | null
+}
 
 const MASTERS_ROOM_REMINDER_EXCLUDED_PATHS = [
   "/access-denied",
@@ -64,16 +69,20 @@ export function buildPublishedMastersRoomAssignments(
       roster: [...roster],
       instructions: choice.group_instructions?.trim() || null,
     }]
-  }).sort((left, right) => left.startsAt.localeCompare(right.startsAt))
+  }).sort((left, right) => left.dayNumber - right.dayNumber || left.startsAt.localeCompare(right.startsAt))
 }
 
 export function selectCurrentMastersRoomAssignment(
   assignments: MastersRoomReminderAssignment[],
-  now = Date.now(),
+  roundProgress: MastersRoomRoundProgress[],
 ) {
   if (assignments.length === 0) return null
-  const upcoming = assignments.find((assignment) => new Date(assignment.startsAt).getTime() >= now)
-  return upcoming || assignments.at(-1) || null
+  const completedPlayDays = new Set(
+    roundProgress
+      .filter((round) => round.status === "submitted" || round.status === "verified")
+      .map((round) => round.play_day_id),
+  )
+  return assignments.find((assignment) => !completedPlayDays.has(assignment.playDayId)) || null
 }
 
 export function mastersRoomReminderScope(assignment: MastersRoomReminderAssignment) {
