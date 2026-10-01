@@ -29,6 +29,11 @@ export async function POST(request: Request) {
     })
     return NextResponse.json(result.authorized ? { allowed: true } : { allowed: false, reason: result.reason })
   } catch (error) {
+    console.error("SCORECARD_DISCORD_AUTHORIZE_FAILED", {
+      adapterKey,
+      sourceKey,
+      error: error instanceof Error ? error.message : "Unknown scorecard authorization failure",
+    })
     const reason = error instanceof Error && error.message === "SCORECARD_ADAPTER_INTAKE_NOT_ENABLED"
       ? "adapter_not_enabled"
       : "fixture_unavailable"

@@ -94,7 +94,11 @@ export async function enqueueStrokeBoardSync(client: SupabaseClient, seasonId: s
     division_number: division,
     reason: reason.slice(0, 120),
     sync_state: "pending",
+    attempt_count: 0,
+    claim_token: null,
+    claimed_at: null,
     next_attempt_at: new Date().toISOString(),
+    last_error: null,
     updated_at: new Date().toISOString(),
   }, { onConflict: "season_id,division_number" })
   if (response.error) throw new Error("STROKE_BOARD_SYNC_ENQUEUE_FAILED")

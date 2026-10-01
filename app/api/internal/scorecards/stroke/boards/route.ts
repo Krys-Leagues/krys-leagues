@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto"
 
 import { parseVerifiedScorecardJson, verifyScorecardBridgeRequest } from "@/lib/scorecards/bridge"
 import { createScorecardServiceClient } from "@/lib/scorecards/server"
+import { discordBoardFailureUpdate, extractDiscordBoardErrorMessage } from "@/lib/scorecards/discordBoardReliability"
 import { loadAuthoritativeStrokeBoards } from "@/lib/scorecards/strokeBoardServer"
 import { filterStrokePilotBoards, parseStrokeScorecardPilotDivisions } from "@/lib/scorecards/strokePilot"
 
@@ -79,7 +80,7 @@ export async function POST(request: Request) {
     if (succeeded && (!DISCORD_ID.test(channelId) || !DISCORD_ID.test(messageId))) {
       return NextResponse.json({ error: "Invalid Discord board acknowledgement." }, { status: 400 })
     }
-    const activeClaim = await service.from("stroke_discord_board_sync_outbox").select("id")
+    const activeClaim = await service.from("stroke_discord_board_sync_outbox").select("id,attempt_count")
       .eq("season_id", seasonId).eq("division_number", division).eq("claim_token", claimToken).eq("sync_state", "claimed").maybeSingle()
     if (activeClaim.error) throw activeClaim.error
     if (!activeClaim.data) return NextResponse.json({ error: "Board claim is no longer active." }, { status: 409 })
@@ -90,17 +91,22 @@ export async function POST(request: Request) {
       }, { onConflict: "season_id,division_number" })
       if (mapping.error) throw mapping.error
     }
+    const failure = succeeded ? null : discordBoardFailureUpdate({
+      attemptCount: Number(activeClaim.data.attempt_count || 0),
+      error: body.error,
+    })
     const outboxUpdate = await service.from("stroke_discord_board_sync_outbox").update({
-      reason: succeeded ? "board_synced" : "board_sync_retry", sync_state: succeeded ? "succeeded" : "failed",
+      reason: succeeded ? "board_synced" : failure!.reason, sync_state: succeeded ? "succeeded" : failure!.syncState,
       claim_token: null, claimed_at: null,
-      last_error: succeeded ? null : String(body.error || "Discord board sync failed.").slice(0, 500),
-      next_attempt_at: succeeded ? new Date().toISOString() : new Date(Date.now() + 60_000).toISOString(),
+      last_error: succeeded ? null : failure!.lastError,
+      next_attempt_at: succeeded ? new Date().toISOString() : failure!.nextAttemptAt,
       updated_at: new Date().toISOString(),
     }).eq("season_id", seasonId).eq("division_number", division).eq("claim_token", claimToken).eq("sync_state", "claimed").select("id").maybeSingle()
     if (outboxUpdate.error) throw outboxUpdate.error
     if (!outboxUpdate.data) return NextResponse.json({ error: "Board claim is no longer active." }, { status: 409 })
     return NextResponse.json({ acknowledged: true })
-  } catch {
+  } catch (error) {
+    console.error("STROKE_BOARD_COORDINATION_FAILED", { error: extractDiscordBoardErrorMessage(error) })
     return NextResponse.json({ error: "Stroke board coordination is temporarily unavailable." }, { status: 503 })
   }
 }

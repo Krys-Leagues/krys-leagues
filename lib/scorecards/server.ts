@@ -9,6 +9,7 @@ import {
   type ScorecardAdapterKey,
 } from "./core"
 import type { ScorecardAdapterContext } from "./adapters/contracts"
+import { resolveAuthoritativeCourse, type AuthoritativeCourse } from "./courseAuthority"
 
 export const SHARED_SCORECARD_BUCKET = "shared-scorecard-evidence"
 
@@ -84,26 +85,14 @@ export async function resolveStrokeScorecardContext(
 
   const coursesResponse = await client
     .from("all_time_courses")
-    .select("id,code,display_name,difficulty,hole_pars,par")
+    .select("id,code,base_map,display_name,difficulty,hole_pars,par")
     .eq("active", true)
     .in("difficulty", ["Easy", "Hard"])
   if (coursesResponse.error || !fixture.course) throw new Error("SCORECARD_STROKE_COURSE_UNAVAILABLE")
-  const courseName = fixture.course.trim().toLowerCase()
-  const courses = (coursesResponse.data || []) as Array<{
-    id: string
-    code: string
-    display_name: string
-    difficulty: "Easy" | "Hard"
-    hole_pars: number[] | null
-    par: number | null
-  }>
-  const matches = courses.filter((course) =>
-    course.display_name.trim().toLowerCase() === courseName || course.code.trim().toLowerCase() === courseName,
-  )
-  if (matches.length !== 1 || matches[0].hole_pars?.length !== 18 || !Number.isInteger(matches[0].par)) {
+  const course = resolveAuthoritativeCourse(fixture.course, (coursesResponse.data || []) as AuthoritativeCourse[])
+  if (!course || course.hole_pars?.length !== 18 || !Number.isInteger(course.par)) {
     throw new Error("SCORECARD_STROKE_COURSE_AUTHORITY_AMBIGUOUS")
   }
-  const course = matches[0]
   const names = new Map(slots.map((slot) => [slot.player_id, slot.player_screen_name]))
   return {
     adapterKey: "stroke",
