@@ -36,6 +36,8 @@ test("Contact Admin is entrant-protected, rate-limited, audited, and truthfully 
   assert.match(migration, /interval '10 minutes'/)
   assert.match(migration, /ANOTHER ROOM|other_room/)
   assert.match(migration, /major_admin_help_deliveries/)
+  assert.match(migration, /v_submitted_at timestamptz := now\(\)/)
+  assert.doesNotMatch(migration, /recent\.submitted_at > submitted_at/)
   assert.match(migration, /primary key \(request_id, admin_player_id\)/)
   assert.match(migration, /get_masters_admin_dm_recipients/)
   assert.match(migration, /alternate\.is_published/)

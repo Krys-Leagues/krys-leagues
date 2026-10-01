@@ -116,7 +116,7 @@ declare
   assignment record;
   other_room jsonb;
   request_id uuid;
-  submitted_at timestamptz := now();
+  v_submitted_at timestamptz := now();
 begin
   if me is null then
     raise exception 'Canonical player identity is required.' using errcode = '42501';
@@ -159,7 +159,7 @@ begin
     select count(*)
     from public.major_admin_help_requests recent
     where recent.player_id = me
-      and recent.submitted_at > submitted_at - interval '10 minutes'
+      and recent.submitted_at > v_submitted_at - interval '10 minutes'
   ) >= 3 then
     raise exception 'Please wait before sending another Masters admin alert.' using errcode = '42900';
   end if;
@@ -170,7 +170,7 @@ begin
       and recent.play_day_id = p_play_day_id
       and recent.category = p_category
       and recent.message = btrim(p_message)
-      and recent.submitted_at > submitted_at - interval '2 minutes'
+      and recent.submitted_at > v_submitted_at - interval '2 minutes'
   ) then
     raise exception 'This Masters admin alert was already sent recently.' using errcode = '23505';
   end if;
@@ -203,7 +203,7 @@ begin
   ) values (
     p_major_event_id, p_play_day_id, assignment.entry_id, me, assignment.player_screen_name_snapshot,
     assignment.room_id, assignment.group_label, assignment.day_number, assignment.starts_at,
-    nullif(left(btrim(coalesce(p_local_display_time, '')), 200), ''), p_category, btrim(p_message), submitted_at,
+    nullif(left(btrim(coalesce(p_local_display_time, '')), 200), ''), p_category, btrim(p_message), v_submitted_at,
     jsonb_build_object('other_room', other_room)
   )
   returning id into request_id;
@@ -219,7 +219,7 @@ begin
     'local_display_time', nullif(left(btrim(coalesce(p_local_display_time, '')), 200), ''),
     'category', p_category,
     'message', btrim(p_message),
-    'submitted_at', submitted_at,
+    'submitted_at', v_submitted_at,
     'other_room', other_room
   );
 end
