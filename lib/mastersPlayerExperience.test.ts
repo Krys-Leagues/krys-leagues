@@ -204,6 +204,8 @@ test("shared room proof renders only an uploaded API image and has an honest emp
   assert.match(sharedViewer, /PointerEvent/)
   assert.match(scorecardPhoto, /No room scorecard has been uploaded yet\./)
   assert.match(scorecardPhoto, /SUBMIT ROOM SCORECARD PHOTO/)
+  assert.match(scorecardPhoto, /ROOM SCORECARD PHOTO ISSUE/)
+  assert.match(scorecardPhoto, /You can still enter and submit your 18-hole scores\./)
   assert.doesNotMatch(scorecardPhoto, /masters-large-scorecard|placeholder|approved-pages\/the masters/i)
   assert.doesNotMatch(scoringPage, /masters-large-scorecard|placeholder.*scorecard/i)
 })

@@ -69,7 +69,7 @@ const requireSourceMarkers = (relativePath, markers) => {
 const requiredSources = {
   "app/page.tsx": ["ArtworkNavigation", "mainHubArtwork"],
   "app/league-play/page.tsx": ["ArtworkNavigation", "leaguePlayArtwork"],
-  "app/players/page.tsx": ["ArtworkNavigation", "playerProfilesArtwork", "loadCanonicalPublicPlayers", "filteredPlayers"],
+  "app/players/page.tsx": ["ArtworkNavigation", "playerProfilesArtwork", "/api/players/public-search", "filteredPlayers"],
   "app/leaderboards/page.tsx": ['redirect("/records")'],
   "app/records/page.tsx": ["ArtworkNavigation", "overallLeaderboardsArtwork"],
   "app/kwt/page.tsx": ["ArtworkNavigation", "kwtArtwork"],

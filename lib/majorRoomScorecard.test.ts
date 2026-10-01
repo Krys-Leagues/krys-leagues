@@ -69,6 +69,24 @@ test("one proof is shown above each player's existing self-owned numeric entry",
   assert.match(existingScoring, /where id=p_scorecard_id and player_id=me for update/)
 })
 
+test("missing or failed room proof never blocks individual scoring or submission", () => {
+  const player = read("app/majors/[slug]/scoring/page.tsx")
+  const component = read("components/majors/MajorRoomScorecardPhoto.tsx")
+  const scoringMigration = read("supabase/migrations/20260930190131_masters_player_rooms_rules_and_scoring_access.sql")
+  const saveFunction = scoringMigration.match(/create or replace function public\.save_my_major_scorecard[\s\S]*?\$function\$;/)?.[0] || ""
+  const submitFunction = scoringMigration.match(/create or replace function public\.submit_my_major_scorecard[\s\S]*?\$function\$;/)?.[0] || ""
+
+  assert.match(component, /ROOM SCORECARD PHOTO ISSUE/)
+  assert.match(component, /You can still enter and submit your 18-hole scores\./)
+  assert.match(component, /setPhotoIssue\(true\)/)
+  assert.match(component, /catch \{/)
+  assert.ok(player.indexOf("<MajorRoomScorecardPhoto") < player.indexOf("YOUR SCORE"))
+  assert.match(player, /SAVE DRAFT/)
+  assert.match(player, /SUBMIT SCORECARD/)
+  assert.doesNotMatch(saveFunction, /major_room_scorecard_proofs/)
+  assert.doesNotMatch(submitFunction, /major_room_scorecard_proofs/)
+})
+
 test("admin verification is authorized and receives room, roster, instructions, scores, and shared proof", () => {
   const route = read("app/api/admin/majors/room-scorecards/route.ts")
   const page = read("app/admin/majors/verification/page.tsx")

@@ -9,30 +9,52 @@ import styles from "./MajorRoomScorecardPhoto.module.css"
 
 const ACCEPTED_IMAGES = "image/jpeg,image/png,image/webp,image/gif"
 
+function PhotoIssueNotice() {
+  return (
+    <div className={styles.photoIssue} role="note">
+      <strong>ROOM SCORECARD PHOTO ISSUE</strong>
+      <p>You can still enter and submit your 18-hole scores.</p>
+      <p>Keep your Room Scorecard photo. An admin must receive or see it for verification. If the shared upload is not working, send the scorecard to an admin or use the backup method provided by the admins.</p>
+    </div>
+  )
+}
+
 export default function MajorRoomScorecardPhoto({ playDayId }: { playDayId: string }) {
   const [payload, setPayload] = useState<MajorRoomScorecardPayload | null>(null)
   const [eligible, setEligible] = useState(true)
+  const [loaded, setLoaded] = useState(false)
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState("")
+  const [photoIssue, setPhotoIssue] = useState(false)
   const [expanded, setExpanded] = useState(false)
   const previewButton = useRef<HTMLButtonElement | null>(null)
   const closeButton = useRef<HTMLButtonElement | null>(null)
   const imageView = useScorecardImageView()
 
   const load = useCallback(async () => {
-    const response = await fetch(`/api/majors/room-scorecard?${new URLSearchParams({ playDayId })}`, { cache: "no-store" })
-    if (response.status === 401 || response.status === 403 || response.status === 404) {
-      setEligible(false)
-      setPayload(null)
-      return
+    try {
+      const response = await fetch(`/api/majors/room-scorecard?${new URLSearchParams({ playDayId })}`, { cache: "no-store" })
+      if (response.status === 401 || response.status === 403 || response.status === 404) {
+        setEligible(false)
+        setPayload(null)
+        setPhotoIssue(true)
+        return
+      }
+      const body = await response.json() as MajorRoomScorecardPayload & { error?: string }
+      if (!response.ok) {
+        setMessage(body.error || "The room scorecard could not be loaded.")
+        setPhotoIssue(true)
+        return
+      }
+      setEligible(true)
+      setPayload(body)
+      setPhotoIssue(false)
+    } catch {
+      setMessage("The room scorecard could not be loaded.")
+      setPhotoIssue(true)
+    } finally {
+      setLoaded(true)
     }
-    const body = await response.json() as MajorRoomScorecardPayload & { error?: string }
-    if (!response.ok) {
-      setMessage(body.error || "The room scorecard could not be loaded.")
-      return
-    }
-    setEligible(true)
-    setPayload(body)
   }, [playDayId])
 
   useEffect(() => {
@@ -72,13 +94,23 @@ export default function MajorRoomScorecardPhoto({ playDayId }: { playDayId: stri
     setBusy(false)
     if (!response.ok) {
       setMessage(body.error || "The room scorecard photo could not be saved.")
+      setPhotoIssue(true)
       return
     }
     setMessage(replace ? "Shared room scorecard photo replaced." : "Shared room scorecard photo submitted.")
     await load()
   }
 
-  if (!eligible || !payload) return null
+  if (!loaded) return null
+
+  if (!eligible || !payload) {
+    return (
+      <section className={styles.panel} aria-label="Room scorecard photo status">
+        <PhotoIssueNotice />
+        {message && <p className={styles.message} role="status">{message}</p>}
+      </section>
+    )
+  }
 
   return (
     <section className={styles.panel} aria-labelledby={`room-scorecard-${playDayId}`}>
@@ -109,6 +141,7 @@ export default function MajorRoomScorecardPhoto({ playDayId }: { playDayId: stri
               sizes="(max-width: 900px) 100vw, 1000px"
               loading="eager"
               unoptimized
+              onError={() => setPhotoIssue(true)}
             />
             <span>VIEW SCORECARD</span>
           </button>
@@ -145,12 +178,14 @@ export default function MajorRoomScorecardPhoto({ playDayId }: { playDayId: stri
         <div className={styles.empty}>
           <strong>No room scorecard has been uploaded yet.</strong>
           <p>Any player assigned to this complete published room may upload the shared scorecard photo.</p>
+          <PhotoIssueNotice />
           <label className={styles.primaryAction} aria-disabled={busy}>
             {busy ? "UPLOADING…" : "SUBMIT ROOM SCORECARD PHOTO"}
             <input type="file" accept={ACCEPTED_IMAGES} disabled={busy} onChange={(event) => void upload(event.target.files?.[0], false)} />
           </label>
         </div>
       )}
+      {photoIssue && payload.proof && <PhotoIssueNotice />}
       {message && <p className={styles.message} role="status">{message}</p>}
     </section>
   )
