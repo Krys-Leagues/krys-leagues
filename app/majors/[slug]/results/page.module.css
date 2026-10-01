@@ -1,6 +1,10 @@
 .page { min-height: 100vh; padding: 18px clamp(8px, 2vw, 30px) 44px; color: #fff4f8; background: radial-gradient(circle at 50% 0, #421023, #08080a 46%, #020304); }
 .shell { width: min(1540px, 100%); margin: auto; }
-.backLink { display: inline-block; margin-bottom: 14px; color: #ffb2d0; font-weight: 850; text-decoration: none; }
+.trackerNav { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.backLink { color: #ffb2d0; font-weight: 850; text-decoration: none; }
+.closeTracker { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 9px 14px; border: 1px solid #f472b6; border-radius: 999px; color: #fff; background: #581c3d; box-shadow: 0 8px 24px #0008; font-size: .78rem; font-weight: 950; letter-spacing: .035em; text-decoration: none; }
+.closeTracker span { font-size: 1.35rem; line-height: .7; }
+.backLink:hover, .backLink:focus-visible, .closeTracker:hover, .closeTracker:focus-visible { color: #fff; outline: 2px solid #ff70aa; outline-offset: 3px; }
 .testBanner { padding: 9px; color: #fff7ed; background: #7c2d12; text-align: center; font-weight: 900; }
 .ornateBoard { overflow: hidden; border: 2px solid #d2145b; border-radius: 14px; background: #030608; box-shadow: 0 24px 80px #000c, 0 0 28px #cc14545c; }
 .artHeader, .artFooter { width: 100%; background-image: url("/masters/masters-live-scoreboard-reference.png"); background-size: 100% auto; background-repeat: no-repeat; }
@@ -52,6 +56,9 @@
 .detailOverall { border-color: #f1bf4f !important; }
 @media (max-width: 700px) {
   .page { padding: 8px 6px 76px; }
+  .trackerNav { align-items: stretch; }
+  .backLink { display: flex; align-items: center; padding: 8px 4px; font-size: .78rem; }
+  .closeTracker { min-height: 48px; padding-inline: 12px; font-size: .7rem; }
   .liveHeader { align-items: flex-start; }
   .legend { display: grid; }
   .tableScroll { max-height: 62vh; }

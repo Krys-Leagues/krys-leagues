@@ -24,7 +24,7 @@ export default function MajorResultsPage() {
   const selectedRow = rows.find((row) => row.playerId === selectedPlayerId) || null
   const selectedCards = useMemo(() => data?.rounds.flatMap((round) => round.cards).filter((card) => card.player_id === selectedPlayerId) || [], [data, selectedPlayerId])
   if (!data) return <main className={styles.loading}>{message || "Loading live Masters results…"}</main>
-  return <main className={styles.page}><div className={styles.shell}><Link className={styles.backLink} href={`/majors/${slug}`}>← Back to {data.event.name}</Link>{data.event.is_test_event && <p className={styles.testBanner}>TEST EVENT · TEST DATA — NOT OFFICIAL</p>}
+  return <main className={styles.page}><div className={styles.shell}><nav className={styles.trackerNav} aria-label="Live Masters Score Tracker navigation"><Link className={styles.backLink} href={`/majors/${slug}`}>← Back to {data.event.name}</Link><Link className={styles.closeTracker} href="/" replace aria-label="Close Live Masters Score Tracker and return to the Krys Leagues Hub"><span aria-hidden="true">×</span> CLOSE LIVE SCORE TRACKER</Link></nav>{data.event.is_test_event && <p className={styles.testBanner}>TEST EVENT · TEST DATA — NOT OFFICIAL</p>}
     <section className={styles.ornateBoard} aria-labelledby="masters-live-title">
       <div className={styles.artHeader} role="img" aria-label="Krys Leagues Masters, Cherry Blossom major tournament" />
       <header className={styles.liveHeader}><div><p>KRYS LEAGUES · MAJORS SERIES</p><h1 id="masters-live-title">MASTERS LIVE SCORE TRACKER</h1></div><span><i /> LIVE</span></header>

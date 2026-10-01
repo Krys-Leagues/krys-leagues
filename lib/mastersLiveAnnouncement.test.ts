@@ -38,3 +38,14 @@ test("public live tracker is independently mounted, public, collapsible, and lef
   assert.doesNotMatch(css, /right: max\(16px, env\(safe-area-inset-right\)\)/u)
   assert.match(layout, /<MastersLiveAnnouncement \/>/u)
 })
+
+test("full tracker closes directly to the public Hub without changing player-detail close behavior", async () => {
+  const tracker = await readFile("app/majors/[slug]/results/page.tsx", "utf8")
+
+  assert.match(tracker, /CLOSE LIVE SCORE TRACKER/u)
+  assert.match(tracker, /href="\/" replace/u)
+  assert.match(tracker, /Close Live Masters Score Tracker and return to the Krys Leagues Hub/u)
+  assert.doesNotMatch(tracker, /router\.back\(|history\.back\(/u)
+  assert.match(tracker, /selectedRow && <PlayerDetail[\s\S]*onClose=\{\(\) => setSelectedPlayerId\(null\)\}/u)
+  assert.match(tracker, /function PlayerDetail[\s\S]*<button ref=\{closeRef\} type="button" onClick=\{onClose\}>CLOSE<\/button>/u)
+})
