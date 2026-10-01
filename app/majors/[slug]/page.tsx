@@ -10,6 +10,7 @@ import { getAuthenticatedDiscordName } from "@/lib/discordPlayerLogin"
 import { mastersRoundAccessState, nextMastersScoreAccessTransition, sortMastersPublishedRooms, visibleMastersScoringRounds } from "@/lib/mastersPlayerExperience"
 import { formatMastersAdminTime, formatMastersPlayerDateTime, formatMastersPlayerSlot, meaningfulMajorSlotLabel, PLAYER_LOCAL_TIME_HEADING } from "@/lib/mastersSignupDisplay"
 import { supabase } from "@/lib/supabase"
+import MastersOfficialRules from "@/components/majors/MastersOfficialRules"
 import styles from "./page.module.css"
 
 export default function MajorDetailPage() {
@@ -147,22 +148,23 @@ export default function MajorDetailPage() {
   const signupState = signupStatus?.state || (event.signup_open ? "open" : "closed")
   const waitlistAvailable = masters && signupState === "full" && !waitlistStatus?.entry_id
   const signupDisabled = schedule.length > 0 ? !event.signup_open : !(signupState === "open" || signupState === "priority" || waitlistAvailable)
-  const weekendStatus = schedule[0]?.weekend_competition_status || "pending"
-  const secondaryFieldName = event.secondary_trophy_display_name || "Secondary Trophy Field"
   const localTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || event.schedule_timezone || "America/New_York"
   const allFourSelected = days.length === 4 && days.every((day) => Boolean(choices[day.id]))
   const currentSignupStep = schedule.length > 0 ? 3 : reviewing ? 2 : 1
   const publishedRooms = days
     .map((day) => ({ day, assignment: schedule.find((choice) => choice.play_day_id === day.id) }))
     .filter(({ assignment }) => Boolean(assignment?.group_label))
-  const infoBlocks = [
+  const infoBlocks = (masters ? [
+    { title: "Scheduling", body: event.scheduling_instructions },
+    { title: "Four-round championship", body: "Every Masters player remains in the championship for all four rounds. Each saved round and room assignment remains intact." },
+  ] : [
     { title: "Scheduling", body: event.scheduling_instructions },
     { title: "Rounds 1 and 2", body: event.qualifier_information },
     { title: "Friday cut", body: event.cut_information },
     { title: "Weekend fields", body: event.weekend_information },
-    ...(!masters ? [{ title: "Room and play rules", body: event.room_rules }] : []),
+    { title: "Room and play rules", body: event.room_rules },
     { title: "Stream information", body: event.stream_information },
-  ].filter((block): block is { title: string; body: string } => Boolean(block.body))
+  ]).filter((block): block is { title: string; body: string } => Boolean(block.body))
 
   return <main className={`${styles.page} ${masters ? styles.masters : styles.defaultTheme}`}><div className={styles.atmosphere}>{masters && <div className={styles.mastersScene} aria-hidden="true"><i className={styles.blossomTree} /><i className={styles.bench} /></div>}</div><div className={styles.container}>
     <Link href="/majors" className={styles.backLink}>← Four Majors</Link>
@@ -187,6 +189,7 @@ export default function MajorDetailPage() {
         <div className={styles.coreActions}>
           <button type="button" onClick={() => { setPlayerPanel("rooms"); setScoreAccessMessage("") }}>VIEW MASTERS ROOMS</button>
           <button type="button" onClick={() => { setPlayerPanel("rules"); setScoreAccessMessage("") }}>MASTERS RULES</button>
+          <button type="button" onClick={() => router.push(`/majors/${slug}/results`)}>MASTERS LIVE SCORE TRACKER</button>
         </div>
         {visibleMastersScoringRounds(scoringRounds, currentTime).length > 0 && <div className={styles.roundScoreActions}>
           {visibleMastersScoringRounds(scoringRounds, currentTime).map((round) => {
@@ -195,7 +198,7 @@ export default function MajorDetailPage() {
           })}
         </div>}
         {scoreAccessMessage && <p className={styles.scoreAccessMessage} role="status">{scoreAccessMessage}</p>}
-        {playerPanel === "rules" && <section className={styles.playerPanel} id="masters-rules"><header><div><p className={styles.eyebrow}>Event-wide</p><h2>MASTERS RULES</h2></div><button type="button" onClick={() => setPlayerPanel(null)} aria-label="Close Masters rules">Close</button></header>{event.room_rules ? <p className={styles.rulesText}>{event.room_rules}</p> : <p className={styles.notice}>Official Masters rules have not been published yet.</p>}</section>}
+        {playerPanel === "rules" && <section className={styles.playerPanel} id="masters-rules"><header><div><p className={styles.eyebrow}>Event-wide</p><h2>MASTERS RULES</h2></div><button type="button" onClick={() => setPlayerPanel(null)} aria-label="Close Masters rules">Close</button></header><MastersOfficialRules className={styles.rulesText} /></section>}
         {playerPanel === "rooms" && <section className={styles.playerPanel} id="masters-rooms"><header><div><p className={styles.eyebrow}>Complete published rooms</p><h2>MASTERS ROOMS</h2></div><button type="button" onClick={() => setPlayerPanel(null)} aria-label="Close Masters rooms">Close</button></header><nav className={styles.roomRoundTabs} aria-label="Masters room rounds">{days.map((day) => <button key={day.id} type="button" className={roomListRound === day.day_number ? styles.activeRoomRound : ""} onClick={() => setRoomListRound(day.day_number)}>ROUND {day.day_number}</button>)}</nav><div className={styles.allRoomsGrid}>{allPublishedRooms.filter((room) => room.day_number === roomListRound).map((room) => <article key={room.group_id} className={`${styles.allRoomCard} ${room.is_my_room ? styles.myRoom : ""}`}><header><h3>{room.group_label}</h3>{room.is_my_room && <span>YOUR ROOM</span>}</header><p className={styles.eventRoomTime}>{formatMastersAdminTime(room.starts_at, event.schedule_timezone)}</p><div className={styles.roomRoster}>{room.roster.map((member) => <span key={member.player_id}>{member.player_screen_name_snapshot}</span>)}</div></article>)}</div>{!allPublishedRooms.some((room) => room.day_number === roomListRound) && <p className={styles.notice}>No complete published rooms are available for this round yet.</p>}</section>}
       </section>}
       <div className={styles.statusRow}><span className={styles.badge}>{event.status}</span><span className={`${styles.badge} ${styles[signupState]}`}>Signup {signupState}</span><span className={styles.capacity}>{signupStatus?.capacity ? `${signupStatus.spots_claimed} / ${signupStatus.capacity} spots claimed` : `${entries.length} claimed · field capacity not set`}</span></div>
@@ -205,8 +208,7 @@ export default function MajorDetailPage() {
         <p className={styles.eyebrow}>You are signing up to play four rounds</p>
         <h2>One 18-hole round each day</h2>
         <div className={styles.roundList}>{DAY_LABELS.map((day) => <p key={day.day}><strong>{day.day} — {day.round}</strong><span>{day.course}</span></p>)}</div>
-        <p>Everyone plays Thursday and Friday. After Friday, the field is divided for the weekend.</p>
-        <p>Players who do not make the Main field are <strong>not eliminated from the Major.</strong> They continue Saturday and Sunday in the Secondary field for its separate trophy.</p>
+        <p>Every Masters player plays all four scheduled rounds.</p>
       </section>
       {(event.signup_open || schedule.length > 0) && <section className={styles.signupCard}>
         <p className={styles.eyebrow}>Your job right now</p>
@@ -215,8 +217,7 @@ export default function MajorDetailPage() {
         <p className={styles.timezone}><strong>All dates and times below are shown in your local time.</strong></p>
         {event.signup_instructions && <p className={styles.description}>{event.signup_instructions}</p>}
         {playerResolution === "no_match" && <p className={styles.notice}>Your Discord name will be used as your initial Krys Leagues screen name for this entry.</p>}
-        <p className={styles.cutNotice}>Choose one independent time for Thursday, Friday, Saturday, and Sunday. After Friday’s Round 2, players in both weekend fields continue Saturday and Sunday; every saved weekend time remains intact.</p>
-        {schedule.length > 0 && <p className={styles.assignment}>{event.weekend_status_published_at ? <>Weekend status: <strong>{weekendStatus === "main" ? "Masters Main Event" : weekendStatus === "secondary" ? secondaryFieldName : "Weekend field status pending"}</strong></> : <strong>Weekend field status pending</strong>}</p>}
+        <p className={styles.cutNotice}>Choose one independent time for Thursday, Friday, Saturday, and Sunday. Every saved round time remains intact.</p>
         {signupState === "upcoming" && <p className={styles.notice}>Public signup opens {signupStatus?.public_signup_opens_at ? formatMastersPlayerDateTime(signupStatus.public_signup_opens_at, localTimeZone) : "at a time to be announced"}. Priority access is not active for this first Major.</p>}
         {signupState === "priority" && <p className={styles.notice}>Priority signup is open for eligible previous-Major players. Public signup opens {signupStatus?.public_signup_opens_at ? formatMastersPlayerDateTime(signupStatus.public_signup_opens_at, localTimeZone) : "at a time to be announced"}.</p>}
         {signupState === "full" && schedule.length === 0 && !waitlistStatus?.entry_id && <p className={styles.notice}>The current field is full. Choose preferred times below to join the wait list.</p>}

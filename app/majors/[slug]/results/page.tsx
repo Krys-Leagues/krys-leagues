@@ -1,340 +1,48 @@
 "use client"
 
-import Image from "next/image"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-
-import {
-  buildMastersLiveRows,
-  formatMastersLiveScore,
-  sortMastersLiveRows,
-  type MastersBoardView,
-  type MastersLiveRow,
-  type MastersRoundNumber,
-} from "@/lib/mastersLiveResults"
-import {
-  majorHoleOutcome,
-  majorRoundDayLabel,
-  type MajorPlayerScorecard,
-  type MajorResultsPayload,
-} from "@/lib/majors"
+import { buildMastersLiveRows, formatMastersLiveScore, sortMastersLiveRows, type MastersLiveRow, type MastersRoundNumber } from "@/lib/mastersLiveResults"
+import { majorRoundDayLabel, type MajorPlayerScorecard, type MajorResultsPayload } from "@/lib/majors"
 import { supabase } from "@/lib/supabase"
-
 import styles from "./page.module.css"
-
-const BOARD_OPTIONS: Array<{ id: MastersBoardView; label: string; shortLabel: string }> = [
-  { id: "easy", label: "Rounds 1 & 2", shortLabel: "R1 & R2" },
-  { id: "hard", label: "Rounds 3 & 4", shortLabel: "R3 & R4" },
-  { id: "overall", label: "Overall Masters", shortLabel: "Overall" },
-]
 
 export default function MajorResultsPage() {
   const { slug } = useParams<{ slug: string }>()
-  const [data, setData] = useState<MajorResultsPayload | null>(null)
-  const [view, setView] = useState<MastersBoardView>("overall")
-  const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null)
-  const [message, setMessage] = useState("")
-
+  const [data, setData] = useState<MajorResultsPayload | null>(null), [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null), [message, setMessage] = useState("")
   const load = useCallback(async () => {
     const eventResult = await supabase.from("major_events").select("id").eq("slug", slug).maybeSingle()
-    if (!eventResult.data) {
-      setMessage(eventResult.error?.message || "Major not found.")
-      return
-    }
-
-    const result = await supabase.rpc("get_public_major_live_results", {
-      p_major_event_id: eventResult.data.id,
-    })
-    setData(result.data as MajorResultsPayload | null)
-    setMessage(result.error?.message || "")
+    if (!eventResult.data) { setMessage(eventResult.error?.message || "Major not found."); return }
+    const result = await supabase.rpc("get_public_major_live_results", { p_major_event_id: eventResult.data.id })
+    setData(result.data as MajorResultsPayload | null); setMessage(result.error?.message || "")
   }, [slug])
-
-  useEffect(() => {
-    // Initial public result synchronization plus lightweight live polling.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void load()
-    const timer = window.setInterval(() => void load(), 15_000)
-    return () => window.clearInterval(timer)
-  }, [load])
-
-  const rows = useMemo(() => (data ? buildMastersLiveRows(data) : []), [data])
-  const orderedRows = useMemo(() => sortMastersLiveRows(rows, view), [rows, view])
-  const selectedRow = rows.find((row) => row.playerId === selectedPlayerId) ?? null
-  const selectedCards = useMemo(
-    () => data?.rounds.flatMap((round) => round.cards).filter((card) => card.player_id === selectedPlayerId) ?? [],
-    [data, selectedPlayerId]
-  )
-
-  if (!data) {
-    return <main className={styles.loading}>{message || "Loading live Masters results…"}</main>
-  }
-
-  return (
-    <main className={styles.page}>
-      <div className={styles.blossomGlow} aria-hidden="true" />
-      <div className={styles.shell}>
-        <Link className={styles.backLink} href={`/majors/${slug}`}>
-          ← Back to {data.event.name}
-        </Link>
-
-        {data.event.is_test_event ? (
-          <p className={styles.testBanner}>TEST EVENT · TEST DATA — NOT OFFICIAL</p>
-        ) : null}
-
-        <header className={styles.masthead}>
-          <div className={styles.logoFrame}>
-            <Image
-              className={styles.logo}
-              src="/masters/krys-leagues-logo-source.png"
-              alt="Krys Leagues"
-              width={808}
-              height={794}
-              priority
-            />
-          </div>
-          <div className={styles.titleBlock}>
-            <p className={styles.eyebrow}>KRYS LEAGUES · MAJORS SERIES</p>
-            <h1>THE MINI-GOLF MASTERS</h1>
-            <p>Cherry Blossom · Live Tournament Scoreboards</p>
-          </div>
-          <div className={styles.liveMark}>
-            <span aria-hidden="true" />
-            LIVE
-          </div>
-        </header>
-
-        <section className={styles.statusStrip} aria-label="Live results status">
-          <p>{data.notice || "Live standings can change while submitted scores are being verified."}</p>
-          <p>
-            <span className={styles.verifiedDot} aria-hidden="true" /> Verified
-            <span className={styles.provisionalDot} aria-hidden="true" /> Provisional
-          </p>
-        </section>
-
-        <nav className={styles.boardNavigation} aria-label="Masters scoreboard views">
-          {BOARD_OPTIONS.map((option) => (
-            <button
-              key={option.id}
-              type="button"
-              className={view === option.id ? styles.activeBoardButton : styles.boardButton}
-              onClick={() => setView(option.id)}
-              aria-pressed={view === option.id}
-            >
-              <span className={styles.fullNavLabel}>{option.label}</span>
-              <span className={styles.shortNavLabel}>{option.shortLabel}</span>
-            </button>
-          ))}
-        </nav>
-
-        {view === "overall" ? (
-          <OverallBoard rows={orderedRows} onSelectPlayer={setSelectedPlayerId} />
-        ) : (
-          <RoundPairBoard view={view} rows={orderedRows} onSelectPlayer={setSelectedPlayerId} />
-        )}
-
-        <footer className={styles.boardFooter}>
-          <p>All registered Masters players remain visible. An em dash means that round has not been recorded.</p>
-          <Link href={`/majors/${slug}/stats`}>View Bonus / Live Stats →</Link>
-        </footer>
-      </div>
-
-      {selectedRow ? (
-        <PlayerDetail
-          row={selectedRow}
-          cards={selectedCards}
-          onClose={() => setSelectedPlayerId(null)}
-        />
-      ) : null}
-    </main>
-  )
+  // Initial public synchronization plus lightweight live polling.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { void load(); const timer = window.setInterval(() => void load(), 15_000); return () => window.clearInterval(timer) }, [load])
+  const rows = useMemo(() => data ? sortMastersLiveRows(buildMastersLiveRows(data), "overall") : [], [data])
+  const selectedRow = rows.find((row) => row.playerId === selectedPlayerId) || null
+  const selectedCards = useMemo(() => data?.rounds.flatMap((round) => round.cards).filter((card) => card.player_id === selectedPlayerId) || [], [data, selectedPlayerId])
+  if (!data) return <main className={styles.loading}>{message || "Loading live Masters results…"}</main>
+  return <main className={styles.page}><div className={styles.shell}><Link className={styles.backLink} href={`/majors/${slug}`}>← Back to {data.event.name}</Link>{data.event.is_test_event && <p className={styles.testBanner}>TEST EVENT · TEST DATA — NOT OFFICIAL</p>}
+    <section className={styles.ornateBoard} aria-labelledby="masters-live-title">
+      <div className={styles.artHeader} role="img" aria-label="Krys Leagues Masters, Cherry Blossom major tournament" />
+      <header className={styles.liveHeader}><div><p>KRYS LEAGUES · MAJORS SERIES</p><h1 id="masters-live-title">MASTERS LIVE SCORE TRACKER</h1></div><span><i /> LIVE</span></header>
+      <div className={styles.legend}><p>{data.notice || "Submitted scores appear provisionally until an authorized admin verifies them."}</p><p><b className={styles.verifiedDot} /> VERIFIED <b className={styles.provisionalDot} /> PROVISIONAL</p></div>
+      <div className={styles.tableScroll}><table><thead><tr><th>POSITION</th><th>PLAYER</th><th>ROUND 1<br /><small>TO PAR</small></th><th>ROUND 2<br /><small>TO PAR</small></th><th>ROUND 3<br /><small>TO PAR</small></th><th>FINAL ROUND<br /><small>TO PAR</small></th><th>OVERALL<br /><small>TO PAR</small></th></tr></thead><tbody>{rows.map((row) => <tr key={row.entryId} data-provisional={row.provisional || undefined}><td>{row.overallPlace || "—"}</td><th><button type="button" onClick={() => setSelectedPlayerId(row.playerId)}>{row.name}{row.provisional && <span>PROVISIONAL</span>}</button></th>{([1, 2, 3, 4] as MastersRoundNumber[]).map((round) => <td key={round}><Score value={row.rounds[round].toPar} status={row.rounds[round].status} /></td>)}<td className={styles.overall}><Score value={row.overallTotal} status={row.overallTotal === null ? null : row.provisional ? "submitted" : "verified"} /></td></tr>)}</tbody></table></div>
+      <div className={styles.artFooter} role="img" aria-label="Krys Leagues Masters trophy and branding" />
+    </section>
+    <p className={styles.fieldNote}>Complete Masters field · An em dash means that round has not been recorded.</p>
+  </div>{selectedRow && <PlayerDetail row={selectedRow} cards={selectedCards} onClose={() => setSelectedPlayerId(null)} />}</main>
 }
 
-function PlayerButton({ row, onSelect }: { row: MastersLiveRow; onSelect: (playerId: string) => void }) {
-  return (
-    <button type="button" className={styles.playerButton} onClick={() => onSelect(row.playerId)}>
-      <span>{row.name}</span>
-      {row.provisional ? <span className={styles.rowStatus} title="One or more scores await verification">PROV.</span> : null}
-    </button>
-  )
-}
-
-function ScoreValue({ value, status }: { value: number | null; status?: MajorPlayerScorecard["status"] | null }) {
+function Score({ value, status }: { value: number | null; status: MajorPlayerScorecard["status"] | null }) {
   const provisional = value !== null && status !== null && status !== "verified"
-  return (
-    <span className={provisional ? styles.provisionalScore : styles.scoreValue}>
-      {formatMastersLiveScore(value)}
-      <span className={styles.screenReaderOnly}>{provisional ? " provisional" : ""}</span>
-    </span>
-  )
+  return <span className={provisional ? styles.provisionalScore : styles.score}>{formatMastersLiveScore(value)}{provisional && <small aria-label="provisional">P</small>}</span>
 }
 
-function RoundPairBoard({
-  view,
-  rows,
-  onSelectPlayer,
-}: {
-  view: Exclude<MastersBoardView, "overall">
-  rows: MastersLiveRow[]
-  onSelectPlayer: (playerId: string) => void
-}) {
-  const easy = view === "easy"
-  const firstRound: MastersRoundNumber = easy ? 1 : 3
-  const secondRound: MastersRoundNumber = easy ? 2 : 4
-
-  return (
-    <section className={styles.scoreboard} aria-labelledby={`${view}-board-title`}>
-      <div className={styles.boardHeading}>
-        <div>
-          <p>{easy ? "CHERRY BLOSSOM · EASY" : "CHERRY BLOSSOM · HARD"}</p>
-          <h2 id={`${view}-board-title`}>{easy ? "ROUNDS 1 & 2" : "ROUNDS 3 & 4"}</h2>
-        </div>
-        <span>{rows.length} PLAYERS</span>
-      </div>
-
-      <div className={styles.tableScroll} data-scoreboard-scroll>
-        <table className={styles.leaderboardTable}>
-          <thead>
-            <tr>
-              <th scope="col">PLAYER</th>
-              <th scope="col">ROUND {firstRound}</th>
-              <th scope="col">ROUND {secondRound}</th>
-              <th scope="col">{easy ? "EASY TOTAL" : "HARD TOTAL"}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row) => {
-              const pairTotal = easy ? row.easyTotal : row.hardTotal
-              const pairIsProvisional = [row.rounds[firstRound], row.rounds[secondRound]]
-                .some((round) => round.toPar !== null && round.status !== "verified")
-              return (
-                <tr key={row.entryId}>
-                  <th scope="row"><PlayerButton row={row} onSelect={onSelectPlayer} /></th>
-                  <td><ScoreValue value={row.rounds[firstRound].toPar} status={row.rounds[firstRound].status} /></td>
-                  <td><ScoreValue value={row.rounds[secondRound].toPar} status={row.rounds[secondRound].status} /></td>
-                  <td className={styles.totalCell}>
-                    <ScoreValue value={pairTotal} status={pairTotal === null ? null : pairIsProvisional ? "submitted" : "verified"} />
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
-      </div>
-    </section>
-  )
-}
-
-function OverallBoard({ rows, onSelectPlayer }: { rows: MastersLiveRow[]; onSelectPlayer: (playerId: string) => void }) {
-  return (
-    <section className={styles.scoreboard} aria-labelledby="overall-board-title">
-      <div className={styles.boardHeading}>
-        <div>
-          <p>THE MINI-GOLF MASTERS</p>
-          <h2 id="overall-board-title">OVERALL MASTERS</h2>
-        </div>
-        <span>{rows.length} PLAYERS</span>
-      </div>
-
-      <div className={styles.tableScroll} data-scoreboard-scroll>
-        <table className={`${styles.leaderboardTable} ${styles.overallTable}`}>
-          <thead>
-            <tr>
-              <th scope="col">PLACE</th>
-              <th scope="col">PLAYER</th>
-              <th scope="col">OVERALL TO PAR</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row) => (
-              <tr key={row.entryId}>
-                <td className={styles.placeCell}>{row.overallPlace ?? "—"}</td>
-                <th scope="row"><PlayerButton row={row} onSelect={onSelectPlayer} /></th>
-                <td className={styles.totalCell}>
-                  <ScoreValue value={row.overallTotal} status={row.provisional ? "submitted" : "verified"} />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </section>
-  )
-}
-
-function PlayerDetail({
-  row,
-  cards,
-  onClose,
-}: {
-  row: MastersLiveRow
-  cards: MajorPlayerScorecard[]
-  onClose: () => void
-}) {
-  const closeButtonRef = useRef<HTMLButtonElement>(null)
-  const priorFocusRef = useRef<HTMLElement | null>(null)
-
-  useEffect(() => {
-    priorFocusRef.current = document.activeElement as HTMLElement | null
-    closeButtonRef.current?.focus()
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose()
-    }
-    window.addEventListener("keydown", handleKeyDown)
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown)
-      priorFocusRef.current?.focus()
-    }
-  }, [onClose])
-
-  return (
-    <div className={styles.modalBackdrop} role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
-      <section className={styles.playerDetail} role="dialog" aria-modal="true" aria-labelledby="player-detail-title">
-        <button ref={closeButtonRef} type="button" className={styles.closeButton} onClick={onClose}>
-          Close
-        </button>
-        <p className={styles.detailEyebrow}>MASTERS PLAYER DETAIL</p>
-        <h2 id="player-detail-title">{row.name}</h2>
-        <div className={styles.detailSummary}>
-          {([1, 2, 3, 4] as MastersRoundNumber[]).map((round) => (
-            <div key={round}>
-              <span>ROUND {round}</span>
-              <strong>{formatMastersLiveScore(row.rounds[round].toPar)}</strong>
-            </div>
-          ))}
-          <div className={styles.overallSummary}>
-            <span>OVERALL TO PAR</span>
-            <strong>{formatMastersLiveScore(row.overallTotal)}</strong>
-          </div>
-        </div>
-        <p className={row.provisional ? styles.detailProvisional : styles.detailVerified}>
-          {row.provisional ? "Live result · one or more rounds await verification" : "Verified result"}
-        </p>
-
-        <div className={styles.roundDetails}>
-          {cards.toSorted((a, b) => a.day_number - b.day_number).map((card) => (
-            <details key={card.id}>
-              <summary>
-                <span>{majorRoundDayLabel(card.day_number)}</span>
-                <strong>{formatMastersLiveScore(row.rounds[card.day_number].toPar)}</strong>
-              </summary>
-              {card.holes.length ? (
-                <div className={styles.holeGrid}>
-                  {card.holes.map((hole) => (
-                    <div key={hole.hole_number}>
-                      <span>HOLE {hole.hole_number}</span>
-                      <strong>{hole.strokes}</strong>
-                      <small>Par {hole.par} · {majorHoleOutcome(hole.strokes, hole.par)}</small>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className={styles.noHoleDetail}>Hole-by-hole detail is not available yet.</p>
-              )}
-            </details>
-          ))}
-        </div>
-      </section>
-    </div>
-  )
+function PlayerDetail({ row, cards, onClose }: { row: MastersLiveRow; cards: MajorPlayerScorecard[]; onClose: () => void }) {
+  const closeRef = useRef<HTMLButtonElement>(null), priorFocus = useRef<HTMLElement | null>(null)
+  useEffect(() => { priorFocus.current = document.activeElement as HTMLElement | null; closeRef.current?.focus(); const keydown = (event: KeyboardEvent) => { if (event.key === "Escape") onClose() }; window.addEventListener("keydown", keydown); return () => { window.removeEventListener("keydown", keydown); priorFocus.current?.focus() } }, [onClose])
+  return <div className={styles.backdrop} onMouseDown={(event) => event.target === event.currentTarget && onClose()}><section className={styles.detail} role="dialog" aria-modal="true" aria-labelledby="masters-player-detail"><button ref={closeRef} type="button" onClick={onClose}>CLOSE</button><p>MASTERS PLAYER DETAIL</p><h2 id="masters-player-detail">{row.name}</h2><div className={styles.detailRounds}>{([1, 2, 3, 4] as MastersRoundNumber[]).map((round) => { const card = cards.find((item) => item.day_number === round); return <article key={round}><span>{majorRoundDayLabel(round)}</span><strong>{formatMastersLiveScore(row.rounds[round].toPar)}</strong><small>{!card ? "NOT PLAYED" : card.status === "verified" ? "VERIFIED" : "PROVISIONAL"}</small></article> })}<article className={styles.detailOverall}><span>OVERALL</span><strong>{formatMastersLiveScore(row.overallTotal)}</strong><small>{row.overallTotal === null ? "NOT YET RANKED" : row.provisional ? "PROVISIONAL" : "VERIFIED"}</small></article></div></section></div>
 }

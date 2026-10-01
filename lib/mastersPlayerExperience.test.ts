@@ -141,8 +141,8 @@ test("published room presentation keeps complete rosters and sorts by time then 
 
 test("Masters rules reuse protected event-wide storage without invented defaults", () => {
   assert.match(mastersPage, />MASTERS RULES</)
-  assert.match(mastersPage, /event\.room_rules/)
-  assert.match(mastersPage, /Official Masters rules have not been published yet\./)
+  assert.match(mastersPage, /MastersOfficialRules/)
+  assert.doesNotMatch(mastersPage, /event\.room_rules \? <p/)
   assert.match(adminScheduling, /Masters rules \(event-wide\)/)
   assert.match(adminScheduling, /save_major_event_information/)
   assert.doesNotMatch(mastersPage, /defaultMastersRules|inventedRules/i)

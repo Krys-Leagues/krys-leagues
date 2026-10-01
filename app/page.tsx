@@ -58,6 +58,10 @@ export default function HomePage() {
             </span>
             <span className="artwork-navigation__masters-arrow" aria-hidden="true">→</span>
           </Link>
+          <Link href="/majors/masters/results" className="artwork-navigation__masters-live-link">
+            <span aria-hidden="true">●</span>
+            MASTERS LIVE SCORE TRACKER
+          </Link>
           <div className="artwork-navigation__admin-treatment">
             <span className="artwork-navigation__admin-accent" aria-hidden="true" />
             <Link href="/admin" className="artwork-navigation__admin-link">

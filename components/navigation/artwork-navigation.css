@@ -210,6 +210,40 @@
   text-shadow: 0 0 9px rgba(235, 203, 94, 0.78);
 }
 
+.artwork-navigation__masters-live-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65em;
+  width: min(50%, 720px);
+  min-height: 48px;
+  box-sizing: border-box;
+  margin-inline: auto;
+  padding: 10px 18px;
+  border: 1px solid #ff4f93;
+  border-radius: 999px;
+  color: #ffe7f0;
+  background: linear-gradient(90deg, #260915, #601138, #260915);
+  box-shadow: 0 0 18px rgba(255, 53, 128, 0.42);
+  font-size: clamp(12px, 1.35vw, 18px);
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+}
+
+.artwork-navigation__masters-live-link span {
+  color: #ff4f93;
+  text-shadow: 0 0 10px #ff4f93;
+}
+
+.artwork-navigation__masters-live-link:hover,
+.artwork-navigation__masters-live-link:focus-visible {
+  border-color: #fff;
+  color: #fff;
+  outline: 2px solid #ff88b6;
+  outline-offset: 2px;
+}
+
 .artwork-navigation__featured-course-link span {
   color: #ffd75a;
   font-size: 1.15em;
@@ -491,6 +525,12 @@
     min-height: 72px;
     padding-inline: 54px;
     border-radius: 18px;
+  }
+
+  .artwork-navigation__masters-live-link {
+    width: min(92%, 720px);
+    min-height: 44px;
+    font-size: clamp(11px, 3.2vw, 16px);
   }
 
   .artwork-navigation__masters-jacket {

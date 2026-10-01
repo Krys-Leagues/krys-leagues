@@ -1,37 +1,74 @@
 "use client"
 
 import Link from "next/link"
-import Image from "next/image"
 import { useCallback, useEffect, useMemo, useState } from "react"
+import { ScorecardPanViewport, ScorecardZoomControls, useScorecardImageView } from "@/components/scorecards/ScorecardZoomViewer"
 import { formatMajorToPar, majorRoundDayLabel, type MajorEvent, type MajorPlayDay, type MajorPlayerScorecard } from "@/lib/majors"
 import { formatMastersAdminDateTime, formatMastersAdminTime } from "@/lib/mastersSignupDisplay"
 import { supabase } from "@/lib/supabase"
+import styles from "./page.module.css"
 
-type AdminRoomProof = { id:string; schedule_group_id:string; image_url:string; uploaded_at:string; uploaded_by_player_id:string; revision:number }
+type AdminRoomProof = { id: string; schedule_group_id: string; image_url: string; uploaded_at: string; uploaded_by_player_id: string; uploader_screen_name: string; revision: number }
+type RoomGroup = { key: string; dayNumber: MajorPlayerScorecard["day_number"]; roomLabel: string; startsAt: string | null; roster: NonNullable<MajorPlayerScorecard["room_roster"]>; instructions: string | null; cards: MajorPlayerScorecard[]; proof?: AdminRoomProof }
 
-export default function MajorVerificationPage(){
- const [events,setEvents]=useState<MajorEvent[]>([]),[days,setDays]=useState<MajorPlayDay[]>([]),[cards,setCards]=useState<MajorPlayerScorecard[]>([]),[proofs,setProofs]=useState<AdminRoomProof[]>([]),[entryCount,setEntryCount]=useState(0)
- const [eventId,setEventId]=useState(""),[dayId,setDayId]=useState(""),[status,setStatus]=useState("submitted"),[slot,setSlot]=useState(""),[room,setRoom]=useState(""),[search,setSearch]=useState(""),[message,setMessage]=useState("")
- const load=useCallback(async()=>{const [e,d]=await Promise.all([supabase.from("major_events").select("*").order("slug"),supabase.from("major_play_days").select("*").order("day_number")]);setEvents((e.data as MajorEvent[])||[]);setDays((d.data as MajorPlayDay[])||[]);setEventId(x=>x||(e.data?.[0]?.id as string)||"");setMessage(e.error?.message||d.error?.message||"")},[])
- // Initial authenticated Supabase synchronization.
- // eslint-disable-next-line react-hooks/set-state-in-effect
- useEffect(()=>{void load()},[load])
- useEffect(()=>{if(!eventId)return;void(async()=>{const [r,e,p]=await Promise.all([supabase.rpc("get_major_scorecard_verification_queue",{p_major_event_id:eventId}),supabase.from("major_entries").select("id",{count:"exact",head:true}).eq("major_event_id",eventId).in("status",["registered","confirmed"]),fetch(`/api/admin/majors/room-scorecards?${new URLSearchParams({eventId})}`,{cache:"no-store"})]);const proofBody=await p.json() as {proofs?:AdminRoomProof[];error?:string};setCards((r.data as MajorPlayerScorecard[])||[]);setProofs(proofBody.proofs||[]);setEntryCount(e.count||0);setMessage(r.error?.message||e.error?.message||(!p.ok?proofBody.error:"")||"")})()},[eventId])
- const visible=useMemo(()=>cards.filter(c=>(!dayId||c.play_day_id===dayId)&&(!status||c.status===status)&&(!slot||c.slot_starts_at===slot)&&(!room||c.room_label===room)&&c.player_screen_name_snapshot.toLowerCase().includes(search.toLowerCase())),[cards,dayId,status,slot,room,search])
- const selectedEvent=events.find(event=>event.id===eventId),eventDays=days.filter(d=>d.major_event_id===eventId),submitted=cards.filter(c=>c.major_event_id===eventId&&c.status==="submitted").length,verified=cards.filter(c=>c.major_event_id===eventId&&c.status==="verified").length
- async function refreshCards(){if(!eventId)return;const r=await supabase.rpc("get_major_scorecard_verification_queue",{p_major_event_id:eventId});setCards((r.data as MajorPlayerScorecard[])||[])}
- async function action(name:"verify_major_scorecard"|"reopen_major_scorecard",id:string){const notes=window.prompt(name.startsWith("verify")?"Optional verification notes":"Reason for reopening")||"";const r=await supabase.rpc(name,{p_scorecard_id:id,p_notes:notes});setMessage(r.error?.message||"Saved.");if(!r.error)await refreshCards()}
- async function toggle(day:MajorPlayDay){const r=await supabase.rpc("set_major_round_scoring_state",{p_play_day_id:day.id,p_is_open:!(day as MajorPlayDay & {scoring_entry_open?:boolean}).scoring_entry_open});setMessage(r.error?.message||"Round entry state updated.");if(!r.error)await load()}
- async function finalize(day:MajorPlayDay){if(!confirm("Finalize this round and preserve its historical standings snapshot?"))return;const r=await supabase.rpc("finalize_major_scoring_round",{p_play_day_id:day.id});setMessage(r.error?.message||"Round finalized and snapshot preserved.");if(!r.error)await load()}
- return <main style={page}><div style={shell}><Link href="/admin/majors/scoring">← Major scoring</Link><h1>Verify Major Results</h1><p style={muted}>Players submit complete 18-hole cards. Admins verify the final total, with full holes available for inspection.</p>
- <section style={summary}><strong>Submitted: {submitted+verified}</strong><strong style={pending}>Awaiting verification: {submitted}</strong><strong style={official}>Verified: {verified}</strong><strong>Missing: {Math.max(0,entryCount-new Set(cards.map(c=>c.entry_id)).size)}</strong></section>
- <div style={filters}><select value={eventId} onChange={e=>{setEventId(e.target.value);setDayId("")}}>{events.map(e=><option key={e.id} value={e.id}>{e.name}</option>)}</select><select value={dayId} onChange={e=>setDayId(e.target.value)}><option value="">All rounds</option>{eventDays.map(d=><option key={d.id} value={d.id}>{majorRoundDayLabel(d.day_number)}</option>)}</select><select value={slot} onChange={e=>setSlot(e.target.value)}><option value="">All slots</option>{[...new Set(cards.map(c=>c.slot_starts_at).filter(Boolean))].map(x=><option key={x!} value={x!}>{formatMastersAdminTime(x!,selectedEvent?.schedule_timezone)}</option>)}</select><select value={room} onChange={e=>setRoom(e.target.value)}><option value="">All rooms</option>{[...new Set(cards.map(c=>c.room_label).filter(Boolean))].map(x=><option key={x!} value={x!}>{x}</option>)}</select><select value={status} onChange={e=>setStatus(e.target.value)}><option value="">All states</option><option value="submitted">Awaiting Verification</option><option value="verified">Verified</option><option value="draft">Draft</option><option value="reopened">Reopened</option></select><input placeholder="Search player" value={search} onChange={e=>setSearch(e.target.value)}/></div>
- <section style={roundControls}>{eventDays.map(d=>{const open=(d as MajorPlayDay&{scoring_entry_open?:boolean}).scoring_entry_open;return <article key={d.id} style={card}><strong>{majorRoundDayLabel(d.day_number)}</strong><span>{open?"Player entry open":"Player entry closed"}</span><button onClick={()=>toggle(d)}>{open?"Close entry":"Open entry"}</button><button onClick={()=>finalize(d)}>Finalize round</button></article>})}</section>
- <div style={list}>{visible.map(c=><details key={c.id} style={card}><summary style={row}><strong>{c.player_screen_name_snapshot}</strong><span>{c.room_label||"Room pending"}</span><span>{c.slot_starts_at?formatMastersAdminTime(c.slot_starts_at,selectedEvent?.schedule_timezone):"Slot pending"}</span><strong>{c.total_strokes??c.holes.reduce((s,h)=>s+h.strokes,0)} · {formatMajorToPar(c.score_to_par??c.holes.reduce((s,h)=>s+h.strokes-h.par,0))}</strong><span style={c.status==="verified"?official:pending}>{c.status}</span></summary><RoomVerificationContext card={c} proof={proofs.find(proof=>proof.schedule_group_id===c.room_group_id)}/><div style={holes}>{c.holes.map(h=><span key={h.hole_number}>H{h.hole_number}: {h.strokes} <small>(par {h.par})</small></span>)}</div><p>Submitted: {c.submitted_at?formatMastersAdminDateTime(c.submitted_at,selectedEvent?.schedule_timezone):"Not submitted"} · Verified: {c.verified_at?formatMastersAdminDateTime(c.verified_at,selectedEvent?.schedule_timezone):"Not verified"}</p><div style={actions}>{c.status==="submitted"&&<button onClick={()=>action("verify_major_scorecard",c.id)}>Verify score</button>}{["submitted","verified"].includes(c.status)&&<button onClick={()=>action("reopen_major_scorecard",c.id)}>Reopen for correction</button>}</div></details>)}</div>{message&&<p>{message}</p>}
- </div></main>}
-
-function RoomVerificationContext({card:scorecard,proof}:{card:MajorPlayerScorecard;proof?:AdminRoomProof}){
- return <section style={roomContext}><div><strong>{scorecard.room_label||"Room pending"}</strong><span>{majorRoundDayLabel(scorecard.day_number)}</span>{scorecard.room_roster?.length?<ul>{scorecard.room_roster.map(player=><li key={player.player_id}>{player.player_screen_name_snapshot}</li>)}</ul>:<p>Room roster unavailable.</p>}{scorecard.room_instructions&&<p><strong>Room instructions:</strong> {scorecard.room_instructions}</p>}</div><div>{proof?<><Image src={proof.image_url} alt={`Shared scorecard for ${scorecard.room_label||"Masters room"}`} width={1200} height={800} sizes="(max-width: 900px) 100vw, 600px" unoptimized style={proofImage}/><small>Shared room proof · revision {proof.revision}</small></>:<p>No shared room scorecard photo submitted.</p>}</div></section>
+export default function MajorVerificationPage() {
+  const [events, setEvents] = useState<MajorEvent[]>([]), [days, setDays] = useState<MajorPlayDay[]>([]), [cards, setCards] = useState<MajorPlayerScorecard[]>([]), [proofs, setProofs] = useState<AdminRoomProof[]>([])
+  const [eventId, setEventId] = useState(""), [message, setMessage] = useState("")
+  const loadEvents = useCallback(async () => {
+    const [eventResult, dayResult] = await Promise.all([supabase.from("major_events").select("*").order("slug"), supabase.from("major_play_days").select("*").order("day_number")])
+    setEvents((eventResult.data as MajorEvent[]) || []); setDays((dayResult.data as MajorPlayDay[]) || [])
+    setEventId((current) => current || String(eventResult.data?.find((event) => event.slug === "masters")?.id || eventResult.data?.[0]?.id || ""))
+    setMessage(eventResult.error?.message || dayResult.error?.message || "")
+  }, [])
+  const refreshQueue = useCallback(async () => {
+    if (!eventId) return
+    const [queueResult, proofResult] = await Promise.all([supabase.rpc("get_major_scorecard_verification_queue", { p_major_event_id: eventId }), fetch(`/api/admin/majors/room-scorecards?${new URLSearchParams({ eventId })}`, { cache: "no-store" })])
+    const proofBody = await proofResult.json() as { proofs?: AdminRoomProof[]; error?: string }
+    setCards((queueResult.data as MajorPlayerScorecard[]) || []); setProofs(proofBody.proofs || []); setMessage(queueResult.error?.message || (!proofResult.ok ? proofBody.error : "") || "")
+  }, [eventId])
+  // Initial authenticated admin synchronization.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { void loadEvents() }, [loadEvents])
+  // Reload the selected event's protected verification queue.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { void refreshQueue() }, [refreshQueue])
+  const selectedEvent = events.find((event) => event.id === eventId), eventDays = days.filter((day) => day.major_event_id === eventId)
+  const rooms = useMemo(() => groupVerificationRooms(cards, proofs), [cards, proofs])
+  const waitingScores = cards.filter((card) => card.status === "submitted").length, waitingRooms = rooms.filter((room) => room.cards.some((card) => card.status === "submitted")).length
+  async function scoreAction(name: "verify_major_scorecard" | "reopen_major_scorecard", id: string) {
+    const notes = window.prompt(name === "verify_major_scorecard" ? "Optional verification notes" : "Correction needed (required for the player audit trail)") || ""
+    if (name === "reopen_major_scorecard" && !notes.trim()) return
+    const result = await supabase.rpc(name, { p_scorecard_id: id, p_notes: notes.trim() })
+    setMessage(result.error?.message || (name === "verify_major_scorecard" ? "Score verified." : "Player score marked as needing correction.")); if (!result.error) await refreshQueue()
+  }
+  async function toggleRound(day: MajorPlayDay) {
+    const open = (day as MajorPlayDay & { scoring_entry_open?: boolean }).scoring_entry_open
+    const result = await supabase.rpc("set_major_round_scoring_state", { p_play_day_id: day.id, p_is_open: !open })
+    setMessage(result.error?.message || "Round entry state updated."); if (!result.error) await loadEvents()
+  }
+  return <main className={styles.page}><div className={styles.shell}><Link href="/admin/majors/scoring">← Major scoring</Link><header className={styles.header}><p>MASTERS ADMIN</p><h1>SCORE VERIFICATION</h1><span>{waitingRooms} {waitingRooms === 1 ? "ROOM" : "ROOMS"} · {waitingScores} {waitingScores === 1 ? "SCORE" : "SCORES"} TO VERIFY</span></header>
+    <label className={styles.eventPicker}>Event<select value={eventId} onChange={(event) => setEventId(event.target.value)}>{events.map((event) => <option key={event.id} value={event.id}>{event.name}</option>)}</select></label>
+    <section className={styles.roundControls}>{eventDays.map((day) => { const open = (day as MajorPlayDay & { scoring_entry_open?: boolean }).scoring_entry_open; return <article key={day.id}><strong>{majorRoundDayLabel(day.day_number)}</strong><span>{open ? "Player entry open" : "Player entry closed"}</span><button type="button" onClick={() => void toggleRound(day)}>{open ? "Close entry" : "Open entry"}</button></article> })}</section>
+    {[1, 2, 3, 4].map((round) => { const roundRooms = rooms.filter((room) => room.dayNumber === round); if (!roundRooms.length) return null; return <section key={round} className={styles.roundSection}><h2>ROUND {round}</h2>{roundRooms.map((room) => <RoomVerification key={room.key} room={room} event={selectedEvent} onAction={scoreAction} />)}</section> })}
+    {rooms.length === 0 && <p className={styles.empty}>No Masters scorecards have been submitted yet.</p>}{message && <p className={styles.message} role="status">{message}</p>}</div></main>
 }
 
-const page:React.CSSProperties={minHeight:"100vh",padding:20,background:"#09090b",color:"white"},shell:React.CSSProperties={maxWidth:1300,margin:"auto"},muted:React.CSSProperties={color:"#a1a1aa"},summary:React.CSSProperties={display:"flex",gap:20,flexWrap:"wrap",padding:16,background:"#18181b",borderRadius:12},pending:React.CSSProperties={color:"#f472b6"},official:React.CSSProperties={color:"#4ade80"},filters:React.CSSProperties={display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))",gap:10,margin:"16px 0"},roundControls:React.CSSProperties={display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:10},list:React.CSSProperties={display:"grid",gap:10,marginTop:18},card:React.CSSProperties={padding:14,border:"1px solid #3f3f46",borderRadius:10,background:"#18181b"},row:React.CSSProperties={display:"grid",gridTemplateColumns:"2fr repeat(4,1fr)",gap:10,cursor:"pointer"},roomContext:React.CSSProperties={display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))",gap:16,marginTop:14,padding:14,border:"1px solid #3f3f46",borderRadius:10,background:"#09090b"},proofImage:React.CSSProperties={display:"block",width:"100%",height:"auto",maxHeight:480,objectFit:"contain",borderRadius:8},holes:React.CSSProperties={display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:7,padding:"15px 0"},actions:React.CSSProperties={display:"flex",gap:8}
+function groupVerificationRooms(cards: MajorPlayerScorecard[], proofs: AdminRoomProof[]): RoomGroup[] {
+  const groups = new Map<string, RoomGroup>()
+  for (const card of cards) { const key = card.room_group_id || `${card.play_day_id}:${card.entry_id}`; const current = groups.get(key) || { key, dayNumber: card.day_number, roomLabel: card.room_label || "Room pending", startsAt: card.slot_starts_at, roster: card.room_roster || [], instructions: card.room_instructions || null, cards: [], proof: proofs.find((proof) => proof.schedule_group_id === card.room_group_id) }; current.cards.push(card); groups.set(key, current) }
+  return [...groups.values()].toSorted((left, right) => left.dayNumber - right.dayNumber || (left.startsAt || "").localeCompare(right.startsAt || "") || left.roomLabel.localeCompare(right.roomLabel))
+}
+
+function RoomVerification({ room, event, onAction }: { room: RoomGroup; event?: MajorEvent; onAction: (name: "verify_major_scorecard" | "reopen_major_scorecard", id: string) => Promise<void> }) {
+  const verified = room.cards.filter((card) => card.status === "verified").length, waiting = room.cards.filter((card) => card.status === "submitted").length
+  return <details className={styles.room} open={waiting > 0}><summary><div><strong>{room.roomLabel}</strong><span>{room.startsAt ? formatMastersAdminTime(room.startsAt, event?.schedule_timezone) : "Time pending"}</span></div><b>{room.proof ? "Room Scorecard: Uploaded" : "Room Scorecard: Missing"}</b><span>{verified} / {room.cards.length} VERIFIED · {waiting} WAITING</span></summary>
+    <div className={styles.roomContext}><section><h3>ROOM ROSTER</h3><ul>{room.roster.map((player) => <li key={player.player_id}>{player.player_screen_name_snapshot}</li>)}</ul>{room.instructions && <><h3>ROOM INSTRUCTIONS</h3><p>{room.instructions}</p></>}</section><RoomProofViewer room={room} /></div>
+    <div className={styles.players}>{room.cards.toSorted((left, right) => left.player_screen_name_snapshot.localeCompare(right.player_screen_name_snapshot)).map((card) => <article key={card.id} className={styles.playerCard}><header><div><h3>{card.player_screen_name_snapshot}</h3><p>Submitted: {card.submitted_at ? formatMastersAdminDateTime(card.submitted_at, event?.schedule_timezone) : "Not submitted"}</p></div><strong>{formatMajorToPar(card.score_to_par ?? card.holes.reduce((sum, hole) => sum + hole.strokes - hole.par, 0))}</strong><span data-status={card.status}>{card.status === "reopened" ? "NEEDS CORRECTION" : card.status.toUpperCase()}</span></header><div className={styles.holes}>{card.holes.map((hole) => <span key={hole.hole_number}><small>H{hole.hole_number}</small><b>{hole.strokes}</b><em>Par {hole.par}</em></span>)}</div><div className={styles.actions}>{card.status === "submitted" && <button type="button" onClick={() => void onAction("verify_major_scorecard", card.id)}>VERIFY SCORE</button>}{["submitted", "verified"].includes(card.status) && <button type="button" onClick={() => void onAction("reopen_major_scorecard", card.id)}>NEEDS CORRECTION</button>}</div></article>)}</div>
+  </details>
+}
+
+function RoomProofViewer({ room }: { room: RoomGroup }) {
+  const controller = useScorecardImageView()
+  if (!room.proof) return <section className={styles.proofEmpty}><h3>ROOM SCORECARD</h3><p>No shared room scorecard photo submitted.</p></section>
+  return <section className={styles.proof}><header><div><h3>ROOM SCORECARD</h3><p>Uploaded by {room.proof.uploader_screen_name} · {formatMastersAdminDateTime(room.proof.uploaded_at)}</p></div><ScorecardZoomControls controller={controller} buttonClassName={styles.viewerButton} /></header><ScorecardPanViewport controller={controller} src={room.proof.image_url} alt={`Shared scorecard for ${room.roomLabel}`} className={styles.viewer} imageClassName={styles.proofImage} /></section>
+}

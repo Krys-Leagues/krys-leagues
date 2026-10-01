@@ -2,7 +2,10 @@
 
 import { useCallback, useEffect, useRef, useState } from "react"
 import { usePathname } from "next/navigation"
+import Link from "next/link"
+import MastersOfficialRules from "@/components/majors/MastersOfficialRules"
 import type { MajorDayChoice, MajorPlayDay } from "@/lib/majors"
+import { MASTERS_HELP_CATEGORIES, type MastersHelpCategory } from "@/lib/mastersRules"
 import {
   buildPublishedMastersRoomAssignments,
   dismissMastersRoomAssignment,
@@ -21,7 +24,7 @@ type ReminderMode = "hidden" | "open" | "collapsed"
 
 function readDismissals() {
   try {
-    return parseMastersRoomReminderDismissals(window.localStorage.getItem(MASTERS_ROOM_REMINDER_STORAGE_KEY))
+    return parseMastersRoomReminderDismissals(window.sessionStorage.getItem(MASTERS_ROOM_REMINDER_STORAGE_KEY))
   } catch {
     return {}
   }
@@ -30,7 +33,7 @@ function readDismissals() {
 function saveDismissal(assignment: MastersRoomReminderAssignment) {
   try {
     const dismissals = dismissMastersRoomAssignment(assignment, readDismissals())
-    window.localStorage.setItem(MASTERS_ROOM_REMINDER_STORAGE_KEY, JSON.stringify(dismissals))
+    window.sessionStorage.setItem(MASTERS_ROOM_REMINDER_STORAGE_KEY, JSON.stringify(dismissals))
   } catch {
     // The reminder still closes for this page view when browser storage is unavailable.
   }
@@ -64,6 +67,11 @@ export default function MastersRoomReminder() {
   const isMastersScoringRoute = /^\/majors\/[^/]+\/scoring(?:\/|$)/.test(pathname || "")
   const [assignment, setAssignment] = useState<MastersRoomReminderAssignment | null>(null)
   const [mode, setMode] = useState<ReminderMode>("hidden")
+  const [panel, setPanel] = useState<"room" | "rules" | "contact">("room")
+  const [category, setCategory] = useState<MastersHelpCategory>("PLAYER NO-SHOW")
+  const [details, setDetails] = useState("")
+  const [contactState, setContactState] = useState<"idle" | "sending" | "sent" | "failed">("idle")
+  const [contactMessage, setContactMessage] = useState("")
   const [refreshing, setRefreshing] = useState(false)
   const requestId = useRef(0)
 
@@ -78,6 +86,7 @@ export default function MastersRoomReminder() {
       setMode("hidden")
       return
     }
+    if (forceOpen) setPanel("room")
     setMode(forceOpen || shouldAutoOpenMastersRoomReminder(current, readDismissals()) ? "open" : "collapsed")
   }, [])
 
@@ -119,7 +128,38 @@ export default function MastersRoomReminder() {
   }
 
   const localTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"
-  const localSlot = formatMastersPlayerSlot(assignment.startsAt, assignment.officialPlayDate, localTimeZone)
+  const currentAssignment = assignment
+  const localSlot = formatMastersPlayerSlot(currentAssignment.startsAt, currentAssignment.officialPlayDate, localTimeZone)
+
+  async function sendAdminAlert() {
+    if (!details.trim()) {
+      setContactState("failed")
+      setContactMessage("Add a short description so the Masters admins know how to help.")
+      return
+    }
+    setContactState("sending")
+    setContactMessage("")
+    try {
+      const response = await fetch("/api/majors/contact-admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          eventId: currentAssignment.eventId,
+          playDayId: currentAssignment.playDayId,
+          category,
+          message: details.trim(),
+          localDisplayTime: `${localSlot.date}, ${localSlot.time}${localSlot.dayShift ? ` · ${localSlot.dayShift}` : ""}`,
+        }),
+      })
+      const body = await response.json().catch(() => ({})) as { error?: string }
+      if (!response.ok) throw new Error(body.error || "We could not send your alert.")
+      setContactState("sent")
+      setContactMessage("ADMIN ALERT SENT")
+    } catch (caught) {
+      setContactState("failed")
+      setContactMessage(caught instanceof Error ? caught.message : "WE COULD NOT SEND YOUR ALERT. Please try again or contact an admin directly.")
+    }
+  }
 
   return (
     <aside className={`${styles.card} ${isMastersScoringRoute ? styles.scoringCard : ""}`} role="dialog" aria-modal="false" aria-labelledby="masters-room-reminder-title">
@@ -136,17 +176,41 @@ export default function MastersRoomReminder() {
       </button>
       <p className={styles.eyebrow}>YOUR MASTERS ROOM</p>
       <h2 id="masters-room-reminder-title">ROOM: {assignment.groupLabel}</h2>
-      <p className={styles.round}>{assignment.roundLabel}</p>
-      <div className={styles.when}>
-        <strong>{localSlot.date}</strong>
-        <span>{localSlot.time}</span>
-        {localSlot.dayShift && <em>{localSlot.dayShift}</em>}
-      </div>
-      <h3>Playing with:</h3>
-      <ul className={styles.roster}>
-        {assignment.roster.map((player) => <li key={player.player_id}>{player.player_screen_name_snapshot}</li>)}
-      </ul>
-      {assignment.instructions && <section className={styles.instructions}><h3>ROOM INSTRUCTIONS</h3><p>{assignment.instructions}</p></section>}
+      {panel === "room" && <>
+        <p className={styles.round}>{assignment.roundLabel}</p>
+        <div className={styles.when}>
+          <strong>{localSlot.date}</strong>
+          <span>{localSlot.time}</span>
+          {localSlot.dayShift && <em>{localSlot.dayShift}</em>}
+        </div>
+        <h3>Playing with:</h3>
+        <ul className={styles.roster}>
+          {assignment.roster.map((player) => <li key={player.player_id}>{player.player_screen_name_snapshot}</li>)}
+        </ul>
+        {assignment.instructions && <section className={styles.instructions}><h3>ROOM INSTRUCTIONS</h3><p>{assignment.instructions}</p></section>}
+      </>}
+      {panel === "rules" && <MastersOfficialRules className={styles.rules} />}
+      {panel === "contact" && <section className={styles.contact} aria-labelledby="masters-contact-title">
+        <h3 id="masters-contact-title">CONTACT ADMIN</h3>
+        <label>What do you need help with?
+          <select value={category} onChange={(event) => setCategory(event.target.value as MastersHelpCategory)}>
+            {MASTERS_HELP_CATEGORIES.map((option) => <option key={option}>{option}</option>)}
+          </select>
+        </label>
+        <label>Short details
+          <textarea maxLength={800} rows={4} value={details} onChange={(event) => { setDetails(event.target.value); setContactState("idle") }} />
+        </label>
+        <button type="button" onClick={() => void sendAdminAlert()} disabled={contactState === "sending" || contactState === "sent"}>
+          {contactState === "sending" ? "SENDING…" : contactState === "sent" ? "ALERT SENT" : "SEND ADMIN ALERT"}
+        </button>
+        {contactMessage && <p className={contactState === "sent" ? styles.contactSuccess : styles.contactError} role="status">{contactMessage}</p>}
+      </section>}
+      <nav className={styles.actions} aria-label="Masters gateway actions">
+        <Link href={`/majors/masters/scoring?round=${assignment.dayNumber}&playDayId=${encodeURIComponent(assignment.playDayId)}`}>ENTER ROUND {assignment.dayNumber} SCORES</Link>
+        <button type="button" onClick={() => setPanel(panel === "rules" ? "room" : "rules")}>{panel === "rules" ? "VIEW MY ROOM" : "VIEW INSTRUCTIONS & RULES"}</button>
+        <Link href="/majors/masters/results">VIEW LIVE MASTERS SCORE TRACKER</Link>
+        <button type="button" onClick={() => setPanel(panel === "contact" ? "room" : "contact")}>{panel === "contact" ? "VIEW MY ROOM" : "CONTACT ADMIN"}</button>
+      </nav>
     </aside>
   )
 }

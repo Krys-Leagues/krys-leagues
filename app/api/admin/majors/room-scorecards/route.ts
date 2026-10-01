@@ -48,7 +48,17 @@ export async function GET(request: Request) {
       .is("replaced_at", null)
       .order("uploaded_at", { ascending: false })
     if (proofs.error) throw proofs.error
-    return json({ proofs: (proofs.data || []).map((proof) => ({ ...proof, image_url: adminRoomScorecardImageUrl(proof.id) })) })
+    const uploaderIds = [...new Set((proofs.data || []).map((proof) => proof.uploaded_by_player_id))]
+    const uploaders = uploaderIds.length
+      ? await service.from("players").select("id,screen_name").in("id", uploaderIds)
+      : { data: [], error: null }
+    if (uploaders.error) throw uploaders.error
+    const uploaderNames = new Map((uploaders.data || []).map((player) => [player.id, player.screen_name]))
+    return json({ proofs: (proofs.data || []).map((proof) => ({
+      ...proof,
+      uploader_screen_name: uploaderNames.get(proof.uploaded_by_player_id) || "Unknown player",
+      image_url: adminRoomScorecardImageUrl(proof.id),
+    })) })
   } catch (caught) {
     return json({ error: caught instanceof Error ? caught.message : "Room scorecard proofs could not be loaded." }, 503)
   }

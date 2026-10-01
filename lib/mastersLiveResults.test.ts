@@ -115,7 +115,7 @@ test("full field supports at least 56 entrants without inventing score rows", ()
   assert.ok(rows.every((row) => row.overallTotal === null && row.overallPlace === null))
 })
 
-test("public board source exposes the required three views without hidden-field wording", () => {
+test("public board exposes one four-round tracker without hidden-field wording", () => {
   const pageSource = readFileSync(new URL("../app/majors/[slug]/results/page.tsx", import.meta.url), "utf8")
   const migrationSource = readFileSync(
     new URL("../supabase/migrations/20260930215309_public_masters_full_field_results.sql", import.meta.url),
@@ -123,11 +123,14 @@ test("public board source exposes the required three views without hidden-field 
   )
   const playerFacingSource = `${pageSource}\n${migrationSource}`
 
-  assert.match(pageSource, /ROUNDS 1 & 2/)
-  assert.match(pageSource, /ROUNDS 3 & 4/)
-  assert.match(pageSource, /OVERALL MASTERS/)
-  assert.match(pageSource, /OVERALL TO PAR/)
+  assert.match(pageSource, /MASTERS LIVE SCORE TRACKER/)
+  assert.match(pageSource, /ROUND 1/)
+  assert.match(pageSource, /ROUND 2/)
+  assert.match(pageSource, /ROUND 3/)
+  assert.match(pageSource, /FINAL ROUND/)
+  assert.match(pageSource, /OVERALL/)
   assert.match(pageSource, /PlayerDetail/)
+  assert.doesNotMatch(pageSource, /BOARD_OPTIONS|RoundPairBoard|boardNavigation/)
   assert.doesNotMatch(playerFacingSource, /CUT LINE|TOP 50%|QUALIFYING|ADVANCE|ELIMINATED|SECONDARY TROPHY|SECOND FIELD/i)
   assert.doesNotMatch(migrationSource, /weekend_field/)
 })
@@ -136,4 +139,10 @@ test("Masters board uses the byte-identical supplied Krys Leagues logo", () => {
   const logo = readFileSync(new URL("../public/masters/krys-leagues-logo-source.png", import.meta.url))
   const digest = createHash("sha256").update(logo).digest("hex")
   assert.equal(digest, "21824c766ce4602a5bc339a0ae0e1b4854ae16a23a671969f896ef02958d30cd")
+})
+
+test("Masters board uses the byte-identical locked ornate scoreboard artwork", () => {
+  const artwork = readFileSync(new URL("../public/masters/masters-live-scoreboard-reference.png", import.meta.url))
+  const digest = createHash("sha256").update(artwork).digest("hex")
+  assert.equal(digest, "9781c93b3a877128c69b806c9459de092f72e575b61e1372b676ddfd485c8022")
 })

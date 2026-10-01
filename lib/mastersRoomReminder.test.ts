@@ -71,7 +71,7 @@ test("the next upcoming published assignment is selected", () => {
   assert.equal(selectCurrentMastersRoomAssignment(assignments, Date.parse("2026-10-01T05:00:00.000Z"))?.roundLabel, "Friday — Round 2")
 })
 
-test("dismissal persists for the exact assignment and changed assignments auto-open", () => {
+test("visit-scoped dismissal closes the exact assignment and changed assignments auto-open", () => {
   const [assignment] = buildPublishedMastersRoomAssignments(eventId, [choice()], [day])
   assert.equal(shouldAutoOpenMastersRoomReminder(assignment, {}), true)
   const dismissed = dismissMastersRoomAssignment(assignment, {})
@@ -155,7 +155,12 @@ test("the reminder has one global mount with cross-route state, full roster, and
   assert.match(component, /styles\.scoringCard/)
   assert.doesNotMatch(component, /\.roster\.(?:slice|splice)\(/)
   assert.match(component, /get_my_major_signup_schedule/)
-  assert.match(component, /window\.localStorage/)
+  assert.match(component, /window\.sessionStorage/)
+  assert.doesNotMatch(component, /window\.localStorage/)
+  assert.match(component, /ENTER ROUND \{assignment\.dayNumber\} SCORES/)
+  assert.match(component, /VIEW INSTRUCTIONS & RULES/)
+  assert.match(component, /VIEW LIVE MASTERS SCORE TRACKER/)
+  assert.match(component, /CONTACT ADMIN/)
   assert.match(css, /@media \(max-width: 600px\)/)
   assert.match(css, /max-height: 58dvh/)
   assert.match(css, /bottom: max\(72px/)

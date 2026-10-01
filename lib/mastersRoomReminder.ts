@@ -1,6 +1,6 @@
 import { majorRoundDayLabel, type MajorDayChoice, type MajorPlayDay, type MajorRoomRosterMember } from "./majors.ts"
 
-export const MASTERS_ROOM_REMINDER_STORAGE_KEY = "krys-leagues:masters-room-reminder-dismissals-v1"
+export const MASTERS_ROOM_REMINDER_STORAGE_KEY = "krys-leagues:masters-room-gateway-visit-v2"
 
 export type MastersRoomReminderAssignment = {
   eventId: string
