@@ -79,6 +79,7 @@ export type MajorScoringSession = {
   revision: number
   fireworks_sequence: number
   stream_participant_order?: string[] | null
+  stream_total_scores?: Record<string, number> | null
   created_at: string
   updated_at: string
 }

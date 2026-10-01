@@ -1,0 +1,50 @@
+.page { min-height: 100vh; padding: clamp(14px, 3vw, 34px); background: #07120d; color: #f8fafc; }
+.header { display: flex; max-width: 1100px; margin: auto; align-items: flex-start; justify-content: space-between; gap: 18px; }
+.header h1 { margin: 0.25rem 0; font-size: clamp(1.8rem, 5vw, 3.2rem); }
+.header p { max-width: 720px; color: #bad2c4; }
+.back { color: #a7f3d0; font-weight: 800; text-decoration: none; }
+.eyebrow { font-size: 0.72rem; font-weight: 900; letter-spacing: 0.14em; text-transform: uppercase; }
+.liveBadge { padding: 9px 13px; border-radius: 999px; background: #7f1d1d; color: #fecaca; font-weight: 900; }
+.notice, .loadPanel, .context, .playerOrder, .players, .actions, .empty { max-width: 1100px; margin: 16px auto; }
+.notice { padding: 12px 14px; border: 1px solid #ca8a04; border-radius: 12px; background: #422006; }
+.loadPanel { display: grid; grid-template-columns: 1fr auto; gap: 12px; padding: 15px; border: 1px solid #275d43; border-radius: 15px; background: #0d2017; }
+.loadPanel label { display: grid; gap: 6px; font-weight: 800; }
+.loadPanel select { min-height: 50px; padding: 9px; border: 1px solid #3f7358; border-radius: 9px; background: #07120d; color: #fff; }
+.page button { min-height: 48px; padding: 10px 16px; border: 0; border-radius: 10px; background: #16a34a; color: #fff; font-weight: 900; cursor: pointer; }
+.page button:disabled { opacity: 0.45; cursor: not-allowed; }
+.context { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.context div { display: grid; gap: 3px; padding: 13px; border: 1px solid #275d43; border-radius: 12px; background: #0d2017; }
+.context span { color: #8ab29b; font-size: 0.74rem; font-weight: 900; text-transform: uppercase; }
+.context strong { font-size: 1.3rem; }
+.playerOrder { display: grid; grid-template-columns: minmax(180px, 0.7fr) 1.3fr; align-items: center; gap: 14px; padding: 14px 16px; border: 1px solid #275d43; border-radius: 14px; background: #0d2017; }
+.playerOrder h2 { margin: 0; font-size: 1rem; letter-spacing: 0.1em; }
+.playerOrder p { margin: 4px 0 0; color: #8ab29b; font-size: 0.82rem; }
+.playerOrder ol { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; counter-reset: player-order; }
+.playerOrder li { display: grid; grid-template-columns: 48px minmax(0, 1fr) 48px; align-items: center; gap: 8px; counter-increment: player-order; }
+.playerOrder strong { overflow-wrap: anywhere; }
+.playerOrder strong::before { content: counter(player-order) ". "; color: #8ab29b; }
+.playerOrder button { min-height: 44px; padding: 4px; background: #0f766e; font-size: 1.35rem; }
+.players { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+.playerCard { padding: 16px; border: 1px solid #357653; border-radius: 16px; background: #0b1b13; text-align: center; }
+.playerCard h2 { min-height: 2.5em; margin: 0; display: grid; place-items: center; overflow-wrap: anywhere; }
+.stepper { display: grid; grid-template-columns: 76px 1fr 76px; align-items: center; gap: 10px; margin-top: 10px; }
+.stepper button { min-height: 72px; padding: 0; font-size: 2.5rem; }
+.stepper strong { font-size: clamp(3.2rem, 8vw, 5.4rem); line-height: 1; }
+.actions { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 14px; padding: 16px; border-radius: 14px; background: #0d2017; }
+.actions div { display: grid; gap: 7px; min-width: 0; }
+.actions code { padding: 7px; overflow-wrap: anywhere; border-radius: 7px; background: #020604; color: #a7f3d0; }
+.fireworksButton { background: #a21caf !important; }
+.modalBackdrop { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 20px; background: rgba(0, 0, 0, 0.78); }
+.modal { width: min(520px, 100%); padding: 24px; border: 1px solid #4ade80; border-radius: 18px; background: #07120d; box-shadow: 0 25px 80px #000; }
+.modalActions { display: flex; justify-content: flex-end; gap: 10px; }
+.cancel { background: #475569 !important; }
+.empty { padding: 50px 20px; border: 1px dashed #357653; border-radius: 16px; color: #bad2c4; text-align: center; }
+@media (max-width: 700px) {
+  .page { padding: 12px; }
+  .header { display: block; }
+  .liveBadge { display: inline-block; margin-top: 6px; }
+  .loadPanel, .playerOrder, .actions { grid-template-columns: 1fr; }
+  .players { grid-template-columns: 1fr; }
+  .stepper strong { font-size: 4.5rem; }
+  .actions code { font-size: 0.7rem; }
+}

@@ -26,6 +26,10 @@ const runningTotalMigration = readFileSync(
   new URL("../supabase/migrations/20261001210856_masters_stream_running_total_controls.sql", import.meta.url),
   "utf8",
 )
+const simpleTotalsMigration = readFileSync(
+  new URL("../supabase/migrations/20261001214500_masters_simple_stream_totals.sql", import.meta.url),
+  "utf8",
+)
 const controller = readFileSync(
   new URL("../app/admin/majors/stream-scorecard/page.tsx", import.meta.url),
   "utf8",
@@ -56,6 +60,22 @@ const fireworksView = readFileSync(
 )
 const fireworksCss = readFileSync(
   new URL("../components/masters/MastersHioFireworksView.module.css", import.meta.url),
+  "utf8",
+)
+const simpleController = readFileSync(
+  new URL("../app/admin/majors/simple-stream-scorecard/page.tsx", import.meta.url),
+  "utf8",
+)
+const simpleDisplay = readFileSync(
+  new URL("../app/majors/masters-stream/[sessionId]/simple/page.tsx", import.meta.url),
+  "utf8",
+)
+const simpleView = readFileSync(
+  new URL("../components/masters/MastersSimpleStreamCard.tsx", import.meta.url),
+  "utf8",
+)
+const simpleCss = readFileSync(
+  new URL("../components/masters/MastersSimpleStreamCard.module.css", import.meta.url),
   "utf8",
 )
 const legacyController = readFileSync(
@@ -284,6 +304,54 @@ test("fireworks OBS route is independent, full-frame, transparent when idle, and
   assert.match(controller, /\/majors\/masters-stream\/\{session\.id\}\/fireworks/)
   assert.match(controller, /920 × 420/)
   assert.match(controller, /1920 × 1080/)
+})
+
+test("simple total controller has only direct plus/minus totals, room loading, order, and fireworks", () => {
+  assert.match(simpleController, /Simple Masters Total Score Card/)
+  assert.match(simpleController, /load_masters_stream_room/)
+  assert.match(simpleController, /update_masters_simple_stream_total/)
+  assert.match(simpleController, /current \+ delta/)
+  assert.match(simpleController, /PLAYER ORDER/)
+  assert.match(simpleController, /reorder_masters_stream_participants/)
+  assert.match(simpleController, /update_masters_stream_scorecard/)
+  assert.doesNotMatch(simpleController, /CONFIRM PAR|SCORECARD \/ CORRECTIONS|Hole strokes|FRONT NINE|BACK NINE/)
+})
+
+test("simple OBS card is a separate horizontal 2-4 player total-only source", () => {
+  assert.match(simpleDisplay, /setInterval\(\(\) => void refresh\(\), 500\)/)
+  assert.match(simpleView, /THE MINI-GOLF MASTERS/)
+  assert.match(simpleView, /CHERRY BLOSSOM/)
+  assert.match(simpleView, /stream_total_scores/)
+  assert.match(simpleView, /formatRunningToPar/)
+  assert.match(simpleView, /krys-leagues-logo-source\.png/)
+  assert.match(simpleCss, /grid-template-columns:\s*repeat\(var\(--player-count\)/)
+  assert.match(simpleCss, /background:\s*transparent/)
+  assert.doesNotMatch(simpleView, /hole_number|strokes|pars|FRONT NINE|BACK NINE|fireworks/)
+  assert.match(simpleController, /1400 × 240/)
+  assert.match(simpleController, /\/majors\/masters-stream\/\{session\.id\}\/simple/)
+})
+
+test("simple totals persist separately and cannot touch official Masters data", () => {
+  assert.match(simpleTotalsMigration, /stream_total_scores jsonb not null default '\{\}'::jsonb/i)
+  assert.match(simpleTotalsMigration, /jsonb_set\(/i)
+  assert.match(simpleTotalsMigration, /p_total_to_par not between -999 and 999/i)
+  assert.match(simpleTotalsMigration, /Participant does not belong to this broadcast scorecard/i)
+  assert.match(simpleTotalsMigration, /STALE_STREAM_REVISION/i)
+  assert.match(simpleTotalsMigration, /public\.is_current_user_site_admin\(\)/i)
+  assert.doesNotMatch(simpleTotalsMigration, /(insert into|update|delete from) public\.major_player_scorecards/i)
+  assert.doesNotMatch(simpleTotalsMigration, /(insert into|update|delete from) public\.major_player_scorecard_holes/i)
+  assert.doesNotMatch(simpleTotalsMigration, /(insert into|update|delete from) public\.major_schedule_groups/i)
+  assert.doesNotMatch(simpleTotalsMigration, /(insert into|update|delete from) public\.major_schedule_group_members/i)
+})
+
+test("simple total formatting covers negative, even, and positive scores for 2-4 players", () => {
+  assert.equal(formatRunningToPar(-25), "-25")
+  assert.equal(formatRunningToPar(0), "E")
+  assert.equal(formatRunningToPar(3), "+3")
+  for (const count of [2, 3, 4]) {
+    const participants = Array.from({ length: count }, (_, index) => ({ id: `p${index + 1}`, position: index + 1 }))
+    assert.equal(orderStreamParticipants(participants, participants.map((participant) => participant.id)).length, count)
+  }
 })
 
 test("OBS route suppresses global site popups without changing normal public pages", () => {
