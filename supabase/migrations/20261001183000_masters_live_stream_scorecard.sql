@@ -25,6 +25,14 @@ alter table public.major_scoring_sessions
   add column if not exists updated_by uuid references auth.users(id) on delete set null;
 
 alter table public.major_scoring_sessions
+  drop constraint if exists major_scoring_sessions_course_code_check;
+alter table public.major_scoring_sessions
+  drop constraint if exists major_scoring_sessions_hole_pars_check;
+alter table public.major_scoring_sessions
+  drop constraint if exists major_scoring_sessions_revision_check;
+alter table public.major_scoring_sessions
+  drop constraint if exists major_scoring_sessions_fireworks_sequence_check;
+alter table public.major_scoring_sessions
   add constraint major_scoring_sessions_course_code_check
   check (course_code is null or course_code in ('CBE', 'CBH')),
   add constraint major_scoring_sessions_hole_pars_check
@@ -40,15 +48,19 @@ create unique index if not exists major_scoring_sessions_schedule_group_unique
 
 create or replace function public.get_admin_masters_stream_rooms(p_major_event_id uuid)
 returns jsonb
-language sql
+language plpgsql
 stable
 security definer
 set search_path to ''
 as $function$
-  select case
-    when not public.is_current_user_site_admin() then
-      jsonb_build_object('error', 'Administrator authorization is required')
-    else coalesce((
+declare
+  rooms jsonb;
+begin
+  if not public.is_current_user_site_admin() then
+    raise exception 'Administrator authorization is required' using errcode = '42501';
+  end if;
+
+  select coalesce((
       select jsonb_agg(jsonb_build_object(
         'group_id', room.id,
         'play_day_id', day.id,
@@ -79,12 +91,18 @@ as $function$
       where room.major_event_id = p_major_event_id
         and room.is_published
     ), '[]'::jsonb)
-  end;
+  into rooms;
+
+  return rooms;
+end;
 $function$;
 
 create or replace function public.load_masters_stream_room(
   p_schedule_group_id uuid,
-  p_confirmed boolean default false
+  p_confirmed boolean,
+  p_course_code text,
+  p_course_name text,
+  p_hole_pars smallint[]
 )
 returns uuid
 language plpgsql
@@ -95,9 +113,10 @@ declare
   room_record record;
   session_id uuid;
   roster_count integer;
-  course_code_value text;
-  course_name_value text;
-  pars_value smallint[];
+  expected_course_code text;
+  expected_course_name text;
+  expected_pars smallint[];
+  existing_participant_count integer;
 begin
   if not public.is_current_user_site_admin() then
     raise exception 'Administrator authorization is required' using errcode = '42501';
@@ -115,6 +134,8 @@ begin
     and room.is_published;
   if not found then raise exception 'Complete published Masters room not found'; end if;
 
+  perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtext(room_record.major_event_id::text));
+
   select count(*) into roster_count
   from public.major_schedule_group_members member
   join public.major_entries entry on entry.id = member.entry_id
@@ -125,19 +146,28 @@ begin
   end if;
 
   if room_record.day_number in (1, 2) then
-    course_code_value := 'CBE';
-    course_name_value := 'Cherry Blossom Easy';
-    pars_value := array[3,4,3,4,3,3,3,4,3,5,3,4,2,3,3,3,3,7]::smallint[];
+    expected_course_code := 'CBE';
+    expected_course_name := 'Cherry Blossom Easy';
+    expected_pars := array[3,4,3,4,3,3,3,4,3,5,3,4,2,3,3,3,3,7]::smallint[];
   else
-    course_code_value := 'CBH';
-    course_name_value := 'Cherry Blossom Hard';
-    pars_value := array[3,4,3,4,3,3,3,4,3,5,3,4,2,3,3,3,3,8]::smallint[];
+    expected_course_code := 'CBH';
+    expected_course_name := 'Cherry Blossom Hard';
+    expected_pars := array[3,4,3,4,3,3,3,4,3,5,3,4,2,3,3,3,3,8]::smallint[];
+  end if;
+
+  if p_course_code is distinct from expected_course_code
+    or p_course_name is distinct from expected_course_name
+    or p_hole_pars is distinct from expected_pars then
+    raise exception 'Course configuration does not match the authoritative Masters round configuration'
+      using errcode = '22023';
   end if;
 
   update public.major_scoring_sessions
   set is_active = false, is_public = false, revision = revision + 1,
       updated_by = auth.uid(), updated_at = now()
-  where is_active or is_public;
+  where major_event_id = room_record.major_event_id
+    and schedule_group_id is not null
+    and (is_active or is_public);
 
   select id into session_id
   from public.major_scoring_sessions
@@ -152,7 +182,7 @@ begin
       room_record.major_event_id,
       room_record.group_label || ' · Round ' || room_record.day_number,
       roster_count, 1, true, true, room_record.id, room_record.play_day_id,
-      course_code_value, course_name_value, pars_value, auth.uid()
+      expected_course_code, expected_course_name, expected_pars, auth.uid()
     ) returning id into session_id;
 
     insert into public.major_scoring_participants (
@@ -166,15 +196,54 @@ begin
       and entry.status in ('registered', 'confirmed')
     order by lower(entry.player_screen_name_snapshot), entry.player_id;
   else
+    select count(*) into existing_participant_count
+    from public.major_scoring_participants participant
+    where participant.session_id = session_id;
+
+    if existing_participant_count <> roster_count
+      or exists (
+        select 1
+        from public.major_scoring_participants participant
+        where participant.session_id = session_id
+          and not exists (
+            select 1
+            from public.major_schedule_group_members member
+            join public.major_entries entry on entry.id = member.entry_id
+            where member.group_id = room_record.id
+              and entry.status in ('registered', 'confirmed')
+              and entry.player_id = participant.player_id
+          )
+      ) then
+      if exists (select 1 from public.major_hole_scores score where score.session_id = session_id) then
+        raise exception 'Published room roster changed after stream scoring began; existing stream state was preserved';
+      end if;
+
+      delete from public.major_scoring_participants participant
+      where participant.session_id = session_id;
+
+      insert into public.major_scoring_participants (
+        session_id, position, player_id, player_screen_name_snapshot
+      )
+      select session_id,
+        row_number() over (order by lower(entry.player_screen_name_snapshot), entry.player_id),
+        entry.player_id,
+        entry.player_screen_name_snapshot
+      from public.major_schedule_group_members member
+      join public.major_entries entry on entry.id = member.entry_id
+      where member.group_id = room_record.id
+        and entry.status in ('registered', 'confirmed')
+      order by lower(entry.player_screen_name_snapshot), entry.player_id;
+    end if;
+
     update public.major_scoring_sessions
     set label = room_record.group_label || ' · Round ' || room_record.day_number,
         participant_count = roster_count,
         is_active = true,
         is_public = true,
         play_day_id = room_record.play_day_id,
-        course_code = course_code_value,
-        course_name = course_name_value,
-        hole_pars = pars_value,
+        course_code = expected_course_code,
+        course_name = expected_course_name,
+        hole_pars = expected_pars,
         revision = revision + 1,
         updated_by = auth.uid(),
         updated_at = now()
@@ -213,6 +282,12 @@ begin
   select * into session_record from public.major_scoring_sessions
   where id = p_session_id for update;
   if not found then raise exception 'Broadcast scorecard not found'; end if;
+  if session_record.schedule_group_id is null then
+    raise exception 'This is not a room-driven Masters stream scorecard' using errcode = '22023';
+  end if;
+  if not session_record.is_active or not session_record.is_public then
+    raise exception 'This stream scorecard is no longer active; reload the current room' using errcode = '55000';
+  end if;
   if session_record.revision <> p_expected_revision then
     raise exception 'STALE_STREAM_REVISION' using errcode = '40001';
   end if;
@@ -305,8 +380,8 @@ $function$;
 
 revoke all on function public.get_admin_masters_stream_rooms(uuid) from public, anon, authenticated;
 grant execute on function public.get_admin_masters_stream_rooms(uuid) to authenticated, service_role;
-revoke all on function public.load_masters_stream_room(uuid, boolean) from public, anon, authenticated;
-grant execute on function public.load_masters_stream_room(uuid, boolean) to authenticated, service_role;
+revoke all on function public.load_masters_stream_room(uuid, boolean, text, text, smallint[]) from public, anon, authenticated;
+grant execute on function public.load_masters_stream_room(uuid, boolean, text, text, smallint[]) to authenticated, service_role;
 revoke all on function public.update_masters_stream_scorecard(uuid, bigint, integer, jsonb, boolean) from public, anon, authenticated;
 grant execute on function public.update_masters_stream_scorecard(uuid, bigint, integer, jsonb, boolean) to authenticated, service_role;
 revoke all on function public.get_public_major_scoreboard(uuid) from public, anon, authenticated;

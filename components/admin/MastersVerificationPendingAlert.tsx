@@ -1,13 +1,17 @@
 "use client"
 
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
 
 export default function MastersVerificationPendingAlert() {
+  const pathname = usePathname()
+  const hiddenForStream = pathname.startsWith("/majors/masters-stream")
   const [summary, setSummary] = useState({ rooms: 0, scores: 0, latestId: null as string | null })
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
+    if (hiddenForStream) return
     let active = true
     async function refresh() {
       try {
@@ -23,9 +27,9 @@ export default function MastersVerificationPendingAlert() {
     void refresh()
     const timer = window.setInterval(() => void refresh(), 20_000)
     return () => { active = false; window.clearInterval(timer) }
-  }, [])
+  }, [hiddenForStream])
 
-  if (!loaded || summary.scores < 1) return null
+  if (hiddenForStream || !loaded || summary.scores < 1) return null
   return (
     <Link href="/admin/majors/verification" style={alertStyle} role="alert" data-latest-scorecard={summary.latestId || undefined}>
       <strong>🔴 MASTERS SCORES WAITING</strong>

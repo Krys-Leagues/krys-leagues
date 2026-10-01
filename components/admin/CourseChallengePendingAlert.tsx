@@ -1,15 +1,19 @@
 "use client"
 
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
 
 export default function CourseChallengePendingAlert() {
+  const pathname = usePathname()
+  const hiddenForStream = pathname.startsWith("/majors/masters-stream")
   const [count, setCount] = useState(0)
   const [latestId, setLatestId] = useState<string | null>(null)
   const [dismissedLatest, setDismissedLatest] = useState<string | null>(() => typeof window === "undefined" ? null : window.localStorage.getItem("course-challenge-dismissed-latest"))
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
+    if (hiddenForStream) return
     let active = true
     let previousLatest: string | null = null
     async function refresh() {
@@ -30,9 +34,9 @@ export default function CourseChallengePendingAlert() {
     void refresh()
     const timer = window.setInterval(() => { void refresh() }, 20_000)
     return () => { active = false; window.clearInterval(timer) }
-  }, [])
+  }, [hiddenForStream])
 
-  if (!loaded || count < 1) return null
+  if (hiddenForStream || !loaded || count < 1) return null
   const showLarge = latestId !== dismissedLatest
   function dismiss() {
     if (!latestId) return

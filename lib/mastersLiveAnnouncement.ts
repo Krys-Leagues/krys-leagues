@@ -3,4 +3,5 @@ export function shouldRenderMastersLiveAnnouncement(pathname: string) {
     && pathname !== "/auth/callback"
     && !pathname.startsWith("/admin")
     && !pathname.startsWith("/auth/")
+    && !pathname.startsWith("/majors/masters-stream")
 }

@@ -32,6 +32,7 @@ const MASTERS_ROOM_REMINDER_EXCLUDED_PREFIXES = [
   "/admin",
   "/auth",
   "/api",
+  "/majors/masters-stream",
 ] as const
 
 export function shouldRenderMastersRoomReminderOnPath(pathname: string | null) {

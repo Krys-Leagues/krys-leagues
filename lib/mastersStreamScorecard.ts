@@ -1,9 +1,18 @@
-import { formatMajorToPar, type MajorHoleScore } from "./majors.ts"
+import { MAJOR_COURSES, formatMajorToPar, type MajorCourseCode, type MajorHoleScore } from "./majors.ts"
 
 export const CHERRY_MASTERS_STREAM_PARS = {
-  CBE: [3, 4, 3, 4, 3, 3, 3, 4, 3, 5, 3, 4, 2, 3, 3, 3, 3, 7],
-  CBH: [3, 4, 3, 4, 3, 3, 3, 4, 3, 5, 3, 4, 2, 3, 3, 3, 3, 8],
+  CBE: MAJOR_COURSES.CBE.pars,
+  CBH: MAJOR_COURSES.CBH.pars,
 } as const
+
+export function mastersStreamCourseForRound(dayNumber: number): {
+  code: MajorCourseCode
+  name: string
+  pars: readonly number[]
+} {
+  const code: MajorCourseCode = dayNumber <= 2 ? "CBE" : "CBH"
+  return { code, ...MAJOR_COURSES[code] }
+}
 
 export type MastersStreamRoom = {
   group_id: string

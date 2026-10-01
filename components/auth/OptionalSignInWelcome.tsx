@@ -14,7 +14,7 @@ export default function OptionalSignInWelcome() {
   const [error, setError] = useState("")
 
   useEffect(() => {
-    if (pathname.startsWith("/admin") || pathname.startsWith("/auth")) return
+    if (pathname.startsWith("/admin") || pathname.startsWith("/auth") || pathname.startsWith("/majors/masters-stream")) return
     let active = true
     void supabase.auth.getSession().then(({ data }) => {
       if (!active || data.session) return
@@ -44,7 +44,7 @@ export default function OptionalSignInWelcome() {
     if (signInError) setError(signInError.message)
   }
 
-  if (!visible) return null
+  if (!visible || pathname.startsWith("/majors/masters-stream")) return null
 
   return <div role="dialog" aria-modal="true" aria-labelledby="welcome-sign-in-title" style={{ position: "fixed", inset: 0, zIndex: 90, display: "grid", placeItems: "center", padding: 20, background: "#0206178c" }}>
     <section style={{ width: "min(100%, 540px)", padding: "clamp(22px, 4vw, 36px)", border: "1px solid #ffffff38", borderRadius: 22, background: "linear-gradient(135deg, #172554f5, #111827f5)", color: "#f8fafc", boxShadow: "0 24px 90px #000b" }}>
