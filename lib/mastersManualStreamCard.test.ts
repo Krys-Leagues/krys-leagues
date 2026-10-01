@@ -28,7 +28,7 @@ const obsCss = readFileSync(new URL("../components/masters/MastersManualStreamCa
 
 test("manual golf scores preserve negative, even, positive, and direct input", () => {
   assert.equal(formatManualGolfScore(-25), "-25")
-  assert.equal(formatManualGolfScore(0), "E")
+  assert.equal(formatManualGolfScore(0), "0")
   assert.equal(formatManualGolfScore(4), "+4")
   assert.equal(parseManualGolfScore("-25"), -25)
   assert.equal(parseManualGolfScore("0"), 0)
@@ -103,14 +103,18 @@ test("controller is large, mobile-safe, and contains only manual score operation
   assert.doesNotMatch(controller, /major_hole_scores|current_hole|hole_pars|LOAD ROOM|global players|public-search/i)
 })
 
-test("OBS source has locked identity, approved logo, compact transparency, and no scoring math", () => {
+test("OBS source has locked identity, approved logo, compact 1920x1080 transparency, and no scoring math", () => {
   assert.match(obsCard, /KRYS LEAGUES/)
   assert.match(obsCard, /THE MINI-GOLF MASTERS/)
   assert.match(obsCard, /CHERRY BLOSSOM/)
   assert.match(obsCard, /krys-leagues-logo-source\.png/)
   assert.match(obsCss, /background: transparent !important/)
-  assert.match(obsCss, /width: min\(1484px/)
-  assert.match(obsCss, /height: min\(234px/)
+  assert.match(obsCss, /width: min\(var\(--card-width\)/)
+  assert.match(obsCss, /width: 100vw/)
+  assert.match(obsCss, /height: 100vh/)
+  assert.match(obsCard, /cardWidth = visibleSlots\.length === 4 \? 920/)
+  assert.match(obsCard, /visibleSlots\.length === 3 \? 760 : 620/)
+  assert.match(obsCss, /grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/)
   assert.doesNotMatch(obsCard, /CHERRY MASTERS|hole|par|room|player_id|fireworks/i)
-  assert.match(controller, /1500 × 250/)
+  assert.match(controller, /1920 × 1080/)
 })

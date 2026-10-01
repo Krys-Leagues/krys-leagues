@@ -86,7 +86,7 @@ export default function MastersManualStreamControllerPage() {
     if (parsed == null) {
       const current = slots.find((slot) => slot.slot === slotNumber)?.score ?? 0
       setDraftScores((previous) => ({ ...previous, [slotNumber]: formatManualGolfScore(current) }))
-      setMessage("Enter a whole golf total from -999 to +999, 0, or E.")
+      setMessage("Enter a whole golf total from -999 to +999, including 0.")
       return
     }
     const nextSlots = updateManualStreamSlot(slots, slotNumber, { score: parsed })
@@ -187,9 +187,6 @@ export default function MastersManualStreamControllerPage() {
                   aria-label={`${slot.name || `Player ${slot.slot}`} direct golf score`}
                   onFocus={(event) => {
                     editingRef.current = true
-                    if (/^e$/i.test(event.currentTarget.value)) {
-                      setDraftScores((previous) => ({ ...previous, [slot.slot]: "0" }))
-                    }
                     event.currentTarget.select()
                   }}
                   onChange={(event) => setDraftScores((previous) => ({ ...previous, [slot.slot]: event.target.value }))}
@@ -210,7 +207,7 @@ export default function MastersManualStreamControllerPage() {
 
       <section className={styles.sourcePanel}>
         <div>
-          <strong>KRYS MANUAL SCORECARD OBS · 1500 × 250</strong>
+          <strong>KRYS MANUAL SCORECARD OBS · 1920 × 1080</strong>
           <code>{browserOrigin}/majors/masters-stream/manual</code>
         </div>
         <p>Transparent outside the card. Add this URL as its own OBS Browser Source.</p>

@@ -8,10 +8,15 @@ import styles from "./MastersManualStreamCard.module.css"
 
 export function MastersManualStreamCard({ slots }: { slots: MastersManualStreamSlot[] }) {
   const visibleSlots = visibleManualStreamSlots(slots)
+  const cardWidth = visibleSlots.length === 4 ? 920 : visibleSlots.length === 3 ? 760 : 620
 
   return (
     <main className={styles.stage}>
-      <section className={styles.card} aria-label="Krys Leagues The Mini-Golf Masters manual scorecard">
+      <section
+        className={styles.card}
+        aria-label="Krys Leagues The Mini-Golf Masters manual scorecard"
+        style={{ "--card-width": `${cardWidth}px` } as React.CSSProperties}
+      >
         <header className={styles.header}>
           <div className={styles.logoFrame}>
             <Image

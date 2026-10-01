@@ -16,25 +16,24 @@
   box-sizing: border-box;
   width: 100vw;
   height: 100vh;
-  padding: 8px;
+  padding: 14px;
   background: transparent;
 }
 
 .card {
   position: relative;
-  width: min(1484px, calc(100vw - 16px));
-  height: min(234px, calc(100vh - 16px));
-  min-height: 205px;
+  width: min(var(--card-width), calc(100vw - 28px));
+  min-width: 0;
   overflow: hidden;
   border: 2px solid #e2b56d;
-  border-radius: 18px;
+  border-radius: 14px;
   color: #fff9ee;
   background:
     radial-gradient(circle at 10% -20%, rgba(244, 114, 182, 0.27), transparent 35%),
     radial-gradient(circle at 92% 130%, rgba(188, 37, 88, 0.2), transparent 38%),
     linear-gradient(132deg, rgba(2, 24, 18, 0.99), rgba(7, 12, 10, 0.99) 48%, rgba(32, 5, 19, 0.99));
   box-shadow:
-    0 12px 38px rgba(0, 0, 0, 0.68),
+    0 9px 26px rgba(0, 0, 0, 0.68),
     inset 0 0 0 1px rgba(255, 239, 193, 0.2),
     inset 0 0 45px rgba(236, 72, 153, 0.08);
 }
@@ -43,8 +42,8 @@
 .card::after {
   position: absolute;
   z-index: 0;
-  width: 260px;
-  height: 85px;
+  width: 210px;
+  height: 66px;
   content: "";
   pointer-events: none;
   opacity: 0.58;
@@ -63,11 +62,11 @@
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: 62px minmax(0, 1fr) auto;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 14px;
-  height: 76px;
-  padding: 5px 24px 5px 17px;
+  gap: 11px;
+  height: 57px;
+  padding: 4px 16px 4px 11px;
   box-sizing: border-box;
   border-bottom: 1px solid rgba(245, 181, 216, 0.68);
   background: linear-gradient(90deg, rgba(3, 58, 43, 0.84), rgba(19, 15, 15, 0.8) 52%, rgba(92, 12, 46, 0.74));
@@ -77,44 +76,44 @@
 .logoFrame {
   display: grid;
   place-items: center;
-  width: 58px;
-  height: 58px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.75));
 }
 
-.logoFrame img { width: 58px; height: 58px; object-fit: contain; }
+.logoFrame img { width: 44px; height: 44px; object-fit: contain; }
 
 .eventName p {
   margin: 0;
   color: #fff4dc;
-  font: 800 clamp(15px, 1.65vw, 24px)/1.05 Georgia, "Times New Roman", serif;
-  letter-spacing: 0.085em;
+  font: 800 clamp(14px, 1.2vw, 19px)/1.04 Georgia, "Times New Roman", serif;
+  letter-spacing: 0.07em;
   text-shadow: 0 2px 8px #000;
 }
 
 .eventName p span { color: #eab4cf; }
 
 .eventName h1 {
-  margin: 5px 0 0;
+  margin: 3px 0 0;
   color: #f9a8d4;
-  font: 800 clamp(11px, 0.95vw, 15px)/1 Georgia, "Times New Roman", serif;
-  letter-spacing: 0.32em;
+  font: 800 clamp(9px, 0.75vw, 12px)/1 Georgia, "Times New Roman", serif;
+  letter-spacing: 0.27em;
   text-shadow: 0 1px 7px rgba(190, 24, 93, 0.8);
 }
 
 .liveMark {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   color: #fde8cf;
-  font: 900 12px/1 Arial, sans-serif;
-  letter-spacing: 0.15em;
+  font: 900 10px/1 Arial, sans-serif;
+  letter-spacing: 0.12em;
 }
 
 .liveMark i {
-  width: 9px;
-  height: 9px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: #fb7185;
   box-shadow: 0 0 0 4px rgba(251, 113, 133, 0.14), 0 0 14px #fb7185;
@@ -125,17 +124,17 @@
   z-index: 1;
   display: grid;
   grid-template-columns: repeat(var(--player-count), minmax(0, 1fr));
-  height: calc(100% - 76px);
+  min-height: 90px;
 }
 
 .player {
   position: relative;
   display: grid;
-  grid-template-rows: minmax(28px, auto) minmax(0, 1fr);
+  grid-template-rows: minmax(22px, auto) minmax(0, 1fr);
   place-items: center;
   gap: 3px;
   min-width: 0;
-  padding: 10px clamp(12px, 1.7vw, 26px) 12px;
+  padding: 7px 12px 9px;
   overflow: hidden;
   border-right: 1px solid rgba(226, 181, 109, 0.48);
   background: linear-gradient(180deg, rgba(12, 50, 37, 0.28), rgba(20, 5, 15, 0.38));
@@ -159,7 +158,7 @@
   min-width: 0;
   margin: 0;
   color: #fff8eb;
-  font: 800 clamp(18px, 1.8vw, 28px)/1.03 Georgia, "Times New Roman", serif;
+  font: 800 clamp(16px, 1.35vw, 21px)/1.03 Georgia, "Times New Roman", serif;
   letter-spacing: 0.035em;
   overflow-wrap: anywhere;
   text-shadow: 0 3px 9px #000;
@@ -167,7 +166,7 @@
 
 .player strong {
   color: #fff;
-  font: 900 clamp(58px, 5.7vw, 86px)/0.82 Arial, Helvetica, sans-serif;
+  font: 900 clamp(42px, 3.6vw, 56px)/0.88 Arial, Helvetica, sans-serif;
   letter-spacing: -0.07em;
   text-shadow: 0 3px 0 #5b0b31, 0 0 18px rgba(244, 114, 182, 0.42), 0 5px 16px #000;
 }
@@ -181,14 +180,15 @@
 }
 
 @media (max-width: 760px) {
-  .card { min-height: 188px; }
-  .header { grid-template-columns: 48px 1fr; height: 68px; padding-inline: 12px; }
-  .logoFrame, .logoFrame img { width: 46px; height: 46px; }
+  .stage { padding: 6px; }
+  .card { width: min(620px, calc(100vw - 12px)); }
+  .header { grid-template-columns: 40px 1fr; height: 52px; padding-inline: 9px; }
+  .logoFrame, .logoFrame img { width: 36px; height: 36px; }
   .liveMark { display: none; }
-  .eventName p { font-size: 14px; }
-  .eventName h1 { font-size: 10px; }
-  .players { height: calc(100% - 68px); }
-  .player { grid-template-columns: 1fr; place-items: center; gap: 4px; padding: 10px 8px; text-align: center; }
-  .player h2 { font-size: clamp(14px, 4.2vw, 24px); }
-  .player strong { font-size: clamp(42px, 13vw, 70px); }
+  .eventName p { font-size: 12px; }
+  .eventName h1 { font-size: 9px; }
+  .players { grid-template-columns: repeat(2, minmax(0, 1fr)); min-height: 0; }
+  .player { min-height: 76px; gap: 2px; padding: 6px 8px; }
+  .player h2 { font-size: clamp(13px, 3.8vw, 18px); }
+  .player strong { font-size: clamp(36px, 10vw, 48px); }
 }

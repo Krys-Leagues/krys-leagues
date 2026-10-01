@@ -19,7 +19,7 @@ export const DEFAULT_MASTERS_MANUAL_STREAM_SLOTS: MastersManualStreamSlot[] = [
 ]
 
 export function formatManualGolfScore(score: number) {
-  if (score === 0) return "E"
+  if (score === 0) return "0"
   return score > 0 ? `+${score}` : String(score)
 }
 
