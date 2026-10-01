@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { useMemo } from "react"
 
 import { completedThrough, formatRunningToPar, nineHoleRows, runningToPar } from "@/lib/mastersStreamScorecard"
@@ -9,10 +10,8 @@ import styles from "./MastersStreamScorecardView.module.css"
 
 export function MastersStreamScorecardView({
   scoreboard,
-  fireworks = false,
 }: {
   scoreboard: PublicMajorScoreboard
-  fireworks?: boolean
 }) {
   const scoreMap = useMemo(() => {
     const map = new Map<string, number>()
@@ -24,16 +23,31 @@ export function MastersStreamScorecardView({
   const currentHole = scoreboard.session.current_hole
   const shownHoles = nineHoleRows(currentHole)
   const sideLabel = currentHole <= 9 ? "FRONT NINE" : "BACK NINE"
+  const roundNumber = scoreboard.session.label.match(/round\s+(\d+)/i)?.[1] || "—"
+  const difficulty = scoreboard.session.course_code === "CBH" ? "HARD" : "EASY"
+  const roomName = scoreboard.session.label.split("·")[0]?.trim() || scoreboard.session.label
 
   return (
     <main className={styles.stage}>
-      {fireworks && <Fireworks />}
       <section className={styles.card} aria-label="Cherry Masters live hole-by-hole scorecard">
         <header className={styles.header}>
-          <div>
-            <p>KRYS LEAGUES · CHERRY MASTERS</p>
-            <h1>{scoreboard.session.label}</h1>
-            <span>{scoreboard.session.course_name}</span>
+          <div className={styles.brand}>
+            <Image
+              src="/masters/krys-leagues-logo-source.png"
+              alt="Krys Leagues"
+              width={66}
+              height={66}
+              priority
+            />
+            <div>
+              <p>KRYS LEAGUES</p>
+              <h1>MASTERS</h1>
+              <span>CHERRY BLOSSOM</span>
+            </div>
+          </div>
+          <div className={styles.context}>
+            <strong>{roomName}</strong>
+            <span>ROUND {roundNumber} · {difficulty}</span>
           </div>
           <div className={styles.current}>
             <span>HOLE</span>
@@ -65,18 +79,9 @@ export function MastersStreamScorecardView({
 
         <footer className={styles.footer}>
           <span className={scoreboard.session.is_active ? styles.live : ""}>● {scoreboard.session.is_active ? "LIVE" : "INACTIVE"}</span>
-          <span>Broadcast scores · unofficial until Masters verification</span>
+          <span>UNOFFICIAL LIVE STREAM SCORECARD</span>
         </footer>
       </section>
     </main>
-  )
-}
-
-function Fireworks() {
-  return (
-    <div className={styles.fireworks} aria-label="Hole in one celebration">
-      {Array.from({ length: 24 }, (_, index) => <i key={index} style={{ "--spark": index } as React.CSSProperties} />)}
-      <strong>HOLE IN ONE!</strong>
-    </div>
   )
 }

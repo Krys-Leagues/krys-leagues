@@ -32,9 +32,31 @@ export function runningToPar(
   participantId: string,
   pars: readonly number[]
 ) {
+  return runningToParThrough(scores, participantId, pars, pars.length)
+}
+
+export function runningToParThrough(
+  scores: readonly MajorHoleScore[],
+  participantId: string,
+  pars: readonly number[],
+  throughHole: number,
+) {
   return scores
-    .filter((score) => score.participant_id === participantId)
+    .filter(
+      (score) =>
+        score.participant_id === participantId &&
+        score.hole_number >= 1 &&
+        score.hole_number <= throughHole,
+    )
     .reduce((total, score) => total + score.strokes - (pars[score.hole_number - 1] ?? 0), 0)
+}
+
+export function deriveHoleStrokesFromRunningTotal(
+  previousRunningTotal: number,
+  nextRunningTotal: number,
+  par: number,
+) {
+  return par + nextRunningTotal - previousRunningTotal
 }
 
 export function formatRunningToPar(value: number) {
@@ -73,4 +95,32 @@ export function updateLocalHoleScores(
 
 export function isStaleRevisionError(message: string) {
   return message.includes("STALE_STREAM_REVISION") || message.includes("could not serialize access")
+}
+
+export function moveStreamParticipant<T extends { id: string }>(
+  participants: readonly T[],
+  participantId: string,
+  direction: -1 | 1,
+) {
+  const fromIndex = participants.findIndex((participant) => participant.id === participantId)
+  const toIndex = fromIndex + direction
+  if (fromIndex < 0 || toIndex < 0 || toIndex >= participants.length) return [...participants]
+  const reordered = [...participants]
+  ;[reordered[fromIndex], reordered[toIndex]] = [reordered[toIndex], reordered[fromIndex]]
+  return reordered
+}
+
+export function orderStreamParticipants<T extends { id: string; position: number }>(
+  participants: readonly T[],
+  participantOrder: readonly string[] | null | undefined,
+) {
+  const order = new Map((participantOrder || []).map((id, index) => [id, index]))
+  return [...participants].sort((left, right) => {
+    const leftOrder = order.get(left.id)
+    const rightOrder = order.get(right.id)
+    if (leftOrder != null && rightOrder != null) return leftOrder - rightOrder
+    if (leftOrder != null) return -1
+    if (rightOrder != null) return 1
+    return left.position - right.position
+  })
 }

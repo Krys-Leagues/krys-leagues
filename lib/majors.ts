@@ -78,6 +78,7 @@ export type MajorScoringSession = {
   hole_pars: number[] | null
   revision: number
   fireworks_sequence: number
+  stream_participant_order?: string[] | null
   created_at: string
   updated_at: string
 }

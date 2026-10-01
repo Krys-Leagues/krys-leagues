@@ -4,10 +4,14 @@ import Link from "next/link"
 import { useCallback, useEffect, useMemo, useState } from "react"
 
 import {
+  deriveHoleStrokesFromRunningTotal,
   formatRunningToPar,
   isStaleRevisionError,
   mastersStreamCourseForRound,
+  moveStreamParticipant,
+  orderStreamParticipants,
   runningToPar,
+  runningToParThrough,
   type MastersStreamRoom,
 } from "@/lib/mastersStreamScorecard"
 import type { MajorEvent, MajorHoleScore, MajorScoringParticipant, MajorScoringSession } from "@/lib/majors"
@@ -33,8 +37,10 @@ export default function MastersStreamControllerPage() {
     ])
     const error = sessionResult.error || participantResult.error || scoreResult.error
     if (error) throw error
-    setSession(sessionResult.data as MajorScoringSession)
-    setParticipants((participantResult.data as MajorScoringParticipant[] | null) || [])
+    const loadedSession = sessionResult.data as MajorScoringSession
+    const loadedParticipants = (participantResult.data as MajorScoringParticipant[] | null) || []
+    setSession(loadedSession)
+    setParticipants(orderStreamParticipants(loadedParticipants, loadedSession.stream_participant_order))
     setScores((scoreResult.data as MajorHoleScore[] | null) || [])
   }, [])
 
@@ -108,16 +114,81 @@ export default function MastersStreamControllerPage() {
     setMessage(`${room.group_label} loaded. Its stream state is separate from official Masters scoring.`)
   }
 
-  async function updateScore(participantId: string, delta: number) {
+  async function updateRunningTotal(participantId: string, delta: number) {
+    if (!session || currentPar == null) return
+    const previousRunning = runningToParThrough(scores, participantId, pars, session.current_hole - 1)
+    const currentStrokes = scoreMap.get(`${participantId}:${session.current_hole}`)
+    const currentRunning = currentStrokes == null
+      ? previousRunning
+      : previousRunning + currentStrokes - currentPar
+    const nextRunning = currentRunning + delta
+    const nextStrokes = deriveHoleStrokesFromRunningTotal(previousRunning, nextRunning, currentPar)
+    if (nextStrokes < 1 || nextStrokes > 99) {
+      setMessage("That running total would create an invalid hole score.")
+      return
+    }
+    await updateBroadcast(
+      session.current_hole,
+      [{ participant_id: participantId, hole_number: session.current_hole, strokes: nextStrokes }],
+      false,
+    )
+  }
+
+  async function confirmPar(participantId: string) {
+    if (!session || currentPar == null) return
+    await updateBroadcast(
+      session.current_hole,
+      [{ participant_id: participantId, hole_number: session.current_hole, strokes: currentPar }],
+      false,
+    )
+  }
+
+  async function correctHole(participantId: string, holeNumber: number, rawValue: string) {
     if (!session) return
-    const current = scoreMap.get(`${participantId}:${session.current_hole}`)
-    const next = current == null ? (delta > 0 ? 1 : null) : Math.max(1, current + delta)
-    await updateBroadcast(session.current_hole, [{ participant_id: participantId, strokes: next }], false)
+    const trimmed = rawValue.trim()
+    const strokes = trimmed === "" ? null : Number(trimmed)
+    if (strokes != null && (!Number.isInteger(strokes) || strokes < 1 || strokes > 99)) {
+      setMessage("Correction scores must be whole numbers from 1 to 99.")
+      return
+    }
+    if (scoreMap.get(`${participantId}:${holeNumber}`) === strokes) return
+    await updateBroadcast(
+      session.current_hole,
+      [{ participant_id: participantId, hole_number: holeNumber, strokes }],
+      false,
+    )
+  }
+
+  async function movePlayer(participantId: string, direction: -1 | 1) {
+    if (!session) return
+    const previous = participants
+    const reordered = moveStreamParticipant(previous, participantId, direction)
+    if (reordered.every((participant, index) => participant.id === previous[index]?.id)) return
+    setParticipants(reordered)
+    setBusy(true)
+    const result = await supabase.rpc("reorder_masters_stream_participants", {
+      p_session_id: session.id,
+      p_expected_revision: session.revision,
+      p_participant_ids: reordered.map((participant) => participant.id),
+    })
+    setBusy(false)
+    if (result.error) {
+      setParticipants(previous)
+      await loadSession(session.id)
+      setMessage(
+        isStaleRevisionError(result.error.message)
+          ? "Another controller changed the scorecard. The latest player order was loaded; please try again."
+          : result.error.message,
+      )
+      return
+    }
+    await loadSession(session.id)
+    setMessage("Broadcast player order updated on the controller and OBS scorecard.")
   }
 
   async function updateBroadcast(
     hole: number,
-    changedScores: Array<{ participant_id: string; strokes: number | null }>,
+    changedScores: Array<{ participant_id: string; hole_number?: number; strokes: number | null }>,
     fireworks: boolean,
   ) {
     if (!session) return
@@ -216,29 +287,111 @@ export default function MastersStreamControllerPage() {
             <button type="button" disabled={busy || session.current_hole === 18} onClick={() => void updateBroadcast(session.current_hole + 1, [], false)}>Next →</button>
           </nav>
 
+          <section className={styles.playerOrder} aria-labelledby="player-order-title">
+            <header>
+              <h2 id="player-order-title">PLAYER ORDER</h2>
+              <p>Match the player order shown on the Walkabout scorecard.</p>
+            </header>
+            <ol>
+              {participants.map((participant, index) => (
+                <li key={participant.id}>
+                  <button type="button" aria-label={`Move ${participant.player_screen_name_snapshot} up`} disabled={busy || index === 0} onClick={() => void movePlayer(participant.id, -1)}>↑</button>
+                  <strong>{participant.player_screen_name_snapshot}</strong>
+                  <button type="button" aria-label={`Move ${participant.player_screen_name_snapshot} down`} disabled={busy || index === participants.length - 1} onClick={() => void movePlayer(participant.id, 1)}>↓</button>
+                </li>
+              ))}
+            </ol>
+          </section>
+
           <section className={styles.players}>
             {participants.map((participant) => {
               const value = scoreMap.get(`${participant.id}:${session.current_hole}`)
+              const previousRunning = runningToParThrough(
+                scores,
+                participant.id,
+                pars,
+                session.current_hole - 1,
+              )
+              const currentRunning = value == null
+                ? previousRunning
+                : previousRunning + value - (currentPar || 0)
+              const canDecrease = currentPar != null && (value ?? currentPar) > 1
               return (
                 <article key={participant.id} className={styles.playerCard}>
                   <h2>{participant.player_screen_name_snapshot}</h2>
+                  <p className={styles.runningLabel}>Running to par</p>
                   <div className={styles.stepper}>
-                    <button type="button" aria-label={`Decrease ${participant.player_screen_name_snapshot} score`} disabled={busy || value == null || value <= 1} onClick={() => void updateScore(participant.id, -1)}>−</button>
-                    <strong>{value ?? "—"}</strong>
-                    <button type="button" aria-label={`Increase ${participant.player_screen_name_snapshot} score`} disabled={busy} onClick={() => void updateScore(participant.id, 1)}>+</button>
+                    <button type="button" aria-label={`Decrease ${participant.player_screen_name_snapshot} running to par`} disabled={busy || !canDecrease} onClick={() => void updateRunningTotal(participant.id, -1)}>−</button>
+                    <strong>{formatRunningToPar(currentRunning)}</strong>
+                    <button type="button" aria-label={`Increase ${participant.player_screen_name_snapshot} running to par`} disabled={busy || currentPar == null || (value ?? currentPar) >= 99} onClick={() => void updateRunningTotal(participant.id, 1)}>+</button>
                   </div>
-                  <p>Running: <strong>{formatRunningToPar(runningToPar(scores, participant.id, pars))}</strong></p>
-                  {value != null && <button type="button" className={styles.clear} disabled={busy} onClick={() => void updateBroadcast(session.current_hole, [{ participant_id: participant.id, strokes: null }], false)}>Clear hole</button>}
+                  <p className={styles.holeConfirmation}>
+                    Current hole: <strong>{session.current_hole}</strong>
+                    <span>Hole strokes: <strong>{value ?? "—"}</strong></span>
+                  </p>
+                  <div className={styles.quickActions}>
+                    <button type="button" className={styles.parButton} disabled={busy || currentPar == null} onClick={() => void confirmPar(participant.id)}>CONFIRM PAR</button>
+                    {value != null && <button type="button" className={styles.clear} disabled={busy} onClick={() => void updateBroadcast(session.current_hole, [{ participant_id: participant.id, hole_number: session.current_hole, strokes: null }], false)}>Clear hole</button>}
+                  </div>
                 </article>
               )
             })}
           </section>
 
+          <details className={styles.corrections}>
+            <summary>SCORECARD / CORRECTIONS</summary>
+            <p>Correct any earlier hole directly. Running totals and the OBS card recalculate automatically.</p>
+            {participants.map((participant) => (
+              <section key={participant.id} className={styles.correctionPlayer}>
+                <header>
+                  <h2>{participant.player_screen_name_snapshot}</h2>
+                  <span>Running {formatRunningToPar(runningToPar(scores, participant.id, pars))}</span>
+                </header>
+                {[1, 10].map((firstHole) => (
+                  <div key={firstHole} className={styles.correctionNine}>
+                    <strong>{firstHole === 1 ? "FRONT NINE" : "BACK NINE"}</strong>
+                    <div className={styles.correctionGrid}>
+                      {Array.from({ length: 9 }, (_, index) => firstHole + index).map((hole) => {
+                        const strokes = scoreMap.get(`${participant.id}:${hole}`)
+                        return (
+                          <label key={`${participant.id}:${hole}`} className={hole === session.current_hole ? styles.currentCorrection : ""}>
+                            <span>H{hole}</span>
+                            <small>Par {pars[hole - 1]}</small>
+                            <input
+                              key={`${participant.id}:${hole}:${strokes ?? "empty"}`}
+                              type="number"
+                              min="1"
+                              max="99"
+                              inputMode="numeric"
+                              defaultValue={strokes ?? ""}
+                              disabled={busy}
+                              aria-label={`${participant.player_screen_name_snapshot} hole ${hole} strokes`}
+                              onBlur={(event) => void correctHole(participant.id, hole, event.currentTarget.value)}
+                              onKeyDown={(event) => {
+                                if (event.key === "Enter") event.currentTarget.blur()
+                              }}
+                            />
+                          </label>
+                        )
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </section>
+            ))}
+          </details>
+
           <section className={styles.actions}>
             <button type="button" className={styles.fireworksButton} disabled={busy} onClick={() => void updateBroadcast(session.current_hole, [], true)}>🎆 HIO FIREWORKS</button>
             <div>
-              <strong>OBS browser source · 1920 × 1080</strong>
-              <code>{browserOrigin}/majors/masters-stream/{session.id}</code>
+              <div className={styles.obsSource}>
+                <strong>MASTERS SCORECARD OBS URL · 920 × 420</strong>
+                <code>{browserOrigin}/majors/masters-stream/{session.id}</code>
+              </div>
+              <div className={styles.obsSource}>
+                <strong>HIO FIREWORKS OBS URL · 1920 × 1080</strong>
+                <code>{browserOrigin}/majors/masters-stream/{session.id}/fireworks</code>
+              </div>
             </div>
           </section>
         </>

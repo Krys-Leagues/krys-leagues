@@ -1,7 +1,7 @@
 "use client"
 
 import { useParams } from "next/navigation"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 
 import { MastersStreamScorecardView } from "@/components/masters/MastersStreamScorecardView"
 import type { PublicMajorScoreboard } from "@/lib/majors"
@@ -11,9 +11,6 @@ export default function MastersObsScorecardPage() {
   const params = useParams<{ sessionId: string }>()
   const [scoreboard, setScoreboard] = useState<PublicMajorScoreboard | null>(null)
   const [error, setError] = useState("")
-  const [fireworks, setFireworks] = useState(false)
-  const lastFireworks = useRef<number | null>(null)
-  const fireworksTimer = useRef<number | null>(null)
 
   const refresh = useCallback(async () => {
     const response = await supabase.rpc("get_public_major_scoreboard", { p_session_id: params.sessionId })
@@ -22,13 +19,6 @@ export default function MastersObsScorecardPage() {
       return
     }
     const next = response.data as PublicMajorScoreboard
-    const sequence = next.session.fireworks_sequence || 0
-    if (lastFireworks.current != null && sequence > lastFireworks.current) {
-      if (fireworksTimer.current != null) window.clearTimeout(fireworksTimer.current)
-      setFireworks(true)
-      fireworksTimer.current = window.setTimeout(() => setFireworks(false), 2600)
-    }
-    lastFireworks.current = sequence
     setScoreboard(next)
     setError("")
   }, [params.sessionId])
@@ -38,17 +28,14 @@ export default function MastersObsScorecardPage() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void refresh()
     const refreshTimer = window.setInterval(() => void refresh(), 850)
-    return () => {
-      window.clearInterval(refreshTimer)
-      if (fireworksTimer.current != null) window.clearTimeout(fireworksTimer.current)
-    }
+    return () => window.clearInterval(refreshTimer)
   }, [refresh])
 
   if (!scoreboard) {
     return <main style={waiting}>{error || "Loading broadcast scorecard…"}</main>
   }
 
-  return <MastersStreamScorecardView scoreboard={scoreboard} fireworks={fireworks} />
+  return <MastersStreamScorecardView scoreboard={scoreboard} />
 }
 
 const waiting: React.CSSProperties = {
