@@ -16,6 +16,7 @@ import {
 } from "./mastersPlayerExperience.ts"
 
 const migration = readFileSync(new URL("../supabase/migrations/20260930190131_masters_player_rooms_rules_and_scoring_access.sql", import.meta.url), "utf8")
+const adminPolicyMigration = readFileSync(new URL("../supabase/migrations/20260930235900_scope_major_admin_policies_to_authenticated.sql", import.meta.url), "utf8")
 const mastersPage = readFileSync(new URL("../app/majors/[slug]/page.tsx", import.meta.url), "utf8")
 const scoringPage = readFileSync(new URL("../app/majors/[slug]/scoring/page.tsx", import.meta.url), "utf8")
 const scoreSubmitRoute = readFileSync(new URL("../app/api/majors/scorecards/submit/route.ts", import.meta.url), "utf8")
@@ -165,6 +166,15 @@ test("the SQL scoring gate uses room start and final complete-room start plus th
   assert.match(migration, /day\.scoring_finalized_at is not null/)
   assert.match(migration, /create or replace function public\.save_my_major_scorecard/)
   assert.match(migration, /create or replace function public\.submit_my_major_scorecard/)
+})
+
+test("public Masters schedule reads do not execute protected admin policies as anonymous", () => {
+  for (const table of ["major_play_days", "major_time_slots", "major_entry_day_choices"]) {
+    assert.match(adminPolicyMigration, new RegExp("on public\\." + table + "[\\s\\S]*?for all[\\s\\S]*?to authenticated"))
+  }
+  assert.doesNotMatch(adminPolicyMigration, /grant execute[\s\S]*is_current_user_site_admin/i)
+  assert.doesNotMatch(adminPolicyMigration, /to anon|to public/i)
+  assert.doesNotMatch(adminPolicyMigration, /insert into|update public\.|delete from/i)
 })
 
 test("Masters courses use the accepted Easy and Hard pars for each round", () => {
