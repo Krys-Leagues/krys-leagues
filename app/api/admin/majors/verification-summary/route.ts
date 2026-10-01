@@ -12,7 +12,7 @@ export async function GET() {
   if (queue.error) return NextResponse.json({ error: queue.error.message }, { status: 503, headers: { "Cache-Control": "no-store" } })
 
   const pending = ((queue.data || []) as Array<{ id: string; status: string; room_group_id: string | null; submitted_at: string | null }>)
-    .filter((card) => card.status === "submitted")
+    .filter((card) => ["submitted", "reopened"].includes(card.status))
   const roomKeys = new Set(pending.map((card) => card.room_group_id || `score:${card.id}`))
   const latest = pending.toSorted((left, right) => (right.submitted_at || "").localeCompare(left.submitted_at || ""))[0]
   return NextResponse.json({ rooms: roomKeys.size, scores: pending.length, latestId: latest?.id || null }, { headers: { "Cache-Control": "no-store" } })

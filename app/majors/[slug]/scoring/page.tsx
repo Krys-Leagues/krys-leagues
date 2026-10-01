@@ -90,13 +90,20 @@ export default function MajorPlayerScoringPage() {
       return
     }
     if (submit) {
-      const submitted = await supabase.rpc("submit_my_major_scorecard", { p_scorecard_id: response.data })
-      if (submitted.error) {
+      const submitted = await fetch("/api/majors/scorecards/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ scorecardId: response.data }),
+      })
+      const submittedBody = await submitted.json().catch(() => null) as null | { error?: string; warning?: string }
+      if (!submitted.ok) {
         setBusy(false)
-        setMessage(submitted.error.message)
+        setMessage(submittedBody?.error || "The scorecard could not be submitted.")
         return
       }
-      setMessage("Scorecard submitted and awaiting admin verification.")
+      setMessage(submittedBody?.warning
+        ? "Scorecard submitted and awaiting admin verification. The Discord alert will be retried from the verification desk."
+        : "Scorecard submitted and awaiting admin verification.")
     } else {
       setMessage("Draft saved. You may keep editing while this round is open.")
     }

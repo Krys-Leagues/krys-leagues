@@ -1,5 +1,11 @@
 import { NextResponse } from "next/server"
 
+import {
+  deliverMastersAdminDms,
+  formatMastersAdminDm,
+  type MastersAdminHelpContext,
+} from "@/lib/mastersDiscord"
+import { loadMastersAdminDmRecipients } from "@/lib/mastersDiscordServer"
 import { getDiscordBotToken } from "@/lib/matchDiscordServer"
 import { isMastersHelpCategory } from "@/lib/mastersRules"
 import { createScorecardServiceClient } from "@/lib/scorecards/server"
@@ -8,28 +14,6 @@ import { createServerSupabaseClient } from "@/lib/supabase/server"
 export const runtime = "nodejs"
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-const MASTERS_ADMIN_DISCORD_IDS = [
-  "925865346802524180",
-  "839633843804045344",
-  "1020077950676250654",
-  "1026481358522023957",
-] as const
-
-type HelpContext = {
-  request_id: string
-  player_id: string
-  player_screen_name: string
-  event_name: string
-  round_number: number
-  room_label: string
-  scheduled_start: string
-  local_display_time: string | null
-  category: string
-  message: string
-  submitted_at: string
-  other_room: null | { room_label: string; players: string[] }
-}
-
 const response = (body: unknown, status = 200) => NextResponse.json(body, { status, headers: { "Cache-Control": "no-store" } })
 
 export async function POST(request: Request) {
@@ -56,11 +40,10 @@ export async function POST(request: Request) {
   })
   if (created.error || !created.data) return response({ error: created.error?.message || "The Masters alert could not be recorded." }, 403)
 
-  const context = created.data as HelpContext
+  const context = created.data as MastersAdminHelpContext
   const token = getDiscordBotToken()
-  const channelId = process.env.DISCORD_MASTERS_ADMIN_CHANNEL_ID?.trim()
   const service = createScorecardServiceClient()
-  if (!token || !channelId || !/^\d+$/.test(channelId)) {
+  if (!token) {
     await service.from("major_admin_help_requests").update({
       delivery_status: "failed",
       delivery_attempted_at: new Date().toISOString(),
@@ -69,32 +52,39 @@ export async function POST(request: Request) {
     return response({ error: "WE COULD NOT SEND YOUR ALERT. Please try again or contact an admin directly." }, 503)
   }
 
-  const otherRoom = context.other_room
-    ? `\n\n**ANOTHER ROOM IS RUNNING**\nRoom: ${context.other_room.room_label}\nPlayers:\n${context.other_room.players.map((name) => `• ${name}`).join("\n")}`
-    : "\n\n**NO OTHER MASTERS ROOM RUNNING AT THIS TIME**"
-  const noShowContext = context.category === "PLAYER NO-SHOW" ? otherRoom : ""
-  const mentions = MASTERS_ADMIN_DISCORD_IDS.map((id) => `<@${id}>`).join(" ")
-  const localTime = context.local_display_time ? `\nPlayer local display: ${context.local_display_time}` : ""
-  const content = `${mentions}\n\n**MASTERS ADMIN ALERT**\n**NEEDS ADMIN DECISION**\n\nPlayer: ${context.player_screen_name}\nPlayer ID: ${context.player_id}\nRoom: ${context.room_label}\nRound: ${context.round_number}\nScheduled time: ${context.scheduled_start}${localTime}\nCategory: ${context.category}\nPlayer message: ${context.message}\nSubmitted: ${context.submitted_at}${noShowContext}`
-
   try {
-    const discord = await fetch(`https://discord.com/api/v10/channels/${encodeURIComponent(channelId)}/messages`, {
-      method: "POST",
-      headers: { Authorization: `Bot ${token}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        content,
-        allowed_mentions: { parse: [], users: [...MASTERS_ADMIN_DISCORD_IDS] },
-      }),
+    const recipients = await loadMastersAdminDmRecipients(service)
+    const deliveries = await deliverMastersAdminDms({
+      botToken: token,
+      recipients,
+      content: formatMastersAdminDm(context),
     })
-    if (!discord.ok) throw new Error(`Discord returned status ${discord.status}.`)
-    const discordBody = await discord.json() as { id?: string }
-    await service.from("major_admin_help_requests").update({
-      delivery_status: "sent",
-      delivery_attempted_at: new Date().toISOString(),
-      discord_message_id: discordBody.id || null,
-      delivery_error: null,
+    const attemptedAt = new Date().toISOString()
+    const persisted = await service.from("major_admin_help_deliveries").upsert(deliveries.map((delivery) => ({
+      request_id: context.request_id,
+      admin_player_id: delivery.canonical_player_id,
+      admin_label_snapshot: delivery.label,
+      admin_screen_name_snapshot: delivery.canonical_screen_name,
+      discord_user_id_snapshot: delivery.discord_user_id,
+      delivery_status: delivery.status,
+      delivery_attempted_at: attemptedAt,
+      discord_channel_id: delivery.discord_channel_id,
+      discord_message_id: delivery.discord_message_id,
+      delivery_error: delivery.error,
+    })), { onConflict: "request_id,admin_player_id" })
+    if (persisted.error) throw new Error(persisted.error.message)
+
+    const successful = deliveries.filter((delivery) => delivery.status === "sent")
+    const failedLabels = deliveries.filter((delivery) => delivery.status === "failed").map((delivery) => delivery.label)
+    const overall = await service.from("major_admin_help_requests").update({
+      delivery_status: successful.length > 0 ? "sent" : "failed",
+      delivery_attempted_at: attemptedAt,
+      discord_message_id: successful[0]?.discord_message_id || null,
+      delivery_error: failedLabels.length > 0 ? `DM failed for: ${failedLabels.join(", ")}.` : null,
     }).eq("id", context.request_id)
-    return response({ sent: true })
+    if (overall.error) throw new Error(overall.error.message)
+    if (successful.length > 0) return response({ sent: true, delivered: successful.length, attempted: deliveries.length })
+    return response({ error: "WE COULD NOT SEND YOUR ALERT. Please try again or contact an admin directly." }, 503)
   } catch (caught) {
     await service.from("major_admin_help_requests").update({
       delivery_status: "failed",

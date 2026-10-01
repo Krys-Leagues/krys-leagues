@@ -24,7 +24,15 @@ export default function MajorVerificationPage() {
     if (!eventId) return
     const [queueResult, proofResult] = await Promise.all([supabase.rpc("get_major_scorecard_verification_queue", { p_major_event_id: eventId }), fetch(`/api/admin/majors/room-scorecards?${new URLSearchParams({ eventId })}`, { cache: "no-store" })])
     const proofBody = await proofResult.json() as { proofs?: AdminRoomProof[]; error?: string }
-    setCards((queueResult.data as MajorPlayerScorecard[]) || []); setProofs(proofBody.proofs || []); setMessage(queueResult.error?.message || (!proofResult.ok ? proofBody.error : "") || "")
+    const loadedCards = (queueResult.data as MajorPlayerScorecard[]) || []
+    setCards(loadedCards); setProofs(proofBody.proofs || []); setMessage(queueResult.error?.message || (!proofResult.ok ? proofBody.error : "") || "")
+    if (!queueResult.error && loadedCards.length > 0) {
+      void fetch("/api/admin/majors/verification-discord", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ scorecardIds: loadedCards.map((card) => card.id) }),
+      }).catch(() => undefined)
+    }
   }, [eventId])
   // Initial authenticated admin synchronization.
   // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -38,8 +46,14 @@ export default function MajorVerificationPage() {
   async function scoreAction(name: "verify_major_scorecard" | "reopen_major_scorecard", id: string) {
     const notes = window.prompt(name === "verify_major_scorecard" ? "Optional verification notes" : "Correction needed (required for the player audit trail)") || ""
     if (name === "reopen_major_scorecard" && !notes.trim()) return
-    const result = await supabase.rpc(name, { p_scorecard_id: id, p_notes: notes.trim() })
-    setMessage(result.error?.message || (name === "verify_major_scorecard" ? "Score verified." : "Player score marked as needing correction.")); if (!result.error) await refreshQueue()
+    const result = await fetch("/api/admin/majors/scorecards/action", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: name, scorecardId: id, notes: notes.trim() }),
+    })
+    const body = await result.json().catch(() => null) as null | { error?: string; warning?: string }
+    setMessage(body?.error || body?.warning || (name === "verify_major_scorecard" ? "Score verified." : "Player score marked as needing correction."))
+    if (result.ok) await refreshQueue()
   }
   async function toggleRound(day: MajorPlayDay) {
     const open = (day as MajorPlayDay & { scoring_entry_open?: boolean }).scoring_entry_open

@@ -18,6 +18,7 @@ import {
 const migration = readFileSync(new URL("../supabase/migrations/20260930190131_masters_player_rooms_rules_and_scoring_access.sql", import.meta.url), "utf8")
 const mastersPage = readFileSync(new URL("../app/majors/[slug]/page.tsx", import.meta.url), "utf8")
 const scoringPage = readFileSync(new URL("../app/majors/[slug]/scoring/page.tsx", import.meta.url), "utf8")
+const scoreSubmitRoute = readFileSync(new URL("../app/api/majors/scorecards/submit/route.ts", import.meta.url), "utf8")
 const scorecardPhoto = readFileSync(new URL("../components/majors/MajorRoomScorecardPhoto.tsx", import.meta.url), "utf8")
 const sharedViewer = readFileSync(new URL("../components/scorecards/ScorecardZoomViewer.tsx", import.meta.url), "utf8")
 const adminScheduling = readFileSync(new URL("../app/admin/majors/scheduling/page.tsx", import.meta.url), "utf8")
@@ -209,7 +210,8 @@ test("shared room proof renders only an uploaded API image and has an honest emp
 
 test("existing individual lifecycle and shared room architecture remain wired", () => {
   assert.match(scoringPage, /save_my_major_scorecard/)
-  assert.match(scoringPage, /submit_my_major_scorecard/)
+  assert.match(scoringPage, /\/api\/majors\/scorecards\/submit/)
+  assert.match(scoreSubmitRoute, /submit_my_major_scorecard/)
   assert.match(scoringPage, /MajorRoomScorecardPhoto/)
   assert.match(migration, /Submitted or verified scorecards cannot be silently changed/)
   assert.doesNotMatch(migration, /delete from public\.major_player_scorecards/)
