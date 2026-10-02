@@ -315,5 +315,6 @@ test("admin Course Challenge review queue exposes pending count and review contr
   assert.match(api, /pendingCount/)
   assert.match(api, /status.*pending.*needs_review/)
   assert.match(dashboard, /COURSE CHALLENGE SUBMISSIONS/)
-  assert.match(dashboard, /api\/admin\/course-challenges\?summary=1/)
+  assert.match(dashboard, /api\/admin\/pending-summary/)
+  assert.doesNotMatch(dashboard, /api\/admin\/course-challenges\?summary=1|setInterval/)
 })

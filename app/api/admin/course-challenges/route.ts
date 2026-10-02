@@ -7,6 +7,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server"
 import { sha256Hex } from "@/lib/all-time/normal-records"
 import { classifyDuplicateCard, courseChallengeUsageKey, isSameCourseChallengeAchievement, type CourseChallengeCardUsage } from "@/lib/courseChallenges/duplicateUsage"
 import { calculateCourseChallengeMetrics, evaluateCourseChallengeRequirements, validHolePars, validHoleScores } from "@/lib/courseChallenges/evaluation"
+import { LEGACY_ADMIN_POLL_HEADERS, legacyCourseChallengeSummary } from "@/lib/adminLegacyPolling"
 
 type DuplicateRow = {
   id: unknown
@@ -78,18 +79,18 @@ async function loadDuplicateAssessment(service: ReturnType<typeof createCourseCh
 }
 
 export async function GET(request: Request) {
+  const params = new URL(request.url).searchParams
+  if (params.get("summary") === "1") {
+    return Response.json(legacyCourseChallengeSummary(), { headers: LEGACY_ADMIN_POLL_HEADERS })
+  }
   const authorization = await requireCourseChallengeAdmin()
   if (authorization.response) return authorization.response
   try {
     const service = createCourseChallengesServiceClient()
-    const params = new URL(request.url).searchParams
     const statuses = params.get("status") === "rejected" ? ["rejected"] : ["pending", "needs_review"]
     const pendingQuery = service.from("course_challenge_submissions").select("id,created_at", { count: "exact" }).in("status", ["pending", "needs_review"]).order("created_at", { ascending: false }).limit(1)
     const pendingResult = await pendingQuery
     if (pendingResult.error) throw pendingResult.error
-    if (params.get("summary") === "1") {
-      return Response.json({ pendingCount: pendingResult.count || 0, latestPendingId: pendingResult.data?.[0]?.id || null, latestPendingAt: pendingResult.data?.[0]?.created_at || null }, { headers: { "Cache-Control": "no-store" } })
-    }
     const sessionClient = await createServerSupabaseClient()
     const viewer = await sessionClient.rpc("current_user_canonical_player_id")
     if (viewer.error) throw viewer.error

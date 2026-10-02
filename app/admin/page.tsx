@@ -41,15 +41,14 @@ export default function Admin() {
     let active = true
     async function loadPending() {
       try {
-        const response = await fetch("/api/admin/course-challenges?summary=1", { cache: "no-store" })
+        const response = await fetch("/api/admin/pending-summary", { cache: "no-store" })
         if (!response.ok) return
-        const payload = await response.json() as { pendingCount?: number }
-        if (active) setPendingCourseChallengeCount(Number(payload.pendingCount) || 0)
+        const payload = await response.json() as { courseChallenges?: { count?: number } }
+        if (active) setPendingCourseChallengeCount(Number(payload.courseChallenges?.count) || 0)
       } catch { /* Dashboard remains usable if the review summary is unavailable. */ }
     }
     void loadPending()
-    const timer = window.setInterval(() => { void loadPending() }, 20_000)
-    return () => { active = false; window.clearInterval(timer) }
+    return () => { active = false }
   }, [])
 
   return (

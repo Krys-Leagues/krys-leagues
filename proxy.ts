@@ -6,6 +6,7 @@ import { refreshSupabaseSession } from "@/lib/supabase/proxy"
 import { resolveSiteAccessMode } from "@/lib/siteAccess/config"
 import { decideSiteAccessGate, safePrelaunchNext, shouldBypassPrivateTestingGate, testingAccessRedirect, type CurrentSiteAccess } from "@/lib/siteAccess/core"
 import { canonicalRedirectUrl } from "@/lib/canonicalHost"
+import { LEGACY_ADMIN_POLL_HEADERS, legacyCourseChallengeSummary, legacyMastersVerificationSummary } from "@/lib/adminLegacyPolling"
 
 function withSessionCookies(source: NextResponse, target: NextResponse) {
   source.cookies.getAll().forEach((cookie) => target.cookies.set(cookie))
@@ -16,8 +17,21 @@ export async function proxy(request: NextRequest) {
   const canonicalRedirect = canonicalRedirectUrl(request.url)
   if (canonicalRedirect) return NextResponse.redirect(canonicalRedirect, 308)
 
-  const session = await refreshSupabaseSession(request)
   const pathname = request.nextUrl.pathname
+  if (request.method === "GET" && pathname === "/api/admin/course-challenges" && request.nextUrl.searchParams.get("summary") === "1") {
+    return NextResponse.json(legacyCourseChallengeSummary(), { headers: LEGACY_ADMIN_POLL_HEADERS })
+  }
+  if (request.method === "GET" && pathname === "/api/admin/majors/verification-summary") {
+    return NextResponse.json(legacyMastersVerificationSummary(), { headers: LEGACY_ADMIN_POLL_HEADERS })
+  }
+
+  // This route performs its own full admin authorization. Skipping the global
+  // session refresh avoids two Auth /user calls for every current admin poll.
+  if (request.method === "GET" && pathname === "/api/admin/pending-summary") {
+    return NextResponse.next({ request })
+  }
+
+  const session = await refreshSupabaseSession(request)
   if (pathname === "/auth/callback") return session.response
   if (pathname === "/api/auth/admin-authorization") return session.response
 

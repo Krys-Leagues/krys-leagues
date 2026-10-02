@@ -4,7 +4,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
 
-import { ADMIN_PENDING_POLL_INTERVAL_MS, shouldPollAdminPendingAlerts } from "@/lib/adminPendingPolling"
+import { ADMIN_PENDING_REQUEST_TIMEOUT_MS, adminPendingPollDelayMs, shouldPollAdminPendingAlerts } from "@/lib/adminPendingPolling"
 import { supabase } from "@/lib/supabase"
 
 type PendingSummary = {
@@ -51,7 +51,9 @@ export default function AdminPendingAlerts() {
     let active = true
     let accessDenied = false
     let inFlight = false
+    let consecutiveFailures = 0
     let timer: number | null = null
+    let requestTimeout: number | null = null
     let controller: AbortController | null = null
 
     const clearTimer = () => {
@@ -66,16 +68,26 @@ export default function AdminPendingAlerts() {
       documentVisible: document.visibilityState !== "hidden",
     })
 
+    const clearRequestTimeout = () => {
+      if (requestTimeout !== null) window.clearTimeout(requestTimeout)
+      requestTimeout = null
+    }
+
     const schedule = () => {
       clearTimer()
       if (!active || !canPoll()) return
-      timer = window.setTimeout(() => void refresh(), ADMIN_PENDING_POLL_INTERVAL_MS)
+      timer = window.setTimeout(() => void refresh(), adminPendingPollDelayMs(consecutiveFailures))
     }
 
     async function refresh() {
       if (!active || inFlight || !canPoll()) return
       inFlight = true
       controller = new AbortController()
+      let timedOut = false
+      requestTimeout = window.setTimeout(() => {
+        timedOut = true
+        controller?.abort()
+      }, ADMIN_PENDING_REQUEST_TIMEOUT_MS)
       try {
         const response = await fetch("/api/admin/pending-summary", { cache: "no-store", signal: controller.signal })
         if (response.status === 401 || response.status === 403) {
@@ -84,19 +96,23 @@ export default function AdminPendingAlerts() {
           setLoaded(false)
           return
         }
-        if (!response.ok) return
+        if (!response.ok) {
+          consecutiveFailures += 1
+          return
+        }
         const payload = await response.json() as PendingSummary
         if (!active) return
+        consecutiveFailures = 0
         const nextLatest = payload.courseChallenges.latestId || null
         if (previousCourseChallengeLatest.current && nextLatest && previousCourseChallengeLatest.current !== nextLatest) playNotificationSound()
         previousCourseChallengeLatest.current = nextLatest
         setSummary(payload)
         setLoaded(true)
       } catch (caught) {
-        if (!(caught instanceof DOMException && caught.name === "AbortError")) {
-          // Admin alert failure must not affect the site. A later bounded poll retries it.
-        }
+        const abortedByCleanup = caught instanceof DOMException && caught.name === "AbortError" && !timedOut
+        if (!abortedByCleanup) consecutiveFailures += 1
       } finally {
+        clearRequestTimeout()
         inFlight = false
         controller = null
         schedule()
@@ -113,6 +129,7 @@ export default function AdminPendingAlerts() {
     return () => {
       active = false
       clearTimer()
+      clearRequestTimeout()
       controller?.abort()
       document.removeEventListener("visibilitychange", handleVisibilityChange)
     }
