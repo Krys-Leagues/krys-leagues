@@ -1,5 +1,6 @@
 import { KRYS_LEAGUES_DISCORD_GUILD_ID } from "./krysLeaguesDiscord.ts"
 
+export const CUP_SIGNUP_ANNOUNCEMENT_ENABLED = false
 export const CUP_SIGNUP_ANNOUNCEMENT_VERSION = "cup-signups-2026-v1"
 export const CUP_SIGNUP_DISMISSAL_KEY = `krys-leagues:announcement:${CUP_SIGNUP_ANNOUNCEMENT_VERSION}:dismissed`
 export const CUP_SIGNUP_ARTWORK_PATH = "/images/announcements/cup-signups-2026-v1.jpg"

@@ -7,6 +7,7 @@ import CupSignupAnnouncement from "@/components/announcements/CupSignupAnnouncem
 import MastersLiveAnnouncement from "@/components/announcements/MastersLiveAnnouncement";
 import OptionalSignInWelcome from "@/components/auth/OptionalSignInWelcome";
 import MastersRoomReminder from "@/components/home/MastersRoomReminder";
+import { CUP_SIGNUP_ANNOUNCEMENT_ENABLED } from "@/lib/cupSignupAnnouncement";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,7 +39,7 @@ export default function RootLayout({
         {children}
         <AdminPendingAlerts />
         <OptionalSignInWelcome />
-        <CupSignupAnnouncement />
+        {CUP_SIGNUP_ANNOUNCEMENT_ENABLED ? <CupSignupAnnouncement /> : null}
         <MastersLiveAnnouncement />
         <MastersRoomReminder />
       </body>

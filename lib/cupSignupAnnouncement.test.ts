@@ -5,6 +5,7 @@ import test from "node:test"
 
 import {
   CUP_SIGNUP_ANNOUNCEMENT_VERSION,
+  CUP_SIGNUP_ANNOUNCEMENT_ENABLED,
   CUP_SIGNUP_ARTWORK_SHA256,
   CUP_SIGNUP_DESTINATIONS,
   CUP_SIGNUP_DISMISSAL_KEY,
@@ -14,6 +15,7 @@ import {
 } from "./cupSignupAnnouncement.ts"
 
 test("Cup announcement is versioned and renders only on normal public/player pages", () => {
+  assert.equal(CUP_SIGNUP_ANNOUNCEMENT_ENABLED, false)
   assert.equal(CUP_SIGNUP_ANNOUNCEMENT_VERSION, "cup-signups-2026-v1")
   assert.match(CUP_SIGNUP_DISMISSAL_KEY, /cup-signups-2026-v1/u)
   assert.equal(CUP_SIGNUP_INSTRUCTION, "CLICK THE CUP FOR YOUR DIVISION TO SIGN UP")
@@ -78,7 +80,7 @@ test("the global client component is cheap, persistent, accessible, and coordina
   const layout = readFileSync("app/layout.tsx", "utf8")
   const welcome = readFileSync("components/auth/OptionalSignInWelcome.tsx", "utf8")
 
-  assert.equal(layout.match(/<CupSignupAnnouncement \/>/gu)?.length, 1)
+  assert.match(layout, /CUP_SIGNUP_ANNOUNCEMENT_ENABLED \? <CupSignupAnnouncement \/> : null/u)
   assert.match(component, /window\.localStorage\.getItem\(CUP_SIGNUP_DISMISSAL_KEY\)/u)
   assert.match(component, /window\.localStorage\.setItem\(CUP_SIGNUP_DISMISSAL_KEY, "dismissed"\)/u)
   assert.match(component, /🏆<\/span> CUP SIGNUPS/u)
