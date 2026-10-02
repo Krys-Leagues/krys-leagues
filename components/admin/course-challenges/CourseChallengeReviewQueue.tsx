@@ -13,7 +13,7 @@ type Submission = {
   proofPhotoUrl: string | null; holeScores: number[]; reviewedHoleScores: number[] | null; pars: number[] | null; calculatedTotal: number; relativeToPar: number; requirements: Requirement[]; levelRequirements: Array<{ label?: string }>; aceRequirements: Array<{ label?: string }>; status: string;
   reviewReason: string | null; reviewNotes: string | null; roundDate: string | null; roundTime: string | null; gameMode: string | null; adminVerifiedGameMode: string | null;
   enteredFinalScore: number | null; finalScoreCheck: string | null; createdAt: string | null; aceStageAtSubmission: number | null; possibleDuplicate: boolean; crossTrackReuse: boolean; duplicateMatches: DuplicateMatch[]; pastCards: PastCard[]; reviewEvents: ReviewEvent[];
-  allTimeProcessingStatus: string; allTimeProcessingResult: Record<string, unknown> | null;
+  allTimeProcessingStatus: string; allTimeProcessingResult: Record<string, unknown> | null; submissionSource: string; sourceMetadata: Record<string, unknown>;
 }
 
 type QueueProps = { showRejectedSection?: boolean; reviewDesk?: boolean }
@@ -167,6 +167,7 @@ function ReviewCard({ submission, mode, setMode, reviewNote, setReviewNote, busy
     </div>
     {submission.requirements.length > 0 && <details style={storedRequirements}><summary>STORED REVIEW SNAPSHOT</summary><ul style={{ marginTop: 10 }}>{submission.requirements.map((item, index) => <li key={index}>{item.requirement?.label || "Requirement"}: {item.status || "needs review"}{item.reason ? ` — ${item.reason}` : ""}</li>)}</ul></details>}
     {submission.reviewReason && <p style={reviewReason}>Review reason: {submission.reviewReason}</p>}
+    {submission.submissionSource === "discord_course_challenge_game" && <p style={information}>SOURCE: COURSE CHALLENGES DISCORD GAME · ROOM {String(submission.sourceMetadata.roomName || "UNASSIGNED")} · GAME {String(submission.sourceMetadata.gameId || "UNKNOWN")}</p>}
     {submission.challengeKey !== "ace" && <p style={muted}>Stored Game Mode: {submission.gameMode || "not supplied by player"} · Admin verified: {submission.adminVerifiedGameMode?.toUpperCase() || "not verified"}</p>}
     <PastCards submission={submission} onPreview={onPreview} />
     {submission.status === "rejected" ? <button type="button" disabled={busy} onClick={() => void onReview(submission, "return_to_review")} style={buttonStyle("#92400e")}>RETURN TO REVIEW</button> : <div style={{ display: "grid", gap: 10 }}>

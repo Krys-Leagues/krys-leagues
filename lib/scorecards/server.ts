@@ -21,7 +21,12 @@ export function createScorecardServiceClient() {
 }
 
 export async function resolveCanonicalDiscordPlayer(client: SupabaseClient, discordUserId: string) {
-  if (!/^\d+$/.test(discordUserId)) return null
+  const result = await resolveCanonicalDiscordPlayerResult(client, discordUserId)
+  return result.status === "resolved" ? result.playerId : null
+}
+
+export async function resolveCanonicalDiscordPlayerResult(client: SupabaseClient, discordUserId: string) {
+  if (!/^\d+$/.test(discordUserId)) return { status: "not_found" as const }
   const [players, members] = await Promise.all([
     client.from("players").select("id").eq("discord_id", discordUserId),
     client.from("discord_members").select("player_id").eq("discord_id", discordUserId),
@@ -30,7 +35,9 @@ export async function resolveCanonicalDiscordPlayer(client: SupabaseClient, disc
   const ids = new Set<string>()
   for (const row of (players.data || []) as Array<{ id: string }>) if (row.id) ids.add(row.id)
   for (const row of (members.data || []) as Array<{ player_id: string | null }>) if (row.player_id) ids.add(row.player_id)
-  return ids.size === 1 ? [...ids][0] : null
+  if (ids.size === 0) return { status: "not_found" as const }
+  if (ids.size > 1) return { status: "ambiguous" as const }
+  return { status: "resolved" as const, playerId: [...ids][0] }
 }
 
 type StrokeFixture = {
