@@ -7,6 +7,11 @@ import { supabase } from "@/lib/supabase"
 import { startDiscordSignIn } from "./DiscordSignInButton"
 
 const WELCOME_STORAGE_KEY = "krys-leagues:optional-sign-in-welcome-dismissed-v1"
+const WELCOME_STATE_ATTRIBUTE = "optionalSignInWelcome"
+
+function setWelcomeState(state: "checking" | "visible" | "settled") {
+  document.documentElement.dataset[WELCOME_STATE_ATTRIBUTE] = state
+}
 
 export default function OptionalSignInWelcome() {
   const pathname = usePathname()
@@ -15,17 +20,31 @@ export default function OptionalSignInWelcome() {
 
   useEffect(() => {
     if (pathname.startsWith("/admin") || pathname.startsWith("/auth") || pathname.startsWith("/majors/masters-stream")) return
+    setWelcomeState("checking")
     let active = true
     void supabase.auth.getSession().then(({ data }) => {
-      if (!active || data.session) return
+      if (!active) return
+      if (data.session) {
+        setWelcomeState("settled")
+        return
+      }
       try {
-        if (window.sessionStorage.getItem(WELCOME_STORAGE_KEY) !== "dismissed") setVisible(true)
+        if (window.sessionStorage.getItem(WELCOME_STORAGE_KEY) !== "dismissed") {
+          setVisible(true)
+          setWelcomeState("visible")
+        } else {
+          setWelcomeState("settled")
+        }
       } catch {
         setVisible(true)
+        setWelcomeState("visible")
       }
     })
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (active && session) setVisible(false)
+      if (active && session) {
+        setVisible(false)
+        setWelcomeState("settled")
+      }
     })
     return () => {
       active = false
@@ -36,6 +55,7 @@ export default function OptionalSignInWelcome() {
   function dismiss() {
     try { window.sessionStorage.setItem(WELCOME_STORAGE_KEY, "dismissed") } catch { /* continue without the preference if storage is unavailable */ }
     setVisible(false)
+    setWelcomeState("settled")
   }
 
   async function signIn() {

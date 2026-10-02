@@ -1,0 +1,218 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  display: grid;
+  place-items: center;
+  overflow: auto;
+  padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  background: rgba(2, 6, 23, 0.88);
+  backdrop-filter: blur(8px);
+}
+
+.dialog {
+  position: relative;
+  width: min(1120px, 100%);
+  max-height: calc(100dvh - 24px);
+  box-sizing: border-box;
+  overflow: auto;
+  padding: clamp(16px, 2.5vw, 28px);
+  border: 1px solid rgba(251, 191, 36, 0.68);
+  border-radius: 22px;
+  color: #fff;
+  background:
+    radial-gradient(circle at 50% -20%, rgba(59, 130, 246, 0.3), transparent 45%),
+    linear-gradient(145deg, #101934 0%, #090d1d 60%, #1c1022 100%);
+  box-shadow: 0 28px 100px rgba(0, 0, 0, 0.8), 0 0 40px rgba(59, 130, 246, 0.16);
+}
+
+.eyebrow {
+  margin: 0 52px 7px;
+  color: #f9a8d4;
+  font-size: 0.73rem;
+  font-weight: 950;
+  letter-spacing: 0.18em;
+  text-align: center;
+}
+
+.dialog h2 {
+  margin: 0 52px clamp(13px, 2vw, 20px);
+  color: #fff7d6;
+  font-family: Georgia, serif;
+  font-size: clamp(1rem, 2.6vw, 1.75rem);
+  font-weight: 950;
+  line-height: 1.2;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: 50%;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.62);
+  cursor: pointer;
+  font: inherit;
+  font-size: 28px;
+  line-height: 1;
+}
+
+.artworkFrame {
+  position: relative;
+  width: min(100%, 105dvh);
+  margin-inline: auto;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 15px;
+  background: #050713;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.52);
+}
+
+.artwork {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.cupLink {
+  position: absolute;
+  z-index: 2;
+  border: 2px solid transparent;
+  border-radius: 16px;
+  background: transparent;
+  cursor: pointer;
+  transition: border-color 140ms ease, background-color 140ms ease, box-shadow 140ms ease;
+}
+
+.cupLink:hover,
+.cupLink:focus-visible {
+  border-color: rgba(255, 255, 255, 0.9);
+  outline: none;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 0 28px rgba(250, 204, 21, 0.22), 0 0 20px rgba(255, 255, 255, 0.35);
+}
+
+.closeText {
+  display: block;
+  min-width: 130px;
+  min-height: 44px;
+  margin: 18px auto 0;
+  padding: 10px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.42);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+}
+
+.launcherDock {
+  position: fixed;
+  left: 50%;
+  bottom: max(14px, env(safe-area-inset-bottom));
+  z-index: 78;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.launcher {
+  min-height: 48px;
+  padding: 11px 18px;
+  border: 1px solid #facc15;
+  border-radius: 999px;
+  color: #fffbea;
+  background: linear-gradient(135deg, #7c2d12, #422006 52%, #172554);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.6), 0 0 18px rgba(250, 204, 21, 0.32);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 950;
+  letter-spacing: 0.055em;
+  white-space: nowrap;
+  pointer-events: auto;
+}
+
+.close:hover,
+.closeText:hover,
+.launcher:hover {
+  border-color: #fff;
+  filter: brightness(1.12);
+}
+
+.close:focus-visible,
+.closeText:focus-visible,
+.launcher:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+
+@media (max-width: 700px) {
+  .backdrop {
+    align-items: center;
+    padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+  }
+
+  .dialog {
+    max-height: calc(100dvh - 16px);
+    padding: 14px 8px 12px;
+    border-radius: 16px;
+  }
+
+  .eyebrow {
+    margin: 2px 48px 5px 8px;
+    font-size: 0.62rem;
+    text-align: left;
+  }
+
+  .dialog h2 {
+    margin: 0 48px 11px 8px;
+    font-size: clamp(0.92rem, 4.2vw, 1.12rem);
+    text-align: left;
+  }
+
+  .artworkFrame {
+    border-radius: 10px;
+  }
+
+  .cupLink {
+    border-radius: 8px;
+  }
+
+  .closeText {
+    min-height: 42px;
+    margin-top: 12px;
+  }
+
+  .launcherDock {
+    bottom: max(10px, env(safe-area-inset-bottom));
+  }
+
+  .launcher {
+    min-height: 46px;
+    padding: 10px 15px;
+    font-size: 0.72rem;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dialog {
+    animation: cup-signup-arrive 180ms ease-out both;
+  }
+}
+
+@keyframes cup-signup-arrive {
+  from { opacity: 0; transform: translateY(12px) scale(0.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}

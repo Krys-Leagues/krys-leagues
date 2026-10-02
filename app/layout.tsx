@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "../components/navigation/artwork-navigation.css";
 import AdminPendingAlerts from "@/components/admin/AdminPendingAlerts";
+import CupSignupAnnouncement from "@/components/announcements/CupSignupAnnouncement";
 import MastersLiveAnnouncement from "@/components/announcements/MastersLiveAnnouncement";
 import OptionalSignInWelcome from "@/components/auth/OptionalSignInWelcome";
 import MastersRoomReminder from "@/components/home/MastersRoomReminder";
@@ -33,7 +34,14 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}<AdminPendingAlerts /><OptionalSignInWelcome /><MastersLiveAnnouncement /><MastersRoomReminder /></body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        <AdminPendingAlerts />
+        <OptionalSignInWelcome />
+        <CupSignupAnnouncement />
+        <MastersLiveAnnouncement />
+        <MastersRoomReminder />
+      </body>
     </html>
   );
 }
