@@ -146,6 +146,7 @@ export type MajorPlayerScoringRound = Omit<MajorPlayerScorecard, "id" | "status"
   score_visible_at: string | null
   room_start_at: string | null
   round_closes_at: string | null
+  admin_reopened_until?: string | null
 }
 
 export type MajorResultsPayload = {

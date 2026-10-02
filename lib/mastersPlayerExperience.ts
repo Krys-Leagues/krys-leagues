@@ -8,16 +8,17 @@ export function mastersCourseForRound(dayNumber: number) {
 }
 
 export function mastersRoundAccessState(
-  round: Pick<MajorPlayerScoringRound, "room_start_at" | "round_closes_at">,
+  round: Pick<MajorPlayerScoringRound, "room_start_at" | "round_closes_at" | "admin_reopened_until">,
   now: number,
 ): MajorPlayerScoringRound["score_access_state"] {
   if (!round.room_start_at || !round.round_closes_at) return "hidden"
   const startsAt = Date.parse(round.room_start_at)
   const closesAt = Date.parse(round.round_closes_at)
+  const reopenedUntil = round.admin_reopened_until ? Date.parse(round.admin_reopened_until) : Number.NaN
   if (!Number.isFinite(startsAt) || !Number.isFinite(closesAt)) return "hidden"
   if (now < startsAt - MASTERS_SCORE_PRESHOW_MS) return "hidden"
   if (now < startsAt) return "upcoming"
-  return now <= closesAt ? "open" : "closed"
+  return now <= Math.max(closesAt, Number.isFinite(reopenedUntil) ? reopenedUntil : closesAt) ? "open" : "closed"
 }
 
 export function visibleMastersScoringRounds(rounds: readonly MajorPlayerScoringRound[], now: number) {
@@ -30,7 +31,8 @@ export function nextMastersScoreAccessTransition(rounds: readonly MajorPlayerSco
     const start = Date.parse(round.room_start_at)
     const close = Date.parse(round.round_closes_at)
     if (!Number.isFinite(start) || !Number.isFinite(close)) return []
-    return [start - MASTERS_SCORE_PRESHOW_MS, start, close + 1]
+    const reopenedUntil = round.admin_reopened_until ? Date.parse(round.admin_reopened_until) : Number.NaN
+    return [start - MASTERS_SCORE_PRESHOW_MS, start, close + 1, ...(Number.isFinite(reopenedUntil) ? [reopenedUntil + 1] : [])]
   }).filter((transition) => transition > now)
   return transitions.length ? Math.min(...transitions) : null
 }

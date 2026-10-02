@@ -149,6 +149,7 @@ export default function MajorPlayerScoringPage() {
       {accessState === "upcoming" && opening && <section className={styles.notStarted}><h2>YOUR ROUND {round.day_number} ROOM HAS NOT STARTED YET.</h2><p>Score entry opens at:</p><strong>{opening.date}<br />{opening.time}</strong>{opening.dayShift && <span>{opening.dayShift}</span>}</section>}
       {accessState === "closed" && !round.id && <p className={styles.notice}>ROUND {round.day_number} SCORE ENTRY IS CLOSED.</p>}
       {accessState === "hidden" && !round.id && <p className={styles.notice}>This round is not yet available for player score entry.</p>}
+      {round.admin_reopened_until && accessState === "open" && <p className={styles.pending}>An admin reopened this round until {formatMastersPlayerSlot(round.admin_reopened_until, round.play_date, localTimeZone).time}. Submit before that temporary window expires.</p>}
       {round.status === "submitted" && <p className={styles.pending}>Awaiting admin verification. Submitted scores cannot be silently changed.</p>}
       {round.status === "verified" && <p className={styles.verified}>Official score verified.</p>}
 

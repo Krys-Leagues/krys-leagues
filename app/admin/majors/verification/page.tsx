@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { MajorAdminWorkspaceLink } from "@/components/admin/majors/MajorAdminWorkspaceLink"
+import MastersLateScoreAdmin from "@/components/admin/majors/MastersLateScoreAdmin"
 import { ScorecardPanViewport, ScorecardZoomControls, useScorecardImageView } from "@/components/scorecards/ScorecardZoomViewer"
 import { majorAdminRouteContext } from "@/lib/majorAdminSelection"
 import { formatMajorToPar, majorRoundDayLabel, type MajorEvent, type MajorPlayDay, type MajorPlayerScorecard } from "@/lib/majors"
@@ -71,6 +72,7 @@ export default function MajorVerificationPage() {
       ? <div className={styles.eventPicker}>Event <strong>{selectedEvent.name}</strong></div>
       : <label className={styles.eventPicker}>Event<select value={eventId} onChange={(event) => setEventId(event.target.value)}>{events.map((event) => <option key={event.id} value={event.id}>{event.name}</option>)}</select></label>}
     <section className={styles.roundControls}>{eventDays.map((day) => { const open = (day as MajorPlayDay & { scoring_entry_open?: boolean }).scoring_entry_open; return <article key={day.id}><strong>{majorRoundDayLabel(day.day_number)}</strong><span>{open ? "Player entry open" : "Player entry closed"}</span><button type="button" onClick={() => void toggleRound(day)}>{open ? "Close entry" : "Open entry"}</button></article> })}</section>
+    {selectedEvent?.slug === "masters" && <MastersLateScoreAdmin eventId={eventId} />}
     {[1, 2, 3, 4].map((round) => { const roundRooms = rooms.filter((room) => room.dayNumber === round); if (!roundRooms.length) return null; return <section key={round} className={styles.roundSection}><h2>ROUND {round}</h2>{roundRooms.map((room) => <RoomVerification key={room.key} room={room} event={selectedEvent} onAction={scoreAction} />)}</section> })}
     {rooms.length === 0 && <p className={styles.empty}>No Masters scorecards have been submitted yet.</p>}{message && <p className={styles.message} role="status">{message}</p>}</div></main>
 }
