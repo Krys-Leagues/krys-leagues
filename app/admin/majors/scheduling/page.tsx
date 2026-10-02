@@ -61,7 +61,7 @@ export default function MajorSchedulingAdminPage() {
   const [message, setMessage] = useState("")
   const selectedEvent = events.find((event) => event.id === eventId)
 
-  const loadSchedule = useCallback(async (id: string) => {
+  const loadSchedule = useCallback(async (id: string, preferredPlayDayId?: string) => {
     if (!id) return
     const dayResult = await supabase.from("major_play_days").select("*").eq("major_event_id", id).order("day_number")
     const loadedDays = (dayResult.data as MajorPlayDay[] | null) || []
@@ -91,6 +91,10 @@ export default function MajorSchedulingAdminPage() {
     setMembers((memberResult.data as MajorScheduleGroupMember[] | null) || [])
     setPlacements((placementResult.data as MajorFinalPlacement[] | null) || [])
     setTesters((testerResult.data as MajorTestTester[] | null) || [])
+    if (preferredPlayDayId) {
+      const requestedDay = loadedDays.find((day) => day.id === preferredPlayDayId && day.day_number >= 1 && day.day_number <= 4)
+      if (requestedDay) setActiveSection(`day-${requestedDay.day_number as 1 | 2 | 3 | 4}`)
+    }
     setMessage(dayResult.error?.message || slotResult.error?.message || standardTimeResult.error?.message || entryResult.error?.message || choiceResult.error?.message || weekendResult.error?.message || groupResult.error?.message || memberResult.error?.message || placementResult.error?.message || testerResult.error?.message || "")
   }, [])
 
@@ -102,7 +106,8 @@ export default function MajorSchedulingAdminPage() {
         .catch((error: Error) => ({ data: [], error })),
     ])
     const loaded = (result.data as MajorEvent[] | null) || []
-    const contextEventId = majorAdminRouteContext(window.location.search).eventId
+    const routeContext = majorAdminRouteContext(window.location.search)
+    const contextEventId = routeContext.eventId
     const requested = preferred || contextEventId
     const next = loaded.some((event) => event.id === requested) ? requested! : loaded[0]?.id || ""
     setEvents(loaded)
@@ -110,7 +115,7 @@ export default function MajorSchedulingAdminPage() {
     setWorkspaceEventId(loaded.some((event) => event.id === contextEventId) ? contextEventId! : "")
     if (playerDirectoryResult.error) setMessage(playerDirectoryResult.error.message)
     setEventId(next)
-    if (next) await loadSchedule(next)
+    if (next) await loadSchedule(next, routeContext.playDayId)
   }, [loadSchedule])
 
   useEffect(() => {
@@ -127,6 +132,25 @@ export default function MajorSchedulingAdminPage() {
   function showResult(error: { message: string } | null, success: string) {
     setMessage(error?.message || success)
     return !error
+  }
+
+  function selectSection(section: AdminSection) {
+    setActiveSection(section)
+    const params = new URLSearchParams(window.location.search)
+    if (eventId) params.set("event", eventId)
+    const dayNumber = section.startsWith("day-") ? Number(section.slice(4)) : null
+    const selectedDay = dayNumber ? days.find((day) => day.day_number === dayNumber) : null
+    if (selectedDay) params.set("playDay", selectedDay.id)
+    else params.delete("playDay")
+    window.history.replaceState(null, "", `${window.location.pathname}?${params.toString()}`)
+  }
+
+  function selectEvent(nextEventId: string) {
+    setEventId(nextEventId)
+    setActiveSection("setup")
+    const params = new URLSearchParams({ event: nextEventId })
+    window.history.replaceState(null, "", `${window.location.pathname}?${params.toString()}`)
+    void loadSchedule(nextEventId)
   }
 
   async function saveOpening(form: HTMLFormElement) {
@@ -437,14 +461,14 @@ export default function MajorSchedulingAdminPage() {
         <div><p className={styles.eyebrow}>Krys Leagues tournament control</p><h1>Major schedule & rooms</h1><p>Setup → Day → Times → Players → Rooms → Publish</p></div>
         {workspaceEventId && selectedEvent
           ? <div className={styles.eventPicker}>Tournament<strong>{selectedEvent.name}</strong></div>
-          : <label className={styles.eventPicker}>Tournament<select value={eventId} onChange={(event) => { setEventId(event.target.value); setActiveSection("setup"); void loadSchedule(event.target.value) }}>{events.map((event) => <option key={event.id} value={event.id}>{event.is_test_event ? "TEST EVENT — " : ""}{event.name}</option>)}</select></label>}
+          : <label className={styles.eventPicker}>Tournament<select value={eventId} onChange={(event) => selectEvent(event.target.value)}>{events.map((event) => <option key={event.id} value={event.id}>{event.is_test_event ? "TEST EVENT — " : ""}{event.name}</option>)}</select></label>}
       </header>
 
       {selectedEvent?.is_test_event && <div className={styles.testBanner}><strong>TEST EVENT</strong><span>TEST DATA — NOT OFFICIAL</span></div>}
       {message && <div className={styles.message}>{message}</div>}
 
       <nav className={styles.workflowNav} aria-label="Major scheduling sections">
-        {navigation.map((item) => <button key={item.id} type="button" className={activeSection === item.id ? styles.activeNav : ""} onClick={() => setActiveSection(item.id)}>{item.label}</button>)}
+        {navigation.map((item) => <button key={item.id} type="button" className={activeSection === item.id ? styles.activeNav : ""} onClick={() => selectSection(item.id)}>{item.label}</button>)}
       </nav>
 
       {selectedEvent && activeSection === "setup" && <EventSetup

@@ -1,9 +1,10 @@
 "use client"
 
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { majorAdminRouteContext, majorAdminToolHref, majorAdminWorkspaceHref, selectMajorAdminEvent } from "@/lib/majorAdminSelection"
-import { MAJOR_ENTRY_STATUSES, MAJOR_EVENT_STATUSES, formatMajorDate, toDateTimeLocal, type MajorEntry, type MajorEvent } from "@/lib/majors"
+import { majorAdminRouteContext, majorAdminSchedulingDayHref, majorAdminToolHref, majorAdminWorkspaceHref, selectActiveMajorPlayDay, selectMajorAdminEvent } from "@/lib/majorAdminSelection"
+import { MAJOR_ENTRY_STATUSES, MAJOR_EVENT_STATUSES, formatMajorDate, toDateTimeLocal, type MajorEntry, type MajorEvent, type MajorPlayDay } from "@/lib/majors"
 import { isActiveMajorEntryStatus, majorEntrantAddState } from "@/lib/majorEntryParticipation"
 import {
   globalPlayerIdentitySummary,
@@ -16,6 +17,7 @@ import { supabase } from "@/lib/supabase"
 type EventDraft = Omit<MajorEvent, "created_at" | "updated_at">
 
 export default function MajorsAdminPage() {
+  const router = useRouter()
   const [events, setEvents] = useState<MajorEvent[]>([])
   const [entries, setEntries] = useState<MajorEntry[]>([])
   const [draft, setDraft] = useState<EventDraft | null>(null)
@@ -46,6 +48,16 @@ export default function MajorsAdminPage() {
     const requestedId = preferredId || routeContext.eventId
     const nextEvent = routeContext.showAll ? null : selectMajorAdminEvent(loaded, requestedId)
     const nextId = nextEvent?.id || ""
+    if (!preferredId && !routeContext.eventId && !routeContext.showAll && nextEvent) {
+      const dayResult = await supabase.from("major_play_days").select("*").eq("major_event_id", nextEvent.id).order("day_number")
+      if (!dayResult.error) {
+        const activeDay = selectActiveMajorPlayDay(nextEvent, (dayResult.data as MajorPlayDay[] | null) || [])
+        if (activeDay) {
+          router.replace(majorAdminSchedulingDayHref(nextEvent.id, activeDay.id))
+          return
+        }
+      }
+    }
     setEvents(loaded)
     setGlobalPlayers(playerDirectoryResult.data)
     setDraft(nextEvent ? { ...nextEvent } : null)
@@ -53,7 +65,7 @@ export default function MajorsAdminPage() {
     setMessage(response.error?.message || playerDirectoryResult.error?.message || "")
     setLoading(false)
     if (nextId) await loadEntries(nextId)
-  }, [loadEntries])
+  }, [loadEntries, router])
 
   useEffect(() => {
     // Initial client-side Supabase synchronization.

@@ -34,10 +34,22 @@ test("deep admin tools return to the selected Major workspace", () => {
 })
 
 test("event-capable tools initialize from the explicit event query without breaking direct URLs", () => {
-  assert.match(read("app/admin/majors/scheduling/page.tsx"), /majorAdminRouteContext\(window\.location\.search\)\.eventId/)
+  assert.match(read("app/admin/majors/scheduling/page.tsx"), /const routeContext = majorAdminRouteContext\(window\.location\.search\)[\s\S]*const contextEventId = routeContext\.eventId/)
   assert.match(read("app/admin/majors/scoring/page.tsx"), /majorAdminRouteContext\(window\.location\.search\)\.eventId/)
   assert.match(read("app/admin/majors/verification/page.tsx"), /majorAdminRouteContext\(window\.location\.search\)\.eventId/)
   assert.match(read("components/admin/majors/MajorAdminWorkspaceLink.tsx"), /if \(eventId\) setHref\(majorAdminWorkspaceHref\(eventId\)\)/)
+})
+
+test("bare Majors entry opens the active play day while explicit navigation remains authoritative", () => {
+  const scheduling = read("app/admin/majors/scheduling/page.tsx")
+  assert.match(hub, /!preferredId && !routeContext\.eventId && !routeContext\.showAll/)
+  assert.match(hub, /selectActiveMajorPlayDay/)
+  assert.match(hub, /router\.replace\(majorAdminSchedulingDayHref/)
+  assert.match(scheduling, /routeContext\.playDayId/)
+  assert.match(scheduling, /requestedDay = loadedDays\.find/)
+  assert.match(scheduling, /window\.history\.replaceState/)
+  assert.match(scheduling, /params\.set\("playDay", selectedDay\.id\)/)
+  assert.match(scheduling, /params\.delete\("playDay"\)/)
 })
 
 test("workspace navigation remains responsive without changing tournament data", () => {

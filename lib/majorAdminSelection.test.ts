@@ -3,10 +3,13 @@ import test from "node:test"
 import type { MajorEvent } from "./majors.ts"
 import {
   majorAdminRouteContext,
+  majorAdminSchedulingDayHref,
   majorAdminToolHref,
   majorAdminWorkspaceHref,
+  selectActiveMajorPlayDay,
   selectMajorAdminEvent,
 } from "./majorAdminSelection.ts"
+import type { MajorPlayDay } from "./majors.ts"
 
 function event(overrides: Partial<MajorEvent>): MajorEvent {
   return {
@@ -70,6 +73,19 @@ const masters = event({
 const major2 = event({})
 const testEvent = event({ id: "test-id", slug: "test", name: "Test", status: "registration", is_test_event: true })
 
+function playDay(dayNumber: 1 | 2 | 3 | 4, playDate: string, overrides: Partial<MajorPlayDay> = {}): MajorPlayDay {
+  return {
+    id: `day-${dayNumber}`,
+    major_event_id: masters.id,
+    day_number: dayNumber,
+    label: dayNumber === 4 ? "Final Round" : `Round ${dayNumber}`,
+    play_date: playDate,
+    choices_locked: false,
+    selection_locks_at: null,
+    ...overrides,
+  }
+}
+
 test("initially selects the one current active public Major", () => {
   assert.equal(selectMajorAdminEvent([major2, masters, testEvent], undefined, new Date("2026-10-02T12:00:00.000Z"))?.id, masters.id)
 })
@@ -95,6 +111,34 @@ test("falls back deterministically to the existing first record when there is no
 test("event-aware workspace and tool links preserve the selected Major", () => {
   assert.equal(majorAdminWorkspaceHref(masters.id), "/admin/majors?event=masters-id")
   assert.equal(majorAdminToolHref("/admin/majors/scheduling", masters.id), "/admin/majors/scheduling?event=masters-id")
-  assert.deepEqual(majorAdminRouteContext("?event=masters-id"), { eventId: masters.id, showAll: false })
-  assert.deepEqual(majorAdminRouteContext("?view=all"), { eventId: undefined, showAll: true })
+  assert.equal(majorAdminSchedulingDayHref(masters.id, "day-2"), "/admin/majors/scheduling?event=masters-id&playDay=day-2")
+  assert.deepEqual(majorAdminRouteContext("?event=masters-id&playDay=day-2"), { eventId: masters.id, playDayId: "day-2", showAll: false })
+  assert.deepEqual(majorAdminRouteContext("?view=all"), { eventId: undefined, playDayId: undefined, showAll: true })
+})
+
+test("selects each unambiguous active play day using the event reference timezone", () => {
+  const days = [
+    playDay(1, "2026-10-01"),
+    playDay(2, "2026-10-02"),
+    playDay(3, "2026-10-03"),
+    playDay(4, "2026-10-04"),
+  ]
+  assert.equal(selectActiveMajorPlayDay(masters, days, new Date("2026-10-01T16:00:00.000Z"))?.day_number, 1)
+  assert.equal(selectActiveMajorPlayDay(masters, days, new Date("2026-10-02T16:00:00.000Z"))?.day_number, 2)
+  assert.equal(selectActiveMajorPlayDay(masters, days, new Date("2026-10-03T16:00:00.000Z"))?.day_number, 3)
+  assert.equal(selectActiveMajorPlayDay(masters, days, new Date("2026-10-04T16:00:00.000Z"))?.day_number, 4)
+})
+
+test("event timezone controls the active day rather than the browser timezone", () => {
+  const days = [playDay(1, "2026-10-01"), playDay(2, "2026-10-02")]
+  assert.equal(selectActiveMajorPlayDay(masters, days, new Date("2026-10-02T02:00:00.000Z"))?.day_number, 1)
+})
+
+test("missing, malformed, foreign, or ambiguous play days fail safely", () => {
+  const now = new Date("2026-10-02T16:00:00.000Z")
+  assert.equal(selectActiveMajorPlayDay(masters, [], now), null)
+  assert.equal(selectActiveMajorPlayDay(masters, [playDay(2, "not-a-date")], now), null)
+  assert.equal(selectActiveMajorPlayDay(masters, [playDay(2, "2026-10-02", { major_event_id: major2.id })], now), null)
+  assert.equal(selectActiveMajorPlayDay(masters, [playDay(2, "2026-10-02"), playDay(3, "2026-10-02")], now), null)
+  assert.equal(selectActiveMajorPlayDay({ ...masters, schedule_timezone: "Invalid/Zone" }, [playDay(2, "2026-10-02")], now), null)
 })
