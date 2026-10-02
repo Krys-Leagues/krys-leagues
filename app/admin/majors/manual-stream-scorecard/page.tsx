@@ -1,7 +1,7 @@
 "use client"
 
-import Link from "next/link"
 import { useCallback, useEffect, useRef, useState } from "react"
+import { MajorAdminWorkspaceLink } from "@/components/admin/majors/MajorAdminWorkspaceLink"
 
 import {
   canToggleManualStreamSlot,
@@ -121,7 +121,7 @@ export default function MastersManualStreamControllerPage() {
     <main className={styles.page}>
       <header className={styles.header}>
         <div>
-          <Link href="/admin/majors" className={styles.back}>← Four Majors</Link>
+          <MajorAdminWorkspaceLink className={styles.back}>← Major workspace</MajorAdminWorkspaceLink>
           <p className={styles.eyebrow}>Protected · manual broadcast only</p>
           <h1>Masters Manual Scorecard</h1>
           <p>Type the four names in Walkabout order. These names and totals never touch official Masters scoring.</p>

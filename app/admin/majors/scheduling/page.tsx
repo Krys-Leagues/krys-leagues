@@ -2,6 +2,8 @@
 
 import Link from "next/link"
 import { useCallback, useEffect, useMemo, useState } from "react"
+import { MajorAdminWorkspaceLink } from "@/components/admin/majors/MajorAdminWorkspaceLink"
+import { majorAdminRouteContext } from "@/lib/majorAdminSelection"
 import {
   isMajorDayLocked,
   majorEventLocalTimeToIso,
@@ -43,6 +45,7 @@ const DAY_NAMES = [
 export default function MajorSchedulingAdminPage() {
   const [events, setEvents] = useState<MajorEvent[]>([])
   const [eventId, setEventId] = useState("")
+  const [workspaceEventId, setWorkspaceEventId] = useState("")
   const [activeSection, setActiveSection] = useState<AdminSection>("setup")
   const [days, setDays] = useState<MajorPlayDay[]>([])
   const [slots, setSlots] = useState<MajorTimeSlot[]>([])
@@ -99,9 +102,12 @@ export default function MajorSchedulingAdminPage() {
         .catch((error: Error) => ({ data: [], error })),
     ])
     const loaded = (result.data as MajorEvent[] | null) || []
-    const next = preferred || loaded[0]?.id || ""
+    const contextEventId = majorAdminRouteContext(window.location.search).eventId
+    const requested = preferred || contextEventId
+    const next = loaded.some((event) => event.id === requested) ? requested! : loaded[0]?.id || ""
     setEvents(loaded)
     setGlobalPlayers(playerDirectoryResult.data)
+    setWorkspaceEventId(loaded.some((event) => event.id === contextEventId) ? contextEventId! : "")
     if (playerDirectoryResult.error) setMessage(playerDirectoryResult.error.message)
     setEventId(next)
     if (next) await loadSchedule(next)
@@ -426,10 +432,12 @@ export default function MajorSchedulingAdminPage() {
 
   return <main className={styles.page}>
     <div className={styles.shell}>
-      <Link href="/admin/majors" className={styles.backLink}>← Four Majors admin</Link>
+      <MajorAdminWorkspaceLink className={styles.backLink}>← Major workspace</MajorAdminWorkspaceLink>
       <header className={styles.header}>
         <div><p className={styles.eyebrow}>Krys Leagues tournament control</p><h1>Major schedule & rooms</h1><p>Setup → Day → Times → Players → Rooms → Publish</p></div>
-        <label className={styles.eventPicker}>Tournament<select value={eventId} onChange={(event) => { setEventId(event.target.value); setActiveSection("setup"); void loadSchedule(event.target.value) }}>{events.map((event) => <option key={event.id} value={event.id}>{event.is_test_event ? "TEST EVENT — " : ""}{event.name}</option>)}</select></label>
+        {workspaceEventId && selectedEvent
+          ? <div className={styles.eventPicker}>Tournament<strong>{selectedEvent.name}</strong></div>
+          : <label className={styles.eventPicker}>Tournament<select value={eventId} onChange={(event) => { setEventId(event.target.value); setActiveSection("setup"); void loadSchedule(event.target.value) }}>{events.map((event) => <option key={event.id} value={event.id}>{event.is_test_event ? "TEST EVENT — " : ""}{event.name}</option>)}</select></label>}
       </header>
 
       {selectedEvent?.is_test_event && <div className={styles.testBanner}><strong>TEST EVENT</strong><span>TEST DATA — NOT OFFICIAL</span></div>}

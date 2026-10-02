@@ -1,7 +1,7 @@
 "use client"
 
-import Link from "next/link"
 import { useCallback, useEffect, useMemo, useState } from "react"
+import { MajorAdminWorkspaceLink } from "@/components/admin/majors/MajorAdminWorkspaceLink"
 
 import {
   deriveHoleStrokesFromRunningTotal,
@@ -222,7 +222,7 @@ export default function MastersStreamControllerPage() {
     <main className={styles.page}>
       <header className={styles.header}>
         <div>
-          <Link href="/admin/majors" className={styles.back}>← Four Majors</Link>
+          <MajorAdminWorkspaceLink className={styles.back}>← Major workspace</MajorAdminWorkspaceLink>
           <p className={styles.eyebrow}>Protected broadcast controller</p>
           <h1>Cherry Masters Live Scorecard</h1>
           <p>Room-driven stream scoring only. Nothing here writes official player scores or results.</p>

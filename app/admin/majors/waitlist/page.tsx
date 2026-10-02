@@ -1,7 +1,7 @@
 "use client"
 
-import Link from "next/link"
 import { useCallback, useEffect, useState } from "react"
+import { MajorAdminWorkspaceLink } from "@/components/admin/majors/MajorAdminWorkspaceLink"
 import { type MajorEvent, type MajorWaitlistEntry } from "@/lib/majors"
 import { formatMastersAdminDateTime } from "@/lib/mastersSignupDisplay"
 import { supabase } from "@/lib/supabase"
@@ -65,7 +65,7 @@ export default function MastersWaitlistAdminPage() {
   return (
     <main style={page}>
       <div style={header}>
-        <div><Link href="/admin/majors" style={back}>← Four Majors</Link><h1 style={title}>Masters Wait List</h1><p style={muted}>Waiting players are preferences only until an administrator promotes them.</p></div>
+        <div><MajorAdminWorkspaceLink style={back}>← Major workspace</MajorAdminWorkspaceLink><h1 style={title}>Masters Wait List</h1><p style={muted}>Waiting players are preferences only until an administrator promotes them.</p></div>
         <button type="button" onClick={() => void load(eventId)} style={refresh}>Refresh</button>
       </div>
       <label style={field}>Event<select value={eventId} onChange={(event) => { setEventId(event.target.value); void load(event.target.value) }} style={select}>{events.map((event) => <option key={event.id} value={event.id}>{event.name} · {event.slug}</option>)}</select></label>

@@ -2,6 +2,8 @@
 
 import Link from "next/link"
 import { useCallback, useEffect, useMemo, useState } from "react"
+import { MajorAdminWorkspaceLink } from "@/components/admin/majors/MajorAdminWorkspaceLink"
+import { majorAdminRouteContext, majorAdminToolHref } from "@/lib/majorAdminSelection"
 import {
   MASTERS_SCORECARD_THEME,
   participantTotal,
@@ -38,6 +40,7 @@ export default function MajorScoringAdminPage() {
   const [themeText, setThemeText] = useState("")
   const [message, setMessage] = useState("")
   const [busy, setBusy] = useState(false)
+  const [workspaceEventId, setWorkspaceEventId] = useState("")
 
   const selectedSession = useMemo(
     () => sessions.find((session) => session.id === sessionId) || null,
@@ -46,6 +49,10 @@ export default function MajorScoringAdminPage() {
   const selectedEvent = useMemo(
     () => events.find((event) => event.id === selectedSession?.major_event_id) || null,
     [events, selectedSession]
+  )
+  const visibleSessions = useMemo(
+    () => workspaceEventId ? sessions.filter((session) => session.major_event_id === workspaceEventId) : sessions,
+    [sessions, workspaceEventId],
   )
   const browserOrigin = typeof window === "undefined" ? "" : window.location.origin
 
@@ -78,10 +85,13 @@ export default function MajorScoringAdminPage() {
     ])
     const loadedEvents = (eventResponse.data as MajorEvent[] | null) || []
     const loadedSessions = (sessionResponse.data as MajorScoringSession[] | null) || []
+    const requested = majorAdminRouteContext(window.location.search).eventId
+    const requestedEvent = loadedEvents.find((event) => event.id === requested)
     setEvents(loadedEvents)
     setPlayers(playerResponse.data.filter((player) => player.active))
     setSessions(loadedSessions)
-    setNewEventId((current) => current || loadedEvents[0]?.id || "")
+    setWorkspaceEventId(requestedEvent?.id || "")
+    setNewEventId((current) => current || requestedEvent?.id || loadedEvents[0]?.id || "")
     setMessage(eventResponse.error?.message || playerResponse.error?.message || sessionResponse.error?.message || "")
   }, [])
 
@@ -201,20 +211,22 @@ export default function MajorScoringAdminPage() {
   return (
     <main style={page}>
       <header style={header}>
-        <div><Link href="/admin/majors" style={back}>← Four Majors</Link><h1>Live Major Scoring</h1><p style={muted}>Remote persistent controls for large and compact broadcast scorecards.</p><Link href="/admin/majors/verification" style={primary}>Open Verify Results →</Link></div>
+        <div><MajorAdminWorkspaceLink style={back}>← Major workspace</MajorAdminWorkspaceLink><h1>Live Major Scoring</h1><p style={muted}>Remote persistent controls for large and compact broadcast scorecards.</p><Link href={majorAdminToolHref("/admin/majors/verification", workspaceEventId || newEventId)} style={primary}>Open Verify Results →</Link></div>
       </header>
       {message && <p style={notice}>{message}</p>}
       <div style={columns}>
         <aside style={panel}>
           <h2>Create session</h2>
-          <Field label="Major"><select value={newEventId} onChange={(event) => setNewEventId(event.target.value)} style={input}>{events.map((event) => <option key={event.id} value={event.id}>{event.name}</option>)}</select></Field>
+          {workspaceEventId
+            ? <Field label="Major"><strong>{events.find((event) => event.id === workspaceEventId)?.name || "Selected Major"}</strong></Field>
+            : <Field label="Major"><select value={newEventId} onChange={(event) => setNewEventId(event.target.value)} style={input}>{events.map((event) => <option key={event.id} value={event.id}>{event.name}</option>)}</select></Field>}
           <Field label="Session label"><input value={newLabel} onChange={(event) => setNewLabel(event.target.value)} style={input} /></Field>
           <Field label="Players"><select value={mode} onChange={(event) => setMode(Number(event.target.value) as 2 | 3)} style={input}><option value={2}>2-player</option><option value={3}>3-player</option></select></Field>
           {Array.from({ length: mode }, (_, index) => <Field key={index} label={`Player ${index + 1}`}><select value={newPlayerIds[index]} onChange={(event) => updateNewPlayer(index, event.target.value)} style={input}><option value="">Choose Global Player…</option>{players.map((player) => <option key={player.id} value={player.id} disabled={newPlayerIds.some((selectedId, position) => position !== index && selectedId === player.id)}>{player.screenName} · {globalPlayerIdentitySummary(player)} · {player.id}</option>)}</select></Field>)}
           <button onClick={createSession} disabled={busy} style={primary}>Create scoring session</button>
 
           <h2 style={sectionTitle}>Open session</h2>
-          <div style={sessionList}>{sessions.map((session) => {
+          <div style={sessionList}>{visibleSessions.map((session) => {
             const event = events.find((item) => item.id === session.major_event_id)
             return <button key={session.id} onClick={() => setSessionId(session.id)} style={session.id === sessionId ? activeSessionButton : sessionButton}><strong>{session.label}</strong><span>{event?.name || "Major"} · {session.participant_count} players</span><small>{session.is_active ? "Active" : "Inactive"} · {session.is_public ? "Published" : "Private"}</small></button>
           })}</div>

@@ -1,7 +1,7 @@
 "use client"
 
-import Link from "next/link"
 import { useCallback, useEffect, useState } from "react"
+import { MajorAdminWorkspaceLink } from "@/components/admin/majors/MajorAdminWorkspaceLink"
 
 import {
   formatRunningToPar,
@@ -165,7 +165,7 @@ export default function MastersSimpleStreamControllerPage() {
     <main className={styles.page}>
       <header className={styles.header}>
         <div>
-          <Link href="/admin/majors" className={styles.back}>← Four Majors</Link>
+          <MajorAdminWorkspaceLink className={styles.back}>← Major workspace</MajorAdminWorkspaceLink>
           <p className={styles.eyebrow}>Protected broadcast-only controller</p>
           <h1>Simple Masters Total Score Card</h1>
           <p>THE MINI-GOLF MASTERS · Cherry Blossom. These totals never change official player scores.</p>

@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { useCallback, useEffect, useMemo, useState } from "react"
+import { majorAdminRouteContext, majorAdminToolHref, majorAdminWorkspaceHref, selectMajorAdminEvent } from "@/lib/majorAdminSelection"
 import { MAJOR_ENTRY_STATUSES, MAJOR_EVENT_STATUSES, formatMajorDate, toDateTimeLocal, type MajorEntry, type MajorEvent } from "@/lib/majors"
 import { isActiveMajorEntryStatus, majorEntrantAddState } from "@/lib/majorEntryParticipation"
 import {
@@ -17,7 +18,6 @@ type EventDraft = Omit<MajorEvent, "created_at" | "updated_at">
 export default function MajorsAdminPage() {
   const [events, setEvents] = useState<MajorEvent[]>([])
   const [entries, setEntries] = useState<MajorEntry[]>([])
-  const [selectedId, setSelectedId] = useState("")
   const [draft, setDraft] = useState<EventDraft | null>(null)
   const [globalPlayers, setGlobalPlayers] = useState<ProtectedAdminGlobalPlayer[]>([])
   const [playerSearch, setPlayerSearch] = useState("")
@@ -26,6 +26,7 @@ export default function MajorsAdminPage() {
   const [message, setMessage] = useState("")
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [showChooser, setShowChooser] = useState(false)
 
   const loadEntries = useCallback(async (eventId: string) => {
     const response = await supabase.from("major_entries").select("*").eq("major_event_id", eventId).order("registered_at")
@@ -41,12 +42,14 @@ export default function MajorsAdminPage() {
         .catch((error: Error) => ({ data: [], error })),
     ])
     const loaded = (response.data as MajorEvent[] | null) || []
-    const nextId = preferredId || loaded[0]?.id || ""
-    const nextEvent = loaded.find((event) => event.id === nextId) || null
+    const routeContext = majorAdminRouteContext(window.location.search)
+    const requestedId = preferredId || routeContext.eventId
+    const nextEvent = routeContext.showAll ? null : selectMajorAdminEvent(loaded, requestedId)
+    const nextId = nextEvent?.id || ""
     setEvents(loaded)
     setGlobalPlayers(playerDirectoryResult.data)
-    setSelectedId(nextId)
     setDraft(nextEvent ? { ...nextEvent } : null)
+    setShowChooser(routeContext.showAll)
     setMessage(response.error?.message || playerDirectoryResult.error?.message || "")
     setLoading(false)
     if (nextId) await loadEntries(nextId)
@@ -57,15 +60,6 @@ export default function MajorsAdminPage() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadEvents()
   }, [loadEvents])
-
-  function selectEvent(event: MajorEvent) {
-    setSelectedId(event.id)
-    setDraft({ ...event })
-    setSelectedPlayerId("")
-    setPlayerSearch("")
-    setAdministrativeAddNote("")
-    void loadEntries(event.id)
-  }
 
   const selectedPlayer = useMemo(
     () => globalPlayers.find((player) => player.id === selectedPlayerId) || null,
@@ -78,6 +72,7 @@ export default function MajorsAdminPage() {
       : [],
     [globalPlayers, playerSearch],
   )
+  const isMastersWorkspace = draft?.slug === "masters" || draft?.name.toLowerCase().includes("masters")
 
   function setField<K extends keyof EventDraft>(key: K, value: EventDraft[K]) {
     setDraft((current) => current ? { ...current, [key]: value } : current)
@@ -172,16 +167,29 @@ export default function MajorsAdminPage() {
   return (
     <main style={page}>
       <div style={topRow}>
-        <div><Link href="/admin" style={backLink}>← Admin</Link><h1 style={title}>Four Majors</h1><p style={muted}>Configure four reusable event records, signup, participants, and streams.</p></div>
-        <div style={headerLinks}><Link href="/admin/majors/scheduling" style={scoringLink}>Signup schedule</Link><Link href="/admin/majors/waitlist" style={scoringLink}>Masters wait list</Link><Link href="/admin/majors/scoring" style={scoringLink}>Live scoring</Link><Link href="/admin/majors/stream-scorecard" style={scoringLink}>Masters stream card</Link><Link href="/majors" style={publicLink}>View public Majors</Link></div>
+        <div><Link href="/admin" style={backLink}>← Admin</Link><h1 style={title}>{draft ? `${draft.name} Admin Workspace` : "Four Majors"}</h1><p style={muted}>{draft ? `Manage ${draft.name} without reselecting the event between tools.` : "Choose a Major to enter its dedicated admin workspace."}</p></div>
+        <div style={headerLinks}>{draft && <Link href="/admin/majors?view=all" style={allMajorsLink}>← ALL MAJORS</Link>}<Link href="/majors" style={publicLink}>View public Majors</Link></div>
       </div>
       {message && <p style={notice}>{message}</p>}
       {loading ? <p>Loading…</p> : (
         <>
-          <nav style={eventTabs}>{events.map((event) => <button key={event.id} onClick={() => selectEvent(event)} style={event.id === selectedId ? activeTab : tab}><strong>{event.name}</strong><span style={tabMeta}>{event.status}{event.is_public ? " · public" : " · private"}</span></button>)}</nav>
+          {showChooser && <nav style={eventTabs} aria-label="Choose a Major">{events.map((event) => <Link key={event.id} href={majorAdminWorkspaceHref(event.id)} style={tab}><strong>{event.name}</strong><span style={tabMeta}>{event.status}{event.is_public ? " · public" : " · private"}</span></Link>)}</nav>}
           {draft && (
-            <div style={columns}>
-              <section style={panel}>
+            <>
+              <nav style={workspaceTools} aria-label={`${draft.name} admin tools`}>
+                <a href="#event-configuration" style={workspaceTool}><strong>Overview / Event Configuration</strong><span>Event status, dates, public visibility, and stream details</span></a>
+                <a href="#entrants" style={workspaceTool}><strong>Entrants</strong><span>Add, withdraw, reactivate, and review players for this Major</span></a>
+                <Link href={majorAdminToolHref("/admin/majors/scheduling", draft.id)} style={workspaceTool}><strong>Signup, Time Slots, Rooms & Scheduling</strong><span>Manage the full schedule workspace for this Major</span></Link>
+                <Link href={majorAdminToolHref("/admin/majors/scoring", draft.id)} style={workspaceTool}><strong>Live Scoring</strong><span>Open persistent live scoring sessions</span></Link>
+                <Link href={majorAdminToolHref("/admin/majors/verification", draft.id)} style={workspaceTool}><strong>Score Verification</strong><span>Review submitted player scorecards</span></Link>
+                {isMastersWorkspace && <Link href={majorAdminToolHref("/admin/majors/waitlist", draft.id)} style={workspaceTool}><strong>Wait List</strong><span>Manage the existing Masters wait list</span></Link>}
+                {isMastersWorkspace && <Link href={majorAdminToolHref("/admin/majors/stream-scorecard", draft.id)} style={workspaceTool}><strong>Stream Control</strong><span>Open the existing Masters stream controller</span></Link>}
+                {isMastersWorkspace && <Link href={majorAdminToolHref("/admin/majors/simple-stream-scorecard", draft.id)} style={workspaceTool}><strong>Simple Stream Card</strong><span>Open the existing total-score stream controller</span></Link>}
+                {isMastersWorkspace && <Link href={majorAdminToolHref("/admin/majors/manual-stream-scorecard", draft.id)} style={workspaceTool}><strong>Manual Stream Card</strong><span>Open the existing manual broadcast fallback</span></Link>}
+                <Link href={`/majors/${draft.slug}/results`} style={workspaceTool}><strong>Results / Live Score Tracker</strong><span>Open the public results page for this Major</span></Link>
+              </nav>
+              <div style={columns}>
+              <section id="event-configuration" style={panel}>
                 <h2>Event configuration</h2>
                 <div style={formGrid}>
                   <Field label="Name"><input value={draft.name} onChange={(event) => setField("name", event.target.value)} style={input} /></Field>
@@ -208,7 +216,7 @@ export default function MajorsAdminPage() {
                 <button onClick={saveEvent} disabled={saving} style={saveButton}>{saving ? "Saving…" : "Save Major"}</button>
               </section>
 
-              <section style={panel}>
+              <section id="entrants" style={panel}>
                 <h2>Entries ({entries.length} registered history · {entries.filter((entry) => isActiveMajorEntryStatus(entry.status)).length} active)</h2>
                 <p style={muted}>All entries use the canonical <code>public.players.id</code>. Screen names below are signup snapshots.</p>
                 <div style={addPanel}>
@@ -241,8 +249,10 @@ export default function MajorsAdminPage() {
                   </article>
                 ))}</div>
               </section>
-            </div>
+              </div>
+            </>
           )}
+          {!showChooser && !draft && <p style={muted}>No Major events are available.</p>}
         </>
       )}
     </main>
@@ -257,14 +267,15 @@ const backLink: React.CSSProperties = { color: "#94a3b8", textDecoration: "none"
 const title: React.CSSProperties = { margin: "10px 0 4px", fontSize: 38 }
 const muted: React.CSSProperties = { color: "#a1a1aa", lineHeight: 1.5 }
 const publicLink: React.CSSProperties = { padding: "11px 15px", borderRadius: 9, background: "#1d4ed8", color: "white", textDecoration: "none", fontWeight: 800 }
-const scoringLink: React.CSSProperties = { ...publicLink, background: "#16a34a" }
+const allMajorsLink: React.CSSProperties = { ...publicLink, background: "#334155" }
 const headerLinks: React.CSSProperties = { display: "flex", gap: 10, flexWrap: "wrap" }
 const notice: React.CSSProperties = { padding: 12, borderRadius: 10, background: "#292524", color: "#fde68a" }
-const eventTabs: React.CSSProperties = { display: "grid", gridTemplateColumns: "repeat(4,minmax(150px,1fr))", gap: 10, margin: "24px 0" }
-const tab: React.CSSProperties = { display: "flex", flexDirection: "column", gap: 4, padding: 14, borderRadius: 12, border: "1px solid #3f3f46", background: "#18181b", color: "white", textAlign: "left", cursor: "pointer" }
-const activeTab: React.CSSProperties = { ...tab, borderColor: "#60a5fa", background: "#172554" }
+const eventTabs: React.CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(150px,100%),1fr))", gap: 10, margin: "24px 0" }
+const tab: React.CSSProperties = { display: "flex", flexDirection: "column", gap: 4, padding: 14, borderRadius: 12, border: "1px solid #3f3f46", background: "#18181b", color: "white", textAlign: "left", cursor: "pointer", textDecoration: "none" }
 const tabMeta: React.CSSProperties = { color: "#a1a1aa", fontSize: 12, textTransform: "capitalize" }
-const columns: React.CSSProperties = { display: "grid", gridTemplateColumns: "minmax(0,1.2fr) minmax(360px,.8fr)", gap: 18, alignItems: "start" }
+const workspaceTools: React.CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 10, margin: "24px 0" }
+const workspaceTool: React.CSSProperties = { display: "grid", gap: 5, padding: 14, border: "1px solid #2563eb", borderRadius: 12, background: "#0f172a", color: "white", textDecoration: "none" }
+const columns: React.CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(360px,100%),1fr))", gap: 18, alignItems: "start" }
 const panel: React.CSSProperties = { padding: 22, border: "1px solid #333", borderRadius: 16, background: "#111" }
 const formGrid: React.CSSProperties = { display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 12 }
 const field: React.CSSProperties = { display: "flex", flexDirection: "column", gap: 6, marginBottom: 12 }

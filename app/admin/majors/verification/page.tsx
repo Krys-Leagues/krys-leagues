@@ -1,8 +1,9 @@
 "use client"
 
-import Link from "next/link"
 import { useCallback, useEffect, useMemo, useState } from "react"
+import { MajorAdminWorkspaceLink } from "@/components/admin/majors/MajorAdminWorkspaceLink"
 import { ScorecardPanViewport, ScorecardZoomControls, useScorecardImageView } from "@/components/scorecards/ScorecardZoomViewer"
+import { majorAdminRouteContext } from "@/lib/majorAdminSelection"
 import { formatMajorToPar, majorRoundDayLabel, type MajorEvent, type MajorPlayDay, type MajorPlayerScorecard } from "@/lib/majors"
 import { formatMastersAdminDateTime, formatMastersAdminTime } from "@/lib/mastersSignupDisplay"
 import { supabase } from "@/lib/supabase"
@@ -14,10 +15,15 @@ type RoomGroup = { key: string; dayNumber: MajorPlayerScorecard["day_number"]; r
 export default function MajorVerificationPage() {
   const [events, setEvents] = useState<MajorEvent[]>([]), [days, setDays] = useState<MajorPlayDay[]>([]), [cards, setCards] = useState<MajorPlayerScorecard[]>([]), [proofs, setProofs] = useState<AdminRoomProof[]>([])
   const [eventId, setEventId] = useState(""), [message, setMessage] = useState("")
+  const [workspaceEventId, setWorkspaceEventId] = useState("")
   const loadEvents = useCallback(async () => {
     const [eventResult, dayResult] = await Promise.all([supabase.from("major_events").select("*").order("slug"), supabase.from("major_play_days").select("*").order("day_number")])
-    setEvents((eventResult.data as MajorEvent[]) || []); setDays((dayResult.data as MajorPlayDay[]) || [])
-    setEventId((current) => current || String(eventResult.data?.find((event) => event.slug === "masters")?.id || eventResult.data?.[0]?.id || ""))
+    const loadedEvents = (eventResult.data as MajorEvent[]) || []
+    const requested = majorAdminRouteContext(window.location.search).eventId
+    const requestedEvent = loadedEvents.find((event) => event.id === requested)
+    setEvents(loadedEvents); setDays((dayResult.data as MajorPlayDay[]) || [])
+    setWorkspaceEventId(requestedEvent?.id || "")
+    setEventId((current) => current || String(requestedEvent?.id || loadedEvents.find((event) => event.slug === "masters")?.id || loadedEvents[0]?.id || ""))
     setMessage(eventResult.error?.message || dayResult.error?.message || "")
   }, [])
   const refreshQueue = useCallback(async () => {
@@ -60,8 +66,10 @@ export default function MajorVerificationPage() {
     const result = await supabase.rpc("set_major_round_scoring_state", { p_play_day_id: day.id, p_is_open: !open })
     setMessage(result.error?.message || "Round entry state updated."); if (!result.error) await loadEvents()
   }
-  return <main className={styles.page}><div className={styles.shell}><Link href="/admin/majors/scoring">← Major scoring</Link><header className={styles.header}><p>MASTERS ADMIN</p><h1>SCORE VERIFICATION</h1><span>{waitingRooms} {waitingRooms === 1 ? "ROOM" : "ROOMS"} · {waitingScores} {waitingScores === 1 ? "SCORE" : "SCORES"} TO VERIFY</span></header>
-    <label className={styles.eventPicker}>Event<select value={eventId} onChange={(event) => setEventId(event.target.value)}>{events.map((event) => <option key={event.id} value={event.id}>{event.name}</option>)}</select></label>
+  return <main className={styles.page}><div className={styles.shell}><MajorAdminWorkspaceLink>← Major workspace</MajorAdminWorkspaceLink><header className={styles.header}><p>MASTERS ADMIN</p><h1>SCORE VERIFICATION</h1><span>{waitingRooms} {waitingRooms === 1 ? "ROOM" : "ROOMS"} · {waitingScores} {waitingScores === 1 ? "SCORE" : "SCORES"} TO VERIFY</span></header>
+    {workspaceEventId && selectedEvent
+      ? <div className={styles.eventPicker}>Event <strong>{selectedEvent.name}</strong></div>
+      : <label className={styles.eventPicker}>Event<select value={eventId} onChange={(event) => setEventId(event.target.value)}>{events.map((event) => <option key={event.id} value={event.id}>{event.name}</option>)}</select></label>}
     <section className={styles.roundControls}>{eventDays.map((day) => { const open = (day as MajorPlayDay & { scoring_entry_open?: boolean }).scoring_entry_open; return <article key={day.id}><strong>{majorRoundDayLabel(day.day_number)}</strong><span>{open ? "Player entry open" : "Player entry closed"}</span><button type="button" onClick={() => void toggleRound(day)}>{open ? "Close entry" : "Open entry"}</button></article> })}</section>
     {[1, 2, 3, 4].map((round) => { const roundRooms = rooms.filter((room) => room.dayNumber === round); if (!roundRooms.length) return null; return <section key={round} className={styles.roundSection}><h2>ROUND {round}</h2>{roundRooms.map((room) => <RoomVerification key={room.key} room={room} event={selectedEvent} onAction={scoreAction} />)}</section> })}
     {rooms.length === 0 && <p className={styles.empty}>No Masters scorecards have been submitted yet.</p>}{message && <p className={styles.message} role="status">{message}</p>}</div></main>
