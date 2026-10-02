@@ -95,3 +95,37 @@ test("published instruction-only save uses the narrow RPC and keeps the full sav
   assert.match(migration, /update public\.major_schedule_groups\s+set instructions = nullif\(btrim\(p_instructions\), ''\),\s+updated_at = now\(\)\s+where id = p_group_id/i)
   assert.doesNotMatch(migration.match(/create or replace function public\.republish_major_schedule_group_instructions[\s\S]*?\$function\$;/i)?.[0] || "", /delete from public\.major_schedule_group_members|update public\.major_entry_day_choices|group_label\s*=/i)
 })
+
+test("weekend rooms can be prepared privately before player classifications are finalized", () => {
+  const migration = readFileSync(new URL("../supabase/migrations/20261002205037_masters_weekend_rooms_independent_of_classification.sql", import.meta.url), "utf8")
+  const saveRoom = migration.match(/create or replace function public\.save_major_schedule_group[\s\S]*?\n\$function\$;/i)?.[0] || ""
+
+  assert.match(saveRoom, /coalesce\(p_is_published, false\)\s+and play_day_number > 2/i)
+  assert.match(saveRoom, /competition_status in \('main', 'secondary'\)/i)
+  assert.match(saveRoom, /Weekend rooms may be published only after every assigned player has a staged competition classification/i)
+  assert.doesNotMatch(saveRoom, /weekend\.competition_status\s*=\s*p_competition/i)
+  assert.doesNotMatch(saveRoom, /Weekend room assignments must match each player/i)
+})
+
+test("mixed weekend classifications may share one physical room without changing selected times", () => {
+  const migration = readFileSync(new URL("../supabase/migrations/20261002205037_masters_weekend_rooms_independent_of_classification.sql", import.meta.url), "utf8")
+  const validateMember = migration.match(/create or replace function public\.validate_major_group_member_row[\s\S]*?\n\$function\$;/i)?.[0] || ""
+  const setWeekendStatus = migration.match(/create or replace function public\.set_major_weekend_status[\s\S]*?\n\$function\$;/i)?.[0] || ""
+
+  assert.match(validateMember, /major_entry_day_choices/i)
+  assert.match(validateMember, /choice\.play_day_id = new\.play_day_id/i)
+  assert.match(validateMember, /choice\.time_slot_id = new\.time_slot_id/i)
+  assert.doesNotMatch(validateMember, /major_entry_weekend_status|competition_status|room_competition/i)
+  assert.doesNotMatch(setWeekendStatus, /delete from public\.major_schedule_group_members/i)
+  assert.match(setWeekendStatus, /insert into public\.major_entry_weekend_status/i)
+  assert.match(setWeekendStatus, /update public\.major_final_placements/i)
+})
+
+test("weekend classification publication safety and room classification guidance remain explicit", () => {
+  const baseSchema = readFileSync(new URL("../major_masters_signup_groups_and_cut.sql", import.meta.url), "utf8")
+  const page = readFileSync(new URL("../app/admin/majors/scheduling/page.tsx", import.meta.url), "utf8")
+
+  assert.match(baseSchema, /Every active entrant must have a staged Main Event or secondary-field decision before publication/i)
+  assert.match(page, /Room competition display/)
+  assert.match(page, /Player classifications remain individual and do not limit who may share this physical room\./)
+})
