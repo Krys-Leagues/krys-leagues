@@ -54,12 +54,13 @@ function payload(cards: MajorPlayerScorecard[], activeDay = 2): MajorResultsPayl
   }
 }
 
-test("full-field rows preserve entrants with clean unplayed placeholders", () => {
+test("full-field rows preserve entrants and rank every recorded rolling score", () => {
   const rows = buildMastersLiveRows(payload([card(1, 1, -8), card(1, 2, -7), card(2, 1, -5)]))
   assert.equal(rows.length, 4)
   assert.equal(rows.find((row) => row.entryId === "entry-1")?.easyTotal, -15)
   assert.equal(rows.find((row) => row.entryId === "entry-2")?.easyTotal, null)
-  assert.equal(rows.find((row) => row.entryId === "entry-2")?.overallPlace, null)
+  assert.equal(rows.find((row) => row.entryId === "entry-2")?.overallTotal, -5)
+  assert.equal(rows.find((row) => row.entryId === "entry-2")?.overallPlace, "2")
   assert.equal(formatMastersLiveScore(null), "—")
   assert.equal(formatMastersLiveScore(0), "E")
   assert.equal(formatMastersLiveScore(3), "+3")
@@ -78,6 +79,23 @@ test("overall rankings use current completed rounds and standard tied placements
     ["PLAYER_3", "3", -9],
     ["PLAYER_4", null, null],
   ])
+})
+
+test("overall remains a four-day rolling score when the next round has started", () => {
+  const rows = sortMastersLiveRows(buildMastersLiveRows(payload([
+    card(1, 1, -24), card(1, 2, -30),
+    card(2, 1, -23), card(2, 2, -29),
+    card(3, 1, -23), card(3, 2, -27),
+    card(4, 1, -30),
+  ], 2)), "overall")
+
+  assert.deepEqual(rows.map((row) => [row.name, row.overallPlace, row.overallTotal]), [
+    ["PLAYER_1", "1", -54],
+    ["PLAYER_2", "2", -52],
+    ["PLAYER_3", "3", -50],
+    ["PLAYER_4", "4", -30],
+  ])
+  assert.equal(rows[3]?.rounds[2].toPar, null)
 })
 
 test("provisional cards remain visible without changing score aggregation", () => {
@@ -106,7 +124,7 @@ test("easy and hard totals require both rounds and never count missing rounds as
   const one = rows.find((row) => row.entryId === "entry-1")!
   const two = rows.find((row) => row.entryId === "entry-2")!
   assert.equal(one.hardTotal, null)
-  assert.equal(one.overallTotal, null)
+  assert.equal(one.overallTotal, -21)
   assert.equal(two.hardTotal, -12)
   assert.equal(two.overallTotal, -20)
   assert.equal(sortMastersLiveRows(rows, "hard")[0]?.entryId, "entry-2")

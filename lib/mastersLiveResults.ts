@@ -93,20 +93,17 @@ export function buildMastersLiveRows(payload: MajorResultsPayload): MastersLiveR
     }
   }
 
-  const startedRounds = payload.rounds.filter((round) => round.cards.length > 0).map((round) => round.day_number)
-  const activeRound = payload.active_day_number && payload.active_day_number >= 1 && payload.active_day_number <= 4
-    ? payload.active_day_number
-    : 0
-  const currentRound = Math.max(activeRound, ...startedRounds, 0)
-  const requiredRounds = ROUND_NUMBERS.filter((round) => round <= currentRound)
   const result = [...rows.values()]
 
   for (const row of result) {
     row.easyTotal = completedPairTotal(row, 1, 2)
     row.hardTotal = completedPairTotal(row, 3, 4)
     row.provisional = ROUND_NUMBERS.some((round) => row.rounds[round].toPar !== null && row.rounds[round].status !== "verified")
-    row.overallTotal = requiredRounds.length > 0 && requiredRounds.every((round) => row.rounds[round].toPar !== null)
-      ? requiredRounds.reduce((total, round) => total + (row.rounds[round].toPar ?? 0), 0)
+    const recordedScores = ROUND_NUMBERS
+      .map((round) => row.rounds[round].toPar)
+      .filter((score): score is number => score !== null)
+    row.overallTotal = recordedScores.length > 0
+      ? recordedScores.reduce((total, score) => total + score, 0)
       : null
   }
 
