@@ -120,10 +120,9 @@
 
 .launcherDock {
   position: fixed;
-  left: 50%;
-  bottom: max(14px, env(safe-area-inset-bottom));
+  top: max(14px, env(safe-area-inset-top));
+  left: max(14px, env(safe-area-inset-left));
   z-index: 78;
-  transform: translateX(-50%);
   pointer-events: none;
 }
 
@@ -196,7 +195,8 @@
   }
 
   .launcherDock {
-    bottom: max(10px, env(safe-area-inset-bottom));
+    top: max(10px, env(safe-area-inset-top));
+    left: max(10px, env(safe-area-inset-left));
   }
 
   .launcher {

@@ -9,7 +9,6 @@ import {
   CUP_SIGNUP_DESTINATIONS,
   CUP_SIGNUP_DISMISSAL_KEY,
   CUP_SIGNUP_INSTRUCTION,
-  discordChannelUrl,
   shouldRenderCupSignupAnnouncement,
 } from "@/lib/cupSignupAnnouncement"
 
@@ -140,9 +139,7 @@ export default function CupSignupAnnouncement() {
             <a
               key={cup.id}
               className={styles.cupLink}
-              href={discordChannelUrl(cup.channelId)}
-              target="_blank"
-              rel="noreferrer"
+              href={cup.url}
               aria-label={cup.label}
               style={{
                 left: `${cup.area.left}%`,

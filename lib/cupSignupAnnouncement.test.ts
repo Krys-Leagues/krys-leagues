@@ -10,14 +10,13 @@ import {
   CUP_SIGNUP_DESTINATIONS,
   CUP_SIGNUP_DISMISSAL_KEY,
   CUP_SIGNUP_INSTRUCTION,
-  discordChannelUrl,
   shouldRenderCupSignupAnnouncement,
 } from "./cupSignupAnnouncement.ts"
 
 test("Cup announcement is versioned and renders only on normal public/player pages", () => {
-  assert.equal(CUP_SIGNUP_ANNOUNCEMENT_ENABLED, false)
-  assert.equal(CUP_SIGNUP_ANNOUNCEMENT_VERSION, "cup-signups-2026-v1")
-  assert.match(CUP_SIGNUP_DISMISSAL_KEY, /cup-signups-2026-v1/u)
+  assert.equal(CUP_SIGNUP_ANNOUNCEMENT_ENABLED, true)
+  assert.equal(CUP_SIGNUP_ANNOUNCEMENT_VERSION, "cup-signups-2026-v2")
+  assert.match(CUP_SIGNUP_DISMISSAL_KEY, /cup-signups-2026-v2/u)
   assert.equal(CUP_SIGNUP_INSTRUCTION, "CLICK THE CUP FOR YOUR DIVISION TO SIGN UP")
 
   for (const path of ["/", "/majors/masters", "/players/player-id", "/course-challenges", "/league-play"]) {
@@ -30,26 +29,26 @@ test("Cup announcement is versioned and renders only on normal public/player pag
 })
 
 test("the three accessible cup regions route to the configured Krys Leagues Discord channels", () => {
+  const configuration = readFileSync("lib/cupSignupAnnouncement.ts", "utf8")
+
   assert.deepEqual(
-    CUP_SIGNUP_DESTINATIONS.map(({ label, channelId }) => ({ label, channelId, url: discordChannelUrl(channelId) })),
+    CUP_SIGNUP_DESTINATIONS.map(({ label, url }) => ({ label, url })),
     [
       {
         label: "SIGN UP FOR THE RYDERVALE CUP",
-        channelId: "1554740606905884713",
         url: "https://discord.com/channels/1036296151651074168/1554740606905884713",
       },
       {
         label: "SIGN UP FOR THE TIARA CUP",
-        channelId: "1554740768478855221",
         url: "https://discord.com/channels/1036296151651074168/1554740768478855221",
       },
       {
         label: "SIGN UP FOR THE NEXT GEN CUP",
-        channelId: "1554740930484117554",
         url: "https://discord.com/channels/1036296151651074168/1554740930484117554",
       },
     ],
   )
+  assert.doesNotMatch(configuration, /KRYS_LEAGUES_DISCORD_GUILD_ID|discordChannelUrl|channelId/u)
 })
 
 test("responsive percentage hit regions are generous, non-overlapping, and stop before the inert artwork area", () => {
@@ -89,15 +88,17 @@ test("the global client component is cheap, persistent, accessible, and coordina
   assert.match(component, /Escape/u)
   assert.match(component, /CUP_SIGNUP_DESTINATIONS\.map/u)
   assert.match(component, /aria-label=\{cup\.label\}/u)
-  assert.match(component, /target="_blank"/u)
+  assert.match(component, /href=\{cup\.url\}/u)
+  assert.doesNotMatch(component, /target="_blank"|window\.open|preventDefault/u)
   assert.doesNotMatch(component, /supabase|fetch\(|setInterval|WebSocket|EventSource/u)
   assert.doesNotMatch(component, /tooltip|title=/u)
   assert.doesNotMatch(component, /mystery/iu)
   assert.match(welcome, /optionalSignInWelcome/u)
   assert.match(component, /data-optional-sign-in-welcome/u)
 
-  assert.match(css, /left: 50%/u)
-  assert.match(css, /transform: translateX\(-50%\)/u)
+  assert.match(css, /\.launcherDock \{[\s\S]*top: max\(14px, env\(safe-area-inset-top\)\);[\s\S]*left: max\(14px, env\(safe-area-inset-left\)\);/u)
+  assert.match(css, /@media \(max-width: 700px\)[\s\S]*\.launcherDock \{[\s\S]*top: max\(10px, env\(safe-area-inset-top\)\);[\s\S]*left: max\(10px, env\(safe-area-inset-left\)\);/u)
+  assert.doesNotMatch(css, /\.launcherDock \{[\s\S]*bottom:/u)
   assert.match(css, /@media \(max-width: 700px\)/u)
   assert.match(css, /width: min\(1120px, 100%\)/u)
   assert.match(css, /width: min\(100%, 105dvh\)/u)
