@@ -20,6 +20,7 @@ const fixture: MastersManualStreamSlot[] = [
 ]
 
 const migration = readFileSync(new URL("../supabase/migrations/20261001225028_masters_manual_stream_card.sql", import.meta.url), "utf8")
+const conflictFixMigration = readFileSync(new URL("../supabase/migrations/20261002064356_fix_masters_manual_stream_revision_conflict.sql", import.meta.url), "utf8")
 const controller = readFileSync(new URL("../app/admin/majors/manual-stream-scorecard/page.tsx", import.meta.url), "utf8")
 const controllerCss = readFileSync(new URL("../app/admin/majors/manual-stream-scorecard/page.module.css", import.meta.url), "utf8")
 const obsPage = readFileSync(new URL("../app/majors/masters-stream/manual/page.tsx", import.meta.url), "utf8")
@@ -83,6 +84,17 @@ test("persistent admin state is revision-locked and public OBS is read-only", ()
   assert.match(obsPage, /get_public_masters_manual_stream_card/)
   assert.match(obsPage, /setInterval\(\(\) => void refresh\(\), 400\)/)
   assert.doesNotMatch(obsPage, /update_masters_manual_stream_card/)
+})
+
+test("stale manual revisions remain locked without triggering PostgREST serialization retries", () => {
+  assert.match(conflictFixMigration, /create or replace function public\.update_masters_manual_stream_card/i)
+  assert.match(conflictFixMigration, /for update/i)
+  assert.match(conflictFixMigration, /current_revision <> p_expected_revision/i)
+  assert.match(conflictFixMigration, /STALE_MANUAL_STREAM_REVISION'[\s\S]*errcode = 'PT409'/i)
+  assert.doesNotMatch(conflictFixMigration, /errcode = '40001'/i)
+  assert.match(conflictFixMigration, /public\.is_current_user_site_admin\(\)/i)
+  assert.match(conflictFixMigration, /revoke all on function public\.update_masters_manual_stream_card/i)
+  assert.match(conflictFixMigration, /grant execute on function public\.update_masters_manual_stream_card\(bigint, jsonb\) to authenticated, service_role/i)
 })
 
 test("manual stream storage cannot write official Masters state", () => {
