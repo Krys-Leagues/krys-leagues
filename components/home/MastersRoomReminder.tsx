@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useRef, useState } from "react"
+import type { Session } from "@supabase/supabase-js"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
 import MastersOfficialRules from "@/components/majors/MastersOfficialRules"
@@ -40,24 +41,20 @@ function saveDismissal(assignment: MastersRoomReminderAssignment) {
 }
 
 async function fetchCurrentMastersRoomAssignment() {
-  const user = await supabase.auth.getUser()
-  if (!user.data.user) return null
+  const catalog = await loadMastersCatalog()
+  if (!catalog) return null
+  const { eventId, days } = catalog
 
-  const eventResult = await supabase.from("major_events").select("id").eq("slug", "masters").maybeSingle()
-  const eventId = eventResult.data?.id as string | undefined
-  if (!eventId || eventResult.error) return null
-
-  const [scheduleResult, daysResult, scorecardsResult] = await Promise.all([
+  const [scheduleResult, scorecardsResult] = await Promise.all([
     supabase.rpc("get_my_major_signup_schedule", { p_major_event_id: eventId }),
-    supabase.from("major_play_days").select("*").eq("major_event_id", eventId).order("day_number"),
     supabase.rpc("get_my_major_scorecards", { p_major_event_id: eventId }),
   ])
-  if (scheduleResult.error || daysResult.error || scorecardsResult.error) return null
+  if (scheduleResult.error || scorecardsResult.error) return null
 
   const assignments = buildPublishedMastersRoomAssignments(
     eventId,
     (scheduleResult.data as MajorDayChoice[] | null) || [],
-    (daysResult.data as MajorPlayDay[] | null) || [],
+    days,
   )
   return selectCurrentMastersRoomAssignment(
     assignments,
@@ -66,6 +63,30 @@ async function fetchCurrentMastersRoomAssignment() {
       status: round.status,
     })),
   )
+}
+
+const MASTERS_CATALOG_CACHE_MS = 5 * 60_000
+let mastersCatalogCache: { expiresAt: number; value: { eventId: string; days: MajorPlayDay[] } } | null = null
+let mastersCatalogRequest: Promise<{ eventId: string; days: MajorPlayDay[] } | null> | null = null
+
+async function loadMastersCatalog() {
+  if (mastersCatalogCache && mastersCatalogCache.expiresAt > Date.now()) return mastersCatalogCache.value
+  if (mastersCatalogRequest) return mastersCatalogRequest
+  mastersCatalogRequest = (async () => {
+    const eventResult = await supabase.from("major_events").select("id").eq("slug", "masters").maybeSingle()
+    const eventId = eventResult.data?.id as string | undefined
+    if (!eventId || eventResult.error) return null
+    const daysResult = await supabase.from("major_play_days").select("*").eq("major_event_id", eventId).order("day_number")
+    if (daysResult.error) return null
+    const value = { eventId, days: (daysResult.data as MajorPlayDay[] | null) || [] }
+    mastersCatalogCache = { expiresAt: Date.now() + MASTERS_CATALOG_CACHE_MS, value }
+    return value
+  })()
+  try {
+    return await mastersCatalogRequest
+  } finally {
+    mastersCatalogRequest = null
+  }
 }
 
 export default function MastersRoomReminder() {
@@ -81,6 +102,7 @@ export default function MastersRoomReminder() {
   const [contactMessage, setContactMessage] = useState("")
   const [refreshing, setRefreshing] = useState(false)
   const requestId = useRef(0)
+  const lastSessionToken = useRef<string | null>(null)
 
   const refreshAssignment = useCallback(async (forceOpen = false) => {
     const currentRequestId = ++requestId.current
@@ -100,17 +122,24 @@ export default function MastersRoomReminder() {
   useEffect(() => {
     if (!rendersOnCurrentPath) return
 
-    const initialRefresh = window.setTimeout(() => void refreshAssignment(), 0)
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) void refreshAssignment()
-      else {
+    let active = true
+    const applySession = (session: Session | null) => {
+      if (!active) return
+      if (!session) {
+        lastSessionToken.current = null
         requestId.current += 1
         setAssignment(null)
         setMode("hidden")
+        return
       }
-    })
+      if (lastSessionToken.current === session.access_token) return
+      lastSessionToken.current = session.access_token
+      void refreshAssignment()
+    }
+    void supabase.auth.getSession().then(({ data }) => applySession(data.session))
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => applySession(session))
     return () => {
-      window.clearTimeout(initialRefresh)
+      active = false
       requestId.current += 1
       listener.subscription.unsubscribe()
     }

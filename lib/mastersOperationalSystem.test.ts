@@ -53,8 +53,8 @@ test("Contact Admin is entrant-protected, rate-limited, audited, and truthfully 
 
 test("Masters verification is grouped round to room with shared proof and per-player actions", () => {
   const desk = read("app/admin/majors/verification/page.tsx")
-  const alert = read("components/admin/MastersVerificationPendingAlert.tsx")
-  const summary = read("app/api/admin/majors/verification-summary/route.ts")
+  const alert = read("components/admin/AdminPendingAlerts.tsx")
+  const summary = read("app/api/admin/pending-summary/route.ts")
   const migration = read("supabase/migrations/20260930230000_masters_operational_admin_help.sql")
   const discord = read("lib/mastersDiscord.ts")
   const discordServer = read("lib/mastersDiscordServer.ts")
@@ -69,7 +69,7 @@ test("Masters verification is grouped round to room with shared proof and per-pl
   assert.match(desk, /\/api\/admin\/majors\/verification-discord/)
   assert.match(alert, /MASTERS SCORES WAITING/)
   assert.match(alert, /\/admin\/majors\/verification/)
-  assert.match(summary, /\["submitted", "reopened"\]/)
+  assert.match(summary, /get_major_scorecard_verification_summary/)
   assert.match(discord, /1555012516625653840/)
   assert.match(discord, /NEEDS CORRECTION/)
   assert.match(discordServer, /createDiscordMessage/)
@@ -82,7 +82,7 @@ test("Masters verification is grouped round to room with shared proof and per-pl
   assert.match(migration, /last_discord_message_id/)
   assert.doesNotMatch(discordServer, /\.from\([^)]*major_[^)]*\)\.delete/)
   assert.doesNotMatch(migration, /delete from public\.major_(player_scorecards|room_scorecard_proofs|entries|schedule_groups)/i)
-  assert.match(summary, /rooms: roomKeys\.size, scores: pending\.length/)
+  assert.match(summary, /rooms: Number\(mastersSummary\.rooms\)/)
 })
 
 test("public Masters tracker is separate from the player-only room gateway", () => {
