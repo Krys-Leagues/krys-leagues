@@ -4,6 +4,7 @@ export const CUP_SIGNUP_DISMISSAL_KEY = `krys-leagues:announcement:${CUP_SIGNUP_
 export const CUP_SIGNUP_ARTWORK_PATH = "/images/announcements/cup-signups-2026-v1.jpg"
 export const CUP_SIGNUP_ARTWORK_SHA256 = "fdf2640ae4840a52c12f170988437c4e934fa01e127b3c7d660e6aab1ea4940c"
 export const CUP_SIGNUP_INSTRUCTION = "CLICK THE CUP FOR YOUR DIVISION TO SIGN UP"
+export const CUP_SIGNUP_DISCORD_INVITE_URL = "https://discord.gg/FfaqUMx9N"
 
 export type CupSignupDestination = {
   id: "rydervale" | "tiara" | "next-gen"

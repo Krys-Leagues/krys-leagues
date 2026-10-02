@@ -8,6 +8,7 @@ import {
   CUP_SIGNUP_ANNOUNCEMENT_ENABLED,
   CUP_SIGNUP_ARTWORK_SHA256,
   CUP_SIGNUP_DESTINATIONS,
+  CUP_SIGNUP_DISCORD_INVITE_URL,
   CUP_SIGNUP_DISMISSAL_KEY,
   CUP_SIGNUP_INSTRUCTION,
   shouldRenderCupSignupAnnouncement,
@@ -51,6 +52,16 @@ test("the three accessible cup regions route to the configured Krys Leagues Disc
   assert.doesNotMatch(configuration, /KRYS_LEAGUES_DISCORD_GUILD_ID|discordChannelUrl|channelId/u)
 })
 
+test("the Discord join fallback uses the exact static invite without changing the announcement version", () => {
+  const component = readFileSync("components/announcements/CupSignupAnnouncement.tsx", "utf8")
+
+  assert.equal(CUP_SIGNUP_ANNOUNCEMENT_VERSION, "cup-signups-2026-v2")
+  assert.equal(CUP_SIGNUP_DISCORD_INVITE_URL, "https://discord.gg/FfaqUMx9N")
+  assert.match(component, /Not in the Krys Leagues Discord yet\?/u)
+  assert.match(component, /JOIN OUR DISCORD/u)
+  assert.match(component, /href=\{CUP_SIGNUP_DISCORD_INVITE_URL\}/u)
+})
+
 test("responsive percentage hit regions are generous, non-overlapping, and stop before the inert artwork area", () => {
   assert.equal(CUP_SIGNUP_DESTINATIONS.length, 3)
   const regions = CUP_SIGNUP_DESTINATIONS.map((cup) => cup.area).sort((left, right) => left.left - right.left)
@@ -89,6 +100,7 @@ test("the global client component is cheap, persistent, accessible, and coordina
   assert.match(component, /CUP_SIGNUP_DESTINATIONS\.map/u)
   assert.match(component, /aria-label=\{cup\.label\}/u)
   assert.match(component, /href=\{cup\.url\}/u)
+  assert.match(component, /href=\{CUP_SIGNUP_DISCORD_INVITE_URL\}/u)
   assert.doesNotMatch(component, /target="_blank"|window\.open|preventDefault/u)
   assert.doesNotMatch(component, /supabase|fetch\(|setInterval|WebSocket|EventSource/u)
   assert.doesNotMatch(component, /tooltip|title=/u)

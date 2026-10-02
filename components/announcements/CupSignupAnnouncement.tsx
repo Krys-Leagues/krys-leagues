@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react"
 import {
   CUP_SIGNUP_ARTWORK_PATH,
   CUP_SIGNUP_DESTINATIONS,
+  CUP_SIGNUP_DISCORD_INVITE_URL,
   CUP_SIGNUP_DISMISSAL_KEY,
   CUP_SIGNUP_INSTRUCTION,
   shouldRenderCupSignupAnnouncement,
@@ -149,6 +150,12 @@ export default function CupSignupAnnouncement() {
               }}
             />
           ))}
+        </div>
+        <div className={styles.joinFallback}>
+          <p>Not in the Krys Leagues Discord yet?</p>
+          <a className={styles.joinButton} href={CUP_SIGNUP_DISCORD_INVITE_URL}>
+            JOIN OUR DISCORD
+          </a>
         </div>
         <button type="button" className={styles.closeText} onClick={close}>CLOSE</button>
       </section>
