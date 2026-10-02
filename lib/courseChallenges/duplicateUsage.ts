@@ -16,6 +16,7 @@ export type DuplicateDisposition =
   | "allowed_cross_track"
   | "blocked_same_track"
   | "blocked_identity_mismatch"
+  | "proof_reuse_warning"
   | "non_blocking_unapproved"
 
 export type DuplicateClassification = {
@@ -39,6 +40,10 @@ export function existingUsageKeys(card: CourseChallengeCardUsage): string[] {
   return keys
 }
 
+export function isSameCourseChallengeAchievement(current: CourseChallengeCardUsage, existing: CourseChallengeCardUsage): boolean {
+  return existingUsageKeys(existing).includes(courseChallengeUsageKey(current))
+}
+
 export function classifyDuplicateCard(current: CourseChallengeCardUsage, existing: CourseChallengeCardUsage): DuplicateClassification {
   const currentUsageKey = courseChallengeUsageKey(current)
   const usageKeys = existingUsageKeys(existing)
@@ -51,7 +56,7 @@ export function classifyDuplicateCard(current: CourseChallengeCardUsage, existin
     return { disposition: "blocked_identity_mismatch", blocking: true, currentUsageKey, existingUsageKeys: usageKeys }
   }
 
-  if (usageKeys.includes(currentUsageKey)) {
+  if (isSameCourseChallengeAchievement(current, existing)) {
     return { disposition: "blocked_same_track", blocking: true, currentUsageKey, existingUsageKeys: usageKeys }
   }
 
@@ -61,5 +66,5 @@ export function classifyDuplicateCard(current: CourseChallengeCardUsage, existin
     return { disposition: "allowed_cross_track", blocking: false, currentUsageKey, existingUsageKeys: usageKeys }
   }
 
-  return { disposition: "blocked_same_track", blocking: true, currentUsageKey, existingUsageKeys: usageKeys }
+  return { disposition: "proof_reuse_warning", blocking: true, currentUsageKey, existingUsageKeys: usageKeys }
 }

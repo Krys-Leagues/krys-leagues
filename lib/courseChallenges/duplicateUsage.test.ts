@@ -1,6 +1,6 @@
 import assert from "node:assert/strict"
 import test from "node:test"
-import { classifyDuplicateCard, courseChallengeUsageKey, existingUsageKeys, type CourseChallengeCardUsage } from "./duplicateUsage.ts"
+import { classifyDuplicateCard, courseChallengeUsageKey, existingUsageKeys, isSameCourseChallengeAchievement, type CourseChallengeCardUsage } from "./duplicateUsage.ts"
 
 const base: CourseChallengeCardUsage = {
   id: "card-current",
@@ -56,6 +56,27 @@ test("card already used for Ace may later be used for a legitimate Level", () =>
 test("same card reused for the same Level target is blocked", () => {
   const result = classifyDuplicateCard(base, card({ id: "same-level-target", status: "approved" }))
   assert.equal(result.disposition, "blocked_same_track")
+  assert.equal(result.blocking, true)
+})
+
+test("Hard Level 1 is not the same achievement as Easy Level 1", () => {
+  const hard = card({ id: "hard-level-1", difficulty: "Hard", status: "approved" })
+  assert.equal(isSameCourseChallengeAchievement(base, hard), false)
+  const result = classifyDuplicateCard(base, hard)
+  assert.equal(result.disposition, "proof_reuse_warning")
+  assert.equal(result.blocking, true)
+  assert.notEqual(result.currentUsageKey, result.existingUsageKeys[0])
+})
+
+test("the same Level and difficulty remains an exact achievement duplicate", () => {
+  const approvedEasy = card({ id: "easy-level-1", difficulty: "Easy", status: "approved" })
+  assert.equal(isSameCourseChallengeAchievement(base, approvedEasy), true)
+  assert.equal(classifyDuplicateCard(base, approvedEasy).disposition, "blocked_same_track")
+})
+
+test("different Level targets sharing proof are warnings rather than already-earned claims", () => {
+  const result = classifyDuplicateCard(base, card({ id: "level-2", level: 2, status: "approved" }))
+  assert.equal(result.disposition, "proof_reuse_warning")
   assert.equal(result.blocking, true)
 })
 
