@@ -44,3 +44,11 @@ test("the combined summary route uses the narrow Masters RPC and limits Course C
   assert.doesNotMatch(route, /get_major_scorecard_verification_queue/)
   assert.match(route, /\.limit\(1\)/)
 })
+
+test("legacy summary URLs stay lightweight for tabs opened before deployment", () => {
+  const masters = readFileSync(new URL("../app/api/admin/majors/verification-summary/route.ts", import.meta.url), "utf8")
+  const courseChallenges = readFileSync(new URL("../app/api/admin/course-challenges/route.ts", import.meta.url), "utf8")
+  assert.match(masters, /get_major_scorecard_verification_summary/)
+  assert.doesNotMatch(masters, /get_major_scorecard_verification_queue/)
+  assert.match(courseChallenges, /pendingQuery[\s\S]*?\.limit\(1\)/)
+})

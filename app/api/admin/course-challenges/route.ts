@@ -84,7 +84,7 @@ export async function GET(request: Request) {
     const service = createCourseChallengesServiceClient()
     const params = new URL(request.url).searchParams
     const statuses = params.get("status") === "rejected" ? ["rejected"] : ["pending", "needs_review"]
-    const pendingQuery = service.from("course_challenge_submissions").select("id,created_at", { count: "exact" }).in("status", ["pending", "needs_review"]).order("created_at", { ascending: false })
+    const pendingQuery = service.from("course_challenge_submissions").select("id,created_at", { count: "exact" }).in("status", ["pending", "needs_review"]).order("created_at", { ascending: false }).limit(1)
     const pendingResult = await pendingQuery
     if (pendingResult.error) throw pendingResult.error
     if (params.get("summary") === "1") {
