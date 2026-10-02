@@ -1,5 +1,7 @@
 import Link from "next/link"
 
+import KwtRoomSignupCleanup from "@/components/admin/kwt/KwtRoomSignupCleanup"
+
 export default function KWTAdminPage() {
   return (
     <main style={page}>
@@ -40,6 +42,8 @@ export default function KWTAdminPage() {
           <span>Return to the main admin dashboard.</span>
         </Link>
       </div>
+
+      <KwtRoomSignupCleanup />
     </main>
   )
 }
