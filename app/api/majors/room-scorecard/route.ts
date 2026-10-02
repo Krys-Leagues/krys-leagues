@@ -131,7 +131,10 @@ export async function POST(request: Request) {
     })
     if (recorded.error) {
       await service.storage.from(MAJOR_ROOM_SCORECARD_BUCKET).remove([storagePath])
-      return json({ error: recorded.error.message }, recorded.error.code === "23505" || recorded.error.code === "40001" ? 409 : 403)
+      return json(
+        { error: recorded.error.message },
+        ["23505", "40001", "PT409"].includes(recorded.error.code ?? "") ? 409 : 403,
+      )
     }
     proofRecorded = true
 
