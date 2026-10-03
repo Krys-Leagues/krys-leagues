@@ -1,4 +1,4 @@
-export type CourseChallengeStatus = "draft" | "scheduled" | "live" | "retired"
+export type CourseChallengeStatus = "draft" | "scheduled" | "live" | "coming_soon" | "retired"
 export type RequirementsStatus = "ready" | "pending_review"
 export type CourseChallengeDifficulty = "Easy" | "Hard"
 export type CourseChallengeSubmissionStatus = "pending" | "needs_review" | "approved" | "rejected"

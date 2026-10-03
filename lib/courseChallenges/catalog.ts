@@ -154,7 +154,7 @@ function aroundTheWorldPrestigeStages(): CourseChallengePrestigeStage[] {
 }
 
 type AceStageSpec = { key: "wader" | "chaser" | "hunter" | "legend"; label: string; easy: number; hard: number | null }
-function aceStages(slug: string, specs: AceStageSpec[], assetPath: (name: string) => string) {
+function aceStages(slug: string, specs: AceStageSpec[], assetPath: (name: string) => string | null) {
   return specs.map((spec, index) => {
     return {
       stage: (index + 1) as 1 | 2 | 3 | 4,
@@ -172,6 +172,13 @@ function aceStages(slug: string, specs: AceStageSpec[], assetPath: (name: string
 
 const touristAceStages = aceStages("tourist-trap", [{ key: "wader", label: "Wader", easy: 2, hard: null }, { key: "chaser", label: "Chaser", easy: 3, hard: 1 }, { key: "hunter", label: "Hunter", easy: 6, hard: 1 }, { key: "legend", label: "Legend", easy: 10, hard: 3 }], asset)
 const cherryAceStages = aceStages("cherry-blossom", [{ key: "wader", label: "Wader", easy: 3, hard: null }, { key: "chaser", label: "Chaser", easy: 6, hard: 2 }, { key: "hunter", label: "Hunter", easy: 10, hard: 5 }, { key: "legend", label: "Legend", easy: 12, hard: 8 }], cherryAsset)
+const aroundTheWorldAceStages = aceStages("80-days-around-the-world", [{ key: "wader", label: "Wader", easy: 2, hard: null }, { key: "chaser", label: "Chaser", easy: 4, hard: 2 }, { key: "hunter", label: "Hunter", easy: 7, hard: 5 }, { key: "legend", label: "Legend", easy: 11, hard: 7 }], () => null)
+const comingSoonCourses: CourseChallengeCourse[] = [
+  { slug: "gardens-of-babylon", name: "Gardens of Babylon", status: "coming_soon", displayOrder: 4, shortDescription: "Coming soon.", backgroundImage: null, easyCode: "", hardCode: "", levels: [] },
+  { slug: "raptor-cliffs", name: "Raptor Cliff's", status: "coming_soon", displayOrder: 5, shortDescription: "Coming soon.", backgroundImage: null, easyCode: "", hardCode: "", levels: [] },
+  { slug: "forgotten-fairyland", name: "Forgotten Fairyland", status: "coming_soon", displayOrder: 6, shortDescription: "Coming soon.", backgroundImage: null, easyCode: "", hardCode: "", levels: [] },
+  { slug: "tiki-a-coco", name: "Tiki à Coco", status: "coming_soon", displayOrder: 7, shortDescription: "Coming soon.", backgroundImage: null, easyCode: "", hardCode: "", levels: [] },
+]
 export const COURSE_CHALLENGE_COURSES: CourseChallengeCourse[] = [
   {
     slug: "tourist-trap",
@@ -213,12 +220,15 @@ export const COURSE_CHALLENGE_COURSES: CourseChallengeCourse[] = [
     easyCode: "AWE",
     hardCode: "AWH",
     levels: aroundTheWorldLevels(),
+    aceStages: aroundTheWorldAceStages,
     prestigeStages: aroundTheWorldPrestigeStages(),
   },
+  ...comingSoonCourses,
 ]
 
 export function getCourseChallenge(slug: string) { return COURSE_CHALLENGE_COURSES.find((course) => course.slug === slug) ?? null }
 export function getPublicCourseChallenges() { return COURSE_CHALLENGE_COURSES.filter((course) => course.status === "live").sort((left, right) => left.displayOrder - right.displayOrder) }
+export function getComingSoonCourseChallenges() { return COURSE_CHALLENGE_COURSES.filter((course) => course.status === "coming_soon").sort((left, right) => left.displayOrder - right.displayOrder) }
 export function getCourseChallengeLevel(course: CourseChallengeCourse, level: number) { return course.levels.find((item) => item.level === level) ?? null }
 export function getAceStage(course: CourseChallengeCourse, stage: number) { return course.aceStages?.find((item) => item.stage === stage) ?? null }
 export function getPrestigeStage(course: CourseChallengeCourse, stage: number) { return course.prestigeStages?.find((item) => item.stage === stage) ?? null }

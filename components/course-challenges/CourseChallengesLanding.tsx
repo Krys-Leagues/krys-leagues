@@ -13,7 +13,7 @@ import DiscordSignInButton from "@/components/auth/DiscordSignInButton"
 
 const INTRO_STORAGE_KEY = "course-challenges-intro-dismissed-v1"
 
-export default function CourseChallengesLanding({ courses }: { courses: CourseChallengeCourse[] }) {
+export default function CourseChallengesLanding({ courses, comingSoonCourses }: { courses: CourseChallengeCourse[]; comingSoonCourses: CourseChallengeCourse[] }) {
   const [showIntro, setShowIntro] = useState(false)
   const [showRules, setShowRules] = useState(false)
   const [openingCourse, setOpeningCourse] = useState<string | null>(null)
@@ -84,6 +84,11 @@ export default function CourseChallengesLanding({ courses }: { courses: CourseCh
             <h3>WIDOW&apos;S WALKABOUT</h3>
             <span className={styles.comingSoonBadge}>COMING SOON</span>
           </article>
+          {comingSoonCourses.map((course) => <article className={styles.comingSoonBook} aria-label={`${course.name} coming soon`} key={course.slug}>
+            <span className={styles.comingSoonBookKicker}>COURSE CHALLENGE BOOK</span>
+            <h3>{course.name}</h3>
+            <span className={styles.comingSoonBadge}>COMING SOON</span>
+          </article>)}
         </div>
       </section>
       <div className={styles.buttonRow}>

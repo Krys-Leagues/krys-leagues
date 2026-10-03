@@ -1,6 +1,7 @@
 import assert from "node:assert/strict"
 import test from "node:test"
-import { getCourseChallenge, isAceChallengeUnlocked } from "./catalog.ts"
+import { getComingSoonCourseChallenges, getCourseChallenge, isAceChallengeUnlocked } from "./catalog.ts"
+import { aceProgress } from "./ace.ts"
 import { calculateCourseChallengeMetrics, evaluateCourseChallengeRequirements } from "./evaluation.ts"
 
 const course = getCourseChallenge("80-days-around-the-world")!
@@ -13,14 +14,58 @@ function improve(scores: number[], holes: number[], amount = 1) {
   return scores
 }
 
-test("80 Days uses the existing authoritative cards and stays Ace-free", () => {
+function scorecard(count: number) { return Array.from({ length: 18 }, (_, index) => index < count ? 1 : 3) }
+function aceRow(stage: number, difficulty: "Easy" | "Hard", count: number, id = `${stage}-${difficulty}-${count}`) {
+  return { id, challenge_key: "ace" as const, ace_stage_number: stage, difficulty, hole_scores: scorecard(count), status: "approved" }
+}
+
+test("80 Days preserves its live cards and exposes the finalized Ace Track", () => {
   assert.equal(course.status, "live")
   assert.equal(course.easyCode, "AWE")
   assert.equal(course.hardCode, "AWH")
   assert.equal(calculateCourseChallengeMetrics(easyPars, easyPars).totalPar, 57)
   assert.equal(calculateCourseChallengeMetrics(hardPars, hardPars).totalPar, 56)
-  assert.equal(course.aceStages, undefined)
-  assert.equal(isAceChallengeUnlocked(course, []), false)
+  assert.deepEqual(course.aceStages?.map((stage) => [stage.key, stage.easyRequirements[0]?.target, stage.hardRequirements[0]?.target]), [["wader", 2, undefined], ["chaser", 4, 2], ["hunter", 7, 5], ["legend", 11, 7]])
+  assert.equal(isAceChallengeUnlocked(course, []), true)
+  assert.equal(course.aceStages?.every((stage) => stage.rewardAsset === null), true)
+})
+
+test("80 Days Ace Wader is Easy-only and requires two HIOs on one card", () => {
+  assert.deepEqual(aceProgress(course, [aceRow(1, "Easy", 1)], []).completedStages, [])
+  assert.deepEqual(aceProgress(course, [aceRow(1, "Easy", 2)], []).completedStages, [1])
+  assert.deepEqual(aceProgress(course, [aceRow(1, "Easy", 2), aceRow(1, "Hard", 18)], []).completedStages, [1])
+})
+
+test("80 Days Chaser requires four Easy and two Hard HIOs per card and Wader first", () => {
+  assert.deepEqual(aceProgress(course, [aceRow(2, "Easy", 4), aceRow(2, "Hard", 2)], []).completedStages, [])
+  assert.deepEqual(aceProgress(course, [aceRow(1, "Easy", 2), aceRow(2, "Easy", 4), aceRow(2, "Hard", 2)], [1]).completedStages, [1, 2])
+  assert.deepEqual(aceProgress(course, [aceRow(1, "Easy", 2), aceRow(2, "Easy", 3), aceRow(2, "Hard", 2)], [1]).completedStages, [1])
+  assert.deepEqual(aceProgress(course, [aceRow(1, "Easy", 2), aceRow(2, "Easy", 4), aceRow(2, "Hard", 1)], [1]).completedStages, [1])
+  assert.deepEqual(aceProgress(course, [aceRow(1, "Easy", 2), aceRow(2, "Easy", 2, "e1"), aceRow(2, "Easy", 2, "e2"), aceRow(2, "Hard", 2)], [1]).completedStages, [1])
+})
+
+test("80 Days Hunter and Legend retain strict sequential progression and per-card thresholds", () => {
+  const hunterRows = [aceRow(1, "Easy", 2), aceRow(2, "Easy", 4), aceRow(2, "Hard", 2), aceRow(3, "Easy", 7), aceRow(3, "Hard", 5)]
+  assert.deepEqual(aceProgress(course, hunterRows, [1, 2]).completedStages, [1, 2, 3])
+  assert.deepEqual(aceProgress(course, [...hunterRows.slice(0, 3), aceRow(3, "Easy", 6), aceRow(3, "Hard", 5)], [1, 2]).completedStages, [1, 2])
+  assert.deepEqual(aceProgress(course, [...hunterRows.slice(0, 3), aceRow(3, "Easy", 7), aceRow(3, "Hard", 4)], [1, 2]).completedStages, [1, 2])
+  const legendRows = [...hunterRows, aceRow(4, "Easy", 11), aceRow(4, "Hard", 7)]
+  assert.deepEqual(aceProgress(course, legendRows, [1, 2, 3]).completedStages, [1, 2, 3, 4])
+  assert.deepEqual(aceProgress(course, [...hunterRows, aceRow(4, "Easy", 10), aceRow(4, "Hard", 7)], [1, 2, 3]).completedStages, [1, 2, 3])
+  assert.deepEqual(aceProgress(course, [...hunterRows, aceRow(4, "Easy", 11), aceRow(4, "Hard", 6)], [1, 2, 3]).completedStages, [1, 2, 3])
+})
+
+test("new Course Challenge books are exact Coming Soon placeholders with no requirements or rewards", () => {
+  const comingSoon = getComingSoonCourseChallenges()
+  assert.deepEqual(comingSoon.map((item) => [item.name, item.status]), [
+    ["Gardens of Babylon", "coming_soon"],
+    ["Raptor Cliff's", "coming_soon"],
+    ["Forgotten Fairyland", "coming_soon"],
+    ["Tiki à Coco", "coming_soon"],
+  ])
+  assert.equal(new Set(comingSoon.map((item) => item.slug)).size, 4)
+  assert.equal(comingSoon.every((item) => item.levels.length === 0 && !item.aceStages && !item.prestigeStages), true)
+  assert.equal(getCourseChallenge("widows-walkabout"), null)
 })
 
 test("80 Days publishes exactly the supplied Level 1 through 5 rule plan", () => {
