@@ -11,6 +11,7 @@ import {
 import { mastersRoundAccessState } from "./mastersPlayerExperience.ts"
 
 const migration = readFileSync(new URL("../supabase/migrations/20261002143000_masters_late_score_admin_tools.sql", import.meta.url), "utf8")
+const playerCutoffMigration = readFileSync(new URL("../supabase/migrations/20261003100000_masters_remove_player_score_cutoff.sql", import.meta.url), "utf8")
 const originalScoringMigration = readFileSync(new URL("../supabase/migrations/20260930190131_masters_player_rooms_rules_and_scoring_access.sql", import.meta.url), "utf8")
 const route = readFileSync(new URL("../app/api/admin/majors/late-scores/route.ts", import.meta.url), "utf8")
 const adminPanel = readFileSync(new URL("../components/admin/majors/MastersLateScoreAdmin.tsx", import.meta.url), "utf8")
@@ -40,14 +41,14 @@ test("a one-player one-round reopen expires without changing submitted states", 
   assert.equal(mastersLateScoreState(row({ scorecardStatus: "verified" }), Date.parse("2026-10-01T20:00:00Z")), "verified")
 })
 
-test("player scoring opens through the admin exception and closes at its expiration", () => {
+test("player scoring stays open after the old deadline without needing an admin exception", () => {
   const scoringRound = {
     room_start_at: "2026-10-01T12:00:00Z",
     round_closes_at: "2026-10-01T15:00:00Z",
     admin_reopened_until: "2026-10-01T17:00:00Z",
   }
   assert.equal(mastersRoundAccessState(scoringRound, Date.parse("2026-10-01T16:30:00Z")), "open")
-  assert.equal(mastersRoundAccessState(scoringRound, Date.parse("2026-10-01T17:00:01Z")), "closed")
+  assert.equal(mastersRoundAccessState(scoringRound, Date.parse("2026-10-02T17:00:01Z")), "open")
 })
 
 test("draft, reopened, and missing cards are unfinished while submitted and verified are protected", () => {
@@ -74,6 +75,14 @@ test("migration preserves the global three-hour rule and adds only scoped except
   assert.match(migration, /'admin_score_entry_reopen'/)
   assert.match(migration, /'admin_score_entry'/)
   assert.doesNotMatch(migration, /update public\.major_time_slots|update public\.major_schedule_groups|delete from public\.major_entries/i)
+})
+
+test("player cutoff removal preserves finalization and submitted-score protections", () => {
+  assert.match(playerCutoffMigration, /when day\.scoring_finalized_at is null then 'open'/)
+  assert.match(playerCutoffMigration, /Submitted or verified scorecards cannot be silently changed/)
+  assert.match(playerCutoffMigration, /This scorecard cannot be submitted/)
+  assert.doesNotMatch(playerCutoffMigration, /now\(\) > scoring_window\.round_closes_at/)
+  assert.doesNotMatch(playerCutoffMigration, /now\(\) <= scoring_window\.round_closes_at/)
 })
 
 test("late-score mutations are Masters-only and require the normal round window to be closed", () => {

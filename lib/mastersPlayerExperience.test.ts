@@ -15,7 +15,8 @@ import {
   visibleMastersScoringRounds,
 } from "./mastersPlayerExperience.ts"
 
-const migration = readFileSync(new URL("../supabase/migrations/20260930190131_masters_player_rooms_rules_and_scoring_access.sql", import.meta.url), "utf8")
+const migration = readFileSync(new URL("../supabase/migrations/20261003100000_masters_remove_player_score_cutoff.sql", import.meta.url), "utf8")
+const roomRulesMigration = readFileSync(new URL("../supabase/migrations/20260930190131_masters_player_rooms_rules_and_scoring_access.sql", import.meta.url), "utf8")
 const adminPolicyMigration = readFileSync(new URL("../supabase/migrations/20260930235900_scope_major_admin_policies_to_authenticated.sql", import.meta.url), "utf8")
 const mastersPage = readFileSync(new URL("../app/majors/[slug]/page.tsx", import.meta.url), "utf8")
 const scoringPage = readFileSync(new URL("../app/majors/[slug]/scoring/page.tsx", import.meta.url), "utf8")
@@ -89,7 +90,7 @@ test("round score controls stay hidden until the three-hour pre-show window", ()
   assert.equal(visibleMastersScoringRounds([item], starts - MASTERS_SCORE_PRESHOW_MS).length, 1)
 })
 
-test("score access opens at the player's room and closes after the round cutoff", () => {
+test("score access opens at the player's room and stays open until finalization", () => {
   const item = round()
   const starts = Date.parse(item.room_start_at!)
   const closes = Date.parse(item.round_closes_at!)
@@ -97,10 +98,10 @@ test("score access opens at the player's room and closes after the round cutoff"
   assert.equal(mastersRoundAccessState(item, starts - 1), "upcoming")
   assert.equal(mastersRoundAccessState(item, starts), "open")
   assert.equal(mastersRoundAccessState(item, closes), "open")
-  assert.equal(mastersRoundAccessState(item, closes + 1), "closed")
+  assert.equal(mastersRoundAccessState(item, closes + 24 * 60 * 60 * 1000), "open")
   assert.equal(nextMastersScoreAccessTransition([item], starts - MASTERS_SCORE_PRESHOW_MS - 1), starts - MASTERS_SCORE_PRESHOW_MS)
   assert.equal(nextMastersScoreAccessTransition([item], starts - 1), starts)
-  assert.equal(nextMastersScoreAccessTransition([item], closes), closes + 1)
+  assert.equal(nextMastersScoreAccessTransition([item], closes), null)
 })
 
 test("overlapping round windows remain independent and explicit", () => {
@@ -136,9 +137,9 @@ test("published room presentation keeps complete rosters and sorts by time then 
   assert.deepEqual(rooms.map((item) => item.group_label), ["KMGM1", "KMGM2", "KMGM10"])
   assert.deepEqual(rooms.map((item) => item.roster.length), [2, 3, 4])
   assert.equal(rooms.find((item) => item.is_my_room)?.group_label, "KMGM2")
-  assert.match(migration, /room\.is_published/)
-  assert.match(migration, /having count\(member\.entry_id\) between 2 and 4/)
-  assert.doesNotMatch(migration.match(/create or replace function public\.get_public_major_published_rooms[\s\S]*?\$function\$;/)?.[0] || "", /admin_notes/)
+  assert.match(roomRulesMigration, /room\.is_published/)
+  assert.match(roomRulesMigration, /having count\(member\.entry_id\) between 2 and 4/)
+  assert.doesNotMatch(roomRulesMigration.match(/create or replace function public\.get_public_major_published_rooms[\s\S]*?\$function\$;/)?.[0] || "", /admin_notes/)
 })
 
 test("Masters rules reuse protected event-wide storage without invented defaults", () => {
@@ -159,13 +160,14 @@ test("all four round actions and the before-start local-time message are explici
   assert.doesNotMatch(mastersPage, /GMT-4|toISOString\(\).*ROUND/)
 })
 
-test("the SQL scoring gate uses room start and final complete-room start plus three hours", () => {
-  assert.match(migration, /select max\(last_slot\.starts_at\) \+ interval '3 hours'/)
+test("the SQL scoring gate uses room start and finalization, not the old three-hour cutoff", () => {
   assert.match(migration, /now\(\) < scoring_window\.room_start_at/)
-  assert.match(migration, /now\(\) > scoring_window\.round_closes_at/)
   assert.match(migration, /day\.scoring_finalized_at is not null/)
   assert.match(migration, /create or replace function public\.save_my_major_scorecard/)
   assert.match(migration, /create or replace function public\.submit_my_major_scorecard/)
+  assert.match(migration, /when day\.scoring_finalized_at is null then 'open'/)
+  assert.doesNotMatch(migration, /now\(\) > scoring_window\.round_closes_at/)
+  assert.doesNotMatch(migration, /now\(\) <= scoring_window\.round_closes_at/)
 })
 
 test("public Masters schedule reads do not execute protected admin policies as anonymous", () => {
