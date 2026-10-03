@@ -115,6 +115,19 @@ test("physical weekend room publication is independent while field publication r
   assert.match(baseSchema, /Every active entrant must have a staged Main Event or secondary-field decision before publication/i)
 })
 
+test("public and player Masters room readers use publication state, not weekend classification", () => {
+  const visibilityMigration = readFileSync(new URL("../supabase/migrations/20261003090000_masters_published_room_visibility_independent_of_classification.sql", import.meta.url), "utf8")
+  const publicReader = visibilityMigration.match(/create or replace function public\.get_public_major_published_rooms[\s\S]*?\$function\$;/i)?.[0] || ""
+  const playerReader = visibilityMigration.match(/create or replace function public\.get_my_major_signup_schedule[\s\S]*?as \$function\$[\s\S]*?\$function\$/i)?.[0] || ""
+  assert.match(publicReader, /room\.is_published/)
+  assert.doesNotMatch(publicReader, /weekend_status_published_at|competition_status|major_entry_weekend_status/)
+  assert.match(playerReader, /room\.is_published/)
+  assert.match(playerReader, /weekend_competition_status/)
+  assert.doesNotMatch(playerReader, /day\.day_number <= 2 or event\.weekend_status_published_at is not null/)
+  assert.match(playerReader, /'group_label', room\.group_label/)
+  assert.match(playerReader, /'room_roster', case\s+when room\.id is not null/)
+})
+
 test("mixed weekend classifications may share one physical room without changing selected times", () => {
   const migration = readFileSync(new URL("../supabase/migrations/20261002205037_masters_weekend_rooms_independent_of_classification.sql", import.meta.url), "utf8")
   const validateMember = migration.match(/create or replace function public\.validate_major_group_member_row[\s\S]*?\n\$function\$;/i)?.[0] || ""
