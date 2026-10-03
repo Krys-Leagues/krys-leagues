@@ -209,7 +209,7 @@ export const COURSE_CHALLENGE_COURSES: CourseChallengeCourse[] = [
     status: "live",
     displayOrder: 3,
     shortDescription: "A five-Level Course Challenge book built from the existing Around The World Easy and Hard scorecards.",
-    backgroundImage: "/course-challenges/80-days-around-the-world/80-days-around-the-world.png",
+    backgroundImage: "/course-challenges/80-days-around-the-world/80-days-around-the-world.jpg",
     easyCode: "AWE",
     hardCode: "AWH",
     levels: aroundTheWorldLevels(),
