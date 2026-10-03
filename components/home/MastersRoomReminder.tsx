@@ -5,7 +5,7 @@ import type { Session } from "@supabase/supabase-js"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
 import MastersOfficialRules from "@/components/majors/MastersOfficialRules"
-import type { MajorDayChoice, MajorPlayerScoringRound, MajorPlayDay } from "@/lib/majors"
+import type { MajorDayChoice, MajorPlayDay } from "@/lib/majors"
 import { MASTERS_HELP_CATEGORIES, type MastersHelpCategory } from "@/lib/mastersRules"
 import {
   buildPublishedMastersRoomAssignments,
@@ -45,11 +45,8 @@ async function fetchCurrentMastersRoomAssignment() {
   if (!catalog) return null
   const { eventId, days } = catalog
 
-  const [scheduleResult, scorecardsResult] = await Promise.all([
-    supabase.rpc("get_my_major_signup_schedule", { p_major_event_id: eventId }),
-    supabase.rpc("get_my_major_scorecards", { p_major_event_id: eventId }),
-  ])
-  if (scheduleResult.error || scorecardsResult.error) return null
+  const scheduleResult = await supabase.rpc("get_my_major_signup_schedule", { p_major_event_id: eventId })
+  if (scheduleResult.error) return null
 
   const assignments = buildPublishedMastersRoomAssignments(
     eventId,
@@ -58,10 +55,7 @@ async function fetchCurrentMastersRoomAssignment() {
   )
   return selectCurrentMastersRoomAssignment(
     assignments,
-    ((scorecardsResult.data as MajorPlayerScoringRound[] | null) || []).map((round) => ({
-      play_day_id: round.play_day_id,
-      status: round.status,
-    })),
+    Date.now(),
   )
 }
 

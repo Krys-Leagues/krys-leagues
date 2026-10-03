@@ -1,4 +1,4 @@
-import { majorRoundDayLabel, type MajorDayChoice, type MajorPlayDay, type MajorRoomRosterMember, type MajorScorecardStatus } from "./majors.ts"
+import { majorRoundDayLabel, type MajorDayChoice, type MajorPlayDay, type MajorRoomRosterMember } from "./majors.ts"
 
 export const MASTERS_ROOM_REMINDER_STORAGE_KEY = "krys-leagues:masters-room-gateway-visit-v2"
 
@@ -17,11 +17,6 @@ export type MastersRoomReminderAssignment = {
 }
 
 export type MastersRoomReminderDismissals = Record<string, string>
-
-export type MastersRoomRoundProgress = {
-  play_day_id: string
-  status: MajorScorecardStatus | null
-}
 
 const MASTERS_ROOM_REMINDER_EXCLUDED_PATHS = [
   "/access-denied",
@@ -75,15 +70,12 @@ export function buildPublishedMastersRoomAssignments(
 
 export function selectCurrentMastersRoomAssignment(
   assignments: MastersRoomReminderAssignment[],
-  roundProgress: MastersRoomRoundProgress[],
+  now = Date.now(),
 ) {
-  if (assignments.length === 0) return null
-  const completedPlayDays = new Set(
-    roundProgress
-      .filter((round) => round.status === "submitted" || round.status === "verified")
-      .map((round) => round.play_day_id),
-  )
-  return assignments.find((assignment) => !completedPlayDays.has(assignment.playDayId)) || null
+  return assignments.find((assignment) => {
+    const startsAt = Date.parse(assignment.startsAt)
+    return Number.isFinite(startsAt) && startsAt > now
+  }) || null
 }
 
 export function mastersRoomReminderScope(assignment: MastersRoomReminderAssignment) {

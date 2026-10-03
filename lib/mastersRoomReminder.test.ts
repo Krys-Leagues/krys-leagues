@@ -70,29 +70,22 @@ function twoPublishedAssignments() {
   ], [day, laterDay])
 }
 
-test("no card, draft, and reopened Round 1 remain the next actionable round", () => {
+test("the next room follows the schedule clock instead of unfinished scorecards", () => {
   const assignments = twoPublishedAssignments()
-  for (const status of [null, "draft", "reopened"] as const) {
-    const progress = [{ play_day_id: day.id, status }]
-    assert.equal(selectCurrentMastersRoomAssignment(assignments, progress)?.dayNumber, 1, String(status))
-  }
+  const afterRoundOne = Date.parse("2026-10-01T12:00:00.000Z")
+  assert.equal(selectCurrentMastersRoomAssignment(assignments, afterRoundOne)?.dayNumber, 2)
 })
 
-test("submitted or verified Round 1 advances to published Round 2 without waiting for verification", () => {
+test("submitted or verified status does not change the scheduled next room", () => {
   const assignments = twoPublishedAssignments()
-  for (const status of ["submitted", "verified"] as const) {
-    assert.equal(selectCurrentMastersRoomAssignment(assignments, [{ play_day_id: day.id, status }])?.dayNumber, 2, status)
-  }
+  const beforeRoundOne = Date.parse("2026-10-01T03:00:00.000Z")
+  assert.equal(selectCurrentMastersRoomAssignment(assignments, beforeRoundOne)?.dayNumber, 1)
 })
 
-test("player progress is isolated and one player's submission cannot advance another player", () => {
+test("missed earlier rounds do not block a later scheduled room", () => {
   const assignments = twoPublishedAssignments()
-  const playerA = selectCurrentMastersRoomAssignment(assignments, [{ play_day_id: day.id, status: "draft" }])
-  const playerB = selectCurrentMastersRoomAssignment(assignments, [{ play_day_id: day.id, status: "submitted" }])
-  const playerC = selectCurrentMastersRoomAssignment(assignments, [{ play_day_id: day.id, status: "verified" }])
-  assert.equal(playerA?.dayNumber, 1)
-  assert.equal(playerB?.dayNumber, 2)
-  assert.equal(playerC?.dayNumber, 2)
+  const afterRoundOne = Date.parse("2026-10-02T03:00:00.000Z")
+  assert.equal(selectCurrentMastersRoomAssignment(assignments, afterRoundOne)?.dayNumber, 2)
 })
 
 test("future room times and midnight changes cannot advance an unfinished earlier round", () => {
@@ -100,18 +93,18 @@ test("future room times and midnight changes cannot advance an unfinished earlie
     ...assignment,
     startsAt: index === 0 ? "2026-09-30T23:59:00.000Z" : "2026-10-01T00:01:00.000Z",
   }))
-  assert.equal(selectCurrentMastersRoomAssignment(assignments, [])?.dayNumber, 1)
-  assert.equal(selectCurrentMastersRoomAssignment(assignments, [{ play_day_id: day.id, status: "reopened" }])?.dayNumber, 1)
+  assert.equal(selectCurrentMastersRoomAssignment(assignments, Date.parse("2026-09-30T23:00:00.000Z"))?.dayNumber, 1)
+  assert.equal(selectCurrentMastersRoomAssignment(assignments, Date.parse("2026-09-30T23:00:00.000Z"))?.dayNumber, 1)
 })
 
 test("a submitted round with no later published assignment produces the completed waiting state", () => {
   const [roundOne] = twoPublishedAssignments()
-  assert.equal(selectCurrentMastersRoomAssignment([roundOne], [{ play_day_id: day.id, status: "submitted" }]), null)
+  assert.equal(selectCurrentMastersRoomAssignment([roundOne], Date.parse("2026-10-03T00:00:00.000Z")), null)
 })
 
 test("the selected assignment retains the exact round and play-day score route", () => {
   const assignments = twoPublishedAssignments()
-  const selected = selectCurrentMastersRoomAssignment(assignments, [{ play_day_id: day.id, status: "submitted" }])
+  const selected = selectCurrentMastersRoomAssignment(assignments, Date.parse("2026-10-01T12:00:00.000Z"))
   assert.equal(selected?.dayNumber, 2)
   assert.equal(selected?.playDayId, "ffffffff-ffff-4fff-8fff-ffffffffffff")
 })
@@ -200,7 +193,8 @@ test("the reminder has one global mount with cross-route state, full roster, and
   assert.match(component, /styles\.scoringCard/)
   assert.doesNotMatch(component, /\.roster\.(?:slice|splice)\(/)
   assert.match(component, /get_my_major_signup_schedule/)
-  assert.match(component, /get_my_major_scorecards/)
+  assert.match(component, /selectCurrentMastersRoomAssignment\(\s*assignments,\s*Date\.now\(\)/)
+  assert.doesNotMatch(component, /get_my_major_scorecards/)
   assert.match(component, /MASTERS_CATALOG_CACHE_MS = 5 \* 60_000/)
   assert.match(component, /lastSessionToken\.current === session\.access_token/)
   assert.doesNotMatch(component, /supabase\.auth\.getUser\(\)/)
