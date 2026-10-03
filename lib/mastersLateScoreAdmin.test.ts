@@ -11,6 +11,7 @@ import {
 import { mastersRoundAccessState } from "./mastersPlayerExperience.ts"
 
 const migration = readFileSync(new URL("../supabase/migrations/20261002143000_masters_late_score_admin_tools.sql", import.meta.url), "utf8")
+const overrideMigration = readFileSync(new URL("../supabase/migrations/20261003160000_masters_admin_score_entry_open_window.sql", import.meta.url), "utf8")
 const playerCutoffMigration = readFileSync(new URL("../supabase/migrations/20261003100000_masters_remove_player_score_cutoff.sql", import.meta.url), "utf8")
 const originalScoringMigration = readFileSync(new URL("../supabase/migrations/20260930190131_masters_player_rooms_rules_and_scoring_access.sql", import.meta.url), "utf8")
 const route = readFileSync(new URL("../app/api/admin/majors/late-scores/route.ts", import.meta.url), "utf8")
@@ -85,9 +86,11 @@ test("player cutoff removal preserves finalization and submitted-score protectio
   assert.doesNotMatch(playerCutoffMigration, /now\(\) <= scoring_window\.round_closes_at/)
 })
 
-test("late-score mutations are Masters-only and require the normal round window to be closed", () => {
+test("late-score reopen remains deadline-bound while admin score entry may override an open window", () => {
   assert.equal((migration.match(/slug = 'masters'/g) || []).length, 2)
-  assert.equal((migration.match(/This player is still inside the normal scoring window/g) || []).length, 2)
+  assert.match(overrideMigration, /admin_submit_major_scorecard_service[\s\S]*?normal_window_open/)
+  assert.doesNotMatch(overrideMigration, /if now\(\) <= scoring_window\.round_closes_at then raise exception 'This player is still inside the normal scoring window'/)
+  assert.match(migration, /admin_reopen_major_score_entry_service[\s\S]*?if now\(\) <= scoring_window\.round_closes_at then raise exception 'This player is still inside the normal scoring window'/)
   assert.match(route, /eventResult\.data\.slug !== "masters"/)
 })
 
@@ -95,7 +98,7 @@ test("privileged late-score mutations remain behind the protected server route",
   assert.match(route, /authorizeSiteAdminMutation/)
   assert.match(route, /createScorecardServiceClient/)
   assert.match(migration, /grant execute on function public\.admin_reopen_major_score_entry_service[\s\S]*?to service_role/)
-  assert.match(migration, /grant execute on function public\.admin_submit_major_scorecard_service[\s\S]*?to service_role/)
+  assert.match(overrideMigration, /grant execute on function public\.admin_submit_major_scorecard_service[\s\S]*?to service_role/)
   assert.doesNotMatch(migration, /grant execute on function public\.admin_(?:reopen|submit)_major_score[\s\S]*?to authenticated/)
 })
 
@@ -105,6 +108,8 @@ test("Masters verification exposes the two distinct late-score admin actions wit
   assert.match(adminPanel, /ADMIN ENTER SCORE/)
   assert.match(adminPanel, /SUBMIT FOR VERIFICATION/)
   assert.match(adminPanel, /ENTERED BY ADMIN ON BEHALF OF PLAYER/)
+  assert.match(adminPanel, /PLAYER ENTRY IS CURRENTLY OPEN/)
+  assert.match(adminPanel, /\["open", "expired", "reopened"\]/)
   assert.match(adminPanel, /REOPENED UNTIL:/)
   assert.doesNotMatch(adminPanel, /setInterval|setTimeout/)
 })

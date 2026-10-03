@@ -67,7 +67,12 @@ export default function MastersLateScoreAdmin({ eventId }: { eventId: string }) 
   async function perform(action: "reopen" | "admin_entry") {
     if (!row) return
     if (action === "reopen" && !window.confirm(`REOPEN ${row.playerName} — ROUND ${row.dayNumber} FOR ONE HOUR?`)) return
-    if (action === "admin_entry" && !window.confirm(`SUBMIT THIS ROUND ${row.dayNumber} SCORECARD ON BEHALF OF ${row.playerName}?`)) return
+    if (action === "admin_entry") {
+      const warning = state === "open"
+        ? `PLAYER ENTRY IS CURRENTLY OPEN.\n\nYou are entering this score as an administrator for ${row.playerName}, Round ${row.dayNumber}. Continue?`
+        : `SUBMIT THIS ROUND ${row.dayNumber} SCORECARD ON BEHALF OF ${row.playerName}?`
+      if (!window.confirm(warning)) return
+    }
     setBusy(true)
     setMessage("")
     const result = await fetch("/api/admin/majors/late-scores", {
@@ -116,7 +121,7 @@ export default function MastersLateScoreAdmin({ eventId }: { eventId: string }) 
       <label className={styles.reason}>Optional admin note<input maxLength={1000} value={reason} onChange={(event) => setReason(event.target.value)} /></label>
       <div className={styles.actions}>
         <button type="button" disabled={busy || state !== "expired"} onClick={() => void perform("reopen")}>REOPEN FOR PLAYER</button>
-        <button type="button" disabled={busy || !["expired", "reopened"].includes(state || "")} onClick={() => setShowEntry(true)}>ADMIN ENTER SCORE</button>
+        <button type="button" disabled={busy || !["open", "expired", "reopened"].includes(state || "")} onClick={() => setShowEntry(true)}>ADMIN ENTER SCORE</button>
       </div>
       {["submitted", "verified"].includes(state || "") && <p className={styles.protected}>This {state} scorecard is protected. Use the established correction workflow instead of overwriting it.</p>}
       {state === "open" && <p className={styles.notice}>This player is still inside the normal score-entry window. No late exception is needed.</p>}
