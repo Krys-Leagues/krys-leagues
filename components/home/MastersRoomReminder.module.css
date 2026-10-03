@@ -61,6 +61,12 @@
   text-transform: uppercase;
 }
 
+.noRoomMessage {
+  margin: 14px 0 0;
+  color: #f5f2df;
+  line-height: 1.5;
+}
+
 .when {
   display: grid;
   gap: 4px;

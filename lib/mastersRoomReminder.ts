@@ -68,6 +68,10 @@ export function buildPublishedMastersRoomAssignments(
   }).sort((left, right) => left.dayNumber - right.dayNumber || left.startsAt.localeCompare(right.startsAt))
 }
 
+export function hasEligibleMastersRoomExperience(schedule: readonly MajorDayChoice[]) {
+  return schedule.length > 0
+}
+
 export function selectCurrentMastersRoomAssignment(
   assignments: MastersRoomReminderAssignment[],
   now = Date.now(),

@@ -10,6 +10,7 @@ import { MASTERS_HELP_CATEGORIES, type MastersHelpCategory } from "@/lib/masters
 import {
   buildPublishedMastersRoomAssignments,
   dismissMastersRoomAssignment,
+  hasEligibleMastersRoomExperience,
   MASTERS_ROOM_REMINDER_STORAGE_KEY,
   parseMastersRoomReminderDismissals,
   selectCurrentMastersRoomAssignment,
@@ -48,15 +49,16 @@ async function fetchCurrentMastersRoomAssignment() {
   const scheduleResult = await supabase.rpc("get_my_major_signup_schedule", { p_major_event_id: eventId })
   if (scheduleResult.error) return null
 
+  const schedule = (scheduleResult.data as MajorDayChoice[] | null) || []
   const assignments = buildPublishedMastersRoomAssignments(
     eventId,
-    (scheduleResult.data as MajorDayChoice[] | null) || [],
+    schedule,
     days,
   )
-  return selectCurrentMastersRoomAssignment(
-    assignments,
-    Date.now(),
-  )
+  return {
+    eligible: hasEligibleMastersRoomExperience(schedule),
+    assignment: selectCurrentMastersRoomAssignment(assignments, Date.now()),
+  }
 }
 
 const MASTERS_CATALOG_CACHE_MS = 5 * 60_000
@@ -88,6 +90,7 @@ export default function MastersRoomReminder() {
   const rendersOnCurrentPath = shouldRenderMastersRoomReminderOnPath(pathname)
   const isMastersScoringRoute = /^\/majors\/[^/]+\/scoring(?:\/|$)/.test(pathname || "")
   const [assignment, setAssignment] = useState<MastersRoomReminderAssignment | null>(null)
+  const [eligible, setEligible] = useState(false)
   const [mode, setMode] = useState<ReminderMode>("hidden")
   const [panel, setPanel] = useState<"room" | "rules" | "contact">("room")
   const [category, setCategory] = useState<MastersHelpCategory>("PLAYER NO-SHOW")
@@ -105,14 +108,23 @@ export default function MastersRoomReminder() {
     const current = await fetchCurrentMastersRoomAssignment()
     if (currentRequestId !== requestId.current) return
     setRefreshing(false)
-    setAssignment(current)
+    setEligible(Boolean(current?.eligible))
+    setAssignment(current?.assignment || null)
     setCountdownNow(Date.now())
-    if (!current) {
+    if (!current?.eligible) {
       setMode("hidden")
       return
     }
-    if (forceOpen) setPanel("room")
-    setMode(forceOpen || shouldAutoOpenMastersRoomReminder(current, readDismissals()) ? "open" : "collapsed")
+    if (forceOpen) {
+      setPanel("room")
+      setMode("open")
+      return
+    }
+    if (!current.assignment) {
+      setMode("collapsed")
+      return
+    }
+    setMode(shouldAutoOpenMastersRoomReminder(current.assignment, readDismissals()) ? "open" : "collapsed")
   }, [])
 
   useEffect(() => {
@@ -147,7 +159,7 @@ export default function MastersRoomReminder() {
     return () => window.clearInterval(timerId)
   }, [assignment?.startsAt])
 
-  if (!rendersOnCurrentPath || !assignment || mode === "hidden") return null
+  if (!rendersOnCurrentPath || !eligible || mode === "hidden") return null
 
   if (mode === "collapsed") {
     return (
@@ -159,9 +171,30 @@ export default function MastersRoomReminder() {
           disabled={refreshing}
           aria-busy={refreshing}
         >
-          SHOW MASTERS ROOM
+          {assignment ? "SHOW MASTERS ROOM" : "OPEN MINI GOLF MASTERS"}
         </button>
       </div>
+    )
+  }
+
+  if (!assignment) {
+    return (
+      <aside className={`${styles.card} ${isMastersScoringRoute ? styles.scoringCard : ""}`} role="dialog" aria-modal="false" aria-labelledby="masters-room-reminder-title">
+        <button
+          type="button"
+          className={styles.close}
+          aria-label="Close Masters room reminder"
+          onClick={() => setMode("collapsed")}
+        >
+          ×
+        </button>
+        <p className={styles.eyebrow}>YOUR MINI-GOLF MASTERS</p>
+        <h2 id="masters-room-reminder-title">NO NEXT ROOM YET</h2>
+        <p className={styles.noRoomMessage}>Your next room has not been published yet. You can still open the Masters player page for available scoring access.</p>
+        <nav className={styles.actions} aria-label="Masters player actions">
+          <Link href="/majors/masters">OPEN MASTERS PLAYER PAGE</Link>
+        </nav>
+      </aside>
     )
   }
 

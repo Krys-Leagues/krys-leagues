@@ -5,6 +5,7 @@ import type { MajorDayChoice, MajorPlayDay, MajorRoomRosterMember } from "./majo
 import {
   buildPublishedMastersRoomAssignments,
   dismissMastersRoomAssignment,
+  hasEligibleMastersRoomExperience,
   mastersRoomAssignmentFingerprint,
   parseMastersRoomReminderDismissals,
   selectCurrentMastersRoomAssignment,
@@ -102,6 +103,12 @@ test("a submitted round with no later published assignment produces the complete
   assert.equal(selectCurrentMastersRoomAssignment([roundOne], Date.parse("2026-10-03T00:00:00.000Z")), null)
 })
 
+test("an eligible player keeps the Masters entry point when no next room is published", () => {
+  const schedule = [choice({ group_label: null, room_roster: [] })]
+  assert.equal(hasEligibleMastersRoomExperience(schedule), true)
+  assert.equal(buildPublishedMastersRoomAssignments(eventId, schedule, [day]).length, 0)
+})
+
 test("the selected assignment retains the exact round and play-day score route", () => {
   const assignments = twoPublishedAssignments()
   const selected = selectCurrentMastersRoomAssignment(assignments, Date.parse("2026-10-01T12:00:00.000Z"))
@@ -182,6 +189,10 @@ test("the reminder has one global mount with cross-route state, full roster, and
   assert.doesNotMatch(home, /MastersRoomReminder/)
   assert.equal(rootLayout.match(/<MastersRoomReminder \/>/g)?.length, 1)
   assert.match(component, /SHOW MASTERS ROOM/)
+  assert.match(component, /OPEN MINI GOLF MASTERS/)
+  assert.match(component, /NO NEXT ROOM YET/)
+  assert.match(component, /hasEligibleMastersRoomExperience\(schedule\)/)
+  assert.match(component, /OPEN MASTERS PLAYER PAGE/)
   assert.match(component, /Close Masters room reminder/)
   assert.match(component, /usePathname/)
   assert.match(component, /refreshAssignment\(true\)/)

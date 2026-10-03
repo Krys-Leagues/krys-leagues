@@ -89,6 +89,7 @@ test("the global client component is cheap, persistent, accessible, and coordina
   const css = readFileSync("components/announcements/CupSignupAnnouncement.module.css", "utf8")
   const layout = readFileSync("app/layout.tsx", "utf8")
   const welcome = readFileSync("components/auth/OptionalSignInWelcome.tsx", "utf8")
+  const adminAlerts = readFileSync("components/admin/AdminPendingAlerts.tsx", "utf8")
 
   assert.match(layout, /CUP_SIGNUP_ANNOUNCEMENT_ENABLED \? <CupSignupAnnouncement \/> : null/u)
   assert.match(component, /window\.localStorage\.getItem\(CUP_SIGNUP_DISMISSAL_KEY\)/u)
@@ -108,8 +109,10 @@ test("the global client component is cheap, persistent, accessible, and coordina
   assert.match(welcome, /optionalSignInWelcome/u)
   assert.match(component, /data-optional-sign-in-welcome/u)
 
-  assert.match(css, /\.launcherDock \{[\s\S]*top: max\(14px, env\(safe-area-inset-top\)\);[\s\S]*left: max\(14px, env\(safe-area-inset-left\)\);/u)
-  assert.match(css, /@media \(max-width: 700px\)[\s\S]*\.launcherDock \{[\s\S]*top: max\(10px, env\(safe-area-inset-top\)\);[\s\S]*left: max\(10px, env\(safe-area-inset-left\)\);/u)
+  assert.match(css, /\.launcherDock \{[\s\S]*top: max\(14px, env\(safe-area-inset-top\)\);[\s\S]*right: max\(14px, env\(safe-area-inset-right\)\);[\s\S]*z-index: 68;/u)
+  assert.match(css, /@media \(max-width: 700px\)[\s\S]*\.launcherDock \{[\s\S]*top: max\(10px, env\(safe-area-inset-top\)\);[\s\S]*right: max\(10px, env\(safe-area-inset-right\)\);/u)
+  assert.doesNotMatch(css, /\.launcherDock \{[\s\S]*left:/u)
+  assert.match(adminAlerts, /const mastersAlert:[\s\S]*zIndex: 71/u)
   assert.doesNotMatch(css, /\.launcherDock \{[\s\S]*bottom:/u)
   assert.match(css, /@media \(max-width: 700px\)/u)
   assert.match(css, /width: min\(1120px, 100%\)/u)
