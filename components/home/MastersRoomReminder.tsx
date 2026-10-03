@@ -17,7 +17,7 @@ import {
   shouldAutoOpenMastersRoomReminder,
   type MastersRoomReminderAssignment,
 } from "@/lib/mastersRoomReminder"
-import { formatMastersPlayerSlot } from "@/lib/mastersSignupDisplay"
+import { formatMastersPlayerSlot, formatMastersRoomCountdown } from "@/lib/mastersSignupDisplay"
 import { supabase } from "@/lib/supabase"
 import styles from "./MastersRoomReminder.module.css"
 
@@ -95,6 +95,7 @@ export default function MastersRoomReminder() {
   const [contactState, setContactState] = useState<"idle" | "sending" | "sent" | "failed">("idle")
   const [contactMessage, setContactMessage] = useState("")
   const [refreshing, setRefreshing] = useState(false)
+  const [countdownNow, setCountdownNow] = useState(() => Date.now())
   const requestId = useRef(0)
   const lastSessionToken = useRef<string | null>(null)
 
@@ -105,6 +106,7 @@ export default function MastersRoomReminder() {
     if (currentRequestId !== requestId.current) return
     setRefreshing(false)
     setAssignment(current)
+    setCountdownNow(Date.now())
     if (!current) {
       setMode("hidden")
       return
@@ -139,6 +141,12 @@ export default function MastersRoomReminder() {
     }
   }, [refreshAssignment, rendersOnCurrentPath])
 
+  useEffect(() => {
+    if (!assignment?.startsAt) return
+    const timerId = window.setInterval(() => setCountdownNow(Date.now()), 60_000)
+    return () => window.clearInterval(timerId)
+  }, [assignment?.startsAt])
+
   if (!rendersOnCurrentPath || !assignment || mode === "hidden") return null
 
   if (mode === "collapsed") {
@@ -160,6 +168,7 @@ export default function MastersRoomReminder() {
   const localTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"
   const currentAssignment = assignment
   const localSlot = formatMastersPlayerSlot(currentAssignment.startsAt, currentAssignment.officialPlayDate, localTimeZone)
+  const roomCountdown = formatMastersRoomCountdown(currentAssignment.startsAt, countdownNow)
 
   async function sendAdminAlert() {
     if (!details.trim()) {
@@ -213,6 +222,10 @@ export default function MastersRoomReminder() {
           <span>{localSlot.time}</span>
           {localSlot.dayShift && <em>{localSlot.dayShift}</em>}
         </div>
+        <section className={styles.countdown} aria-live="polite">
+          <span>ROOM STARTS IN:</span>
+          <strong>{roomCountdown}</strong>
+        </section>
         <h3>Playing with:</h3>
         <ul className={styles.roster}>
           {assignment.roster.map((player) => <li key={player.player_id}>{player.player_screen_name_snapshot}</li>)}

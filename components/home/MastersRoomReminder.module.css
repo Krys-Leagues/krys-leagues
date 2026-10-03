@@ -89,6 +89,29 @@
   font-weight: 900;
 }
 
+.countdown {
+  display: grid;
+  gap: 4px;
+  margin: -8px 0 18px;
+  padding: 12px 15px;
+  border: 1px solid rgba(243, 212, 115, 0.35);
+  border-radius: 13px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.countdown span {
+  color: #d8f5df;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.countdown strong {
+  color: #f8e9b4;
+  font-size: 1.05rem;
+  font-weight: 950;
+}
+
 .card h3 {
   margin: 0 0 9px;
   color: #f3d473;

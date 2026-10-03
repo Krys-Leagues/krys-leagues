@@ -9,9 +9,30 @@ import {
   formatMastersPlayerDateTime,
   formatMastersPlayerSlot,
   formatMastersPlayerTime,
+  formatMastersRoomCountdown,
   meaningfulMajorSlotLabel,
   PLAYER_LOCAL_TIME_HEADING,
 } from "./mastersSignupDisplay.ts"
+
+test("Masters room countdown uses the absolute start timestamp without seconds or negative values", () => {
+  const now = Date.parse("2026-10-03T00:00:00.000Z")
+  assert.equal(formatMastersRoomCountdown("2026-10-04T05:12:00.000Z", now), "1 DAY 5 HOURS 12 MINUTES")
+  assert.equal(formatMastersRoomCountdown("2026-10-03T05:12:00.000Z", now), "5 HOURS 12 MINUTES")
+  assert.equal(formatMastersRoomCountdown("2026-10-03T00:42:59.000Z", now), "42 MINUTES")
+  assert.equal(formatMastersRoomCountdown("2026-10-03T00:00:59.000Z", now), "STARTING NOW")
+  assert.equal(formatMastersRoomCountdown("2026-10-02T23:59:59.000Z", now), "ROOM STARTED")
+})
+
+test("the same room countdown is timezone-independent while local slot display remains DST-aware", () => {
+  const start = "2026-10-04T00:00:00.000Z"
+  const now = Date.parse("2026-10-03T23:18:00.000Z")
+  assert.equal(formatMastersRoomCountdown(start, now), "42 MINUTES")
+  assert.equal(formatMastersRoomCountdown(start, now), formatMastersRoomCountdown(start, now))
+  const newSouthWales = formatMastersPlayerSlot(start, "2026-10-03", "Australia/Sydney")
+  assert.equal(newSouthWales.date, "Sunday, October 4")
+  assert.equal(newSouthWales.time, "11:00 AM")
+  assert.equal(newSouthWales.dayShift, "Next day locally")
+})
 
 test("the local-time explanation is a single round-level heading", () => {
   assert.equal(PLAYER_LOCAL_TIME_HEADING, "AVAILABLE TIMES — SHOWN IN YOUR LOCAL TIME")

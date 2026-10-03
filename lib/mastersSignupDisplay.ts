@@ -122,3 +122,19 @@ export function formatMastersOfficialDate(value: string) {
     timeZone: "UTC",
   }).format(new Date(`${value}T12:00:00Z`))
 }
+
+export function formatMastersRoomCountdown(value: string, now = Date.now()) {
+  const remainingMs = new Date(value).getTime() - now
+  if (remainingMs <= 0) return "ROOM STARTED"
+  if (remainingMs < 60_000) return "STARTING NOW"
+
+  const totalMinutes = Math.floor(remainingMs / 60_000)
+  const days = Math.floor(totalMinutes / 1_440)
+  const hours = Math.floor((totalMinutes % 1_440) / 60)
+  const minutes = totalMinutes % 60
+  const unit = (count: number, singular: string) => `${count} ${count === 1 ? singular : `${singular}S`}`
+
+  if (days > 0) return `${unit(days, "DAY")} ${unit(hours, "HOUR")} ${unit(minutes, "MINUTE")}`
+  if (hours > 0) return `${unit(hours, "HOUR")} ${unit(minutes, "MINUTE")}`
+  return unit(minutes, "MINUTE")
+}
