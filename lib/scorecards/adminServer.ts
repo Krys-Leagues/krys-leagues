@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js"
 
 import { pypScorecardAdapter } from "./adapters/pyp"
 import { strokeScorecardAdapter } from "./adapters/stroke"
+import { matchScorecardAdapter } from "./adapters/match"
 import type { ScorecardAdapterContext, VerifiedParticipantCard } from "./adapters/contracts"
 import { calculateScorecardTotals, resolvePlayedDate, type ScorecardHoleInput } from "./core"
 import { enqueueStrokeBoardSync } from "./strokeBoardServer"
@@ -38,6 +39,7 @@ type ParticipantRow = {
   player_id: string | null
   team_id: string | null
   display_name_snapshot: string
+  participant_metadata?: Record<string, unknown>
 }
 
 export type AdminScorecardInput = {
@@ -74,6 +76,7 @@ function adapterContext(context: ContextRow, participants: ParticipantRow[], com
       playerId: participant.player_id,
       teamId: participant.team_id,
       displayName: participant.display_name_snapshot,
+      participantMetadata: participant.participant_metadata,
     })),
     ...(course1 || course2 ? { pypComponents: {
       ...(course1 ? { course1: { key: "course1" as const, courseId: course1.course_id, courseCode: course1.course_code, courseName: course1.course_name_snapshot, difficulty: course1.difficulty, pars: course1.par_snapshot } } : {}),
@@ -89,7 +92,7 @@ export async function loadScorecardReviewContext(client: SupabaseClient, evidenc
   if (evidence.error || !evidence.data) throw new Error("SCORECARD_REVIEW_NOT_FOUND")
   const [context, participants, existingCards, components, evidenceItems] = await Promise.all([
     client.from("shared_scorecard_contexts").select("*").eq("id", evidence.data.context_id).single(),
-    client.from("shared_scorecard_participants").select("id,role_key,player_id,team_id,display_name_snapshot").eq("context_id", evidence.data.context_id).order("role_key"),
+    client.from("shared_scorecard_participants").select("id,role_key,player_id,team_id,display_name_snapshot,participant_metadata").eq("context_id", evidence.data.context_id).order("role_key"),
     client.from("shared_scorecards").select("id,participant_id,component_key,played_date,played_date_source,card_date_text,review_status,total_strokes,total_par,score_to_par,shared_scorecard_holes(hole_number,par,strokes)").eq("context_id", evidence.data.context_id),
     client.from("shared_scorecard_context_components").select("component_key,course_id,course_code,course_name_snapshot,difficulty,par_snapshot").eq("context_id", evidence.data.context_id),
     client.from("shared_scorecard_evidence").select("id,component_key,storage_bucket,storage_path,original_filename,review_status,submitted_at,submitted_by_player_id").eq("context_id", evidence.data.context_id).in("review_status", ["submitted", "under_review", "verified"]),
@@ -166,7 +169,7 @@ export async function saveAdminScorecardReview(options: {
     })
   }
   if (!options.verify) return { verified: false, cardIds: saved.map((entry) => entry.cardId) }
-  const adapter = context.adapterKey === "stroke" ? strokeScorecardAdapter : context.adapterKey === "pyp" ? pypScorecardAdapter : null
+  const adapter = context.adapterKey === "stroke" ? strokeScorecardAdapter : context.adapterKey === "pyp" ? pypScorecardAdapter : context.adapterKey === "match" ? matchScorecardAdapter : null
   if (!adapter) throw new Error("SCORECARD_ADAPTER_VERIFICATION_NOT_ENABLED")
   const cardsForVerification = saved.map((entry) => ({ cardId: entry.cardId, card: entry.card }))
   if (context.adapterKey === "pyp") {
@@ -195,7 +198,6 @@ export async function saveAdminScorecardReview(options: {
   if (existingCommit.error) throw new Error("SCORECARD_VERIFICATION_STATE_FAILED")
   if (existingCommit.data.commit_state === "succeeded") {
     if (context.adapterKey !== "stroke") return { verified: true, cardIds: cardsForVerification.map((entry) => entry.cardId), boardSync: "not_applicable" as const }
-    if (context.adapterKey !== "stroke") return { verified: true, cardIds: cardsForVerification.map((entry) => entry.cardId), boardSync: "not_applicable" as const }
     let boardSync: "queued" | "retry_required" = "queued"
     try {
       await enqueueStrokeBoardSync(options.client, context.seasonId!, context.divisionNumber!, "verified_result_retry")
@@ -218,10 +220,11 @@ export async function saveAdminScorecardReview(options: {
       p_error_message: null,
     })
     if (completed.error || completed.data !== true) throw new Error("SCORECARD_VERIFICATION_COMPLETE_FAILED")
-    let boardSync: "queued" | "retry_required" = "queued"
-    try {
-      await enqueueStrokeBoardSync(options.client, context.seasonId!, context.divisionNumber!, "verified_result")
-    } catch { boardSync = "retry_required" }
+    let boardSync: "queued" | "retry_required" | "not_applicable" = "not_applicable"
+    if (context.adapterKey === "stroke") {
+      boardSync = "queued"
+      try { await enqueueStrokeBoardSync(options.client, context.seasonId!, context.divisionNumber!, "verified_result") } catch { boardSync = "retry_required" }
+    }
     return { verified: true, cardIds: saved.map((entry) => entry.cardId), boardSync }
   } catch {
     await options.client.rpc("complete_shared_scorecard_verification_service", {

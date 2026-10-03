@@ -11,6 +11,7 @@ export type ScorecardAdapterParticipant = {
   playerId: string | null
   teamId: string | null
   displayName: string
+  participantMetadata?: Record<string, unknown>
 }
 
 export type ScorecardAdapterContext = ScorecardContextReference & {
