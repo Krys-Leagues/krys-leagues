@@ -153,8 +153,8 @@ export default function MajorPlayerScoringPage() {
       {round.status === "submitted" && <p className={styles.pending}>Awaiting admin verification. Submitted scores cannot be silently changed.</p>}
       {round.status === "verified" && <p className={styles.verified}>Official score verified.</p>}
 
+      {round.room_group_id && <MajorRoomScorecardPhoto playDayId={round.play_day_id} />}
       {(accessState === "open" || Boolean(round.id)) && <>
-        <MajorRoomScorecardPhoto playDayId={round.play_day_id} />
         <section className={styles.scoreSection}>
           <div className={styles.scoreHeading}><div><p>YOUR SCORE</p><h2>{round.player_screen_name_snapshot}</h2><span>Round {round.day_number} — {course.name}</span></div><div><strong>{completedHoles === 18 ? strokes : "—"}</strong><span>{completedHoles} / 18 holes · {formatMajorToPar(scoreToPar)}</span></div></div>
           <div className={styles.scorecardScroll}>

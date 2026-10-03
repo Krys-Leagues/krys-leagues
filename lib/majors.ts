@@ -103,7 +103,7 @@ export type MajorHoleScore = {
 
 export const MAJOR_COURSES = {
   CBE: { name: "Cherry Blossom Easy", pars: [3,4,3,4,3,3,3,4,3,5,3,4,2,3,3,3,3,7] },
-  CBH: { name: "Cherry Blossom Hard", pars: [3,4,3,4,3,3,3,4,3,5,3,4,2,3,3,3,3,8] },
+  CBH: { name: "Cherry Blossom Hard", pars: [3,4,3,4,3,3,3,4,3,8,3,3,2,4,3,4,4,6] },
 } as const
 
 export type MajorCourseCode = keyof typeof MAJOR_COURSES

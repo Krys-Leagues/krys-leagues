@@ -181,7 +181,11 @@ test("public Masters schedule reads do not execute protected admin policies as a
 
 test("Masters courses use the accepted Easy and Hard pars for each round", () => {
   assert.deepEqual(MAJOR_COURSES.CBE.pars, [3,4,3,4,3,3,3,4,3,5,3,4,2,3,3,3,3,7])
-  assert.deepEqual(MAJOR_COURSES.CBH.pars, [3,4,3,4,3,3,3,4,3,5,3,4,2,3,3,3,3,8])
+  assert.deepEqual(MAJOR_COURSES.CBH.pars, [3,4,3,4,3,3,3,4,3,8,3,3,2,4,3,4,4,6])
+  assert.equal(MAJOR_COURSES.CBH.pars.length, 18)
+  assert.equal(MAJOR_COURSES.CBH.pars.reduce((sum, par) => sum + par, 0), 67)
+  assert.equal(MAJOR_COURSES.CBH.pars[9], 8)
+  assert.equal(MAJOR_COURSES.CBH.pars[11], 3)
   assert.equal(mastersCourseForRound(1), MAJOR_COURSES.CBE)
   assert.equal(mastersCourseForRound(2), MAJOR_COURSES.CBE)
   assert.equal(mastersCourseForRound(3), MAJOR_COURSES.CBH)
