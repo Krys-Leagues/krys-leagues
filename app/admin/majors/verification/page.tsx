@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { MajorAdminWorkspaceLink } from "@/components/admin/majors/MajorAdminWorkspaceLink"
 import MastersLateScoreAdmin from "@/components/admin/majors/MastersLateScoreAdmin"
 import { ScorecardPanViewport, ScorecardZoomControls, useScorecardImageView } from "@/components/scorecards/ScorecardZoomViewer"
@@ -17,6 +17,8 @@ export default function MajorVerificationPage() {
   const [events, setEvents] = useState<MajorEvent[]>([]), [days, setDays] = useState<MajorPlayDay[]>([]), [cards, setCards] = useState<MajorPlayerScorecard[]>([]), [proofs, setProofs] = useState<AdminRoomProof[]>([])
   const [eventId, setEventId] = useState(""), [message, setMessage] = useState("")
   const [workspaceEventId, setWorkspaceEventId] = useState("")
+  const [busyCardIds, setBusyCardIds] = useState<Set<string>>(new Set()), [collapsedCardIds, setCollapsedCardIds] = useState<Set<string>>(new Set())
+  const busyCardIdsRef = useRef(new Set<string>())
   const loadEvents = useCallback(async () => {
     const [eventResult, dayResult] = await Promise.all([supabase.from("major_events").select("*").order("slug"), supabase.from("major_play_days").select("*").order("day_number")])
     const loadedEvents = (eventResult.data as MajorEvent[]) || []
@@ -51,16 +53,25 @@ export default function MajorVerificationPage() {
   const rooms = useMemo(() => groupVerificationRooms(cards, proofs), [cards, proofs])
   const waitingScores = cards.filter((card) => card.status === "submitted").length, waitingRooms = rooms.filter((room) => room.cards.some((card) => card.status === "submitted")).length
   async function scoreAction(name: "verify_major_scorecard" | "reopen_major_scorecard", id: string) {
-    const notes = window.prompt(name === "verify_major_scorecard" ? "Optional verification notes" : "Correction needed (required for the player audit trail)") || ""
-    if (name === "reopen_major_scorecard" && !notes.trim()) return
-    const result = await fetch("/api/admin/majors/scorecards/action", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: name, scorecardId: id, notes: notes.trim() }),
-    })
-    const body = await result.json().catch(() => null) as null | { error?: string; warning?: string }
-    setMessage(body?.error || body?.warning || (name === "verify_major_scorecard" ? "Score verified." : "Player score marked as needing correction."))
-    if (result.ok) await refreshQueue()
+    if (busyCardIdsRef.current.has(id)) return
+    busyCardIdsRef.current.add(id); setBusyCardIds((current) => new Set(current).add(id))
+    try {
+      const notes = name === "verify_major_scorecard" ? "" : window.prompt("Correction needed (required for the player audit trail)") || ""
+      if (name === "reopen_major_scorecard" && !notes.trim()) return
+      const result = await fetch("/api/admin/majors/scorecards/action", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: name, scorecardId: id, notes: notes.trim() }),
+      })
+      const body = await result.json().catch(() => null) as null | { error?: string; warning?: string }
+      setMessage(body?.error || body?.warning || (name === "verify_major_scorecard" ? "Score verified." : "Player score marked as needing correction."))
+      if (result.ok) {
+        if (name === "verify_major_scorecard") setCollapsedCardIds((current) => new Set(current).add(id))
+        await refreshQueue()
+      }
+    } finally {
+      busyCardIdsRef.current.delete(id); setBusyCardIds((current) => { const next = new Set(current); next.delete(id); return next })
+    }
   }
   async function toggleRound(day: MajorPlayDay) {
     const open = (day as MajorPlayDay & { scoring_entry_open?: boolean }).scoring_entry_open
@@ -73,7 +84,7 @@ export default function MajorVerificationPage() {
       : <label className={styles.eventPicker}>Event<select value={eventId} onChange={(event) => setEventId(event.target.value)}>{events.map((event) => <option key={event.id} value={event.id}>{event.name}</option>)}</select></label>}
     <section className={styles.roundControls}>{eventDays.map((day) => { const open = (day as MajorPlayDay & { scoring_entry_open?: boolean }).scoring_entry_open; return <article key={day.id}><strong>{majorRoundDayLabel(day.day_number)}</strong><span>{open ? "Player entry open" : "Player entry closed"}</span><button type="button" onClick={() => void toggleRound(day)}>{open ? "Close entry" : "Open entry"}</button></article> })}</section>
     {selectedEvent?.slug === "masters" && <MastersLateScoreAdmin eventId={eventId} />}
-    {[1, 2, 3, 4].map((round) => { const roundRooms = rooms.filter((room) => room.dayNumber === round); if (!roundRooms.length) return null; return <section key={round} className={styles.roundSection}><h2>ROUND {round}</h2>{roundRooms.map((room) => <RoomVerification key={room.key} room={room} event={selectedEvent} onAction={scoreAction} />)}</section> })}
+    {[1, 2, 3, 4].map((round) => { const roundRooms = rooms.filter((room) => room.dayNumber === round); if (!roundRooms.length) return null; return <section key={round} className={styles.roundSection}><h2>ROUND {round}</h2>{roundRooms.map((room) => <RoomVerification key={room.key} room={room} event={selectedEvent} onAction={scoreAction} busyCardIds={busyCardIds} collapsedCardIds={collapsedCardIds} />)}</section> })}
     {rooms.length === 0 && <p className={styles.empty}>No Masters scorecards have been submitted yet.</p>}{message && <p className={styles.message} role="status">{message}</p>}</div></main>
 }
 
@@ -83,11 +94,11 @@ function groupVerificationRooms(cards: MajorPlayerScorecard[], proofs: AdminRoom
   return [...groups.values()].toSorted((left, right) => left.dayNumber - right.dayNumber || (left.startsAt || "").localeCompare(right.startsAt || "") || left.roomLabel.localeCompare(right.roomLabel))
 }
 
-function RoomVerification({ room, event, onAction }: { room: RoomGroup; event?: MajorEvent; onAction: (name: "verify_major_scorecard" | "reopen_major_scorecard", id: string) => Promise<void> }) {
+function RoomVerification({ room, event, onAction, busyCardIds, collapsedCardIds }: { room: RoomGroup; event?: MajorEvent; onAction: (name: "verify_major_scorecard" | "reopen_major_scorecard", id: string) => Promise<void>; busyCardIds: Set<string>; collapsedCardIds: Set<string> }) {
   const verified = room.cards.filter((card) => card.status === "verified").length, waiting = room.cards.filter((card) => card.status === "submitted").length
   return <details className={styles.room} open={waiting > 0}><summary><div><strong>{room.roomLabel}</strong><span>{room.startsAt ? formatMastersAdminTime(room.startsAt, event?.schedule_timezone) : "Time pending"}</span></div><b>{room.proof ? "Room Scorecard: Uploaded" : "Room Scorecard: Missing"}</b><span>{verified} / {room.cards.length} VERIFIED · {waiting} WAITING</span></summary>
     <div className={styles.roomContext}><section><h3>ROOM ROSTER</h3><ul>{room.roster.map((player) => <li key={player.player_id}>{player.player_screen_name_snapshot}</li>)}</ul>{room.instructions && <><h3>ROOM INSTRUCTIONS</h3><p>{room.instructions}</p></>}</section><RoomProofViewer room={room} /></div>
-    <div className={styles.players}>{room.cards.toSorted((left, right) => left.player_screen_name_snapshot.localeCompare(right.player_screen_name_snapshot)).map((card) => <article key={card.id} className={styles.playerCard}><header><div><h3>{card.player_screen_name_snapshot}</h3><p>Submitted: {card.submitted_at ? formatMastersAdminDateTime(card.submitted_at, event?.schedule_timezone) : "Not submitted"}</p></div><strong>{formatMajorToPar(card.score_to_par ?? card.holes.reduce((sum, hole) => sum + hole.strokes - hole.par, 0))}</strong><span data-status={card.status}>{card.status === "reopened" ? "NEEDS CORRECTION" : card.status.toUpperCase()}</span></header><div className={styles.holes}>{card.holes.map((hole) => <span key={hole.hole_number}><small>H{hole.hole_number}</small><b>{hole.strokes}</b><em>Par {hole.par}</em></span>)}</div><div className={styles.actions}>{card.status === "submitted" && <button type="button" onClick={() => void onAction("verify_major_scorecard", card.id)}>VERIFY SCORE</button>}{["submitted", "verified"].includes(card.status) && <button type="button" onClick={() => void onAction("reopen_major_scorecard", card.id)}>NEEDS CORRECTION</button>}</div></article>)}</div>
+    <div className={styles.players}>{room.cards.toSorted((left, right) => left.player_screen_name_snapshot.localeCompare(right.player_screen_name_snapshot)).map((card) => <details key={card.id} className={styles.playerCard} open={card.status !== "verified" && !collapsedCardIds.has(card.id)}><summary><header><div><h3>{card.player_screen_name_snapshot}</h3><p>Submitted: {card.submitted_at ? formatMastersAdminDateTime(card.submitted_at, event?.schedule_timezone) : "Not submitted"}</p></div><strong>{formatMajorToPar(card.score_to_par ?? card.holes.reduce((sum, hole) => sum + hole.strokes - hole.par, 0))}</strong><span data-status={card.status}>{card.status === "reopened" ? "NEEDS CORRECTION" : card.status.toUpperCase()}</span></header></summary><div className={styles.holes}>{card.holes.map((hole) => <span key={hole.hole_number}><small>H{hole.hole_number}</small><b>{hole.strokes}</b><em>Par {hole.par}</em></span>)}</div><div className={styles.actions}>{card.status === "submitted" && <button type="button" disabled={busyCardIds.has(card.id)} onClick={() => void onAction("verify_major_scorecard", card.id)}>{busyCardIds.has(card.id) ? "VERIFYING..." : "VERIFY SCORE"}</button>}{["submitted", "verified"].includes(card.status) && <button type="button" onClick={() => void onAction("reopen_major_scorecard", card.id)}>NEEDS CORRECTION</button>}</div></details>)}</div>
   </details>
 }
 

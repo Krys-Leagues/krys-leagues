@@ -85,6 +85,22 @@ test("Masters verification is grouped round to room with shared proof and per-pl
   assert.match(summary, /rooms: Number\(mastersSummary\.rooms\)/)
 })
 
+test("Masters VERIFY SCORE is one-click, guarded against repeats, and collapses only after success", () => {
+  const desk = read("app/admin/majors/verification/page.tsx")
+  const page = read("app/admin/majors/verification/page.module.css")
+  const action = desk.slice(desk.indexOf("async function scoreAction"), desk.indexOf("async function toggleRound"))
+  assert.match(action, /name === "verify_major_scorecard" \? "" : window\.prompt/)
+  assert.doesNotMatch(action, /window\.confirm\(/)
+  assert.equal((action.match(/fetch\("\/api\/admin\/majors\/scorecards\/action"/g) || []).length, 1)
+  assert.match(desk, /busyCardIdsRef\.current\.has\(id\)/)
+  assert.match(desk, /disabled=\{busyCardIds\.has\(card\.id\)\}/)
+  assert.match(desk, /VERIFYING\.\.\./)
+  assert.match(desk, /setCollapsedCardIds\(\(current\) => new Set\(current\)\.add\(id\)\)/)
+  assert.match(desk, /open=\{card\.status !== "verified" && !collapsedCardIds\.has\(card\.id\)\}/)
+  assert.match(desk, /name === "reopen_major_scorecard" && !notes\.trim\(\)/)
+  assert.match(page, /playerCard > summary/)
+})
+
 test("public Masters tracker is separate from the player-only room gateway", () => {
   const home = read("app/page.tsx")
   const gateway = read("components/home/MastersRoomReminder.tsx")
