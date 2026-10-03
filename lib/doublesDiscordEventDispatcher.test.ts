@@ -25,7 +25,7 @@ test("disabled dispatcher never enqueues a real-season event", async () => {
 
 test("dispatcher acks successful worker processing", async () => {
   let acked = false
-  let claimed = true
+  const claimed = true
   const eventStore: DoublesDiscordEventStore = { enqueue: async () => ({ id: "1" }), claim: async () => claimed ? { id: "1", attempts: 0, eventType: "BOARD_REFRESH", seasonId: "next", division: "ELITE", channelId: "1335848394081570911", testMode: true, boardPayload: { content: "board" } } : null, ack: async () => { acked = true }, fail: async () => undefined, recoverStale: async () => undefined }
   const result = await processNextDoublesDiscordEvent({ eventStore, mappingStore, transport, enabled: true })
   assert.equal(result.status, "ACKED")

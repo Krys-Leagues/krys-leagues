@@ -23,6 +23,7 @@ import { supabase } from "@/lib/supabase"
 import styles from "./player-dashboard.module.css"
 
 const DASHBOARD_ERROR = "Your player dashboard is temporarily unavailable. Please try again."
+type DoublesDashboard = { memberships: Array<{ season_id: string; season_team_id: string }>; teams: Array<{ id: string; division: string; team_name_snapshot: string }>; fixtures: Array<{ id: string; game_number: number; division: string; home_season_team_id: string; away_season_team_id: string; home_team_name_snapshot: string; away_team_name_snapshot: string; home_course: string; away_course: string; status: string; arranged_at: string | null }>; drafts: Array<{ fixture_id: string; season_team_id: string; course_slot: string; status: string }>; evidence: Array<{ fixture_id: string; course_slot: string; status: string }>; standings: Array<{ division: string; team_name_snapshot: string; rank: number | null; points: number; wins: number; losses: number; ties: number; season_holes_won: number }> }
 
 export default function PlayerDashboardClient() {
   const [dashboard, setDashboard] = useState<PlayerDashboardPayload | null>(null)
@@ -30,6 +31,7 @@ export default function PlayerDashboardClient() {
   const [authRequired, setAuthRequired] = useState(false)
   const [message, setMessage] = useState("")
   const [selectedLeague, setSelectedLeague] = useState<DashboardLeagueKey | null>(null)
+  const [doubles, setDoubles] = useState<DoublesDashboard | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -67,6 +69,11 @@ export default function PlayerDashboardClient() {
 
       const currentLeagues = currentDashboardLeagues(response.data.leagues)
       setDashboard(response.data)
+      const doublesResponse = await fetch("/api/doubles/dashboard", { cache: "no-store" })
+      if (doublesResponse.ok) {
+        const doublesData = await doublesResponse.json() as DoublesDashboard
+        if (doublesData.memberships?.length) { setDoubles(doublesData); currentLeagues.push({ key: "doubles", label: "Doubles Match Play" }) }
+      }
       setSelectedLeague(selectedDashboardLeague(null, currentLeagues))
       setLoading(false)
     }
@@ -91,9 +98,11 @@ export default function PlayerDashboardClient() {
   const match = dashboard?.leagues.match ?? null
   const stroke = dashboard?.leagues.stroke ?? null
   const availableLeagues = dashboard ? currentDashboardLeagues(dashboard.leagues) : []
+  if (doubles?.memberships.length && !availableLeagues.some((league) => league.key === "doubles")) availableLeagues.push({ key: "doubles", label: "Doubles Match Play" })
   const activeLeague = selectedDashboardLeague(selectedLeague, availableLeagues)
   const membershipView = dashboard ? dashboardMembershipView(dashboard.leagues) : null
   const publicLeagueHref = activeLeague === "stroke" ? "/stroke" : "/match-play"
+  const activePublicLeagueHref = activeLeague === "doubles" ? "/league-play" : publicLeagueHref
 
   return (
     <main className={styles.page}>
@@ -141,16 +150,18 @@ export default function PlayerDashboardClient() {
                   <MatchDashboardCard match={match} />
                 ) : activeLeague === "stroke" ? (
                   <StrokeDashboardCard stroke={stroke} />
+                ) : activeLeague === "doubles" ? (
+                  <DoublesDashboardCard doubles={doubles} />
                 ) : (
                   <FutureLeagueCard league={availableLeagues.find((league) => league.key === activeLeague) ?? null} />
                 )}
 
                 <section className={styles.actionGrid}>
-                  <Link href={publicLeagueHref} className={styles.actionButton}>
-                    {activeLeague === "stroke" ? "Public Stroke" : "Public Match Play"}
+                  <Link href={activePublicLeagueHref} className={styles.actionButton}>
+                    {activeLeague === "stroke" ? "Public Stroke" : activeLeague === "doubles" ? "Public Doubles Live" : "Public Match Play"}
                   </Link>
                   <PlayerProfileNavLink className={styles.actionButton}>Player Profile</PlayerProfileNavLink>
-                  <Link href={publicLeagueHref} className={styles.actionButton}>View Standings</Link>
+                  {activeLeague === "doubles" ? <Link href={activePublicLeagueHref} className={styles.actionButton}>View Standings</Link> : <Link href={publicLeagueHref} className={styles.actionButton}>View Standings</Link>}
                   <Link href="/records" className={styles.actionButton}>View Records</Link>
                 </section>
               </>
@@ -162,6 +173,13 @@ export default function PlayerDashboardClient() {
       </div>
     </main>
   )
+}
+
+function DoublesDashboardCard({ doubles }: { doubles: DoublesDashboard | null }) {
+  if (!doubles?.memberships.length) return <section className={styles.futureLeague}><p className={styles.kicker}>DOUBLES MATCH PLAY</p><h2>Not currently rostered</h2><p>Your Doubles team workspace will appear after an approved season roster is published.</p></section>
+  const teamIds = new Set(doubles.memberships.map((membership) => membership.season_team_id))
+  const fixtures = doubles.fixtures.filter((fixture) => teamIds.has(fixture.home_season_team_id) || teamIds.has(fixture.away_season_team_id))
+  return <section className={styles.matchCard}><div className={styles.matchIdentity}><p>DOUBLES MATCH PLAY</p><h2>Team workspace</h2></div>{doubles.teams.filter((team) => teamIds.has(team.id)).map((team) => <div key={team.id} className={styles.dashboardSection}><h4>{team.team_name_snapshot}</h4><p>{team.division}</p></div>)}<div className={styles.dashboardSection}><h4>Current fixtures</h4>{fixtures.length === 0 ? <p className={styles.empty}>No published Doubles fixtures.</p> : fixtures.map((fixture) => <Link key={fixture.id} href={`/doubles/scorecard?fixture_id=${fixture.id}`} className={styles.assignmentRow}><span>GAME {fixture.game_number}</span><strong>{fixture.home_team_name_snapshot} vs {fixture.away_team_name_snapshot}</strong><small>{fixture.home_course} · {fixture.away_course}</small></Link>)}</div><div className={styles.dashboardSection}><h4>Standings</h4>{doubles.standings.filter((standing) => teamIds.has(doubles.teams.find((team) => team.team_name_snapshot === standing.team_name_snapshot)?.id || "")).map((standing) => <p key={`${standing.division}:${standing.team_name_snapshot}`}>{standing.rank ?? "—"}. {standing.team_name_snapshot} · {standing.points} pts · {standing.season_holes_won} holes won</p>)}</div></section>
 }
 
 function MembershipCoveragePending() {

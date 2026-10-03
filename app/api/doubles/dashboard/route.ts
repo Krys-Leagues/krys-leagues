@@ -10,13 +10,15 @@ export async function GET() {
   const playerId = typeof canonical.data === "string" ? canonical.data : null
   if (canonical.error || !playerId) return NextResponse.json({ error: "Canonical player identity is not linked" }, { status: 403 })
   const client = createDoublesRuntimeClient()
-  const memberships = await client.from("doubles_season_team_members").select("season_id,season_team_id,player_id,effective_from,effective_to").eq("player_id", playerId).eq("role", "member").order("season_id")
+  const memberships = await client.from("doubles_season_team_members").select("season_id,season_team_id,player_id,effective_from,effective_to").eq("player_id", playerId).in("role", ["MEMBER", "member"]).eq("active", true).is("effective_to", null).order("season_id")
   if (memberships.error) return NextResponse.json({ error: "Doubles history is unavailable" }, { status: 503 })
   const teamIds = Array.from(new Set((memberships.data || []).map((row) => row.season_team_id)))
   if (!teamIds.length) return NextResponse.json({ player_id: playerId, memberships: [], teams: [], fixtures: [], standings: [] })
   const teams = await client.from("doubles_managed_season_teams").select("id,season_id,division,order_position,team_name_snapshot,status,global_team_id").in("id", teamIds)
   const fixtures = await client.from("doubles_managed_fixtures").select("*").or(`home_season_team_id.in.(${teamIds.join(",")}),away_season_team_id.in.(${teamIds.join(",")})`).order("game_number")
+  const drafts = await client.from("doubles_team_course_drafts").select("fixture_id,season_team_id,course_slot,course_name,status,home_holes_won,away_holes_won,updated_at").in("season_team_id", teamIds)
+  const evidence = await client.from("doubles_course_evidence").select("fixture_id,course_slot,status,original_filename,uploaded_at").in("fixture_id", (fixtures.data || []).map((fixture) => fixture.id))
   const standings = await client.from("doubles_managed_standings").select("*").in("season_team_id", teamIds).order("rank")
-  if (teams.error || fixtures.error || standings.error) return NextResponse.json({ error: "Doubles dashboard data is unavailable" }, { status: 503 })
-  return NextResponse.json({ player_id: playerId, memberships: memberships.data || [], teams: teams.data || [], fixtures: fixtures.data || [], standings: standings.data || [] })
+  if (teams.error || fixtures.error || drafts.error || evidence.error || standings.error) return NextResponse.json({ error: "Doubles dashboard data is unavailable" }, { status: 503 })
+  return NextResponse.json({ player_id: playerId, memberships: memberships.data || [], teams: teams.data || [], fixtures: fixtures.data || [], drafts: drafts.data || [], evidence: evidence.data || [], standings: standings.data || [] })
 }

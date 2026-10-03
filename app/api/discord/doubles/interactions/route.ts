@@ -23,7 +23,7 @@ export async function POST(request: Request) {
   if (player.error || !player.data?.id) return NextResponse.json({ error: "Canonical Discord player identity could not be resolved" }, { status: 403 })
   const fixture = await client.from("doubles_managed_fixtures").select("id,home_season_team_id,away_season_team_id,season_id").eq("id", signed.fixtureId).maybeSingle()
   if (fixture.error || !fixture.data) return NextResponse.json({ error: "Doubles fixture not found" }, { status: 404 })
-  const members = await client.from("doubles_season_team_members").select("player_id").eq("season_id", fixture.data.season_id).in("season_team_id", [fixture.data.home_season_team_id, fixture.data.away_season_team_id]).eq("role", "member").is("effective_to", null)
+  const members = await client.from("doubles_season_team_members").select("player_id").eq("season_id", fixture.data.season_id).in("season_team_id", [fixture.data.home_season_team_id, fixture.data.away_season_team_id]).in("role", ["MEMBER", "member"]).eq("active", true).is("effective_to", null)
   const participantIds = [...new Set((members.data || []).map((row) => row.player_id as string))]
   if (members.error || participantIds.length !== 4 || !participantIds.includes(player.data.id)) return NextResponse.json({ error: "Only the four scheduled Doubles players may interact" }, { status: 403 })
   if (signed.action === "scorecard") {

@@ -10,14 +10,19 @@ export default function DoublesAdminPage() {
       </p>
 
       <div style={grid}>
+        <Link href="/admin/doubles/teams" style={card}>
+          <strong>Canonical Teams</strong>
+          <span>Manage persistent teams and season-scoped rosters.</span>
+        </Link>
+
         <Link href="/admin/doubles/schedule" style={card}>
-          <strong>Setup Season</strong>
-          <span>Create and manage Doubles seasons.</span>
+          <strong>Schedule Fixtures</strong>
+          <span>Build Home/Away fixtures, actual courses, and publication.</span>
         </Link>
 
         <Link href="/admin/doubles/results" style={card}>
-          <strong>Score Season</strong>
-          <span>Enter Doubles match results.</span>
+          <strong>Authoritative Review</strong>
+          <span>Review two-course team submissions and verify results.</span>
         </Link>
 
         <Link href="/doubles-standings" style={card}>
