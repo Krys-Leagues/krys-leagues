@@ -97,14 +97,22 @@ test("published instruction-only save uses the narrow RPC and keeps the full sav
 })
 
 test("weekend rooms can be prepared privately before player classifications are finalized", () => {
-  const migration = readFileSync(new URL("../supabase/migrations/20261002205037_masters_weekend_rooms_independent_of_classification.sql", import.meta.url), "utf8")
+  const migration = readFileSync(new URL("../supabase/migrations/20261002230000_masters_weekend_room_publication_independent_of_classification.sql", import.meta.url), "utf8")
   const saveRoom = migration.match(/create or replace function public\.save_major_schedule_group[\s\S]*?\n\$function\$;/i)?.[0] || ""
 
-  assert.match(saveRoom, /coalesce\(p_is_published, false\)\s+and play_day_number > 2/i)
-  assert.match(saveRoom, /competition_status in \('main', 'secondary'\)/i)
-  assert.match(saveRoom, /Weekend rooms may be published only after every assigned player has a staged competition classification/i)
+  assert.match(saveRoom, /p_is_published boolean/i)
+  assert.doesNotMatch(saveRoom, /major_entry_weekend_status|competition_status|staged competition classification/i)
   assert.doesNotMatch(saveRoom, /weekend\.competition_status\s*=\s*p_competition/i)
   assert.doesNotMatch(saveRoom, /Weekend room assignments must match each player/i)
+})
+
+test("physical weekend room publication is independent while field publication remains classified", () => {
+  const roomMigration = readFileSync(new URL("../supabase/migrations/20261002230000_masters_weekend_room_publication_independent_of_classification.sql", import.meta.url), "utf8")
+  const baseSchema = readFileSync(new URL("../major_masters_signup_groups_and_cut.sql", import.meta.url), "utf8")
+  const saveRoom = roomMigration.match(/create or replace function public\.save_major_schedule_group[\s\S]*?\n\$function\$;/i)?.[0] || ""
+  assert.doesNotMatch(saveRoom, /Weekend rooms may be published only after/i)
+  assert.match(roomMigration, /weekend field publication still requires classification finalization/i)
+  assert.match(baseSchema, /Every active entrant must have a staged Main Event or secondary-field decision before publication/i)
 })
 
 test("mixed weekend classifications may share one physical room without changing selected times", () => {
