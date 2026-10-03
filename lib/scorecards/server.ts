@@ -12,6 +12,8 @@ import type { ScorecardAdapterContext } from "./adapters/contracts"
 import { resolveAuthoritativeCourse, type AuthoritativeCourse } from "./courseAuthority"
 import { getAuthenticatedDiscordId } from "@/lib/discordPlayerLogin"
 
+type EnabledScorecardAdapterKey = "pyp" | "stroke" | "match"
+
 export const SHARED_SCORECARD_BUCKET = "shared-scorecard-evidence"
 
 export function createScorecardServiceClient() {
@@ -221,7 +223,7 @@ export type WebsiteScorecardContext = {
   opponentLabel: string | null
   submissionComponentKey: string
   participants: Array<{ roleKey: string; playerId: string | null; teamId: string | null; displayName: string; participantMetadata?: Record<string, unknown> }>
-  evidence: Array<{ componentKey: string; label: string; reviewStatus: string | null }>
+  evidence: Array<{ componentKey: string; label: string; reviewStatus: string | null; evidenceId: string | null; signedUrl: string | null }>
 }
 
 function roleForPlayer(context: ScorecardAdapterContext, playerId: string) {
@@ -239,22 +241,31 @@ export async function loadWebsiteScorecardContexts(client: SupabaseClient, playe
   const append = async (adapterKey: WebsiteScorecardContext["adapterKey"], sourceKey: string) => {
     try {
       const context = adapterKey === "pyp" ? await resolvePypScorecardContext(client, sourceKey, "course1", undefined) : await resolveScorecardContext(client, adapterKey, sourceKey)
-      let memberRole = roleForPlayer(context, playerId)
+      const memberRole = roleForPlayer(context, playerId)
       if (!memberRole) return
       const persisted = await client.from("shared_scorecard_contexts").select("id").eq("adapter_key", adapterKey).eq("source_key", sourceKey).maybeSingle()
       if (persisted.error) throw persisted.error
-      const evidenceRows = persisted.data ? await client.from("shared_scorecard_evidence").select("component_key,review_status").eq("context_id", persisted.data.id).in("review_status", ["uploading", "submitted", "under_review", "verified"]) : { data: [], error: null }
+      const evidenceRows = persisted.data ? await client.from("shared_scorecard_evidence").select("id,component_key,review_status,storage_path").eq("context_id", persisted.data.id).in("review_status", ["uploading", "submitted", "under_review", "reopened", "verified"]) : { data: [], error: null }
       if (evidenceRows.error) throw evidenceRows.error
       let expected: Array<{ componentKey: string; label: string }>
       if (adapterKey === "pyp") {
         const course2 = await resolvePypScorecardContext(client, sourceKey, "course2", undefined)
         expected = [{ componentKey: "course1", label: `Course 1 · ${context.courseName} ${context.difficulty}` }, { componentKey: "course2", label: `Course 2 · ${course2.courseName} ${course2.difficulty}` }]
       } else {
-        const componentKey = adapterKey === "stroke" ? "primary" : memberRole.roleKey
+        const componentKey = "primary"
         expected = [{ componentKey, label: `${context.courseName} ${context.difficulty}` }]
       }
       const opponentLabel = context.participants.filter((participant) => participant.roleKey !== memberRole?.roleKey).map((participant) => participant.displayName).join(" vs ") || null
-      contexts.push({ adapterKey, sourceKey, seasonNumber: context.seasonNumber, divisionNumber: context.divisionNumber, gameNumber: context.gameNumber, divisionLabel: context.divisionLabel, courseName: context.courseName, difficulty: context.difficulty, opponentLabel, submissionComponentKey: adapterKey === "pyp" ? "course1" : adapterKey === "stroke" ? "primary" : memberRole.roleKey, participants: context.participants, evidence: expected.map((slot) => ({ ...slot, reviewStatus: (evidenceRows.data || []).find((row) => row.component_key === slot.componentKey)?.review_status || null })) })
+      const evidence = await Promise.all(expected.map(async (slot) => {
+        const row = (evidenceRows.data || []).find((item) => item.component_key === slot.componentKey) as { id?: string; review_status?: string; storage_path?: string } | undefined
+        let signedUrl: string | null = null
+        if (row?.storage_path && row.review_status !== "replaced") {
+          const signed = await client.storage.from(SHARED_SCORECARD_BUCKET).createSignedUrl(row.storage_path, 900)
+          if (!signed.error) signedUrl = signed.data.signedUrl
+        }
+        return { ...slot, reviewStatus: row?.review_status || null, evidenceId: row?.id || null, signedUrl }
+      }))
+      contexts.push({ adapterKey, sourceKey, seasonNumber: context.seasonNumber, divisionNumber: context.divisionNumber, gameNumber: context.gameNumber, divisionLabel: context.divisionLabel, courseName: context.courseName, difficulty: context.difficulty, opponentLabel, submissionComponentKey: adapterKey === "pyp" ? "course1" : "primary", participants: context.participants, evidence })
     } catch { /* Current roster/result guards intentionally hide stale or completed games. */ }
   }
   for (const row of (pypRows.data || []) as Array<{ id: string }>) await append("pyp", row.id)
@@ -263,17 +274,20 @@ export async function loadWebsiteScorecardContexts(client: SupabaseClient, playe
   return contexts
 }
 
-export async function storeWebsiteScorecardEvidence(options: { client: SupabaseClient; playerId: string; adapterKey: "pyp" | "stroke" | "match"; sourceKey: string; componentKey?: string; filename: string; contentType: string; bytes: Uint8Array }) {
+export async function storeWebsiteScorecardEvidence(options: { client: SupabaseClient; playerId: string; adapterKey: "pyp" | "stroke" | "match"; sourceKey: string; componentKey?: string; filename: string; contentType: string; bytes: Uint8Array; action?: "upload" | "replace"; expectedEvidenceId?: string }) {
   if (!isSupportedScorecardEvidence(options.contentType, options.bytes.byteLength)) return { stored: false as const, reason: "invalid_image" as const }
   const context = options.adapterKey === "pyp" ? await resolvePypScorecardContext(options.client, options.sourceKey, options.componentKey, undefined) : await resolveScorecardContext(options.client, options.adapterKey, options.sourceKey)
-  let participant = roleForPlayer(context, options.playerId)
+  const participant = roleForPlayer(context, options.playerId)
   if (!participant) return { stored: false as const, reason: "not_participant" as const }
-  const componentKey = options.adapterKey === "stroke" ? "primary" : options.adapterKey === "pyp" ? options.componentKey || "" : participant.roleKey
+  const componentKey = options.adapterKey === "pyp" ? options.componentKey || "" : "primary"
   if (!componentKey || (options.adapterKey === "pyp" && componentKey !== "course1" && componentKey !== "course2")) return { stored: false as const, reason: "component_required" as const }
   const persisted = await ensureSharedScorecardContext(options.client, context)
-  const existing = await options.client.from("shared_scorecard_evidence").select("id").eq("context_id", persisted.contextId).eq("component_key", componentKey).in("review_status", ["uploading", "submitted", "under_review", "verified"]).limit(1)
+  const existing = await options.client.from("shared_scorecard_evidence").select("id,review_status,sha256,storage_path").eq("context_id", persisted.contextId).eq("component_key", componentKey).in("review_status", ["uploading", "submitted", "under_review", "reopened", "verified"]).limit(1)
   if (existing.error) throw new Error("SCORECARD_DUPLICATE_CHECK_FAILED")
-  if ((existing.data || []).length) return { stored: false as const, reason: "already_submitted" as const }
+  const currentEvidence = (existing.data || [])[0] as { id?: string; review_status?: string; sha256?: string } | undefined
+  if (currentEvidence && options.action !== "replace") return { stored: false as const, reason: "already_submitted" as const }
+  if (options.action === "replace" && options.expectedEvidenceId && currentEvidence?.id !== options.expectedEvidenceId) return { stored: false as const, reason: "evidence_changed" as const }
+  if (options.action === "replace" && currentEvidence) return replaceScorecardEvidence({ ...options, contextId: persisted.contextId, componentKey, previousEvidence: currentEvidence, submittedByPlayerId: options.playerId, submittedByDiscordUserId: null })
   const evidenceId = randomUUID()
   const storagePath = `${options.adapterKey}/${persisted.contextId}/${componentKey}/${evidenceId}-${safeScorecardEvidenceFilename(options.filename, options.contentType)}`
   const reservation = await options.client.from("shared_scorecard_evidence").insert({ id: evidenceId, context_id: persisted.contextId, component_key: componentKey, submitted_by_player_id: options.playerId, submitted_by_discord_user_id: null, submission_source: "website_player", storage_path: storagePath, original_filename: options.filename.slice(0, 255), content_type: options.contentType.toLowerCase(), file_size_bytes: options.bytes.byteLength, sha256: createHash("sha256").update(options.bytes).digest("hex"), review_status: "uploading" })
@@ -282,7 +296,7 @@ export async function storeWebsiteScorecardEvidence(options: { client: SupabaseC
   if (upload.error) { await options.client.from("shared_scorecard_evidence").update({ review_status: "upload_failed" }).eq("id", evidenceId); throw new Error("SCORECARD_EVIDENCE_STORAGE_FAILED") }
   const complete = await options.client.from("shared_scorecard_evidence").update({ review_status: "submitted", submitted_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq("id", evidenceId).eq("review_status", "uploading")
   if (complete.error) throw new Error("SCORECARD_EVIDENCE_FINALIZE_FAILED")
-  return { stored: true as const, evidenceId, adapterKey: options.adapterKey, sourceKey: options.sourceKey, componentKey }
+  return { stored: true as const, evidenceId, adapterKey: options.adapterKey, sourceKey: options.sourceKey, componentKey, status: "submitted" as const }
 }
 
 export async function ensureSharedScorecardContext(client: SupabaseClient, context: ScorecardAdapterContext) {
@@ -332,9 +346,79 @@ export async function ensureSharedScorecardContext(client: SupabaseClient, conte
   return { contextId, participants: participantResponse.data || [] }
 }
 
-export async function authorizeDiscordScorecard(options: {
+type EvidenceReplacementOptions = {
   client: SupabaseClient
-  adapterKey: ScorecardAdapterKey
+  adapterKey: EnabledScorecardAdapterKey
+  sourceKey: string
+  contextId: string
+  componentKey: string
+  filename: string
+  contentType: string
+  bytes: Uint8Array
+  previousEvidence: { id?: string; review_status?: string; sha256?: string }
+  submittedByPlayerId: string | null
+  submittedByDiscordUserId: string | null
+  seasonId?: string | null
+  divisionNumber?: number | null
+}
+
+async function replaceScorecardEvidence(options: EvidenceReplacementOptions) {
+  const previousId = options.previousEvidence.id
+  const previousStatus = options.previousEvidence.review_status
+  if (!previousId || !previousStatus) return { stored: false as const, reason: "already_submitted" as const }
+  if (previousStatus === "verified") return { stored: false as const, reason: "verified_locked" as const }
+  const sha256 = createHash("sha256").update(options.bytes).digest("hex")
+  if (options.previousEvidence.sha256 === sha256) return { stored: false as const, reason: "already_submitted" as const }
+  const evidenceId = randomUUID()
+  const auditId = randomUUID()
+  const safeName = safeScorecardEvidenceFilename(options.filename, options.contentType)
+  const storagePath = `${options.adapterKey}/${options.contextId}/${options.componentKey}/${evidenceId}-${safeName}`
+  const now = new Date().toISOString()
+  const retired = await options.client.from("shared_scorecard_evidence").update({ review_status: "replaced", replaced_from_status: previousStatus, replaced_at: now }).eq("id", previousId).eq("context_id", options.contextId).in("review_status", ["submitted", "under_review", "reopened"]).select("id")
+  if (retired.error) throw new Error("SCORECARD_EVIDENCE_REPLACEMENT_FAILED")
+  if (!(retired.data || []).length) return { stored: false as const, reason: "evidence_changed" as const }
+  const reservation = await options.client.from("shared_scorecard_evidence").insert({
+    id: evidenceId,
+    context_id: options.contextId,
+    component_key: options.componentKey,
+    submitted_by_player_id: options.submittedByPlayerId,
+    submitted_by_discord_user_id: options.submittedByDiscordUserId,
+    submission_source: options.submittedByDiscordUserId ? "discord_player" : "website_player",
+    storage_path: storagePath,
+    original_filename: options.filename.slice(0, 255),
+    content_type: options.contentType.toLowerCase(),
+    file_size_bytes: options.bytes.byteLength,
+    sha256,
+    review_status: "uploading",
+  })
+  if (reservation.error) {
+    await options.client.from("shared_scorecard_evidence").update({ review_status: previousStatus, replaced_from_status: null, replaced_at: null }).eq("id", previousId).eq("review_status", "replaced")
+    if (reservation.error.code === "23505") return { stored: false as const, reason: "already_submitted" as const }
+    throw new Error("SCORECARD_EVIDENCE_REPLACEMENT_FAILED")
+  }
+  const audit = await options.client.from("shared_scorecard_evidence_replacements").insert({ id: auditId, context_id: options.contextId, component_key: options.componentKey, previous_evidence_id: previousId, new_evidence_id: evidenceId, replaced_by_player_id: options.submittedByPlayerId, replaced_by_discord_user_id: options.submittedByDiscordUserId, previous_review_status: previousStatus, replacement_status: "reserved" })
+  if (audit.error) {
+    await options.client.from("shared_scorecard_evidence").update({ review_status: "upload_failed" }).eq("id", evidenceId)
+    await options.client.from("shared_scorecard_evidence").update({ review_status: previousStatus, replaced_from_status: null, replaced_at: null }).eq("id", previousId).eq("review_status", "replaced")
+    throw new Error("SCORECARD_EVIDENCE_REPLACEMENT_FAILED")
+  }
+  await options.client.from("shared_scorecard_evidence").update({ replaced_by_evidence_id: evidenceId, replacement_audit_id: auditId }).eq("id", previousId)
+  const upload = await options.client.storage.from(SHARED_SCORECARD_BUCKET).upload(storagePath, options.bytes, { contentType: options.contentType.toLowerCase(), cacheControl: "3600", upsert: false })
+  if (upload.error) {
+    await options.client.from("shared_scorecard_evidence").update({ review_status: "upload_failed" }).eq("id", evidenceId)
+    await options.client.from("shared_scorecard_evidence_replacements").update({ replacement_status: "rolled_back" }).eq("id", auditId)
+    await options.client.from("shared_scorecard_evidence").update({ review_status: previousStatus, replaced_by_evidence_id: null, replacement_audit_id: null, replaced_from_status: null, replaced_at: null }).eq("id", previousId).eq("review_status", "replaced")
+    throw new Error("SCORECARD_EVIDENCE_STORAGE_FAILED")
+  }
+  const complete = await options.client.from("shared_scorecard_evidence").update({ review_status: "submitted", submitted_at: now, updated_at: now }).eq("id", evidenceId).eq("review_status", "uploading")
+  if (complete.error) throw new Error("SCORECARD_EVIDENCE_FINALIZE_FAILED")
+  await options.client.from("shared_scorecard_evidence_replacements").update({ replacement_status: "completed", completed_at: new Date().toISOString() }).eq("id", auditId).eq("replacement_status", "reserved")
+  return { stored: true as const, replaced: true as const, evidenceId, adapterKey: options.adapterKey, sourceKey: options.sourceKey, componentKey: options.componentKey, seasonId: options.seasonId, divisionNumber: options.divisionNumber, status: "submitted" as const }
+}
+
+export async function loadDiscordScorecardState(options: {
+  client: SupabaseClient
+  adapterKey: EnabledScorecardAdapterKey
   sourceKey: string
   discordUserId: string
   componentKey?: string
@@ -342,28 +426,34 @@ export async function authorizeDiscordScorecard(options: {
 }) {
   const playerId = await resolveCanonicalDiscordPlayer(options.client, options.discordUserId)
   if (!playerId) return { authorized: false as const, reason: "identity_unavailable" as const }
-  const context = options.adapterKey === "pyp"
-    ? await resolvePypScorecardContext(options.client, options.sourceKey, options.componentKey, options.courseName)
-    : await resolveScorecardContext(options.client, options.adapterKey, options.sourceKey)
-  if (!context.participants.some((participant) => participant.playerId === playerId)) {
-    return { authorized: false as const, reason: "not_participant" as const }
-  }
+  const context = options.adapterKey === "pyp" ? await resolvePypScorecardContext(options.client, options.sourceKey, options.componentKey, options.courseName) : await resolveScorecardContext(options.client, options.adapterKey, options.sourceKey)
+  if (!context.participants.some((participant) => participant.playerId === playerId)) return { authorized: false as const, reason: "not_participant" as const }
+  const componentKey = options.adapterKey === "pyp" ? options.componentKey || "" : "primary"
+  if (!componentKey) return { authorized: false as const, reason: "component_required" as const }
   const persisted = await ensureSharedScorecardContext(options.client, context)
-  const existing = await options.client
-    .from("shared_scorecard_evidence")
-    .select("id")
-    .eq("context_id", persisted.contextId)
-    .eq("component_key", options.adapterKey === "pyp" ? options.componentKey || "" : "primary")
-    .in("review_status", ["uploading", "submitted", "under_review", "verified"])
-    .limit(1)
+  const existing = await options.client.from("shared_scorecard_evidence").select("id,review_status,storage_path,sha256").eq("context_id", persisted.contextId).eq("component_key", componentKey).in("review_status", ["uploading", "submitted", "under_review", "reopened", "verified"]).limit(1)
   if (existing.error) throw new Error("SCORECARD_DUPLICATE_CHECK_FAILED")
-  if ((existing.data || []).length > 0) return { authorized: false as const, reason: "already_submitted" as const }
-  return { authorized: true as const, playerId, context, ...persisted }
+  const evidence = ((existing.data || [])[0] || null) as { id: string; review_status: string; storage_path: string; sha256: string } | null
+  return { authorized: true as const, playerId, context, componentKey, contextId: persisted.contextId, evidence }
+}
+
+export async function authorizeDiscordScorecard(options: {
+  client: SupabaseClient
+  adapterKey: EnabledScorecardAdapterKey
+  sourceKey: string
+  discordUserId: string
+  componentKey?: string
+  courseName?: string
+}) {
+  const state = await loadDiscordScorecardState(options)
+  if (!state.authorized) return state
+  if (state.evidence) return { authorized: false as const, reason: state.evidence.review_status === "verified" ? "verified_locked" as const : "already_submitted" as const }
+  return state
 }
 
 export async function storeDiscordScorecardEvidence(options: {
   client: SupabaseClient
-  adapterKey: ScorecardAdapterKey
+  adapterKey: EnabledScorecardAdapterKey
   sourceKey: string
   discordUserId: string
   filename: string
@@ -371,21 +461,30 @@ export async function storeDiscordScorecardEvidence(options: {
   bytes: Uint8Array
   componentKey?: string
   courseName?: string
+  action?: "upload" | "replace"
+  expectedEvidenceId?: string
 }) {
   if (!isSupportedScorecardEvidence(options.contentType, options.bytes.byteLength)) {
     return { stored: false as const, reason: "invalid_image" as const }
   }
-  const authorization = await authorizeDiscordScorecard(options)
-  if (!authorization.authorized) return { stored: false as const, reason: authorization.reason }
+  const state = await loadDiscordScorecardState(options)
+  if (!state.authorized) return { stored: false as const, reason: state.reason }
+  if (options.action === "replace") {
+    if (options.expectedEvidenceId && state.evidence?.id !== options.expectedEvidenceId) return { stored: false as const, reason: "evidence_changed" as const }
+    if (!state.evidence) return { stored: false as const, reason: "not_submitted" as const }
+    return replaceScorecardEvidence({ ...options, contextId: state.contextId, componentKey: state.componentKey, previousEvidence: state.evidence, submittedByPlayerId: state.playerId, submittedByDiscordUserId: options.discordUserId, seasonId: state.context.seasonId, divisionNumber: state.context.divisionNumber })
+  }
+  if (state.evidence) return { stored: false as const, reason: state.evidence.review_status === "verified" ? "verified_locked" as const : "already_submitted" as const }
   const evidenceId = randomUUID()
   const safeName = safeScorecardEvidenceFilename(options.filename, options.contentType)
-  const storagePath = `${options.adapterKey}/${authorization.contextId}/${options.componentKey || "primary"}/${evidenceId}-${safeName}`
+  const componentKey = state.componentKey
+  const storagePath = `${options.adapterKey}/${state.contextId}/${componentKey}/${evidenceId}-${safeName}`
   const sha256 = createHash("sha256").update(options.bytes).digest("hex")
   const reservation = await options.client.from("shared_scorecard_evidence").insert({
     id: evidenceId,
-    context_id: authorization.contextId,
-    component_key: options.componentKey || "primary",
-    submitted_by_player_id: authorization.playerId,
+    context_id: state.contextId,
+    component_key: componentKey,
+    submitted_by_player_id: state.playerId,
     submitted_by_discord_user_id: options.discordUserId,
     submission_source: "discord_player",
     storage_path: storagePath,
@@ -419,7 +518,9 @@ export async function storeDiscordScorecardEvidence(options: {
     evidenceId,
     adapterKey: options.adapterKey,
     sourceKey: options.sourceKey,
-    seasonId: authorization.context.seasonId,
-    divisionNumber: authorization.context.divisionNumber,
+    componentKey,
+    seasonId: state.context.seasonId,
+    divisionNumber: state.context.divisionNumber,
+    status: "submitted" as const,
   }
 }

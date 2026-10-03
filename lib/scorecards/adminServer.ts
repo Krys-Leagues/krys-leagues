@@ -95,7 +95,7 @@ export async function loadScorecardReviewContext(client: SupabaseClient, evidenc
     client.from("shared_scorecard_participants").select("id,role_key,player_id,team_id,display_name_snapshot,participant_metadata").eq("context_id", evidence.data.context_id).order("role_key"),
     client.from("shared_scorecards").select("id,participant_id,component_key,played_date,played_date_source,card_date_text,review_status,total_strokes,total_par,score_to_par,shared_scorecard_holes(hole_number,par,strokes)").eq("context_id", evidence.data.context_id),
     client.from("shared_scorecard_context_components").select("component_key,course_id,course_code,course_name_snapshot,difficulty,par_snapshot").eq("context_id", evidence.data.context_id),
-    client.from("shared_scorecard_evidence").select("id,component_key,storage_bucket,storage_path,original_filename,review_status,submitted_at,submitted_by_player_id").eq("context_id", evidence.data.context_id).in("review_status", ["submitted", "under_review", "verified"]),
+    client.from("shared_scorecard_evidence").select("id,component_key,storage_bucket,storage_path,original_filename,review_status,submitted_at,submitted_by_player_id").eq("context_id", evidence.data.context_id).in("review_status", ["submitted", "under_review", "reopened", "verified"]),
   ])
   if (context.error || participants.error || existingCards.error || components.error || evidenceItems.error) throw new Error("SCORECARD_REVIEW_LOAD_FAILED")
   const signedItems = await Promise.all((evidenceItems.data || []).map(async (item) => ({ ...item, signedUrl: (await client.storage.from(String(item.storage_bucket)).createSignedUrl(String(item.storage_path), 900)).data?.signedUrl || "" })))

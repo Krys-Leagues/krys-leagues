@@ -1,6 +1,6 @@
 # Shared scorecard platform
 
-Status: local foundation only. The migration has not been executed and no production configuration has been changed.
+Status: PYP, Stroke, and Match website/Discord scorecard intake is live. Doubles remains blocked.
 
 ## Audit result
 
@@ -51,6 +51,12 @@ Required future configuration (not configured here):
 - Website and bot: the same high-entropy `SCORECARD_BRIDGE_SECRET`.
 - Bot: `KRYS_LEAGUES_API_BASE_URL`.
 - Website: existing Supabase service credential for private storage and server-only adapter work.
+
+## Direct links and shared evidence
+
+Discord status and authorization responses include a signed `/scorecards?fixture=...` navigation link. The token contains only the enabled adapter, exact fixture source key, and PYP component when applicable; it contains no player identity or storage path. The website validates the signed target, then still loads every authorized active context for the canonical signed-in player.
+
+Match uses one `primary` evidence component for the fixture, so either participant sees the same private upload and either can replace it while it is submitted, under review, or reopened. Each replacement keeps the previous private object and writes a service-only audit row. Verified evidence is locked. PYP retains separate Course 1 and Course 2 evidence components. The Discord status bridge reports `SUBMIT`, `SUBMITTED`, or `VERIFIED` without polling.
 
 ## Player history
 

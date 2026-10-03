@@ -15,12 +15,14 @@ export async function POST(request: Request) {
   const adapterKey = form.get("adapterKey")
   const sourceKey = form.get("sourceKey")
   const componentKey = form.get("componentKey")
+  const action = form.get("action") === "replace" ? "replace" as const : "upload" as const
+  const expectedEvidenceId = typeof form.get("expectedEvidenceId") === "string" ? String(form.get("expectedEvidenceId")) : undefined
   const file = form.get("file")
   if (!["pyp", "stroke", "match"].includes(String(adapterKey)) || typeof sourceKey !== "string" || !sourceKey || !(file instanceof File)) return NextResponse.json({ error: "A valid scorecard context and image are required." }, { status: 400 })
   if (adapterKey === "pyp" && componentKey !== "course1" && componentKey !== "course2") return NextResponse.json({ error: "Choose Course 1 or Course 2." }, { status: 400 })
   try {
-    const result = await storeWebsiteScorecardEvidence({ client: service, playerId: identity.playerId, adapterKey: adapterKey as "pyp" | "stroke" | "match", sourceKey, componentKey: typeof componentKey === "string" ? componentKey : undefined, filename: file.name, contentType: file.type, bytes: new Uint8Array(await file.arrayBuffer()) })
-    if (!result.stored) return NextResponse.json({ error: result.reason === "already_submitted" ? "This scorecard component is already submitted or under review." : "This scorecard image could not be accepted." }, { status: 409 })
+    const result = await storeWebsiteScorecardEvidence({ client: service, playerId: identity.playerId, adapterKey: adapterKey as "pyp" | "stroke" | "match", sourceKey, componentKey: typeof componentKey === "string" ? componentKey : undefined, filename: file.name, contentType: file.type, bytes: new Uint8Array(await file.arrayBuffer()), action, expectedEvidenceId })
+    if (!result.stored) return NextResponse.json({ error: result.reason === "verified_locked" ? "Verified scorecard evidence cannot be replaced." : result.reason === "already_submitted" ? "This scorecard component is already submitted or under review." : "This scorecard image could not be accepted." }, { status: 409 })
     return NextResponse.json(result, { status: 201 })
   } catch (caught) {
     return NextResponse.json({ error: caught instanceof Error ? caught.message : "Scorecard upload failed." }, { status: 400 })
