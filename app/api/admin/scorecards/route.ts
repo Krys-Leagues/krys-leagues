@@ -16,7 +16,7 @@ export async function GET(request: Request) {
   try {
     if (UUID.test(evidenceId)) return json(await loadScorecardReviewContext(service, evidenceId))
     const queue = await service.from("shared_scorecard_evidence")
-      .select("id,review_status,submitted_at,original_filename,shared_scorecard_contexts(adapter_key,season_number,division_label,game_number,course_name_snapshot,difficulty)")
+      .select("id,component_key,review_status,submitted_at,original_filename,shared_scorecard_contexts(adapter_key,season_number,division_label,game_number,course_name_snapshot,difficulty)")
       .in("review_status", ["submitted", "under_review"])
       .order("submitted_at", { ascending: true }).limit(100)
     if (queue.error) throw queue.error

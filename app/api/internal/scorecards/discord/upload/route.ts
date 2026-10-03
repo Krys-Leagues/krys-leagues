@@ -21,14 +21,16 @@ export async function POST(request: Request) {
   const sourceKey = header(request, "x-krys-scorecard-source", 200)
   const discordUserId = header(request, "x-krys-discord-user-id", 30)
   const filename = header(request, "x-krys-file-name", 255)
+  const componentKey = header(request, "x-krys-scorecard-component", 40) || "primary"
+  const courseName = header(request, "x-krys-scorecard-course", 200) || undefined
   const contentType = header(request, "content-type", 80).toLowerCase()
-  if (!adapterKey || !sourceKey || !/^\d+$/.test(discordUserId) || !filename) {
+  if (!adapterKey || !sourceKey || !/^\d+$/.test(discordUserId) || !filename || !/^[a-z][a-z0-9_]{0,39}$/.test(componentKey)) {
     return NextResponse.json({ stored: false, reason: "invalid_request" }, { status: 400 })
   }
   try {
     const result = await storeDiscordScorecardEvidence({
       client: createScorecardServiceClient(), adapterKey, sourceKey, discordUserId,
-      filename, contentType, bytes: verification.body,
+      filename, contentType, bytes: verification.body, componentKey, courseName,
     })
     if (!result.stored) {
       const status = result.reason === "already_submitted" ? 409 : result.reason === "invalid_image" ? 400 : 403

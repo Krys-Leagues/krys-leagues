@@ -6,7 +6,7 @@ import { authorizeDiscordScorecard, createScorecardServiceClient } from "@/lib/s
 
 export const runtime = "nodejs"
 
-type Body = { adapterKey?: unknown; sourceKey?: unknown; discordUserId?: unknown }
+type Body = { adapterKey?: unknown; sourceKey?: unknown; discordUserId?: unknown; componentKey?: unknown; courseName?: unknown }
 
 export async function POST(request: Request) {
   const verification = await verifyScorecardBridgeRequest(request)
@@ -20,12 +20,14 @@ export async function POST(request: Request) {
     : null
   const sourceKey = typeof body.sourceKey === "string" ? body.sourceKey.trim().slice(0, 200) : ""
   const discordUserId = typeof body.discordUserId === "string" ? body.discordUserId.trim() : ""
-  if (!adapterKey || !sourceKey || !/^\d+$/.test(discordUserId)) {
+  const componentKey = typeof body.componentKey === "string" ? body.componentKey.trim() : "primary"
+  const courseName = typeof body.courseName === "string" ? body.courseName.trim().slice(0, 200) : undefined
+  if (!adapterKey || !sourceKey || !/^\d+$/.test(discordUserId) || !/^[a-z][a-z0-9_]{0,39}$/.test(componentKey)) {
     return NextResponse.json({ allowed: false, reason: "invalid_request" }, { status: 400 })
   }
   try {
     const result = await authorizeDiscordScorecard({
-      client: createScorecardServiceClient(), adapterKey, sourceKey, discordUserId,
+      client: createScorecardServiceClient(), adapterKey, sourceKey, discordUserId, componentKey, courseName,
     })
     return NextResponse.json(result.authorized ? { allowed: true } : { allowed: false, reason: result.reason })
   } catch (error) {

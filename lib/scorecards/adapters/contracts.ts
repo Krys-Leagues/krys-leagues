@@ -29,10 +29,24 @@ export type ScorecardAdapterContext = ScorecardContextReference & {
   difficulty: "Easy" | "Hard"
   pars: number[]
   participants: ScorecardAdapterParticipant[]
+  pypComponents?: {
+    course1?: ScorecardComponentContext
+    course2?: ScorecardComponentContext
+  }
+}
+
+export type ScorecardComponentContext = {
+  key: "course1" | "course2"
+  courseId?: string
+  courseCode?: string
+  courseName: string
+  difficulty: "Easy" | "Hard"
+  pars: number[]
 }
 
 export type VerifiedParticipantCard = {
   participant: ScorecardAdapterParticipant
+  componentKey?: string
   holes: ScorecardHoleInput[]
   totals: ScorecardTotals
 }

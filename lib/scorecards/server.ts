@@ -53,6 +53,36 @@ type StrokeFixture = {
   roster_version_id: string | null
 }
 
+type PypFixture = { id: string; season_id: string; division_number: number; game_number: number; pyp_roster_version_id: string | null; pyp_home_player_id: string | null; pyp_away_player_id: string | null; pyp_home_player_screen_name: string | null; pyp_away_player_screen_name: string | null }
+
+export async function resolvePypScorecardContext(client: SupabaseClient, fixtureId: string, componentKeyInput: string | undefined, courseNameInput: string | undefined): Promise<ScorecardAdapterContext> {
+  const componentKey = componentKeyInput === "course1" || componentKeyInput === "course2" ? componentKeyInput : null
+  const courseName = courseNameInput?.trim()
+  if (!componentKey || !courseName) throw new Error("SCORECARD_PYP_COMPONENT_INVALID")
+  const fixtureResponse = await client.from("schedule").select("id,season_id,division_number,game_number,pyp_roster_version_id,pyp_home_player_id,pyp_away_player_id,pyp_home_player_screen_name,pyp_away_player_screen_name").eq("id", fixtureId).eq("league_type", "pyp").maybeSingle()
+  if (fixtureResponse.error || !fixtureResponse.data) throw new Error("SCORECARD_PYP_FIXTURE_UNAVAILABLE")
+  const fixture = fixtureResponse.data as PypFixture
+  if (!fixture.season_id || !fixture.pyp_roster_version_id || !fixture.pyp_home_player_id || !fixture.pyp_away_player_id || fixture.pyp_home_player_id === fixture.pyp_away_player_id) throw new Error("SCORECARD_PYP_FIXTURE_INVALID")
+  const [seasonResponse, rosterResponse, resultResponse, coursesResponse] = await Promise.all([
+    client.from("seasons").select("id,season_number,is_active").eq("id", fixture.season_id).eq("league_type", "pyp").maybeSingle(),
+    client.from("pyp_roster_versions").select("id,season_id,division_count,status").eq("id", fixture.pyp_roster_version_id).in("status", ["approved", "locked"]).maybeSingle(),
+    client.from("pyp_managed_results").select("id,course1_name,course2_name").eq("schedule_id", fixture.id).maybeSingle(),
+    client.from("all_time_courses").select("id,code,display_name,difficulty,hole_pars,par").eq("active", true).in("difficulty", ["Easy", "Hard"]),
+  ])
+  if (seasonResponse.error || rosterResponse.error || resultResponse.error || coursesResponse.error || !seasonResponse.data || !rosterResponse.data) throw new Error("SCORECARD_PYP_FIXTURE_AUTHORITY_FAILED")
+  if (rosterResponse.data.season_id !== fixture.season_id || fixture.division_number < 1 || fixture.division_number > rosterResponse.data.division_count) throw new Error("SCORECARD_PYP_FIXTURE_NOT_CURRENT")
+  if (resultResponse.data?.course1_name && resultResponse.data?.course2_name) throw new Error("SCORECARD_PYP_FIXTURE_COMPLETED")
+  const slotsResponse = await client.from("pyp_division_roster_slots").select("player_id,player_screen_name").eq("roster_version_id", rosterResponse.data.id).eq("division_number", fixture.division_number).in("player_id", [fixture.pyp_home_player_id, fixture.pyp_away_player_id])
+  if (slotsResponse.error || new Set((slotsResponse.data || []).map((slot) => slot.player_id)).size !== 2) throw new Error("SCORECARD_PYP_ROSTER_UNAVAILABLE")
+  const courses = (coursesResponse.data || []) as Array<{ id: string; code: string; display_name: string; difficulty: "Easy" | "Hard"; hole_pars: number[] | null; par: number | null }>
+  const matches = courses.filter((course) => course.display_name.trim().toLowerCase() === courseName.toLowerCase() || course.code.trim().toLowerCase() === courseName.toLowerCase())
+  if (matches.length !== 1 || matches[0].hole_pars?.length !== 18 || !Number.isInteger(matches[0].par)) throw new Error("SCORECARD_PYP_COURSE_AUTHORITY_AMBIGUOUS")
+  const course = matches[0]
+  const names = new Map((slotsResponse.data || []).map((slot) => [slot.player_id, slot.player_screen_name]))
+  const component = { key: componentKey, courseId: course.id, courseCode: course.code, courseName: course.display_name, difficulty: course.difficulty, pars: [...course.hole_pars!] }
+  return { adapterKey: "pyp", sourceType: "fixture", sourceKey: fixture.id, seasonId: fixture.season_id, seasonNumber: Number(seasonResponse.data.season_number), divisionNumber: fixture.division_number, divisionLabel: `PYP D${fixture.division_number}`, gameNumber: fixture.game_number, roundKey: componentKey, roundLabel: componentKey === "course1" ? "Course 1" : "Course 2", arrangedPlayedDate: null, eventPlayedDate: null, courseId: course.id, courseCode: course.code, courseName: course.display_name, difficulty: course.difficulty, pars: [...course.hole_pars!], participants: [{ roleKey: "home", playerId: fixture.pyp_home_player_id, teamId: null, displayName: names.get(fixture.pyp_home_player_id) || fixture.pyp_home_player_screen_name || "Home" }, { roleKey: "away", playerId: fixture.pyp_away_player_id, teamId: null, displayName: names.get(fixture.pyp_away_player_id) || fixture.pyp_away_player_screen_name || "Away" }], pypComponents: { [componentKey]: component } }
+}
+
 export async function resolveStrokeScorecardContext(
   client: SupabaseClient,
   fixtureId: string,
@@ -130,8 +160,11 @@ export async function resolveScorecardContext(
   client: SupabaseClient,
   adapterKey: ScorecardAdapterKey,
   sourceKey: string,
+  componentKey?: string,
+  courseName?: string,
 ) {
   if (adapterKey === "stroke") return resolveStrokeScorecardContext(client, sourceKey)
+  if (adapterKey === "pyp") return resolvePypScorecardContext(client, sourceKey, componentKey, courseName)
   throw new Error("SCORECARD_ADAPTER_INTAKE_NOT_ENABLED")
 }
 
@@ -173,6 +206,11 @@ export async function ensureSharedScorecardContext(client: SupabaseClient, conte
     { onConflict: "context_id,role_key" },
   ).select("id,role_key,player_id,team_id,display_name_snapshot")
   if (participantResponse.error) throw new Error("SCORECARD_PARTICIPANTS_SAVE_FAILED")
+  if (context.adapterKey === "pyp" && context.pypComponents) {
+    const components = [context.pypComponents.course1, context.pypComponents.course2].filter(Boolean)
+    const componentResponse = await client.from("shared_scorecard_context_components").upsert(components.map((component) => ({ context_id: contextResponse.data.id, component_key: component!.key, course_id: component!.courseId, course_code: component!.courseCode, course_name_snapshot: component!.courseName, difficulty: component!.difficulty, par_snapshot: component!.pars, total_par: component!.pars.reduce((sum, par) => sum + par, 0), updated_at: new Date().toISOString() })), { onConflict: "context_id,component_key" })
+    if (componentResponse.error) throw new Error("SCORECARD_COMPONENTS_SAVE_FAILED")
+  }
   return { contextId, participants: participantResponse.data || [] }
 }
 
@@ -181,10 +219,14 @@ export async function authorizeDiscordScorecard(options: {
   adapterKey: ScorecardAdapterKey
   sourceKey: string
   discordUserId: string
+  componentKey?: string
+  courseName?: string
 }) {
   const playerId = await resolveCanonicalDiscordPlayer(options.client, options.discordUserId)
   if (!playerId) return { authorized: false as const, reason: "identity_unavailable" as const }
-  const context = await resolveScorecardContext(options.client, options.adapterKey, options.sourceKey)
+  const context = options.adapterKey === "pyp"
+    ? await resolvePypScorecardContext(options.client, options.sourceKey, options.componentKey, options.courseName)
+    : await resolveScorecardContext(options.client, options.adapterKey, options.sourceKey)
   if (!context.participants.some((participant) => participant.playerId === playerId)) {
     return { authorized: false as const, reason: "not_participant" as const }
   }
@@ -193,6 +235,7 @@ export async function authorizeDiscordScorecard(options: {
     .from("shared_scorecard_evidence")
     .select("id")
     .eq("context_id", persisted.contextId)
+    .eq("component_key", options.adapterKey === "pyp" ? options.componentKey || "" : "primary")
     .in("review_status", ["uploading", "submitted", "under_review", "verified"])
     .limit(1)
   if (existing.error) throw new Error("SCORECARD_DUPLICATE_CHECK_FAILED")
@@ -208,6 +251,8 @@ export async function storeDiscordScorecardEvidence(options: {
   filename: string
   contentType: string
   bytes: Uint8Array
+  componentKey?: string
+  courseName?: string
 }) {
   if (!isSupportedScorecardEvidence(options.contentType, options.bytes.byteLength)) {
     return { stored: false as const, reason: "invalid_image" as const }
@@ -216,11 +261,12 @@ export async function storeDiscordScorecardEvidence(options: {
   if (!authorization.authorized) return { stored: false as const, reason: authorization.reason }
   const evidenceId = randomUUID()
   const safeName = safeScorecardEvidenceFilename(options.filename, options.contentType)
-  const storagePath = `${options.adapterKey}/${authorization.contextId}/${evidenceId}-${safeName}`
+  const storagePath = `${options.adapterKey}/${authorization.contextId}/${options.componentKey || "primary"}/${evidenceId}-${safeName}`
   const sha256 = createHash("sha256").update(options.bytes).digest("hex")
   const reservation = await options.client.from("shared_scorecard_evidence").insert({
     id: evidenceId,
     context_id: authorization.contextId,
+    component_key: options.componentKey || "primary",
     submitted_by_player_id: authorization.playerId,
     submitted_by_discord_user_id: options.discordUserId,
     submission_source: "discord_player",
