@@ -17,6 +17,9 @@ const eagles = (level: number, side: string, target: number) => req("l" + level 
 const holeScore = (level: number, side: string, hole: number, label: string, operator: CourseChallengeRequirement["operator"], target: number, helpText?: string) => req("l" + level + "-" + side + "-h" + hole, label, "hole_score", operator, target, hole, false, helpText)
 const holeRelative = (level: number, side: string, hole: number, label: string, target: number, helpText?: string) => req("l" + level + "-" + side + "-h" + hole + "-relative", label, "hole_relative_to_par", "lte", target, hole, false, helpText)
 const strokeOuts = (level: number, side: string, target: number) => req("l" + level + "-" + side + "-stroke-outs", target + " stroke-outs or fewer", "stroke_out_count", "lte", target)
+const holesAtOrBelow = (level: number, side: string, target: number, scoreThreshold: number, label: string) => ({ ...req("l" + level + "-" + side + "-holes-at-most", label, "holes_at_or_below_score_count", "gte", target), scoreThreshold })
+const holesUnderPar = (level: number, side: string, target: number) => req("l" + level + "-" + side + "-holes-under-par", target + " holes under par", "holes_under_par_count", "gte", target)
+const allHolesAtOrBelow = (level: number, side: string, scoreThreshold: number, label: string) => ({ ...req("l" + level + "-" + side + "-all-holes-at-most", label, "all_holes_at_or_below_score", "eq", 18), scoreThreshold })
 
 function touristTrapLevels(): CourseChallengeLevel[] {
   const requirements: Record<number, { easy: CourseChallengeRequirement[]; hard: CourseChallengeRequirement[] }> = {
@@ -92,6 +95,43 @@ function cherryBlossomLevels(): CourseChallengeLevel[] {
   }))
 }
 
+function aroundTheWorldLevels(): CourseChallengeLevel[] {
+  const requirements: Record<number, { easy: CourseChallengeRequirement[]; hard: CourseChallengeRequirement[] }> = {
+    1: {
+      easy: [complete(1), relative(1, "easy", -3), birdies(1, "easy", 2), strokeOuts(1, "easy", 1)],
+      hard: [complete(1), relative(1, "hard", 5), req("l1-hard-par-or-better", "3 holes at par or better", "par_or_better_count", "gte", 3)],
+    },
+    2: {
+      easy: [complete(2), relative(2, "easy", -6), holeRelative(2, "easy", 8, "Birdie or better on Hole 8", -1), strokeOuts(2, "easy", 0)],
+      hard: [complete(2), relative(2, "hard", 0), birdies(2, "hard", 2)],
+    },
+    3: {
+      easy: [complete(3), relative(3, "easy", -10), holeRelative(3, "easy", 8, "Eagle or better on Hole 8", -2), holeRelative(3, "easy", 1, "Birdie or better on Hole 1", -1), holeRelative(3, "easy", 3, "Birdie or better on Hole 3", -1), holeRelative(3, "easy", 5, "Birdie or better on Hole 5", -1), holeRelative(3, "easy", 17, "Birdie or better on Hole 17", -1)],
+      hard: [complete(3), relative(3, "hard", -5), holeRelative(3, "hard", 3, "Birdie or better on Hole 3", -1), holeRelative(3, "hard", 10, "Birdie or better on Hole 10", -1), strokeOuts(3, "hard", 1)],
+    },
+    4: {
+      easy: [complete(4), relative(4, "easy", -15), bogeys(4, "easy", 0), holesAtOrBelow(4, "easy", 5, 2, "5 holes at 2 strokes or better")],
+      hard: [complete(4), relative(4, "hard", -10), strokeOuts(4, "hard", 0), holeScore(4, "hard", 7, "2 strokes or better on Hole 7", "lte", 2, "Lay up on the bottom to get it in two.")],
+    },
+    5: {
+      easy: [complete(5), relative(5, "easy", -20), holesUnderPar(5, "easy", 10)],
+      hard: [complete(5), relative(5, "hard", -15), bogeys(5, "hard", 2)],
+    },
+  }
+  return levelNumbers.map((level) => ({
+    level,
+    easyCode: "AWE",
+    hardCode: "AWH",
+    requirementsStatus: "ready",
+    easyRequirements: requirements[level].easy,
+    hardRequirements: requirements[level].hard,
+    stickerKey: "course-challenge:80-days-around-the-world:level-" + level + ":sticker",
+    stickerAsset: null,
+    badgeKey: null,
+    badgeAsset: null,
+  }))
+}
+
 function touristPrestigeStages(): CourseChallengePrestigeStage[] {
   return [
     { stage: 1, key: "course-pro", label: "Course Pro", easyRequirements: [relative(6, "easy", -23), bogeys(6, "easy", 0)], hardRequirements: [relative(6, "hard", -20), bogeys(6, "hard", 0), eagles(6, "hard", 2)], requirementsStatus: "ready", rewardKey: "course-challenge:tourist-trap:course-pro", rewardAsset: asset("tourist-trap-course-pro.png"), requiresHard: true },
@@ -103,6 +143,13 @@ function cherryPrestigeStages(): CourseChallengePrestigeStage[] {
   return [
     { stage: 1, key: "course-pro", label: "Course Pro", easyRequirements: [relative(6, "easy", -28)], hardRequirements: [relative(6, "hard", -23), holeRelative(6, "hard", 16, "Hole 16 — par or better", 0), holeRelative(6, "hard", 17, "Hole 17 — par or better", 0), holeRelative(6, "hard", 18, "Hole 18 — par or better", 0)], requirementsStatus: "ready", rewardKey: "course-challenge:cherry-blossom:course-pro", rewardAsset: cherryAsset("cherry-blossom-course-pro.png"), requiresHard: true },
     { stage: 2, key: "course-master", label: "Course Master", easyRequirements: [relative(7, "easy", -31)], hardRequirements: [relative(7, "hard", -26), holeRelative(7, "hard", 15, "Hole 15 — birdie or better", -1), holeRelative(7, "hard", 16, "Hole 16 — birdie or better", -1), holeRelative(7, "hard", 17, "Hole 17 — birdie or better", -1), holeRelative(7, "hard", 18, "Hole 18 — birdie or better", -1)], requirementsStatus: "ready", rewardKey: "course-challenge:cherry-blossom:course-master", rewardAsset: cherryAsset("cherry-blossom-course-master.png"), requiresHard: true },
+  ]
+}
+
+function aroundTheWorldPrestigeStages(): CourseChallengePrestigeStage[] {
+  return [
+    { stage: 1, key: "course-pro", label: "Course Pro", easyRequirements: [allHolesAtOrBelow(6, "easy", 2, "All 18 holes at 2 strokes or better")], hardRequirements: [relative(6, "hard", -17), bogeys(6, "hard", 0), eagles(6, "hard", 1)], requirementsStatus: "ready", rewardKey: "course-challenge:80-days-around-the-world:course-pro", rewardAsset: null, requiresHard: true },
+    { stage: 2, key: "course-master", label: "Course Master", easyRequirements: [relative(7, "easy", -26)], hardRequirements: [allHolesAtOrBelow(7, "hard", 2, "All 18 holes at 2 strokes or better")], requirementsStatus: "ready", rewardKey: "course-challenge:80-days-around-the-world:course-master", rewardAsset: null, requiresHard: true },
   ]
 }
 
@@ -155,6 +202,18 @@ export const COURSE_CHALLENGE_COURSES: CourseChallengeCourse[] = [
     courseProAsset: CHERRY_BLOSSOM_REWARD_ASSET_PATHS.coursePro,
     courseMasterAsset: CHERRY_BLOSSOM_REWARD_ASSET_PATHS.courseMaster,
     prestigeStages: cherryPrestigeStages(),
+  },
+  {
+    slug: "80-days-around-the-world",
+    name: "80 Days Around the World",
+    status: "live",
+    displayOrder: 3,
+    shortDescription: "A five-Level Course Challenge book built from the existing Around The World Easy and Hard scorecards.",
+    backgroundImage: "/course-challenges/80-days-around-the-world/80-days-around-the-world.png",
+    easyCode: "AWE",
+    hardCode: "AWH",
+    levels: aroundTheWorldLevels(),
+    prestigeStages: aroundTheWorldPrestigeStages(),
   },
 ]
 

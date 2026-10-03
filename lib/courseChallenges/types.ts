@@ -17,6 +17,9 @@ export type CourseChallengeRequirementKind =
   | "par_or_better_count"
   | "birdie_count"
   | "eagle_count"
+  | "holes_at_or_below_score_count"
+  | "holes_under_par_count"
+  | "all_holes_at_or_below_score"
 
 export type RequirementOperator = "eq" | "lte" | "gte"
 
@@ -27,6 +30,7 @@ export type CourseChallengeRequirement = {
   operator?: RequirementOperator
   target?: number
   hole?: number
+  scoreThreshold?: number
   reviewRequired?: boolean
   helpText?: string
 }
@@ -103,6 +107,7 @@ export type CourseChallengeMetrics = {
   parsOrBetter: number
   birdies: number
   eagles: number
+  holesUnderPar: number
   strokeOuts: number | null
   lastHoleScore: number
   lastThreeRelativeToPar: number

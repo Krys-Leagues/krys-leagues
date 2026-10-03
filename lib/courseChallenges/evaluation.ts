@@ -18,6 +18,7 @@ export function calculateCourseChallengeMetrics(scores: number[], pars: number[]
     parsOrBetter: differences.filter((difference) => difference <= 0).length,
     birdies: differences.filter((difference) => difference === -1).length,
     eagles: differences.filter((difference) => difference <= -2).length,
+    holesUnderPar: differences.filter((difference) => difference < 0).length,
     // Confirmed Course Challenges rule: a stroke-out is score >= authoritative par + 4.
     strokeOuts: differences.filter((difference) => difference >= 4).length,
     lastHoleScore: scores[17],
@@ -40,6 +41,9 @@ function requirementValue(requirement: CourseChallengeRequirement, metrics: Cour
     case "par_or_better_count": return metrics.parsOrBetter
     case "birdie_count": return metrics.birdies
     case "eagle_count": return metrics.eagles
+    case "holes_at_or_below_score_count": return scores.filter((score) => score <= (requirement.scoreThreshold ?? 2)).length
+    case "holes_under_par_count": return metrics.holesUnderPar
+    case "all_holes_at_or_below_score": return scores.filter((score) => score <= (requirement.scoreThreshold ?? 2)).length
     default: return null
   }
 }
