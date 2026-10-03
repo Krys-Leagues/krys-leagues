@@ -1,4 +1,4 @@
-import { DISCORD_DOUBLES_ELITE_CHANNEL_ID } from "./discordPreviewSender.ts"
+import { DISCORD_DOUBLES_ELITE_CHANNEL_ID } from "./doublesDiscordConstants.ts"
 import type { DiscordWorkerTransport } from "./doublesDiscordWorker.ts"
 
 export const DOUBLES_DISCORD_CHANNELS: Record<string, string> = {

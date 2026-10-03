@@ -1,5 +1,5 @@
 import { createHmac, timingSafeEqual } from "node:crypto"
-import { DISCORD_DOUBLES_ELITE_CHANNEL_ID } from "./discordPreviewSender.ts"
+import { DISCORD_DOUBLES_ELITE_CHANNEL_ID } from "./doublesDiscordConstants.ts"
 
 export const NEXT_SEASON_DOUBLES_DISCORD_ENABLED = false
 export const DOUBLES_DISCORD_INTERACTION_PREFIX = "preview:next-season:doubles:"

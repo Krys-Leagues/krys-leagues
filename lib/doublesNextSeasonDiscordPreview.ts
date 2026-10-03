@@ -1,4 +1,4 @@
-import { DISCORD_DOUBLES_ELITE_CHANNEL_ID } from "./discordPreviewSender.ts"
+import { DISCORD_DOUBLES_ELITE_CHANNEL_ID } from "./doublesDiscordConstants.ts"
 
 export const DOUBLES_NEXT_SEASON_TEST_CHANNEL_ID = DISCORD_DOUBLES_ELITE_CHANNEL_ID
 export const DOUBLES_NEXT_SEASON_TEST_CUSTOM_PREFIX = "preview:next-season:doubles:"
