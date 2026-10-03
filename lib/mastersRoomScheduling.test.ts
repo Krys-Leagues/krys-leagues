@@ -150,3 +150,14 @@ test("weekend classification publication safety and room classification guidance
   assert.match(page, /Room competition display/)
   assert.match(page, /Player classifications remain individual and do not limit who may share this physical room\./)
 })
+
+test("Round 3 and Final Round score entry use published rooms, not weekend classification publication", () => {
+  const migration = readFileSync(new URL("../supabase/migrations/20261003093000_masters_score_entry_independent_of_classification.sql", import.meta.url), "utf8")
+  const scoringWindow = migration.match(/create or replace function public\.major_player_round_scoring_window[\s\S]*?\$function\$;/i)?.[0] || ""
+
+  assert.match(scoringWindow, /room\.is_published/)
+  assert.match(scoringWindow, /between 2 and 4/)
+  assert.doesNotMatch(scoringWindow, /weekend_status_published_at|major_entry_weekend_status|competition_status/)
+  assert.doesNotMatch(scoringWindow, /day\.day_number\s*<=\s*2\s+or/i)
+  assert.match(scoringWindow, /interval '3 hours'/i)
+})
