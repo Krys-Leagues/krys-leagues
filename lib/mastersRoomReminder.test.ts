@@ -98,9 +98,33 @@ test("future room times and midnight changes cannot advance an unfinished earlie
   assert.equal(selectCurrentMastersRoomAssignment(assignments, Date.parse("2026-09-30T23:00:00.000Z"))?.dayNumber, 1)
 })
 
-test("a submitted round with no later published assignment produces the completed waiting state", () => {
+test("a published room with no later assignment remains the available room", () => {
   const [roundOne] = twoPublishedAssignments()
-  assert.equal(selectCurrentMastersRoomAssignment([roundOne], Date.parse("2026-10-03T00:00:00.000Z")), null)
+  assert.equal(selectCurrentMastersRoomAssignment([roundOne], Date.parse("2026-10-03T00:00:00.000Z"))?.dayNumber, 1)
+})
+
+test("a started room remains visible when it is the player's only assignment", () => {
+  const [roundOne] = twoPublishedAssignments()
+  assert.equal(selectCurrentMastersRoomAssignment([roundOne], Date.parse("2026-10-01T04:00:00.000Z"))?.groupLabel, "KMGM7")
+})
+
+test("the latest started published room is the fallback when no future room exists", () => {
+  const assignments = twoPublishedAssignments()
+  const selected = selectCurrentMastersRoomAssignment(assignments, Date.parse("2026-10-03T00:00:00.000Z"))
+  assert.equal(selected?.dayNumber, 2)
+})
+
+test("a future room takes priority over older started rooms", () => {
+  const assignments = twoPublishedAssignments()
+  const selected = selectCurrentMastersRoomAssignment(assignments, Date.parse("2026-10-01T12:00:00.000Z"))
+  assert.equal(selected?.dayNumber, 2)
+})
+
+test("a final round room remains visible at and after its start", () => {
+  const finalDay = { ...day, id: "22222222-2222-4222-8222-222222222222", day_number: 4 as const, label: "Final Round", play_date: "2026-10-04" }
+  const [finalRound] = buildPublishedMastersRoomAssignments(eventId, [choice({ play_day_id: finalDay.id, starts_at: "2026-10-04T04:00:00.000Z" })], [finalDay])
+  assert.equal(selectCurrentMastersRoomAssignment([finalRound], Date.parse("2026-10-04T04:00:00.000Z"))?.dayNumber, 4)
+  assert.equal(selectCurrentMastersRoomAssignment([finalRound], Date.parse("2026-10-05T04:00:00.000Z"))?.roundLabel, "Sunday — Final Round")
 })
 
 test("an eligible player keeps the Masters entry point when no next room is published", () => {

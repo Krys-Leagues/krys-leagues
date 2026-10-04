@@ -76,10 +76,21 @@ export function selectCurrentMastersRoomAssignment(
   assignments: MastersRoomReminderAssignment[],
   now = Date.now(),
 ) {
-  return assignments.find((assignment) => {
+  const futureAssignment = assignments.find((assignment) => {
     const startsAt = Date.parse(assignment.startsAt)
     return Number.isFinite(startsAt) && startsAt > now
-  }) || null
+  })
+  if (futureAssignment) return futureAssignment
+
+  // Keep the latest published room available after its scheduled start. This
+  // is especially important for a player's final round, which has no later
+  // assignment to become the next room.
+  return assignments.reduce<MastersRoomReminderAssignment | null>((latest, assignment) => {
+    const startsAt = Date.parse(assignment.startsAt)
+    if (!Number.isFinite(startsAt) || startsAt > now) return latest
+    if (!latest || startsAt > Date.parse(latest.startsAt)) return assignment
+    return latest
+  }, null)
 }
 
 export function mastersRoomReminderScope(assignment: MastersRoomReminderAssignment) {
