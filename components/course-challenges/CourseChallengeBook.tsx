@@ -164,8 +164,10 @@ function ChallengeSide({ course, difficulty, requirements, requirementsPending, 
   return <article className={styles.sideCard}>
     <div className={styles.sideHeading}><h3>{difficulty} Course</h3><span>{code}</span></div>
     <h4 className={styles.requirementTitle}>COURSE REQUIREMENTS</h4>
-    <div className={styles.playFormatRule} aria-label="Admin-enforced play format rule"><strong>PLAY FORMAT · ADMIN-ENFORCED</strong><span>{playFormatRule}</span><small>This display rule explains the intended play format; authorized admins enforce it during review.</small></div>
-    {requirementsPending ? <p>Final approved requirements are pending Krys review. An authorized admin reviews each submitted card.</p> : <ul className={styles.requirementList}>{requirements.map((requirement) => <li key={requirement.id}>{requirement.label}{requirement.reviewRequired && <small> · admin/photo review required</small>}{requirement.helpText && <details><summary>Optional PB tip</summary><small>{requirement.helpText}</small></details>}</li>)}</ul>}
+    <ul className={styles.requirementList}>
+      <li className={styles.playFormatRequirement}><strong>{playFormatRule}</strong></li>
+      {requirementsPending ? <li>Final approved requirements are pending Krys review. An authorized admin reviews each submitted card.</li> : requirements.map((requirement) => <li key={requirement.id}>{requirement.label}{requirement.reviewRequired && <small> · admin/photo review required</small>}{requirement.helpText && <details><summary>Optional PB tip</summary><small>{requirement.helpText}</small></details>}</li>)}
+    </ul>
     <button type="button" className={styles.submitButton} onClick={onSubmit}>Submit {difficulty} scorecard</button>
   </article>
 }
