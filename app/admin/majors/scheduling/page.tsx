@@ -297,6 +297,22 @@ export default function MajorSchedulingAdminPage() {
     await loadSchedule(eventId)
   }
 
+  async function emergencyReplaceFinalRound(targetGroupId: string, removeEntryId: string, addEntryId: string, reason: string) {
+    if (!window.confirm("Replace only the selected player in this protected Final Round room? The room, proof history, scores, evidence, and other players remain unchanged.")) return
+    const response = await fetch("/api/admin/majors/emergency-room-replacement", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ eventId, targetGroupId, removeEntryId, addEntryId, reason }),
+    })
+    const body = await response.json().catch(() => null) as { error?: string; replacement?: { status?: string; group_label?: string } } | null
+    if (!response.ok) {
+      setMessage(body?.error || "The protected Final Round replacement was not applied.")
+      return
+    }
+    setMessage(body?.replacement?.status === "already_replaced" ? "That protected Final Round replacement is already complete." : `Protected Final Round replacement saved for ${body?.replacement?.group_label || "the selected room"}.`)
+    await loadSchedule(eventId)
+  }
+
   async function saveGroup(slot: MajorTimeSlot, form: HTMLFormElement, group: MajorScheduleGroup | null, publish: boolean) {
     const data = new FormData(form)
     const day = days.find((item) => item.id === slot.play_day_id)
@@ -518,6 +534,7 @@ export default function MajorSchedulingAdminPage() {
         onRemoveSlot={removeSlot}
         onMovePlayer={movePlayer}
         onEmergencyAssign={emergencyAssignFinalRound}
+        onEmergencyReplace={emergencyReplaceFinalRound}
         onSaveGroup={saveGroup}
         onDeleteGroup={deleteGroup}
         onPublishDay={publishDay}
@@ -632,7 +649,7 @@ function EventSetup({ event, events, days, standardTimes, onSaveOpening, onRelea
   </section>
 }
 
-function DayWorkspace({ event, dayNumber, day, slots, entries, groups, members, choicesBySlot, onAddSlot, onEditSlot, onSetSlotAvailability, onRemoveSlot, onMovePlayer, onEmergencyAssign, onSaveGroup, onDeleteGroup, onPublishDay }: {
+function DayWorkspace({ event, dayNumber, day, slots, entries, groups, members, choicesBySlot, onAddSlot, onEditSlot, onSetSlotAvailability, onRemoveSlot, onMovePlayer, onEmergencyAssign, onEmergencyReplace, onSaveGroup, onDeleteGroup, onPublishDay }: {
   event: MajorEvent
   dayNumber: number
   day?: MajorPlayDay
@@ -647,6 +664,7 @@ function DayWorkspace({ event, dayNumber, day, slots, entries, groups, members, 
   onRemoveSlot: (slot: MajorTimeSlot, playerCount: number, roomCount: number) => Promise<void>
   onMovePlayer: (entryId: string, dayId: string, slotId: string) => Promise<void>
   onEmergencyAssign: (entryId: string, targetGroupId: string, reason: string) => Promise<void>
+  onEmergencyReplace: (targetGroupId: string, removeEntryId: string, addEntryId: string, reason: string) => Promise<void>
   onSaveGroup: (slot: MajorTimeSlot, form: HTMLFormElement, group: MajorScheduleGroup | null, publish: boolean) => Promise<void>
   onDeleteGroup: (id: string) => Promise<void>
   onPublishDay: (day: MajorPlayDay) => Promise<void>
@@ -682,7 +700,7 @@ function DayWorkspace({ event, dayNumber, day, slots, entries, groups, members, 
     </section>
 
     {daySlots.length > 0 && <>{entriesNeedingTime.length > 0 && <section className={styles.timeManager}><div className={styles.inlineHeading}><div><p className={styles.step}>Admin scheduling required</p><h3>Active players requiring a {name.short} time</h3><p>Choose a legitimate event time for each player. This does not place them in a room or move anyone else.</p></div></div><div className={styles.managerGrid}>{entriesNeedingTime.map((entry) => <label key={entry.id} className={styles.managerCard}><strong>{entry.player_screen_name_snapshot}</strong><select defaultValue="" onChange={(event) => { if (event.target.value) void onMovePlayer(entry.id, day.id, event.target.value) }}><option value="" disabled>Choose {name.short} time</option>{daySlots.filter((slot) => slot.is_available).map((slot) => <option key={slot.id} value={slot.id}>{formatMastersAdminTime(slot.starts_at, event.schedule_timezone)}</option>)}</select><small>Time assignment only; room placement remains deliberate.</small></label>)}</div></section>}
-    {dayNumber === 4 && <EmergencyFinalRoundAssignment event={event} day={day} slots={daySlots} entries={activeEntries} choicesBySlot={choicesBySlot} groups={dayGroups} members={members} onAssign={onEmergencyAssign} />}
+    {dayNumber === 4 && <EmergencyFinalRoundAssignment event={event} day={day} slots={daySlots} entries={activeEntries} choicesBySlot={choicesBySlot} groups={dayGroups} members={members} onAssign={onEmergencyAssign} onReplace={onEmergencyReplace} />}
     <div className={styles.countSectionHeading}><p className={styles.step}>Players → rooms</p><h3>Signup counts and room builder</h3><p>Counts are guidance only. Signup times have no player capacity.</p></div><div className={styles.slotStack}>{daySlots.map((slot) => {
       const selectedChoices = choicesBySlot.get(slot.id) || []
       const selectedEntries = selectedChoices.flatMap((choice) => {
@@ -709,7 +727,7 @@ function DayWorkspace({ event, dayNumber, day, slots, entries, groups, members, 
   </section>
 }
 
-function EmergencyFinalRoundAssignment({ event, day, slots, entries, choicesBySlot, groups, members, onAssign }: {
+function EmergencyFinalRoundAssignment({ event, day, slots, entries, choicesBySlot, groups, members, onAssign, onReplace }: {
   event: MajorEvent
   day: MajorPlayDay
   slots: MajorTimeSlot[]
@@ -718,10 +736,15 @@ function EmergencyFinalRoundAssignment({ event, day, slots, entries, choicesBySl
   groups: MajorScheduleGroup[]
   members: MajorScheduleGroupMember[]
   onAssign: (entryId: string, targetGroupId: string, reason: string) => Promise<void>
+  onReplace: (targetGroupId: string, removeEntryId: string, addEntryId: string, reason: string) => Promise<void>
 }) {
   const [entryId, setEntryId] = useState("")
   const [targetGroupId, setTargetGroupId] = useState("")
   const [reason, setReason] = useState("Emergency Final Round room repair")
+  const [replacementGroupId, setReplacementGroupId] = useState("")
+  const [removeEntryId, setRemoveEntryId] = useState("")
+  const [addEntryId, setAddEntryId] = useState("")
+  const [replacementReason, setReplacementReason] = useState("Protected Final Round player replacement")
   const memberByEntry = new Map(members.filter((member) => member.play_day_id === day.id).map((member) => [member.entry_id, member]))
   const selectedEntry = entries.find((entry) => entry.id === entryId)
   const selectedChoice = selectedEntry && choicesBySlot
@@ -731,6 +754,12 @@ function EmergencyFinalRoundAssignment({ event, day, slots, entries, choicesBySl
   const targetGroups = selectedChoice
     ? groups.filter((group) => group.time_slot_id === selectedChoice.slot.id && group.is_published && group.is_finalized && members.filter((member) => member.group_id === group.id).length < 4)
     : []
+  const replacementGroups = groups.filter((group) => group.is_published && group.is_finalized)
+  const replacementGroup = groups.find((group) => group.id === replacementGroupId)
+  const replacementMembers = members.filter((member) => member.group_id === replacementGroupId)
+  const replacementEntryIds = new Set(replacementMembers.map((member) => member.entry_id))
+  const replacementRemovable = entries.filter((entry) => replacementEntryIds.has(entry.id))
+  const replacementAddable = entries.filter((entry) => !replacementEntryIds.has(entry.id))
 
   return <section className={styles.timeManager}>
     <div className={styles.inlineHeading}><div><p className={styles.step}>Protected admin exception</p><h3>Final Round room repair</h3><p>Use only for a documented player-specific repair. This changes one membership, never the room proof, room identity, selected time, or other players.</p></div></div>
@@ -741,6 +770,14 @@ function EmergencyFinalRoundAssignment({ event, day, slots, entries, choicesBySl
     </div>
     {selectedEntry && <p className={styles.help}><strong>{selectedEntry.player_screen_name_snapshot}</strong> selected {selectedChoice ? formatMastersAdminTime(selectedChoice.slot.starts_at, event.schedule_timezone) : "no Final Round time"}; current room: {currentMember ? (groups.find((group) => group.id === currentMember.group_id)?.group_label || "assigned") : "UNASSIGNED"}. Classification is intentionally not consulted.</p>}
     <button type="button" className={styles.warningButton} disabled={!entryId || !targetGroupId || reason.trim().length < 8} onClick={() => void onAssign(entryId, targetGroupId, reason.trim())}>Assign one player to existing room</button>
+    <div className={styles.formGrid}>
+      <label>Protected room<select value={replacementGroupId} onChange={(event) => { setReplacementGroupId(event.target.value); setRemoveEntryId(""); setAddEntryId("") }}><option value="">Choose published Final Round room</option>{replacementGroups.map((group) => <option key={group.id} value={group.id}>{group.group_label} · {members.filter((member) => member.group_id === group.id).length}/4</option>)}</select></label>
+      <label>Remove player<select value={removeEntryId} onChange={(event) => setRemoveEntryId(event.target.value)} disabled={!replacementGroup}><option value="">Choose current room player</option>{replacementRemovable.map((entry) => <option key={entry.id} value={entry.id}>{entry.player_screen_name_snapshot}</option>)}</select></label>
+      <label>Add player<select value={addEntryId} onChange={(event) => setAddEntryId(event.target.value)} disabled={!replacementGroup}><option value="">Choose replacement player</option>{replacementAddable.map((entry) => <option key={entry.id} value={entry.id}>{entry.player_screen_name_snapshot}</option>)}</select></label>
+      <label>Replacement reason<input value={replacementReason} onChange={(event) => setReplacementReason(event.target.value)} minLength={8} maxLength={1000} /></label>
+    </div>
+    {replacementGroupId && <p className={styles.help}>Atomic protected replacement: one current membership is removed and one selected replacement is added only if all Final Round time, score-safety, room, and audit checks pass.</p>}
+    <button type="button" className={styles.warningButton} disabled={!replacementGroupId || !removeEntryId || !addEntryId || replacementReason.trim().length < 8} onClick={() => void onReplace(replacementGroupId, removeEntryId, addEntryId, replacementReason.trim())}>Replace player in protected room</button>
   </section>
 }
 

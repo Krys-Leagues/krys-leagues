@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs"
 import test from "node:test"
 
 const migration = readFileSync(new URL("../supabase/migrations/20261004120000_masters_emergency_final_room_assignment.sql", import.meta.url), "utf8")
+const replacementMigration = readFileSync(new URL("../supabase/migrations/20261004123000_masters_protected_final_round_player_replacement.sql", import.meta.url), "utf8")
 const route = readFileSync(new URL("../app/api/admin/majors/emergency-room-assignment/route.ts", import.meta.url), "utf8")
 const roomReader = readFileSync(new URL("../major_player_room_roster.sql", import.meta.url), "utf8")
 
@@ -49,4 +50,35 @@ test("the existing MGM/player lookup will discover the new destination membershi
   assert.match(roomReader, /major_schedule_group_members/i)
   assert.match(roomReader, /where room_member\.group_id = g\.id/i)
   assert.match(migration, /target_room\.id, event_row\.id, target_day\.id, target_slot\.id, entry_row\.id/i)
+})
+
+test("protected Final Round replacement is one audited atomic remove-and-add operation", () => {
+  assert.match(replacementMigration, /admin_replace_major_final_round_player/i)
+  assert.match(replacementMigration, /auth\.uid\(\)/i)
+  assert.match(replacementMigration, /is_current_user_site_admin/i)
+  assert.match(replacementMigration, /day_row\.day_number <> 4/i)
+  assert.match(replacementMigration, /room_row\.is_published or not room_row\.is_finalized/i)
+  assert.match(replacementMigration, /remove_entry\.id/i)
+  assert.match(replacementMigration, /add_entry\.id/i)
+  assert.match(replacementMigration, /major_player_scorecards/i)
+  assert.match(replacementMigration, /major_score_entry_admin_actions/i)
+  assert.match(replacementMigration, /delete from public\.major_schedule_group_members/i)
+  assert.match(replacementMigration, /insert into public\.major_schedule_group_members/i)
+  assert.match(replacementMigration, /insert into public\.major_entry_participation_audit/i)
+  assert.match(replacementMigration, /protected_player_replacement/i)
+  assert.match(replacementMigration, /operation_id/i)
+  assert.match(replacementMigration, /already_replaced/i)
+  assert.doesNotMatch(replacementMigration, /delete from public\.major_schedule_groups|delete from public\.major_room_scorecard_proofs|update public\.major_schedule_groups/i)
+})
+
+test("protected replacement has a separate authenticated admin route and deliberate UI action", () => {
+  const replacementRoute = readFileSync(new URL("../app/api/admin/majors/emergency-room-replacement/route.ts", import.meta.url), "utf8")
+  const page = readFileSync(new URL("../app/admin/majors/scheduling/page.tsx", import.meta.url), "utf8")
+  assert.match(replacementRoute, /authorizeSiteAdminMutation/)
+  assert.match(replacementRoute, /admin_replace_major_final_round_player/)
+  assert.match(replacementRoute, /p_remove_entry_id: removeEntryId/)
+  assert.match(replacementRoute, /p_add_entry_id: addEntryId/)
+  assert.match(page, /Replace player in protected room/)
+  assert.match(page, /Atomic protected replacement/)
+  assert.match(page, /emergency-room-replacement/)
 })
