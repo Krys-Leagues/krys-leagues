@@ -281,6 +281,22 @@ export default function MajorSchedulingAdminPage() {
     if (showResult(result.error, "Player time updated with administrator override.")) await loadSchedule(eventId)
   }
 
+  async function emergencyAssignFinalRound(entryId: string, targetGroupId: string, reason: string) {
+    if (!window.confirm("Assign this player to the existing published Final Round room? This changes only that player's membership and writes an audit record.")) return
+    const response = await fetch("/api/admin/majors/emergency-room-assignment", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ eventId, entryId, targetGroupId, reason }),
+    })
+    const body = await response.json().catch(() => null) as { error?: string; assignment?: { target_group_label?: string; status?: string } } | null
+    if (!response.ok) {
+      setMessage(body?.error || "The emergency Final Round assignment was not applied.")
+      return
+    }
+    setMessage(body?.assignment?.status === "already_assigned" ? "Player is already in that Final Round room." : `Final Round assignment saved to ${body?.assignment?.target_group_label || "the selected room"}.`)
+    await loadSchedule(eventId)
+  }
+
   async function saveGroup(slot: MajorTimeSlot, form: HTMLFormElement, group: MajorScheduleGroup | null, publish: boolean) {
     const data = new FormData(form)
     const day = days.find((item) => item.id === slot.play_day_id)
@@ -501,6 +517,7 @@ export default function MajorSchedulingAdminPage() {
         onSetSlotAvailability={setSlotAvailability}
         onRemoveSlot={removeSlot}
         onMovePlayer={movePlayer}
+        onEmergencyAssign={emergencyAssignFinalRound}
         onSaveGroup={saveGroup}
         onDeleteGroup={deleteGroup}
         onPublishDay={publishDay}
@@ -615,7 +632,7 @@ function EventSetup({ event, events, days, standardTimes, onSaveOpening, onRelea
   </section>
 }
 
-function DayWorkspace({ event, dayNumber, day, slots, entries, groups, members, choicesBySlot, onAddSlot, onEditSlot, onSetSlotAvailability, onRemoveSlot, onMovePlayer, onSaveGroup, onDeleteGroup, onPublishDay }: {
+function DayWorkspace({ event, dayNumber, day, slots, entries, groups, members, choicesBySlot, onAddSlot, onEditSlot, onSetSlotAvailability, onRemoveSlot, onMovePlayer, onEmergencyAssign, onSaveGroup, onDeleteGroup, onPublishDay }: {
   event: MajorEvent
   dayNumber: number
   day?: MajorPlayDay
@@ -629,6 +646,7 @@ function DayWorkspace({ event, dayNumber, day, slots, entries, groups, members, 
   onSetSlotAvailability: (slot: MajorTimeSlot, available: boolean, playerCount: number) => Promise<void>
   onRemoveSlot: (slot: MajorTimeSlot, playerCount: number, roomCount: number) => Promise<void>
   onMovePlayer: (entryId: string, dayId: string, slotId: string) => Promise<void>
+  onEmergencyAssign: (entryId: string, targetGroupId: string, reason: string) => Promise<void>
   onSaveGroup: (slot: MajorTimeSlot, form: HTMLFormElement, group: MajorScheduleGroup | null, publish: boolean) => Promise<void>
   onDeleteGroup: (id: string) => Promise<void>
   onPublishDay: (day: MajorPlayDay) => Promise<void>
@@ -664,6 +682,7 @@ function DayWorkspace({ event, dayNumber, day, slots, entries, groups, members, 
     </section>
 
     {daySlots.length > 0 && <>{entriesNeedingTime.length > 0 && <section className={styles.timeManager}><div className={styles.inlineHeading}><div><p className={styles.step}>Admin scheduling required</p><h3>Active players requiring a {name.short} time</h3><p>Choose a legitimate event time for each player. This does not place them in a room or move anyone else.</p></div></div><div className={styles.managerGrid}>{entriesNeedingTime.map((entry) => <label key={entry.id} className={styles.managerCard}><strong>{entry.player_screen_name_snapshot}</strong><select defaultValue="" onChange={(event) => { if (event.target.value) void onMovePlayer(entry.id, day.id, event.target.value) }}><option value="" disabled>Choose {name.short} time</option>{daySlots.filter((slot) => slot.is_available).map((slot) => <option key={slot.id} value={slot.id}>{formatMastersAdminTime(slot.starts_at, event.schedule_timezone)}</option>)}</select><small>Time assignment only; room placement remains deliberate.</small></label>)}</div></section>}
+    {dayNumber === 4 && <EmergencyFinalRoundAssignment event={event} day={day} slots={daySlots} entries={activeEntries} choicesBySlot={choicesBySlot} groups={dayGroups} members={members} onAssign={onEmergencyAssign} />}
     <div className={styles.countSectionHeading}><p className={styles.step}>Players → rooms</p><h3>Signup counts and room builder</h3><p>Counts are guidance only. Signup times have no player capacity.</p></div><div className={styles.slotStack}>{daySlots.map((slot) => {
       const selectedChoices = choicesBySlot.get(slot.id) || []
       const selectedEntries = selectedChoices.flatMap((choice) => {
@@ -687,6 +706,41 @@ function DayWorkspace({ event, dayNumber, day, slots, entries, groups, members, 
         </div>
       </article>
     })}</div></>}
+  </section>
+}
+
+function EmergencyFinalRoundAssignment({ event, day, slots, entries, choicesBySlot, groups, members, onAssign }: {
+  event: MajorEvent
+  day: MajorPlayDay
+  slots: MajorTimeSlot[]
+  entries: MajorEntry[]
+  choicesBySlot: Map<string, MajorDayChoice[]>
+  groups: MajorScheduleGroup[]
+  members: MajorScheduleGroupMember[]
+  onAssign: (entryId: string, targetGroupId: string, reason: string) => Promise<void>
+}) {
+  const [entryId, setEntryId] = useState("")
+  const [targetGroupId, setTargetGroupId] = useState("")
+  const [reason, setReason] = useState("Emergency Final Round room repair")
+  const memberByEntry = new Map(members.filter((member) => member.play_day_id === day.id).map((member) => [member.entry_id, member]))
+  const selectedEntry = entries.find((entry) => entry.id === entryId)
+  const selectedChoice = selectedEntry && choicesBySlot
+    ? slots.map((slot) => ({ slot, choice: (choicesBySlot.get(slot.id) || []).find((choice) => choice.entry_id === selectedEntry.id) })).find((item) => item.choice)
+    : undefined
+  const currentMember = selectedEntry ? memberByEntry.get(selectedEntry.id) : undefined
+  const targetGroups = selectedChoice
+    ? groups.filter((group) => group.time_slot_id === selectedChoice.slot.id && group.is_published && group.is_finalized && members.filter((member) => member.group_id === group.id).length < 4)
+    : []
+
+  return <section className={styles.timeManager}>
+    <div className={styles.inlineHeading}><div><p className={styles.step}>Protected admin exception</p><h3>Final Round room repair</h3><p>Use only for a documented player-specific repair. This changes one membership, never the room proof, room identity, selected time, or other players.</p></div></div>
+    <div className={styles.formGrid}>
+      <label>Player<select value={entryId} onChange={(event) => { setEntryId(event.target.value); setTargetGroupId("") }}><option value="">Choose an active Final Round player</option>{entries.map((entry) => <option key={entry.id} value={entry.id}>{entry.player_screen_name_snapshot}</option>)}</select></label>
+      <label>Existing published room<select value={targetGroupId} onChange={(event) => setTargetGroupId(event.target.value)} disabled={!selectedChoice}><option value="">Choose a same-time finalized room</option>{targetGroups.map((group) => <option key={group.id} value={group.id}>{group.group_label} · {formatMastersAdminTime(selectedChoice!.slot.starts_at, event.schedule_timezone)} · {members.filter((member) => member.group_id === group.id).length}/4</option>)}</select></label>
+      <label>Reason<input value={reason} onChange={(event) => setReason(event.target.value)} minLength={8} maxLength={1000} /></label>
+    </div>
+    {selectedEntry && <p className={styles.help}><strong>{selectedEntry.player_screen_name_snapshot}</strong> selected {selectedChoice ? formatMastersAdminTime(selectedChoice.slot.starts_at, event.schedule_timezone) : "no Final Round time"}; current room: {currentMember ? (groups.find((group) => group.id === currentMember.group_id)?.group_label || "assigned") : "UNASSIGNED"}. Classification is intentionally not consulted.</p>}
+    <button type="button" className={styles.warningButton} disabled={!entryId || !targetGroupId || reason.trim().length < 8} onClick={() => void onAssign(entryId, targetGroupId, reason.trim())}>Assign one player to existing room</button>
   </section>
 }
 
