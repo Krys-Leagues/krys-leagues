@@ -31,5 +31,19 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    ".all-time-admin-launch",
+    ".codex",
+    ".join-monthly-guard",
+    ".local-worktrees",
+    ".tmp",
+    ".tmp-bot-test-deps",
+    ".wt",
+    "emergency-website-restore-live",
+    "full-width-scorecard",
+    "monthly-overall-board-release-live",
+    "monthly-timeout-safe-batched",
+    "monthly-timeout-safe-rpc"
+  ]
 }

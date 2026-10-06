@@ -7,11 +7,181 @@
   overflow-x: hidden;
 }
 
+.artwork-navigation__hub-stack {
+  position: relative;
+  width: min(100%, 1664px);
+  isolation: isolate;
+}
+
 .artwork-navigation__frame {
   position: relative;
+  z-index: 2;
   width: min(100%, 1664px);
   overflow: hidden;
   isolation: isolate;
+}
+
+.artwork-navigation__after-frame {
+  position: relative;
+  z-index: 1;
+  width: min(94.2%, 1568px);
+  margin: clamp(8px, 1vw, 16px) auto 0;
+}
+
+.artwork-navigation__main-hub-actions {
+  display: grid;
+  gap: clamp(8px, 1vw, 14px);
+}
+
+.artwork-navigation__course-challenges-preview-link {
+  display: block;
+}
+
+.artwork-navigation__course-challenges-preview-banner {
+  display: block;
+  width: 50%;
+  height: auto;
+  margin-inline: auto;
+  mix-blend-mode: screen;
+}
+
+.artwork-navigation__masters-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(50%, 720px);
+  aspect-ratio: 1364 / 230;
+  box-sizing: border-box;
+  margin-inline: auto;
+  padding: 0 clamp(64px, 8vw, 104px);
+  overflow: hidden;
+  border: 1px solid rgba(240, 205, 112, 0.96);
+  border-radius: clamp(16px, 1.6vw, 24px);
+  color: #fff6d2;
+  background: linear-gradient(90deg, rgba(2, 20, 11, 0.76), transparent 26%, transparent 74%, rgba(2, 20, 11, 0.76)), url("/approved-pages/the masters.jpg") center / cover;
+  box-shadow: 0 0 14px rgba(224, 190, 80, 0.72), inset 0 0 18px rgba(255, 239, 158, 0.16);
+  text-decoration: none;
+}
+
+.artwork-navigation__masters-jacket {
+  display: none;
+}
+
+.artwork-navigation__masters-copy {
+  display: grid;
+  gap: 0.22em;
+  justify-items: center;
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  line-height: 1;
+}
+
+.artwork-navigation__masters-copy strong {
+  color: #fff8d5;
+  font-size: clamp(14px, 1.55vw, 22px);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  text-shadow: 0 2px 0 #071c12, 0 0 9px rgba(255, 225, 133, 0.42);
+}
+
+.artwork-navigation__masters-copy small {
+  color: #f0cd66;
+  font-size: clamp(9px, 0.82vw, 12px);
+  font-weight: 900;
+  letter-spacing: 0.24em;
+}
+
+.artwork-navigation__masters-arrow {
+  position: absolute;
+  right: clamp(12px, 1.7vw, 24px);
+  color: #ffe79a;
+  font-size: clamp(24px, 2.4vw, 36px);
+}
+
+.artwork-navigation__admin-treatment {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(10px, 1.4vw, 22px);
+  width: min(100%, 58%);
+  margin: clamp(8px, 1vw, 16px) auto 0;
+}
+
+.artwork-navigation__admin-accent {
+  display: block;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #00eaff 35%, #00eaff 65%, transparent);
+  box-shadow: 0 0 8px rgba(0, 226, 255, 0.9);
+}
+
+.artwork-navigation__admin-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: clamp(38px, 3.5vw, 52px);
+  box-sizing: border-box;
+  padding: 0.65em 1.2em;
+  border: 1px solid rgba(0, 226, 255, 0.8);
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(4, 18, 37, 0.94);
+  box-shadow: 0 0 12px rgba(0, 226, 255, 0.38), inset 0 0 12px rgba(0, 226, 255, 0.12);
+  font-size: clamp(12px, 1.25vw, 18px);
+  font-weight: 900;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.artwork-navigation__admin-gear { margin-right: 0.55em; color: #00eaff; }
+
+.artwork-navigation__masters-link:hover,
+.artwork-navigation__admin-link:hover { filter: brightness(1.18); transform: translateY(-1px); }
+
+.artwork-navigation__hub-after-frame-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  align-items: start;
+  gap: clamp(14px, 2vw, 28px);
+}
+
+.artwork-navigation__hub-after-frame-layout > * {
+  min-width: 0;
+}
+
+.artwork-navigation__hub-after-frame-layout > aside {
+  order: -1;
+  margin-top: clamp(44px, 4vw, 64px);
+}
+
+.artwork-navigation__main-hub-frame--cropped .artwork-navigation__image {
+  height: auto !important;
+  bottom: auto;
+  aspect-ratio: auto;
+}
+
+.artwork-navigation__main-hub-frame--cropped .artwork-navigation__targets,
+.artwork-navigation__main-hub-frame--cropped .artwork-navigation__overlay {
+  height: 110.3% !important;
+}
+
+.artwork-navigation__hub-utility-stack {
+  position: fixed;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(16px, env(safe-area-inset-bottom));
+  z-index: 79;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  width: min(290px, calc(100vw - 32px));
+}
+
+.artwork-navigation__hub-utility-stack > .artwork-navigation__utility-launcher {
+  position: static;
+  width: 100%;
 }
 
 .artwork-navigation__image,
@@ -183,6 +353,39 @@
   .artwork-navigation__frame {
     width: 100%;
   }
+
+  .artwork-navigation__hub-stack {
+    width: 100%;
+  }
+
+  .artwork-navigation__after-frame {
+    width: 94.2%;
+    margin-top: 8px;
+  }
+
+  .artwork-navigation__hub-after-frame-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .artwork-navigation__hub-after-frame-layout > aside {
+    order: initial;
+    margin-top: 0;
+  }
+
+  .artwork-navigation__hub-utility-stack {
+    position: static;
+    width: min(94.2%, 560px);
+    margin: 10px auto max(16px, env(safe-area-inset-bottom));
+  }
+
+  .artwork-navigation__course-challenges-preview-banner,
+  .artwork-navigation__masters-link { width: 92%; }
+
+  .artwork-navigation__masters-link { min-height: 72px; padding-inline: 54px; }
+
+  .artwork-navigation__masters-copy strong { font-size: clamp(14px, 4.4vw, 20px); }
+
+  .artwork-navigation__admin-treatment { width: 88%; }
 
   .artwork-navigation__back-link {
     font-size: clamp(11px, 3.2vw, 16px);

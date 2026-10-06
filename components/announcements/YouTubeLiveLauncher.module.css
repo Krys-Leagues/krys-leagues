@@ -1,0 +1,7 @@
+.launcher { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 42px; margin: 4px auto 0; padding: 10px 18px; border: 1px solid rgba(248,113,113,.72); border-radius: 999px; color: #fff; background: linear-gradient(135deg,#3f0d18,#18152b 58%,#241016); box-shadow: 0 8px 20px rgba(0,0,0,.36),0 0 16px rgba(248,113,113,.2); font-size: .72rem; font-weight: 950; letter-spacing: .045em; line-height: 1.2; text-align: center; text-decoration: none; }
+.coreLabel { white-space: nowrap; }
+.liveLabel { color: #fecaca; font-size: .64rem; white-space: nowrap; }
+.indicator { width: 9px; height: 9px; flex: 0 0 auto; border-radius: 50%; background: #ef4444; box-shadow: 0 0 10px #ef4444; }
+.launcher:hover,.launcher:focus-visible { border-color: #fff; filter: brightness(1.14); }
+.launcher:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+@media (max-width: 600px) { .launcher { max-width: calc(100vw - 24px); gap: 6px; padding: 9px 12px; font-size: .62rem; } .liveLabel { font-size: .54rem; } .indicator { width: 8px; height: 8px; } }
