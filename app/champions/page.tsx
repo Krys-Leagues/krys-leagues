@@ -134,6 +134,10 @@ function ChampionsContent() {
             KWT Hall &amp; Memories
           </Link>
 
+          <Link href="/majors/masters/championship" style={backButton}>
+            Masters Championship
+          </Link>
+
           <PlayerProfileNavLink style={backButton}>
             Player Profile
           </PlayerProfileNavLink>
