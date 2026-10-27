@@ -3,8 +3,8 @@ import { readFileSync } from "node:fs"
 import test from "node:test"
 import { ownProfilePath, playerProfileNavigationPath, shouldAutoOpenOwnProfile } from "./playerProfilesRouting.ts"
 
-test("hub Player Profiles opens the canonical signed-in profile unless browse mode is requested", () => {
-  assert.equal(shouldAutoOpenOwnProfile(""), true)
+test("hub Player Profiles always remains the public directory", () => {
+  assert.equal(shouldAutoOpenOwnProfile(""), false)
   assert.equal(shouldAutoOpenOwnProfile("?browse=1"), false)
   assert.equal(ownProfilePath("canonical-player-id"), "/players/canonical-player-id")
   assert.equal(ownProfilePath(null), null)
@@ -24,8 +24,7 @@ test("Player Profiles routing uses only the canonical player resolver", () => {
   const hub = readFileSync("app/players/page.tsx", "utf8")
   const profile = readFileSync("app/players/[id]/page.tsx", "utf8")
   const nav = readFileSync("components/PlayerProfileNavLink.tsx", "utf8")
-  assert.match(hub, /current_user_canonical_player_id/)
-  assert.match(hub, /router\.replace\(path\)/)
+  assert.doesNotMatch(hub, /router\.replace\(path\)/)
   assert.match(profile, /PlayerProfileNavLink currentPlayerId=\{player\.id\}/)
   assert.match(nav, /current_user_canonical_player_id/)
   assert.doesNotMatch(nav, /screen_name|display_name|email/)

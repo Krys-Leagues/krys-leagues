@@ -1,5 +1,6 @@
 export function shouldAutoOpenOwnProfile(search: string): boolean {
-  return new URLSearchParams(search).get("browse") !== "1"
+  void search
+  return false
 }
 
 export function ownProfilePath(canonicalPlayerId: string | null): string | null {

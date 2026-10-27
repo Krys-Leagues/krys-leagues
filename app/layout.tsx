@@ -6,6 +6,7 @@ import AdminPendingAlerts from "@/components/admin/AdminPendingAlerts";
 import OptionalSignInWelcome from "@/components/auth/OptionalSignInWelcome";
 import PublicLiveAlert from "@/components/announcements/PublicLiveAlert";
 import KwtNetLaunchAnnouncement from "@/components/announcements/KwtNetLaunchAnnouncement";
+import PlayerProfileFloatingControl from "@/components/PlayerProfileFloatingControl";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,6 +40,7 @@ export default function RootLayout({
         <OptionalSignInWelcome />
         <PublicLiveAlert />
         <KwtNetLaunchAnnouncement />
+        <PlayerProfileFloatingControl />
       </body>
     </html>
   );

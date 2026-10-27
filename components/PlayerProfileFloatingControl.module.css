@@ -1,0 +1,46 @@
+.control {
+  position: fixed;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(16px, env(safe-area-inset-bottom));
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  padding: 2px;
+  border: 2px solid rgba(196, 181, 253, .82);
+  border-radius: 50%;
+  background: rgba(15, 23, 42, .94);
+  box-shadow: 0 0 16px rgba(129, 140, 248, .46), 0 8px 24px rgba(0, 0, 0, .32);
+  text-decoration: none;
+  transition: transform 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.control:hover,
+.control:focus-visible {
+  border-color: #f5f3ff;
+  box-shadow: 0 0 0 3px rgba(196, 181, 253, .28), 0 0 22px rgba(196, 181, 253, .7), 0 8px 24px rgba(0, 0, 0, .4);
+  transform: translateY(-2px);
+}
+
+.control:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+
+.avatar {
+  border: 0 !important;
+}
+
+@media (max-width: 600px) {
+  .control {
+    right: max(12px, env(safe-area-inset-right));
+    bottom: max(12px, env(safe-area-inset-bottom));
+    width: 48px;
+    height: 48px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .control { transition: none; }
+}

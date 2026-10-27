@@ -9,6 +9,10 @@
   padding: 0;
 }
 
+.page :global(.artwork-navigation__frame) {
+  overflow: visible;
+}
+
 .backButton {
   display: flex;
   width: fit-content;
@@ -44,6 +48,7 @@
 
 .searchOverlay {
   position: absolute;
+  z-index: 3;
   top: 73.2%;
   left: 5.6%;
   width: 54.8%;
@@ -96,6 +101,7 @@
 
 .results {
   position: absolute;
+  z-index: 4;
   right: 0;
   bottom: calc(100% + 2%);
   width: min(100%, 620px);

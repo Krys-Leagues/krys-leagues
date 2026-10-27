@@ -38,7 +38,7 @@ export function ArtworkNavigation({ definition, overlay, afterFrame, hiddenTarge
                 style: artworkTargetStyle(target),
                 "data-artwork-target-id": target.id,
               }
-                return target.id === "player-profiles" ? (
+                return target.id === "player-profiles" && definition.id !== "main-hub" ? (
                   <PlayerProfileNavLink key={target.id} ariaLabel={target.label} className={props.className} style={props.style} dataArtworkTargetId={target.id}>
                     <span className="sr-only">{target.label}</span>
                   </PlayerProfileNavLink>

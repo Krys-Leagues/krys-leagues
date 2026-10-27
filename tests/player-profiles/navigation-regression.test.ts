@@ -4,11 +4,13 @@ import test from "node:test"
 
 const read = (path: string) => readFileSync(path, "utf8")
 
-test("Main Hub artwork Player Profile target uses canonical context-aware navigation", () => {
+test("Main Hub artwork Player Profile target opens the public directory", () => {
   const navigation = read("components/navigation/ArtworkNavigation.tsx")
   const hub = read("lib/artworkPageMaps.ts")
-  assert.match(navigation, /target\.id === "player-profiles"/)
+  assert.match(navigation, /target\.id === "player-profiles" && definition\.id !== "main-hub"/)
   assert.match(hub, /id: "player-profiles"[\s\S]*href: "\/players"/)
+  assert.match(read("app/players/page.tsx"), /ArtworkNavigation/)
+  assert.doesNotMatch(read("app/players/page.tsx"), /router\.replace\(path\)/)
 })
 
 test("dashboard and public profile controls preserve own-profile and directory behavior", () => {
@@ -22,4 +24,16 @@ test("navigation does not resolve a player from screen-name or private identity 
   const component = read("components/PlayerProfileNavLink.tsx")
   assert.match(component, /current_user_canonical_player_id/)
   assert.doesNotMatch(component, /screen_name|display_name|email|discord/i)
+})
+
+test("signed-in players get a separate floating canonical-profile control", () => {
+  const layout = read("app/layout.tsx")
+  const control = read("components/PlayerProfileFloatingControl.tsx")
+  const styles = read("components/PlayerProfileFloatingControl.module.css")
+  assert.match(layout, /PlayerProfileFloatingControl/)
+  assert.match(control, /current_user_canonical_player_id/)
+  assert.match(control, /href=\{`\/players\/\$\{encodeURIComponent\(player\.id\)\}`\}/)
+  assert.match(control, /data-tour="my-profile-shortcut"/)
+  assert.match(styles, /position: fixed/)
+  assert.match(styles, /border-radius: 50%/)
 })
