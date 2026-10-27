@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "phase100-effective-period-review-v1",
+  "status": "PROPOSED_REVIEW_ONLY",
+  "sourceCalculationRunId": "fb606c55-e2f6-5d01-b79d-bfcc129a7cc6",
+  "policyVersion": "krys-handicap-approved-policy-v1",
+  "chronologyPolicy": "OFFICIAL_KWT_SEQUENCE",
+  "effectiveFrom": null,
+  "readyRatings": 72,
+  "provisionalRatings": 6,
+  "sourceExceptions": [
+    [
+      "UNRESOLVED_CANONICAL_ID",
+      806
+    ],
+    [
+      "INVALID_SCORE",
+      2
+    ]
+  ],
+  "periodRows": 78,
+  "noCalendarDatesInvented": true,
+  "sourceHashes": {
+    "phase60Exceptions": "EDA8DF4DCF161217D9A4DC68644E4A49BD9322F201075A5F023953F24E9DCAEE",
+    "phase68Provenance": "8440A1D1DCB4C09283F64235F5A85567E59D677DC6494EAB58E1FFB5EE2499CE",
+    "phase68Manifest": "4EDF8E2248030383BDA1D2DAEF028122CE53DD4A212A529C5491D7BA3CA88D53",
+    "phase98Manifest": "CD408B22F395E712912BC30C850AB0EC4929602B6AA3BAA2CD3F8AE6BE416B0E"
+  }
+}

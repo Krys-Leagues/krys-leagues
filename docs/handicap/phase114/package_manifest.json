@@ -1,0 +1,24 @@
+{
+  "package_version": "phase114-official-kwt-csv-reconciled-v1",
+  "source_zip_sha256": "E599CF6DF746F6C60C9718FBB73486396055567B738ED1A6EEB5808D2E2E46CE",
+  "source_namespace": "OFFICIAL_KWT_CSV",
+  "source_type": "KWT",
+  "total_player_week_pairs": 371,
+  "resolved_player_week_pairs": 364,
+  "quarantined_player_week_pairs": 7,
+  "import_candidate_course_observations": 728,
+  "quarantined_course_observations": 14,
+  "source_ids_recovered": false,
+  "numeric_source_player_ids_recovered": false,
+  "numeric_round_ids_recovered": false,
+  "discord_ids_used_as_kwt_ids": false,
+  "weekly_personal_handicap_eligible": false,
+  "official_sequence": "SEASON_WEEK_EASY_HARD",
+  "status": "LOCAL_CANDIDATE_REQUIRES_SCHEMA_AND_PUBLICATION_GATE_REVIEW",
+  "identity_mapping_policy": "OWNER_SUPPLIED_OR_UNIQUE_VERIFIED_NORMALIZED_GLOBAL_PLAYER_EVIDENCE_ONLY",
+  "counts": {
+    "fingerprints": 728,
+    "unique_fingerprints": 728,
+    "old_phase68_collisions": 0
+  }
+}

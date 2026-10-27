@@ -1,0 +1,29 @@
+{
+  "schema_version": "phase140-rolling20-publication-v1",
+  "status": "LOCAL_PREPARATION_ONLY",
+  "production_project": "jfbndcwdsvsjgnzwvexp",
+  "calculation_run_id": "5db94324-3789-559c-865c-35ed9c2081dd",
+  "source_run_id": "8f136000-0000-5000-8000-000000000136",
+  "counts": {
+    "candidates": 166,
+    "official_eligible": 120,
+    "provisional": 46,
+    "blocked": 0,
+    "rating_dependencies": 78,
+    "source_round_references": 14076,
+    "weekly_personal_inputs": 0
+  },
+  "input_checksums": {
+    "docs/handicap/phase126/player_index_candidates.csv": "8A5512DEDB2763E982357851836163CB6E9B0BD8DFFFA7B08C21C0787B35D992",
+    "docs/handicap/phase136/player_index_revalidation.csv": "94FADDCE462ACC48A3A27FF119A9403C04AD007E63F350222CA652D88F77B31F",
+    "docs/handicap/phase136/owner_rating_snapshot_mapping.csv": "0641A1BEC7B283319EA31654C19E1B7DE908802006150A9D278847582655D1F0"
+  },
+  "generated_files": {
+    "index_snapshot_import_rows.csv": "C54B27EC4F1B0BD4CF8BEAE326A5ACCA130FDE3E4232EF9130212A44809E5A5E",
+    "calculation_run_manifest.json": "D8BB43475FAFF5CD3981D2A0F7C465272CDC9E8BEF427890821DEF6E4646FE73",
+    "production_preflight.sql": "3FE397AE501E737980E7F811D50B877936B074CCE1E1407E30A0F33525ACE44C",
+    "production_installation.sql": "7149460178946A1841C121BE9CAFD47AEF05B85494FCFBC8DAD2F18D5877D841",
+    "production_postflight.sql": "337F3C6D091AB1B87F9EF675844068D4FC212B8FCC77F185EF6BE093CF5E1E25",
+    "package_report.md": "D412E57E753309A1D00AB02376A3430CFC584A412DDA52A9B26ECB6F9F2B48AA"
+  }
+}

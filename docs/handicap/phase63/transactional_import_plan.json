@@ -1,0 +1,33 @@
+{
+  "safeToExecute": true,
+  "order": [
+    "calculation_run",
+    "source_provenance",
+    "rating_snapshots"
+  ],
+  "calculationRun": {
+    "id": "5a57560c-3548-54a8-879c-8fc516a85f26",
+    "label": "phase60-run-ad45a0fec187721d",
+    "policyVersion": "krys-handicap-approved-policy-v1",
+    "modelVersion": "krys-course-rating-elite-lowest-12-v1",
+    "sourcePackageRef": "phase60-local-reviewed-evidence-v1",
+    "chronologyPolicy": "course-rating evidence only; no player-index snapshots",
+    "status": "DRAFT"
+  },
+  "inputFiles": {
+    "provenance": "handicap_source_provenance_import.csv",
+    "snapshotManifest": "rating_snapshot_import_manifest.json",
+    "dispositions": "rating_snapshot_import_disposition.csv"
+  },
+  "provenanceRowCount": 14394,
+  "importReadySnapshotCount": 169,
+  "blockedSnapshotCount": 0,
+  "prohibited": [
+    "UPDATE",
+    "DELETE",
+    "TRUNCATE",
+    "player-index snapshots",
+    "legacy Handicap tables",
+    "publication"
+  ]
+}

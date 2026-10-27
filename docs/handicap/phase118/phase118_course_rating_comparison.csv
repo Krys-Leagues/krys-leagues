@@ -1,0 +1,325 @@
+course_id,difficulty,model,qualifying_rounds,distinct_verified_players,mean_score,median_score,elite_benchmark,simulated_course_rating,simulated_slope,maximum_player_concentration,confidence_status,confidence_reason,prior_phase104_rating,prior_phase104_slope,rating_delta_from_phase104,slope_delta_from_phase104,weekly_rows_in_model,note
+"20,000 Leagues Under The Sea_easy",easy,KWT_ONLY,177,100,-17.514,-18,-23.364,-23.364,5.85,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-23.364,5.85,0,0,0,Corrected Phase 68 KWT history
+"20,000 Leagues Under The Sea_easy",easy,KWT_PLUS_S14_W05_12,177,100,-17.514,-18,-23.364,-23.364,5.85,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-23.364,5.85,0,0,0,Corrected KWT plus Phase 117; no overlap
+"20,000 Leagues Under The Sea_easy",easy,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-23.364,5.85,,,0,Verified THE_WEEKLY course-rating evidence only
+"20,000 Leagues Under The Sea_easy",easy,KWT_PLUS_WEEKLY,177,100,-17.514,-18,-23.364,-23.364,5.85,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-23.364,5.85,0,0,0,Simulation only; Weekly excluded from personal indexes
+"20,000 Leagues Under The Sea_hard",hard,KWT_ONLY,177,100,-10.441,-12,-19.182,-19.182,8.741,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-19.182,8.741,0,0,0,Corrected Phase 68 KWT history
+"20,000 Leagues Under The Sea_hard",hard,KWT_PLUS_S14_W05_12,177,100,-10.441,-12,-19.182,-19.182,8.741,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-19.182,8.741,0,0,0,Corrected KWT plus Phase 117; no overlap
+"20,000 Leagues Under The Sea_hard",hard,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-19.182,8.741,,,0,Verified THE_WEEKLY course-rating evidence only
+"20,000 Leagues Under The Sea_hard",hard,KWT_PLUS_WEEKLY,177,100,-10.441,-12,-19.182,-19.182,8.741,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-19.182,8.741,0,0,0,Simulation only; Weekly excluded from personal indexes
+8-Bit Lair_easy,easy,KWT_ONLY,163,94,-12.46,-13,-21.8,-21.8,9.34,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-21.8,9.34,0,0,0,Corrected Phase 68 KWT history
+8-Bit Lair_easy,easy,KWT_PLUS_S14_W05_12,163,94,-12.46,-13,-21.8,-21.8,9.34,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-21.8,9.34,0,0,0,Corrected KWT plus Phase 117; no overlap
+8-Bit Lair_easy,easy,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-21.8,9.34,,,0,Verified THE_WEEKLY course-rating evidence only
+8-Bit Lair_easy,easy,KWT_PLUS_WEEKLY,163,94,-12.46,-13,-21.8,-21.8,9.34,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-21.8,9.34,0,0,0,Simulation only; Weekly excluded from personal indexes
+8-Bit Lair_hard,hard,KWT_ONLY,163,94,-6.178,-7,-18.75,-18.75,12.572,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-18.75,12.572,0,0,0,Corrected Phase 68 KWT history
+8-Bit Lair_hard,hard,KWT_PLUS_S14_W05_12,163,94,-6.178,-7,-18.75,-18.75,12.572,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-18.75,12.572,0,0,0,Corrected KWT plus Phase 117; no overlap
+8-Bit Lair_hard,hard,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-18.75,12.572,,,0,Verified THE_WEEKLY course-rating evidence only
+8-Bit Lair_hard,hard,KWT_PLUS_WEEKLY,163,94,-6.178,-7,-18.75,-18.75,12.572,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-18.75,12.572,0,0,0,Simulation only; Weekly excluded from personal indexes
+Alfheim_easy,easy,KWT_ONLY,221,117,-14.683,-15,-21.185,-21.185,6.502,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-21.185,6.502,0,0,0,Corrected Phase 68 KWT history
+Alfheim_easy,easy,KWT_PLUS_S14_W05_12,221,117,-14.683,-15,-21.185,-21.185,6.502,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-21.185,6.502,0,0,0,Corrected KWT plus Phase 117; no overlap
+Alfheim_easy,easy,WEEKLY_ONLY,80,80,-17.512,-18,-21.7,-21.7,4.188,0.013,READY_CANDIDATE,THRESHOLDS_PASS,-21.185,6.502,-0.515,-2.314,80,Verified THE_WEEKLY course-rating evidence only
+Alfheim_easy,easy,KWT_PLUS_WEEKLY,301,197,-15.435,-16,-21.351,-21.351,5.916,0.013,READY_CANDIDATE,THRESHOLDS_PASS,-21.185,6.502,-0.166,-0.586,80,Simulation only; Weekly excluded from personal indexes
+Alfheim_hard,hard,KWT_ONLY,221,117,-12.602,-14,-21.667,-21.667,9.065,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-21.667,9.065,0,0,0,Corrected Phase 68 KWT history
+Alfheim_hard,hard,KWT_PLUS_S14_W05_12,221,117,-12.602,-14,-21.667,-21.667,9.065,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-21.667,9.065,0,0,0,Corrected KWT plus Phase 117; no overlap
+Alfheim_hard,hard,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-21.667,9.065,,,0,Verified THE_WEEKLY course-rating evidence only
+Alfheim_hard,hard,KWT_PLUS_WEEKLY,221,117,-12.602,-14,-21.667,-21.667,9.065,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-21.667,9.065,0,0,0,Simulation only; Weekly excluded from personal indexes
+Alice's Adventures in Wonderland_easy,easy,KWT_ONLY,49,49,-14.408,-14,-21.5,-21.5,7.092,0.02,PROVISIONAL,20_TO_49_ROUNDS,,,,,0,Corrected Phase 68 KWT history
+Alice's Adventures in Wonderland_easy,easy,KWT_PLUS_S14_W05_12,87,63,-14.931,-15,-22.182,-22.182,7.251,0.023,READY_CANDIDATE,THRESHOLDS_PASS,,,,,0,Corrected KWT plus Phase 117; no overlap
+Alice's Adventures in Wonderland_easy,easy,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,,,,,0,Verified THE_WEEKLY course-rating evidence only
+Alice's Adventures in Wonderland_easy,easy,KWT_PLUS_WEEKLY,87,63,-14.931,-15,-22.182,-22.182,7.251,0.023,READY_CANDIDATE,THRESHOLDS_PASS,,,,,0,Simulation only; Weekly excluded from personal indexes
+Alice's Adventures in Wonderland_hard,hard,KWT_ONLY,49,49,-1.776,0,-13,-13,11.224,0.02,PROVISIONAL,20_TO_49_ROUNDS,,,,,0,Corrected Phase 68 KWT history
+Alice's Adventures in Wonderland_hard,hard,KWT_PLUS_S14_W05_12,87,63,-2,-1,-13,-13,11,0.023,READY_CANDIDATE,THRESHOLDS_PASS,,,,,0,Corrected KWT plus Phase 117; no overlap
+Alice's Adventures in Wonderland_hard,hard,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,,,,,0,Verified THE_WEEKLY course-rating evidence only
+Alice's Adventures in Wonderland_hard,hard,KWT_PLUS_WEEKLY,87,63,-2,-1,-13,-13,11,0.023,READY_CANDIDATE,THRESHOLDS_PASS,,,,,0,Simulation only; Weekly excluded from personal indexes
+Arizona Modern_easy,easy,KWT_ONLY,174,97,-21.81,-23,-27.381,-27.381,5.571,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-27.381,5.571,0,0,0,Corrected Phase 68 KWT history
+Arizona Modern_easy,easy,KWT_PLUS_S14_W05_12,174,97,-21.81,-23,-27.381,-27.381,5.571,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-27.381,5.571,0,0,0,Corrected KWT plus Phase 117; no overlap
+Arizona Modern_easy,easy,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-27.381,5.571,,,0,Verified THE_WEEKLY course-rating evidence only
+Arizona Modern_easy,easy,KWT_PLUS_WEEKLY,174,97,-21.81,-23,-27.381,-27.381,5.571,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-27.381,5.571,0,0,0,Simulation only; Weekly excluded from personal indexes
+Arizona Modern_hard,hard,KWT_ONLY,174,97,-13.425,-14,-22.714,-22.714,9.289,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-22.714,9.289,0,0,0,Corrected Phase 68 KWT history
+Arizona Modern_hard,hard,KWT_PLUS_S14_W05_12,174,97,-13.425,-14,-22.714,-22.714,9.289,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-22.714,9.289,0,0,0,Corrected KWT plus Phase 117; no overlap
+Arizona Modern_hard,hard,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-22.714,9.289,,,0,Verified THE_WEEKLY course-rating evidence only
+Arizona Modern_hard,hard,KWT_PLUS_WEEKLY,174,97,-13.425,-14,-22.714,-22.714,9.289,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-22.714,9.289,0,0,0,Simulation only; Weekly excluded from personal indexes
+Around The World_easy,easy,KWT_ONLY,174,103,-15.586,-16,-23.048,-23.048,7.461,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-23.048,7.461,0,0,0,Corrected Phase 68 KWT history
+Around The World_easy,easy,KWT_PLUS_S14_W05_12,174,103,-15.586,-16,-23.048,-23.048,7.461,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-23.048,7.461,0,0,0,Corrected KWT plus Phase 117; no overlap
+Around The World_easy,easy,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-23.048,7.461,,,0,Verified THE_WEEKLY course-rating evidence only
+Around The World_easy,easy,KWT_PLUS_WEEKLY,174,103,-15.586,-16,-23.048,-23.048,7.461,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-23.048,7.461,0,0,0,Simulation only; Weekly excluded from personal indexes
+Around The World_hard,hard,KWT_ONLY,174,103,-5.391,-7,-15.762,-15.762,10.371,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-15.762,10.371,0,0,0,Corrected Phase 68 KWT history
+Around The World_hard,hard,KWT_PLUS_S14_W05_12,174,103,-5.391,-7,-15.762,-15.762,10.371,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-15.762,10.371,0,0,0,Corrected KWT plus Phase 117; no overlap
+Around The World_hard,hard,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-15.762,10.371,,,0,Verified THE_WEEKLY course-rating evidence only
+Around The World_hard,hard,KWT_PLUS_WEEKLY,174,103,-5.391,-7,-15.762,-15.762,10.371,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-15.762,10.371,0,0,0,Simulation only; Weekly excluded from personal indexes
+Atlantis_easy,easy,KWT_ONLY,223,110,-18.704,-19,-25.148,-25.148,6.444,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-25.148,6.444,0,0,0,Corrected Phase 68 KWT history
+Atlantis_easy,easy,KWT_PLUS_S14_W05_12,223,110,-18.704,-19,-25.148,-25.148,6.444,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-25.148,6.444,0,0,0,Corrected KWT plus Phase 117; no overlap
+Atlantis_easy,easy,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-25.148,6.444,,,0,Verified THE_WEEKLY course-rating evidence only
+Atlantis_easy,easy,KWT_PLUS_WEEKLY,223,110,-18.704,-19,-25.148,-25.148,6.444,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-25.148,6.444,0,0,0,Simulation only; Weekly excluded from personal indexes
+Atlantis_hard,hard,KWT_ONLY,223,110,-7.229,-8,-17.556,-17.556,10.327,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-17.556,10.327,0,0,0,Corrected Phase 68 KWT history
+Atlantis_hard,hard,KWT_PLUS_S14_W05_12,223,110,-7.229,-8,-17.556,-17.556,10.327,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-17.556,10.327,0,0,0,Corrected KWT plus Phase 117; no overlap
+Atlantis_hard,hard,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-17.556,10.327,,,0,Verified THE_WEEKLY course-rating evidence only
+Atlantis_hard,hard,KWT_PLUS_WEEKLY,223,110,-7.229,-8,-17.556,-17.556,10.327,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-17.556,10.327,0,0,0,Simulation only; Weekly excluded from personal indexes
+Blokhaven_easy,easy,KWT_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,,,,,0,Corrected Phase 68 KWT history
+Blokhaven_easy,easy,KWT_PLUS_S14_W05_12,50,50,-13.9,-14.5,-22.167,-22.167,8.267,0.02,READY_CANDIDATE,THRESHOLDS_PASS,,,,,0,Corrected KWT plus Phase 117; no overlap
+Blokhaven_easy,easy,WEEKLY_ONLY,85,85,-16.306,-17,-21.818,-21.818,5.512,0.012,READY_CANDIDATE,THRESHOLDS_PASS,,,,,85,Verified THE_WEEKLY course-rating evidence only
+Blokhaven_easy,easy,KWT_PLUS_WEEKLY,135,135,-15.415,-16,-21.941,-21.941,6.526,0.007,READY_CANDIDATE,THRESHOLDS_PASS,,,,,85,Simulation only; Weekly excluded from personal indexes
+Blokhaven_hard,hard,KWT_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,,,,,0,Corrected Phase 68 KWT history
+Blokhaven_hard,hard,KWT_PLUS_S14_W05_12,50,50,-8.76,-9.5,-18.333,-18.333,9.573,0.02,READY_CANDIDATE,THRESHOLDS_PASS,,,,,0,Corrected KWT plus Phase 117; no overlap
+Blokhaven_hard,hard,WEEKLY_ONLY,80,80,-12.7,-13.5,-20,-20,7.3,0.013,READY_CANDIDATE,THRESHOLDS_PASS,,,,,80,Verified THE_WEEKLY course-rating evidence only
+Blokhaven_hard,hard,KWT_PLUS_WEEKLY,130,130,-11.185,-12.5,-19.5,-19.5,8.315,0.008,READY_CANDIDATE,THRESHOLDS_PASS,,,,,80,Simulation only; Weekly excluded from personal indexes
+Bogey's Bonanza_easy,easy,KWT_ONLY,224,112,-17.411,-18,-25.37,-25.37,7.96,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-25.37,7.96,0,0,0,Corrected Phase 68 KWT history
+Bogey's Bonanza_easy,easy,KWT_PLUS_S14_W05_12,224,112,-17.411,-18,-25.37,-25.37,7.96,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-25.37,7.96,0,0,0,Corrected KWT plus Phase 117; no overlap
+Bogey's Bonanza_easy,easy,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-25.37,7.96,,,0,Verified THE_WEEKLY course-rating evidence only
+Bogey's Bonanza_easy,easy,KWT_PLUS_WEEKLY,224,112,-17.411,-18,-25.37,-25.37,7.96,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-25.37,7.96,0,0,0,Simulation only; Weekly excluded from personal indexes
+Bogey's Bonanza_hard,hard,KWT_ONLY,224,112,-9.089,-10.5,-22.444,-22.444,13.355,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-22.444,13.355,0,0,0,Corrected Phase 68 KWT history
+Bogey's Bonanza_hard,hard,KWT_PLUS_S14_W05_12,224,112,-9.089,-10.5,-22.444,-22.444,13.355,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-22.444,13.355,0,0,0,Corrected KWT plus Phase 117; no overlap
+Bogey's Bonanza_hard,hard,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-22.444,13.355,,,0,Verified THE_WEEKLY course-rating evidence only
+Bogey's Bonanza_hard,hard,KWT_PLUS_WEEKLY,224,112,-9.089,-10.5,-22.444,-22.444,13.355,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-22.444,13.355,0,0,0,Simulation only; Weekly excluded from personal indexes
+Cherry Blossom_easy,easy,KWT_ONLY,220,104,-21.586,-22,-27.519,-27.519,5.932,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-27.519,5.932,0,0,0,Corrected Phase 68 KWT history
+Cherry Blossom_easy,easy,KWT_PLUS_S14_W05_12,220,104,-21.586,-22,-27.519,-27.519,5.932,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-27.519,5.932,0,0,0,Corrected KWT plus Phase 117; no overlap
+Cherry Blossom_easy,easy,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-27.519,5.932,,,0,Verified THE_WEEKLY course-rating evidence only
+Cherry Blossom_easy,easy,KWT_PLUS_WEEKLY,220,104,-21.586,-22,-27.519,-27.519,5.932,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-27.519,5.932,0,0,0,Simulation only; Weekly excluded from personal indexes
+Cherry Blossom_hard,hard,KWT_ONLY,220,104,-10.495,-11.5,-21.704,-21.704,11.208,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-21.704,11.208,0,0,0,Corrected Phase 68 KWT history
+Cherry Blossom_hard,hard,KWT_PLUS_S14_W05_12,220,104,-10.495,-11.5,-21.704,-21.704,11.208,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-21.704,11.208,0,0,0,Corrected KWT plus Phase 117; no overlap
+Cherry Blossom_hard,hard,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-21.704,11.208,,,0,Verified THE_WEEKLY course-rating evidence only
+Cherry Blossom_hard,hard,KWT_PLUS_WEEKLY,220,104,-10.495,-11.5,-21.704,-21.704,11.208,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-21.704,11.208,0,0,0,Simulation only; Weekly excluded from personal indexes
+Crystal Lair_easy,easy,KWT_ONLY,101,67,-15.416,-16,-24.538,-24.538,9.123,0.02,READY_CANDIDATE,THRESHOLDS_PASS,-24.538,9.123,0,0,0,Corrected Phase 68 KWT history
+Crystal Lair_easy,easy,KWT_PLUS_S14_W05_12,101,67,-15.416,-16,-24.538,-24.538,9.123,0.02,READY_CANDIDATE,THRESHOLDS_PASS,-24.538,9.123,0,0,0,Corrected KWT plus Phase 117; no overlap
+Crystal Lair_easy,easy,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-24.538,9.123,,,0,Verified THE_WEEKLY course-rating evidence only
+Crystal Lair_easy,easy,KWT_PLUS_WEEKLY,101,67,-15.416,-16,-24.538,-24.538,9.123,0.02,READY_CANDIDATE,THRESHOLDS_PASS,-24.538,9.123,0,0,0,Simulation only; Weekly excluded from personal indexes
+Crystal Lair_hard,hard,KWT_ONLY,101,67,-9,-10,-20.692,-20.692,11.692,0.02,READY_CANDIDATE,THRESHOLDS_PASS,-20.692,11.692,0,0,0,Corrected Phase 68 KWT history
+Crystal Lair_hard,hard,KWT_PLUS_S14_W05_12,101,67,-9,-10,-20.692,-20.692,11.692,0.02,READY_CANDIDATE,THRESHOLDS_PASS,-20.692,11.692,0,0,0,Corrected KWT plus Phase 117; no overlap
+Crystal Lair_hard,hard,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-20.692,11.692,,,0,Verified THE_WEEKLY course-rating evidence only
+Crystal Lair_hard,hard,KWT_PLUS_WEEKLY,101,67,-9,-10,-20.692,-20.692,11.692,0.02,READY_CANDIDATE,THRESHOLDS_PASS,-20.692,11.692,0,0,0,Simulation only; Weekly excluded from personal indexes
+El Dorado_easy,easy,KWT_ONLY,234,111,-15.838,-17,-23.862,-23.862,8.024,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-23.862,8.024,0,0,0,Corrected Phase 68 KWT history
+El Dorado_easy,easy,KWT_PLUS_S14_W05_12,234,111,-15.838,-17,-23.862,-23.862,8.024,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-23.862,8.024,0,0,0,Corrected KWT plus Phase 117; no overlap
+El Dorado_easy,easy,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-23.862,8.024,,,0,Verified THE_WEEKLY course-rating evidence only
+El Dorado_easy,easy,KWT_PLUS_WEEKLY,234,111,-15.838,-17,-23.862,-23.862,8.024,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-23.862,8.024,0,0,0,Simulation only; Weekly excluded from personal indexes
+El Dorado_hard,hard,KWT_ONLY,234,111,-7.124,-8,-18.172,-18.172,11.048,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-18.172,11.048,0,0,0,Corrected Phase 68 KWT history
+El Dorado_hard,hard,KWT_PLUS_S14_W05_12,234,111,-7.124,-8,-18.172,-18.172,11.048,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-18.172,11.048,0,0,0,Corrected KWT plus Phase 117; no overlap
+El Dorado_hard,hard,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-18.172,11.048,,,0,Verified THE_WEEKLY course-rating evidence only
+El Dorado_hard,hard,KWT_PLUS_WEEKLY,234,111,-7.124,-8,-18.172,-18.172,11.048,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-18.172,11.048,0,0,0,Simulation only; Weekly excluded from personal indexes
+Forgotten Fairyland_easy,easy,KWT_ONLY,62,62,-20.516,-21,-28.75,-28.75,8.234,0.016,READY_CANDIDATE,THRESHOLDS_PASS,-28.75,8.234,0,0,0,Corrected Phase 68 KWT history
+Forgotten Fairyland_easy,easy,KWT_PLUS_S14_W05_12,100,71,-20.79,-22,-28.917,-28.917,8.127,0.02,READY_CANDIDATE,THRESHOLDS_PASS,-28.75,8.234,-0.167,-0.107,0,Corrected KWT plus Phase 117; no overlap
+Forgotten Fairyland_easy,easy,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-28.75,8.234,,,0,Verified THE_WEEKLY course-rating evidence only
+Forgotten Fairyland_easy,easy,KWT_PLUS_WEEKLY,100,71,-20.79,-22,-28.917,-28.917,8.127,0.02,READY_CANDIDATE,THRESHOLDS_PASS,-28.75,8.234,-0.167,-0.107,0,Simulation only; Weekly excluded from personal indexes
+Forgotten Fairyland_hard,hard,KWT_ONLY,62,62,-5.661,-7.5,-15.75,-15.75,10.089,0.016,READY_CANDIDATE,THRESHOLDS_PASS,-15.75,10.089,0,0,0,Corrected Phase 68 KWT history
+Forgotten Fairyland_hard,hard,KWT_PLUS_S14_W05_12,100,71,-5.87,-7,-16.083,-16.083,10.213,0.02,READY_CANDIDATE,THRESHOLDS_PASS,-15.75,10.089,-0.333,0.124,0,Corrected KWT plus Phase 117; no overlap
+Forgotten Fairyland_hard,hard,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-15.75,10.089,,,0,Verified THE_WEEKLY course-rating evidence only
+Forgotten Fairyland_hard,hard,KWT_PLUS_WEEKLY,100,71,-5.87,-7,-16.083,-16.083,10.213,0.02,READY_CANDIDATE,THRESHOLDS_PASS,-15.75,10.089,-0.333,0.124,0,Simulation only; Weekly excluded from personal indexes
+Gardens of Babylon_easy,easy,KWT_ONLY,226,110,-18.106,-18,-26.143,-26.143,8.037,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-26.143,8.037,0,0,0,Corrected Phase 68 KWT history
+Gardens of Babylon_easy,easy,KWT_PLUS_S14_W05_12,226,110,-18.106,-18,-26.143,-26.143,8.037,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-26.143,8.037,0,0,0,Corrected KWT plus Phase 117; no overlap
+Gardens of Babylon_easy,easy,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-26.143,8.037,,,0,Verified THE_WEEKLY course-rating evidence only
+Gardens of Babylon_easy,easy,KWT_PLUS_WEEKLY,226,110,-18.106,-18,-26.143,-26.143,8.037,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-26.143,8.037,0,0,0,Simulation only; Weekly excluded from personal indexes
+Gardens of Babylon_hard,hard,KWT_ONLY,226,110,-8.296,-9,-19.5,-19.5,11.204,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-19.5,11.204,0,0,0,Corrected Phase 68 KWT history
+Gardens of Babylon_hard,hard,KWT_PLUS_S14_W05_12,226,110,-8.296,-9,-19.5,-19.5,11.204,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-19.5,11.204,0,0,0,Corrected KWT plus Phase 117; no overlap
+Gardens of Babylon_hard,hard,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-19.5,11.204,,,0,Verified THE_WEEKLY course-rating evidence only
+Gardens of Babylon_hard,hard,KWT_PLUS_WEEKLY,226,110,-8.296,-9,-19.5,-19.5,11.204,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-19.5,11.204,0,0,0,Simulation only; Weekly excluded from personal indexes
+Gloop Lair_easy,easy,KWT_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,,,,,0,Corrected Phase 68 KWT history
+Gloop Lair_easy,easy,KWT_PLUS_S14_W05_12,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,,,,,0,Corrected KWT plus Phase 117; no overlap
+Gloop Lair_easy,easy,WEEKLY_ONLY,92,92,-20.62,-21,-28.25,-28.25,7.63,0.011,READY_CANDIDATE,THRESHOLDS_PASS,,,,,92,Verified THE_WEEKLY course-rating evidence only
+Gloop Lair_easy,easy,KWT_PLUS_WEEKLY,92,92,-20.62,-21,-28.25,-28.25,7.63,0.011,READY_CANDIDATE,THRESHOLDS_PASS,,,,,92,Simulation only; Weekly excluded from personal indexes
+Holiday Hideaway_easy,easy,KWT_ONLY,154,88,-11.981,-13,-19.053,-19.053,7.072,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-19.053,7.072,0,0,0,Corrected Phase 68 KWT history
+Holiday Hideaway_easy,easy,KWT_PLUS_S14_W05_12,154,88,-11.981,-13,-19.053,-19.053,7.072,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-19.053,7.072,0,0,0,Corrected KWT plus Phase 117; no overlap
+Holiday Hideaway_easy,easy,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-19.053,7.072,,,0,Verified THE_WEEKLY course-rating evidence only
+Holiday Hideaway_easy,easy,KWT_PLUS_WEEKLY,154,88,-11.981,-13,-19.053,-19.053,7.072,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-19.053,7.072,0,0,0,Simulation only; Weekly excluded from personal indexes
+Holiday Hideaway_hard,hard,KWT_ONLY,154,88,-2.753,-3.5,-14.158,-14.158,11.405,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-14.158,11.405,0,0,0,Corrected Phase 68 KWT history
+Holiday Hideaway_hard,hard,KWT_PLUS_S14_W05_12,154,88,-2.753,-3.5,-14.158,-14.158,11.405,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-14.158,11.405,0,0,0,Corrected KWT plus Phase 117; no overlap
+Holiday Hideaway_hard,hard,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-14.158,11.405,,,0,Verified THE_WEEKLY course-rating evidence only
+Holiday Hideaway_hard,hard,KWT_PLUS_WEEKLY,154,88,-2.753,-3.5,-14.158,-14.158,11.405,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-14.158,11.405,0,0,0,Simulation only; Weekly excluded from personal indexes
+Hollywood_easy,easy,KWT_ONLY,46,46,-13.413,-14.5,-21.167,-21.167,7.754,0.022,PROVISIONAL,20_TO_49_ROUNDS,,,,,0,Corrected Phase 68 KWT history
+Hollywood_easy,easy,KWT_PLUS_S14_W05_12,46,46,-13.413,-14.5,-21.167,-21.167,7.754,0.022,PROVISIONAL,20_TO_49_ROUNDS,,,,,0,Corrected KWT plus Phase 117; no overlap
+Hollywood_easy,easy,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,,,,,0,Verified THE_WEEKLY course-rating evidence only
+Hollywood_easy,easy,KWT_PLUS_WEEKLY,46,46,-13.413,-14.5,-21.167,-21.167,7.754,0.022,PROVISIONAL,20_TO_49_ROUNDS,,,,,0,Simulation only; Weekly excluded from personal indexes
+Hollywood_hard,hard,KWT_ONLY,46,46,-3.239,-4,-16.667,-16.667,13.428,0.022,PROVISIONAL,20_TO_49_ROUNDS,,,,,0,Corrected Phase 68 KWT history
+Hollywood_hard,hard,KWT_PLUS_S14_W05_12,46,46,-3.239,-4,-16.667,-16.667,13.428,0.022,PROVISIONAL,20_TO_49_ROUNDS,,,,,0,Corrected KWT plus Phase 117; no overlap
+Hollywood_hard,hard,WEEKLY_ONLY,92,92,-9.533,-11,-17.333,-17.333,7.801,0.011,READY_CANDIDATE,THRESHOLDS_PASS,,,,,92,Verified THE_WEEKLY course-rating evidence only
+Hollywood_hard,hard,KWT_PLUS_WEEKLY,138,138,-7.435,-9,-17.294,-17.294,9.859,0.007,READY_CANDIDATE,THRESHOLDS_PASS,,,,,92,Simulation only; Weekly excluded from personal indexes
+Ice Lair_easy,easy,KWT_ONLY,236,103,-14.089,-14,-20.828,-20.828,6.739,0.021,READY_CANDIDATE,THRESHOLDS_PASS,-20.828,6.739,0,0,0,Corrected Phase 68 KWT history
+Ice Lair_easy,easy,KWT_PLUS_S14_W05_12,236,103,-14.089,-14,-20.828,-20.828,6.739,0.021,READY_CANDIDATE,THRESHOLDS_PASS,-20.828,6.739,0,0,0,Corrected KWT plus Phase 117; no overlap
+Ice Lair_easy,easy,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-20.828,6.739,,,0,Verified THE_WEEKLY course-rating evidence only
+Ice Lair_easy,easy,KWT_PLUS_WEEKLY,236,103,-14.089,-14,-20.828,-20.828,6.739,0.021,READY_CANDIDATE,THRESHOLDS_PASS,-20.828,6.739,0,0,0,Simulation only; Weekly excluded from personal indexes
+Ice Lair_hard,hard,KWT_ONLY,236,103,-6.86,-7,-16.69,-16.69,9.829,0.021,READY_CANDIDATE,THRESHOLDS_PASS,-16.69,9.829,0,0,0,Corrected Phase 68 KWT history
+Ice Lair_hard,hard,KWT_PLUS_S14_W05_12,236,103,-6.86,-7,-16.69,-16.69,9.829,0.021,READY_CANDIDATE,THRESHOLDS_PASS,-16.69,9.829,0,0,0,Corrected KWT plus Phase 117; no overlap
+Ice Lair_hard,hard,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-16.69,9.829,,,0,Verified THE_WEEKLY course-rating evidence only
+Ice Lair_hard,hard,KWT_PLUS_WEEKLY,236,103,-6.86,-7,-16.69,-16.69,9.829,0.021,READY_CANDIDATE,THRESHOLDS_PASS,-16.69,9.829,0,0,0,Simulation only; Weekly excluded from personal indexes
+Journey to the Center of the Earth_easy,easy,KWT_ONLY,204,106,-15.554,-16,-21.6,-21.6,6.046,0.02,READY_CANDIDATE,THRESHOLDS_PASS,-21.6,6.046,0,0,0,Corrected Phase 68 KWT history
+Journey to the Center of the Earth_easy,easy,KWT_PLUS_S14_W05_12,204,106,-15.554,-16,-21.6,-21.6,6.046,0.02,READY_CANDIDATE,THRESHOLDS_PASS,-21.6,6.046,0,0,0,Corrected KWT plus Phase 117; no overlap
+Journey to the Center of the Earth_easy,easy,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-21.6,6.046,,,0,Verified THE_WEEKLY course-rating evidence only
+Journey to the Center of the Earth_easy,easy,KWT_PLUS_WEEKLY,204,106,-15.554,-16,-21.6,-21.6,6.046,0.02,READY_CANDIDATE,THRESHOLDS_PASS,-21.6,6.046,0,0,0,Simulation only; Weekly excluded from personal indexes
+Journey to the Center of the Earth_hard,hard,KWT_ONLY,204,106,-8.922,-10,-18.24,-18.24,9.318,0.02,READY_CANDIDATE,THRESHOLDS_PASS,-18.24,9.318,0,0,0,Corrected Phase 68 KWT history
+Journey to the Center of the Earth_hard,hard,KWT_PLUS_S14_W05_12,204,106,-8.922,-10,-18.24,-18.24,9.318,0.02,READY_CANDIDATE,THRESHOLDS_PASS,-18.24,9.318,0,0,0,Corrected KWT plus Phase 117; no overlap
+Journey to the Center of the Earth_hard,hard,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-18.24,9.318,,,0,Verified THE_WEEKLY course-rating evidence only
+Journey to the Center of the Earth_hard,hard,KWT_PLUS_WEEKLY,204,106,-8.922,-10,-18.24,-18.24,9.318,0.02,READY_CANDIDATE,THRESHOLDS_PASS,-18.24,9.318,0,0,0,Simulation only; Weekly excluded from personal indexes
+Labyrinth_easy,easy,KWT_ONLY,270,113,-15.259,-16.5,-23.455,-23.455,8.195,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-23.455,8.195,0,0,0,Corrected Phase 68 KWT history
+Labyrinth_easy,easy,KWT_PLUS_S14_W05_12,270,113,-15.259,-16.5,-23.455,-23.455,8.195,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-23.455,8.195,0,0,0,Corrected KWT plus Phase 117; no overlap
+Labyrinth_easy,easy,WEEKLY_ONLY,79,79,-19.076,-20,-24.7,-24.7,5.624,0.013,READY_CANDIDATE,THRESHOLDS_PASS,-23.455,8.195,-1.245,-2.571,79,Verified THE_WEEKLY course-rating evidence only
+Labyrinth_easy,easy,KWT_PLUS_WEEKLY,349,192,-16.123,-17,-24,-24,7.877,0.014,READY_CANDIDATE,THRESHOLDS_PASS,-23.455,8.195,-0.545,-0.318,79,Simulation only; Weekly excluded from personal indexes
+Labyrinth_hard,hard,KWT_ONLY,270,113,-7.493,-8,-18.727,-18.727,11.235,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-18.727,11.235,0,0,0,Corrected Phase 68 KWT history
+Labyrinth_hard,hard,KWT_PLUS_S14_W05_12,270,113,-7.493,-8,-18.727,-18.727,11.235,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-18.727,11.235,0,0,0,Corrected KWT plus Phase 117; no overlap
+Labyrinth_hard,hard,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-18.727,11.235,,,0,Verified THE_WEEKLY course-rating evidence only
+Labyrinth_hard,hard,KWT_PLUS_WEEKLY,270,113,-7.493,-8,-18.727,-18.727,11.235,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-18.727,11.235,0,0,0,Simulation only; Weekly excluded from personal indexes
+Laser Lair_easy,easy,KWT_ONLY,241,114,-18.27,-19,-25.414,-25.414,7.144,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-25.414,7.144,0,0,0,Corrected Phase 68 KWT history
+Laser Lair_easy,easy,KWT_PLUS_S14_W05_12,288,121,-18.302,-19,-25.343,-25.343,7.041,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-25.414,7.144,0.071,-0.103,0,Corrected KWT plus Phase 117; no overlap
+Laser Lair_easy,easy,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-25.414,7.144,,,0,Verified THE_WEEKLY course-rating evidence only
+Laser Lair_easy,easy,KWT_PLUS_WEEKLY,288,121,-18.302,-19,-25.343,-25.343,7.041,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-25.414,7.144,0.071,-0.103,0,Simulation only; Weekly excluded from personal indexes
+Laser Lair_hard,hard,KWT_ONLY,241,114,-12.037,-13,-22.793,-22.793,10.756,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-22.793,10.756,0,0,0,Corrected Phase 68 KWT history
+Laser Lair_hard,hard,KWT_PLUS_S14_W05_12,288,121,-12.142,-13,-23.029,-23.029,10.886,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-22.793,10.756,-0.236,0.13,0,Corrected KWT plus Phase 117; no overlap
+Laser Lair_hard,hard,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-22.793,10.756,,,0,Verified THE_WEEKLY course-rating evidence only
+Laser Lair_hard,hard,KWT_PLUS_WEEKLY,288,121,-12.142,-13,-23.029,-23.029,10.886,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-22.793,10.756,-0.236,0.13,0,Simulation only; Weekly excluded from personal indexes
+Mars Gardens_easy,easy,KWT_ONLY,156,96,-15.045,-16,-21.895,-21.895,6.85,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-21.895,6.85,0,0,0,Corrected Phase 68 KWT history
+Mars Gardens_easy,easy,KWT_PLUS_S14_W05_12,156,96,-15.045,-16,-21.895,-21.895,6.85,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-21.895,6.85,0,0,0,Corrected KWT plus Phase 117; no overlap
+Mars Gardens_easy,easy,WEEKLY_ONLY,86,86,-18.093,-18,-23.364,-23.364,5.271,0.012,READY_CANDIDATE,THRESHOLDS_PASS,-21.895,6.85,-1.469,-1.579,86,Verified THE_WEEKLY course-rating evidence only
+Mars Gardens_easy,easy,KWT_PLUS_WEEKLY,242,182,-16.128,-17,-22.533,-22.533,6.405,0.012,READY_CANDIDATE,THRESHOLDS_PASS,-21.895,6.85,-0.638,-0.445,86,Simulation only; Weekly excluded from personal indexes
+Mars Gardens_hard,hard,KWT_ONLY,156,96,-6.263,-7,-16.842,-16.842,10.579,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-16.842,10.579,0,0,0,Corrected Phase 68 KWT history
+Mars Gardens_hard,hard,KWT_PLUS_S14_W05_12,156,96,-6.263,-7,-16.842,-16.842,10.579,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-16.842,10.579,0,0,0,Corrected KWT plus Phase 117; no overlap
+Mars Gardens_hard,hard,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-16.842,10.579,,,0,Verified THE_WEEKLY course-rating evidence only
+Mars Gardens_hard,hard,KWT_PLUS_WEEKLY,156,96,-6.263,-7,-16.842,-16.842,10.579,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-16.842,10.579,0,0,0,Simulation only; Weekly excluded from personal indexes
+Meow Wolf_easy,easy,KWT_ONLY,149,85,-16.161,-17,-21.889,-21.889,5.728,0.02,READY_CANDIDATE,THRESHOLDS_PASS,-21.889,5.728,0,0,0,Corrected Phase 68 KWT history
+Meow Wolf_easy,easy,KWT_PLUS_S14_W05_12,149,85,-16.161,-17,-21.889,-21.889,5.728,0.02,READY_CANDIDATE,THRESHOLDS_PASS,-21.889,5.728,0,0,0,Corrected KWT plus Phase 117; no overlap
+Meow Wolf_easy,easy,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-21.889,5.728,,,0,Verified THE_WEEKLY course-rating evidence only
+Meow Wolf_easy,easy,KWT_PLUS_WEEKLY,149,85,-16.161,-17,-21.889,-21.889,5.728,0.02,READY_CANDIDATE,THRESHOLDS_PASS,-21.889,5.728,0,0,0,Simulation only; Weekly excluded from personal indexes
+Meow Wolf_hard,hard,KWT_ONLY,149,85,-8.436,-10,-18.889,-18.889,10.453,0.02,READY_CANDIDATE,THRESHOLDS_PASS,-18.889,10.453,0,0,0,Corrected Phase 68 KWT history
+Meow Wolf_hard,hard,KWT_PLUS_S14_W05_12,149,85,-8.436,-10,-18.889,-18.889,10.453,0.02,READY_CANDIDATE,THRESHOLDS_PASS,-18.889,10.453,0,0,0,Corrected KWT plus Phase 117; no overlap
+Meow Wolf_hard,hard,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-18.889,10.453,,,0,Verified THE_WEEKLY course-rating evidence only
+Meow Wolf_hard,hard,KWT_PLUS_WEEKLY,149,85,-8.436,-10,-18.889,-18.889,10.453,0.02,READY_CANDIDATE,THRESHOLDS_PASS,-18.889,10.453,0,0,0,Simulation only; Weekly excluded from personal indexes
+Mount Olympus_easy,easy,KWT_ONLY,115,78,-16.835,-17,-24,-24,7.165,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-24,7.165,0,0,0,Corrected Phase 68 KWT history
+Mount Olympus_easy,easy,KWT_PLUS_S14_W05_12,163,91,-16.816,-18,-24.1,-24.1,7.284,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-24,7.165,-0.1,0.119,0,Corrected KWT plus Phase 117; no overlap
+Mount Olympus_easy,easy,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-24,7.165,,,0,Verified THE_WEEKLY course-rating evidence only
+Mount Olympus_easy,easy,KWT_PLUS_WEEKLY,163,91,-16.816,-18,-24.1,-24.1,7.284,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-24,7.165,-0.1,0.119,0,Simulation only; Weekly excluded from personal indexes
+Mount Olympus_hard,hard,KWT_ONLY,115,78,-8.983,-10,-17.857,-17.857,8.875,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-17.857,8.875,0,0,0,Corrected Phase 68 KWT history
+Mount Olympus_hard,hard,KWT_PLUS_S14_W05_12,163,91,-9.258,-10,-18.35,-18.35,9.092,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-17.857,8.875,-0.493,0.217,0,Corrected KWT plus Phase 117; no overlap
+Mount Olympus_hard,hard,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-17.857,8.875,,,0,Verified THE_WEEKLY course-rating evidence only
+Mount Olympus_hard,hard,KWT_PLUS_WEEKLY,163,91,-9.258,-10,-18.35,-18.35,9.092,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-17.857,8.875,-0.493,0.217,0,Simulation only; Weekly excluded from personal indexes
+Myst_easy,easy,KWT_ONLY,237,108,-18.928,-19,-25.379,-25.379,6.451,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-25.379,6.451,0,0,0,Corrected Phase 68 KWT history
+Myst_easy,easy,KWT_PLUS_S14_W05_12,237,108,-18.928,-19,-25.379,-25.379,6.451,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-25.379,6.451,0,0,0,Corrected KWT plus Phase 117; no overlap
+Myst_easy,easy,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-25.379,6.451,,,0,Verified THE_WEEKLY course-rating evidence only
+Myst_easy,easy,KWT_PLUS_WEEKLY,237,108,-18.928,-19,-25.379,-25.379,6.451,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-25.379,6.451,0,0,0,Simulation only; Weekly excluded from personal indexes
+Myst_hard,hard,KWT_ONLY,237,108,-11.16,-13,-20.172,-20.172,9.012,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-20.172,9.012,0,0,0,Corrected Phase 68 KWT history
+Myst_hard,hard,KWT_PLUS_S14_W05_12,237,108,-11.16,-13,-20.172,-20.172,9.012,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-20.172,9.012,0,0,0,Corrected KWT plus Phase 117; no overlap
+Myst_hard,hard,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-20.172,9.012,,,0,Verified THE_WEEKLY course-rating evidence only
+Myst_hard,hard,KWT_PLUS_WEEKLY,237,108,-11.16,-13,-20.172,-20.172,9.012,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-20.172,9.012,0,0,0,Simulation only; Weekly excluded from personal indexes
+Original Gothic_easy,easy,KWT_ONLY,180,109,-16.228,-17,-20.591,-20.591,4.363,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-20.591,4.363,0,0,0,Corrected Phase 68 KWT history
+Original Gothic_easy,easy,KWT_PLUS_S14_W05_12,180,109,-16.228,-17,-20.591,-20.591,4.363,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-20.591,4.363,0,0,0,Corrected KWT plus Phase 117; no overlap
+Original Gothic_easy,easy,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-20.591,4.363,,,0,Verified THE_WEEKLY course-rating evidence only
+Original Gothic_easy,easy,KWT_PLUS_WEEKLY,180,109,-16.228,-17,-20.591,-20.591,4.363,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-20.591,4.363,0,0,0,Simulation only; Weekly excluded from personal indexes
+Original Gothic_hard,hard,KWT_ONLY,180,109,-11.411,-13,-19.955,-19.955,8.543,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-19.955,8.543,0,0,0,Corrected Phase 68 KWT history
+Original Gothic_hard,hard,KWT_PLUS_S14_W05_12,180,109,-11.411,-13,-19.955,-19.955,8.543,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-19.955,8.543,0,0,0,Corrected KWT plus Phase 117; no overlap
+Original Gothic_hard,hard,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-19.955,8.543,,,0,Verified THE_WEEKLY course-rating evidence only
+Original Gothic_hard,hard,KWT_PLUS_WEEKLY,180,109,-11.411,-13,-19.955,-19.955,8.543,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-19.955,8.543,0,0,0,Simulation only; Weekly excluded from personal indexes
+Quixote Valley_easy,easy,KWT_ONLY,209,106,-12.569,-13,-17.615,-17.615,5.046,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-17.615,5.046,0,0,0,Corrected Phase 68 KWT history
+Quixote Valley_easy,easy,KWT_PLUS_S14_W05_12,209,106,-12.569,-13,-17.615,-17.615,5.046,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-17.615,5.046,0,0,0,Corrected KWT plus Phase 117; no overlap
+Quixote Valley_easy,easy,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-17.615,5.046,,,0,Verified THE_WEEKLY course-rating evidence only
+Quixote Valley_easy,easy,KWT_PLUS_WEEKLY,209,106,-12.569,-13,-17.615,-17.615,5.046,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-17.615,5.046,0,0,0,Simulation only; Weekly excluded from personal indexes
+Quixote Valley_hard,hard,KWT_ONLY,209,106,-9.579,-10,-19.385,-19.385,9.806,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-19.385,9.806,0,0,0,Corrected Phase 68 KWT history
+Quixote Valley_hard,hard,KWT_PLUS_S14_W05_12,209,106,-9.579,-10,-19.385,-19.385,9.806,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-19.385,9.806,0,0,0,Corrected KWT plus Phase 117; no overlap
+Quixote Valley_hard,hard,WEEKLY_ONLY,85,85,-11.659,-13,-18.636,-18.636,6.978,0.012,READY_CANDIDATE,THRESHOLDS_PASS,-19.385,9.806,0.749,-2.828,85,Verified THE_WEEKLY course-rating evidence only
+Quixote Valley_hard,hard,KWT_PLUS_WEEKLY,294,191,-10.18,-12,-19.222,-19.222,9.042,0.014,READY_CANDIDATE,THRESHOLDS_PASS,-19.385,9.806,0.163,-0.764,85,Simulation only; Weekly excluded from personal indexes
+Raptor Cliff's_easy,easy,KWT_ONLY,152,78,-13.158,-14,-22.211,-22.211,9.053,0.02,READY_CANDIDATE,THRESHOLDS_PASS,-22.211,9.053,0,0,0,Corrected Phase 68 KWT history
+Raptor Cliff's_easy,easy,KWT_PLUS_S14_W05_12,152,78,-13.158,-14,-22.211,-22.211,9.053,0.02,READY_CANDIDATE,THRESHOLDS_PASS,-22.211,9.053,0,0,0,Corrected KWT plus Phase 117; no overlap
+Raptor Cliff's_easy,easy,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-22.211,9.053,,,0,Verified THE_WEEKLY course-rating evidence only
+Raptor Cliff's_easy,easy,KWT_PLUS_WEEKLY,152,78,-13.158,-14,-22.211,-22.211,9.053,0.02,READY_CANDIDATE,THRESHOLDS_PASS,-22.211,9.053,0,0,0,Simulation only; Weekly excluded from personal indexes
+Raptor Cliff's_hard,hard,KWT_ONLY,152,78,-1.697,-2,-13.895,-13.895,12.197,0.02,READY_CANDIDATE,THRESHOLDS_PASS,-13.895,12.197,0,0,0,Corrected Phase 68 KWT history
+Raptor Cliff's_hard,hard,KWT_PLUS_S14_W05_12,152,78,-1.697,-2,-13.895,-13.895,12.197,0.02,READY_CANDIDATE,THRESHOLDS_PASS,-13.895,12.197,0,0,0,Corrected KWT plus Phase 117; no overlap
+Raptor Cliff's_hard,hard,WEEKLY_ONLY,79,79,-6.937,-7,-16.3,-16.3,9.363,0.013,READY_CANDIDATE,THRESHOLDS_PASS,-13.895,12.197,-2.405,-2.834,79,Verified THE_WEEKLY course-rating evidence only
+Raptor Cliff's_hard,hard,KWT_PLUS_WEEKLY,231,157,-3.489,-4,-15.214,-15.214,11.725,0.013,READY_CANDIDATE,THRESHOLDS_PASS,-13.895,12.197,-1.319,-0.472,79,Simulation only; Weekly excluded from personal indexes
+Seagull Stacks_easy,easy,KWT_ONLY,231,117,-16.853,-17,-21.821,-21.821,4.969,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-21.821,4.969,0,0,0,Corrected Phase 68 KWT history
+Seagull Stacks_easy,easy,KWT_PLUS_S14_W05_12,231,117,-16.853,-17,-21.821,-21.821,4.969,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-21.821,4.969,0,0,0,Corrected KWT plus Phase 117; no overlap
+Seagull Stacks_easy,easy,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-21.821,4.969,,,0,Verified THE_WEEKLY course-rating evidence only
+Seagull Stacks_easy,easy,KWT_PLUS_WEEKLY,231,117,-16.853,-17,-21.821,-21.821,4.969,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-21.821,4.969,0,0,0,Simulation only; Weekly excluded from personal indexes
+Seagull Stacks_hard,hard,KWT_ONLY,231,117,-7.182,-8,-16.679,-16.679,9.497,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-16.679,9.497,0,0,0,Corrected Phase 68 KWT history
+Seagull Stacks_hard,hard,KWT_PLUS_S14_W05_12,231,117,-7.182,-8,-16.679,-16.679,9.497,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-16.679,9.497,0,0,0,Corrected KWT plus Phase 117; no overlap
+Seagull Stacks_hard,hard,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-16.679,9.497,,,0,Verified THE_WEEKLY course-rating evidence only
+Seagull Stacks_hard,hard,KWT_PLUS_WEEKLY,231,117,-7.182,-8,-16.679,-16.679,9.497,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-16.679,9.497,0,0,0,Simulation only; Weekly excluded from personal indexes
+Shangri-La_easy,easy,KWT_ONLY,122,89,-22.082,-24,-30.067,-30.067,7.985,0.016,READY_CANDIDATE,THRESHOLDS_PASS,-30.067,7.985,0,0,0,Corrected Phase 68 KWT history
+Shangri-La_easy,easy,KWT_PLUS_S14_W05_12,171,100,-22.468,-24,-29.81,-29.81,7.342,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-30.067,7.985,0.257,-0.643,0,Corrected KWT plus Phase 117; no overlap
+Shangri-La_easy,easy,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-30.067,7.985,,,0,Verified THE_WEEKLY course-rating evidence only
+Shangri-La_easy,easy,KWT_PLUS_WEEKLY,171,100,-22.468,-24,-29.81,-29.81,7.342,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-30.067,7.985,0.257,-0.643,0,Simulation only; Weekly excluded from personal indexes
+Shangri-La_hard,hard,KWT_ONLY,122,89,-10.672,-12,-23,-23,12.328,0.016,READY_CANDIDATE,THRESHOLDS_PASS,-23,12.328,0,0,0,Corrected Phase 68 KWT history
+Shangri-La_hard,hard,KWT_PLUS_S14_W05_12,171,100,-10.678,-12,-23.286,-23.286,12.607,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-23,12.328,-0.286,0.279,0,Corrected KWT plus Phase 117; no overlap
+Shangri-La_hard,hard,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-23,12.328,,,0,Verified THE_WEEKLY course-rating evidence only
+Shangri-La_hard,hard,KWT_PLUS_WEEKLY,171,100,-10.678,-12,-23.286,-23.286,12.607,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-23,12.328,-0.286,0.279,0,Simulation only; Weekly excluded from personal indexes
+Sweetopia_easy,easy,KWT_ONLY,176,99,-13.21,-14,-19.909,-19.909,6.699,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-19.909,6.699,0,0,0,Corrected Phase 68 KWT history
+Sweetopia_easy,easy,KWT_PLUS_S14_W05_12,176,99,-13.21,-14,-19.909,-19.909,6.699,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-19.909,6.699,0,0,0,Corrected KWT plus Phase 117; no overlap
+Sweetopia_easy,easy,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-19.909,6.699,,,0,Verified THE_WEEKLY course-rating evidence only
+Sweetopia_easy,easy,KWT_PLUS_WEEKLY,176,99,-13.21,-14,-19.909,-19.909,6.699,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-19.909,6.699,0,0,0,Simulation only; Weekly excluded from personal indexes
+Sweetopia_hard,hard,KWT_ONLY,176,99,-8.92,-10,-19.045,-19.045,10.125,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-19.045,10.125,0,0,0,Corrected Phase 68 KWT history
+Sweetopia_hard,hard,KWT_PLUS_S14_W05_12,176,99,-8.92,-10,-19.045,-19.045,10.125,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-19.045,10.125,0,0,0,Corrected KWT plus Phase 117; no overlap
+Sweetopia_hard,hard,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-19.045,10.125,,,0,Verified THE_WEEKLY course-rating evidence only
+Sweetopia_hard,hard,KWT_PLUS_WEEKLY,176,99,-8.92,-10,-19.045,-19.045,10.125,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-19.045,10.125,0,0,0,Simulation only; Weekly excluded from personal indexes
+Temple at Zerzura_easy,easy,KWT_ONLY,212,103,-17.123,-17,-25.269,-25.269,8.147,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-25.269,8.147,0,0,0,Corrected Phase 68 KWT history
+Temple at Zerzura_easy,easy,KWT_PLUS_S14_W05_12,212,103,-17.123,-17,-25.269,-25.269,8.147,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-25.269,8.147,0,0,0,Corrected KWT plus Phase 117; no overlap
+Temple at Zerzura_easy,easy,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-25.269,8.147,,,0,Verified THE_WEEKLY course-rating evidence only
+Temple at Zerzura_easy,easy,KWT_PLUS_WEEKLY,212,103,-17.123,-17,-25.269,-25.269,8.147,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-25.269,8.147,0,0,0,Simulation only; Weekly excluded from personal indexes
+Temple at Zerzura_hard,hard,KWT_ONLY,212,103,-6.726,-7.5,-16.808,-16.808,10.081,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-16.808,10.081,0,0,0,Corrected Phase 68 KWT history
+Temple at Zerzura_hard,hard,KWT_PLUS_S14_W05_12,212,103,-6.726,-7.5,-16.808,-16.808,10.081,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-16.808,10.081,0,0,0,Corrected KWT plus Phase 117; no overlap
+Temple at Zerzura_hard,hard,WEEKLY_ONLY,86,86,-9.744,-11,-17.727,-17.727,7.983,0.012,READY_CANDIDATE,THRESHOLDS_PASS,-16.808,10.081,-0.919,-2.098,86,Verified THE_WEEKLY course-rating evidence only
+Temple at Zerzura_hard,hard,KWT_PLUS_WEEKLY,298,189,-7.597,-8,-17.278,-17.278,9.68,0.013,READY_CANDIDATE,THRESHOLDS_PASS,-16.808,10.081,-0.47,-0.401,86,Simulation only; Weekly excluded from personal indexes
+Tethys Station_easy,easy,KWT_ONLY,164,93,-17.799,-19,-25.15,-25.15,7.351,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-25.15,7.351,0,0,0,Corrected Phase 68 KWT history
+Tethys Station_easy,easy,KWT_PLUS_S14_W05_12,164,93,-17.799,-19,-25.15,-25.15,7.351,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-25.15,7.351,0,0,0,Corrected KWT plus Phase 117; no overlap
+Tethys Station_easy,easy,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-25.15,7.351,,,0,Verified THE_WEEKLY course-rating evidence only
+Tethys Station_easy,easy,KWT_PLUS_WEEKLY,164,93,-17.799,-19,-25.15,-25.15,7.351,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-25.15,7.351,0,0,0,Simulation only; Weekly excluded from personal indexes
+Tethys Station_hard,hard,KWT_ONLY,164,93,-8.134,-9,-19.6,-19.6,11.466,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-19.6,11.466,0,0,0,Corrected Phase 68 KWT history
+Tethys Station_hard,hard,KWT_PLUS_S14_W05_12,164,93,-8.134,-9,-19.6,-19.6,11.466,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-19.6,11.466,0,0,0,Corrected KWT plus Phase 117; no overlap
+Tethys Station_hard,hard,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-19.6,11.466,,,0,Verified THE_WEEKLY course-rating evidence only
+Tethys Station_hard,hard,KWT_PLUS_WEEKLY,164,93,-8.134,-9,-19.6,-19.6,11.466,0.018,READY_CANDIDATE,THRESHOLDS_PASS,-19.6,11.466,0,0,0,Simulation only; Weekly excluded from personal indexes
+Tiki à Coco_easy,easy,KWT_ONLY,49,49,-13.612,-14,-20.333,-20.333,6.721,0.02,PROVISIONAL,20_TO_49_ROUNDS,,,,,0,Corrected Phase 68 KWT history
+Tiki à Coco_easy,easy,KWT_PLUS_S14_W05_12,92,63,-12.739,-13,-19.75,-19.75,7.011,0.022,READY_CANDIDATE,THRESHOLDS_PASS,,,,,0,Corrected KWT plus Phase 117; no overlap
+Tiki à Coco_easy,easy,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,,,,,0,Verified THE_WEEKLY course-rating evidence only
+Tiki à Coco_easy,easy,KWT_PLUS_WEEKLY,92,63,-12.739,-13,-19.75,-19.75,7.011,0.022,READY_CANDIDATE,THRESHOLDS_PASS,,,,,0,Simulation only; Weekly excluded from personal indexes
+Tiki à Coco_hard,hard,KWT_ONLY,49,49,-6.49,-7,-16.333,-16.333,9.844,0.02,PROVISIONAL,20_TO_49_ROUNDS,,,,,0,Corrected Phase 68 KWT history
+Tiki à Coco_hard,hard,KWT_PLUS_S14_W05_12,92,63,-6.196,-7,-15.25,-15.25,9.054,0.022,READY_CANDIDATE,THRESHOLDS_PASS,,,,,0,Corrected KWT plus Phase 117; no overlap
+Tiki à Coco_hard,hard,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,,,,,0,Verified THE_WEEKLY course-rating evidence only
+Tiki à Coco_hard,hard,KWT_PLUS_WEEKLY,92,63,-6.196,-7,-15.25,-15.25,9.054,0.022,READY_CANDIDATE,THRESHOLDS_PASS,,,,,0,Simulation only; Weekly excluded from personal indexes
+Tokyo_easy,easy,KWT_ONLY,105,72,-15.99,-16,-22.462,-22.462,6.471,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-22.462,6.471,0,0,0,Corrected Phase 68 KWT history
+Tokyo_easy,easy,KWT_PLUS_S14_W05_12,105,72,-15.99,-16,-22.462,-22.462,6.471,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-22.462,6.471,0,0,0,Corrected KWT plus Phase 117; no overlap
+Tokyo_easy,easy,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-22.462,6.471,,,0,Verified THE_WEEKLY course-rating evidence only
+Tokyo_easy,easy,KWT_PLUS_WEEKLY,105,72,-15.99,-16,-22.462,-22.462,6.471,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-22.462,6.471,0,0,0,Simulation only; Weekly excluded from personal indexes
+Tokyo_hard,hard,KWT_ONLY,105,72,-5.429,-6,-15.846,-15.846,10.418,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-15.846,10.418,0,0,0,Corrected Phase 68 KWT history
+Tokyo_hard,hard,KWT_PLUS_S14_W05_12,105,72,-5.429,-6,-15.846,-15.846,10.418,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-15.846,10.418,0,0,0,Corrected KWT plus Phase 117; no overlap
+Tokyo_hard,hard,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-15.846,10.418,,,0,Verified THE_WEEKLY course-rating evidence only
+Tokyo_hard,hard,KWT_PLUS_WEEKLY,105,72,-5.429,-6,-15.846,-15.846,10.418,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-15.846,10.418,0,0,0,Simulation only; Weekly excluded from personal indexes
+Tourist Trap_easy,easy,KWT_ONLY,230,110,-17.439,-18,-22.321,-22.321,4.882,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-22.321,4.882,0,0,0,Corrected Phase 68 KWT history
+Tourist Trap_easy,easy,KWT_PLUS_S14_W05_12,230,110,-17.439,-18,-22.321,-22.321,4.882,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-22.321,4.882,0,0,0,Corrected KWT plus Phase 117; no overlap
+Tourist Trap_easy,easy,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-22.321,4.882,,,0,Verified THE_WEEKLY course-rating evidence only
+Tourist Trap_easy,easy,KWT_PLUS_WEEKLY,230,110,-17.439,-18,-22.321,-22.321,4.882,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-22.321,4.882,0,0,0,Simulation only; Weekly excluded from personal indexes
+Tourist Trap_hard,hard,KWT_ONLY,230,110,-11.2,-12,-18.714,-18.714,7.514,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-18.714,7.514,0,0,0,Corrected Phase 68 KWT history
+Tourist Trap_hard,hard,KWT_PLUS_S14_W05_12,230,110,-11.2,-12,-18.714,-18.714,7.514,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-18.714,7.514,0,0,0,Corrected KWT plus Phase 117; no overlap
+Tourist Trap_hard,hard,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-18.714,7.514,,,0,Verified THE_WEEKLY course-rating evidence only
+Tourist Trap_hard,hard,KWT_PLUS_WEEKLY,230,110,-11.2,-12,-18.714,-18.714,7.514,0.017,READY_CANDIDATE,THRESHOLDS_PASS,-18.714,7.514,0,0,0,Simulation only; Weekly excluded from personal indexes
+Upside Town_easy,easy,KWT_ONLY,144,78,-14.958,-16,-22.667,-22.667,7.708,0.021,READY_CANDIDATE,THRESHOLDS_PASS,-22.667,7.708,0,0,0,Corrected Phase 68 KWT history
+Upside Town_easy,easy,KWT_PLUS_S14_W05_12,144,78,-14.958,-16,-22.667,-22.667,7.708,0.021,READY_CANDIDATE,THRESHOLDS_PASS,-22.667,7.708,0,0,0,Corrected KWT plus Phase 117; no overlap
+Upside Town_easy,easy,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-22.667,7.708,,,0,Verified THE_WEEKLY course-rating evidence only
+Upside Town_easy,easy,KWT_PLUS_WEEKLY,144,78,-14.958,-16,-22.667,-22.667,7.708,0.021,READY_CANDIDATE,THRESHOLDS_PASS,-22.667,7.708,0,0,0,Simulation only; Weekly excluded from personal indexes
+Upside Town_hard,hard,KWT_ONLY,144,78,-8.667,-9,-19.667,-19.667,11,0.021,READY_CANDIDATE,THRESHOLDS_PASS,-19.667,11,0,0,0,Corrected Phase 68 KWT history
+Upside Town_hard,hard,KWT_PLUS_S14_W05_12,144,78,-8.667,-9,-19.667,-19.667,11,0.021,READY_CANDIDATE,THRESHOLDS_PASS,-19.667,11,0,0,0,Corrected KWT plus Phase 117; no overlap
+Upside Town_hard,hard,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-19.667,11,,,0,Verified THE_WEEKLY course-rating evidence only
+Upside Town_hard,hard,KWT_PLUS_WEEKLY,144,78,-8.667,-9,-19.667,-19.667,11,0.021,READY_CANDIDATE,THRESHOLDS_PASS,-19.667,11,0,0,0,Simulation only; Weekly excluded from personal indexes
+Venice_easy,easy,KWT_ONLY,215,101,-13.284,-14,-19.577,-19.577,6.293,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-19.519,6.265,-0.058,0.028,0,Corrected Phase 68 KWT history
+Venice_easy,easy,KWT_PLUS_S14_W05_12,215,101,-13.284,-14,-19.577,-19.577,6.293,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-19.519,6.265,-0.058,0.028,0,Corrected KWT plus Phase 117; no overlap
+Venice_easy,easy,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-19.519,6.265,,,0,Verified THE_WEEKLY course-rating evidence only
+Venice_easy,easy,KWT_PLUS_WEEKLY,215,101,-13.284,-14,-19.577,-19.577,6.293,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-19.519,6.265,-0.058,0.028,0,Simulation only; Weekly excluded from personal indexes
+Venice_hard,hard,KWT_ONLY,215,101,-7.972,-9,-17.769,-17.769,9.797,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-17.769,9.797,0,0,0,Corrected Phase 68 KWT history
+Venice_hard,hard,KWT_PLUS_S14_W05_12,215,101,-7.972,-9,-17.769,-17.769,9.797,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-17.769,9.797,0,0,0,Corrected KWT plus Phase 117; no overlap
+Venice_hard,hard,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-17.769,9.797,,,0,Verified THE_WEEKLY course-rating evidence only
+Venice_hard,hard,KWT_PLUS_WEEKLY,215,101,-7.972,-9,-17.769,-17.769,9.797,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-17.769,9.797,0,0,0,Simulation only; Weekly excluded from personal indexes
+Viva Las Elvis_easy,easy,KWT_ONLY,154,85,-13.727,-14,-21.158,-21.158,7.431,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-21.158,7.431,0,0,0,Corrected Phase 68 KWT history
+Viva Las Elvis_easy,easy,KWT_PLUS_S14_W05_12,154,85,-13.727,-14,-21.158,-21.158,7.431,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-21.158,7.431,0,0,0,Corrected KWT plus Phase 117; no overlap
+Viva Las Elvis_easy,easy,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-21.158,7.431,,,0,Verified THE_WEEKLY course-rating evidence only
+Viva Las Elvis_easy,easy,KWT_PLUS_WEEKLY,154,85,-13.727,-14,-21.158,-21.158,7.431,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-21.158,7.431,0,0,0,Simulation only; Weekly excluded from personal indexes
+Viva Las Elvis_hard,hard,KWT_ONLY,154,85,-8.727,-9.5,-19.895,-19.895,11.167,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-19.895,11.167,0,0,0,Corrected Phase 68 KWT history
+Viva Las Elvis_hard,hard,KWT_PLUS_S14_W05_12,154,85,-8.727,-9.5,-19.895,-19.895,11.167,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-19.895,11.167,0,0,0,Corrected KWT plus Phase 117; no overlap
+Viva Las Elvis_hard,hard,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-19.895,11.167,,,0,Verified THE_WEEKLY course-rating evidence only
+Viva Las Elvis_hard,hard,KWT_PLUS_WEEKLY,154,85,-8.727,-9.5,-19.895,-19.895,11.167,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-19.895,11.167,0,0,0,Simulation only; Weekly excluded from personal indexes
+Wallace & Gromit_easy,easy,KWT_ONLY,215,98,-17.116,-17,-24.731,-24.731,7.614,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-24.731,7.614,0,0,0,Corrected Phase 68 KWT history
+Wallace & Gromit_easy,easy,KWT_PLUS_S14_W05_12,215,98,-17.116,-17,-24.731,-24.731,7.614,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-24.731,7.614,0,0,0,Corrected KWT plus Phase 117; no overlap
+Wallace & Gromit_easy,easy,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-24.731,7.614,,,0,Verified THE_WEEKLY course-rating evidence only
+Wallace & Gromit_easy,easy,KWT_PLUS_WEEKLY,215,98,-17.116,-17,-24.731,-24.731,7.614,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-24.731,7.614,0,0,0,Simulation only; Weekly excluded from personal indexes
+Wallace & Gromit_hard,hard,KWT_ONLY,215,98,-5.595,-7,-15.538,-15.538,9.943,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-15.538,9.943,0,0,0,Corrected Phase 68 KWT history
+Wallace & Gromit_hard,hard,KWT_PLUS_S14_W05_12,215,98,-5.595,-7,-15.538,-15.538,9.943,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-15.538,9.943,0,0,0,Corrected KWT plus Phase 117; no overlap
+Wallace & Gromit_hard,hard,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-15.538,9.943,,,0,Verified THE_WEEKLY course-rating evidence only
+Wallace & Gromit_hard,hard,KWT_PLUS_WEEKLY,215,98,-5.595,-7,-15.538,-15.538,9.943,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-15.538,9.943,0,0,0,Simulation only; Weekly excluded from personal indexes
+Widow’s Walkabout_easy,easy,KWT_ONLY,160,89,-17.987,-18,-24.75,-24.75,6.762,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-24.75,6.762,0,0,0,Corrected Phase 68 KWT history
+Widow’s Walkabout_easy,easy,KWT_PLUS_S14_W05_12,211,101,-17.991,-18,-25.115,-25.115,7.125,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-24.75,6.762,-0.365,0.363,0,Corrected KWT plus Phase 117; no overlap
+Widow’s Walkabout_easy,easy,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-24.75,6.762,,,0,Verified THE_WEEKLY course-rating evidence only
+Widow’s Walkabout_easy,easy,KWT_PLUS_WEEKLY,211,101,-17.991,-18,-25.115,-25.115,7.125,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-24.75,6.762,-0.365,0.363,0,Simulation only; Weekly excluded from personal indexes
+Widow’s Walkabout_hard,hard,KWT_ONLY,160,89,-8.612,-9.5,-18.5,-18.5,9.888,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-18.5,9.888,0,-0.001,0,Corrected Phase 68 KWT history
+Widow’s Walkabout_hard,hard,KWT_PLUS_S14_W05_12,211,101,-8.782,-10,-18.462,-18.462,9.68,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-18.5,9.888,0.038,-0.208,0,Corrected KWT plus Phase 117; no overlap
+Widow’s Walkabout_hard,hard,WEEKLY_ONLY,0,0,,,,,,,UNRATED,NO_QUALIFYING_ROUNDS,-18.5,9.888,,,0,Verified THE_WEEKLY course-rating evidence only
+Widow’s Walkabout_hard,hard,KWT_PLUS_WEEKLY,211,101,-8.782,-10,-18.462,-18.462,9.68,0.019,READY_CANDIDATE,THRESHOLDS_PASS,-18.5,9.888,0.038,-0.208,0,Simulation only; Weekly excluded from personal indexes

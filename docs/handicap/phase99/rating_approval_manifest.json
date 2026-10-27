@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "phase99-rating-approval-review-v1",
+  "sourceCheckpoint": "75da6c9d5d01e7849bb2caa04397ef17cc555faf",
+  "sourceCalculationRunId": "e2f53406-75b7-5acb-a3e9-9bec0d39421b",
+  "status": "REVIEW_ONLY_UNPUBLISHED",
+  "policyVersion": "krys-handicap-approved-policy-v1",
+  "differentialModelVersion": "krys-handicap-candidate-a-v1",
+  "referenceSlope": 8.515,
+  "formula": "(score - course_rating) * 8.515 / course_slope",
+  "ratings": {
+    "totalKwtOnly": 78,
+    "statisticallyReady": 72,
+    "provisional": 6,
+    "recommendedHold": 74,
+    "recommendedInvestigate": 4,
+    "recommendedApprove": 0
+  },
+  "indexDependency": {
+    "numericCandidates": 157,
+    "ratingsUsed": 72,
+    "totalDependencyReferences": 785
+  },
+  "evidence": {
+    "source": "KWT",
+    "sourcePackage": "phase68-provenance-recovery-v1",
+    "sourceProvenanceRows": 14394,
+    "allRefsRecovered": true,
+    "weeklyRowsInPersonalPackage": 0,
+    "effectiveDatesInvented": false
+  },
+  "diagnostics": {
+    "ratingMean": -20.813064102564105,
+    "ratingSampleStandardDeviation": 3.522527274335133,
+    "slopeMean": 8.729102564102565,
+    "slopeSampleStandardDeviation": 2.14728621595727,
+    "zScoreThreshold": 2,
+    "note": "Z-score flags are review diagnostics, not additional approval policy thresholds."
+  },
+  "allRatingsRemainUnpublished": true,
+  "sourceHashes": {
+    "phase68_rating_manifest_sha256": "4EDF8E2248030383BDA1D2DAEF028122CE53DD4A212A529C5491D7BA3CA88D53",
+    "phase68_provenance_sha256": "8440A1D1DCB4C09283F64235F5A85567E59D677DC6494EAB58E1FFB5EE2499CE",
+    "phase98_calculation_manifest_sha256": "CD408B22F395E712912BC30C850AB0EC4929602B6AA3BAA2CD3F8AE6BE416B0E",
+    "phase98_index_rows_sha256": "7FF5A59D01C94CBEEC1A3C50010C68F8AD67A4257D7EE77BDD5BE58F4E0C2321"
+  }
+}

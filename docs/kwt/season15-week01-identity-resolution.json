@@ -1,0 +1,55 @@
+{
+  "schema": "kwt-season15-week01-identity-resolution-v1",
+  "sourceFile": "kwt15w01_ful_results.csv",
+  "sourceSha256": "0A03A1659F0CDEF77B14E2300C07876E20D0D7F8CE9E84C6E09C675E3AE18C83",
+  "season": 15,
+  "week": 1,
+  "eventIdentifier": "KWTS15W01",
+  "course": "Raptor Cliffs",
+  "identityPolicy": "Existing Global Players screen names and verified player_aliases only; no new identities or fuzzy merges.",
+  "unresolvedCount": 0,
+  "rows": [
+    {
+      "sourceName": "Zanetti",
+      "canonicalPlayerId": "2e4ce1d8-afd6-44a2-9560-f85c16f23747",
+      "canonicalScreenName": "ZANETTI",
+      "evidence": "verified player_aliases alias ZANETTI (source players.screen_name)"
+    },
+    {
+      "sourceName": "Jesunet",
+      "canonicalPlayerId": "a0eaf23c-0784-4eb9-ab1d-530b077121a9",
+      "canonicalScreenName": "JESUNET",
+      "evidence": "case-insensitive exact canonical screen_name match"
+    },
+    {
+      "sourceName": "Chipnputt",
+      "canonicalPlayerId": "d38c0220-8a80-45a6-86e8-d495f523d5ab",
+      "canonicalScreenName": "CHIPNPUTT",
+      "evidence": "verified player_aliases alias CHIPNPUTT (source players.screen_name)"
+    },
+    {
+      "sourceName": "NuttyGrandpa",
+      "canonicalPlayerId": "ebcdd3f4-1a69-40f6-819e-899fbe9998d7",
+      "canonicalScreenName": "NUTTYGRANDPA",
+      "evidence": "verified player_aliases alias NUTTYGRANDPA (source players.screen_name)"
+    },
+    {
+      "sourceName": "KillERBee",
+      "canonicalPlayerId": "e2741a95-19e9-440c-a605-f1c1498aa5c1",
+      "canonicalScreenName": "KILLERBEE",
+      "evidence": "verified player_aliases alias KILLERBEE (source players.screen_name)"
+    },
+    {
+      "sourceName": "Ultrafox_Lynne",
+      "canonicalPlayerId": "e249815d-ac23-4ef7-9c20-7ed9ba0c57c4",
+      "canonicalScreenName": "ULTRAFOX_LYNNE",
+      "evidence": "verified player_aliases alias ULTRAFOX_LYNNE (source players.screen_name)"
+    },
+    {
+      "sourceName": "Sj_76",
+      "canonicalPlayerId": "ec943c83-bd7f-46b9-a9a9-8d2d6a3a71b0",
+      "canonicalScreenName": "Sj_76",
+      "evidence": "verified player_aliases alias Sj_76 (source players.screen_name)"
+    }
+  ]
+}

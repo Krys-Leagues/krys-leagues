@@ -1,0 +1,151 @@
+Skip to Main Content
+Kry's Monthlies
+Search
+0 results
+Install App
+About
+nobody
+	
+2026 February
+86/74 players
+COMPLETED
+	
+Overall Leaders - 2026 February
+Pos	Player	League	Courses
+Played	Total
+Strokes	HN1's	Points
+1	plucky✌	Semi Pro 2	8	-140	16	1,616
+2	Matt916	Pro 1	8	-171	29	1,609
+3	FORE_FUN	Pro 3	8	-140	24	1,584
+4	PETERK9FLORIDA	Elite	8	-179	37	1,577
+5	SlugJug33	Semi Pro 1	8	-135	23	1,573
+6	yankeedude1123	Master	8	-195	41	1,571
+7	ZoeDarlin	Pro 2	8	-137	30	1,550
+8	GREATSEER5024	Semi Pro 2	8	-105	17	1,537
+9	The Real JB	Semi Pro 1	8	-120	20	1,520
+10	mammothrept	Pro 1	8	-157	25	1,505
+1 - 10
+Welcome Leaders
+League
+- Select -
+Master
+Elite
+Pro 1
+Pro 2
+Pro 3
+Semi Pro 1
+Beginner
+Welcome
+Pos	Player	Courses
+Played	Total
+Strokes	HN1's	Points
+1
+	leanin2it	2	-40	7	407
+	steven2018	1	0	1	201
+	peach🌻	0			
+	mamabear2002	0			
+	Mark1703	0			
+	Sandtrap	0			
+	WAREY84	0			
+	Savy	0			
+1 - 8
+ Players at risk of relegation
+  Point change since last report.
+ Widow’s Walkabout
+#	Player	Score	HN1	Points
+	Savy			
+	peach🌻			
+	leanin2it			
+	mamabear2002			
+	WAREY84			
+	Sandtrap			
+	steven2018			
+	Mark1703			
+ Widow’s Walkabout - Hard
+#	Player	Score	HN1	Points
+1	steven2018	0	1	201
+	peach🌻			
+	Savy			
+	Sandtrap			
+	mamabear2002			
+	Mark1703			
+	WAREY84			
+	leanin2it			
+ Meow Wolf
+#	Player	Score	HN1	Points
+1	leanin2it	-22	4	204
+	Savy			
+	mamabear2002			
+	Sandtrap			
+	WAREY84			
+	steven2018			
+	peach🌻			
+	Mark1703			
+ Meow Wolf - Hard
+#	Player	Score	HN1	Points
+1	leanin2it	-18	3	203
+	Savy			
+	WAREY84			
+	mamabear2002			
+	Sandtrap			
+	Mark1703			
+	peach🌻			
+	steven2018			
+ Crystal Lair
+#	Player	Score	HN1	Points
+	Savy			
+	peach🌻			
+	leanin2it			
+	Mark1703			
+	mamabear2002			
+	WAREY84			
+	steven2018			
+	Sandtrap			
+ Crystal Lair - Hard
+#	Player	Score	HN1	Points
+	leanin2it			
+	Savy			
+	peach🌻			
+	Mark1703			
+	Sandtrap			
+	mamabear2002			
+	WAREY84			
+	steven2018			
+ Tiki à Coco
+#	Player	Score	HN1	Points
+	Savy			
+	leanin2it			
+	peach🌻			
+	WAREY84			
+	mamabear2002			
+	Sandtrap			
+	steven2018			
+	Mark1703			
+ Tiki à Coco - Hard
+#	Player	Score	HN1	Points
+	leanin2it			
+	peach🌻			
+	Savy			
+	mamabear2002			
+	steven2018			
+	WAREY84			
+	Mark1703			
+	Sandtrap			
+2026 February Courses
+
+
+WWE - Widow’s Walkabout
+WWH - Widow’s Walkabout - Hard
+
+
+MWE - Meow Wolf
+MWH - Meow Wolf - Hard
+
+
+CLE - Crystal Lair
+CLH - Crystal Lair - Hard
+
+
+TCE - Tiki à Coco
+TCH - Tiki à Coco - Hard
+Release 1.2 Built with  using Oracle APEX

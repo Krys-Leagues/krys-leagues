@@ -1,0 +1,28 @@
+{
+  "artifacts": {
+    "handicap_source_provenance_import.csv": {
+      "sha256": "0A9FD1032FA87C2D92E628B83DDB6F9089D5C81F3AB0C24929F030892870E186",
+      "bytes": 1258355
+    },
+    "handicap_source_provenance_exceptions.csv": {
+      "sha256": "0983068BA56CE0529FA6B349C954EE8C01ABCEFD45DED4505D4ABCA7CDD1357D",
+      "bytes": 1773
+    },
+    "production_preflight.sql": {
+      "sha256": "9ED516BDB7F294965166029D5A2FE349F55196BE17FD904F3E2D1C0D7760E4E0",
+      "bytes": 365667
+    },
+    "production_install.sql": {
+      "sha256": "312A85E8E1FEC11B01A33AF1C28FD569EC804F52CD88371703E6EC92915C8104",
+      "bytes": 1267689
+    },
+    "production_postflight.sql": {
+      "sha256": "1592D155E305E53C07306CC811487193537694FE528D34101B72D3C4AD98099B",
+      "bytes": 3212
+    },
+    "package_manifest.json": {
+      "sha256": "A6AA20477D84F2B3577265EC30226BEA90137636287E46132D80C3DB0B45CC53",
+      "bytes": 1261
+    }
+  }
+}

@@ -1,0 +1,60 @@
+.playerTools {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  min-height: 50px;
+  padding: 8px clamp(12px, 3vw, 28px);
+  background: rgba(5, 8, 20, .92);
+  border-bottom: 1px solid rgba(148, 163, 184, .24);
+  backdrop-filter: blur(12px);
+}
+
+.profileShortcut, .helpButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(165, 180, 252, .48);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, .94);
+  color: #f8fafc;
+  padding: 4px 12px 4px 5px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-decoration: none;
+}
+
+.helpButton { width: 36px; height: 36px; justify-content: center; padding: 0; cursor: pointer; font-size: 18px; }
+.profileShortcut:hover, .helpButton:hover { border-color: #c4b5fd; background: #1e1b4b; }
+
+.modalBackdrop, .tourLayer { position: fixed; inset: 0; z-index: 100; }
+.modalBackdrop { display: grid; place-items: center; padding: 20px; background: rgba(2, 6, 23, .74); }
+.welcomeCard, .tourCard { max-width: 430px; border: 1px solid rgba(196, 181, 253, .52); border-radius: 20px; background: #111827; color: #f8fafc; box-shadow: 0 24px 80px rgba(0, 0, 0, .55); padding: clamp(22px, 5vw, 34px); }
+.welcomeCard h2, .tourCard h2 { margin: 0; font-size: clamp(1.35rem, 4vw, 2rem); line-height: 1.08; }
+.welcomeCard p:not(.eyebrow), .tourCard p:not(.eyebrow):not(.stepCounter) { margin: 14px 0 0; color: #cbd5e1; line-height: 1.55; }
+.eyebrow, .stepCounter { margin: 0 0 10px; color: #a5b4fc; font-size: 11px; font-weight: 900; letter-spacing: .16em; }
+.actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+.primaryButton, .secondaryButton, .textButton, .closeButton { border-radius: 9px; padding: 9px 13px; font: inherit; font-size: 12px; font-weight: 900; letter-spacing: .08em; cursor: pointer; }
+.primaryButton { border: 1px solid #c4b5fd; background: #6d28d9; color: white; }
+.secondaryButton { border: 1px solid #64748b; background: #1e293b; color: #e2e8f0; }
+.textButton { border: 0; background: transparent; color: #c4b5fd; }
+.primaryButton:disabled, .secondaryButton:disabled { opacity: .42; cursor: not-allowed; }
+.tourLayer { pointer-events: none; }
+.spotlight { position: fixed; border: 2px solid #c4b5fd; border-radius: 12px; box-shadow: 0 0 0 9999px rgba(2, 6, 23, .72), 0 0 24px rgba(196, 181, 253, .7); pointer-events: none; transition: top .2s ease, left .2s ease, width .2s ease, height .2s ease; }
+.tourCard { position: fixed; pointer-events: auto; }
+.closeButton { position: absolute; top: 10px; right: 10px; width: 34px; height: 34px; padding: 0; border: 0; background: transparent; color: #cbd5e1; font-size: 24px; line-height: 1; }
+
+@media (max-width: 560px) {
+  .playerTools { justify-content: space-between; }
+  .profileShortcut { flex: 1; max-width: 190px; }
+  .tourCard { max-width: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spotlight { transition: none; }
+}

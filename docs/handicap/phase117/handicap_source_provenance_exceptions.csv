@@ -1,0 +1,8 @@
+season,week,event_id,original_player_name,detail_file,detail_row,summary_file,summary_row,easy_code,hard_code,easy_score,hard_score,total_score,status,reason
+14,7,KWT14W07,Stephen1D47,kwt14w07_ful_results.csv,36,weekly_results (10).csv,37,WWE,WWH,-12,-11,-23,QUARANTINED_UNRESOLVED_CANONICAL_IDENTITY,No unique verified canonical Global Player evidence found; no identity guess applied.
+14,7,KWT14W07,Honeybee1998,kwt14w07_ful_results.csv,54,weekly_results (10).csv,54,WWE,WWH,16,26,42,QUARANTINED_UNRESOLVED_CANONICAL_IDENTITY,No unique verified canonical Global Player evidence found; no identity guess applied.
+14,8,KWT14W08,Stephen1D47,kwt14w08_ful_results.csv,15,weekly_results (11).csv,16,MOE,MOH,-22,-11,-33,QUARANTINED_UNRESOLVED_CANONICAL_IDENTITY,No unique verified canonical Global Player evidence found; no identity guess applied.
+14,10,KWT14W10,Stephen1D47,kwt14w10_ful_results.csv,18,weekly_results (13).csv,18,FFE,FFH,-21,-11,-32,QUARANTINED_UNRESOLVED_CANONICAL_IDENTITY,No unique verified canonical Global Player evidence found; no identity guess applied.
+14,11,KWT14W11,¿¿¿¿¿¿,kwt14w11_ful_results(1).csv,3,weekly_results (14)(1).csv,3,TCE,TCH,-20,-14,-34,QUARANTINED_UNRESOLVED_CANONICAL_IDENTITY,No unique verified canonical Global Player evidence found; no identity guess applied.
+14,11,KWT14W11,Stephen1D47,kwt14w11_ful_results(1).csv,34,weekly_results (14)(1).csv,34,TCE,TCH,-10,-3,-13,QUARANTINED_UNRESOLVED_CANONICAL_IDENTITY,No unique verified canonical Global Player evidence found; no identity guess applied.
+14,12,KWT14W12,¿¿¿¿¿¿,kwt14w12_ful_results.csv,19,weekly_results (16).csv,19,WOE,WOH,-18,-1,-19,QUARANTINED_UNRESOLVED_CANONICAL_IDENTITY,No unique verified canonical Global Player evidence found; no identity guess applied.

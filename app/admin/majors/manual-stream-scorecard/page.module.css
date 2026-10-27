@@ -1,0 +1,68 @@
+.page {
+  min-height: 100vh;
+  padding: clamp(14px, 3vw, 34px);
+  color: #fff8ed;
+  background:
+    radial-gradient(circle at 88% 0, rgba(190, 24, 93, 0.2), transparent 35%),
+    linear-gradient(145deg, #03150f, #090806 55%, #210613);
+}
+
+.header {
+  display: flex;
+  max-width: 1120px;
+  margin: auto;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.header h1 { margin: 0.3rem 0; font: 800 clamp(2rem, 5vw, 3.4rem)/1 Georgia, serif; }
+.header p { max-width: 740px; color: #d6c8bb; }
+.back { color: #f9a8d4; font-weight: 900; text-decoration: none; }
+.eyebrow { font-size: 0.72rem; font-weight: 900; letter-spacing: 0.16em; text-transform: uppercase; }
+.liveBadge { padding: 10px 14px; border: 1px solid #fb7185; border-radius: 999px; background: #4c0519; color: #fecdd3; font-weight: 900; white-space: nowrap; }
+
+.notice, .players, .sourcePanel { max-width: 1120px; margin: 17px auto; }
+.notice { padding: 13px 15px; border: 1px solid #d6a654; border-radius: 12px; background: #3b2205; }
+
+.players { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.playerCard { padding: 17px; border: 1px solid #7b5c38; border-radius: 18px; background: linear-gradient(145deg, rgba(6, 43, 31, 0.94), rgba(28, 8, 18, 0.96)); box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28); }
+.disabledCard { opacity: 0.64; filter: saturate(0.5); }
+.playerCard > header { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.playerCard > header div { display: grid; gap: 3px; min-width: 0; }
+.playerCard > header span { color: #e7b56d; font-size: 0.73rem; font-weight: 900; letter-spacing: 0.13em; }
+.playerCard > header strong { overflow-wrap: anywhere; font: 800 1.35rem/1.1 Georgia, serif; }
+
+.page button { min-height: 52px; border: 0; border-radius: 12px; color: white; background: #be185d; font-weight: 900; cursor: pointer; touch-action: manipulation; }
+.page button:disabled { opacity: 0.48; cursor: not-allowed; }
+.onButton, .offButton { min-width: 72px; padding: 8px 13px; }
+.onButton { background: #15803d !important; }
+.offButton { background: #7f1d1d !important; }
+
+.nameField { display: grid; gap: 7px; margin-top: 16px; }
+.nameField span, .scoreArea label span { color: #d3bfa9; font-size: 0.77rem; font-weight: 800; }
+.nameField input, .scoreArea input { box-sizing: border-box; width: 100%; border: 1px solid #9d6c45; border-radius: 11px; outline: none; color: #fff; background: #090d0b; }
+.nameField input { min-height: 55px; padding: 10px 13px; font-size: 1.25rem; font-weight: 800; }
+.nameField input:focus, .scoreArea input:focus { border-color: #f9a8d4; box-shadow: 0 0 0 3px rgba(249, 168, 212, 0.16); }
+
+.scoreArea { display: grid; grid-template-columns: 86px minmax(0, 1fr) 86px; align-items: end; gap: 10px; margin-top: 14px; }
+.scoreArea button { min-height: 86px; padding: 0; font-size: 3.2rem; line-height: 1; }
+.scoreArea label { display: grid; gap: 7px; text-align: center; }
+.scoreArea input { height: 86px; padding: 4px 10px; text-align: center; font-size: clamp(2.5rem, 7vw, 4.4rem); font-weight: 950; }
+
+.sourcePanel { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 16px; padding: 17px; border: 1px solid #6e5334; border-radius: 15px; background: #07120d; }
+.sourcePanel div { display: grid; gap: 8px; min-width: 0; }
+.sourcePanel code { padding: 9px; overflow-wrap: anywhere; border-radius: 8px; color: #f9a8d4; background: #020604; }
+.sourcePanel p { max-width: 320px; margin: 0; color: #bba998; }
+
+@media (max-width: 760px) {
+  .page { padding: 12px; }
+  .header { display: block; }
+  .liveBadge { display: inline-block; margin-top: 5px; }
+  .players { grid-template-columns: 1fr; }
+  .playerCard { padding: 14px; }
+  .scoreArea { grid-template-columns: 76px minmax(0, 1fr) 76px; }
+  .scoreArea button, .scoreArea input { min-height: 76px; height: 76px; }
+  .sourcePanel { grid-template-columns: 1fr; }
+  .sourcePanel p { max-width: none; }
+}

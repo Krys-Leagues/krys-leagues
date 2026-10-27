@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "phase101-kwt-rating-approval-v1",
+  "status": "PROPOSED_REVIEW_ONLY_UNPUBLISHED",
+  "sourceCheckpoint": "0c8e09fd6463094ecbfb6d15a3a3237e1b39b808",
+  "sourceCalculationRunId": "e2f53406-75b7-5acb-a3e9-9bec0d39421b",
+  "policyVersion": "krys-handicap-approved-policy-v1",
+  "differentialModelVersion": "krys-handicap-candidate-a-v1",
+  "referenceSlope": 8.515,
+  "chronologyPolicy": "OFFICIAL_KWT_SEQUENCE",
+  "formula": "(score - course_rating) * 8.515 / course_slope",
+  "totalKwtOnlyRatings": 78,
+  "readyRatings": 72,
+  "provisionalRatings": 6,
+  "readyRecommendedForFormalApproval": 72,
+  "diagnosticRatings": 4,
+  "numericIndexCandidates": 157,
+  "dependentIndexReferences": 785,
+  "sourceExceptions": {
+    "unresolvedCanonicalId": 806,
+    "invalidScore": 2,
+    "includedInCorrectedPackage": 0
+  },
+  "effectivePeriod": {
+    "representation": "per-snapshot KWT Season/Week range under OFFICIAL_KWT_SEQUENCE",
+    "calendarDate": null,
+    "noCalendarDatesInvented": true,
+    "currentProductionGateRequiresCalendarDate": true,
+    "proposedGateRequiresExplicitRunOptIn": true
+  },
+  "allRatingsRemainUnpublished": true,
+  "formalPublicationEligible": false,
+  "sourceHashes": {
+    "phase99Review": "AA9E09F666FF34364C531D02F1EEFB9DB67B486CB05391AEC0A768B29B645817",
+    "phase99Manifest": "C2201815C0DFAF8C7F9577A4868AAD7C395DBA1C26A03B22E1F8C3321E613F28",
+    "phase100PeriodManifest": "C46C46DCEA4636E23843EC4F473817187842A9CDE7246DDE5889E272D4BB3B61",
+    "phase100Diagnostics": "426CBC936AFA19FDF9B4129EAB00E7BFEE5C8A9EDDBD13E11E4B2FAA059861FA",
+    "phase100Ledger": "FF3E04FF0D25B28A3C1CBD4A24FE4B5D674A80231D7C9104E24B37A7C90B7173",
+    "phase98Manifest": "CD408B22F395E712912BC30C850AB0EC4929602B6AA3BAA2CD3F8AE6BE416B0E"
+  }
+}

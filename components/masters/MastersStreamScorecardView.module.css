@@ -1,0 +1,86 @@
+:global(html):has(.stage),
+:global(body):has(.stage) {
+  margin: 0 !important;
+  background: transparent !important;
+  overflow: hidden;
+}
+
+.stage {
+  display: flex;
+  width: 100vw;
+  min-height: 100vh;
+  box-sizing: border-box;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 8px;
+  background: transparent;
+  color: #fff;
+  font-family: Arial, sans-serif;
+}
+
+.card {
+  width: min(900px, calc(100vw - 16px));
+  overflow: hidden;
+  border: 2px solid #e11d68;
+  border-radius: 14px;
+  background: linear-gradient(115deg, rgba(0, 82, 79, 0.24), transparent 31%), linear-gradient(145deg, rgba(5, 8, 9, 0.985), rgba(31, 2, 19, 0.98));
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.74), 0 0 0 1px rgba(251, 113, 133, 0.34) inset, 0 0 22px rgba(236, 72, 153, 0.24);
+}
+
+.header {
+  display: grid;
+  grid-template-columns: minmax(260px, 1.2fr) minmax(160px, 0.8fr) 76px;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-bottom: 1px solid #be185d;
+  background: radial-gradient(circle at 93% 18%, rgba(244, 114, 182, 0.3), transparent 27%), linear-gradient(90deg, rgba(4, 120, 87, 0.25), rgba(190, 24, 93, 0.2));
+}
+
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.brand img { width: 54px; height: 54px; flex: 0 0 auto; object-fit: contain; }
+.brand p { margin: 0; color: #f8fafc; font-family: Georgia, serif; font-size: 10px; font-weight: 900; letter-spacing: 0.16em; }
+.brand h1 { margin: -1px 0; color: #dffbff; font-family: Georgia, serif; font-size: clamp(22px, 3.2vw, 31px); line-height: 1; letter-spacing: 0.05em; text-shadow: 0 1px 0 #fff, 0 0 7px #22d3ee; }
+.brand span { color: #f472b6; font-family: Georgia, serif; font-size: 9px; font-weight: 900; letter-spacing: 0.17em; }
+.context { min-width: 0; padding: 7px 10px; border-right: 1px solid rgba(244, 114, 182, 0.28); border-left: 1px solid rgba(244, 114, 182, 0.28); text-align: center; }
+.context strong { display: block; overflow-wrap: anywhere; color: #fff; font-family: Georgia, serif; font-size: clamp(17px, 2.5vw, 24px); }
+.context span { display: block; margin-top: 3px; color: #5eead4; font-size: 9px; font-weight: 900; letter-spacing: 0.12em; }
+
+.current { display: grid; min-width: 58px; padding: 5px 7px; place-items: center; border: 1px solid #ec4899; border-radius: 10px; background: #12030b; }
+.current span, .current small { margin: 0; color: #f9a8d4; font-size: 8px; font-weight: 900; letter-spacing: 0.1em; }
+.current strong { font-size: 29px; line-height: 0.95; }
+
+.nineHeader, .player { display: grid; grid-template-columns: minmax(185px, 1.65fr) 4.8fr 68px 80px; align-items: center; gap: 7px; padding-right: 10px; padding-left: 10px; }
+.nineHeader { padding-top: 5px; padding-bottom: 5px; color: #f9a8d4; font-size: 9px; letter-spacing: 0.1em; }
+.nineHeader div, .holeScores { display: grid; grid-template-columns: repeat(9, 1fr); gap: 3px; text-align: center; }
+.nineHeader span { padding: 3px 0; border-radius: 4px; background: rgba(255, 255, 255, 0.06); }
+.activeHole { background: #be185d !important; color: #fff !important; box-shadow: 0 0 8px rgba(244, 114, 182, 0.72); }
+.players { display: grid; }
+.player { min-height: 45px; padding-top: 4px; padding-bottom: 4px; border-top: 1px solid rgba(244, 114, 182, 0.24); }
+.playerIdentity { min-width: 0; }
+.playerIdentity h2 { margin: 0; overflow-wrap: anywhere; color: #fff; font-size: clamp(14px, 2vw, 19px); line-height: 1.03; }
+.playerIdentity p { margin: 2px 0 0; color: #94a3b8; font-size: 8px; font-weight: 900; }
+.holeScores span { display: grid; min-height: 29px; place-items: center; border-radius: 4px; background: rgba(255, 255, 255, 0.06); font-size: 14px; font-weight: 900; }
+.activeScore { outline: 2px solid #ec4899; background: rgba(190, 24, 93, 0.34) !important; }
+
+.now, .total { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 3px; padding: 5px 6px; border-radius: 7px; background: #0a1210; }
+.now span, .total span { color: #94a3b8; font-size: 7px; font-weight: 900; }
+.now strong, .total strong { font-size: 20px; }
+.total strong { color: #5eead4; }
+.footer { display: flex; justify-content: space-between; gap: 12px; padding: 6px 11px; border-top: 1px solid #be185d; color: #94a3b8; font-size: 8px; font-weight: 900; letter-spacing: 0.08em; }
+.live { color: #fb7185; }
+
+@media (max-width: 720px) {
+  .stage { padding: 4px; }
+  .card { width: calc(100vw - 8px); border-radius: 9px; }
+  .header { grid-template-columns: minmax(170px, 1fr) 68px; padding: 6px 8px; }
+  .brand img { width: 42px; height: 42px; }
+  .context { display: none; }
+  .nineHeader, .player { grid-template-columns: minmax(105px, 1.25fr) 4.8fr 58px; }
+  .nineHeader, .player { padding-right: 6px; padding-left: 6px; }
+  .now { display: none; }
+  .playerIdentity h2 { font-size: 11px; }
+  .holeScores span { min-height: 24px; font-size: 11px; }
+  .total strong { font-size: 17px; }
+  .footer { padding: 5px 7px; font-size: 7px; }
+}

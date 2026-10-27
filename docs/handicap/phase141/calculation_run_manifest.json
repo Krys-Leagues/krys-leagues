@@ -1,0 +1,37 @@
+{
+  "schema_version": "phase141-rolling20-publication-v1",
+  "status": "LOCAL_DRAFT_QUARANTINED_UNPUBLISHED",
+  "production_project": "jfbndcwdsvsjgnzwvexp",
+  "calculation_run_id": "5db94324-3789-559c-865c-35ed9c2081dd",
+  "predecessor_run_id": "8f136000-0000-5000-8000-000000000136",
+  "policy_version": "krys-handicap-approved-policy-v1",
+  "model_version": "krys-handicap-candidate-a-v1",
+  "differential_formula": "(score - course rating) * 8.515 / course slope",
+  "reference_slope": 8.515,
+  "chronology_policy": "OFFICIAL_KWT_SEQUENCE",
+  "chronology_confidence": "OFFICIAL_KWT_SEQUENCE",
+  "allow_official_kwt_sequence_publication": true,
+  "rolling_window": 20,
+  "average_all_active_differentials": true,
+  "best_five_selection": false,
+  "effective_from": "2026-10-22",
+  "effective_period_is_metadata_only": true,
+  "publication_opt_in": false,
+  "publication_eligibility": "QUARANTINED",
+  "index_approval_required": true,
+  "candidate_counts": {
+    "total": 166,
+    "official_eligible": 120,
+    "provisional": 46,
+    "blocked": 0
+  },
+  "referenced_rating_snapshots": 78,
+  "source_round_references": 14076,
+  "weekly_personal_inputs": 0,
+  "input_checksums": {
+    "phase140_rows": "C54B27EC4F1B0BD4CF8BEAE326A5ACCA130FDE3E4232EF9130212A44809E5A5E",
+    "phase140_manifest": "D8BB43475FAFF5CD3981D2A0F7C465272CDC9E8BEF427890821DEF6E4646FE73",
+    "phase140_package_checksums": "1E8038309A1E29E6EA0B026D3F628EF660CC3A0D3344F2B14E46455D4D112469"
+  },
+  "approval_manifest_sha256": "4D45F06D05B8C89E69BBCDE0377E5C0FF143E90947258061D1C561449ECA9F36"
+}

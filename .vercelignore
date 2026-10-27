@@ -1,0 +1,7 @@
+.kwt-current-import-pgtest
+.kwt-current-import-*.sql
+vercel-build-error.txt
+tsconfig.tsbuildinfo
+.env*
+.next
+node_modules

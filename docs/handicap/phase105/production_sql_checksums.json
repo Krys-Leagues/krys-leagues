@@ -1,0 +1,11 @@
+{
+  "production_preflight_sql": "9DE563B2DC0EC59BDFCBF5258A74DE4C76FC5BC1B3E357C1C4B439BFC188A981",
+  "production_install_sql": "EDA4E97EB0AD01457CD814FD9FCE049C9409C28F47887DDC44054159DD358B63",
+  "production_install_sql_bytes": 653271,
+  "packageRef": "phase104-first-eligible-kwt-handicap-run-v1",
+  "runId": "3973f8e7-f2c9-5d05-bdb7-e49810713612",
+  "ratingCount": 72,
+  "indexCount": 157,
+  "sourceRefCount": 13262,
+  "playerCount": 201
+}

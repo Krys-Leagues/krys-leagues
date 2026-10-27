@@ -1,0 +1,129 @@
+Skip to Main Content
+Kry's Monthlies
+Search
+0 results
+Install App
+About
+nobody
+	
+2026 March
+76/76 players
+COMPLETED
+	
+Overall Leaders - 2026 March
+Pos	Player	League	Courses
+Played	Total
+Strokes	HN1's	Points
+1	mini_G	Pro 3	8	-199	32	1,622
+2	plucky✌	Semi Pro 1	8	-153	20	1,600
+3	Earthling	Semi Pro 2	8	-130	11	1,561
+4	Sj_76	Semi Pro 3	8	-78	10	1,560
+5	NuttyGrandpa	Semi Pro 2	8	-120	11	1,551
+5	DARLAVA	Semi Pro 3	8	-81	11	1,551
+7	Neo Impossible	Elite	8	-188	25	1,545
+8	Mully	Elite	8	-187	25	1,525
+9	yankeedude1123	Master	8	-198	34	1,524
+10	stewiestewie	Pro 1	8	-171	18	1,518
+1 - 10
+Semi Pro 3 Leaders
+League
+- Select -
+Master
+Elite
+Pro 1
+Pro 2
+Pro 3
+Semi Pro 1
+Beginner
+Welcome
+115
+Pos	Player	Courses
+Played	Total
+Strokes	HN1's	Points
+1
+	Sj_76	8	-78	10	1,560
+2
+	DARLAVA	8	-81	11	1,551
+3
+	SHANNON_OLIVEOWL	2	-20	1	371
+4
+	Woofmaster521 (Kathy)	2	12	0	350
+5
+	Chicagobry	1	-13	1	201
+1 - 5
+ Players at risk of relegation
+  Point change since last report.
+ Arizona Modern
+#	Player	Score	HN1	Points
+1	DARLAVA	-19	3	203
+2	Sj_76	-13	1	191
+3	SHANNON_OLIVEOWL	-12	1	181
+	Woofmaster521 (Kathy)			
+	Chicagobry			
+ Arizona Modern Hard
+#	Player	Score	HN1	Points
+1	Sj_76	-15	0	200
+2	DARLAVA	-11	0	190
+	Woofmaster521 (Kathy)			
+	SHANNON_OLIVEOWL			
+	Chicagobry			
+ Original Gothic
+#	Player	Score	HN1	Points
+1	DARLAVA	-15	4	204
+2	Sj_76	-13	1	191
+	Chicagobry			
+	SHANNON_OLIVEOWL			
+	Woofmaster521 (Kathy)			
+ Original Gothic Hard
+#	Player	Score	HN1	Points
+1	Sj_76	-6	1	201
+2	DARLAVA	-6	0	190
+	Woofmaster521 (Kathy)			
+	SHANNON_OLIVEOWL			
+	Chicagobry			
+ Sweetopia
+#	Player	Score	HN1	Points
+1	Sj_76	-15	3	203
+2	SHANNON_OLIVEOWL	-8	0	190
+3	DARLAVA	-4	0	180
+4	Woofmaster521 (Kathy)	2	0	170
+	Chicagobry			
+ Sweetopia - Hard
+#	Player	Score	HN1	Points
+1	Sj_76	-3	0	200
+2	DARLAVA	-2	1	191
+3	Woofmaster521 (Kathy)	10	0	180
+	Chicagobry			
+	SHANNON_OLIVEOWL			
+ Laser Lair
+#	Player	Score	HN1	Points
+1	DARLAVA	-17	3	203
+2	Sj_76	-16	2	192
+	Woofmaster521 (Kathy)			
+	SHANNON_OLIVEOWL			
+	Chicagobry			
+ Laser Lair - Hard
+#	Player	Score	HN1	Points
+1	Chicagobry	-13	1	201
+2	DARLAVA	-7	0	190
+3	Sj_76	3	2	182
+	SHANNON_OLIVEOWL			
+	Woofmaster521 (Kathy)			
+2026 March Courses
+
+
+AME - Arizona Modern
+AMH - Arizona Modern Hard
+
+
+OGE - Original Gothic
+OGH - Original Gothic Hard
+
+
+SWE - Sweetopia
+SWH - Sweetopia - Hard
+
+
+LLE - Laser Lair
+LLH - Laser Lair - Hard
+Release 1.2 Built with  using Oracle APEX

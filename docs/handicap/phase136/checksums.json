@@ -1,0 +1,35 @@
+{
+  "schema_version": "phase136-venice-complete-pair-lineage-v1",
+  "status": "PRODUCTION_BLOCKED_LOCAL_PACKAGE_ONLY",
+  "production_project": "jfbndcwdsvsjgnzwvexp",
+  "phase135_checkpoint": "41922fc849a0b177f3366f09bc3ec716d811b43a",
+  "source_package_version": "phase68-provenance-recovery-v1",
+  "phase68_provenance_sha256": "8440A1D1DCB4C09283F64235F5A85567E59D677DC6494EAB58E1FFB5EE2499CE",
+  "phase135_successor_sha256": "40AD767219C21A8BE28AB3FF815B526E2F0CB43C641188B20D791B53287BBC7F",
+  "calculation_run_id": "8f136000-0000-5000-8000-000000000136",
+  "counts": {
+    "venice_easy_ledger_rows": 217,
+    "venice_easy_qualifying_rows": 215,
+    "venice_easy_excluded_incomplete_pair_rows": 2,
+    "venice_hard_ledger_rows": 215,
+    "successor_snapshots": 17,
+    "complete_rating_mappings": 78,
+    "index_candidates": 166,
+    "blocked_index_candidates": 0,
+    "official_eligible": 120,
+    "provisional": 46,
+    "weekly_personal_inputs": 0
+  },
+  "generated_files": {
+    "venice_easy_lineage_comparison.csv": "7569E9B87A5B2754B3463962BEC69088582EE147F03CDE7F2DB363B9F80D0102",
+    "successor_rating_snapshots.csv": "14E9E0D5DABDA5B2166E3A8748EDF717097D5F1CDF53C650CC2EAA58902FC32D",
+    "rating_lineage_recovery.csv": "14E9E0D5DABDA5B2166E3A8748EDF717097D5F1CDF53C650CC2EAA58902FC32D",
+    "owner_rating_snapshot_mapping.csv": "0641A1BEC7B283319EA31654C19E1B7DE908802006150A9D278847582655D1F0",
+    "player_index_revalidation.csv": "94FADDCE462ACC48A3A27FF119A9403C04AD007E63F350222CA652D88F77B31F",
+    "lineage_exceptions.csv": "01BA4719C80B6FE911B091A7C05124B64EEECE964E09C058EF8F9805DACA546B",
+    "production_preflight.sql": "0E8CAF18813F91E2863EE2D601D17A58B807D0CC922E3814A57EBB08AAA7D5CE",
+    "production_installation.sql": "A3694E2384BC2635E6E7F310ADE4F4643196D020C67B81F94182147E506B7018",
+    "production_postflight.sql": "5DC8459C882F5546A6BAA8FD40C3C131DBFCA59DA4E880FE0E844143603FD32A",
+    "recovery_report.md": "9D5DC11DE78FD5D821777E0542EA0E0CC43252580DABA0E88CB9D5273F07F7AF"
+  }
+}

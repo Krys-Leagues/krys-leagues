@@ -1,0 +1,6 @@
+type,count,effect
+UNRESOLVED_PHASE117_PAIRS,7,Excluded from KWT statistics and personal indexes
+INCOMPLETE_OR_DUPLICATE_KWT_PAIRS,2,Excluded from personal indexes
+WEEKLY_DUPLICATE_FINGERPRINTS,0,Excluded from Weekly rating statistics
+WEEKLY_UNMAPPED_COURSE_ROWS,0,Excluded from Weekly rating statistics
+BLOCKED_REVISED_PLAYERS,0,No local numeric index candidate

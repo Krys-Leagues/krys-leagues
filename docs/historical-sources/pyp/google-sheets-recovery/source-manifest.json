@@ -1,0 +1,50 @@
+{
+  "source": {
+    "title": "PYP",
+    "spreadsheetId": "1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw",
+    "url": "https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit",
+    "mimeType": "application/vnd.google-apps.spreadsheet",
+    "historicalScope": "S1-S14",
+    "currentExcluded": [
+      "Season 15 via Current divisions / Current COURSE MASTER"
+    ],
+    "capturedAt": "2026-08-26T21:42:58.500Z"
+  },
+  "counts": {
+    "historicalSeasons": 14,
+    "exactHistoricalNamesExcludingBye": 79,
+    "participantSeasonDivisionRows": 265,
+    "playerGameSlots": 795,
+    "numericResultSlots": 597,
+    "explicitBlankOrDashUnplayedSlots": 198,
+    "dashUnplayedSlots": 161,
+    "blankUnplayedSlots": 37,
+    "numericZeroZeroNeedsReview": 37,
+    "numericZeroZeroWithWldEvidence": 2,
+    "mirroredPlacementDiscrepancies": 184,
+    "explicitOpponentEvidenceRows": 66,
+    "publishedPlacementAuthority": "RIGHT-SIDE FORMULA-SORTED STANDINGS; PTS DESC THEN HOLES WON DESC",
+    "mirroredPlacementConflictsResolved": 184,
+    "normalizedRowsIncludeStandingsPoints": true
+  },
+  "artifactHashes": {
+    "README.md": "714E038E8FF9A64397801A848093325507BA40E0DD46F810B8B99BF705406C12",
+    "historical-pyp-normalized.csv": "074F8EAF648DFA5537C6201138FEE5352DE2FAE92DCE00FFE55E169D772774E6",
+    "historical-pyp-opponent-evidence.csv": "46FC717D5E82BAAB79EBF1AFF8C2B7BA3B152BBEB86228CA98ECF80981B65E5F",
+    "historical-pyp-rank-conflicts.csv": "816098B3807DA46DA2068EAE15CF5188F687E068C51FFC422BBE3E3611A5F94E",
+    "historical-pyp-raw-values.json": "3E70C39096F0FCEB133EA269D18826EBBEE9EF2C890A08C80E8453A20F44DC35",
+    "historical-pyp-score-formatting.json": "5CC3159DEBE35BC40560C5F9F3B33EC6D03481D71190C295734DA7765C5734BC",
+    "historical-pyp-zero-review.csv": "F7CED84D5393CB9EE5E1198135BFB28BC966BA6D3321BEC92E7C044131382217",
+    "tab-inventory.json": "10DFABBAEC795A3AF8A305FF843361B9AA1EA7A322D36F366A20EA931F8CF8FD"
+  },
+  "artifacts": [
+    "historical-pyp-raw-values.json",
+    "historical-pyp-score-formatting.json",
+    "historical-pyp-normalized.csv",
+    "historical-pyp-zero-review.csv",
+    "historical-pyp-rank-conflicts.csv",
+    "historical-pyp-opponent-evidence.csv",
+    "tab-inventory.json",
+    "README.md"
+  ]
+}

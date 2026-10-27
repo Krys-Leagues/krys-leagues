@@ -1,0 +1,30 @@
+{
+  "schema": "krys-leagues.kwt-week-verification.v1",
+  "status": "VERIFIED_SOURCE_PENDING_PROTECTED_SETUP",
+  "season": 15,
+  "week": 1,
+  "eventIdentifier": "KWTS15W01",
+  "courseName": "Raptor Cliffs",
+  "easyCourseCode": "RCE",
+  "hardCourseCode": "RCH",
+  "officialDate": "2026-10-24",
+  "officialDatePrecision": "DAY",
+  "handicapFreezeCutoff": null,
+  "ownerConfirmedHandicapFreezeCutoffUtc": "2026-10-23T04:00:00Z",
+  "ownerConfirmedHandicapFreezeTimezone": "America/New_York",
+  "courseRecordsVerified": true,
+  "sourceUrl": "https://dqvo64m7q9ujvqa-wmgt23ai.adb.us-ashburn-1.oraclecloudapps.com/ords/r/wmgt/kwt/home?tz=America/New_York",
+  "sourceEvidence": [
+    "Tournament: October 24, 2026",
+    "Current Top Leaderboard (KWT15W01)",
+    "Courses: Raptor Cliff's & Raptor Cliff's - Hard",
+    "Season Courses: Week 1 of 12, RCE, RCH"
+  ],
+  "activation": {
+    "canActivate": false,
+    "blockers": [
+      "No protected Week Setup record exists in Production.",
+      "The external source does not expose a Handicap freeze cutoff; the owner-confirmed local cutoff must be persisted by an authorized protected setup record."
+    ]
+  }
+}

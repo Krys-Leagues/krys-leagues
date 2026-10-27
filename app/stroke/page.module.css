@@ -1,0 +1,15 @@
+.page {
+  position: relative;
+  min-height: 100vh;
+  background:
+    linear-gradient(180deg, rgba(2, 6, 23, 0.08) 0%, rgba(2, 6, 23, 0.74) 42%, #020617 86%),
+    url("/approved-pages/stroke-play-approved.jpg") top center / min(100%, 1664px) auto no-repeat,
+    radial-gradient(circle at top, #172554 0%, #020617 48%, #000000 100%);
+  color: #ffffff;
+}
+
+.page :global(.artwork-navigation) {
+  min-height: 0;
+  padding: 0;
+  background: transparent;
+}

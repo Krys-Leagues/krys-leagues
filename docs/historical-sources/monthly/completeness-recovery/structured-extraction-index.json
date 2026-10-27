@@ -1,0 +1,23 @@
+{
+  "captureTimestamp": "2026-09-05",
+  "captureMethod": "Local Microsoft Edge headless CDP rendered-DOM capture",
+  "authority": "Kry's Monthlies rendered APEX application",
+  "scope": {
+    "targetCells": 6,
+    "periods": [361, 381, 401, 421],
+    "retiredDivisionValues": {"114": "Semi Pro 2", "115": "Semi Pro 3"}
+  },
+  "cells": [
+    {"period":"2026 March","periodId":361,"division":"Semi Pro 2","sourceDivisionId":"114","leaderRows":7,"courseTables":8,"courseRows":56,"scored":56,"missingScore":0,"malformed":0,"rawResponseSha256":"see evidence-sha256.tsv","rawResponseFile":"raw/period-361-division-114.html"},
+    {"period":"2026 March","periodId":361,"division":"Semi Pro 3","sourceDivisionId":"115","leaderRows":5,"courseTables":8,"courseRows":40,"scored":21,"missingScore":19,"malformed":0,"rawResponseSha256":"see evidence-sha256.tsv","rawResponseFile":"raw/period-361-division-115.html"},
+    {"period":"2026 April","periodId":381,"division":"Semi Pro 2","sourceDivisionId":"114","leaderRows":8,"courseTables":8,"courseRows":64,"scored":54,"missingScore":10,"malformed":0,"rawResponseSha256":"see evidence-sha256.tsv","rawResponseFile":"raw/period-381-division-114.html"},
+    {"period":"2026 May","periodId":401,"division":"Semi Pro 2","sourceDivisionId":"114","leaderRows":7,"courseTables":8,"courseRows":56,"scored":28,"missingScore":28,"malformed":0,"rawResponseSha256":"see evidence-sha256.tsv","rawResponseFile":"raw/period-401-division-114.html"},
+    {"period":"2026 May","periodId":401,"division":"Semi Pro 3","sourceDivisionId":"115","leaderRows":7,"courseTables":8,"courseRows":56,"scored":10,"missingScore":46,"malformed":0,"rawResponseSha256":"see evidence-sha256.tsv","rawResponseFile":"raw/period-401-division-115.html"},
+    {"period":"2026 June","periodId":421,"division":"Semi Pro 2","sourceDivisionId":"114","leaderRows":6,"courseTables":8,"courseRows":48,"scored":25,"missingScore":23,"malformed":0,"rawResponseSha256":"see evidence-sha256.tsv","rawResponseFile":"raw/period-421-division-114.html"}
+  ],
+  "totals": {"observations":320,"scored":194,"missingScore":126,"malformed":0},
+  "exactScreenNamesFile": "retired-division-player-names.tsv",
+  "rowLevelRawCaptureStatus": "RENDERED_DOM_CAPTURED_HTTP_BODY_NOT_CLAIMED",
+  "localRowLevelExtractionFile": "recovered-observations.tsv",
+  "identityDecisions": 0
+}

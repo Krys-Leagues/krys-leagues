@@ -1,0 +1,125 @@
+Skip to Main Content
+Kry's Monthlies
+Search
+0 results
+Install App
+About
+nobody
+	
+2026 August
+60/50 players
+COMPLETED
+	
+Overall Leaders - 2026 August
+Pos	Player	League	Courses
+Played	Total
+Strokes	HN1's	Points
+1	Zanetti	Welcome	8	-180	21	1,621
+2	far canal	Pro 3	8	-149	10	1,600
+3	Earthling	Semi Pro 1	8	-67	12	1,592
+4	POLANECE	Master	8	-184	23	1,533
+5	lynniebodd	Welcome	8	-128	12	1,532
+5	Sj_76	Pro 2	8	-120	12	1,532
+7	Mully	Elite	8	-182	21	1,511
+8	PaulV-PPP 🇨🇦	Pro 1	8	-147	19	1,459
+9	DMD-Enditnow	Pro 2	8	-116	5	1,455
+10	leanin2it	Elite	8	-173	18	1,448
+1 - 10
+Welcome Leaders
+League
+- Select -
+Master
+Elite
+Pro 1
+Pro 2
+Pro 3
+Semi Pro 1
+Beginner
+Welcome
+Pos	Player	Courses
+Played	Total
+Strokes	HN1's	Points
+1
+	Zanetti	8	-180	21	1,621
+2
+	lynniebodd	8	-128	12	1,532
+	Gobson	0			
+	Matt916	0			
+	stewiestewie	0			
+1 - 5
+ Players at risk of relegation
+  Point change since last report.
+ Cherry Blossom
+#	Player	Score	HN1	Points
+1	Zanetti	-31	7	207
+2	lynniebodd	-23	2	192
+	Matt916			
+	Gobson			
+	stewiestewie			
+ Cherry Blossom Hard
+#	Player	Score	HN1	Points
+1	Zanetti	-23	1	201
+2	lynniebodd	-15	1	191
+	Matt916			
+	Gobson			
+	stewiestewie			
+ Shangri-La
+#	Player	Score	HN1	Points
+1	Zanetti	-28	5	205
+2	lynniebodd	-26	3	193
+	Matt916			
+	Gobson			
+	stewiestewie			
+ Shangri-La - Hard
+#	Player	Score	HN1	Points
+1	Zanetti	-24	1	201
+2	lynniebodd	-19	3	193
+	Gobson			
+	Matt916			
+	stewiestewie			
+ Ice Lair
+#	Player	Score	HN1	Points
+1	Zanetti	-21	1	201
+2	lynniebodd	-11	0	190
+	Gobson			
+	Matt916			
+	stewiestewie			
+ Ice Lair - Hard
+#	Player	Score	HN1	Points
+1	Zanetti	-16	3	203
+2	lynniebodd	-10	0	190
+	Matt916			
+	Gobson			
+	stewiestewie			
+ Hollywood
+#	Player	Score	HN1	Points
+1	Zanetti	-18	2	202
+2	lynniebodd	-15	2	192
+	Matt916			
+	Gobson			
+	stewiestewie			
+ Hollywood - Hard
+#	Player	Score	HN1	Points
+1	Zanetti	-19	1	201
+2	lynniebodd	-9	1	191
+	Gobson			
+	Matt916			
+	stewiestewie			
+2026 August Courses
+
+
+CBE - Cherry Blossom
+CBH - Cherry Blossom Hard
+
+
+SLE - Shangri-La
+SLH - Shangri-La - Hard
+
+
+ILE - Ice Lair
+ILH - Ice Lair - Hard
+
+
+HWE - Hollywood
+HWH - Hollywood - Hard
+Release 1.2 Built with  using Oracle APEX

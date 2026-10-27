@@ -1,0 +1,68 @@
+{
+  "capturedCells": 16,
+  "capturedRows": 1144,
+  "capturedScored": 807,
+  "capturedMissing": 337,
+  "retiredRows": 320,
+  "retiredScored": 194,
+  "retiredMissing": 126,
+  "visibleRows": 824,
+  "visibleScored": 613,
+  "visibleMissing": 211,
+  "oldRowsInCapturedCells": 0,
+  "newRowsAbsentFromOld": 1144,
+  "exactScoreConflictsAgainstOld": 0,
+  "exactPlayerNameConflictsAgainstOld": 0,
+  "exactDuplicateFingerprintGroups": 0,
+  "malformedRows": 0,
+  "previousFreshVisibleRows": 681,
+  "currentVisibleRows": 824,
+  "previousFreshVisibleScored": 522,
+  "currentVisibleScored": 613,
+  "previousFreshVisibleMissing": 159,
+  "currentVisibleMissing": 211,
+  "retiredSourceStateConflicts": [
+    {
+      "cell": "361|Semi Pro 2|114",
+      "previousScored": 56,
+      "previousMissing": 0,
+      "currentScored": 56,
+      "currentMissing": 0
+    },
+    {
+      "cell": "361|Semi Pro 3|115",
+      "previousScored": 21,
+      "previousMissing": 19,
+      "currentScored": 21,
+      "currentMissing": 19
+    },
+    {
+      "cell": "381|Semi Pro 2|114",
+      "previousScored": 57,
+      "previousMissing": 7,
+      "currentScored": 54,
+      "currentMissing": 10
+    },
+    {
+      "cell": "401|Semi Pro 2|114",
+      "previousScored": 29,
+      "previousMissing": 27,
+      "currentScored": 28,
+      "currentMissing": 28
+    },
+    {
+      "cell": "401|Semi Pro 3|115",
+      "previousScored": 11,
+      "previousMissing": 45,
+      "currentScored": 10,
+      "currentMissing": 46
+    },
+    {
+      "cell": "421|Semi Pro 2|114",
+      "previousScored": 24,
+      "previousMissing": 24,
+      "currentScored": 25,
+      "currentMissing": 23
+    }
+  ]
+}

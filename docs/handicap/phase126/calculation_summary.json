@@ -1,0 +1,29 @@
+{
+  "schema_version": "phase126-rolling-20-handicap-update-v1",
+  "status": "LOCAL_PRELIMINARY_UNPUBLISHED",
+  "calculation_run_id": "12600000-0000-5000-8000-000000000001",
+  "source_scope": "KWT_ONLY",
+  "differential_formula": "(score - course rating) * 8.515 / course slope",
+  "model_version": "krys-handicap-candidate-a-v1",
+  "reference_slope": 8.515,
+  "active_round_limit": 20,
+  "official_threshold": 20,
+  "provisional_rule": "1-19 qualifying cards; average all available differentials",
+  "no_cards_rule": "NOT_YET_RATED",
+  "counts": {
+    "candidates": 166,
+    "official_eligible": 120,
+    "provisional": 46,
+    "not_yet_rated": 0,
+    "weekly_rows_used_in_personal_indexes": 0,
+    "changed_from_old": 166
+  },
+  "input_checksums": {
+    "phase68_provenance": "8440A1D1DCB4C09283F64235F5A85567E59D677DC6494EAB58E1FFB5EE2499CE",
+    "phase117_provenance": "0A9FD1032FA87C2D92E628B83DDB6F9089D5C81F3AB0C24929F030892870E186",
+    "phase121_ratings": "224E5113A227F929C992F043FA85A91EEEFC39FDBADD3F16DA242CB86AC17ECC",
+    "phase121_indexes": "8E68C92ED92D20E2AE2749D56E11C37ED036E91D372E3FF63B2E8A0BADC2CDB5",
+    "canonical_names": "1991A4D8E398856E3A6D29DA9D30DD5C06337C60508F8E06E8ABE0D8F46B2152"
+  },
+  "publication_boundary": "No Production rows, ratings, indexes, or profiles changed; all candidates remain unpublished."
+}

@@ -1,0 +1,2 @@
+local_snapshot_id,course_id,difficulty,candidate_sample_size,recovered_source_ref_count,candidate_distinct_players,recovered_distinct_players,source_scope,status,reasons
+96bdf7e8-1b97-51c8-83c7-3a03c3413f4e,Venice_easy,easy,215,217,101,101,KWT_ONLY,BLOCKED_LINEAGE_MISMATCH,SOURCE_COUNT_MISMATCH:217:215

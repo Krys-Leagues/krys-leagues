@@ -1,0 +1,159 @@
+Skip to Main Content
+Kry's Monthlies
+Search
+0 results
+Install App
+About
+nobody
+	
+2025 September
+118/91 players
+COMPLETED
+	
+Overall Leaders - 2025 September
+Pos	Player	League	Courses
+Played	Total
+Strokes	HN1's	Points
+1	ZoeDarlin	Semi Pro 3	8	-122	18	1,618
+2	Zanetti	Pro 1	8	-183	36	1,586
+3	Chelle💯	Pro 3	8	-148	21	1,571
+4	Audrey	Amateur 2	8	-77	8	1,568
+5	Master_KP	Semi Pro 2	8	-104	15	1,535
+6	Fry_Lock	Semi Pro 2	8	-105	11	1,531
+7	yankeedude1123	Pro 1	8	-171	33	1,523
+8	YUK1N	Pro 2	8	-144	16	1,516
+9	PaulV-PPP 🇨🇦	Pro 2	8	-140	23	1,503
+10	Blutes87	Master	8	-179	25	1,495
+1 - 10
+Semi Pro 3 Leaders
+League
+- Select -
+Master
+Elite
+Pro 1
+Pro 2
+Pro 3
+Semi Pro 1
+Beginner
+Welcome
+115
+Pos	Player	Courses
+Played	Total
+Strokes	HN1's	Points
+1
+	ZoeDarlin	8	-122	18	1,618
+2
+	RUBBERDUCK	8	-70	12	1,452
+3
+	Bethann	8	-68	12	1,392
+4
+	Ultrafox_Lynne	8	-37	6	1,306
+5
+	Savy	6	-60	5	1,075
+6
+	SMILEROBIN	4	-14	4	684
+7
+	ANDRIA77	3	-35	3	503
+8
+	KDK	2	-16	2	312
+1 - 8
+ Players at risk of relegation
+  Point change since last report.
+ Tourist Trap
+#	Player	Score	HN1	Points
+1	ZoeDarlin	-20	3	203
+2	Ultrafox_Lynne	-18	2	192
+2	RUBBERDUCK	-18	2	192
+4	ANDRIA77	-17	1	171
+5	Bethann	-14	1	161
+6	Savy	-13	1	151
+7	KDK	-10	2	142
+	SMILEROBIN			
+ Tourist Trap Hard
+#	Player	Score	HN1	Points
+1	ZoeDarlin	-15	1	201
+2	Savy	-13	1	191
+3	RUBBERDUCK	-12	1	181
+4	KDK	-6	0	170
+5	Bethann	-4	0	160
+6	Ultrafox_Lynne	-1	0	150
+6	ANDRIA77	-1	0	150
+	SMILEROBIN			
+ Gardens of Babylon
+#	Player	Score	HN1	Points
+1	ZoeDarlin	-20	3	203
+2	Savy	-18	1	191
+3	Bethann	-17	2	182
+3	ANDRIA77	-17	2	182
+5	Ultrafox_Lynne	-12	2	162
+6	RUBBERDUCK	-8	1	151
+	KDK			
+	SMILEROBIN			
+ Gardens of Babylon Hard
+#	Player	Score	HN1	Points
+1	ZoeDarlin	-15	1	201
+2	Savy	-5	0	190
+2	RUBBERDUCK	-5	0	190
+4	Bethann	-4	0	170
+5	Ultrafox_Lynne	4	0	160
+	ANDRIA77			
+	SMILEROBIN			
+	KDK			
+ Holiday Hideaway
+#	Player	Score	HN1	Points
+1	ZoeDarlin	-16	1	201
+2	SMILEROBIN	-11	1	191
+2	RUBBERDUCK	-11	1	191
+4	Savy	-10	2	172
+5	Bethann	-6	2	162
+6	Ultrafox_Lynne	-4	0	150
+	ANDRIA77			
+	KDK			
+ Holiday Hideaway - Hard
+#	Player	Score	HN1	Points
+1	ZoeDarlin	-8	3	203
+2	Bethann	-8	2	192
+3	Savy	-1	0	180
+4	RUBBERDUCK	2	2	172
+5	Ultrafox_Lynne	6	0	160
+6	SMILEROBIN	8	0	150
+	ANDRIA77			
+	KDK			
+ Tokyo
+#	Player	Score	HN1	Points
+1	ZoeDarlin	-17	4	204
+2	RUBBERDUCK	-16	3	193
+3	SMILEROBIN	-13	3	183
+4	Bethann	-12	3	173
+5	Ultrafox_Lynne	-11	2	162
+	ANDRIA77			
+	KDK			
+	Savy			
+ Tokyo - Hard
+#	Player	Score	HN1	Points
+1	ZoeDarlin	-11	2	202
+2	Bethann	-3	2	192
+3	RUBBERDUCK	-2	2	182
+4	Ultrafox_Lynne	-1	0	170
+5	SMILEROBIN	2	0	160
+	ANDRIA77			
+	KDK			
+	Savy			
+2025 September Courses
+
+
+TTE - Tourist Trap
+TTH - Tourist Trap Hard
+
+
+GBE - Gardens of Babylon
+GBH - Gardens of Babylon Hard
+
+
+HHE - Holiday Hideaway
+HHH - Holiday Hideaway - Hard
+
+
+TOE - Tokyo
+TOH - Tokyo - Hard
+Release 1.2 Built with  using Oracle APEX

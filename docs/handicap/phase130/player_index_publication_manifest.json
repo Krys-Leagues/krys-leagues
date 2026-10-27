@@ -1,0 +1,1340 @@
+{
+  "schema_version": "phase130-rolling20-index-publication-manifest-v1",
+  "status": "PENDING_SEPARATE_PUBLICATION_AUTHORIZATION",
+  "approval_manifest_sha256": "6B52FA488F6079DD4E68AE52784CECE192A50A0E825B7103A8844BB4AA7203A8",
+  "source_package_sha256": "8A5512DEDB2763E982357851836163CB6E9B0BD8DFFFA7B08C21C0787B35D992",
+  "candidate_count": 166,
+  "publication_status_required": "PUBLISHED",
+  "run_status_required": "COMPLETED",
+  "run_eligibility_required": "ELIGIBLE",
+  "rows": [
+    {
+      "snapshot_id": "f1873c23-aac2-50b5-a5ed-d56aa97cc5e6",
+      "canonical_player_id": "01d3a462-08f4-412b-9c73-ef85b70c2a40",
+      "canonical_screen_name": "DBCQ",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "d7d31806-efa7-517f-a389-e53af39cec7a",
+      "canonical_player_id": "06bdb19f-1387-405a-b937-b3740bcfe007",
+      "canonical_screen_name": "kenmorefield",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "750515ad-4480-5493-83e5-e91982bd0e75",
+      "canonical_player_id": "09a3a4c5-8cba-41b6-81b5-e2ddaea8c12d",
+      "canonical_screen_name": "ANDRIA77",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "5fd13a10-61e8-5645-b028-305de07e50cf",
+      "canonical_player_id": "0a4fef7a-880a-4bfe-a663-438b78621178",
+      "canonical_screen_name": "SQUEEZY_JIBBZ",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "04fbf2a0-bf5f-5356-b410-6945a30b68b5",
+      "canonical_player_id": "0dbb4a28-34d0-479e-aba3-d7074e234c13",
+      "canonical_screen_name": "DESERT_RAT",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "fcfbafde-4a88-5761-a245-9b9b1924034d",
+      "canonical_player_id": "100a9131-fd1e-49cd-b194-2c1c2f07387f",
+      "canonical_screen_name": "Captain",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "55dd4ac6-03fa-505b-a5c9-d6d92df8792b",
+      "canonical_player_id": "1412e58b-2ed6-418a-9818-f47c99a11107",
+      "canonical_screen_name": "GOPATS37",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "bcb7acae-f9a4-5a02-86c5-0cb79f991a2b",
+      "canonical_player_id": "166b2489-8fbb-4286-ad1d-c9691db20828",
+      "canonical_screen_name": "onesilygrl",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "3ef2c63c-7c55-5b35-831b-51c47a57e62f",
+      "canonical_player_id": "1ac34b97-06fc-4aff-a837-9d387544f21b",
+      "canonical_screen_name": "ANDREWBARBER",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "62c63a7b-ef63-56bb-8e0d-e7ffd0bda038",
+      "canonical_player_id": "1ce077b9-5d7a-49ae-bbcd-a714a443af4f",
+      "canonical_screen_name": "UroPa",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "4b0a8253-5bfd-50a6-ae41-8b38c9732397",
+      "canonical_player_id": "1dd7f7b8-1c34-4e9b-8ba9-c1a6f00fac1b",
+      "canonical_screen_name": "PHARO_23",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "21b88399-2a92-5eec-9c92-40c36acc71c9",
+      "canonical_player_id": "212a9d8d-337d-473c-991d-75b38c4af4b7",
+      "canonical_screen_name": "KILLJOY_CODY",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "c1044e49-efe7-5a13-b686-0c1215ac3115",
+      "canonical_player_id": "21be1be9-9b32-4f82-9c48-b0811e0f975e",
+      "canonical_screen_name": "YUK1N",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "0d4ea159-aa40-59c2-be69-2115ed72f058",
+      "canonical_player_id": "235b5480-f2fe-4c81-b843-ff34743e882b",
+      "canonical_screen_name": "LAKE",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "01c8c84e-0744-5ae8-a145-97cf55af8660",
+      "canonical_player_id": "26a69f57-69b1-4865-bb8b-c24c265e1810",
+      "canonical_screen_name": "pluff",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "c5e50155-59bd-5b7a-8657-2be9e9e80ec5",
+      "canonical_player_id": "271ba43d-dfde-4fc8-bc1b-791f4a749b20",
+      "canonical_screen_name": "sirtacoman13",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "683e39b3-9b17-590a-b56f-48f4629b948e",
+      "canonical_player_id": "29be691a-b81b-4da3-a0de-2a1ff1fd037e",
+      "canonical_screen_name": "WOOFMASTER521 (KATHY)",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "4c3140e1-198e-54aa-884f-0a362a89533e",
+      "canonical_player_id": "2a0bc5be-8e7e-4483-a038-d4c88d05eae7",
+      "canonical_screen_name": "Chicagobry",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "43283d2a-caea-5e1c-b301-386206ed5ce9",
+      "canonical_player_id": "2d9d2691-f458-4eaf-ab2b-f1d65d5b9c4d",
+      "canonical_screen_name": "ARTSY",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "84802bc6-174d-55df-9c30-57a8b2c58582",
+      "canonical_player_id": "2e4ce1d8-afd6-44a2-9560-f85c16f23747",
+      "canonical_screen_name": "ZANETTI",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "5ec4d16c-865e-5bbf-9bcd-0747f2bc67c8",
+      "canonical_player_id": "324a043d-27a4-4319-9f74-f17671c7375a",
+      "canonical_screen_name": "CRAZYHORSE",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "8e09b14c-9f1f-55fe-abcd-d93232f7e8f8",
+      "canonical_player_id": "3299fa06-716f-4c62-89d3-7bd72fb39b0c",
+      "canonical_screen_name": "GripRip",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "9b01c98c-aa2d-5f48-b1c4-ee601d1f15b0",
+      "canonical_player_id": "32a7cbdb-4446-4d64-b9cd-261a4338dfb5",
+      "canonical_screen_name": "Danielaoculus",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "60c4e7e1-d2c8-548c-89d6-4f029f96075e",
+      "canonical_player_id": "334cceb8-df81-4499-b73d-0d9f242f8274",
+      "canonical_screen_name": "Slugjug33",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "971ac322-1aee-54bb-8886-226cc1c775bb",
+      "canonical_player_id": "34279c33-4d86-476b-a82e-f2c6ef4c18d4",
+      "canonical_screen_name": "KIM",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "4d955022-2104-50c3-8ff9-e57b1fb37b6e",
+      "canonical_player_id": "348dc00f-f92f-4726-b9db-f9b5fe7e74d4",
+      "canonical_screen_name": "ITS YOUR WOLD",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "d973a68e-0e94-577a-8dcd-0836b6361b36",
+      "canonical_player_id": "357c3f89-c8bb-40d5-b1f9-8448411ca804",
+      "canonical_screen_name": "MISSI",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "332d5c95-a6fb-56a5-afec-4c6cbd205f5f",
+      "canonical_player_id": "35928d1d-a4b5-481b-8081-eae90acd9ac5",
+      "canonical_screen_name": "GOLFSHARK",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "88276e6d-06dd-5ab2-a09c-3edee4f10a31",
+      "canonical_player_id": "3a608d22-c3e8-43ee-bb64-6bab95c7233b",
+      "canonical_screen_name": "FRY_LOCK",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "1c66d884-fc00-57e1-b442-eef9ed92d3a6",
+      "canonical_player_id": "3aec83ee-9082-4703-b19f-7f33f0f7e995",
+      "canonical_screen_name": "Zoedarlin",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "0f2f5fa5-8803-545e-b9b4-c0f2bf8d573b",
+      "canonical_player_id": "406dc09d-2d51-4ba3-af11-8b549421be80",
+      "canonical_screen_name": "L7JAZZ",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "cee39827-0014-5fac-a9d0-b6aaf0ae5a86",
+      "canonical_player_id": "432fb05b-1506-41ea-86e9-41bf07763b48",
+      "canonical_screen_name": "Matt916",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "8d48df55-9d94-5d8f-98f4-4ea65211c25f",
+      "canonical_player_id": "4386b8de-90db-41f9-bf6c-1a3f4b402f6a",
+      "canonical_screen_name": "DeathByZeth",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "acc825c4-a2e5-5f5f-bc9d-6d0fb2938dc2",
+      "canonical_player_id": "4496de5d-91a4-4e6f-91a8-2c0ad448b664",
+      "canonical_screen_name": "DUBI0US",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "ea90ec51-3bd6-5c74-9320-9a2a7e5664f9",
+      "canonical_player_id": "45150b1f-ffa0-4bdf-a9b3-e69a5d79bcaa",
+      "canonical_screen_name": "MINI_G",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "e01ed4d5-b96f-58fd-a170-39c488b04889",
+      "canonical_player_id": "457cadeb-920d-420e-ab1a-276e703356be",
+      "canonical_screen_name": "Grezza",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "725f6148-c871-5a95-8060-6c6a4b4ac4c6",
+      "canonical_player_id": "4762efe6-529d-4c15-b30e-afefe066abc4",
+      "canonical_screen_name": "bendybear",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "5bee822e-72f4-5989-b5a6-108458242182",
+      "canonical_player_id": "48fc7f28-71c4-42d9-9d20-3ef6de2f44e3",
+      "canonical_screen_name": "moba",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "d91a87f7-06d4-5ea5-bb43-296965a098f2",
+      "canonical_player_id": "49fff0a5-9a99-45b8-8247-7329ba1470da",
+      "canonical_screen_name": "shez_from_hw",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "f4a70ab0-817d-53fc-8043-159ea77b2035",
+      "canonical_player_id": "4d58c67c-8890-41d7-af98-3d82a8a6879d",
+      "canonical_screen_name": "Raccoons Whisker",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "dc34c42a-f1e1-5377-ab5c-7953a487f28c",
+      "canonical_player_id": "4d8d617f-dfd6-49df-a437-e7bd865daae2",
+      "canonical_screen_name": "ladytea",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "4a4cf171-8a93-5805-aeb2-b946d8e88ebd",
+      "canonical_player_id": "4f7d798e-c375-4ab6-bf9e-318a659d72b0",
+      "canonical_screen_name": "DUDDY",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "a00ec754-977a-5ba0-ae09-8475c6a9afec",
+      "canonical_player_id": "52042e45-6736-4214-876c-de3c9245a95e",
+      "canonical_screen_name": "SNOWBALL",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "c5aa8fd1-3fda-5653-b723-d9268b2501b0",
+      "canonical_player_id": "548938e7-3ff3-400c-a386-279a1d676135",
+      "canonical_screen_name": "Brit_The_Elder",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "2eb3a48b-a4e3-5ca0-8376-09d85d4579da",
+      "canonical_player_id": "55d9c7f0-ba6b-4245-91de-a90189276744",
+      "canonical_screen_name": "The Real JB",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "4c27f7bb-6828-5189-b40f-9a721efe9a2e",
+      "canonical_player_id": "58920b82-e47c-48af-bcd5-d6386ceda86f",
+      "canonical_screen_name": "AmberWave",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "fb782fcf-340f-546e-a069-1325c44b6326",
+      "canonical_player_id": "58f80176-b481-49a8-b766-4cfdb505d28f",
+      "canonical_screen_name": "BMAC",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "2dd472b5-23e1-53dc-b0f0-890f2595c8c0",
+      "canonical_player_id": "5b961f90-36b7-4b98-9983-5dd69a933e2d",
+      "canonical_screen_name": "GATORSFAN89",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "9bc5ac2a-c846-51f3-bc49-c21675412f94",
+      "canonical_player_id": "5f293732-47a3-4407-a8a6-887d8d885c61",
+      "canonical_screen_name": "BEARDED_DRIVER",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "ca142350-9209-5a4a-9c45-e5d29eeecd1d",
+      "canonical_player_id": "62b923df-f790-4ea3-936d-80af6508ce2a",
+      "canonical_screen_name": "Calassy",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "bb814ff4-f1a5-5d2d-940e-df8334e40dfa",
+      "canonical_player_id": "6309b9d7-93a8-4047-99af-2f0dcb58d054",
+      "canonical_screen_name": "STEWIESTEWIE",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "9bdf453e-4620-562b-bd96-3473a496ab1b",
+      "canonical_player_id": "67bf10e5-19f6-4e48-82f6-ae15732edb63",
+      "canonical_screen_name": "LARRYR",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "846828ee-602e-51ef-b862-e7a99e6f587d",
+      "canonical_player_id": "680d3cd3-66cd-40e3-9014-f70714c6c68e",
+      "canonical_screen_name": "PYRAMIDD",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "213148d8-dbed-5d6a-924f-523fc4249a35",
+      "canonical_player_id": "6845f4bf-d395-47e7-b5d0-8cb02f881c20",
+      "canonical_screen_name": "GUYB22",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "7089d8ab-8e78-57c7-a29d-213d2205d454",
+      "canonical_player_id": "6918df0a-cc2b-495a-8c09-b8be600ed0bc",
+      "canonical_screen_name": "Maxfrom-fr",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "bd5b0c69-f71f-5858-aed4-a05f4b52b898",
+      "canonical_player_id": "69c0daa5-70b8-481b-94e5-a9d033bc75fb",
+      "canonical_screen_name": "bigja33",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "d363926d-0fc9-59d7-90d0-cc4003cb5f93",
+      "canonical_player_id": "6a931c2e-e766-46c8-9a45-3e1a3cda2659",
+      "canonical_screen_name": "ROACH",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "44711d0e-af1f-5c06-8789-2eb74d6198a4",
+      "canonical_player_id": "6d74f565-dc1d-41e3-81e5-fd7e6b38e28d",
+      "canonical_screen_name": "ROKNHORSEBRAT",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "8b94bf47-4880-55d7-895f-8bdd033b4c1c",
+      "canonical_player_id": "6da4e335-3218-4711-b5db-e3faf558e68b",
+      "canonical_screen_name": "DABIGWILLO",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "05497e2a-86c7-55f2-bf4a-e3ba2bbd2a16",
+      "canonical_player_id": "6e2bbe1d-1da7-4b7e-bbab-94fd7f7376c7",
+      "canonical_screen_name": "LLABB23_LISA",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "f5e83c81-5e51-5640-8ee8-157e96e89ae3",
+      "canonical_player_id": "6f38b6b4-46bf-4ae6-9bb5-2230be6fb3f4",
+      "canonical_screen_name": "TRICKYDICKY",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "f44014c9-d648-5c0b-8795-7e5cbe95ff42",
+      "canonical_player_id": "706ba7c0-9efd-4b2c-9366-94b6354a82ce",
+      "canonical_screen_name": "awesome_kris",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "5eb05cf0-8cde-58bf-8c1a-b630f736fda0",
+      "canonical_player_id": "7214f550-5d35-44df-8e2f-7734f214e3de",
+      "canonical_screen_name": "callmemike",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "bd622406-0e17-5c5d-a615-6da7ea11dc9d",
+      "canonical_player_id": "72432212-9450-4b8a-8819-ad01c86555da",
+      "canonical_screen_name": "DERBY_DAZ",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "6d06d4cb-4278-5819-86bd-d2bb0f9298f4",
+      "canonical_player_id": "726a43ea-f061-41e9-8505-cda3f589dcab",
+      "canonical_screen_name": "TIGERHOODS",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "10243916-ac3e-5475-8470-cfb94b3bb295",
+      "canonical_player_id": "72bd3518-f11a-458c-a37f-3fb90cf0c5c8",
+      "canonical_screen_name": "Jennem",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "bc160fba-c047-56df-a994-2218aa7e672d",
+      "canonical_player_id": "768ccb1a-567c-4f4b-a4e0-f2c709583ab4",
+      "canonical_screen_name": "INDIANCHIEF",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "97566a5b-8ca5-5870-a16a-67e977df40ed",
+      "canonical_player_id": "771e909b-de1d-446e-bc8d-bbbd5165c82f",
+      "canonical_screen_name": "CRISPYNUT",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "6c44db6b-1854-5406-8e17-d1961ba19a6d",
+      "canonical_player_id": "78b95430-f473-41a2-b770-5bb5c36545e4",
+      "canonical_screen_name": "EARTHLING",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "6876d7ea-fef8-558c-a4e8-d014ea02f3d5",
+      "canonical_player_id": "7a9466f0-afe6-46e3-870c-59819c194e63",
+      "canonical_screen_name": "ZONK",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "b0bac6c1-2d90-516a-9129-f85d3c0a4157",
+      "canonical_player_id": "7aa1a03b-9efb-4a02-95fb-51fcf379fe97",
+      "canonical_screen_name": "FUNNY",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "413692fd-12be-5699-b1db-9db7dc1d7135",
+      "canonical_player_id": "7befb54f-6eec-4c7c-9881-c75d1acfb8d8",
+      "canonical_screen_name": "WendyW(Wyndemere2020)",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "f366a492-fb5f-5d2e-a258-dbf7632f372c",
+      "canonical_player_id": "7e4735e2-f501-4c82-92ec-6bbf3a1a1309",
+      "canonical_screen_name": "FelixTortilla",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "38a6351a-5997-53c2-9ea2-a41f0cc141ce",
+      "canonical_player_id": "7f5d015a-1397-4fa6-918c-5bac4a0dd5ba",
+      "canonical_screen_name": "DJTWIGG",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "7d8b5cfc-2830-5690-81b6-f4bab93f7284",
+      "canonical_player_id": "800f4966-ff28-4c1c-9cac-100caf22eeec",
+      "canonical_screen_name": "JUICE_WRLD",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "1d9facfe-f3a1-5e49-9cb9-e443cabe2cf0",
+      "canonical_player_id": "83343490-426d-4275-a557-b1fab48b76f0",
+      "canonical_screen_name": "KD",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "694a51d7-1295-5588-a801-abb9e9cc7cda",
+      "canonical_player_id": "85409f47-fd51-4c66-b0e5-b8964c15e0a7",
+      "canonical_screen_name": "KCROB",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "4068c597-f742-5dab-9af0-b209af29dbe0",
+      "canonical_player_id": "8832eacf-2433-4ea3-b97e-5d0d25da3099",
+      "canonical_screen_name": "EL JORGE",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "be9873e4-7159-5a72-9545-15e126cc6f33",
+      "canonical_player_id": "885658a2-0fc3-4da4-af4a-a10480acb7ea",
+      "canonical_screen_name": "RYANL503",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "286978ee-7f56-5be9-8d93-4a8e70adcba1",
+      "canonical_player_id": "8bfd665c-6aa4-4fe9-a905-a3866a3a7715",
+      "canonical_screen_name": "STEVIEWONDERFUL",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "161b2882-2c4b-5902-9005-1f333648ecd3",
+      "canonical_player_id": "8d1f89ad-1f76-4c4a-be2e-ae9f5a3826fe",
+      "canonical_screen_name": "RUBBERDUCK",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "2042678a-27f6-5813-8066-a80b99ddc5e0",
+      "canonical_player_id": "8d97d60f-834a-4d83-aabd-007cdfa6f43e",
+      "canonical_screen_name": "Awkward3Sauce",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "36b76dfa-4ba5-59b0-a33c-a2bff073d325",
+      "canonical_player_id": "8dbfa313-08ba-470d-85d8-6f947dc424b8",
+      "canonical_screen_name": "JTVC",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "6a793da1-f784-5c32-87be-587d62fddbf8",
+      "canonical_player_id": "95b55b59-45bc-4eaa-a3fe-8c89ab150488",
+      "canonical_screen_name": "Spicy - DawnSophia",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "5ccc948c-4b5d-5f4f-bdc8-6e7333bc825a",
+      "canonical_player_id": "96c17730-84dd-47f9-94bf-0b26579cf3d4",
+      "canonical_screen_name": "spiral37",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "7c251a78-6537-5c72-8bab-28c41082f48e",
+      "canonical_player_id": "9976197b-dc3d-4cf6-9200-603a3d1acbf9",
+      "canonical_screen_name": "BadWolff�",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "65428bc3-8057-54d6-81e6-4ca68720fd77",
+      "canonical_player_id": "9a3b0702-8240-400f-afab-00b5412192c7",
+      "canonical_screen_name": "YANKEEDUDE1123",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "edb4c2d3-9036-5014-9420-0146f496e9ab",
+      "canonical_player_id": "9ac6ad68-7590-470d-8d35-122fcebed394",
+      "canonical_screen_name": "leanin2it",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "f8cf7c32-1720-5a23-b05b-d4dd846c6b50",
+      "canonical_player_id": "9ba01526-5c8d-4118-81a0-1934c8daee37",
+      "canonical_screen_name": "BLUTES87",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "2b610d9c-6072-523a-8579-a5b9a974d1f3",
+      "canonical_player_id": "9c61e55a-0161-47ce-b577-a10c3d35dc83",
+      "canonical_screen_name": "Goldenbrett",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "051490c6-2d3c-5058-85ee-4574fbbcf5a7",
+      "canonical_player_id": "9ee7e536-6ec1-4d9d-a328-d493416c2054",
+      "canonical_screen_name": "RINTARA",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "e60a60d4-e9fe-5c50-8996-68a86c77218b",
+      "canonical_player_id": "9f6ae156-26d6-4377-a03c-86964d5dc657",
+      "canonical_screen_name": "PUTT_FOR_DOH",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "e91e87fb-5d71-5327-8f30-147361781ad6",
+      "canonical_player_id": "a0109a6a-6dfa-47fd-b3df-292e058d2417",
+      "canonical_screen_name": "TOMMYGUNNZFUND",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "8529615d-2dc2-562e-9c76-98e58422920b",
+      "canonical_player_id": "a0eaf23c-0784-4eb9-ab1d-530b077121a9",
+      "canonical_screen_name": "Jesunet",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "795b9366-0acb-5774-a556-a3aa3b253504",
+      "canonical_player_id": "a87eb9c9-54c7-4ed3-87c3-62d9df7114da",
+      "canonical_screen_name": "LUKE.WARM.DOG.WATER",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "a4e4c6f5-3179-5357-bacb-5b131c4ceccb",
+      "canonical_player_id": "aa804558-799e-46c0-8971-b51ff4bd38de",
+      "canonical_screen_name": "STROKELIMITREACHED",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "eca0979c-1d45-5209-b1a0-7fb51eff426c",
+      "canonical_player_id": "ab407333-f315-4a88-944b-b21a75e60b52",
+      "canonical_screen_name": "ThePrankser15",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "da10e0fc-6872-5ed7-8091-721cb7bb9bb4",
+      "canonical_player_id": "ae096f1e-4adc-464b-9947-bf8b635e4d9f",
+      "canonical_screen_name": "KnockoutG �",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "553e889b-e182-5666-b127-61d65da3fc41",
+      "canonical_player_id": "af550593-9ec2-4530-9b5c-757d9b6b3774",
+      "canonical_screen_name": "freitag68",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "32fc0f25-0757-5332-9c4f-b7774180f5d8",
+      "canonical_player_id": "b08c87f2-497f-4bf0-b5ae-bc6f716f0f3b",
+      "canonical_screen_name": "EMILIEXAL",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "3bb6e236-e0eb-5203-8ec9-0bce360681da",
+      "canonical_player_id": "b11369ea-3990-424e-89ed-8e54a4824519",
+      "canonical_screen_name": "ALLIGATOR65",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "8794244d-b156-5669-8a24-dd37787338d7",
+      "canonical_player_id": "b48d4e30-de56-4864-b31d-e9b2880cee01",
+      "canonical_screen_name": "Nic79",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "7ad69d24-c583-584f-9a4f-6bc92f504d79",
+      "canonical_player_id": "b507c445-6824-47ff-868c-5ce8a394a83a",
+      "canonical_screen_name": "CHERIE_ROSE",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "fc4fd2a5-8f4c-513c-82e0-2670f6999bb2",
+      "canonical_player_id": "b74a39fc-0463-4756-934d-1feb0c9657ca",
+      "canonical_screen_name": "Warri0rLink",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "7d370cb0-3fa9-5af7-b047-08a8b4cc8004",
+      "canonical_player_id": "b77d2644-31eb-4b82-9f76-f124a25b9a06",
+      "canonical_screen_name": "deebee",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "196f8f98-4ad2-5561-95a4-e6fa4346a175",
+      "canonical_player_id": "b82b24ba-da94-42e2-8c2e-2c9ce1076142",
+      "canonical_screen_name": "Sandtrap",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "81e1470a-0621-54c8-be28-62040d6bf00c",
+      "canonical_player_id": "b8ddda64-7507-4c11-b606-d8a50f4c196b",
+      "canonical_screen_name": "HHAUS",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "f73c2b30-272b-5105-bcde-08fb7a9a32a0",
+      "canonical_player_id": "b9150f7d-f024-4f56-9af8-a66fe99cf7a8",
+      "canonical_screen_name": "5.0JIM",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "3bcc2c9f-dfc3-575e-b258-efcf09239272",
+      "canonical_player_id": "b98df6d3-7e16-450f-bd17-f39d9903d1e1",
+      "canonical_screen_name": "lynniebodd",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "d684629c-68e9-5fea-8846-264e477c90d9",
+      "canonical_player_id": "ba5a3695-4e76-4820-a489-5eac43aec5cc",
+      "canonical_screen_name": "METUM",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "b738b3d6-d485-5b5c-9139-6f735b98e678",
+      "canonical_player_id": "ba91585f-04b5-440a-a5fa-9e70352ece91",
+      "canonical_screen_name": "Maximus",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "c4ca2b25-aa19-5ca9-a2c0-b65b24ea5237",
+      "canonical_player_id": "bc1a539d-1a55-46ff-abb4-10b36c30aa1b",
+      "canonical_screen_name": "KYDA",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "03b77755-17fb-5c8c-abdd-601e36ce1138",
+      "canonical_player_id": "bc5bda4d-8977-4119-95a5-848733e9c6b5",
+      "canonical_screen_name": "GOBSON",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "e48eeb60-66e0-53e6-94fc-b61ace71ecf3",
+      "canonical_player_id": "be92b2ca-8fa9-41f6-b6d3-cd84a258879e",
+      "canonical_screen_name": "FROGMAN",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "40e9ac26-2ac1-58f6-83fc-9d20c4526c07",
+      "canonical_player_id": "bed2b89f-bb23-4a5c-9add-ae3cc4e67fdd",
+      "canonical_screen_name": "ANDYP1970",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "e9484863-0dec-5117-a641-dda205be0ce1",
+      "canonical_player_id": "bed410dd-2b89-4db3-8fe4-8226c21c3f5f",
+      "canonical_screen_name": "Dandnt65",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "8107d11d-0118-5e9b-ba7d-3d600b81c2e3",
+      "canonical_player_id": "c0707ed3-323f-4e0d-b119-99dd9790f8f4",
+      "canonical_screen_name": "GOMARINO13",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "47c68445-0cb6-52b7-ac63-648ce080b61a",
+      "canonical_player_id": "c0d63290-8833-4712-82df-ad310c052278",
+      "canonical_screen_name": "kimcat",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "9e10262c-7b75-58a9-a517-363863c4ec51",
+      "canonical_player_id": "c19d0b98-ed0b-462c-8b31-6b54221127d9",
+      "canonical_screen_name": "Neo Impossible",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "00a4e5ec-d431-578f-adbd-9e842306d1f7",
+      "canonical_player_id": "c4198d7c-dbe7-442f-bc89-908b3b1803d0",
+      "canonical_screen_name": "MUSICAL_ATV �",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "a87aa78f-c527-51ed-999a-9927f7a4b8cb",
+      "canonical_player_id": "c50cb21a-de40-4900-b02f-866207521fe3",
+      "canonical_screen_name": "MASTER_KP",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "42a53497-fc27-5b18-8329-3467ffee4a58",
+      "canonical_player_id": "c5c9c0a1-941a-4145-b31f-77323499af21",
+      "canonical_screen_name": "WICKEDSHACK��",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "2bcf0d2e-cddf-5421-8ad9-a35367a5112e",
+      "canonical_player_id": "c60ed0d8-1f05-4675-b635-342707607c18",
+      "canonical_screen_name": "ALYSSA38",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "60a91fbb-466a-597c-9ac7-ab12ba0ac0b1",
+      "canonical_player_id": "c7c85811-6bb8-4824-a288-2f3ae0af89c9",
+      "canonical_screen_name": "PLUCKY�",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "c3576c3e-22c5-5e65-81a9-b95fee1c61ea",
+      "canonical_player_id": "c874dbcf-28f0-4508-bfc0-535d2e0dfbfc",
+      "canonical_screen_name": "DOMEY",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "96ab1153-c40e-5bb4-a140-be97fb2c8680",
+      "canonical_player_id": "c9e93aeb-f148-4ae0-a68a-5061436d47cf",
+      "canonical_screen_name": "FAKKU FR",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "15860d52-b29d-5f57-afe3-f4c100641565",
+      "canonical_player_id": "cb01e4af-b57b-4424-a00f-7697f1c5f90f",
+      "canonical_screen_name": "PRINCESS_BANKSHOT",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "d7f9a725-4331-53b1-94e6-71eb63ad3184",
+      "canonical_player_id": "cdd9d0a3-c186-4dc1-9f59-d7ec97280d54",
+      "canonical_screen_name": "BIGDLONGSTROKE",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "f02063eb-3535-5355-9e3d-e44b2ca197cc",
+      "canonical_player_id": "ce13ef8c-ace6-4216-94aa-056afa49f903",
+      "canonical_screen_name": "LEFTY",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "1c781118-31f1-5798-b12c-a227cba31b8b",
+      "canonical_player_id": "ced93ab9-a8d7-4573-a987-51051cfd1ac5",
+      "canonical_screen_name": "Audrey",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "2e3ac29c-4c0b-5986-8277-433dcf9c9032",
+      "canonical_player_id": "cfcd0387-84ad-417b-92fc-b4653574e66d",
+      "canonical_screen_name": "FAR CANAL",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "93f28435-2145-56e9-b6d0-84ee9d4799cc",
+      "canonical_player_id": "d1621cfd-1841-435e-b97b-cf369f6aecd7",
+      "canonical_screen_name": "mammothrept",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "a68be3ee-d0ba-5abb-bc32-ecdf681ef249",
+      "canonical_player_id": "d38c0220-8a80-45a6-86e8-d495f523d5ab",
+      "canonical_screen_name": "CHIPNPUTT",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "cbcb8382-d03d-5b83-8177-b99f9cc213a0",
+      "canonical_player_id": "d435277d-c5dd-4a23-8edc-bea2729d7673",
+      "canonical_screen_name": "Shaggy960",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "fa898997-1e96-5ebd-968a-a9fac19085ff",
+      "canonical_player_id": "d4e37778-8a69-4878-9ec3-6b6fddb03425",
+      "canonical_screen_name": "INDY",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "8452993a-43ae-5f7e-bfba-1977a2be556f",
+      "canonical_player_id": "d74bba7c-a0a8-4976-b7f7-1b9deb23b8b5",
+      "canonical_screen_name": "PEACH",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "ec24a1ec-6c54-5ea3-a23d-a36cf6602745",
+      "canonical_player_id": "d9ab1df5-32ef-4a23-9fc6-e47661ea3bb6",
+      "canonical_screen_name": "Iteach88",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "a1d6cd55-968d-538c-bbbf-937d5375a72b",
+      "canonical_player_id": "d9ab73b1-5e50-4acd-ad92-a72071405045",
+      "canonical_screen_name": "halfpint",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "c7b78ab4-f62a-51c0-a593-c0ee502698f8",
+      "canonical_player_id": "db682f5a-3352-4490-a2cb-013573c8a1c0",
+      "canonical_screen_name": "Mully",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "d672b60b-6e4e-5237-baf4-9ff83bf8e52c",
+      "canonical_player_id": "db88e65e-5b26-4627-9331-b07738276116",
+      "canonical_screen_name": "SERENITYMOON",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "51965e5e-049c-5c9d-b2e6-df4129520cff",
+      "canonical_player_id": "dbc70bf7-5239-440c-aad1-b2b288311a7d",
+      "canonical_screen_name": "DUCKK",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "638356de-b889-5d87-94f0-c9c900b18772",
+      "canonical_player_id": "dede8d19-e92b-4e3e-8af3-4050b8e40fd2",
+      "canonical_screen_name": "BUBBAFRAME",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "762f7fee-82af-50bf-801f-11db6b2af7fb",
+      "canonical_player_id": "dfdd9e81-01ff-4284-b910-acdf41ee7bdd",
+      "canonical_screen_name": "StoneyMan69",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "25daa8fd-b992-5943-b11c-5f62fb07fee2",
+      "canonical_player_id": "e249815d-ac23-4ef7-9c20-7ed9ba0c57c4",
+      "canonical_screen_name": "ULTRAFOX_LYNNE",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "e6471f9b-2a51-5071-b2ed-e25ad2437f7f",
+      "canonical_player_id": "e2741a95-19e9-440c-a605-f1c1498aa5c1",
+      "canonical_screen_name": "KILLERBEE",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "5d2a686b-08dc-58f9-a614-a215768d5d14",
+      "canonical_player_id": "e28db184-9399-478d-9989-26db76e40619",
+      "canonical_screen_name": "SLAPPY",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "3cd5754f-3b24-5ffb-bd70-4679e036dfbf",
+      "canonical_player_id": "e2af01d7-90d5-4963-9d9f-0493df9fefb2",
+      "canonical_screen_name": "Chelle�",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "30afb9f5-e3d9-50f3-817a-30fe04e61a87",
+      "canonical_player_id": "e83333ae-2b1f-44e1-8a91-9a7382ad5282",
+      "canonical_screen_name": "DontQuitWhenLosing",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "723c151f-cd05-50de-b4cc-bfe3875d3a69",
+      "canonical_player_id": "e9729b85-6778-4239-b171-64edbbd90efa",
+      "canonical_screen_name": "Putty",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "777fce56-a5af-55bf-8b27-5657e74f650c",
+      "canonical_player_id": "eb44d050-2082-4f66-a926-c26d5bee1765",
+      "canonical_screen_name": "SHOOTER_MCGAVIN",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "bb3d2d80-fa97-5640-9a8a-14f5ba85db36",
+      "canonical_player_id": "eb95bd85-5cee-437b-b458-abedf5a368d3",
+      "canonical_screen_name": "PAULV-PPP ��",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "c8e428d1-d913-5d4c-8c81-cd33099e2ead",
+      "canonical_player_id": "ebcdd3f4-1a69-40f6-819e-899fbe9998d7",
+      "canonical_screen_name": "NUTTYGRANDPA",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "e9c3aecf-0450-528b-b641-4bd4664e813f",
+      "canonical_player_id": "ec196f54-9822-4d2a-8658-eed900df8d59",
+      "canonical_screen_name": "SAVY",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "1ed58126-b7aa-5ae6-9660-b56820fcc818",
+      "canonical_player_id": "ec5c8f36-444f-4c7e-8309-f358d0475c27",
+      "canonical_screen_name": "sarahloo1971",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "1ae41ea2-2f67-5f3a-b865-9926174bd776",
+      "canonical_player_id": "ec943c83-bd7f-46b9-a9a9-8d2d6a3a71b0",
+      "canonical_screen_name": "Sj_76",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "3da69629-0bb8-58e7-b689-c0f9d0370362",
+      "canonical_player_id": "ec9b51eb-7d89-477f-bc93-1baafd4cbee7",
+      "canonical_screen_name": "MRDACHSHUND81",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "f9453847-7bf2-58d2-9206-79124caf4c17",
+      "canonical_player_id": "ee250925-578a-4b26-a549-c4dc88d42b23",
+      "canonical_screen_name": "Slabdaddy",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "d71d95e5-ec2b-53cf-a958-54365e35e021",
+      "canonical_player_id": "efc952cd-bab1-4acd-a16c-6e77146b8c5f",
+      "canonical_screen_name": "Sparebullet",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "8f0129ee-9e72-56ca-9275-8823c075bf19",
+      "canonical_player_id": "f036158a-65e4-4ae6-8e52-5cd7786aa05a",
+      "canonical_screen_name": "JAYNICE",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "e166c083-9462-59fb-8912-af73f6da7d70",
+      "canonical_player_id": "f1bab752-d5cf-4001-b2ad-bafd6af83d8b",
+      "canonical_screen_name": "D3BB13",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "012af025-b636-59a0-954a-1a46231443ae",
+      "canonical_player_id": "f4bdb6c0-4286-48cf-816f-530510b97ed2",
+      "canonical_screen_name": "Cory",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "34af24d6-79f0-5fc9-aa3a-4eee713b2070",
+      "canonical_player_id": "f7ca6a2f-777a-4ecb-afcd-ee5edb43324b",
+      "canonical_screen_name": "BROWNER",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "d7ef5966-7b02-5a24-aa5f-3fa48f4fac41",
+      "canonical_player_id": "fb35bddc-4e71-4cc5-bd18-3efcfb488e22",
+      "canonical_screen_name": "DMD-Enditnow",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "eb95964f-6a28-52eb-8f0d-b5ef18559958",
+      "canonical_player_id": "fb99691f-d122-4620-8532-6b84aa224434",
+      "canonical_screen_name": "RICK",
+      "handicap_status": "PROVISIONAL",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "c4bab3d5-a339-5fad-8948-8aa16e4fec95",
+      "canonical_player_id": "fbd60e4a-9d17-4556-9062-dc005a0c5723",
+      "canonical_screen_name": "LAURENT",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    },
+    {
+      "snapshot_id": "1f87c7eb-96fe-52a5-9873-6a0a8b38ab82",
+      "canonical_player_id": "fd08eeaa-50a8-4bec-a0fd-87a628a13260",
+      "canonical_screen_name": "olle",
+      "handicap_status": "OFFICIAL_ELIGIBLE",
+      "approval_decision": "PENDING",
+      "publication_decision": "PENDING"
+    }
+  ]
+}

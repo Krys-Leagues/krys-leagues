@@ -1,0 +1,22 @@
+source_name	status	matched_name	player_id	evidence	confidence	scored_observations
+BEVE3630	EXISTING_ALIAS_MAPPED	EVE	813739b5-3023-4640-ab59-2958f83f27cd	historical_alias	100	2
+CATHY G	EXACT	CATHYG	fd74c52c-dd6e-4f64-8a55-81294a886360	screen_name	100	15
+CHERIE_ROSE	EXISTING_ALIAS_MAPPED	CHERIE_ROSE	b507c445-6824-47ff-868c-5ce8a394a83a	historical_alias	100	62
+Camdawg15	UNRESOLVED			none	0	5
+GHINI	UNRESOLVED			none	0	11
+HARLEY	AMBIGUOUS	Warey84	e093fb15-b91d-4fc1-9c9f-3fa9b6b94058	historical_alias	67	1
+Jaynice	EXACT	JAYNICE	f036158a-65e4-4ae6-8e52-5cd7786aa05a	screen_name	100	16
+Jesshsp	UNRESOLVED			none	0	3
+Ladyrider60	EXACT	Ladyrider60	45b94717-0376-4c69-a4ef-9375343a687c	screen_name	100	5
+MOENSHINER	EXISTING_ALIAS_MAPPED	MOENSHINER	7a5a13bb-fbe6-42ee-9d7e-65149ac16209	historical_alias	100	18
+Mark1703	AMBIGUOUS	MA	dca96a7d-d4f6-47e1-b76d-476a90a44cc1	screen_name	88	3
+Merged into 7231	AMBIGUOUS	8189	27f87a3a-4f4b-4abc-9ede-91373c66a107	historical_alias	71	8
+ROSE.M1231	EXACT	ROSE.M1231	8b7583e1-5434-4fd1-825c-6e8ec03c4f2e	screen_name	100	7
+SubZero	AMBIGUOUS	zero	4039ec08-e301-4b02-ab0b-aab987426491	screen_name	86	8
+TENBEERS	UNRESOLVED			none	0	7
+ThePrankser15	EXACT	ThePrankser15	ab407333-f315-4a88-944b-b21a75e60b52	screen_name	100	15
+beezy1	EXACT	beezy1	9bb58e2f-fe54-45fa-ac87-5bce8709f5e2	screen_name	100	20
+crispynut	EXACT	CRISPYNUT	771e909b-de1d-446e-bc8d-bbbd5165c82f	screen_name	100	9
+kenmorefield	EXISTING_ALIAS_MAPPED	kenmorefield	06bdb19f-1387-405a-b937-b3740bcfe007	historical_alias	100	8
+kimcat	EXISTING_ALIAS_MAPPED	kimcat	c0d63290-8833-4712-82df-ad310c052278	historical_alias	100	8
+mamabear2002	EXACT	MAMABEAR2002	3b311000-2abf-46e6-9b37-5d662161b198	screen_name	100	11

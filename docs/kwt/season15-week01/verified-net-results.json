@@ -1,0 +1,25 @@
+{
+  "eventIdentifier": "KWTS15W01",
+  "courseName": "Raptor Cliffs",
+  "easySlope": 9.053,
+  "hardSlope": 12.197,
+  "referenceSlope": 8.515,
+  "freezeCutoff": "2026-10-23T04:00:00Z",
+  "sourceSha256": "8C9A20EFB45B6399AD4F7DBCFB3633B8C63A6F9F5C6A7A5385069B1A8A0D8D7D",
+  "results": [
+    {"playerId":"2e4ce1d8-afd6-44a2-9560-f85c16f23747","screenName":"ZANETTI","index":0.4,"status":"OFFICIAL","netRank":1,"points":25,"easyGross":-24,"hardGross":-21,"easyStrokes":"0 RECEIVED","hardStrokes":"1 RECEIVED","easyNet":-24,"hardNet":-22,"combinedNet":-46},
+    {"playerId":"e2741a95-19e9-440c-a605-f1c1498aa5c1","screenName":"KILLERBEE","index":17.28,"status":"OFFICIAL","netRank":2,"points":21,"easyGross":-8,"hardGross":10,"easyStrokes":"18 RECEIVED","hardStrokes":"25 RECEIVED","easyNet":-26,"hardNet":-15,"combinedNet":-41},
+    {"playerId":"ec943c83-bd7f-46b9-a9a9-8d2d6a3a71b0","screenName":"Sj_76","index":18.64,"status":"OFFICIAL","netRank":2,"points":21,"easyGross":-6,"hardGross":12,"easyStrokes":"20 RECEIVED","hardStrokes":"27 RECEIVED","easyNet":-26,"hardNet":-15,"combinedNet":-41},
+    {"playerId":"d38c0220-8a80-45a6-86e8-d495f523d5ab","screenName":"CHIPNPUTT","index":6.74,"status":"OFFICIAL","netRank":4,"points":16,"easyGross":-20,"hardGross":-3,"easyStrokes":"7 RECEIVED","hardStrokes":"10 RECEIVED","easyNet":-27,"hardNet":-13,"combinedNet":-40},
+    {"playerId":"a0eaf23c-0784-4eb9-ab1d-530b077121a9","screenName":"JESUNET","index":3.12,"status":"PROVISIONAL","netRank":4,"points":16,"easyGross":-19,"hardGross":-14,"easyStrokes":"3 RECEIVED","hardStrokes":"4 RECEIVED","easyNet":-22,"hardNet":-18,"combinedNet":-40},
+    {"playerId":"ebcdd3f4-1a69-40f6-819e-899fbe9998d7","screenName":"NUTTYGRANDPA","index":9.69,"status":"OFFICIAL","netRank":4,"points":16,"easyGross":-14,"hardGross":-2,"easyStrokes":"10 RECEIVED","hardStrokes":"14 RECEIVED","easyNet":-24,"hardNet":-16,"combinedNet":-40},
+    {"playerId":"6d74f565-dc1d-41e3-81e5-fd7e6b38e28d","screenName":"ROKNHORSEBRAT","index":11.31,"status":"OFFICIAL","netRank":4,"points":16,"easyGross":-9,"hardGross":-3,"easyStrokes":"12 RECEIVED","hardStrokes":"16 RECEIVED","easyNet":-21,"hardNet":-19,"combinedNet":-40},
+    {"playerId":"6918df0a-cc2b-495a-8c09-b8be600ed0bc","screenName":"MAXFROM-FR","index":6.28,"status":"PROVISIONAL","netRank":8,"points":12,"easyGross":-17,"hardGross":-6,"easyStrokes":"7 RECEIVED","hardStrokes":"9 RECEIVED","easyNet":-24,"hardNet":-15,"combinedNet":-39},
+    {"playerId":"bed410dd-2b89-4db3-8fe4-8226c21c3f5f","screenName":"Dandnt65","index":13.19,"status":"OFFICIAL","netRank":9,"points":11,"easyGross":-11,"hardGross":6,"easyStrokes":"14 RECEIVED","hardStrokes":"19 RECEIVED","easyNet":-25,"hardNet":-13,"combinedNet":-38},
+    {"playerId":"e249815d-ac23-4ef7-9c20-7ed9ba0c57c4","screenName":"ULTRAFOX_LYNNE","index":15.97,"status":"OFFICIAL","netRank":9,"points":11,"easyGross":-6,"hardGross":8,"easyStrokes":"17 RECEIVED","hardStrokes":"23 RECEIVED","easyNet":-23,"hardNet":-15,"combinedNet":-38},
+    {"playerId":"fbd60e4a-9d17-4556-9062-dc005a0c5723","screenName":"LAURENT","index":4.91,"status":"OFFICIAL","netRank":11,"points":9,"easyGross":-18,"hardGross":-5,"easyStrokes":"5 RECEIVED","hardStrokes":"7 RECEIVED","easyNet":-23,"hardNet":-12,"combinedNet":-35},
+    {"playerId":"b98df6d3-7e16-450f-bd17-f39d9903d1e1","screenName":"lynniebodd","index":9.43,"status":"OFFICIAL","netRank":11,"points":9,"easyGross":-12,"hardGross":1,"easyStrokes":"10 RECEIVED","hardStrokes":"14 RECEIVED","easyNet":-22,"hardNet":-13,"combinedNet":-35},
+    {"playerId":"c60ed0d8-1f05-4675-b635-342707607c18","screenName":"ALYSSA38","index":9.11,"netRank":13,"points":7,"status":"OFFICIAL","easyGross":-13,"hardGross":3,"easyStrokes":"10 RECEIVED","hardStrokes":"13 RECEIVED","easyNet":-23,"hardNet":-10,"combinedNet":-33},
+    {"playerId":"69c0daa5-70b8-481b-94e5-a9d033bc75fb","screenName":"BIGJA","index":2.87,"status":"PROVISIONAL","netRank":14,"points":6,"easyGross":-19,"hardGross":-6,"easyStrokes":"3 RECEIVED","hardStrokes":"4 RECEIVED","easyNet":-22,"hardNet":-10,"combinedNet":-32}
+  ]
+}

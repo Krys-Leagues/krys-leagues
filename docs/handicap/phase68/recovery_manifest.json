@@ -1,0 +1,24 @@
+{
+  "packageVersion": "phase68-provenance-recovery-v1",
+  "sourcePackage": "docs/handicap/phase63",
+  "supersededRunId": "5a57560c-3548-54a8-879c-8fc516a85f26",
+  "correctedRunId": "fb606c55-e2f6-5d01-b79d-bfcc129a7cc6",
+  "sourceCounts": {
+    "KWT": 13550,
+    "THE_WEEKLY": 844
+  },
+  "snapshotCounts": {
+    "total": 169,
+    "ready": 158,
+    "provisional": 11,
+    "unpublished": 169
+  },
+  "requiredChecks": [
+    "KWT canonical_player_id is present and source-player metadata is present for every row",
+    "Every fingerprint and provenance UUID is deterministic",
+    "Weekly rows remain canonical-player-null and personal-handicap-ineligible",
+    "Every corrected snapshot reference resolves to a corrected provenance fingerprint",
+    "Old invalid rows are retained and quarantined by an append-only review decision; no UPDATE or DELETE is permitted",
+    "No rating or player-index publication is part of this package"
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "package_version": "phase112-official-kwt-csv-v1",
+  "source_zip_sha256": "E599CF6DF746F6C60C9718FBB73486396055567B738ED1A6EEB5808D2E2E46CE",
+  "source_manifest": "../phase111/phase111_source_manifest.csv",
+  "source_namespace": "OFFICIAL_KWT_CSV",
+  "source_type": "KWT",
+  "total_player_week_pairs": 371,
+  "resolved_player_week_pairs": 324,
+  "quarantined_player_week_pairs": 47,
+  "import_candidate_course_observations": 648,
+  "quarantined_course_observations": 94,
+  "source_ids_recovered": false,
+  "numeric_source_player_ids_recovered": false,
+  "numeric_round_ids_recovered": false,
+  "canonical_identity_policy": "EXACT_OR_EXACT_NORMALIZED_CANONICAL_SCREEN_NAME_ONLY",
+  "discord_ids_used_as_kwt_ids": false,
+  "weekly_personal_handicap_eligible": false,
+  "official_sequence": "SEASON_WEEK_EASY_HARD",
+  "status": "LOCAL_CANDIDATE_REQUIRES_SCHEMA_AND_PUBLICATION_GATE_REVIEW",
+  "import_contract": {
+    "source_type": "KWT",
+    "fingerprint_shape": "KWT|OFFICIAL_KWT_CSV:<zip_sha256>|<event>:<detail_file_sha256>:row=<detail_row>|<course_code>:<difficulty>|<immutable_row_digest>",
+    "source_player_id_kind": "CSV_PARTICIPANT_KEY_NOT_KWT_NUMERIC_ID",
+    "round_id_kind": "CSV_ROW_EVIDENCE_KEY_NOT_KWT_NUMERIC_ID"
+  },
+  "counts": {
+    "fingerprints": 648,
+    "unique_fingerprints": 648,
+    "old_phase68_collisions": 0
+  }
+}

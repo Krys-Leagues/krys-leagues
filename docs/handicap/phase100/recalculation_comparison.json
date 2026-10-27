@@ -1,0 +1,13 @@
+{
+  "recalculationRequired": false,
+  "reason": "Phase 68 corrected KWT source references and values are unchanged; Phase 100 reclassifies excluded historical exceptions and supplies period metadata only.",
+  "correctedKwtProvenanceRows": 14394,
+  "correctedKwtFingerprintCount": 13550,
+  "ratingKwtFingerprintCount": 13550,
+  "ratingKwtRefsAllExist": true,
+  "phase98NumericIndexCandidates": 157,
+  "expectedNumericIndexCandidatesAfterResolution": 157,
+  "ratingValuesChanged": 0,
+  "indexValuesChanged": 0,
+  "weeklyRowsInPersonalPackage": 0
+}

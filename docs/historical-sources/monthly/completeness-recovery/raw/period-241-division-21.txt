@@ -1,0 +1,178 @@
+Skip to Main Content
+Kry's Monthlies
+Search
+0 results
+Install App
+About
+nobody
+	
+2025 September
+118/91 players
+COMPLETED
+	
+Overall Leaders - 2025 September
+Pos	Player	League	Courses
+Played	Total
+Strokes	HN1's	Points
+1	ZoeDarlin	Semi Pro 3	8	-122	18	1,618
+2	Zanetti	Pro 1	8	-183	36	1,586
+3	Chelle💯	Pro 3	8	-148	21	1,571
+4	Audrey	Amateur 2	8	-77	8	1,568
+5	Master_KP	Semi Pro 2	8	-104	15	1,535
+6	Fry_Lock	Semi Pro 2	8	-105	11	1,531
+7	yankeedude1123	Pro 1	8	-171	33	1,523
+8	YUK1N	Pro 2	8	-144	16	1,516
+9	PaulV-PPP 🇨🇦	Pro 2	8	-140	23	1,503
+10	Blutes87	Master	8	-179	25	1,495
+1 - 10
+Master Leaders
+League
+- Select -
+Master
+Elite
+Pro 1
+Pro 2
+Pro 3
+Semi Pro 1
+Beginner
+Welcome
+Pos	Player	Courses
+Played	Total
+Strokes	HN1's	Points
+1
+	Blutes87	8	-179	25	1,495
+2
+	INDY	8	-179	31	1,491
+3
+	Gobson	8	-170	28	1,438
+4
+	POLANECE	8	-169	29	1,399
+5
+	El Jorge	8	-171	29	1,389
+6
+	Neo Impossible	8	-163	30	1,270
+7
+	Mully	8	-156	23	1,173
+8
+	steven2018	8	-151	20	1,120
+9
+	Princess_Bankshot	8	-139	22	1,062
+10
+	l7jazz	6	-85	13	703
+1 - 10
+ Players at risk of relegation
+  Point change since last report.
+ Tourist Trap
+#	Player	Score	HN1	Points
+1	Blutes87	-25	6	206
+2	INDY	-25	5	195
+3	POLANECE	-24	5	185
+4	Gobson	-24	3	173
+5	El Jorge	-23	5	165
+6	Neo Impossible	-23	4	154
+7	Mully	-23	3	143
+8	steven2018	-22	5	135
+9	Princess_Bankshot	-22	4	124
+10	l7jazz	-9	1	111
+ Tourist Trap Hard
+#	Player	Score	HN1	Points
+1	Gobson	-25	2	202
+2	Blutes87	-23	0	190
+3	Mully	-22	0	180
+4	INDY	-21	1	171
+5	POLANECE	-19	1	161
+5	El Jorge	-19	1	161
+7	Neo Impossible	-19	0	140
+8	Princess_Bankshot	-18	1	131
+9	steven2018	-18	0	120
+10	l7jazz	-8	1	111
+ Gardens of Babylon
+#	Player	Score	HN1	Points
+1	Blutes87	-29	5	205
+1	INDY	-29	5	205
+3	POLANECE	-29	4	184
+4	Neo Impossible	-28	7	177
+5	El Jorge	-27	4	164
+6	Gobson	-25	4	154
+7	steven2018	-23	2	142
+8	Princess_Bankshot	-22	2	132
+9	l7jazz	-20	3	123
+10	Mully	-19	2	112
+ Gardens of Babylon Hard
+#	Player	Score	HN1	Points
+1	El Jorge	-25	1	201
+2	Gobson	-23	3	193
+3	INDY	-23	2	182
+4	Mully	-22	3	173
+4	Neo Impossible	-22	3	173
+6	Blutes87	-21	1	151
+7	POLANECE	-19	2	142
+8	steven2018	-17	0	130
+9	l7jazz	-15	1	121
+10	Princess_Bankshot	-14	0	110
+ Holiday Hideaway
+#	Player	Score	HN1	Points
+1	Gobson	-22	2	202
+2	POLANECE	-21	4	194
+3	Blutes87	-21	3	183
+3	Neo Impossible	-21	3	183
+3	INDY	-21	3	183
+6	steven2018	-21	2	152
+7	El Jorge	-18	4	144
+8	Mully	-18	2	132
+8	Princess_Bankshot	-18	2	132
+	l7jazz			
+ Holiday Hideaway - Hard
+#	Player	Score	HN1	Points
+1	INDY	-20	5	205
+2	Mully	-19	5	195
+3	Blutes87	-17	2	182
+4	El Jorge	-16	3	173
+5	POLANECE	-15	3	163
+6	Neo Impossible	-13	3	153
+7	steven2018	-12	3	143
+8	Princess_Bankshot	-8	3	133
+9	Gobson	-7	2	122
+	l7jazz			
+ Tokyo
+#	Player	Score	HN1	Points
+1	POLANECE	-25	7	207
+1	Blutes87	-25	7	207
+3	El Jorge	-24	8	188
+3	Gobson	-24	8	188
+5	Princess_Bankshot	-22	7	167
+5	INDY	-22	7	167
+7	steven2018	-22	5	145
+8	Neo Impossible	-21	7	137
+9	Mully	-20	6	126
+10	l7jazz	-19	5	115
+ Tokyo - Hard
+#	Player	Score	HN1	Points
+1	Gobson	-20	4	204
+2	El Jorge	-19	3	193
+3	INDY	-18	3	183
+4	Blutes87	-18	1	171
+5	POLANECE	-17	3	163
+6	steven2018	-16	3	153
+6	Neo Impossible	-16	3	153
+8	Princess_Bankshot	-15	3	133
+9	l7jazz	-14	2	122
+10	Mully	-13	2	112
+2025 September Courses
+
+
+TTE - Tourist Trap
+TTH - Tourist Trap Hard
+
+
+GBE - Gardens of Babylon
+GBH - Gardens of Babylon Hard
+
+
+HHE - Holiday Hideaway
+HHH - Holiday Hideaway - Hard
+
+
+TOE - Tokyo
+TOH - Tokyo - Hard
+Release 1.2 Built with  using Oracle APEX

@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "phase104-package-checksums-v1",
+  "packageRef": "phase104-first-eligible-kwt-handicap-run-v1",
+  "runId": "3973f8e7-f2c9-5d05-bdb7-e49810713612",
+  "artifacts": {
+    "calculation_run_manifest.json": {
+      "sha256": "3AE236C49565E11D7C84FBB7079A4D03060B78DD4151369D297505FB0B513AC4",
+      "bytes": 2329
+    },
+    "rating_snapshot_import_rows.csv": {
+      "sha256": "DBF39EB1FCDACDE7D7239B6033A453AFDD534ED71C4E4B5BB1ACF2F11C9F7440",
+      "bytes": 433122
+    },
+    "index_snapshot_import_rows.csv": {
+      "sha256": "1FD4222036A298A9F3D22D82F1E73D6F5825759F0B8DC40D76AADDF740EC2443",
+      "bytes": 578145
+    },
+    "provisional_rating_exclusions.csv": {
+      "sha256": "C31601B77A8E41E94AB278A697B23BFBC3B5EFF311257993944E49D334449AF0",
+      "bytes": 926
+    },
+    "blocked_players.csv": {
+      "sha256": "1E600FC2D5DCFC1B1EE1444EBAC896DA077A42505B0FEA388A3EFEAA62481147",
+      "bytes": 5413
+    },
+    "snapshot_id_map.csv": {
+      "sha256": "6F581089D774B2D741295BCB55C364845E406B32843B5ACF22E33625E435E202",
+      "bytes": 7143
+    },
+    "production_installation_plan.md": {
+      "sha256": "BA41313FD4CDED6C562B18A58AEB39A4FDF965291ACF096AAE197F6653FC1B64",
+      "bytes": 2103
+    },
+    "source_artifacts": {
+      "phase68_provenance": "8440A1D1DCB4C09283F64235F5A85567E59D677DC6494EAB58E1FFB5EE2499CE",
+      "phase101_approval": "E92AAE93C4D365CF5547C955BE8A6EA56388CA592320CAE1A97539649AD7B422",
+      "phase101_periods": "914386FA763584FF2D040E524BCD1D08D3CF5A8EFC115768CF4F60E43860AB85",
+      "phase98_indexes": "7FF5A59D01C94CBEEC1A3C50010C68F8AD67A4257D7EE77BDD5BE58F4E0C2321"
+    }
+  }
+}

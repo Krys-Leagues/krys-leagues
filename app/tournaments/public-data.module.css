@@ -1,0 +1,13 @@
+.sections { width: min(100% - 32px, 1180px); margin: 24px auto 56px; display: grid; gap: 20px; }
+.section { padding: clamp(18px, 3vw, 30px); border: 1px solid #31598a; border-radius: 18px; background: rgba(8, 19, 48, .92); color: white; box-shadow: 0 12px 34px rgba(0, 0, 0, .25); }
+.header { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; }
+.header h2 { margin: 4px 0; font-size: clamp(1.5rem, 3vw, 2.3rem); }
+.eyebrow { margin: 0; color: #67e8f9; font-size: .75rem; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; }
+.muted { color: #cbd5e1; line-height: 1.5; }
+.live { display: inline-flex; padding: 5px 9px; border-radius: 999px; background: #14532d; color: #bbf7d0; font-size: .75rem; font-weight: 900; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; margin: 18px 0; }
+.card { display: grid; gap: 7px; padding: 16px; border: 1px solid #294d7b; border-radius: 14px; background: rgba(2, 6, 23, .62); }
+.card h3 { margin: 0; font-size: 1.2rem; }
+.trophy { color: #fde68a; font-weight: 800; }
+.link { color: #7dd3fc; font-weight: 900; text-decoration: none; }
+@media (max-width: 600px) { .header { flex-direction: column; } }

@@ -1,0 +1,5 @@
+scope	period_scope	division	source_id	status	row_count	reason
+division	all finalized source periods	Semi Pro 4		NO_PROVEN_PARTICIPATION	0	No preserved authoritative participation evidence.
+period	2024 January through 2024 July			UNKNOWN_NO_OBSERVATIONS_IMPORTED	0	No affirmative historical result evidence; no rows fabricated.
+period	2026 September and later			CURRENT_OR_FUTURE_EXCLUDED	0	September 2026 is current/in-progress; later periods are not finalized.
+logical_observation	2025 August	Elite	22	QUARANTINED_SOURCE_DRIFT_REVIEW	1	PETERK9FLORIDA / Atlantis remains excluded pending authoritative score resolution.

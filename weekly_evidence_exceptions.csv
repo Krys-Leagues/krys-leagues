@@ -1,0 +1,23 @@
+source,event_id,course_codes,screenshot_or_scope,reason,disposition
+THE_WEEKLY,S21W05_GLE_HWH,GLE/HWH,event screenshots,S21W05 rows visually transcribed; four source-name rows remain quarantined because the supplied screenshots do not preserve an exact screen name,PARTIALLY_PROCESSED
+THE_WEEKLY,S20W07_ALE_BHH,ALE/BHH,event screenshots,Replacement Elite screenshot and remaining division rows visually transcribed; three visible screen-name rows remain quarantined,PARTIALLY_PROCESSED
+THE_WEEKLY,S20W06_BHE_QVH,BHE/QVH,event screenshots,S20W06 rows visually transcribed; three visible screen-name rows remain quarantined because the supplied screenshots do not preserve exact names,PARTIALLY_PROCESSED
+THE_WEEKLY,S20W05_MGE_ZZH,MGE/ZZH,event screenshots,S20W05 rows visually transcribed; two visible screen names remain quarantined because the supplied screenshots do not preserve an exact name,PARTIALLY_PROCESSED
+THE_WEEKLY,S20W04_RCE_CLH_UNCONFIRMED_WEEK,RCE/CLH,event screenshots,Image header confirms S20W04/RCE/CLH; remaining rows require exact transcription,PARTIALLY_PROCESSED
+THE_WEEKLY,S20W03_20E_MWH,20E/MWH,event screenshots,Screenshots accessible; no rows admitted without complete row-level visual verification,PARTIALLY_PROCESSED
+THE_WEEKLY,S20W02_SWE_FFH,SWE/FFH,event screenshots,Screenshots accessible; no rows admitted without complete row-level visual verification,PARTIALLY_PROCESSED
+THE_WEEKLY,S20W01_AWE_HWH,AWE/HWH,event screenshots,Screenshots accessible; no rows admitted without complete row-level visual verification,PARTIALLY_PROCESSED
+THE_WEEKLY,S19W12_HWE_UTH,HWE/UTH,event screenshots,Screenshots accessible; no rows admitted without complete row-level visual verification,PARTIALLY_PROCESSED
+THE_WEEKLY,S19W11_WGE_BBH,WGE/BBH,event screenshots,Screenshots accessible; no rows admitted without complete row-level visual verification,PARTIALLY_PROCESSED
+THE_WEEKLY,S19W10_LBE_RCH,LBE/RCH,event screenshots,"79 visually verified players admitted; 3 visible player rows are quarantined: one ambiguous, one unreadable, and one truncated",PARTIALLY_PROCESSED
+THE_WEEKLY,S18W09_WWE_FFH,WWE/FFH,event screenshots,Screenshots accessible; no rows admitted without complete row-level visual verification,PARTIALLY_PROCESSED
+THE_WEEKLY,S18W08_FFE_SECOND_CODE_UNVERIFIED,FFE/?,event screenshots,Second course code is visibly MOH but is not approved by the package manifest; no course rows admitted,QUARANTINED
+THE_WEEKLY,S20W07_ALE_BHH,ALE/BHH,supplementary_DO_NOT_DOUBLE_COUNT/image(20261019-160759).png,superseded Elite capture contains incomplete BHH and tournament penalty 99,SUPERSEDED
+THE_WEEKLY,S19W10_LBE_RCH,LBE/RCH,image(20261019-174341).png row 15,player name is not exact in the source image,QUARANTINED_AMBIGUOUS_PLAYER
+THE_WEEKLY,S19W10_LBE_RCH,LBE/RCH,image(20261019-174350).png row 13,player name is not readable as an exact screen name,QUARANTINED_UNREADABLE_PLAYER
+THE_WEEKLY,S19W10_LBE_RCH,LBE/RCH,image(20261019-174359).png row 24,player name is truncated in the supplied screenshot,QUARANTINED_TRUNCATED_PLAYER
+THE_WEEKLY,ALL,GLH,manifest and package,no GLH Weekly event supplied,NO_ROWS_INVENTED
+THE_WEEKLY,S21W05_GLE_HWH,GLE/HWH,S21W05 division screenshots,four visible rows omitted because the player screen names could not be preserved exactly,QUARANTINED_NAME_UNCERTAIN
+THE_WEEKLY,S20W05_MGE_ZZH,MGE/ZZH,S20W05 division screenshots,two visible rows omitted because the player screen names could not be preserved exactly,QUARANTINED_NAME_UNCERTAIN
+THE_WEEKLY,S20W06_BHE_QVH,BHE/QVH,S20W06 division screenshots,three visible rows omitted because the player screen names could not be preserved exactly,QUARANTINED_NAME_UNCERTAIN
+THE_WEEKLY,S20W07_ALE_BHH,ALE/BHH,S20W07 division screenshots,three visible rows omitted because the player screen names could not be preserved exactly; superseded Elite capture with penalty 99 remains excluded,QUARANTINED_NAME_UNCERTAIN

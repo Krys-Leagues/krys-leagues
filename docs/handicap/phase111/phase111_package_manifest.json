@@ -1,0 +1,192 @@
+{
+  "schemaVersion": "phase111-kwt-season14-reconciliation-v1",
+  "sourceZipSha256": "E599CF6DF746F6C60C9718FBB73486396055567B738ED1A6EEB5808D2E2E46CE",
+  "sourceFiles": [
+    {
+      "file": "kwt14w05_ful_results.csv",
+      "sha256": "B7E8D39ACEDBE609A0B95DBCC3CF9D98179EFDF89F9FE1A5D29C47FDD7EABC8B",
+      "bytes": 5846,
+      "encoding": "WINDOWS-1252",
+      "row_count": 49,
+      "internal_event_ids": "",
+      "source_week_from_filename": 5,
+      "parse_errors": ""
+    },
+    {
+      "file": "kwt14w06_ful_results.csv",
+      "sha256": "6ECA5A43B829F2860DB251DF828C2202DC996B2B06F3FCD3AC750B396FFAADAE",
+      "bytes": 5827,
+      "encoding": "WINDOWS-1252",
+      "row_count": 50,
+      "internal_event_ids": "",
+      "source_week_from_filename": 6,
+      "parse_errors": ""
+    },
+    {
+      "file": "kwt14w07_ful_results.csv",
+      "sha256": "F3F8F0DA0D0061675B02E576BEB762739C8154CC8FD229764C4AA845A9E1EB00",
+      "bytes": 6260,
+      "encoding": "WINDOWS-1252",
+      "row_count": 53,
+      "internal_event_ids": "",
+      "source_week_from_filename": 7,
+      "parse_errors": ""
+    },
+    {
+      "file": "kwt14w08_ful_results.csv",
+      "sha256": "41ED06ED0D9D7685ECC0A9E4FFB9F677B8CD68EFF744356DC31A039CA76FD533",
+      "bytes": 5855,
+      "encoding": "WINDOWS-1252",
+      "row_count": 49,
+      "internal_event_ids": "",
+      "source_week_from_filename": 8,
+      "parse_errors": ""
+    },
+    {
+      "file": "kwt14w09_ful_results.csv",
+      "sha256": "641F2E75F9F140142F82B6A7E32A406459C72DA29D7DC9D251C2CF9E544ED7E3",
+      "bytes": 5618,
+      "encoding": "WINDOWS-1252",
+      "row_count": 47,
+      "internal_event_ids": "",
+      "source_week_from_filename": 9,
+      "parse_errors": ""
+    },
+    {
+      "file": "kwt14w10_ful_results.csv",
+      "sha256": "A3EF37E10ACA4C697079AC14AB486C5B41FE30B863D6C17B6E3F46F72FA50E8D",
+      "bytes": 4574,
+      "encoding": "WINDOWS-1252",
+      "row_count": 39,
+      "internal_event_ids": "",
+      "source_week_from_filename": 10,
+      "parse_errors": ""
+    },
+    {
+      "file": "kwt14w11_ful_results(1).csv",
+      "sha256": "99F32534030E308AC7721EE4D8EDDB57768D134845A52F479B63A0684E71A67B",
+      "bytes": 5240,
+      "encoding": "WINDOWS-1252",
+      "row_count": 45,
+      "internal_event_ids": "",
+      "source_week_from_filename": 11,
+      "parse_errors": ""
+    },
+    {
+      "file": "kwt14w12_ful_results.csv",
+      "sha256": "85A1949A79FEBC6213A28A54BDAA96145C18622B6032CEA0157E02B347641E64",
+      "bytes": 4559,
+      "encoding": "WINDOWS-1252",
+      "row_count": 39,
+      "internal_event_ids": "",
+      "source_week_from_filename": 12,
+      "parse_errors": ""
+    },
+    {
+      "file": "weekly_results (10).csv",
+      "sha256": "4717D05392E117E7941BBF76F990389414C5E34AD68D20FA60482398452FDE3B",
+      "bytes": 15736,
+      "encoding": "WINDOWS-1252",
+      "row_count": 53,
+      "internal_event_ids": "KWT14W07",
+      "source_week_from_filename": "",
+      "parse_errors": ""
+    },
+    {
+      "file": "weekly_results (11).csv",
+      "sha256": "39784A4FBC2554F27215BB2D5E34206252AFA9C1A5D7E700E331702289E5C7B1",
+      "bytes": 14484,
+      "encoding": "WINDOWS-1252",
+      "row_count": 49,
+      "internal_event_ids": "KWT14W08",
+      "source_week_from_filename": "",
+      "parse_errors": ""
+    },
+    {
+      "file": "weekly_results (12).csv",
+      "sha256": "CCB9E3694E1D881D70E0E0F05688106207070AE2998FC42BB7D6863204DF2D30",
+      "bytes": 14123,
+      "encoding": "WINDOWS-1252",
+      "row_count": 47,
+      "internal_event_ids": "KWT14W09",
+      "source_week_from_filename": "",
+      "parse_errors": ""
+    },
+    {
+      "file": "weekly_results (13).csv",
+      "sha256": "7E94D9E2688448F14A17A963DE7717B545D9F0386E6A85D77FB463CE1A685ABA",
+      "bytes": 11515,
+      "encoding": "WINDOWS-1252",
+      "row_count": 39,
+      "internal_event_ids": "KWT14W10",
+      "source_week_from_filename": "",
+      "parse_errors": ""
+    },
+    {
+      "file": "weekly_results (14)(1).csv",
+      "sha256": "CE0F5A8B5E18FA53CB4A58686A0C56D78670110BCE3139FE8C81281981039480",
+      "bytes": 13162,
+      "encoding": "WINDOWS-1252",
+      "row_count": 45,
+      "internal_event_ids": "KWT14W11",
+      "source_week_from_filename": "",
+      "parse_errors": ""
+    },
+    {
+      "file": "weekly_results (16).csv",
+      "sha256": "6C8535E3550E542ED1877B0EEBEE2DE46CEBFB8969D23228C0590777388FBE70",
+      "bytes": 11544,
+      "encoding": "WINDOWS-1252",
+      "row_count": 39,
+      "internal_event_ids": "KWT14W12",
+      "source_week_from_filename": "",
+      "parse_errors": ""
+    },
+    {
+      "file": "weekly_results (8).csv",
+      "sha256": "A8682BF0CEA81FDA09DF018497ABD4CBF459C95546BAB8967BA51CF8C132CF43",
+      "bytes": 14547,
+      "encoding": "WINDOWS-1252",
+      "row_count": 49,
+      "internal_event_ids": "KWT14W05",
+      "source_week_from_filename": "",
+      "parse_errors": ""
+    },
+    {
+      "file": "weekly_results (9).csv",
+      "sha256": "2E0960D156A912CA7003855E809880DEC394FC94A54116AB869AB873E49C55BF",
+      "bytes": 14392,
+      "encoding": "WINDOWS-1252",
+      "row_count": 50,
+      "internal_event_ids": "KWT14W06",
+      "source_week_from_filename": "",
+      "parse_errors": ""
+    }
+  ],
+  "counts": {
+    "detailedFiles": 8,
+    "summaryFiles": 8,
+    "playerWeekPairs": 371,
+    "courseObservations": 742,
+    "exactSummaryMatches": 371,
+    "duplicatePlayerWeekGroups": 0,
+    "exactIdentityPairRows": 279,
+    "unresolvedIdentityPairRows": 92,
+    "importReadyRows": 0,
+    "weeklyVerifiedCourseRows": 844,
+    "weeklyPersonalHandicapRows": 0,
+    "baselineIndexCandidates": 157,
+    "revisedNumericLocalPreviews": 158
+  },
+  "generatedChecksums": {
+    "kwt_s14w05_12_exceptions.csv": "EB4BECA1A99A16BCA928C30D76ED7BD0A7FEA67CBC8C030D577CB05A39A45AA4",
+    "kwt_s14w05_12_pair_reconciliation.csv": "EB4BECA1A99A16BCA928C30D76ED7BD0A7FEA67CBC8C030D577CB05A39A45AA4",
+    "kwt_s14w05_12_staging_rows.csv": "7B37CF6A3A9B979189BCAE0153B2163D01A5F86269C5A8ED4FDF13E41A608AB6",
+    "phase111_course_rating_comparison.csv": "0496A7546A7A696D4AC61E15E1CE3AA50D85D90C4123F04A41B16DC8D8F753FC",
+    "phase111_player_index_comparison.csv": "C139C5B0A084BAA9DB70BA7AE333BCEF61B7F5C547DCDA8D1224DC2CC33A5E48",
+    "phase111_reconciliation_report.md": "EEE68C5809C7AF5A6B673D953E65FC16F3EDA6933FDE4DEC80A32909EB1D143F",
+    "phase111_source_manifest.csv": "B6188DAA1BFFFBE2E39EAEFD9E4808F00F404D107C3A9A28BD220F85CB491480",
+    "weekly_course_rating_review.csv": "4540BF5BF14E3429969205A3276C2FED20A563F355F2290C0B0A1A07CD8DB523"
+  },
+  "status": "LOCAL_ONLY_BLOCKED_PENDING_AUTHORITATIVE_KWT_SOURCE_IDS_AND_ROUND_IDS"
+}

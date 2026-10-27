@@ -1,0 +1,159 @@
+Skip to Main Content
+Kry's Monthlies
+Search
+0 results
+Install App
+About
+nobody
+	
+2025 October
+105/90 players
+COMPLETED
+	
+Overall Leaders - 2025 October
+Pos	Player	League	Courses
+Played	Total
+Strokes	HN1's	Points
+1	Zanetti	Elite	8	-183	34	1,614
+2	SlugJug33	Amateur 2	8	-97	17	1,607
+3	Audrey	Amateur 1	8	-69	14	1,584
+4	ZoeDarlin	Semi Pro 2	8	-107	14	1,574
+4	Gobson	Master	8	-188	34	1,574
+6	AndyP1970	Pro 2	8	-118	18	1,548
+7	IMJOMAMA	Welcome	8	-40	7	1,547
+8	The Real JB	Amateur 2	8	-67	11	1,511
+9	RYANL503	Semi Pro 3	8	-74	9	1,489
+10	SMILEROBIN	Amateur 1	8	0	8	1,488
+1 - 10
+Semi Pro 2 Leaders
+League
+- Select -
+Master
+Elite
+Pro 1
+Pro 2
+Pro 3
+Semi Pro 1
+Beginner
+Welcome
+114
+Pos	Player	Courses
+Played	Total
+Strokes	HN1's	Points
+1
+	ZoeDarlin	8	-107	14	1,574
+2
+	plucky✌	8	-71	12	1,392
+3
+	Kd	8	-67	7	1,387
+4
+	Bethann	8	-56	12	1,332
+5
+	RUBBERDUCK	5	-41	8	878
+6
+	MAMAGOATZ	5	-36	6	866
+7
+	Sandtrap	4	-43	3	703
+8
+	freitag68	1	-19	2	182
+1 - 8
+ Players at risk of relegation
+  Point change since last report.
+ Seagull Stacks
+#	Player	Score	HN1	Points
+1	ZoeDarlin	-21	1	201
+2	Sandtrap	-20	1	191
+3	freitag68	-19	2	182
+4	plucky✌	-18	0	170
+5	Kd	-17	1	161
+5	MAMAGOATZ	-17	1	161
+7	Bethann	-13	0	140
+	RUBBERDUCK			
+ Seagull Stacks - Hard
+#	Player	Score	HN1	Points
+1	RUBBERDUCK	-16	1	201
+2	ZoeDarlin	-14	2	192
+3	Sandtrap	-11	1	181
+4	Kd	-9	0	170
+5	Bethann	-8	0	160
+6	plucky✌	-3	1	151
+	MAMAGOATZ			
+	freitag68			
+ Wallace & Gromit
+#	Player	Score	HN1	Points
+1	plucky✌	-21	5	205
+2	ZoeDarlin	-19	4	194
+3	RUBBERDUCK	-17	4	184
+4	Kd	-14	3	173
+5	MAMAGOATZ	-11	2	162
+6	Bethann	-9	4	154
+	Sandtrap			
+	freitag68			
+ Wallace & Gromit - Hard
+#	Player	Score	HN1	Points
+1	ZoeDarlin	-8	2	202
+2	Kd	-6	0	190
+3	plucky✌	-4	1	181
+4	Bethann	-2	1	171
+5	RUBBERDUCK	3	1	161
+6	MAMAGOATZ	4	0	150
+	freitag68			
+	Sandtrap			
+ 8-Bit Lair
+#	Player	Score	HN1	Points
+1	plucky✌	-19	4	204
+2	ZoeDarlin	-14	2	192
+3	Bethann	-10	4	184
+4	Kd	-6	2	172
+	freitag68			
+	MAMAGOATZ			
+	RUBBERDUCK			
+	Sandtrap			
+ 8-Bit Lair - Hard
+#	Player	Score	HN1	Points
+1	ZoeDarlin	-8	1	201
+2	Bethann	-5	2	192
+2	MAMAGOATZ	-5	2	192
+4	Kd	0	0	170
+5	plucky✌	7	0	160
+	RUBBERDUCK			
+	Sandtrap			
+	freitag68			
+ Raptor Cliff's
+#	Player	Score	HN1	Points
+1	ZoeDarlin	-17	1	201
+2	Sandtrap	-14	1	191
+3	Kd	-14	0	180
+4	plucky✌	-13	1	171
+5	RUBBERDUCK	-10	1	161
+6	Bethann	-7	1	151
+	MAMAGOATZ			
+	freitag68			
+ Raptor Cliff's - Hard
+#	Player	Score	HN1	Points
+1	MAMAGOATZ	-7	1	201
+2	ZoeDarlin	-6	1	191
+3	Bethann	-2	0	180
+4	Kd	-1	1	171
+4	RUBBERDUCK	-1	1	171
+6	plucky✌	0	0	150
+7	Sandtrap	2	0	140
+	freitag68			
+2025 October Courses
+
+
+SSE - Seagull Stacks
+SSH - Seagull Stacks - Hard
+
+
+WGE - Wallace & Gromit
+WGH - Wallace & Gromit - Hard
+
+
+8BE - 8-Bit Lair
+8BH - 8-Bit Lair - Hard
+
+
+RCE - Raptor Cliff's
+RCH - Raptor Cliff's - Hard
+Release 1.2 Built with  using Oracle APEX

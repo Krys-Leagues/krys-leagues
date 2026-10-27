@@ -1,0 +1,14 @@
+{
+  "schema_version": "phase132-rating-decision-package-checksums-v1",
+  "production_project": "jfbndcwdsvsjgnzwvexp",
+  "source_batch_sha256": "52D2D88FD821F231148FCCC1C90C85BF32D34FA9156C2A8C2F3D75CD2CF53C0B",
+  "files": {
+    "rating_owner_decision_manifest.json": "8D900971D84481D3EFFC498BB8AEBFA19007F44762271A86A5B54CE98861790D",
+    "rating_decision_installation_rows.csv": "05119D8208FB1075BC078081EF1016CE7EC5085720533F8A2CD7523AA30E2BAC",
+    "production_rating_decision_preflight.sql": "48002DD583C54007116561728CEF22E5AB0A5F29A02C508EC6638850DFB58E6B",
+    "production_rating_decision_installation.sql": "237B8A8A392CF62F3F830406AB7A1BB227635D569D3C2BFFD6D7CE323429C8B9",
+    "production_rating_decision_postflight.sql": "5AFA958857B73658EA1C152548AB236112142241ABBF2C3159B959C397508951",
+    "rating_decision_installation_plan.md": "92F02B956486F52AA9DA7227F0C2118B703025596BC0A4DBEB655B7E9D27AC6F",
+    "rating_owner_decision_report.md": "6BC28CA5FF41CACBE63B29D1991B092CECF8987E3BB83B7E35DBCD56FAF90A87"
+  }
+}

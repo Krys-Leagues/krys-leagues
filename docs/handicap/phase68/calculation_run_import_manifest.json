@@ -1,0 +1,13 @@
+{
+  "id": "fb606c55-e2f6-5d01-b79d-bfcc129a7cc6",
+  "label": "phase68-provenance-recovery-v1",
+  "policyVersion": "krys-handicap-approved-policy-v1",
+  "modelVersion": "krys-course-rating-elite-lowest-12-v1",
+  "sourcePackageRef": "phase68-provenance-recovery-v1",
+  "chronologyPolicy": "course-rating evidence only; no player-index snapshots",
+  "status": "DRAFT",
+  "supersedesCalculationRunId": "5a57560c-3548-54a8-879c-8fc516a85f26",
+  "supersessionReason": "Phase 67 compact dictionary indexes lost repeated KWT identity values; corrected package is append-only and remains unpublished.",
+  "provenance_row_count": 14394,
+  "snapshot_count": 169
+}

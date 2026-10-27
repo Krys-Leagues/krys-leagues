@@ -1,0 +1,58 @@
+{
+  "schemaVersion": "phase104-first-eligible-kwt-handicap-run-v1",
+  "packageRef": "phase104-first-eligible-kwt-handicap-run-v1",
+  "calculationRun": {
+    "id": "3973f8e7-f2c9-5d05-bdb7-e49810713612",
+    "label": "phase104-first-eligible-kwt-handicap-run-v1",
+    "policy_version": "krys-handicap-approved-policy-v1",
+    "model_version": "krys-handicap-candidate-a-v1",
+    "source_package_ref": "phase68-provenance-recovery-v1",
+    "chronology_policy": "OFFICIAL_KWT_SEQUENCE",
+    "status": "DRAFT",
+    "publication_eligibility": "QUARANTINED",
+    "metadata": {
+      "allow_official_kwt_sequence_publication": true,
+      "source_scope": "KWT_ONLY",
+      "source_separation": "THE_WEEKLY excluded from personal indexes",
+      "effective_from": null,
+      "effective_period_policy": "KWT_SEASON_WEEK_ONLY",
+      "rating_approval_required": true,
+      "index_publication_requires_separate_approval": true,
+      "preserved_quarantined_source_exception_count": 808
+    }
+  },
+  "policy": {
+    "differential": "(score - course rating) * 8.515 / course slope",
+    "referenceSlope": 8.515,
+    "latestRoundLimit": 10,
+    "bestRoundLimit": 5,
+    "minimumIndexRounds": 5,
+    "chronologyOrdering": "Season -> Week -> Easy -> Hard",
+    "chronologyConfidence": "OFFICIAL_KWT_SEQUENCE"
+  },
+  "sourceInputs": {
+    "phase98CalculationRunId": "e2f53406-75b7-5acb-a3e9-9bec0d39421b",
+    "phase101ApprovalManifest": "E92AAE93C4D365CF5547C955BE8A6EA56388CA592320CAE1A97539649AD7B422",
+    "phase101PeriodManifest": "914386FA763584FF2D040E524BCD1D08D3CF5A8EFC115768CF4F60E43860AB85",
+    "phase68Provenance": "8440A1D1DCB4C09283F64235F5A85567E59D677DC6494EAB58E1FFB5EE2499CE",
+    "phase98IndexCandidates": "7FF5A59D01C94CBEEC1A3C50010C68F8AD67A4257D7EE77BDD5BE58F4E0C2321"
+  },
+  "counts": {
+    "readyRatingSnapshots": 72,
+    "provisionalRatingsExcluded": 6,
+    "playerIndexSnapshots": 157,
+    "blockedPlayers": 44,
+    "correctedKwtProvenanceRowsReferenced": 13550,
+    "weeklyRowsExcludedFromPersonalIndexes": 844,
+    "quarantinedSourceExceptionsPreserved": 808,
+    "effectiveFromValuesInvented": 0
+  },
+  "publication": {
+    "allRatingsUnpublished": true,
+    "allIndexesUnpublished": true,
+    "runDraft": true,
+    "runQuarantined": true,
+    "formalApprovalRequired": true,
+    "productionWrites": false
+  }
+}

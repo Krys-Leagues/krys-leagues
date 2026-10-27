@@ -1,0 +1,56 @@
+{
+  "package": "repaired historical Monthlies source package with targeted Amateur recovery",
+  "schema_version": "repaired-monthly-v2-score-only-amateur-extended",
+  "generated_at": "2026-09-08T12:11:52.8495228Z",
+  "generated_by": "extend-repaired-package-with-amateur.ps1",
+  "parent_package": "repaired-history/repaired-monthly-manifest.json",
+  "raw_targeted_source": "completeness-recovery/amateur-recovery/public-targeted-http-v2",
+  "finalized_scope": "2024 August through 2026 August; 2024 January-July UNKNOWN and excluded",
+  "division_ids": {
+    "Amateur 1": "26",
+    "Amateur 2": "27",
+    "Amateur 3": "28"
+  },
+  "counts": {
+    "import_ready_numeric_observations": 19015,
+    "played_scored": 19015,
+    "blank_unplayed_evidence": 5972,
+    "zero_scores": 139,
+    "negative_scores": 18172,
+    "positive_scores": 704,
+    "malformed": 0,
+    "duplicate_logical_keys": 0,
+    "duplicate_fingerprints": 0,
+    "targeted_amateur_numeric_additions": 1553,
+    "targeted_amateur_unplayed_evidence": 1063,
+    "quarantined_rows": 1,
+    "pending_amateur_rows_excluded": 0
+  },
+  "semantics": {
+    "numeric_score": "Importable historical observation, including zero",
+    "zero": "Played at even par",
+    "negative": "Played under par",
+    "positive": "Played over par",
+    "blank": "Unplayed evidence only; no score row created"
+  },
+  "evidence": {
+    "targeted_cells": 35,
+    "targeted_numeric_source_file": "amateur-recovered-score-observations.tsv",
+    "targeted_unplayed_source_file": "amateur-recovered-unplayed-evidence.tsv",
+    "target_raw_responses": 105,
+    "source_id_discovery": "September 2024 period 55 public rendered labels: 26 Amateur 1, 27 Amateur 2, 28 Amateur 3"
+  },
+  "finalization": {
+    "finalizedThrough": "2026 August",
+    "currentIncompletePeriod": "2026 September",
+    "currentPeriodReason": "September 2026 is current/in-progress and excluded."
+  },
+  "file_sha256": {
+    "repaired-monthly-observations.tsv": "83dd90ef8a53b71e2dd952900f25dbd3f0c745959502d1b55e59d155ca9e45c8",
+    "repaired-monthly-unplayed-evidence.tsv": "fd22e35a295c0f56c40806b8c0459ed0975d570b619aa186f1a1681ea516db3d",
+    "repaired-monthly-provenance.tsv": "e3c2cf552bf925116357dc2377f18861b7654f82e0da7b9a352b43ab6be12d63",
+    "repaired-monthly-merge-ledger.tsv": "142e4959a76f6c7fbdd229f2cbffc240a27663056446351c5c328ad73ced0410",
+    "repaired-monthly-exclusions.tsv": "0a6fd588dc3c9cfc1032ceb788704024c8e89e4af03a619617546b758e5e6848",
+    "repaired-monthly-review-quarantine.tsv": "9d42a221918b77406cd20b0ac01823804fd4626428e63fb2a0a2048e7b10e6f4"
+  }
+}

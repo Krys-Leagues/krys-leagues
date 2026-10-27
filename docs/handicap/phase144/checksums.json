@@ -1,0 +1,20 @@
+{
+  "schema_version": "phase144-public-profile-rpc-v1",
+  "status": "LOCAL_PREPARATION_ONLY",
+  "production_project": "jfbndcwdsvsjgnzwvexp",
+  "replaces_phase143_proposal_sha256": "061723F85F83F4EA28C1867C9B76AB5C04327F1FC0F7184F29B8B3621C5759C8",
+  "generated_files": {
+    "production_installation.sql": "3D66487F16BBDBA570A40D7C74EC2BDF09210A2F043A966FB511D58DE3A78B62",
+    "production_preflight.sql": "8304252058B7C6BD37C58FDAB3121E84DD50B8F1ED77E40F11C53583C308A938",
+    "production_postflight.sql": "126146EA7E03BF8829B690305D7C1F16E0634F3E02B8B66C6104E6291E34A0DA"
+  },
+  "security_design": {
+    "private_helper": "ELIMINATED",
+    "public_function_security": "SECURITY DEFINER",
+    "function_owner": "postgres",
+    "search_path": "",
+    "client_execute_roles": ["anon", "authenticated"],
+    "direct_snapshot_select_roles": [],
+    "publication_source": "public.handicap_publishable_index_snapshots"
+  }
+}

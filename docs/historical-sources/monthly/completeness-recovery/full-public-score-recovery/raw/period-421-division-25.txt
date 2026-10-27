@@ -1,0 +1,145 @@
+Skip to Main Content
+Kry's Monthlies
+Search
+0 results
+Install App
+About
+nobody
+	
+2026 June
+85/55 players
+COMPLETED
+	
+Overall Leaders - 2026 June
+Pos	Player	League	Courses
+Played	Total
+Strokes	HN1's	Points
+1	mini_G	Elite	8	-191	25	1,615
+2	ladytea	Semi Pro 2	8	-114	9	1,609
+3	D3bb13	Pro 3	8	-113	10	1,550
+4	Sj_76	Semi Pro 1	8	-114	11	1,531
+5	Zanetti	Master	8	-195	24	1,524
+6	Nic79	Pro 2	8	-119	13	1,503
+7	Chipnputt	Pro 2	8	-129	10	1,500
+8	musical_atv 🎻	Pro 3	8	-84	6	1,476
+9	Audrey	Semi Pro 1	8	-104	4	1,464
+10	plucky✌	Pro 1	8	-153	13	1,463
+1 - 10
+Pro 3 Leaders
+League
+- Select -
+Master
+Elite
+Pro 1
+Pro 2
+Pro 3
+Semi Pro 1
+Beginner
+Welcome
+Pos	Player	Courses
+Played	Total
+Strokes	HN1's	Points
+1
+	D3bb13	8	-113	10	1,550
+2
+	musical_atv 🎻	8	-84	6	1,476
+3
+	NuttyGrandpa	6	-76	5	1,155
+4
+	BadWolff🐺	4	-45	2	752
+	breezy	0			
+	pluff	0			
+	lynniebodd	0			
+1 - 7
+ Players at risk of relegation
+  Point change since last report.
+ Seagull Stacks
+#	Player	Score	HN1	Points
+1	D3bb13	-20	2	202
+2	musical_atv 🎻	-17	1	191
+3	BadWolff🐺	-14	0	180
+	breezy			
+	NuttyGrandpa			
+	pluff			
+	lynniebodd			
+ Seagull Stacks - Hard
+#	Player	Score	HN1	Points
+1	D3bb13	-13	1	201
+2	musical_atv 🎻	-7	1	191
+3	BadWolff🐺	0	0	180
+	breezy			
+	NuttyGrandpa			
+	pluff			
+	lynniebodd			
+ Bogey's Bonanza
+#	Player	Score	HN1	Points
+1	D3bb13	-21	2	202
+2	NuttyGrandpa	-19	1	191
+3	musical_atv 🎻	-16	2	182
+	pluff			
+	BadWolff🐺			
+	breezy			
+	lynniebodd			
+ Bogey's Bonanza Hard
+#	Player	Score	HN1	Points
+1	NuttyGrandpa	-6	0	200
+1	musical_atv 🎻	-6	0	200
+3	D3bb13	-4	1	181
+	breezy			
+	BadWolff🐺			
+	pluff			
+	lynniebodd			
+ Journey to the Center of the Earth
+#	Player	Score	HN1	Points
+1	NuttyGrandpa	-17	3	203
+2	D3bb13	-17	2	192
+3	musical_atv 🎻	-11	1	181
+	breezy			
+	BadWolff🐺			
+	pluff			
+	lynniebodd			
+ Center of the Earth - Hard
+#	Player	Score	HN1	Points
+1	NuttyGrandpa	-14	1	201
+2	musical_atv 🎻	-10	0	190
+3	D3bb13	-8	0	180
+	breezy			
+	BadWolff🐺			
+	pluff			
+	lynniebodd			
+ Alfheim
+#	Player	Score	HN1	Points
+1	BadWolff🐺	-19	2	202
+2	D3bb13	-17	2	192
+3	NuttyGrandpa	-14	0	180
+4	musical_atv 🎻	-13	1	171
+	breezy			
+	pluff			
+	lynniebodd			
+ Alfheim Hard
+#	Player	Score	HN1	Points
+1	D3bb13	-13	0	200
+2	BadWolff🐺	-12	0	190
+3	NuttyGrandpa	-6	0	180
+4	musical_atv 🎻	-4	0	170
+	breezy			
+	pluff			
+	lynniebodd			
+2026 June Courses
+
+
+SSE - Seagull Stacks
+SSH - Seagull Stacks - Hard
+
+
+BBE - Bogey's Bonanza
+BBH - Bogey's Bonanza Hard
+
+
+JCE - Journey to the Center of the Earth
+JCH - Center of the Earth - Hard
+
+
+ALE - Alfheim
+ALH - Alfheim Hard
+Release 1.2 Built with  using Oracle APEX

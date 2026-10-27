@@ -1,0 +1,30 @@
+{
+  "schema_version": "phase140-rolling20-publication-v1",
+  "status": "LOCAL_DRAFT_QUARANTINED_UNPUBLISHED",
+  "production_project": "jfbndcwdsvsjgnzwvexp",
+  "calculation_run_id": "5db94324-3789-559c-865c-35ed9c2081dd",
+  "predecessor_run_id": "8f136000-0000-5000-8000-000000000136",
+  "source_package_ref": "phase140-rolling20-publication-v1:8A5512DEDB2763E982357851836163CB6E9B0BD8DFFFA7B08C21C0787B35D992:94FADDCE462ACC48A3A27FF119A9403C04AD007E63F350222CA652D88F77B31F:0641A1BEC7B283319EA31654C19E1B7DE908802006150A9D278847582655D1F0",
+  "policy_version": "krys-handicap-approved-policy-v1",
+  "model_version": "krys-handicap-candidate-a-v1",
+  "chronology_policy": "OFFICIAL_KWT_SEQUENCE",
+  "reference_slope": 8.515,
+  "active_window": 20,
+  "candidate_counts": {
+    "total": 166,
+    "official_eligible": 120,
+    "provisional": 46,
+    "blocked": 0
+  },
+  "referenced_rating_snapshots": 78,
+  "source_round_references": 14076,
+  "weekly_personal_inputs": 0,
+  "effective_from": null,
+  "publication_opt_in": false,
+  "index_approval_required": true,
+  "input_checksums": {
+    "docs/handicap/phase126/player_index_candidates.csv": "8A5512DEDB2763E982357851836163CB6E9B0BD8DFFFA7B08C21C0787B35D992",
+    "docs/handicap/phase136/player_index_revalidation.csv": "94FADDCE462ACC48A3A27FF119A9403C04AD007E63F350222CA652D88F77B31F",
+    "docs/handicap/phase136/owner_rating_snapshot_mapping.csv": "0641A1BEC7B283319EA31654C19E1B7DE908802006150A9D278847582655D1F0"
+  }
+}

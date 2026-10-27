@@ -1,0 +1,125 @@
+{
+  "schema_version": "phase121-revised-handicap-publication-package-v1",
+  "status": "DRAFT_QUARANTINED_UNPUBLISHED",
+  "production_project": "jfbndcwdsvsjgnzwvexp",
+  "calculation_run": {
+    "id": "19777bdb-8c2d-5c39-80fa-55a7b429fe93",
+    "policy_version": "krys-handicap-approved-policy-v1",
+    "model_version": "krys-handicap-candidate-a-v1",
+    "differential_formula": "(score - course rating) * 8.515 / course slope",
+    "reference_slope": 8.515,
+    "chronology_policy": "OFFICIAL_KWT_SEQUENCE",
+    "source_scope": "KWT_ONLY",
+    "source_runs": [
+      "3973f8e7-f2c9-5d05-bdb7-e49810713612",
+      "9a9a4bc4-e43d-55d4-84fb-a83c0b757681"
+    ],
+    "status": "DRAFT",
+    "publication_eligibility": "QUARANTINED",
+    "effective_period_policy": "KWT_SEASON_WEEK_ONLY; no invented calendar dates"
+  },
+  "owner_acceptance_scope": "NUMERIC_FAIRNESS_ONLY",
+  "owner_rating_approvals": [
+    {
+      "course_id": "Bogey's Bonanza_hard",
+      "course_rating": -22.444,
+      "slope": 13.355,
+      "decision": "APPROVED_FOR_INITIAL_PUBLICATION_PREPARATION",
+      "reviewer": "Krys",
+      "decision_date": "2026-10-21",
+      "recorded_at": null,
+      "reviewer_uuid": null
+    },
+    {
+      "course_id": "Forgotten Fairyland_easy",
+      "course_rating": -28.917,
+      "slope": 8.127,
+      "decision": "APPROVED_FOR_INITIAL_PUBLICATION_PREPARATION",
+      "reviewer": "Krys",
+      "decision_date": "2026-10-21",
+      "recorded_at": null,
+      "reviewer_uuid": null
+    },
+    {
+      "course_id": "Original Gothic_easy",
+      "course_rating": -20.591,
+      "slope": 4.363,
+      "decision": "APPROVED_FOR_INITIAL_PUBLICATION_PREPARATION",
+      "reviewer": "Krys",
+      "decision_date": "2026-10-21",
+      "recorded_at": null,
+      "reviewer_uuid": null
+    },
+    {
+      "course_id": "Raptor Cliff's_hard",
+      "course_rating": -13.895,
+      "slope": 12.197,
+      "decision": "APPROVED_FOR_INITIAL_PUBLICATION_PREPARATION",
+      "reviewer": "Krys",
+      "decision_date": "2026-10-21",
+      "recorded_at": null,
+      "reviewer_uuid": null
+    },
+    {
+      "course_id": "Shangri-La_easy",
+      "course_rating": -29.81,
+      "slope": 7.342,
+      "decision": "APPROVED_FOR_INITIAL_PUBLICATION_PREPARATION",
+      "reviewer": "Krys",
+      "decision_date": "2026-10-21",
+      "recorded_at": null,
+      "reviewer_uuid": null
+    }
+  ],
+  "counts": {
+    "rating_candidates": 78,
+    "reviewed_course_entries": 82,
+    "index_candidates": 166,
+    "distinct_players": 166,
+    "provisional_ratings": 2,
+    "unrated_ratings": 2,
+    "investigate_ratings": 0,
+    "owner_approved_ratings": 5,
+    "weekly_rows_used_in_indexes": 0,
+    "indexes_with_rating_review_blockers": 0
+  },
+  "publication_boundaries": [
+    "No Production rows are changed by this package.",
+    "All candidate ratings and indexes remain UNPUBLISHED.",
+    "Numeric fairness acceptance from Krys and Tricky is not formal rating or publication approval.",
+    "THE_WEEKLY is excluded from every personal index row.",
+    "The five diagnostic ratings have explicit Krys approval for initial publication preparation; publication remains separately gated.",
+    "Hollywood provisional ratings and both Gloop Lair unrated entries remain ineligible."
+  ],
+  "input_checksums": {
+    "phase68_provenance": "8440A1D1DCB4C09283F64235F5A85567E59D677DC6494EAB58E1FFB5EE2499CE",
+    "phase117_provenance": "0A9FD1032FA87C2D92E628B83DDB6F9089D5C81F3AB0C24929F030892870E186",
+    "phase104_ratings": "DBF39EB1FCDACDE7D7239B6033A453AFDD534ED71C4E4B5BB1ACF2F11C9F7440",
+    "phase104_indexes": "1FD4222036A298A9F3D22D82F1E73D6F5825759F0B8DC40D76AADDF740EC2443",
+    "phase118_players": "7FAC352D2D24EF647A93DC3D05F115DC2E13BFF3F265E4F3D71FCA8B3F710AE7",
+    "phase118_courses": "EC7BC533087D80BC1DEED9B3BF4E92D38D8FA820358729CCE54846A826CF45C5",
+    "phase119_courses": "B35593B28655192EAA38B055C2807D599E7FE067703AB8659D812B21836BAE95",
+    "canonical_names": "1991A4D8E398856E3A6D29DA9D30DD5C06337C60508F8E06E8ABE0D8F46B2152"
+  },
+  "package_files": {
+    "rating_snapshot_candidates.csv": "224E5113A227F929C992F043FA85A91EEEFC39FDBADD3F16DA242CB86AC17ECC",
+    "player_index_candidates.csv": "8E68C92ED92D20E2AE2749D56E11C37ED036E91D372E3FF63B2E8A0BADC2CDB5",
+    "rating_review_dispositions.csv": "D3CD3E902C361D9856504684A68F0C7EF9C485E7C74F14021E97C08CF65A0191",
+    "rating_review_dispositions.json": "0D6437EB689DB514261E5F6507377A969AA0D4CB82ACDC5C8ADFFA4267E501AC",
+    "player_index_approval_manifest.csv": "94BFDD1723C774EC169945792D8E564A43A185621B7C86C3C160036C194D0171",
+    "player_index_approval_manifest.json": "2CEBA012BE6927767CD3E942D3696FA2EA5F0869F37D97E7071689F4B9A676AC"
+  },
+  "installation_artifacts": {
+    "production_preflight.sql": "DEFF5F550CE0820F5851F5699B895D8BC4F9AE9104D5768721CDDAC4E74A856A",
+    "production_postflight.sql": "274E5CE39946B77E685B551BC30F84FFF47EDBC7126E1DD620A2BD9712E68A91",
+    "player_read_rpc_installation.md": "6178672F531C6C8AA8E60B1F6BB0E86BDD3B7A676BB2374C8BC0440C67FFD209",
+    "publication_installation_plan.md": "FB6EC51DAEFFE74984551518F53B612A38024B5CDC6F167887C4387B9A80981F",
+    "rating_approval_report.md": "77019024AE10D88FA8CD84BD5D4DE10EFCDAEACC57D56081146AE19243573CF3",
+    "rating_approval_manifest.csv": "9712A78894FCC8D2A89989E661682F2C3237B42465601E35F7E77634B44766C0",
+    "rating_approval_manifest.json": "09382A8C7901F549377ADE119E3DF5068CD40A9C8FF9629F572DA5FE7EFB22A6",
+    "quarterly_rating_review_policy.md": "DAB8E583A218B03C9834EEA950197D11A7272A36299B6814E82921B5761C9FA9",
+    "supabase/proposals/20261020_handicap_player_read_rpc.proposed.sql": "CE728292916851FFFDD758D84C742CD5D91BF26C41D3430C23F3439627E36232"
+  },
+  "approval_manifest_sha256": "2CEBA012BE6927767CD3E942D3696FA2EA5F0869F37D97E7071689F4B9A676AC",
+  "rating_review_sha256": "0D6437EB689DB514261E5F6507377A969AA0D4CB82ACDC5C8ADFFA4267E501AC"
+}

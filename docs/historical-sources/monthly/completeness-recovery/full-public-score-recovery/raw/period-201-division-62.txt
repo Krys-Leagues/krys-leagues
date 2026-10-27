@@ -1,0 +1,124 @@
+Skip to Main Content
+Kry's Monthlies
+Search
+0 results
+Install App
+About
+nobody
+	
+2025 July
+107/87 players
+COMPLETED
+	
+Overall Leaders - 2025 July
+Pos	Player	League	Courses
+Played	Total
+Strokes	HN1's	Points
+1	GuyB22	Semi Pro 2	8	-131	10	1,600
+2	Raccoons Whisker	Amateur 2	8	-85	8	1,588
+3	Zanetti	Pro 3	8	-196	30	1,580
+4	Merged into 8648	Pro 2	8	-175	18	1,578
+5	Blutes87	Pro 1	8	-181	20	1,570
+6	𝙹𝚞𝚕𝚒𝚊𝚗	Pro 3	8	-192	25	1,565
+7	Merged into 8708	Beginner	8	-50	8	1,548
+8	Sandtrap	Semi Pro 2	8	-112	11	1,531
+9	INDY	Master	8	-195	22	1,522
+10	KillERBee	Amateur 1	8	-65	7	1,517
+1 - 10
+Welcome Leaders
+League
+- Select -
+Master
+Elite
+Pro 1
+Pro 2
+Pro 3
+Semi Pro 1
+Beginner
+Welcome
+Pos	Player	Courses
+Played	Total
+Strokes	HN1's	Points
+1
+	ANDRIA77	1	-12	1	201
+	PUTT_FOR_DOH	0			
+	Merged into 8189	0			
+	Captain	0			
+	KDK	0			
+1 - 5
+ Players at risk of relegation
+  Point change since last report.
+ Bogey's Bonanza
+#	Player	Score	HN1	Points
+	Captain			
+	KDK			
+	Merged into 8189			
+	ANDRIA77			
+	PUTT_FOR_DOH			
+ Bogey's Bonanza Hard
+#	Player	Score	HN1	Points
+	Captain			
+	KDK			
+	Merged into 8189			
+	ANDRIA77			
+	PUTT_FOR_DOH			
+ Upside Town
+#	Player	Score	HN1	Points
+1	ANDRIA77	-12	1	201
+	PUTT_FOR_DOH			
+	Merged into 8189			
+	Captain			
+	KDK			
+ Upside Town - Hard
+#	Player	Score	HN1	Points
+	Captain			
+	KDK			
+	ANDRIA77			
+	PUTT_FOR_DOH			
+	Merged into 8189			
+ Journey to the Center of the Earth
+#	Player	Score	HN1	Points
+	Captain			
+	KDK			
+	Merged into 8189			
+	ANDRIA77			
+	PUTT_FOR_DOH			
+ Center of the Earth - Hard
+#	Player	Score	HN1	Points
+	Captain			
+	PUTT_FOR_DOH			
+	KDK			
+	Merged into 8189			
+	ANDRIA77			
+ Crystal Lair
+#	Player	Score	HN1	Points
+	Captain			
+	PUTT_FOR_DOH			
+	Merged into 8189			
+	KDK			
+	ANDRIA77			
+ Crystal Lair - Hard
+#	Player	Score	HN1	Points
+	Captain			
+	PUTT_FOR_DOH			
+	Merged into 8189			
+	ANDRIA77			
+	KDK			
+2025 July Courses
+
+
+BBE - Bogey's Bonanza
+BBH - Bogey's Bonanza Hard
+
+
+UTE - Upside Town
+UTH - Upside Town - Hard
+
+
+JCE - Journey to the Center of the Earth
+JCH - Center of the Earth - Hard
+
+
+CLE - Crystal Lair
+CLH - Crystal Lair - Hard
+Release 1.2 Built with  using Oracle APEX

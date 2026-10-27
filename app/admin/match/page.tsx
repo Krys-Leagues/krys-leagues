@@ -1,0 +1,207 @@
+"use client"
+
+import Link from "next/link"
+import { useEffect, useState } from "react"
+import { supabase } from "@/lib/supabase"
+import {
+  resolveCurrentMatchAdminSeason,
+  type MatchAdminRoster,
+  type MatchAdminSeason,
+  type MatchAdminSeasonResolution,
+} from "@/lib/matchAdminSeason"
+
+export default function MatchAdminPage() {
+  const [seasonResolution, setSeasonResolution] = useState<MatchAdminSeasonResolution | null>(null)
+  const [scheduleLinkError, setScheduleLinkError] = useState("")
+
+  useEffect(() => {
+    async function loadCurrentManagedSeason() {
+      const { data: seasonData, error: seasonError } = await supabase
+        .from("seasons")
+        .select("id, season_number, is_active, is_locked, start_date, end_date")
+        .eq("league_type", "match")
+        .is("division", null)
+        .order("is_active", { ascending: false })
+        .order("season_number", { ascending: false })
+
+      if (seasonError) {
+        setScheduleLinkError(`Could not load the current Match season: ${seasonError.message}`)
+        return
+      }
+
+      const seasons = (seasonData || []) as MatchAdminSeason[]
+      if (seasons.length === 0) return
+
+      const { data: rosterData, error: rosterError } = await supabase
+        .from("match_roster_versions")
+        .select("season_id, status")
+        .in("season_id", seasons.map((season) => season.id))
+        .in("status", ["draft", "approved", "locked"])
+
+      if (rosterError) {
+        setScheduleLinkError(`Could not load the current Match roster: ${rosterError.message}`)
+        return
+      }
+
+      const rosters = (rosterData || []) as MatchAdminRoster[]
+      const requestedSeasonId = new URLSearchParams(window.location.search).get("seasonId")
+      setSeasonResolution(
+        resolveCurrentMatchAdminSeason(
+          seasons,
+          rosters,
+          requestedSeasonId
+        )
+      )
+    }
+
+    void loadCurrentManagedSeason()
+  }, [])
+
+  const managedSeason = seasonResolution?.season || null
+  const isLegacyFallback = seasonResolution?.source === "legacy-fallback"
+
+  return (
+    <main style={page}>
+      <h1 style={title}>Match Play Admin</h1>
+      <p style={subtitle}>
+        Manage Match Play seasons, scoring, and active games.
+        {isLegacyFallback ? " Current legacy season tools are enabled during the transition." : ""}
+      </p>
+
+      {!managedSeason && (
+        <section style={emptyState} role="status">
+          <h2 style={emptyStateTitle}>NO CURRENT MATCH SEASON</h2>
+          <p style={emptyStateText}>
+            Create the new Match season to initialize its draft roster and enable the current-season admin tools.
+          </p>
+          <Link href="/admin/match/season" style={createSeasonLink}>
+            CREATE NEW MATCH SEASON
+          </Link>
+        </section>
+      )}
+
+      <div style={grid}>
+        <Link href="/admin/match/season" style={card}>
+          <strong>{managedSeason ? "Setup New Season" : "Match Season Details"}</strong>
+          <span>{managedSeason ? "Create or prepare a new Match Play season." : "Enter the season number, dates, courses, and division count."}</span>
+        </Link>
+
+        <Link href="/admin/match/season/edit" style={card}>
+          <strong>Edit Current Season</strong>
+          <span>Edit the current managed Match season and its divisions.</span>
+        </Link>
+
+        {managedSeason ? (
+          <Link
+            href={`/admin/match/schedule?seasonId=${encodeURIComponent(managedSeason.id)}`}
+            style={card}
+          >
+            <strong>Schedule &amp; Images</strong>
+            <span>
+              View the current schedule, review changes, and download division schedule images.
+            </span>
+          </Link>
+        ) : (
+          <div style={{ ...card, opacity: 0.65 }}>
+            <strong>Schedule &amp; Images</strong>
+            <span>
+              {scheduleLinkError || "No current managed Match season is available yet."}
+            </span>
+          </div>
+        )}
+
+        {managedSeason && (
+          <>
+            <Link href={`/admin/match/results?seasonId=${encodeURIComponent(managedSeason.id)}`} style={card}>
+              <strong>Score Current Season</strong>
+              <span>Enter, correct, or delete managed Match results.</span>
+            </Link>
+            <Link href={`/admin/match/standings?seasonId=${encodeURIComponent(managedSeason.id)}`} style={card}>
+              <strong>Standings / Final Scorecard</strong>
+              <span>Review standings and finalize the season scorecard.</span>
+            </Link>
+          </>
+        )}
+
+        {managedSeason ? (
+          <Link href={`/admin/match/players?seasonId=${encodeURIComponent(managedSeason.id)}`} style={card}>
+            <strong>Players</strong>
+            <span>View players in this Match season.</span>
+          </Link>
+        ) : (
+          <div style={{ ...card, opacity: 0.65 }}><strong>Players</strong><span>{scheduleLinkError || "No current managed Match season is available yet."}</span></div>
+        )}
+
+        <Link href="/admin" style={card}>
+          <strong>Back to Admin Home</strong>
+          <span>Return to the main admin dashboard.</span>
+        </Link>
+      </div>
+    </main>
+  )
+}
+
+const page: React.CSSProperties = {
+  minHeight: "100vh",
+  padding: 24,
+  background: "black",
+  color: "white",
+}
+
+const title: React.CSSProperties = {
+  fontSize: 34,
+  marginBottom: 8,
+}
+
+const subtitle: React.CSSProperties = {
+  color: "#cfcfcf",
+  marginBottom: 28,
+}
+
+const grid: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))",
+  gap: 14,
+}
+
+const emptyState: React.CSSProperties = {
+  marginBottom: 24,
+  padding: 22,
+  border: "1px solid #854d0e",
+  borderRadius: 12,
+  background: "rgba(120, 53, 15, 0.18)",
+}
+
+const emptyStateTitle: React.CSSProperties = {
+  margin: 0,
+  color: "#facc15",
+  fontSize: 22,
+}
+
+const emptyStateText: React.CSSProperties = {
+  margin: "10px 0 18px",
+  color: "#fde68a",
+  lineHeight: 1.5,
+}
+
+const createSeasonLink: React.CSSProperties = {
+  display: "inline-block",
+  padding: "12px 16px",
+  borderRadius: 9,
+  background: "#16a34a",
+  color: "white",
+  fontWeight: 800,
+  textDecoration: "none",
+}
+
+const card: React.CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+  gap: 8,
+  padding: 18,
+  borderRadius: 14,
+  border: "1px solid #333",
+  background: "#111",
+  color: "white",
+  textDecoration: "none",
+}

@@ -1,0 +1,21 @@
+.page { min-height: 100vh; padding: 32px clamp(16px, 5vw, 72px) 64px; background: #050505; color: #f8fafc; }
+.header { max-width: 900px; margin: 0 auto 24px; }
+.backLink { display: inline-block; margin-bottom: 30px; color: #bfdbfe; text-decoration: none; }
+.eyebrow { margin: 0 0 8px; color: #93c5fd; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.header h1, .card h2, .indexCard h2 { margin: 0; }
+.header h1 { font-size: clamp(30px, 5vw, 48px); }
+.subtitle, .card p, .note { color: #cbd5e1; line-height: 1.55; }
+.card, .indexCard { max-width: 900px; margin: 0 auto 18px; padding: 22px; border: 1px solid #263244; border-radius: 14px; background: #0b1220; }
+.indexCard { display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: center; }
+.index { color: #bbf7d0; font-size: clamp(42px, 8vw, 76px); line-height: 1; }
+.metadata { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 18px 34px; margin: 0; }
+.metadata div { display: grid; gap: 4px; }
+.metadata dt { color: #94a3b8; font-size: 11px; font-weight: 800; text-transform: uppercase; }
+.metadata dd { margin: 0; color: #e2e8f0; }
+.status { display: inline-block; margin-bottom: 12px; padding: 5px 8px; border-radius: 999px; color: #fed7aa; background: #7c2d12; font-size: 11px; font-weight: 800; letter-spacing: .06em; }
+.note { font-size: 13px; }
+.tableWrap { overflow-x: auto; }
+.tableWrap table { width: 100%; min-width: 650px; border-collapse: collapse; font-size: 13px; }
+.tableWrap th, .tableWrap td { padding: 10px; border-bottom: 1px solid #1e293b; text-align: left; }
+.tableWrap th { color: #94a3b8; font-size: 11px; text-transform: uppercase; }
+@media (max-width: 640px) { .indexCard { grid-template-columns: 1fr; } .index { justify-self: start; } }

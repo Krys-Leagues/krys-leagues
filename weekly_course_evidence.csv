@@ -1,0 +1,845 @@
+source,event_id,season_week,division,player_exact,source_player_id,course_code,canonical_course,difficulty,score,completed_round,source_screenshot,source_row,verification_status,exception_reason,personal_handicap_eligible
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,AMATEUR,Fake4Real,,LBE,Labyrinth Easy,EASY,-19,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174330).png,1,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,AMATEUR,Fake4Real,,RCH,Raptor Cliff's Hard,HARD,-6,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174330).png,1,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,AMATEUR,BigSlimJ,,LBE,Labyrinth Easy,EASY,-19,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174330).png,2,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,AMATEUR,BigSlimJ,,RCH,Raptor Cliff's Hard,HARD,-5,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174330).png,2,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,AMATEUR,Necrolitic,,LBE,Labyrinth Easy,EASY,-21,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174330).png,3,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,AMATEUR,Necrolitic,,RCH,Raptor Cliff's Hard,HARD,0,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174330).png,3,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,AMATEUR,joshbenesh,,LBE,Labyrinth Easy,EASY,-20,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174330).png,4,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,AMATEUR,joshbenesh,,RCH,Raptor Cliff's Hard,HARD,0,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174330).png,4,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,AMATEUR,NuttyGrandpa,,LBE,Labyrinth Easy,EASY,-14,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174330).png,5,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,AMATEUR,NuttyGrandpa,,RCH,Raptor Cliff's Hard,HARD,-6,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174330).png,5,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,AMATEUR,ZoeDarlin,,LBE,Labyrinth Easy,EASY,-13,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174330).png,6,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,AMATEUR,ZoeDarlin,,RCH,Raptor Cliff's Hard,HARD,-4,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174330).png,6,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,AMATEUR,SlugJug33,,LBE,Labyrinth Easy,EASY,-14,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174330).png,7,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,AMATEUR,SlugJug33,,RCH,Raptor Cliff's Hard,HARD,-2,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174330).png,7,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,AMATEUR,AKFlyerFan,,LBE,Labyrinth Easy,EASY,-14,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174330).png,8,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,AMATEUR,AKFlyerFan,,RCH,Raptor Cliff's Hard,HARD,0,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174330).png,8,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,AMATEUR,indianchief,,LBE,Labyrinth Easy,EASY,-15,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174330).png,9,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,AMATEUR,indianchief,,RCH,Raptor Cliff's Hard,HARD,1,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174330).png,9,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,AMATEUR,kinghenryclub,,LBE,Labyrinth Easy,EASY,-18,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174330).png,10,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,AMATEUR,kinghenryclub,,RCH,Raptor Cliff's Hard,HARD,4,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174330).png,10,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,AMATEUR,Old-T,,LBE,Labyrinth Easy,EASY,-13,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174330).png,11,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,AMATEUR,Old-T,,RCH,Raptor Cliff's Hard,HARD,-1,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174330).png,11,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,AMATEUR,Bubbaframe,,LBE,Labyrinth Easy,EASY,-11,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174330).png,12,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,AMATEUR,Bubbaframe,,RCH,Raptor Cliff's Hard,HARD,-2,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174330).png,12,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,AMATEUR,StoneyMan69,,LBE,Labyrinth Easy,EASY,-8,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174330).png,13,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,AMATEUR,StoneyMan69,,RCH,Raptor Cliff's Hard,HARD,-2,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174330).png,13,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,AMATEUR,KnockoutG,,LBE,Labyrinth Easy,EASY,-12,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174330).png,14,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,AMATEUR,KnockoutG,,RCH,Raptor Cliff's Hard,HARD,5,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174330).png,14,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,AMATEUR,strawbag,,LBE,Labyrinth Easy,EASY,-7,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174330).png,15,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,AMATEUR,strawbag,,RCH,Raptor Cliff's Hard,HARD,1,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174330).png,15,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,SEMI-PRO,Kyda,,LBE,Labyrinth Easy,EASY,-18,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174341).png,1,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,SEMI-PRO,Kyda,,RCH,Raptor Cliff's Hard,HARD,-15,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174341).png,1,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,SEMI-PRO,TrickyDicky,,LBE,Labyrinth Easy,EASY,-22,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174341).png,2,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,SEMI-PRO,TrickyDicky,,RCH,Raptor Cliff's Hard,HARD,-11,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174341).png,2,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,SEMI-PRO,steven_T,,LBE,Labyrinth Easy,EASY,-19,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174341).png,3,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,SEMI-PRO,steven_T,,RCH,Raptor Cliff's Hard,HARD,-12,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174341).png,3,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,SEMI-PRO,Neo Impossible,,LBE,Labyrinth Easy,EASY,-19,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174341).png,4,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,SEMI-PRO,Neo Impossible,,RCH,Raptor Cliff's Hard,HARD,-11,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174341).png,4,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,SEMI-PRO,Chipnputt,,LBE,Labyrinth Easy,EASY,-24,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174341).png,5,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,SEMI-PRO,Chipnputt,,RCH,Raptor Cliff's Hard,HARD,-5,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174341).png,5,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,SEMI-PRO,The Mortski,,LBE,Labyrinth Easy,EASY,-20,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174341).png,6,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,SEMI-PRO,The Mortski,,RCH,Raptor Cliff's Hard,HARD,-8,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174341).png,6,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,SEMI-PRO,Mully,,LBE,Labyrinth Easy,EASY,-23,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174341).png,7,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,SEMI-PRO,Mully,,RCH,Raptor Cliff's Hard,HARD,-2,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174341).png,7,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,SEMI-PRO,The Real JB,,LBE,Labyrinth Easy,EASY,-18,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174341).png,8,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,SEMI-PRO,The Real JB,,RCH,Raptor Cliff's Hard,HARD,-7,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174341).png,8,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,SEMI-PRO,Browner,,LBE,Labyrinth Easy,EASY,-19,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174341).png,9,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,SEMI-PRO,Browner,,RCH,Raptor Cliff's Hard,HARD,-4,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174341).png,9,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,SEMI-PRO,Emil,,LBE,Labyrinth Easy,EASY,-20,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174341).png,10,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,SEMI-PRO,Emil,,RCH,Raptor Cliff's Hard,HARD,-3,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174341).png,10,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,SEMI-PRO,Firefly,,LBE,Labyrinth Easy,EASY,-15,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174341).png,11,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,SEMI-PRO,Firefly,,RCH,Raptor Cliff's Hard,HARD,-8,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174341).png,11,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,SEMI-PRO,autodidactic,,LBE,Labyrinth Easy,EASY,-14,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174341).png,12,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,SEMI-PRO,autodidactic,,RCH,Raptor Cliff's Hard,HARD,-7,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174341).png,12,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,SEMI-PRO,DISClingerADK,,LBE,Labyrinth Easy,EASY,-18,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174341).png,13,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,SEMI-PRO,DISClingerADK,,RCH,Raptor Cliff's Hard,HARD,-2,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174341).png,13,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,SEMI-PRO,LB1,,LBE,Labyrinth Easy,EASY,-15,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174341).png,14,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,SEMI-PRO,LB1,,RCH,Raptor Cliff's Hard,HARD,-3,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174341).png,14,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,SEMI-PRO,breezy,,LBE,Labyrinth Easy,EASY,-11,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174341).png,15,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,SEMI-PRO,breezy,,RCH,Raptor Cliff's Hard,HARD,-5,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174341).png,15,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,SEMI-PRO,deebee,,LBE,Labyrinth Easy,EASY,-13,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174341).png,16,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,SEMI-PRO,deebee,,RCH,Raptor Cliff's Hard,HARD,0,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174341).png,16,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,SEMI-PRO,call_me_snow,,LBE,Labyrinth Easy,EASY,-15,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174341).png,17,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,SEMI-PRO,call_me_snow,,RCH,Raptor Cliff's Hard,HARD,5,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174341).png,17,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,SEMI-PRO,hhaus,,LBE,Labyrinth Easy,EASY,-17,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174341).png,18,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,SEMI-PRO,hhaus,,RCH,Raptor Cliff's Hard,HARD,7,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174341).png,18,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,PRO,Oculus_Prime,,LBE,Labyrinth Easy,EASY,-23,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174350).png,1,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,PRO,Oculus_Prime,,RCH,Raptor Cliff's Hard,HARD,-14,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174350).png,1,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,PRO,Jay,,LBE,Labyrinth Easy,EASY,-20,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174350).png,2,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,PRO,Jay,,RCH,Raptor Cliff's Hard,HARD,-14,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174350).png,2,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,PRO,Traynor,,LBE,Labyrinth Easy,EASY,-23,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174350).png,3,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,PRO,Traynor,,RCH,Raptor Cliff's Hard,HARD,-11,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174350).png,3,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,PRO,HeartBreakKid,,LBE,Labyrinth Easy,EASY,-24,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174350).png,4,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,PRO,HeartBreakKid,,RCH,Raptor Cliff's Hard,HARD,-9,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174350).png,4,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,PRO,Trikster32,,LBE,Labyrinth Easy,EASY,-23,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174350).png,5,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,PRO,Trikster32,,RCH,Raptor Cliff's Hard,HARD,-10,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174350).png,5,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,PRO,Freitag,,LBE,Labyrinth Easy,EASY,-21,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174350).png,6,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,PRO,Freitag,,RCH,Raptor Cliff's Hard,HARD,-9,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174350).png,6,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,PRO,Jesunet,,LBE,Labyrinth Easy,EASY,-18,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174350).png,7,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,PRO,Jesunet,,RCH,Raptor Cliff's Hard,HARD,-12,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174350).png,7,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,PRO,The_WB,,LBE,Labyrinth Easy,EASY,-22,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174350).png,8,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,PRO,The_WB,,RCH,Raptor Cliff's Hard,HARD,-8,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174350).png,8,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,PRO,JC,,LBE,Labyrinth Easy,EASY,-17,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174350).png,9,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,PRO,JC,,RCH,Raptor Cliff's Hard,HARD,-12,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174350).png,9,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,PRO,Larry,,LBE,Labyrinth Easy,EASY,-23,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174350).png,10,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,PRO,Larry,,RCH,Raptor Cliff's Hard,HARD,-6,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174350).png,10,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,PRO,lefty,,LBE,Labyrinth Easy,EASY,-20,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174350).png,11,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,PRO,lefty,,RCH,Raptor Cliff's Hard,HARD,-9,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174350).png,11,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,PRO,omielgato,,LBE,Labyrinth Easy,EASY,-20,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174350).png,12,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,PRO,omielgato,,RCH,Raptor Cliff's Hard,HARD,-7,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174350).png,12,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,PRO,Mau,,LBE,Labyrinth Easy,EASY,-20,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174350).png,13,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,PRO,Mau,,RCH,Raptor Cliff's Hard,HARD,-4,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174350).png,13,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,PRO,pluff,,LBE,Labyrinth Easy,EASY,-21,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174350).png,14,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,PRO,pluff,,RCH,Raptor Cliff's Hard,HARD,-2,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174350).png,14,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,PRO,Princess_Bankshot,,LBE,Labyrinth Easy,EASY,-18,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174350).png,15,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,PRO,Princess_Bankshot,,RCH,Raptor Cliff's Hard,HARD,-5,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174350).png,15,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,PRO,Gus,,LBE,Labyrinth Easy,EASY,-19,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174350).png,16,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,PRO,Gus,,RCH,Raptor Cliff's Hard,HARD,-3,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174350).png,16,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,PRO,NERD_GP,,LBE,Labyrinth Easy,EASY,-19,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174350).png,17,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,PRO,NERD_GP,,RCH,Raptor Cliff's Hard,HARD,-3,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174350).png,17,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,PRO,Karma Changer,,LBE,Labyrinth Easy,EASY,-17,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174350).png,18,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,PRO,Karma Changer,,RCH,Raptor Cliff's Hard,HARD,-4,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174350).png,18,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,PRO,LaurentE,,LBE,Labyrinth Easy,EASY,-19,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174350).png,19,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,PRO,LaurentE,,RCH,Raptor Cliff's Hard,HARD,-1,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174350).png,19,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,PRO,AmberWave,,LBE,Labyrinth Easy,EASY,-15,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174350).png,20,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,PRO,AmberWave,,RCH,Raptor Cliff's Hard,HARD,1,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174350).png,20,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,Zanetti,,LBE,Labyrinth Easy,EASY,-26,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,1,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,Zanetti,,RCH,Raptor Cliff's Hard,HARD,-18,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,1,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,Matt916,,LBE,Labyrinth Easy,EASY,-27,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,2,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,Matt916,,RCH,Raptor Cliff's Hard,HARD,-15,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,2,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,mini_G,,LBE,Labyrinth Easy,EASY,-21,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,3,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,mini_G,,RCH,Raptor Cliff's Hard,HARD,-20,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,3,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,INDY,,LBE,Labyrinth Easy,EASY,-23,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,4,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,INDY,,RCH,Raptor Cliff's Hard,HARD,-17,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,4,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,Derby_Daz,,LBE,Labyrinth Easy,EASY,-23,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,5,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,Derby_Daz,,RCH,Raptor Cliff's Hard,HARD,-16,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,5,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,Duardy,,LBE,Labyrinth Easy,EASY,-25,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,6,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,Duardy,,RCH,Raptor Cliff's Hard,HARD,-14,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,6,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,Fugohallarin,,LBE,Labyrinth Easy,EASY,-24,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,7,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,Fugohallarin,,RCH,Raptor Cliff's Hard,HARD,-14,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,7,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,his.Dudeness,,LBE,Labyrinth Easy,EASY,-24,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,8,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,his.Dudeness,,RCH,Raptor Cliff's Hard,HARD,-13,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,8,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,IceCreamTaco,,LBE,Labyrinth Easy,EASY,-20,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,9,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,IceCreamTaco,,RCH,Raptor Cliff's Hard,HARD,-16,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,9,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,leanin2it,,LBE,Labyrinth Easy,EASY,-19,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,10,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,leanin2it,,RCH,Raptor Cliff's Hard,HARD,-17,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,10,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,OpusMcGraw,,LBE,Labyrinth Easy,EASY,-24,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,11,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,OpusMcGraw,,RCH,Raptor Cliff's Hard,HARD,-11,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,11,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,Dude_Lebowski,,LBE,Labyrinth Easy,EASY,-19,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,12,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,Dude_Lebowski,,RCH,Raptor Cliff's Hard,HARD,-15,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,12,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,El Jorge,,LBE,Labyrinth Easy,EASY,-23,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,13,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,El Jorge,,RCH,Raptor Cliff's Hard,HARD,-10,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,13,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,Gobson,,LBE,Labyrinth Easy,EASY,-20,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,14,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,Gobson,,RCH,Raptor Cliff's Hard,HARD,-13,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,14,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,bigja33,,LBE,Labyrinth Easy,EASY,-22,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,15,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,bigja33,,RCH,Raptor Cliff's Hard,HARD,-10,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,15,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,gomarino13,,LBE,Labyrinth Easy,EASY,-23,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,16,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,gomarino13,,RCH,Raptor Cliff's Hard,HARD,-9,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,16,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,Puttnafed,,LBE,Labyrinth Easy,EASY,-24,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,17,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,Puttnafed,,RCH,Raptor Cliff's Hard,HARD,-7,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,17,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,gOnz0nater,,LBE,Labyrinth Easy,EASY,-17,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,18,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,gOnz0nater,,RCH,Raptor Cliff's Hard,HARD,-13,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,18,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,moba,,LBE,Labyrinth Easy,EASY,-25,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,19,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,moba,,RCH,Raptor Cliff's Hard,HARD,-5,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,19,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,FelixTortilla,,LBE,Labyrinth Easy,EASY,-24,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,20,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,FelixTortilla,,RCH,Raptor Cliff's Hard,HARD,-5,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,20,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,Goldenbrett,,LBE,Labyrinth Easy,EASY,-16,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,21,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,Goldenbrett,,RCH,Raptor Cliff's Hard,HARD,-13,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,21,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,Harry Highpants,,LBE,Labyrinth Easy,EASY,-20,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,22,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,Harry Highpants,,RCH,Raptor Cliff's Hard,HARD,-9,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,22,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,UroPa,,LBE,Labyrinth Easy,EASY,-23,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,23,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,UroPa,,RCH,Raptor Cliff's Hard,HARD,-6,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,23,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,Sticky,,LBE,Labyrinth Easy,EASY,-23,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,24,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,Sticky,,RCH,Raptor Cliff's Hard,HARD,-3,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,24,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,wayne1538,,LBE,Labyrinth Easy,EASY,-12,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,25,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,wayne1538,,RCH,Raptor Cliff's Hard,HARD,-11,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,25,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,NATE,,LBE,Labyrinth Easy,EASY,-20,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,26,VERIFIED,,false
+THE_WEEKLY,S19W10_LBE_RCH,S19W10,ELITE,NATE,,RCH,Raptor Cliff's Hard,HARD,2,true,phase52-input/weekly_screenshots/S19W10_LBE_RCH/image(20261019-174359).png,26,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,Dickfor247,,GLE,Gloop Lair Easy,EASY,-21,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,1,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,Dickfor247,,HWH,Hollywood Hard,HARD,-11,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,1,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,SlugJug33,,GLE,Gloop Lair Easy,EASY,-20,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,2,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,SlugJug33,,HWH,Hollywood Hard,HARD,-9,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,2,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,Tee_Wrecks,,GLE,Gloop Lair Easy,EASY,-21,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,3,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,Tee_Wrecks,,HWH,Hollywood Hard,HARD,-8,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,3,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,nakleh,,GLE,Gloop Lair Easy,EASY,-20,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,4,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,nakleh,,HWH,Hollywood Hard,HARD,-7,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,4,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,strawbag,,GLE,Gloop Lair Easy,EASY,-20,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,5,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,strawbag,,HWH,Hollywood Hard,HARD,-7,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,5,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,Tonix,,GLE,Gloop Lair Easy,EASY,-20,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,6,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,Tonix,,HWH,Hollywood Hard,HARD,-6,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,6,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,Dealerodd,,GLE,Gloop Lair Easy,EASY,-25,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,7,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,Dealerodd,,HWH,Hollywood Hard,HARD,0,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,7,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,par5tx,,GLE,Gloop Lair Easy,EASY,-22,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,8,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,par5tx,,HWH,Hollywood Hard,HARD,-3,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,8,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,ZoeDarlin,,GLE,Gloop Lair Easy,EASY,-18,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,9,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,ZoeDarlin,,HWH,Hollywood Hard,HARD,-7,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,9,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,joshbenesh,,GLE,Gloop Lair Easy,EASY,-19,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,10,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,joshbenesh,,HWH,Hollywood Hard,HARD,-5,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,10,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,Lynbot5000,,GLE,Gloop Lair Easy,EASY,-20,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,11,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,Lynbot5000,,HWH,Hollywood Hard,HARD,-3,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,11,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,KnockoutG,,GLE,Gloop Lair Easy,EASY,-12,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,12,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,KnockoutG,,HWH,Hollywood Hard,HARD,-10,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,12,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,par5MS0210,,GLE,Gloop Lair Easy,EASY,-16,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,13,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,par5MS0210,,HWH,Hollywood Hard,HARD,-3,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,13,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,Eyerie,,GLE,Gloop Lair Easy,EASY,-12,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,14,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,Eyerie,,HWH,Hollywood Hard,HARD,-6,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,14,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,Callthemedic,,GLE,Gloop Lair Easy,EASY,-17,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,15,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,Callthemedic,,HWH,Hollywood Hard,HARD,0,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,15,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,Mrroth,,GLE,Gloop Lair Easy,EASY,-12,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,16,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,Mrroth,,HWH,Hollywood Hard,HARD,-5,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,16,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,StoneyMan69,,GLE,Gloop Lair Easy,EASY,-17,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,17,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,StoneyMan69,,HWH,Hollywood Hard,HARD,1,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,17,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,Fake4Real,,GLE,Gloop Lair Easy,EASY,-13,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,18,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,Fake4Real,,HWH,Hollywood Hard,HARD,-2,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,18,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,NuttyGrandpa,,GLE,Gloop Lair Easy,EASY,-15,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,19,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,NuttyGrandpa,,HWH,Hollywood Hard,HARD,0,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,19,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,AKFlyerFan,,GLE,Gloop Lair Easy,EASY,-8,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,20,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,AKFlyerFan,,HWH,Hollywood Hard,HARD,-2,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,20,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,Fabita53,,GLE,Gloop Lair Easy,EASY,-10,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,21,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,Fabita53,,HWH,Hollywood Hard,HARD,0,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,21,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,thatgirl18,,GLE,Gloop Lair Easy,EASY,-15,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,22,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,AMATEUR,thatgirl18,,HWH,Hollywood Hard,HARD,8,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155200).png,22,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,SEMI-PRO,call_me_snow,,GLE,Gloop Lair Easy,EASY,-25,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155411).png,1,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,SEMI-PRO,call_me_snow,,HWH,Hollywood Hard,HARD,-12,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155411).png,1,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,SEMI-PRO,Catweazel,,GLE,Gloop Lair Easy,EASY,-23,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155411).png,1,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,SEMI-PRO,Catweazel,,HWH,Hollywood Hard,HARD,-14,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155411).png,1,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,SEMI-PRO,Calassy,,GLE,Gloop Lair Easy,EASY,-24,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155411).png,3,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,SEMI-PRO,Calassy,,HWH,Hollywood Hard,HARD,-12,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155411).png,3,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,SEMI-PRO,The Real JB,,GLE,Gloop Lair Easy,EASY,-21,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155411).png,4,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,SEMI-PRO,The Real JB,,HWH,Hollywood Hard,HARD,-12,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155411).png,4,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,SEMI-PRO,hhaus,,GLE,Gloop Lair Easy,EASY,-19,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155411).png,6,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,SEMI-PRO,hhaus,,HWH,Hollywood Hard,HARD,-12,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155411).png,6,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,SEMI-PRO,TrickyDicky,,GLE,Gloop Lair Easy,EASY,-24,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155411).png,6,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,SEMI-PRO,TrickyDicky,,HWH,Hollywood Hard,HARD,-7,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155411).png,6,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,SEMI-PRO,EL.MEXICANO,,GLE,Gloop Lair Easy,EASY,-21,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155411).png,8,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,SEMI-PRO,EL.MEXICANO,,HWH,Hollywood Hard,HARD,-9,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155411).png,8,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,SEMI-PRO,steven_T,,GLE,Gloop Lair Easy,EASY,-18,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155411).png,11,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,SEMI-PRO,steven_T,,HWH,Hollywood Hard,HARD,-12,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155411).png,11,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,SEMI-PRO,Mully,,GLE,Gloop Lair Easy,EASY,-22,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155411).png,12,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,SEMI-PRO,Mully,,HWH,Hollywood Hard,HARD,-6,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155411).png,12,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,SEMI-PRO,Tornado,,GLE,Gloop Lair Easy,EASY,-18,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155411).png,13,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,SEMI-PRO,Tornado,,HWH,Hollywood Hard,HARD,-9,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155411).png,13,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,SEMI-PRO,clarksoft,,GLE,Gloop Lair Easy,EASY,-18,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155411).png,13,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,SEMI-PRO,clarksoft,,HWH,Hollywood Hard,HARD,-8,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155411).png,13,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,SEMI-PRO,Maxxom-fr,,GLE,Gloop Lair Easy,EASY,-18,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155411).png,15,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,SEMI-PRO,Maxxom-fr,,HWH,Hollywood Hard,HARD,-8,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155411).png,15,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,SEMI-PRO,deebee,,GLE,Gloop Lair Easy,EASY,-18,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155411).png,16,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,SEMI-PRO,deebee,,HWH,Hollywood Hard,HARD,-7,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155411).png,16,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,SEMI-PRO,The Mortski,,GLE,Gloop Lair Easy,EASY,-17,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155411).png,18,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,SEMI-PRO,The Mortski,,HWH,Hollywood Hard,HARD,-6,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155411).png,18,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,SEMI-PRO,PorkPie Doofus,,GLE,Gloop Lair Easy,EASY,-24,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155411).png,19,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,SEMI-PRO,PorkPie Doofus,,HWH,Hollywood Hard,HARD,3,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155411).png,19,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,SEMI-PRO,2000MPH,,GLE,Gloop Lair Easy,EASY,-14,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155411).png,19,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,SEMI-PRO,2000MPH,,HWH,Hollywood Hard,HARD,-3,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155411).png,19,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,SEMI-PRO,Chipnputt,,GLE,Gloop Lair Easy,EASY,-11,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155411).png,21,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,SEMI-PRO,Chipnputt,,HWH,Hollywood Hard,HARD,-6,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155411).png,21,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,SEMI-PRO,D3bb13,,GLE,Gloop Lair Easy,EASY,-14,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155411).png,21,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,SEMI-PRO,D3bb13,,HWH,Hollywood Hard,HARD,0,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155411).png,21,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,SEMI-PRO,Neo Impossible,,GLE,Gloop Lair Easy,EASY,-8,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155411).png,23,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,SEMI-PRO,Neo Impossible,,HWH,Hollywood Hard,HARD,-6,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155411).png,23,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,SEMI-PRO,Emil,,GLE,Gloop Lair Easy,EASY,-7,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155411).png,23,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,SEMI-PRO,Emil,,HWH,Hollywood Hard,HARD,-4,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155411).png,23,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,PRO,biz,,GLE,Gloop Lair Easy,EASY,-24,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155450).png,1,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,PRO,biz,,HWH,Hollywood Hard,HARD,-14,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155450).png,1,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,PRO,Mau,,GLE,Gloop Lair Easy,EASY,-23,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155450).png,2,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,PRO,Mau,,HWH,Hollywood Hard,HARD,-15,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155450).png,2,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,PRO,NERD_GP,,GLE,Gloop Lair Easy,EASY,-29,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155450).png,3,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,PRO,NERD_GP,,HWH,Hollywood Hard,HARD,-9,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155450).png,3,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,PRO,Will_Xo,,GLE,Gloop Lair Easy,EASY,-25,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155450).png,4,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,PRO,Will_Xo,,HWH,Hollywood Hard,HARD,-13,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155450).png,4,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,PRO,Jesunet,,GLE,Gloop Lair Easy,EASY,-28,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155450).png,5,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,PRO,Jesunet,,HWH,Hollywood Hard,HARD,-9,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155450).png,5,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,PRO,Karma Changer,,GLE,Gloop Lair Easy,EASY,-23,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155450).png,6,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,PRO,Karma Changer,,HWH,Hollywood Hard,HARD,-13,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155450).png,6,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,PRO,The_WB,,GLE,Gloop Lair Easy,EASY,-23,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155450).png,7,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,PRO,The_WB,,HWH,Hollywood Hard,HARD,-13,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155450).png,7,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,PRO,akaMikeD,,GLE,Gloop Lair Easy,EASY,-21,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155450).png,8,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,PRO,akaMikeD,,HWH,Hollywood Hard,HARD,-14,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155450).png,8,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,PRO,Freitag,,GLE,Gloop Lair Easy,EASY,-23,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155450).png,9,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,PRO,Freitag,,HWH,Hollywood Hard,HARD,-12,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155450).png,9,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,PRO,Jay,,GLE,Gloop Lair Easy,EASY,-23,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155450).png,10,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,PRO,Jay,,HWH,Hollywood Hard,HARD,-12,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155450).png,10,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,PRO,Trikster32,,GLE,Gloop Lair Easy,EASY,-24,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155450).png,11,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,PRO,Trikster32,,HWH,Hollywood Hard,HARD,-11,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155450).png,11,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,PRO,pluff,,GLE,Gloop Lair Easy,EASY,-26,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155450).png,12,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,PRO,pluff,,HWH,Hollywood Hard,HARD,-8,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155450).png,12,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,PRO,Gatorsfan89,,GLE,Gloop Lair Easy,EASY,-25,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155450).png,13,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,PRO,Gatorsfan89,,HWH,Hollywood Hard,HARD,-8,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155450).png,13,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,PRO,Gus,,GLE,Gloop Lair Easy,EASY,-19,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155450).png,14,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,PRO,Gus,,HWH,Hollywood Hard,HARD,-13,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155450).png,14,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,PRO,quickfam4,,GLE,Gloop Lair Easy,EASY,-17,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155450).png,15,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,PRO,quickfam4,,HWH,Hollywood Hard,HARD,-15,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155450).png,15,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,PRO,DontQuitWhenLosing,,GLE,Gloop Lair Easy,EASY,-15,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155450).png,16,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,PRO,DontQuitWhenLosing,,HWH,Hollywood Hard,HARD,-16,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155450).png,16,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,PRO,Larry,,GLE,Gloop Lair Easy,EASY,-24,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155450).png,17,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,PRO,Larry,,HWH,Hollywood Hard,HARD,-7,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155450).png,17,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,PRO,Princess_Bankshot,,GLE,Gloop Lair Easy,EASY,-19,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155450).png,18,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,PRO,Princess_Bankshot,,HWH,Hollywood Hard,HARD,-12,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155450).png,18,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,PRO,LaurentE,,GLE,Gloop Lair Easy,EASY,-16,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155450).png,19,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,PRO,LaurentE,,HWH,Hollywood Hard,HARD,-12,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155450).png,19,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,PRO,omielgato,,GLE,Gloop Lair Easy,EASY,-16,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155450).png,20,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,PRO,omielgato,,HWH,Hollywood Hard,HARD,-11,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155450).png,20,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,moba,,GLE,Gloop Lair Easy,EASY,-29,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,1,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,moba,,HWH,Hollywood Hard,HARD,-18,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,1,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,upстаниа_c,,GLE,Gloop Lair Easy,EASY,-28,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,2,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,upстаниа_c,,HWH,Hollywood Hard,HARD,-18,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,2,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,5.0jim,,GLE,Gloop Lair Easy,EASY,-31,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,3,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,5.0jim,,HWH,Hollywood Hard,HARD,-14,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,3,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,Fugohallarin,,GLE,Gloop Lair Easy,EASY,-26,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,4,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,Fugohallarin,,HWH,Hollywood Hard,HARD,-19,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,4,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,Zanetti,,GLE,Gloop Lair Easy,EASY,-27,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,5,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,Zanetti,,HWH,Hollywood Hard,HARD,-18,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,5,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,El Jorge,,GLE,Gloop Lair Easy,EASY,-29,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,6,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,El Jorge,,HWH,Hollywood Hard,HARD,-14,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,6,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,Harry Highpants,,GLE,Gloop Lair Easy,EASY,-25,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,7,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,Harry Highpants,,HWH,Hollywood Hard,HARD,-18,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,7,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,ZONK,,GLE,Gloop Lair Easy,EASY,-28,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,8,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,ZONK,,HWH,Hollywood Hard,HARD,-15,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,8,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,Puttnafed,,GLE,Gloop Lair Easy,EASY,-27,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,9,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,Puttnafed,,HWH,Hollywood Hard,HARD,-15,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,9,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,Colbatic,,GLE,Gloop Lair Easy,EASY,-28,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,10,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,Colbatic,,HWH,Hollywood Hard,HARD,-13,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,10,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,Duardy,,GLE,Gloop Lair Easy,EASY,-22,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,11,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,Duardy,,HWH,Hollywood Hard,HARD,-19,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,11,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,FelixTortilla,,GLE,Gloop Lair Easy,EASY,-29,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,12,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,FelixTortilla,,HWH,Hollywood Hard,HARD,-12,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,12,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,his.Dudeness,,GLE,Gloop Lair Easy,EASY,-23,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,13,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,his.Dudeness,,HWH,Hollywood Hard,HARD,-18,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,13,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,IceCreamTaco,,GLE,Gloop Lair Easy,EASY,-23,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,14,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,IceCreamTaco,,HWH,Hollywood Hard,HARD,-18,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,14,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,bigja33,,GLE,Gloop Lair Easy,EASY,-25,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,15,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,bigja33,,HWH,Hollywood Hard,HARD,-14,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,15,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,INDY,,GLE,Gloop Lair Easy,EASY,-24,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,16,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,INDY,,HWH,Hollywood Hard,HARD,-14,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,16,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,leanin2it,,GLE,Gloop Lair Easy,EASY,-23,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,17,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,leanin2it,,HWH,Hollywood Hard,HARD,-14,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,17,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,Marc,,GLE,Gloop Lair Easy,EASY,-23,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,18,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,Marc,,HWH,Hollywood Hard,HARD,-13,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,18,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,Sticky,,GLE,Gloop Lair Easy,EASY,-23,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,19,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,Sticky,,HWH,Hollywood Hard,HARD,-13,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,19,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,Derby_Daz,,GLE,Gloop Lair Easy,EASY,-18,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,20,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,Derby_Daz,,HWH,Hollywood Hard,HARD,-16,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,20,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,wayne1538,,GLE,Gloop Lair Easy,EASY,-23,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,21,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,wayne1538,,HWH,Hollywood Hard,HARD,-11,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,21,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,Goldenbrett,,GLE,Gloop Lair Easy,EASY,-24,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,22,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,Goldenbrett,,HWH,Hollywood Hard,HARD,-9,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,22,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,gomarino13,,GLE,Gloop Lair Easy,EASY,-22,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,23,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,gomarino13,,HWH,Hollywood Hard,HARD,-11,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,23,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,gOnz0nater,,GLE,Gloop Lair Easy,EASY,-19,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,24,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,gOnz0nater,,HWH,Hollywood Hard,HARD,-13,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,24,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,OpusMcGraw,,GLE,Gloop Lair Easy,EASY,-21,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,25,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,OpusMcGraw,,HWH,Hollywood Hard,HARD,-11,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,25,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,TIGERHOODS,,GLE,Gloop Lair Easy,EASY,-19,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,26,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,TIGERHOODS,,HWH,Hollywood Hard,HARD,-12,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,26,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,NATE,,GLE,Gloop Lair Easy,EASY,-19,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,27,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,NATE,,HWH,Hollywood Hard,HARD,-10,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,27,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,UroPa,,GLE,Gloop Lair Easy,EASY,-22,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,28,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,UroPa,,HWH,Hollywood Hard,HARD,-6,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,28,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,Dude_Lebowski,,GLE,Gloop Lair Easy,EASY,-17,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,29,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,Dude_Lebowski,,HWH,Hollywood Hard,HARD,-9,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,29,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,Gobson,,GLE,Gloop Lair Easy,EASY,-20,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,30,VERIFIED,,false
+THE_WEEKLY,S21W05_GLE_HWH,S21W05,ELITE,Gobson,,HWH,Hollywood Hard,HARD,0,true,phase52-input/weekly_screenshots/S21W05_GLE_HWH/image(20261019-155508).png,30,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,AMATEUR,OysterJelly,,MGE,Mars Gardens Easy,EASY,-19,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171235).png,1,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,AMATEUR,OysterJelly,,ZZH,Temple at Zerzura Hard,HARD,-11,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171235).png,1,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,AMATEUR,StoneyMan69,,MGE,Mars Gardens Easy,EASY,-18,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171235).png,2,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,AMATEUR,StoneyMan69,,ZZH,Temple at Zerzura Hard,HARD,-12,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171235).png,2,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,AMATEUR,SlugJug33,,MGE,Mars Gardens Easy,EASY,-20,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171235).png,3,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,AMATEUR,SlugJug33,,ZZH,Temple at Zerzura Hard,HARD,-8,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171235).png,3,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,AMATEUR,BadWolf,,MGE,Mars Gardens Easy,EASY,-18,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171235).png,4,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,AMATEUR,BadWolf,,ZZH,Temple at Zerzura Hard,HARD,-7,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171235).png,4,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,AMATEUR,Fake4Real,,MGE,Mars Gardens Easy,EASY,-17,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171235).png,5,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,AMATEUR,Fake4Real,,ZZH,Temple at Zerzura Hard,HARD,-8,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171235).png,5,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,AMATEUR,strawbag,,MGE,Mars Gardens Easy,EASY,-16,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171235).png,6,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,AMATEUR,strawbag,,ZZH,Temple at Zerzura Hard,HARD,-6,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171235).png,6,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,AMATEUR,##ultramontani##,,MGE,Mars Gardens Easy,EASY,-13,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171235).png,7,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,AMATEUR,##ultramontani##,,ZZH,Temple at Zerzura Hard,HARD,-7,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171235).png,7,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,AMATEUR,puttz,,MGE,Mars Gardens Easy,EASY,-14,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171235).png,8,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,AMATEUR,puttz,,ZZH,Temple at Zerzura Hard,HARD,-6,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171235).png,8,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,AMATEUR,Lynbot5000,,MGE,Mars Gardens Easy,EASY,-15,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171235).png,9,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,AMATEUR,Lynbot5000,,ZZH,Temple at Zerzura Hard,HARD,-3,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171235).png,9,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,AMATEUR,ZoeDarlin,,MGE,Mars Gardens Easy,EASY,-14,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171235).png,10,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,AMATEUR,ZoeDarlin,,ZZH,Temple at Zerzura Hard,HARD,-4,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171235).png,10,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,AMATEUR,Fabita53,,MGE,Mars Gardens Easy,EASY,-14,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171235).png,11,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,AMATEUR,Fabita53,,ZZH,Temple at Zerzura Hard,HARD,-2,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171235).png,11,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,AMATEUR,hmc21,,MGE,Mars Gardens Easy,EASY,-13,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171235).png,12,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,AMATEUR,hmc21,,ZZH,Temple at Zerzura Hard,HARD,-3,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171235).png,12,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,AMATEUR,indianchief,,MGE,Mars Gardens Easy,EASY,-14,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171235).png,13,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,AMATEUR,indianchief,,ZZH,Temple at Zerzura Hard,HARD,-2,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171235).png,13,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,AMATEUR,Bridgger,,MGE,Mars Gardens Easy,EASY,-16,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171235).png,14,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,AMATEUR,Bridgger,,ZZH,Temple at Zerzura Hard,HARD,1,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171235).png,14,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,AMATEUR,Eyerie,,MGE,Mars Gardens Easy,EASY,-10,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171235).png,15,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,AMATEUR,Eyerie,,ZZH,Temple at Zerzura Hard,HARD,-3,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171235).png,15,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,AMATEUR,AKFlyerFan,,MGE,Mars Gardens Easy,EASY,-10,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171235).png,16,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,AMATEUR,AKFlyerFan,,ZZH,Temple at Zerzura Hard,HARD,11,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171235).png,16,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,AMATEUR,MidMillenial,,MGE,Mars Gardens Easy,EASY,-5,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171235).png,17,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,AMATEUR,MidMillenial,,ZZH,Temple at Zerzura Hard,HARD,14,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171235).png,17,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,SEMI-PRO,breezy,,MGE,Mars Gardens Easy,EASY,-19,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171243).png,1,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,SEMI-PRO,breezy,,ZZH,Temple at Zerzura Hard,HARD,-17,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171243).png,1,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,SEMI-PRO,D3bb13,,MGE,Mars Gardens Easy,EASY,-19,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171243).png,2,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,SEMI-PRO,D3bb13,,ZZH,Temple at Zerzura Hard,HARD,-15,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171243).png,2,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,SEMI-PRO,Maxxom-fr,,MGE,Mars Gardens Easy,EASY,-21,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171243).png,3,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,SEMI-PRO,Maxxom-fr,,ZZH,Temple at Zerzura Hard,HARD,-13,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171243).png,3,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,SEMI-PRO,Firefly,,MGE,Mars Gardens Easy,EASY,-18,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171243).png,4,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,SEMI-PRO,Firefly,,ZZH,Temple at Zerzura Hard,HARD,-12,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171243).png,4,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,SEMI-PRO,Rare cup,,MGE,Mars Gardens Easy,EASY,-18,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171243).png,5,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,SEMI-PRO,Rare cup,,ZZH,Temple at Zerzura Hard,HARD,-12,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171243).png,5,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,SEMI-PRO,steven_T,,MGE,Mars Gardens Easy,EASY,-20,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171243).png,6,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,SEMI-PRO,steven_T,,ZZH,Temple at Zerzura Hard,HARD,-10,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171243).png,6,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,SEMI-PRO,Kyda,,MGE,Mars Gardens Easy,EASY,-17,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171243).png,7,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,SEMI-PRO,Kyda,,ZZH,Temple at Zerzura Hard,HARD,-11,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171243).png,7,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,SEMI-PRO,The Real JB,,MGE,Mars Gardens Easy,EASY,-19,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171243).png,8,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,SEMI-PRO,The Real JB,,ZZH,Temple at Zerzura Hard,HARD,-9,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171243).png,8,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,SEMI-PRO,autodidactic,,MGE,Mars Gardens Easy,EASY,-17,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171243).png,9,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,SEMI-PRO,autodidactic,,ZZH,Temple at Zerzura Hard,HARD,-10,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171243).png,9,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,SEMI-PRO,Fakku_FR,,MGE,Mars Gardens Easy,EASY,-14,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171243).png,10,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,SEMI-PRO,Fakku_FR,,ZZH,Temple at Zerzura Hard,HARD,-12,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171243).png,10,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,SEMI-PRO,LB1,,MGE,Mars Gardens Easy,EASY,-21,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171243).png,11,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,SEMI-PRO,LB1,,ZZH,Temple at Zerzura Hard,HARD,-4,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171243).png,11,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,SEMI-PRO,deebee,,MGE,Mars Gardens Easy,EASY,-16,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171243).png,12,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,SEMI-PRO,deebee,,ZZH,Temple at Zerzura Hard,HARD,-8,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171243).png,12,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,SEMI-PRO,TrickyDicky,,MGE,Mars Gardens Easy,EASY,-15,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171243).png,13,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,SEMI-PRO,TrickyDicky,,ZZH,Temple at Zerzura Hard,HARD,-7,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171243).png,13,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,SEMI-PRO,Mully,,MGE,Mars Gardens Easy,EASY,-18,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171243).png,14,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,SEMI-PRO,Mully,,ZZH,Temple at Zerzura Hard,HARD,-2,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171243).png,14,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,SEMI-PRO,The Mortski,,MGE,Mars Gardens Easy,EASY,-11,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171243).png,16,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,SEMI-PRO,The Mortski,,ZZH,Temple at Zerzura Hard,HARD,-5,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171243).png,16,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,SEMI-PRO,Emil,,MGE,Mars Gardens Easy,EASY,-7,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171243).png,17,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,SEMI-PRO,Emil,,ZZH,Temple at Zerzura Hard,HARD,-8,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171243).png,17,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,quickfam4,,MGE,Mars Gardens Easy,EASY,-21,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,1,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,quickfam4,,ZZH,Temple at Zerzura Hard,HARD,-17,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,1,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,lefty,,MGE,Mars Gardens Easy,EASY,-22,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,2,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,lefty,,ZZH,Temple at Zerzura Hard,HARD,-14,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,2,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,omielgato,,MGE,Mars Gardens Easy,EASY,-24,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,3,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,omielgato,,ZZH,Temple at Zerzura Hard,HARD,-12,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,3,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,Gus,,MGE,Mars Gardens Easy,EASY,-18,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,4,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,Gus,,ZZH,Temple at Zerzura Hard,HARD,-17,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,4,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,LaurentE,,MGE,Mars Gardens Easy,EASY,-18,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,5,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,LaurentE,,ZZH,Temple at Zerzura Hard,HARD,-17,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,5,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,Larry,,MGE,Mars Gardens Easy,EASY,-19,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,6,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,Larry,,ZZH,Temple at Zerzura Hard,HARD,-15,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,6,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,Will_Xo,,MGE,Mars Gardens Easy,EASY,-17,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,7,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,Will_Xo,,ZZH,Temple at Zerzura Hard,HARD,-15,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,7,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,HeartBreakKid,,MGE,Mars Gardens Easy,EASY,-18,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,9,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,HeartBreakKid,,ZZH,Temple at Zerzura Hard,HARD,-13,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,9,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,Jay,,MGE,Mars Gardens Easy,EASY,-18,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,10,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,Jay,,ZZH,Temple at Zerzura Hard,HARD,-13,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,10,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,NERD_GP,,MGE,Mars Gardens Easy,EASY,-16,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,11,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,NERD_GP,,ZZH,Temple at Zerzura Hard,HARD,-15,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,11,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,Karma Changer,,MGE,Mars Gardens Easy,EASY,-21,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,12,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,Karma Changer,,ZZH,Temple at Zerzura Hard,HARD,-9,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,12,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,pluff,,MGE,Mars Gardens Easy,EASY,-23,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,13,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,pluff,,ZZH,Temple at Zerzura Hard,HARD,-7,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,13,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,DontQuitWhenLosing,,MGE,Mars Gardens Easy,EASY,-21,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,14,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,DontQuitWhenLosing,,ZZH,Temple at Zerzura Hard,HARD,-8,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,14,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,Mau,,MGE,Mars Gardens Easy,EASY,-24,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,15,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,Mau,,ZZH,Temple at Zerzura Hard,HARD,-5,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,15,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,Princess_Bankshot,,MGE,Mars Gardens Easy,EASY,-18,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,16,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,Princess_Bankshot,,ZZH,Temple at Zerzura Hard,HARD,-11,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,16,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,Trikster32,,MGE,Mars Gardens Easy,EASY,-17,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,17,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,Trikster32,,ZZH,Temple at Zerzura Hard,HARD,-12,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,17,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,akaMikeD,,MGE,Mars Gardens Easy,EASY,-19,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,18,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,akaMikeD,,ZZH,Temple at Zerzura Hard,HARD,-9,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,18,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,Gatorsfan89,,MGE,Mars Gardens Easy,EASY,-20,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,19,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,Gatorsfan89,,ZZH,Temple at Zerzura Hard,HARD,-7,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,19,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,Jesunet,,MGE,Mars Gardens Easy,EASY,-22,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,20,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,Jesunet,,ZZH,Temple at Zerzura Hard,HARD,-5,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,20,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,Pootato,,MGE,Mars Gardens Easy,EASY,-21,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,21,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,Pootato,,ZZH,Temple at Zerzura Hard,HARD,-5,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,21,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,AmberWave,,MGE,Mars Gardens Easy,EASY,-19,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,22,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,AmberWave,,ZZH,Temple at Zerzura Hard,HARD,-6,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,22,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,CHI CHI RODRIGUEZ,,MGE,Mars Gardens Easy,EASY,-12,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,23,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,CHI CHI RODRIGUEZ,,ZZH,Temple at Zerzura Hard,HARD,-10,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,23,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,Freitag,,MGE,Mars Gardens Easy,EASY,-19,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,24,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,Freitag,,ZZH,Temple at Zerzura Hard,HARD,-3,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,24,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,JC,,MGE,Mars Gardens Easy,EASY,-16,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,25,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,PRO,JC,,ZZH,Temple at Zerzura Hard,HARD,11,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171301).png,25,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,Duardy,,MGE,Mars Gardens Easy,EASY,-24,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,1,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,Duardy,,ZZH,Temple at Zerzura Hard,HARD,-19,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,1,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,mini_G,,MGE,Mars Gardens Easy,EASY,-24,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,2,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,mini_G,,ZZH,Temple at Zerzura Hard,HARD,-18,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,2,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,Zanetti,,MGE,Mars Gardens Easy,EASY,-26,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,3,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,Zanetti,,ZZH,Temple at Zerzura Hard,HARD,-16,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,3,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,Gobson,,MGE,Mars Gardens Easy,EASY,-22,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,4,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,Gobson,,ZZH,Temple at Zerzura Hard,HARD,-19,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,4,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,INDY,,MGE,Mars Gardens Easy,EASY,-24,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,5,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,INDY,,ZZH,Temple at Zerzura Hard,HARD,-17,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,5,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,leanin2it,,MGE,Mars Gardens Easy,EASY,-21,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,6,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,leanin2it,,ZZH,Temple at Zerzura Hard,HARD,-18,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,6,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,Puttnafed,,MGE,Mars Gardens Easy,EASY,-22,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,7,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,Puttnafed,,ZZH,Temple at Zerzura Hard,HARD,-17,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,7,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,wayne1538,,MGE,Mars Gardens Easy,EASY,-21,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,8,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,wayne1538,,ZZH,Temple at Zerzura Hard,HARD,-17,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,8,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,upстаниа_c,,MGE,Mars Gardens Easy,EASY,-18,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,9,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,upстаниа_c,,ZZH,Temple at Zerzura Hard,HARD,-19,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,9,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,Dude_Lebowski,,MGE,Mars Gardens Easy,EASY,-21,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,10,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,Dude_Lebowski,,ZZH,Temple at Zerzura Hard,HARD,-15,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,10,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,IceCreamTaco,,MGE,Mars Gardens Easy,EASY,-20,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,11,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,IceCreamTaco,,ZZH,Temple at Zerzura Hard,HARD,-16,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,11,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,OpusMcGraw,,MGE,Mars Gardens Easy,EASY,-22,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,12,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,OpusMcGraw,,ZZH,Temple at Zerzura Hard,HARD,-14,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,12,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,his.Dudeness,,MGE,Mars Gardens Easy,EASY,-21,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,13,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,his.Dudeness,,ZZH,Temple at Zerzura Hard,HARD,-14,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,13,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,Derby_Daz,,MGE,Mars Gardens Easy,EASY,-18,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,14,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,Derby_Daz,,ZZH,Temple at Zerzura Hard,HARD,-16,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,14,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,Sticky,,MGE,Mars Gardens Easy,EASY,-20,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,15,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,Sticky,,ZZH,Temple at Zerzura Hard,HARD,-14,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,15,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,TIGERHOODS,,MGE,Mars Gardens Easy,EASY,-18,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,16,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,TIGERHOODS,,ZZH,Temple at Zerzura Hard,HARD,-15,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,16,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,FelixTortilla,,MGE,Mars Gardens Easy,EASY,-21,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,17,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,FelixTortilla,,ZZH,Temple at Zerzura Hard,HARD,-11,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,17,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,Harry Highpants,,MGE,Mars Gardens Easy,EASY,-18,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,18,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,Harry Highpants,,ZZH,Temple at Zerzura Hard,HARD,-14,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,18,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,5.0jim,,MGE,Mars Gardens Easy,EASY,-22,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,19,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,5.0jim,,ZZH,Temple at Zerzura Hard,HARD,-9,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,19,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,Blues87,,MGE,Mars Gardens Easy,EASY,-20,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,20,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,Blues87,,ZZH,Temple at Zerzura Hard,HARD,-11,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,20,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,gomarino13,,MGE,Mars Gardens Easy,EASY,-19,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,21,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,gomarino13,,ZZH,Temple at Zerzura Hard,HARD,-12,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,21,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,Goldenbrett,,MGE,Mars Gardens Easy,EASY,-20,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,22,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,Goldenbrett,,ZZH,Temple at Zerzura Hard,HARD,-10,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,22,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,bigja33,,MGE,Mars Gardens Easy,EASY,-18,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,23,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,bigja33,,ZZH,Temple at Zerzura Hard,HARD,-11,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,23,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,Fugohallarin,,MGE,Mars Gardens Easy,EASY,-22,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,24,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,Fugohallarin,,ZZH,Temple at Zerzura Hard,HARD,-6,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,24,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,moba,,MGE,Mars Gardens Easy,EASY,-17,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,25,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,moba,,ZZH,Temple at Zerzura Hard,HARD,-11,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,25,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,ZONK,,MGE,Mars Gardens Easy,EASY,-14,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,26,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,ZONK,,ZZH,Temple at Zerzura Hard,HARD,-12,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,26,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,NATE,,MGE,Mars Gardens Easy,EASY,-19,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,27,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,NATE,,ZZH,Temple at Zerzura Hard,HARD,-6,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,27,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,UroPa,,MGE,Mars Gardens Easy,EASY,-14,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,28,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,UroPa,,ZZH,Temple at Zerzura Hard,HARD,-8,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,28,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,El Jorge,,MGE,Mars Gardens Easy,EASY,-11,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,30,VERIFIED,,false
+THE_WEEKLY,S20W05_MGE_ZZH,S20W05,ELITE,El Jorge,,ZZH,Temple at Zerzura Hard,HARD,-8,true,phase52-input/weekly_screenshots/S20W05_MGE_ZZH/image(20261019-171317).png,30,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,AMATEUR,ZoeDarlin,,BHE,Blokhaven Easy,EASY,-17,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161525).png,1,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,AMATEUR,ZoeDarlin,,QVH,Quixote Valley Hard,HARD,-16,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161525).png,1,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,AMATEUR,KnockoutG,,BHE,Blokhaven Easy,EASY,-16,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161525).png,2,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,AMATEUR,KnockoutG,,QVH,Quixote Valley Hard,HARD,-14,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161525).png,2,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,AMATEUR,SD_Diver,,BHE,Blokhaven Easy,EASY,-17,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161525).png,3,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,AMATEUR,SD_Diver,,QVH,Quixote Valley Hard,HARD,-13,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161525).png,3,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,AMATEUR,StoneyMan69,,BHE,Blokhaven Easy,EASY,-16,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161525).png,4,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,AMATEUR,StoneyMan69,,QVH,Quixote Valley Hard,HARD,-12,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161525).png,4,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,AMATEUR,NuttyGrandpa,,BHE,Blokhaven Easy,EASY,-14,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161525).png,5,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,AMATEUR,NuttyGrandpa,,QVH,Quixote Valley Hard,HARD,-12,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161525).png,5,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,AMATEUR,Alabamer_Hammer,,BHE,Blokhaven Easy,EASY,-12,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161525).png,6,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,AMATEUR,Alabamer_Hammer,,QVH,Quixote Valley Hard,HARD,-13,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161525).png,6,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,AMATEUR,##ultramontani##,,BHE,Blokhaven Easy,EASY,-14,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161525).png,7,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,AMATEUR,##ultramontani##,,QVH,Quixote Valley Hard,HARD,-10,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161525).png,7,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,AMATEUR,Necrolitic,,BHE,Blokhaven Easy,EASY,-10,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161525).png,8,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,AMATEUR,Necrolitic,,QVH,Quixote Valley Hard,HARD,-12,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161525).png,8,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,AMATEUR,indianchief,,BHE,Blokhaven Easy,EASY,-13,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161525).png,9,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,AMATEUR,indianchief,,QVH,Quixote Valley Hard,HARD,-7,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161525).png,9,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,AMATEUR,joshbenesh,,BHE,Blokhaven Easy,EASY,-8,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161525).png,10,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,AMATEUR,joshbenesh,,QVH,Quixote Valley Hard,HARD,-12,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161525).png,10,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,AMATEUR,BadWolf,,BHE,Blokhaven Easy,EASY,-15,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161525).png,11,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,AMATEUR,BadWolf,,QVH,Quixote Valley Hard,HARD,-4,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161525).png,11,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,AMATEUR,Eyerie,,BHE,Blokhaven Easy,EASY,-15,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161525).png,12,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,AMATEUR,Eyerie,,QVH,Quixote Valley Hard,HARD,-4,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161525).png,12,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,AMATEUR,AKFlyerFan,,BHE,Blokhaven Easy,EASY,-15,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161525).png,13,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,AMATEUR,AKFlyerFan,,QVH,Quixote Valley Hard,HARD,-3,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161525).png,13,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,AMATEUR,strawbag,,BHE,Blokhaven Easy,EASY,-14,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161525).png,14,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,AMATEUR,strawbag,,QVH,Quixote Valley Hard,HARD,-3,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161525).png,14,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,AMATEUR,Fabita53,,BHE,Blokhaven Easy,EASY,-9,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161525).png,15,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,AMATEUR,Fabita53,,QVH,Quixote Valley Hard,HARD,-5,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161525).png,15,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,AMATEUR,Fake4Real,,BHE,Blokhaven Easy,EASY,-12,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161525).png,16,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,AMATEUR,Fake4Real,,QVH,Quixote Valley Hard,HARD,2,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161525).png,16,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,AMATEUR,SlugJug33,,BHE,Blokhaven Easy,EASY,-12,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161525).png,17,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,AMATEUR,SlugJug33,,QVH,Quixote Valley Hard,HARD,2,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161525).png,17,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,AMATEUR,MidMillenial,,BHE,Blokhaven Easy,EASY,-5,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161525).png,18,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,AMATEUR,MidMillenial,,QVH,Quixote Valley Hard,HARD,0,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161525).png,18,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,AMATEUR,Bridgger,,BHE,Blokhaven Easy,EASY,-4,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161525).png,19,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,AMATEUR,Bridgger,,QVH,Quixote Valley Hard,HARD,1,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161525).png,19,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,AMATEUR,hmc21,,BHE,Blokhaven Easy,EASY,-8,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161525).png,20,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,AMATEUR,hmc21,,QVH,Quixote Valley Hard,HARD,7,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161525).png,20,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,SEMI-PRO,The Real JB,,BHE,Blokhaven Easy,EASY,-18,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161601).png,1,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,SEMI-PRO,The Real JB,,QVH,Quixote Valley Hard,HARD,-14,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161601).png,1,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,SEMI-PRO,breezy,,BHE,Blokhaven Easy,EASY,-18,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161601).png,2,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,SEMI-PRO,breezy,,QVH,Quixote Valley Hard,HARD,-12,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161601).png,2,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,SEMI-PRO,Maxxom-fr,,BHE,Blokhaven Easy,EASY,-18,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161601).png,2,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,SEMI-PRO,Maxxom-fr,,QVH,Quixote Valley Hard,HARD,-12,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161601).png,2,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,SEMI-PRO,PaulV-PPP CA,,BHE,Blokhaven Easy,EASY,-11,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161601).png,4,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,SEMI-PRO,PaulV-PPP CA,,QVH,Quixote Valley Hard,HARD,-17,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161601).png,4,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,SEMI-PRO,Firefly,,BHE,Blokhaven Easy,EASY,-18,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161601).png,5,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,SEMI-PRO,Firefly,,QVH,Quixote Valley Hard,HARD,-9,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161601).png,5,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,SEMI-PRO,steven_T,,BHE,Blokhaven Easy,EASY,-18,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161601).png,5,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,SEMI-PRO,steven_T,,QVH,Quixote Valley Hard,HARD,-9,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161601).png,5,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,SEMI-PRO,Neo Impossible,,BHE,Blokhaven Easy,EASY,-16,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161601).png,7,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,SEMI-PRO,Neo Impossible,,QVH,Quixote Valley Hard,HARD,-9,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161601).png,7,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,SEMI-PRO,Chipnputt,,BHE,Blokhaven Easy,EASY,-13,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161601).png,8,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,SEMI-PRO,Chipnputt,,QVH,Quixote Valley Hard,HARD,-11,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161601).png,8,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,SEMI-PRO,Duckk,,BHE,Blokhaven Easy,EASY,-19,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161601).png,8,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,SEMI-PRO,Duckk,,QVH,Quixote Valley Hard,HARD,-5,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161601).png,8,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,SEMI-PRO,autodidactic,,BHE,Blokhaven Easy,EASY,-13,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161601).png,8,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,SEMI-PRO,autodidactic,,QVH,Quixote Valley Hard,HARD,-11,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161601).png,8,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,SEMI-PRO,deebee,,BHE,Blokhaven Easy,EASY,-12,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161601).png,11,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,SEMI-PRO,deebee,,QVH,Quixote Valley Hard,HARD,-11,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161601).png,11,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,SEMI-PRO,The Mortski,,BHE,Blokhaven Easy,EASY,-14,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161601).png,11,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,SEMI-PRO,The Mortski,,QVH,Quixote Valley Hard,HARD,-9,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161601).png,11,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,SEMI-PRO,Emil,,BHE,Blokhaven Easy,EASY,-12,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161601).png,14,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,SEMI-PRO,Emil,,QVH,Quixote Valley Hard,HARD,-7,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161601).png,14,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,SEMI-PRO,LB1,,BHE,Blokhaven Easy,EASY,-15,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161601).png,14,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,SEMI-PRO,LB1,,QVH,Quixote Valley Hard,HARD,-4,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161601).png,14,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,akaMikeD,,BHE,Blokhaven Easy,EASY,-16,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,1,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,akaMikeD,,QVH,Quixote Valley Hard,HARD,-21,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,1,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,DontQuitWhenLosing,,BHE,Blokhaven Easy,EASY,-19,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,2,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,DontQuitWhenLosing,,QVH,Quixote Valley Hard,HARD,-17,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,2,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,Gus,,BHE,Blokhaven Easy,EASY,-20,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,2,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,Gus,,QVH,Quixote Valley Hard,HARD,-16,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,2,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,quickfam4,,BHE,Blokhaven Easy,EASY,-17,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,2,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,quickfam4,,QVH,Quixote Valley Hard,HARD,-19,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,2,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,Trikster32,,BHE,Blokhaven Easy,EASY,-17,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,5,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,Trikster32,,QVH,Quixote Valley Hard,HARD,-18,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,5,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,NERD_GP,,BHE,Blokhaven Easy,EASY,-19,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,7,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,NERD_GP,,QVH,Quixote Valley Hard,HARD,-15,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,7,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,Larry,,BHE,Blokhaven Easy,EASY,-19,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,8,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,Larry,,QVH,Quixote Valley Hard,HARD,-14,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,8,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,Mau,,BHE,Blokhaven Easy,EASY,-19,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,8,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,Mau,,QVH,Quixote Valley Hard,HARD,-14,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,8,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,CHI CHI RODRIGUEZ,,BHE,Blokhaven Easy,EASY,-18,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,10,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,CHI CHI RODRIGUEZ,,QVH,Quixote Valley Hard,HARD,-14,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,10,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,HeartBreakKid,,BHE,Blokhaven Easy,EASY,-20,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,10,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,HeartBreakKid,,QVH,Quixote Valley Hard,HARD,-12,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,10,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,omielgato,,BHE,Blokhaven Easy,EASY,-21,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,10,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,omielgato,,QVH,Quixote Valley Hard,HARD,-11,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,10,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,pluff,,BHE,Blokhaven Easy,EASY,-17,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,10,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,pluff,,QVH,Quixote Valley Hard,HARD,-15,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,10,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,Gatorsfan89,,BHE,Blokhaven Easy,EASY,-22,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,14,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,Gatorsfan89,,QVH,Quixote Valley Hard,HARD,-9,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,14,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,Jesunet,,BHE,Blokhaven Easy,EASY,-16,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,14,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,Jesunet,,QVH,Quixote Valley Hard,HARD,-15,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,14,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,Metum,,BHE,Blokhaven Easy,EASY,-19,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,14,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,Metum,,QVH,Quixote Valley Hard,HARD,-12,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,14,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,JC,,BHE,Blokhaven Easy,EASY,-18,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,17,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,JC,,QVH,Quixote Valley Hard,HARD,-12,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,17,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,Pootato,,BHE,Blokhaven Easy,EASY,-16,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,17,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,Pootato,,QVH,Quixote Valley Hard,HARD,-14,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,17,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,Princess_Bankshot,,BHE,Blokhaven Easy,EASY,-19,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,17,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,Princess_Bankshot,,QVH,Quixote Valley Hard,HARD,-11,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,17,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,Karma Changer,,BHE,Blokhaven Easy,EASY,-12,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,20,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,Karma Changer,,QVH,Quixote Valley Hard,HARD,-14,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,20,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,LaurentE,,BHE,Blokhaven Easy,EASY,-13,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,20,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,LaurentE,,QVH,Quixote Valley Hard,HARD,-13,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,20,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,Will_Xo,,BHE,Blokhaven Easy,EASY,-17,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,20,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,Will_Xo,,QVH,Quixote Valley Hard,HARD,-9,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,20,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,Jay,,BHE,Blokhaven Easy,EASY,-15,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,23,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,Jay,,QVH,Quixote Valley Hard,HARD,-6,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,23,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,Freitag,,BHE,Blokhaven Easy,EASY,-8,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,24,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,Freitag,,QVH,Quixote Valley Hard,HARD,-11,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,24,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,lefty,,BHE,Blokhaven Easy,EASY,-12,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,25,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,PRO,lefty,,QVH,Quixote Valley Hard,HARD,12,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-161616).png,25,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,Harry Highpants,,BHE,Blokhaven Easy,EASY,-23,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,1,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,Harry Highpants,,QVH,Quixote Valley Hard,HARD,-18,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,1,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,Matt916,,BHE,Blokhaven Easy,EASY,-21,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,2,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,Matt916,,QVH,Quixote Valley Hard,HARD,-20,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,2,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,OpusMcGraw,,BHE,Blokhaven Easy,EASY,-21,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,3,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,OpusMcGraw,,QVH,Quixote Valley Hard,HARD,-19,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,3,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,mini_G,,BHE,Blokhaven Easy,EASY,-24,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,4,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,mini_G,,QVH,Quixote Valley Hard,HARD,-15,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,4,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,bigja33,,BHE,Blokhaven Easy,EASY,-21,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,5,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,bigja33,,QVH,Quixote Valley Hard,HARD,-17,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,5,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,INDY,,BHE,Blokhaven Easy,EASY,-20,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,6,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,INDY,,QVH,Quixote Valley Hard,HARD,-18,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,6,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,Zanetti,,BHE,Blokhaven Easy,EASY,-21,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,7,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,Zanetti,,QVH,Quixote Valley Hard,HARD,-17,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,7,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,FelixTortilla,,BHE,Blokhaven Easy,EASY,-23,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,8,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,FelixTortilla,,QVH,Quixote Valley Hard,HARD,-14,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,8,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,Fugohallarin,,BHE,Blokhaven Easy,EASY,-20,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,9,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,Fugohallarin,,QVH,Quixote Valley Hard,HARD,-17,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,9,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,his.Dudeness,,BHE,Blokhaven Easy,EASY,-20,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,10,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,his.Dudeness,,QVH,Quixote Valley Hard,HARD,-17,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,10,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,IceCreamTaco,,BHE,Blokhaven Easy,EASY,-21,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,11,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,IceCreamTaco,,QVH,Quixote Valley Hard,HARD,-16,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,11,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,Duardy,,BHE,Blokhaven Easy,EASY,-18,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,12,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,Duardy,,QVH,Quixote Valley Hard,HARD,-18,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,12,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,leanin2it,,BHE,Blokhaven Easy,EASY,-22,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,13,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,leanin2it,,QVH,Quixote Valley Hard,HARD,-14,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,13,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,moba,,BHE,Blokhaven Easy,EASY,-18,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,14,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,moba,,QVH,Quixote Valley Hard,HARD,-18,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,14,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,gomarino13,,BHE,Blokhaven Easy,EASY,-19,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,15,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,gomarino13,,QVH,Quixote Valley Hard,HARD,-16,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,15,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,Sticky,,BHE,Blokhaven Easy,EASY,-19,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,16,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,Sticky,,QVH,Quixote Valley Hard,HARD,-16,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,16,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,El Jorge,,BHE,Blokhaven Easy,EASY,-15,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,17,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,El Jorge,,QVH,Quixote Valley Hard,HARD,-19,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,17,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,ZONK,,BHE,Blokhaven Easy,EASY,-20,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,18,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,ZONK,,QVH,Quixote Valley Hard,HARD,-14,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,18,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,Gobson,,BHE,Blokhaven Easy,EASY,-18,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,19,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,Gobson,,QVH,Quixote Valley Hard,HARD,-15,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,19,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,TIGERHOODS,,BHE,Blokhaven Easy,EASY,-20,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,20,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,TIGERHOODS,,QVH,Quixote Valley Hard,HARD,-13,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,20,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,wayne1538,,BHE,Blokhaven Easy,EASY,-15,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,21,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,wayne1538,,QVH,Quixote Valley Hard,HARD,-17,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,21,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,upстаниа_c,,BHE,Blokhaven Easy,EASY,-17,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,22,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,upстаниа_c,,QVH,Quixote Valley Hard,HARD,-15,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,22,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,Puttnafed,,BHE,Blokhaven Easy,EASY,-17,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,23,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,Puttnafed,,QVH,Quixote Valley Hard,HARD,-15,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,23,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,Goldenbrett,,BHE,Blokhaven Easy,EASY,-18,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,25,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,Goldenbrett,,QVH,Quixote Valley Hard,HARD,-11,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,25,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,NATE,,BHE,Blokhaven Easy,EASY,-18,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,26,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,NATE,,QVH,Quixote Valley Hard,HARD,-11,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,26,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,Dude_Lebowski,,BHE,Blokhaven Easy,EASY,-13,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,27,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,Dude_Lebowski,,QVH,Quixote Valley Hard,HARD,-15,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,27,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,UroPa,,BHE,Blokhaven Easy,EASY,-14,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,28,VERIFIED,,false
+THE_WEEKLY,S20W06_BHE_QVH,S20W06,ELITE,UroPa,,QVH,Quixote Valley Hard,HARD,-8,true,phase52-input/weekly_screenshots/S20W06_BHE_QVH/image(20261019-162207).png,28,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,AMATEUR,##ultramontani##,,ALE,Alfheim Easy,EASY,-18,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160240).png,1,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,AMATEUR,##ultramontani##,,BHH,Blokhaven Hard,HARD,-16,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160240).png,1,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,AMATEUR,Fake4Real,,ALE,Alfheim Easy,EASY,-18,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160240).png,2,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,AMATEUR,Fake4Real,,BHH,Blokhaven Hard,HARD,-16,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160240).png,2,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,AMATEUR,BadWolff,,ALE,Alfheim Easy,EASY,-17,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160240).png,3,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,AMATEUR,BadWolff,,BHH,Blokhaven Hard,HARD,-16,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160240).png,3,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,AMATEUR,SD_Diver,,ALE,Alfheim Easy,EASY,-16,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160240).png,4,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,AMATEUR,SD_Diver,,BHH,Blokhaven Hard,HARD,-7,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160240).png,4,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,AMATEUR,KCRob,,ALE,Alfheim Easy,EASY,-16,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160240).png,5,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,AMATEUR,KCRob,,BHH,Blokhaven Hard,HARD,-6,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160240).png,5,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,AMATEUR,adaman_can,,ALE,Alfheim Easy,EASY,-16,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160240).png,6,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,AMATEUR,adaman_can,,BHH,Blokhaven Hard,HARD,-5,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160240).png,6,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,AMATEUR,joshbenesh,,ALE,Alfheim Easy,EASY,-16,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160240).png,7,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,AMATEUR,joshbenesh,,BHH,Blokhaven Hard,HARD,-5,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160240).png,7,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,AMATEUR,KnockoutG,,ALE,Alfheim Easy,EASY,-17,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160240).png,8,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,AMATEUR,KnockoutG,,BHH,Blokhaven Hard,HARD,-4,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160240).png,8,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,AMATEUR,AKFlyerFan,,ALE,Alfheim Easy,EASY,-16,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160240).png,9,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,AMATEUR,AKFlyerFan,,BHH,Blokhaven Hard,HARD,-3,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160240).png,9,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,AMATEUR,Fabita53,,ALE,Alfheim Easy,EASY,-11,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160240).png,10,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,AMATEUR,Fabita53,,BHH,Blokhaven Hard,HARD,-8,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160240).png,10,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,AMATEUR,strawbag,,ALE,Alfheim Easy,EASY,-14,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160240).png,11,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,AMATEUR,strawbag,,BHH,Blokhaven Hard,HARD,-5,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160240).png,11,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,AMATEUR,SlugJug33,,ALE,Alfheim Easy,EASY,-11,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160240).png,12,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,AMATEUR,SlugJug33,,BHH,Blokhaven Hard,HARD,-6,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160240).png,12,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,AMATEUR,Eyerie,,ALE,Alfheim Easy,EASY,-14,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160240).png,13,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,AMATEUR,Eyerie,,BHH,Blokhaven Hard,HARD,-2,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160240).png,13,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,AMATEUR,StoneyMan69,,ALE,Alfheim Easy,EASY,-18,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160240).png,14,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,AMATEUR,StoneyMan69,,BHH,Blokhaven Hard,HARD,3,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160240).png,14,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,AMATEUR,ZoeDarlin,,ALE,Alfheim Easy,EASY,-10,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160240).png,15,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,AMATEUR,ZoeDarlin,,BHH,Blokhaven Hard,HARD,-4,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160240).png,15,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,AMATEUR,hmc21,,ALE,Alfheim Easy,EASY,-7,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160240).png,16,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,AMATEUR,hmc21,,BHH,Blokhaven Hard,HARD,3,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160240).png,16,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,SEMI-PRO,Browner,,ALE,Alfheim Easy,EASY,-20,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160722).png,1,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,SEMI-PRO,Browner,,BHH,Blokhaven Hard,HARD,-18,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160722).png,1,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,SEMI-PRO,steven_T,,ALE,Alfheim Easy,EASY,-19,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160722).png,2,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,SEMI-PRO,steven_T,,BHH,Blokhaven Hard,HARD,-18,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160722).png,2,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,SEMI-PRO,Calassy,,ALE,Alfheim Easy,EASY,-22,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160722).png,3,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,SEMI-PRO,Calassy,,BHH,Blokhaven Hard,HARD,-13,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160722).png,3,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,SEMI-PRO,Duckk,,ALE,Alfheim Easy,EASY,-17,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160722).png,4,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,SEMI-PRO,Duckk,,BHH,Blokhaven Hard,HARD,-18,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160722).png,4,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,SEMI-PRO,Firefly,,ALE,Alfheim Easy,EASY,-17,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160722).png,5,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,SEMI-PRO,Firefly,,BHH,Blokhaven Hard,HARD,-16,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160722).png,5,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,SEMI-PRO,The Mortski,,ALE,Alfheim Easy,EASY,-19,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160722).png,6,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,SEMI-PRO,The Mortski,,BHH,Blokhaven Hard,HARD,-14,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160722).png,6,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,SEMI-PRO,Neo Impossible,,ALE,Alfheim Easy,EASY,-16,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160722).png,7,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,SEMI-PRO,Neo Impossible,,BHH,Blokhaven Hard,HARD,-16,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160722).png,7,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,SEMI-PRO,Maxxom-fr,,ALE,Alfheim Easy,EASY,-19,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160722).png,8,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,SEMI-PRO,Maxxom-fr,,BHH,Blokhaven Hard,HARD,-12,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160722).png,8,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,SEMI-PRO,breezy,,ALE,Alfheim Easy,EASY,-17,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160722).png,9,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,SEMI-PRO,breezy,,BHH,Blokhaven Hard,HARD,-13,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160722).png,9,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,SEMI-PRO,TrickyDicky,,ALE,Alfheim Easy,EASY,-16,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160722).png,9,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,SEMI-PRO,TrickyDicky,,BHH,Blokhaven Hard,HARD,-14,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160722).png,9,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,SEMI-PRO,autodidactic,,ALE,Alfheim Easy,EASY,-18,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160722).png,9,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,SEMI-PRO,autodidactic,,BHH,Blokhaven Hard,HARD,-12,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160722).png,9,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,SEMI-PRO,LB1,,ALE,Alfheim Easy,EASY,-16,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160722).png,12,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,SEMI-PRO,LB1,,BHH,Blokhaven Hard,HARD,-11,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160722).png,12,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,SEMI-PRO,Emil,,ALE,Alfheim Easy,EASY,-15,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160722).png,14,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,SEMI-PRO,Emil,,BHH,Blokhaven Hard,HARD,-11,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160722).png,14,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,SEMI-PRO,PaulV-PPP CA,,ALE,Alfheim Easy,EASY,-15,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160722).png,15,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,SEMI-PRO,PaulV-PPP CA,,BHH,Blokhaven Hard,HARD,-9,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160722).png,15,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,SEMI-PRO,deebee,,ALE,Alfheim Easy,EASY,-14,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160722).png,16,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,SEMI-PRO,deebee,,BHH,Blokhaven Hard,HARD,-9,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160722).png,16,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,SEMI-PRO,D3bb13,,ALE,Alfheim Easy,EASY,-7,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160722).png,17,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,SEMI-PRO,D3bb13,,BHH,Blokhaven Hard,HARD,-6,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160722).png,17,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,PRO,Jay,,ALE,Alfheim Easy,EASY,-20,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160734).png,1,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,PRO,Jay,,BHH,Blokhaven Hard,HARD,-20,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160734).png,1,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,PRO,Karma Changer,,ALE,Alfheim Easy,EASY,-23,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160734).png,2,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,PRO,Karma Changer,,BHH,Blokhaven Hard,HARD,-17,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160734).png,2,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,PRO,Gus,,ALE,Alfheim Easy,EASY,-20,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160734).png,3,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,PRO,Gus,,BHH,Blokhaven Hard,HARD,-19,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160734).png,3,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,PRO,HeartBreakKid,,ALE,Alfheim Easy,EASY,-22,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160734).png,3,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,PRO,HeartBreakKid,,BHH,Blokhaven Hard,HARD,-17,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160734).png,3,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,PRO,pluff,,ALE,Alfheim Easy,EASY,-20,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160734).png,3,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,PRO,pluff,,BHH,Blokhaven Hard,HARD,-19,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160734).png,3,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,PRO,Jesunet,,ALE,Alfheim Easy,EASY,-19,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160734).png,6,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,PRO,Jesunet,,BHH,Blokhaven Hard,HARD,-15,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160734).png,6,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,PRO,CHI CHI RODRIGUEZ,,ALE,Alfheim Easy,EASY,-18,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160734).png,7,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,PRO,CHI CHI RODRIGUEZ,,BHH,Blokhaven Hard,HARD,-15,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160734).png,7,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,PRO,akaMikeD,,ALE,Alfheim Easy,EASY,-20,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160734).png,9,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,PRO,akaMikeD,,BHH,Blokhaven Hard,HARD,-11,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160734).png,9,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,PRO,Gatorsfan89,,ALE,Alfheim Easy,EASY,-18,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160734).png,9,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,PRO,Gatorsfan89,,BHH,Blokhaven Hard,HARD,-13,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160734).png,9,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,PRO,Princess_Bankshot,,ALE,Alfheim Easy,EASY,-17,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160734).png,9,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,PRO,Princess_Bankshot,,BHH,Blokhaven Hard,HARD,-14,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160734).png,9,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,PRO,Trikster32,,ALE,Alfheim Easy,EASY,-18,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160734).png,13,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,PRO,Trikster32,,BHH,Blokhaven Hard,HARD,-13,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160734).png,13,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,PRO,Larry,,ALE,Alfheim Easy,EASY,-16,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160734).png,14,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,PRO,Larry,,BHH,Blokhaven Hard,HARD,-13,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160734).png,14,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,PRO,DontQuitWhenLosing,,ALE,Alfheim Easy,EASY,-19,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160734).png,14,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,PRO,DontQuitWhenLosing,,BHH,Blokhaven Hard,HARD,-9,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160734).png,14,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,PRO,Metum,,ALE,Alfheim Easy,EASY,-16,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160734).png,16,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,PRO,Metum,,BHH,Blokhaven Hard,HARD,-12,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160734).png,16,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,PRO,LaurentE,,ALE,Alfheim Easy,EASY,-13,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160734).png,17,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,PRO,LaurentE,,BHH,Blokhaven Hard,HARD,-13,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160734).png,17,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,PRO,omielgato,,ALE,Alfheim Easy,EASY,-18,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160734).png,18,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,PRO,omielgato,,BHH,Blokhaven Hard,HARD,-7,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160734).png,18,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,PRO,Freitag,,ALE,Alfheim Easy,EASY,-17,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160734).png,19,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,PRO,Freitag,,BHH,Blokhaven Hard,HARD,-7,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160734).png,19,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,PRO,Mau,,ALE,Alfheim Easy,EASY,-12,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160734).png,20,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,PRO,Mau,,BHH,Blokhaven Hard,HARD,-10,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160734).png,20,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,PRO,Pootato,,ALE,Alfheim Easy,EASY,-18,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160734).png,21,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,PRO,Pootato,,BHH,Blokhaven Hard,HARD,-4,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160734).png,21,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,PRO,JC,,ALE,Alfheim Easy,EASY,-13,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160734).png,21,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,PRO,JC,,BHH,Blokhaven Hard,HARD,-7,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-160734).png,21,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,his.Dudeness,,ALE,Alfheim Easy,EASY,-21,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,1,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,his.Dudeness,,BHH,Blokhaven Hard,HARD,-23,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,1,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,bigja33,,ALE,Alfheim Easy,EASY,-21,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,2,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,bigja33,,BHH,Blokhaven Hard,HARD,-20,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,2,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,Puttnafed,,ALE,Alfheim Easy,EASY,-18,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,4,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,Puttnafed,,BHH,Blokhaven Hard,HARD,-22,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,4,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,Colbatic,,ALE,Alfheim Easy,EASY,-20,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,5,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,Colbatic,,BHH,Blokhaven Hard,HARD,-19,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,5,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,Dude_Lebowski,,ALE,Alfheim Easy,EASY,-23,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,6,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,Dude_Lebowski,,BHH,Blokhaven Hard,HARD,-16,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,6,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,Zanetti,,ALE,Alfheim Easy,EASY,-20,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,7,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,Zanetti,,BHH,Blokhaven Hard,HARD,-19,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,7,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,Goldenbrett,,ALE,Alfheim Easy,EASY,-18,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,8,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,Goldenbrett,,BHH,Blokhaven Hard,HARD,-20,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,8,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,gomarino13,,ALE,Alfheim Easy,EASY,-20,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,9,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,gomarino13,,BHH,Blokhaven Hard,HARD,-18,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,9,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,leanin2it,,ALE,Alfheim Easy,EASY,-19,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,10,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,leanin2it,,BHH,Blokhaven Hard,HARD,-19,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,10,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,Duardy,,ALE,Alfheim Easy,EASY,-22,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,11,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,Duardy,,BHH,Blokhaven Hard,HARD,-15,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,11,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,El Jorge,,ALE,Alfheim Easy,EASY,-20,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,12,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,El Jorge,,BHH,Blokhaven Hard,HARD,-17,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,12,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,INDY,,ALE,Alfheim Easy,EASY,-20,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,13,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,INDY,,BHH,Blokhaven Hard,HARD,-17,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,13,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,wayne1538,,ALE,Alfheim Easy,EASY,-21,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,14,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,wayne1538,,BHH,Blokhaven Hard,HARD,-16,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,14,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,upстаниа_c,,ALE,Alfheim Easy,EASY,-19,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,15,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,upстаниа_c,,BHH,Blokhaven Hard,HARD,-18,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,15,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,Derby_Daz,,ALE,Alfheim Easy,EASY,-21,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,16,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,Derby_Daz,,BHH,Blokhaven Hard,HARD,-15,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,16,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,Gobson,,ALE,Alfheim Easy,EASY,-20,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,17,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,Gobson,,BHH,Blokhaven Hard,HARD,-16,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,17,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,Fugohallarin,,ALE,Alfheim Easy,EASY,-18,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,18,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,Fugohallarin,,BHH,Blokhaven Hard,HARD,-17,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,18,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,Matt916,,ALE,Alfheim Easy,EASY,-21,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,19,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,Matt916,,BHH,Blokhaven Hard,HARD,-14,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,19,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,mini_G,,ALE,Alfheim Easy,EASY,-19,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,20,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,mini_G,,BHH,Blokhaven Hard,HARD,-16,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,20,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,OpusMcGraw,,ALE,Alfheim Easy,EASY,-21,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,21,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,OpusMcGraw,,BHH,Blokhaven Hard,HARD,-13,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,21,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,TIGERHOODS,,ALE,Alfheim Easy,EASY,-17,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,22,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,TIGERHOODS,,BHH,Blokhaven Hard,HARD,-17,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,22,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,FelixTortilla,,ALE,Alfheim Easy,EASY,-18,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,23,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,FelixTortilla,,BHH,Blokhaven Hard,HARD,-15,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,23,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,IceCreamTaco,,ALE,Alfheim Easy,EASY,-19,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,24,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,IceCreamTaco,,BHH,Blokhaven Hard,HARD,-13,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,24,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,ZONK,,ALE,Alfheim Easy,EASY,-19,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,25,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,ZONK,,BHH,Blokhaven Hard,HARD,-13,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,25,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,Sticky,,ALE,Alfheim Easy,EASY,-17,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,26,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,Sticky,,BHH,Blokhaven Hard,HARD,-14,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,26,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,Harry Highpants,,ALE,Alfheim Easy,EASY,-18,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,27,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,Harry Highpants,,BHH,Blokhaven Hard,HARD,-12,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,27,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,UroPa,,ALE,Alfheim Easy,EASY,-16,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,28,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,UroPa,,BHH,Blokhaven Hard,HARD,-12,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,28,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,NATE,,ALE,Alfheim Easy,EASY,-16,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,29,VERIFIED,,false
+THE_WEEKLY,S20W07_ALE_BHH,S20W07,ELITE,NATE,,BHH,Blokhaven Hard,HARD,-8,true,phase52-input/weekly_screenshots/S20W07_ALE_BHH/image(20261019-161424).png,29,VERIFIED,,false

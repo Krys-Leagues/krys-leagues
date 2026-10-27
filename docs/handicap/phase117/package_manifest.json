@@ -1,0 +1,35 @@
+{
+  "package_version": "phase117-official-kwt-csv-production-import-v1",
+  "production_project": "jfbndcwdsvsjgnzwvexp",
+  "calculation_run_id": "9a9a4bc4-e43d-55d4-84fb-a83c0b757681",
+  "source_manifest_sha256": "E808D8459AC131E384CCA0F2D44ED230B8513EA61671149322EDDEA1972230E3",
+  "source_zip_sha256": "E599CF6DF746F6C60C9718FBB73486396055567B738ED1A6EEB5808D2E2E46CE",
+  "source_namespace": "OFFICIAL_KWT_CSV",
+  "source_type": "KWT",
+  "resolved_player_week_pairs": 364,
+  "quarantined_player_week_pairs": 7,
+  "imported_observations": 728,
+  "quarantined_observations": 14,
+  "distinct_canonical_players": 65,
+  "easy_observations": 364,
+  "hard_observations": 364,
+  "existing_production_counts": {
+    "calculation_runs": 3,
+    "provenance_rows": 27944,
+    "rating_snapshots": 410,
+    "index_snapshots": 157,
+    "weekly_rows": 844
+  },
+  "expected_post_import_counts": {
+    "calculation_runs": 4,
+    "provenance_rows": 28672,
+    "rating_snapshots": 410,
+    "index_snapshots": 157,
+    "weekly_rows": 844,
+    "publishable_ratings": 0,
+    "publishable_indexes": 0
+  },
+  "ratings_or_indexes_included": false,
+  "publication_eligibility": "QUARANTINED",
+  "status": "LOCAL_PACKAGE_REQUIRES_READ_ONLY_PREFLIGHT_AND_EXPLICIT_PRODUCTION_EXECUTION"
+}

@@ -1,0 +1,18 @@
+{
+    "repetition":  1,
+    "period":  "2025 August",
+    "period_id":  221,
+    "division":  "Elite",
+    "division_id":  22,
+    "course":  "Atlantis",
+    "source_player_name":  "PETERK9FLORIDA",
+    "source_player_id":  8108,
+    "score_text":  "-26",
+    "leader_rows":  1,
+    "course_tables":  8,
+    "html_sha256":  "84A08C9A6A51D2C3CFBDF5AAB6750DD20F1EF8EF357ED0735134CA6B01B555E3",
+    "text_sha256":  "14BCD7F56FEE78D309A88ED9CAD2A3AFBC4B7E96258C3B36EFE516EE52656878",
+    "html_file":  "repro-1-period-221-division-22.html",
+    "text_file":  "repro-1-period-221-division-22.txt",
+    "session_state":  "not stored"
+}

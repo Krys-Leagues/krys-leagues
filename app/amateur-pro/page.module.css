@@ -1,0 +1,4 @@
+.page :global(.artwork-navigation) {
+  min-height: 0;
+  padding: 0;
+}

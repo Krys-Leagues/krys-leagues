@@ -1,0 +1,325 @@
+course_id,difficulty,model,qualifying_rounds,distinct_players,mean_score,median_score,elite_benchmark,simulated_course_rating,simulated_slope,status,phase104_rating,phase104_slope,rating_delta_from_kwt_only,slope_delta_from_kwt_only,note
+"20,000 Leagues Under The Sea_easy",easy,KWT_ONLY,177,100,-17.51412429378531,-18,-23.363636363636363,-23.363636363636363,5.849512069851052,POTENTIALLY_READY,-23.364,5.85,,,historical Phase 68 KWT provenance
+"20,000 Leagues Under The Sea_easy",easy,KWT_PLUS_S14W05_12,177,100,-17.51412429378531,-18,-23.363636363636363,-23.363636363636363,5.849512069851052,POTENTIALLY_READY,-23.364,5.85,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+"20,000 Leagues Under The Sea_easy",easy,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-23.364,5.85,,,THE_WEEKLY course-rating-only evidence
+"20,000 Leagues Under The Sea_easy",easy,KWT_PLUS_WEEKLY,177,100,-17.51412429378531,-18,-23.363636363636363,-23.363636363636363,5.849512069851052,POTENTIALLY_READY,-23.364,5.85,0,0,local combined simulation; Weekly never enters personal indexes
+"20,000 Leagues Under The Sea_hard",hard,KWT_ONLY,177,100,-10.440677966101696,-12,-19.181818181818183,-19.181818181818183,8.741140215716488,POTENTIALLY_READY,-19.182,8.741,,,historical Phase 68 KWT provenance
+"20,000 Leagues Under The Sea_hard",hard,KWT_PLUS_S14W05_12,177,100,-10.440677966101696,-12,-19.181818181818183,-19.181818181818183,8.741140215716488,POTENTIALLY_READY,-19.182,8.741,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+"20,000 Leagues Under The Sea_hard",hard,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-19.182,8.741,,,THE_WEEKLY course-rating-only evidence
+"20,000 Leagues Under The Sea_hard",hard,KWT_PLUS_WEEKLY,177,100,-10.440677966101696,-12,-19.181818181818183,-19.181818181818183,8.741140215716488,POTENTIALLY_READY,-19.182,8.741,0,0,local combined simulation; Weekly never enters personal indexes
+8-Bit Lair_easy,easy,KWT_ONLY,163,94,-12.460122699386503,-13,-21.8,-21.8,9.339877300613498,POTENTIALLY_READY,-21.8,9.34,,,historical Phase 68 KWT provenance
+8-Bit Lair_easy,easy,KWT_PLUS_S14W05_12,163,94,-12.460122699386503,-13,-21.8,-21.8,9.339877300613498,POTENTIALLY_READY,-21.8,9.34,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+8-Bit Lair_easy,easy,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-21.8,9.34,,,THE_WEEKLY course-rating-only evidence
+8-Bit Lair_easy,easy,KWT_PLUS_WEEKLY,163,94,-12.460122699386503,-13,-21.8,-21.8,9.339877300613498,POTENTIALLY_READY,-21.8,9.34,0,0,local combined simulation; Weekly never enters personal indexes
+8-Bit Lair_hard,hard,KWT_ONLY,163,94,-6.177914110429448,-7,-18.75,-18.75,12.572085889570552,POTENTIALLY_READY,-18.75,12.572,,,historical Phase 68 KWT provenance
+8-Bit Lair_hard,hard,KWT_PLUS_S14W05_12,163,94,-6.177914110429448,-7,-18.75,-18.75,12.572085889570552,POTENTIALLY_READY,-18.75,12.572,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+8-Bit Lair_hard,hard,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-18.75,12.572,,,THE_WEEKLY course-rating-only evidence
+8-Bit Lair_hard,hard,KWT_PLUS_WEEKLY,163,94,-6.177914110429448,-7,-18.75,-18.75,12.572085889570552,POTENTIALLY_READY,-18.75,12.572,0,0,local combined simulation; Weekly never enters personal indexes
+Alfheim_easy,easy,KWT_ONLY,221,117,-14.683257918552036,-15,-21.185185185185187,-21.185185185185187,6.501927266633151,POTENTIALLY_READY,-21.185,6.502,,,historical Phase 68 KWT provenance
+Alfheim_easy,easy,KWT_PLUS_S14W05_12,221,117,-14.683257918552036,-15,-21.185185185185187,-21.185185185185187,6.501927266633151,POTENTIALLY_READY,-21.185,6.502,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Alfheim_easy,easy,WEEKLY_ONLY,80,80,-17.5125,-18,-21.7,-21.7,4.1875,POTENTIALLY_READY,-21.185,6.502,-0.5148148148148124,-2.3144272666331513,THE_WEEKLY course-rating-only evidence
+Alfheim_easy,easy,KWT_PLUS_WEEKLY,301,197,-15.435215946843854,-16,-21.35135135135135,-21.35135135135135,5.9161354045074965,POTENTIALLY_READY,-21.185,6.502,-0.16616616616616398,-0.5857918621256548,local combined simulation; Weekly never enters personal indexes
+Alfheim_hard,hard,KWT_ONLY,221,117,-12.60180995475113,-14,-21.666666666666668,-21.666666666666668,9.064856711915537,POTENTIALLY_READY,-21.667,9.065,,,historical Phase 68 KWT provenance
+Alfheim_hard,hard,KWT_PLUS_S14W05_12,221,117,-12.60180995475113,-14,-21.666666666666668,-21.666666666666668,9.064856711915537,POTENTIALLY_READY,-21.667,9.065,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Alfheim_hard,hard,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-21.667,9.065,,,THE_WEEKLY course-rating-only evidence
+Alfheim_hard,hard,KWT_PLUS_WEEKLY,221,117,-12.60180995475113,-14,-21.666666666666668,-21.666666666666668,9.064856711915537,POTENTIALLY_READY,-21.667,9.065,0,0,local combined simulation; Weekly never enters personal indexes
+Alice's Adventures in Wonderland_easy,easy,KWT_ONLY,49,49,-14.408163265306122,-14,-21.5,-21.5,7.091836734693878,PROVISIONAL,,,,,historical Phase 68 KWT provenance
+Alice's Adventures in Wonderland_easy,easy,KWT_PLUS_S14W05_12,88,67,-14.965909090909092,-15,-22.181818181818183,-22.181818181818183,7.215909090909092,POTENTIALLY_READY,,,-0.6818181818181834,0.12407235621521373,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Alice's Adventures in Wonderland_easy,easy,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,,,,,THE_WEEKLY course-rating-only evidence
+Alice's Adventures in Wonderland_easy,easy,KWT_PLUS_WEEKLY,88,67,-14.965909090909092,-15,-22.181818181818183,-22.181818181818183,7.215909090909092,POTENTIALLY_READY,,,-0.6818181818181834,0.12407235621521373,local combined simulation; Weekly never enters personal indexes
+Alice's Adventures in Wonderland_hard,hard,KWT_ONLY,49,49,-1.7755102040816326,0,-13,-13,11.224489795918368,PROVISIONAL,,,,,historical Phase 68 KWT provenance
+Alice's Adventures in Wonderland_hard,hard,KWT_PLUS_S14W05_12,88,67,-1.9886363636363635,-1,-13,-13,11.011363636363637,POTENTIALLY_READY,,,0,-0.21312615955473113,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Alice's Adventures in Wonderland_hard,hard,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,,,,,THE_WEEKLY course-rating-only evidence
+Alice's Adventures in Wonderland_hard,hard,KWT_PLUS_WEEKLY,88,67,-1.9886363636363635,-1,-13,-13,11.011363636363637,POTENTIALLY_READY,,,0,-0.21312615955473113,local combined simulation; Weekly never enters personal indexes
+Arizona Modern_easy,easy,KWT_ONLY,174,97,-21.810344827586206,-23,-27.38095238095238,-27.38095238095238,5.570607553366173,POTENTIALLY_READY,-27.381,5.571,,,historical Phase 68 KWT provenance
+Arizona Modern_easy,easy,KWT_PLUS_S14W05_12,174,97,-21.810344827586206,-23,-27.38095238095238,-27.38095238095238,5.570607553366173,POTENTIALLY_READY,-27.381,5.571,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Arizona Modern_easy,easy,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-27.381,5.571,,,THE_WEEKLY course-rating-only evidence
+Arizona Modern_easy,easy,KWT_PLUS_WEEKLY,174,97,-21.810344827586206,-23,-27.38095238095238,-27.38095238095238,5.570607553366173,POTENTIALLY_READY,-27.381,5.571,0,0,local combined simulation; Weekly never enters personal indexes
+Arizona Modern_hard,hard,KWT_ONLY,174,97,-13.425287356321839,-14,-22.714285714285715,-22.714285714285715,9.288998357963877,POTENTIALLY_READY,-22.714,9.289,,,historical Phase 68 KWT provenance
+Arizona Modern_hard,hard,KWT_PLUS_S14W05_12,174,97,-13.425287356321839,-14,-22.714285714285715,-22.714285714285715,9.288998357963877,POTENTIALLY_READY,-22.714,9.289,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Arizona Modern_hard,hard,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-22.714,9.289,,,THE_WEEKLY course-rating-only evidence
+Arizona Modern_hard,hard,KWT_PLUS_WEEKLY,174,97,-13.425287356321839,-14,-22.714285714285715,-22.714285714285715,9.288998357963877,POTENTIALLY_READY,-22.714,9.289,0,0,local combined simulation; Weekly never enters personal indexes
+Around The World_easy,easy,KWT_ONLY,174,103,-15.586206896551724,-16,-23.047619047619047,-23.047619047619047,7.461412151067323,POTENTIALLY_READY,-23.048,7.461,,,historical Phase 68 KWT provenance
+Around The World_easy,easy,KWT_PLUS_S14W05_12,174,103,-15.586206896551724,-16,-23.047619047619047,-23.047619047619047,7.461412151067323,POTENTIALLY_READY,-23.048,7.461,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Around The World_easy,easy,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-23.048,7.461,,,THE_WEEKLY course-rating-only evidence
+Around The World_easy,easy,KWT_PLUS_WEEKLY,174,103,-15.586206896551724,-16,-23.047619047619047,-23.047619047619047,7.461412151067323,POTENTIALLY_READY,-23.048,7.461,0,0,local combined simulation; Weekly never enters personal indexes
+Around The World_hard,hard,KWT_ONLY,174,103,-5.390804597701149,-7,-15.761904761904763,-15.761904761904763,10.371100164203614,POTENTIALLY_READY,-15.762,10.371,,,historical Phase 68 KWT provenance
+Around The World_hard,hard,KWT_PLUS_S14W05_12,174,103,-5.390804597701149,-7,-15.761904761904763,-15.761904761904763,10.371100164203614,POTENTIALLY_READY,-15.762,10.371,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Around The World_hard,hard,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-15.762,10.371,,,THE_WEEKLY course-rating-only evidence
+Around The World_hard,hard,KWT_PLUS_WEEKLY,174,103,-5.390804597701149,-7,-15.761904761904763,-15.761904761904763,10.371100164203614,POTENTIALLY_READY,-15.762,10.371,0,0,local combined simulation; Weekly never enters personal indexes
+Atlantis_easy,easy,KWT_ONLY,223,110,-18.704035874439462,-19,-25.14814814814815,-25.14814814814815,6.4441122737086864,POTENTIALLY_READY,-25.148,6.444,,,historical Phase 68 KWT provenance
+Atlantis_easy,easy,KWT_PLUS_S14W05_12,223,110,-18.704035874439462,-19,-25.14814814814815,-25.14814814814815,6.4441122737086864,POTENTIALLY_READY,-25.148,6.444,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Atlantis_easy,easy,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-25.148,6.444,,,THE_WEEKLY course-rating-only evidence
+Atlantis_easy,easy,KWT_PLUS_WEEKLY,223,110,-18.704035874439462,-19,-25.14814814814815,-25.14814814814815,6.4441122737086864,POTENTIALLY_READY,-25.148,6.444,0,0,local combined simulation; Weekly never enters personal indexes
+Atlantis_hard,hard,KWT_ONLY,223,110,-7.228699551569507,-8,-17.555555555555557,-17.555555555555557,10.32685600398605,POTENTIALLY_READY,-17.556,10.327,,,historical Phase 68 KWT provenance
+Atlantis_hard,hard,KWT_PLUS_S14W05_12,223,110,-7.228699551569507,-8,-17.555555555555557,-17.555555555555557,10.32685600398605,POTENTIALLY_READY,-17.556,10.327,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Atlantis_hard,hard,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-17.556,10.327,,,THE_WEEKLY course-rating-only evidence
+Atlantis_hard,hard,KWT_PLUS_WEEKLY,223,110,-7.228699551569507,-8,-17.555555555555557,-17.555555555555557,10.32685600398605,POTENTIALLY_READY,-17.556,10.327,0,0,local combined simulation; Weekly never enters personal indexes
+Blokhaven_easy,easy,KWT_ONLY,0,0,,,,,,INSUFFICIENT,,,,,historical Phase 68 KWT provenance
+Blokhaven_easy,easy,KWT_PLUS_S14W05_12,50,50,-13.9,-14.5,-22.166666666666668,-22.166666666666668,8.266666666666667,POTENTIALLY_READY,,,,,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Blokhaven_easy,easy,WEEKLY_ONLY,85,85,-16.305882352941175,-17,-21.818181818181817,-21.818181818181817,5.512299465240641,POTENTIALLY_READY,,,,,THE_WEEKLY course-rating-only evidence
+Blokhaven_easy,easy,KWT_PLUS_WEEKLY,135,135,-15.414814814814815,-16,-21.941176470588236,-21.941176470588236,6.526361655773421,POTENTIALLY_READY,,,,,local combined simulation; Weekly never enters personal indexes
+Blokhaven_hard,hard,KWT_ONLY,0,0,,,,,,INSUFFICIENT,,,,,historical Phase 68 KWT provenance
+Blokhaven_hard,hard,KWT_PLUS_S14W05_12,50,50,-8.76,-9.5,-18.333333333333332,-18.333333333333332,9.573333333333332,POTENTIALLY_READY,,,,,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Blokhaven_hard,hard,WEEKLY_ONLY,80,80,-12.7,-13.5,-20,-20,7.300000000000001,POTENTIALLY_READY,,,,,THE_WEEKLY course-rating-only evidence
+Blokhaven_hard,hard,KWT_PLUS_WEEKLY,130,130,-11.184615384615384,-12.5,-19.5,-19.5,8.315384615384616,POTENTIALLY_READY,,,,,local combined simulation; Weekly never enters personal indexes
+Bogey's Bonanza_easy,easy,KWT_ONLY,224,112,-17.410714285714285,-18,-25.37037037037037,-25.37037037037037,7.9596560846560855,POTENTIALLY_READY,-25.37,7.96,,,historical Phase 68 KWT provenance
+Bogey's Bonanza_easy,easy,KWT_PLUS_S14W05_12,224,112,-17.410714285714285,-18,-25.37037037037037,-25.37037037037037,7.9596560846560855,POTENTIALLY_READY,-25.37,7.96,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Bogey's Bonanza_easy,easy,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-25.37,7.96,,,THE_WEEKLY course-rating-only evidence
+Bogey's Bonanza_easy,easy,KWT_PLUS_WEEKLY,224,112,-17.410714285714285,-18,-25.37037037037037,-25.37037037037037,7.9596560846560855,POTENTIALLY_READY,-25.37,7.96,0,0,local combined simulation; Weekly never enters personal indexes
+Bogey's Bonanza_hard,hard,KWT_ONLY,224,112,-9.089285714285714,-10.5,-22.444444444444443,-22.444444444444443,13.35515873015873,POTENTIALLY_READY,-22.444,13.355,,,historical Phase 68 KWT provenance
+Bogey's Bonanza_hard,hard,KWT_PLUS_S14W05_12,224,112,-9.089285714285714,-10.5,-22.444444444444443,-22.444444444444443,13.35515873015873,POTENTIALLY_READY,-22.444,13.355,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Bogey's Bonanza_hard,hard,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-22.444,13.355,,,THE_WEEKLY course-rating-only evidence
+Bogey's Bonanza_hard,hard,KWT_PLUS_WEEKLY,224,112,-9.089285714285714,-10.5,-22.444444444444443,-22.444444444444443,13.35515873015873,POTENTIALLY_READY,-22.444,13.355,0,0,local combined simulation; Weekly never enters personal indexes
+Cherry Blossom_easy,easy,KWT_ONLY,220,104,-21.586363636363636,-22,-27.51851851851852,-27.51851851851852,5.932154882154883,POTENTIALLY_READY,-27.519,5.932,,,historical Phase 68 KWT provenance
+Cherry Blossom_easy,easy,KWT_PLUS_S14W05_12,220,104,-21.586363636363636,-22,-27.51851851851852,-27.51851851851852,5.932154882154883,POTENTIALLY_READY,-27.519,5.932,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Cherry Blossom_easy,easy,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-27.519,5.932,,,THE_WEEKLY course-rating-only evidence
+Cherry Blossom_easy,easy,KWT_PLUS_WEEKLY,220,104,-21.586363636363636,-22,-27.51851851851852,-27.51851851851852,5.932154882154883,POTENTIALLY_READY,-27.519,5.932,0,0,local combined simulation; Weekly never enters personal indexes
+Cherry Blossom_hard,hard,KWT_ONLY,220,104,-10.495454545454546,-11.5,-21.703703703703702,-21.703703703703702,11.208249158249156,POTENTIALLY_READY,-21.704,11.208,,,historical Phase 68 KWT provenance
+Cherry Blossom_hard,hard,KWT_PLUS_S14W05_12,220,104,-10.495454545454546,-11.5,-21.703703703703702,-21.703703703703702,11.208249158249156,POTENTIALLY_READY,-21.704,11.208,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Cherry Blossom_hard,hard,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-21.704,11.208,,,THE_WEEKLY course-rating-only evidence
+Cherry Blossom_hard,hard,KWT_PLUS_WEEKLY,220,104,-10.495454545454546,-11.5,-21.703703703703702,-21.703703703703702,11.208249158249156,POTENTIALLY_READY,-21.704,11.208,0,0,local combined simulation; Weekly never enters personal indexes
+Crystal Lair_easy,easy,KWT_ONLY,101,67,-15.415841584158416,-16,-24.53846153846154,-24.53846153846154,9.122619954303124,POTENTIALLY_READY,-24.538,9.123,,,historical Phase 68 KWT provenance
+Crystal Lair_easy,easy,KWT_PLUS_S14W05_12,101,67,-15.415841584158416,-16,-24.53846153846154,-24.53846153846154,9.122619954303124,POTENTIALLY_READY,-24.538,9.123,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Crystal Lair_easy,easy,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-24.538,9.123,,,THE_WEEKLY course-rating-only evidence
+Crystal Lair_easy,easy,KWT_PLUS_WEEKLY,101,67,-15.415841584158416,-16,-24.53846153846154,-24.53846153846154,9.122619954303124,POTENTIALLY_READY,-24.538,9.123,0,0,local combined simulation; Weekly never enters personal indexes
+Crystal Lair_hard,hard,KWT_ONLY,101,67,-9,-10,-20.692307692307693,-20.692307692307693,11.692307692307693,POTENTIALLY_READY,-20.692,11.692,,,historical Phase 68 KWT provenance
+Crystal Lair_hard,hard,KWT_PLUS_S14W05_12,101,67,-9,-10,-20.692307692307693,-20.692307692307693,11.692307692307693,POTENTIALLY_READY,-20.692,11.692,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Crystal Lair_hard,hard,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-20.692,11.692,,,THE_WEEKLY course-rating-only evidence
+Crystal Lair_hard,hard,KWT_PLUS_WEEKLY,101,67,-9,-10,-20.692307692307693,-20.692307692307693,11.692307692307693,POTENTIALLY_READY,-20.692,11.692,0,0,local combined simulation; Weekly never enters personal indexes
+El Dorado_easy,easy,KWT_ONLY,234,111,-15.837606837606838,-17,-23.862068965517242,-23.862068965517242,8.024462127910404,POTENTIALLY_READY,-23.862,8.024,,,historical Phase 68 KWT provenance
+El Dorado_easy,easy,KWT_PLUS_S14W05_12,234,111,-15.837606837606838,-17,-23.862068965517242,-23.862068965517242,8.024462127910404,POTENTIALLY_READY,-23.862,8.024,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+El Dorado_easy,easy,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-23.862,8.024,,,THE_WEEKLY course-rating-only evidence
+El Dorado_easy,easy,KWT_PLUS_WEEKLY,234,111,-15.837606837606838,-17,-23.862068965517242,-23.862068965517242,8.024462127910404,POTENTIALLY_READY,-23.862,8.024,0,0,local combined simulation; Weekly never enters personal indexes
+El Dorado_hard,hard,KWT_ONLY,234,111,-7.1239316239316235,-8,-18.17241379310345,-18.17241379310345,11.048482169171825,POTENTIALLY_READY,-18.172,11.048,,,historical Phase 68 KWT provenance
+El Dorado_hard,hard,KWT_PLUS_S14W05_12,234,111,-7.1239316239316235,-8,-18.17241379310345,-18.17241379310345,11.048482169171825,POTENTIALLY_READY,-18.172,11.048,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+El Dorado_hard,hard,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-18.172,11.048,,,THE_WEEKLY course-rating-only evidence
+El Dorado_hard,hard,KWT_PLUS_WEEKLY,234,111,-7.1239316239316235,-8,-18.17241379310345,-18.17241379310345,11.048482169171825,POTENTIALLY_READY,-18.172,11.048,0,0,local combined simulation; Weekly never enters personal indexes
+Forgotten Fairyland_easy,easy,KWT_ONLY,62,62,-20.516129032258064,-21,-28.75,-28.75,8.233870967741936,POTENTIALLY_READY,-28.75,8.234,,,historical Phase 68 KWT provenance
+Forgotten Fairyland_easy,easy,KWT_PLUS_S14W05_12,101,75,-20.792079207920793,-22,-28.76923076923077,-28.76923076923077,7.977151561309977,POTENTIALLY_READY,-28.75,8.234,-0.01923076923077005,-0.2567194064319587,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Forgotten Fairyland_easy,easy,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-28.75,8.234,,,THE_WEEKLY course-rating-only evidence
+Forgotten Fairyland_easy,easy,KWT_PLUS_WEEKLY,101,75,-20.792079207920793,-22,-28.76923076923077,-28.76923076923077,7.977151561309977,POTENTIALLY_READY,-28.75,8.234,-0.01923076923077005,-0.2567194064319587,local combined simulation; Weekly never enters personal indexes
+Forgotten Fairyland_hard,hard,KWT_ONLY,62,62,-5.661290322580645,-7.5,-15.75,-15.75,10.088709677419356,POTENTIALLY_READY,-15.75,10.089,,,historical Phase 68 KWT provenance
+Forgotten Fairyland_hard,hard,KWT_PLUS_S14W05_12,101,75,-5.920792079207921,-7,-15.846153846153847,-15.846153846153847,9.925361766945926,POTENTIALLY_READY,-15.75,10.089,-0.0961538461538467,-0.1633479104734299,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Forgotten Fairyland_hard,hard,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-15.75,10.089,,,THE_WEEKLY course-rating-only evidence
+Forgotten Fairyland_hard,hard,KWT_PLUS_WEEKLY,101,75,-5.920792079207921,-7,-15.846153846153847,-15.846153846153847,9.925361766945926,POTENTIALLY_READY,-15.75,10.089,-0.0961538461538467,-0.1633479104734299,local combined simulation; Weekly never enters personal indexes
+Gardens of Babylon_easy,easy,KWT_ONLY,226,110,-18.106194690265486,-18,-26.142857142857142,-26.142857142857142,8.036662452591656,POTENTIALLY_READY,-26.143,8.037,,,historical Phase 68 KWT provenance
+Gardens of Babylon_easy,easy,KWT_PLUS_S14W05_12,226,110,-18.106194690265486,-18,-26.142857142857142,-26.142857142857142,8.036662452591656,POTENTIALLY_READY,-26.143,8.037,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Gardens of Babylon_easy,easy,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-26.143,8.037,,,THE_WEEKLY course-rating-only evidence
+Gardens of Babylon_easy,easy,KWT_PLUS_WEEKLY,226,110,-18.106194690265486,-18,-26.142857142857142,-26.142857142857142,8.036662452591656,POTENTIALLY_READY,-26.143,8.037,0,0,local combined simulation; Weekly never enters personal indexes
+Gardens of Babylon_hard,hard,KWT_ONLY,226,110,-8.29646017699115,-9,-19.5,-19.5,11.20353982300885,POTENTIALLY_READY,-19.5,11.204,,,historical Phase 68 KWT provenance
+Gardens of Babylon_hard,hard,KWT_PLUS_S14W05_12,226,110,-8.29646017699115,-9,-19.5,-19.5,11.20353982300885,POTENTIALLY_READY,-19.5,11.204,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Gardens of Babylon_hard,hard,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-19.5,11.204,,,THE_WEEKLY course-rating-only evidence
+Gardens of Babylon_hard,hard,KWT_PLUS_WEEKLY,226,110,-8.29646017699115,-9,-19.5,-19.5,11.20353982300885,POTENTIALLY_READY,-19.5,11.204,0,0,local combined simulation; Weekly never enters personal indexes
+Gloop Lair_easy,easy,KWT_ONLY,0,0,,,,,,INSUFFICIENT,,,,,historical Phase 68 KWT provenance
+Gloop Lair_easy,easy,KWT_PLUS_S14W05_12,0,0,,,,,,INSUFFICIENT,,,,,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Gloop Lair_easy,easy,WEEKLY_ONLY,92,92,-20.619565217391305,-21,-28.25,-28.25,7.630434782608695,POTENTIALLY_READY,,,,,THE_WEEKLY course-rating-only evidence
+Gloop Lair_easy,easy,KWT_PLUS_WEEKLY,92,92,-20.619565217391305,-21,-28.25,-28.25,7.630434782608695,POTENTIALLY_READY,,,,,local combined simulation; Weekly never enters personal indexes
+Holiday Hideaway_easy,easy,KWT_ONLY,154,88,-11.980519480519481,-13,-19.05263157894737,-19.05263157894737,7.072112098427889,POTENTIALLY_READY,-19.053,7.072,,,historical Phase 68 KWT provenance
+Holiday Hideaway_easy,easy,KWT_PLUS_S14W05_12,154,88,-11.980519480519481,-13,-19.05263157894737,-19.05263157894737,7.072112098427889,POTENTIALLY_READY,-19.053,7.072,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Holiday Hideaway_easy,easy,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-19.053,7.072,,,THE_WEEKLY course-rating-only evidence
+Holiday Hideaway_easy,easy,KWT_PLUS_WEEKLY,154,88,-11.980519480519481,-13,-19.05263157894737,-19.05263157894737,7.072112098427889,POTENTIALLY_READY,-19.053,7.072,0,0,local combined simulation; Weekly never enters personal indexes
+Holiday Hideaway_hard,hard,KWT_ONLY,154,88,-2.7532467532467533,-3.5,-14.157894736842104,-14.157894736842104,11.404647983595352,POTENTIALLY_READY,-14.158,11.405,,,historical Phase 68 KWT provenance
+Holiday Hideaway_hard,hard,KWT_PLUS_S14W05_12,154,88,-2.7532467532467533,-3.5,-14.157894736842104,-14.157894736842104,11.404647983595352,POTENTIALLY_READY,-14.158,11.405,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Holiday Hideaway_hard,hard,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-14.158,11.405,,,THE_WEEKLY course-rating-only evidence
+Holiday Hideaway_hard,hard,KWT_PLUS_WEEKLY,154,88,-2.7532467532467533,-3.5,-14.157894736842104,-14.157894736842104,11.404647983595352,POTENTIALLY_READY,-14.158,11.405,0,0,local combined simulation; Weekly never enters personal indexes
+Hollywood_easy,easy,KWT_ONLY,46,46,-13.41304347826087,-14.5,-21.166666666666668,-21.166666666666668,7.753623188405799,PROVISIONAL,,,,,historical Phase 68 KWT provenance
+Hollywood_easy,easy,KWT_PLUS_S14W05_12,46,46,-13.41304347826087,-14.5,-21.166666666666668,-21.166666666666668,7.753623188405799,PROVISIONAL,,,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Hollywood_easy,easy,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,,,,,THE_WEEKLY course-rating-only evidence
+Hollywood_easy,easy,KWT_PLUS_WEEKLY,46,46,-13.41304347826087,-14.5,-21.166666666666668,-21.166666666666668,7.753623188405799,PROVISIONAL,,,0,0,local combined simulation; Weekly never enters personal indexes
+Hollywood_hard,hard,KWT_ONLY,46,46,-3.239130434782609,-4,-16.666666666666668,-16.666666666666668,13.427536231884059,PROVISIONAL,,,,,historical Phase 68 KWT provenance
+Hollywood_hard,hard,KWT_PLUS_S14W05_12,46,46,-3.239130434782609,-4,-16.666666666666668,-16.666666666666668,13.427536231884059,PROVISIONAL,,,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Hollywood_hard,hard,WEEKLY_ONLY,92,92,-9.532608695652174,-11,-17.333333333333332,-17.333333333333332,7.800724637681158,POTENTIALLY_READY,,,-0.6666666666666643,-5.6268115942029,THE_WEEKLY course-rating-only evidence
+Hollywood_hard,hard,KWT_PLUS_WEEKLY,138,138,-7.434782608695652,-9,-17.294117647058822,-17.294117647058822,9.85933503836317,POTENTIALLY_READY,,,-0.6274509803921546,-3.5682011935208884,local combined simulation; Weekly never enters personal indexes
+Ice Lair_easy,easy,KWT_ONLY,236,103,-14.088983050847459,-14,-20.82758620689655,-20.82758620689655,6.738603156049093,POTENTIALLY_READY,-20.828,6.739,,,historical Phase 68 KWT provenance
+Ice Lair_easy,easy,KWT_PLUS_S14W05_12,236,103,-14.088983050847459,-14,-20.82758620689655,-20.82758620689655,6.738603156049093,POTENTIALLY_READY,-20.828,6.739,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Ice Lair_easy,easy,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-20.828,6.739,,,THE_WEEKLY course-rating-only evidence
+Ice Lair_easy,easy,KWT_PLUS_WEEKLY,236,103,-14.088983050847459,-14,-20.82758620689655,-20.82758620689655,6.738603156049093,POTENTIALLY_READY,-20.828,6.739,0,0,local combined simulation; Weekly never enters personal indexes
+Ice Lair_hard,hard,KWT_ONLY,236,103,-6.860169491525424,-7,-16.689655172413794,-16.689655172413794,9.82948568088837,POTENTIALLY_READY,-16.69,9.829,,,historical Phase 68 KWT provenance
+Ice Lair_hard,hard,KWT_PLUS_S14W05_12,236,103,-6.860169491525424,-7,-16.689655172413794,-16.689655172413794,9.82948568088837,POTENTIALLY_READY,-16.69,9.829,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Ice Lair_hard,hard,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-16.69,9.829,,,THE_WEEKLY course-rating-only evidence
+Ice Lair_hard,hard,KWT_PLUS_WEEKLY,236,103,-6.860169491525424,-7,-16.689655172413794,-16.689655172413794,9.82948568088837,POTENTIALLY_READY,-16.69,9.829,0,0,local combined simulation; Weekly never enters personal indexes
+Journey to the Center of the Earth_easy,easy,KWT_ONLY,204,106,-15.553921568627452,-16,-21.6,-21.6,6.04607843137255,POTENTIALLY_READY,-21.6,6.046,,,historical Phase 68 KWT provenance
+Journey to the Center of the Earth_easy,easy,KWT_PLUS_S14W05_12,204,106,-15.553921568627452,-16,-21.6,-21.6,6.04607843137255,POTENTIALLY_READY,-21.6,6.046,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Journey to the Center of the Earth_easy,easy,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-21.6,6.046,,,THE_WEEKLY course-rating-only evidence
+Journey to the Center of the Earth_easy,easy,KWT_PLUS_WEEKLY,204,106,-15.553921568627452,-16,-21.6,-21.6,6.04607843137255,POTENTIALLY_READY,-21.6,6.046,0,0,local combined simulation; Weekly never enters personal indexes
+Journey to the Center of the Earth_hard,hard,KWT_ONLY,204,106,-8.92156862745098,-10,-18.24,-18.24,9.318431372549018,POTENTIALLY_READY,-18.24,9.318,,,historical Phase 68 KWT provenance
+Journey to the Center of the Earth_hard,hard,KWT_PLUS_S14W05_12,204,106,-8.92156862745098,-10,-18.24,-18.24,9.318431372549018,POTENTIALLY_READY,-18.24,9.318,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Journey to the Center of the Earth_hard,hard,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-18.24,9.318,,,THE_WEEKLY course-rating-only evidence
+Journey to the Center of the Earth_hard,hard,KWT_PLUS_WEEKLY,204,106,-8.92156862745098,-10,-18.24,-18.24,9.318431372549018,POTENTIALLY_READY,-18.24,9.318,0,0,local combined simulation; Weekly never enters personal indexes
+Labyrinth_easy,easy,KWT_ONLY,270,113,-15.25925925925926,-16.5,-23.454545454545453,-23.454545454545453,8.195286195286194,POTENTIALLY_READY,-23.455,8.195,,,historical Phase 68 KWT provenance
+Labyrinth_easy,easy,KWT_PLUS_S14W05_12,270,113,-15.25925925925926,-16.5,-23.454545454545453,-23.454545454545453,8.195286195286194,POTENTIALLY_READY,-23.455,8.195,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Labyrinth_easy,easy,WEEKLY_ONLY,79,79,-19.075949367088608,-20,-24.7,-24.7,5.624050632911391,POTENTIALLY_READY,-23.455,8.195,-1.245454545454546,-2.5712355623748024,THE_WEEKLY course-rating-only evidence
+Labyrinth_easy,easy,KWT_PLUS_WEEKLY,349,192,-16.12320916905444,-17,-24,-24,7.876790830945559,POTENTIALLY_READY,-23.455,8.195,-0.5454545454545467,-0.3184953643406345,local combined simulation; Weekly never enters personal indexes
+Labyrinth_hard,hard,KWT_ONLY,270,113,-7.492592592592593,-8,-18.727272727272727,-18.727272727272727,11.234680134680133,POTENTIALLY_READY,-18.727,11.235,,,historical Phase 68 KWT provenance
+Labyrinth_hard,hard,KWT_PLUS_S14W05_12,270,113,-7.492592592592593,-8,-18.727272727272727,-18.727272727272727,11.234680134680133,POTENTIALLY_READY,-18.727,11.235,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Labyrinth_hard,hard,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-18.727,11.235,,,THE_WEEKLY course-rating-only evidence
+Labyrinth_hard,hard,KWT_PLUS_WEEKLY,270,113,-7.492592592592593,-8,-18.727272727272727,-18.727272727272727,11.234680134680133,POTENTIALLY_READY,-18.727,11.235,0,0,local combined simulation; Weekly never enters personal indexes
+Laser Lair_easy,easy,KWT_ONLY,241,114,-18.269709543568464,-19,-25.413793103448278,-25.413793103448278,7.144083559879814,POTENTIALLY_READY,-25.414,7.144,,,historical Phase 68 KWT provenance
+Laser Lair_easy,easy,KWT_PLUS_S14W05_12,288,125,-18.302083333333332,-19,-25.34285714285714,-25.34285714285714,7.0407738095238095,POTENTIALLY_READY,-25.414,7.144,0.07093596059113594,-0.10330975035600432,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Laser Lair_easy,easy,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-25.414,7.144,,,THE_WEEKLY course-rating-only evidence
+Laser Lair_easy,easy,KWT_PLUS_WEEKLY,288,125,-18.302083333333332,-19,-25.34285714285714,-25.34285714285714,7.0407738095238095,POTENTIALLY_READY,-25.414,7.144,0.07093596059113594,-0.10330975035600432,local combined simulation; Weekly never enters personal indexes
+Laser Lair_hard,hard,KWT_ONLY,241,114,-12.037344398340249,-13,-22.79310344827586,-22.79310344827586,10.755759049935612,POTENTIALLY_READY,-22.793,10.756,,,historical Phase 68 KWT provenance
+Laser Lair_hard,hard,KWT_PLUS_S14W05_12,288,125,-12.14236111111111,-13,-23.02857142857143,-23.02857142857143,10.886210317460318,POTENTIALLY_READY,-22.793,10.756,-0.23546798029556726,0.13045126752470537,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Laser Lair_hard,hard,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-22.793,10.756,,,THE_WEEKLY course-rating-only evidence
+Laser Lair_hard,hard,KWT_PLUS_WEEKLY,288,125,-12.14236111111111,-13,-23.02857142857143,-23.02857142857143,10.886210317460318,POTENTIALLY_READY,-22.793,10.756,-0.23546798029556726,0.13045126752470537,local combined simulation; Weekly never enters personal indexes
+Mars Gardens_easy,easy,KWT_ONLY,156,96,-15.044871794871796,-16,-21.894736842105264,-21.894736842105264,6.849865047233468,POTENTIALLY_READY,-21.895,6.85,,,historical Phase 68 KWT provenance
+Mars Gardens_easy,easy,KWT_PLUS_S14W05_12,156,96,-15.044871794871796,-16,-21.894736842105264,-21.894736842105264,6.849865047233468,POTENTIALLY_READY,-21.895,6.85,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Mars Gardens_easy,easy,WEEKLY_ONLY,86,86,-18.093023255813954,-18,-23.363636363636363,-23.363636363636363,5.27061310782241,POTENTIALLY_READY,-21.895,6.85,-1.4688995215310996,-1.5792519394110585,THE_WEEKLY course-rating-only evidence
+Mars Gardens_easy,easy,KWT_PLUS_WEEKLY,242,182,-16.128099173553718,-17,-22.533333333333335,-22.533333333333335,6.405234159779617,POTENTIALLY_READY,-21.895,6.85,-0.6385964912280713,-0.44463088745385093,local combined simulation; Weekly never enters personal indexes
+Mars Gardens_hard,hard,KWT_ONLY,156,96,-6.262820512820513,-7,-16.842105263157894,-16.842105263157894,10.579284750337381,POTENTIALLY_READY,-16.842,10.579,,,historical Phase 68 KWT provenance
+Mars Gardens_hard,hard,KWT_PLUS_S14W05_12,156,96,-6.262820512820513,-7,-16.842105263157894,-16.842105263157894,10.579284750337381,POTENTIALLY_READY,-16.842,10.579,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Mars Gardens_hard,hard,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-16.842,10.579,,,THE_WEEKLY course-rating-only evidence
+Mars Gardens_hard,hard,KWT_PLUS_WEEKLY,156,96,-6.262820512820513,-7,-16.842105263157894,-16.842105263157894,10.579284750337381,POTENTIALLY_READY,-16.842,10.579,0,0,local combined simulation; Weekly never enters personal indexes
+Meow Wolf_easy,easy,KWT_ONLY,149,85,-16.161073825503355,-17,-21.88888888888889,-21.88888888888889,5.727815063385535,POTENTIALLY_READY,-21.889,5.728,,,historical Phase 68 KWT provenance
+Meow Wolf_easy,easy,KWT_PLUS_S14W05_12,149,85,-16.161073825503355,-17,-21.88888888888889,-21.88888888888889,5.727815063385535,POTENTIALLY_READY,-21.889,5.728,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Meow Wolf_easy,easy,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-21.889,5.728,,,THE_WEEKLY course-rating-only evidence
+Meow Wolf_easy,easy,KWT_PLUS_WEEKLY,149,85,-16.161073825503355,-17,-21.88888888888889,-21.88888888888889,5.727815063385535,POTENTIALLY_READY,-21.889,5.728,0,0,local combined simulation; Weekly never enters personal indexes
+Meow Wolf_hard,hard,KWT_ONLY,149,85,-8.436241610738255,-10,-18.88888888888889,-18.88888888888889,10.452647278150634,POTENTIALLY_READY,-18.889,10.453,,,historical Phase 68 KWT provenance
+Meow Wolf_hard,hard,KWT_PLUS_S14W05_12,149,85,-8.436241610738255,-10,-18.88888888888889,-18.88888888888889,10.452647278150634,POTENTIALLY_READY,-18.889,10.453,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Meow Wolf_hard,hard,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-18.889,10.453,,,THE_WEEKLY course-rating-only evidence
+Meow Wolf_hard,hard,KWT_PLUS_WEEKLY,149,85,-8.436241610738255,-10,-18.88888888888889,-18.88888888888889,10.452647278150634,POTENTIALLY_READY,-18.889,10.453,0,0,local combined simulation; Weekly never enters personal indexes
+Mount Olympus_easy,easy,KWT_ONLY,115,78,-16.83478260869565,-17,-24,-24,7.165217391304349,POTENTIALLY_READY,-24,7.165,,,historical Phase 68 KWT provenance
+Mount Olympus_easy,easy,KWT_PLUS_S14W05_12,164,96,-16.847560975609756,-18,-24.1,-24.1,7.252439024390245,POTENTIALLY_READY,-24,7.165,-0.10000000000000142,0.08722163308589614,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Mount Olympus_easy,easy,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-24,7.165,,,THE_WEEKLY course-rating-only evidence
+Mount Olympus_easy,easy,KWT_PLUS_WEEKLY,164,96,-16.847560975609756,-18,-24.1,-24.1,7.252439024390245,POTENTIALLY_READY,-24,7.165,-0.10000000000000142,0.08722163308589614,local combined simulation; Weekly never enters personal indexes
+Mount Olympus_hard,hard,KWT_ONLY,115,78,-8.982608695652173,-10,-17.857142857142858,-17.857142857142858,8.874534161490685,POTENTIALLY_READY,-17.857,8.875,,,historical Phase 68 KWT provenance
+Mount Olympus_hard,hard,KWT_PLUS_S14W05_12,164,96,-9.268292682926829,-10,-18.35,-18.35,9.081707317073173,POTENTIALLY_READY,-17.857,8.875,-0.49285714285714377,0.20717315558248828,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Mount Olympus_hard,hard,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-17.857,8.875,,,THE_WEEKLY course-rating-only evidence
+Mount Olympus_hard,hard,KWT_PLUS_WEEKLY,164,96,-9.268292682926829,-10,-18.35,-18.35,9.081707317073173,POTENTIALLY_READY,-17.857,8.875,-0.49285714285714377,0.20717315558248828,local combined simulation; Weekly never enters personal indexes
+Myst_easy,easy,KWT_ONLY,237,108,-18.928270042194093,-19,-25.379310344827587,-25.379310344827587,6.451040302633494,POTENTIALLY_READY,-25.379,6.451,,,historical Phase 68 KWT provenance
+Myst_easy,easy,KWT_PLUS_S14W05_12,237,108,-18.928270042194093,-19,-25.379310344827587,-25.379310344827587,6.451040302633494,POTENTIALLY_READY,-25.379,6.451,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Myst_easy,easy,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-25.379,6.451,,,THE_WEEKLY course-rating-only evidence
+Myst_easy,easy,KWT_PLUS_WEEKLY,237,108,-18.928270042194093,-19,-25.379310344827587,-25.379310344827587,6.451040302633494,POTENTIALLY_READY,-25.379,6.451,0,0,local combined simulation; Weekly never enters personal indexes
+Myst_hard,hard,KWT_ONLY,237,108,-11.160337552742616,-13,-20.17241379310345,-20.17241379310345,9.012076240360832,POTENTIALLY_READY,-20.172,9.012,,,historical Phase 68 KWT provenance
+Myst_hard,hard,KWT_PLUS_S14W05_12,237,108,-11.160337552742616,-13,-20.17241379310345,-20.17241379310345,9.012076240360832,POTENTIALLY_READY,-20.172,9.012,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Myst_hard,hard,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-20.172,9.012,,,THE_WEEKLY course-rating-only evidence
+Myst_hard,hard,KWT_PLUS_WEEKLY,237,108,-11.160337552742616,-13,-20.17241379310345,-20.17241379310345,9.012076240360832,POTENTIALLY_READY,-20.172,9.012,0,0,local combined simulation; Weekly never enters personal indexes
+Original Gothic_easy,easy,KWT_ONLY,180,109,-16.227777777777778,-17,-20.59090909090909,-20.59090909090909,4.363131313131312,POTENTIALLY_READY,-20.591,4.363,,,historical Phase 68 KWT provenance
+Original Gothic_easy,easy,KWT_PLUS_S14W05_12,180,109,-16.227777777777778,-17,-20.59090909090909,-20.59090909090909,4.363131313131312,POTENTIALLY_READY,-20.591,4.363,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Original Gothic_easy,easy,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-20.591,4.363,,,THE_WEEKLY course-rating-only evidence
+Original Gothic_easy,easy,KWT_PLUS_WEEKLY,180,109,-16.227777777777778,-17,-20.59090909090909,-20.59090909090909,4.363131313131312,POTENTIALLY_READY,-20.591,4.363,0,0,local combined simulation; Weekly never enters personal indexes
+Original Gothic_hard,hard,KWT_ONLY,180,109,-11.411111111111111,-13,-19.954545454545453,-19.954545454545453,8.543434343434342,POTENTIALLY_READY,-19.955,8.543,,,historical Phase 68 KWT provenance
+Original Gothic_hard,hard,KWT_PLUS_S14W05_12,180,109,-11.411111111111111,-13,-19.954545454545453,-19.954545454545453,8.543434343434342,POTENTIALLY_READY,-19.955,8.543,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Original Gothic_hard,hard,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-19.955,8.543,,,THE_WEEKLY course-rating-only evidence
+Original Gothic_hard,hard,KWT_PLUS_WEEKLY,180,109,-11.411111111111111,-13,-19.954545454545453,-19.954545454545453,8.543434343434342,POTENTIALLY_READY,-19.955,8.543,0,0,local combined simulation; Weekly never enters personal indexes
+Quixote Valley_easy,easy,KWT_ONLY,209,106,-12.569377990430622,-13,-17.615384615384617,-17.615384615384617,5.0460066249539945,POTENTIALLY_READY,-17.615,5.046,,,historical Phase 68 KWT provenance
+Quixote Valley_easy,easy,KWT_PLUS_S14W05_12,209,106,-12.569377990430622,-13,-17.615384615384617,-17.615384615384617,5.0460066249539945,POTENTIALLY_READY,-17.615,5.046,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Quixote Valley_easy,easy,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-17.615,5.046,,,THE_WEEKLY course-rating-only evidence
+Quixote Valley_easy,easy,KWT_PLUS_WEEKLY,209,106,-12.569377990430622,-13,-17.615384615384617,-17.615384615384617,5.0460066249539945,POTENTIALLY_READY,-17.615,5.046,0,0,local combined simulation; Weekly never enters personal indexes
+Quixote Valley_hard,hard,KWT_ONLY,209,106,-9.578947368421053,-10,-19.384615384615383,-19.384615384615383,9.80566801619433,POTENTIALLY_READY,-19.385,9.806,,,historical Phase 68 KWT provenance
+Quixote Valley_hard,hard,KWT_PLUS_S14W05_12,209,106,-9.578947368421053,-10,-19.384615384615383,-19.384615384615383,9.80566801619433,POTENTIALLY_READY,-19.385,9.806,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Quixote Valley_hard,hard,WEEKLY_ONLY,85,85,-11.658823529411764,-13,-18.636363636363637,-18.636363636363637,6.9775401069518725,POTENTIALLY_READY,-19.385,9.806,0.7482517482517466,-2.8281279092424576,THE_WEEKLY course-rating-only evidence
+Quixote Valley_hard,hard,KWT_PLUS_WEEKLY,294,191,-10.180272108843537,-12,-19.22222222222222,-19.22222222222222,9.041950113378684,POTENTIALLY_READY,-19.385,9.806,0.16239316239316182,-0.763717902815646,local combined simulation; Weekly never enters personal indexes
+Raptor Cliff's_easy,easy,KWT_ONLY,152,78,-13.157894736842104,-14,-22.210526315789473,-22.210526315789473,9.052631578947368,POTENTIALLY_READY,-22.211,9.053,,,historical Phase 68 KWT provenance
+Raptor Cliff's_easy,easy,KWT_PLUS_S14W05_12,152,78,-13.157894736842104,-14,-22.210526315789473,-22.210526315789473,9.052631578947368,POTENTIALLY_READY,-22.211,9.053,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Raptor Cliff's_easy,easy,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-22.211,9.053,,,THE_WEEKLY course-rating-only evidence
+Raptor Cliff's_easy,easy,KWT_PLUS_WEEKLY,152,78,-13.157894736842104,-14,-22.210526315789473,-22.210526315789473,9.052631578947368,POTENTIALLY_READY,-22.211,9.053,0,0,local combined simulation; Weekly never enters personal indexes
+Raptor Cliff's_hard,hard,KWT_ONLY,152,78,-1.6973684210526316,-2,-13.894736842105264,-13.894736842105264,12.197368421052632,POTENTIALLY_READY,-13.895,12.197,,,historical Phase 68 KWT provenance
+Raptor Cliff's_hard,hard,KWT_PLUS_S14W05_12,152,78,-1.6973684210526316,-2,-13.894736842105264,-13.894736842105264,12.197368421052632,POTENTIALLY_READY,-13.895,12.197,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Raptor Cliff's_hard,hard,WEEKLY_ONLY,79,79,-6.936708860759493,-7,-16.3,-16.3,9.363291139240507,POTENTIALLY_READY,-13.895,12.197,-2.405263157894737,-2.8340772818121245,THE_WEEKLY course-rating-only evidence
+Raptor Cliff's_hard,hard,KWT_PLUS_WEEKLY,231,157,-3.4891774891774894,-4,-15.214285714285714,-15.214285714285714,11.725108225108224,POTENTIALLY_READY,-13.895,12.197,-1.3195488721804498,-0.4722601959444077,local combined simulation; Weekly never enters personal indexes
+Seagull Stacks_easy,easy,KWT_ONLY,231,117,-16.852813852813853,-17,-21.821428571428573,-21.821428571428573,4.96861471861472,POTENTIALLY_READY,-21.821,4.969,,,historical Phase 68 KWT provenance
+Seagull Stacks_easy,easy,KWT_PLUS_S14W05_12,231,117,-16.852813852813853,-17,-21.821428571428573,-21.821428571428573,4.96861471861472,POTENTIALLY_READY,-21.821,4.969,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Seagull Stacks_easy,easy,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-21.821,4.969,,,THE_WEEKLY course-rating-only evidence
+Seagull Stacks_easy,easy,KWT_PLUS_WEEKLY,231,117,-16.852813852813853,-17,-21.821428571428573,-21.821428571428573,4.96861471861472,POTENTIALLY_READY,-21.821,4.969,0,0,local combined simulation; Weekly never enters personal indexes
+Seagull Stacks_hard,hard,KWT_ONLY,231,117,-7.181818181818182,-8,-16.678571428571427,-16.678571428571427,9.496753246753245,POTENTIALLY_READY,-16.679,9.497,,,historical Phase 68 KWT provenance
+Seagull Stacks_hard,hard,KWT_PLUS_S14W05_12,231,117,-7.181818181818182,-8,-16.678571428571427,-16.678571428571427,9.496753246753245,POTENTIALLY_READY,-16.679,9.497,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Seagull Stacks_hard,hard,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-16.679,9.497,,,THE_WEEKLY course-rating-only evidence
+Seagull Stacks_hard,hard,KWT_PLUS_WEEKLY,231,117,-7.181818181818182,-8,-16.678571428571427,-16.678571428571427,9.496753246753245,POTENTIALLY_READY,-16.679,9.497,0,0,local combined simulation; Weekly never enters personal indexes
+Shangri-La_easy,easy,KWT_ONLY,122,89,-22.081967213114755,-24,-30.066666666666666,-30.066666666666666,7.984699453551912,POTENTIALLY_READY,-30.067,7.985,,,historical Phase 68 KWT provenance
+Shangri-La_easy,easy,KWT_PLUS_S14W05_12,171,105,-22.46783625730994,-24,-29.80952380952381,-29.80952380952381,7.34168755221387,POTENTIALLY_READY,-30.067,7.985,0.25714285714285623,-0.643011901338042,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Shangri-La_easy,easy,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-30.067,7.985,,,THE_WEEKLY course-rating-only evidence
+Shangri-La_easy,easy,KWT_PLUS_WEEKLY,171,105,-22.46783625730994,-24,-29.80952380952381,-29.80952380952381,7.34168755221387,POTENTIALLY_READY,-30.067,7.985,0.25714285714285623,-0.643011901338042,local combined simulation; Weekly never enters personal indexes
+Shangri-La_hard,hard,KWT_ONLY,122,89,-10.672131147540984,-12,-23,-23,12.327868852459016,POTENTIALLY_READY,-23,12.328,,,historical Phase 68 KWT provenance
+Shangri-La_hard,hard,KWT_PLUS_S14W05_12,171,105,-10.678362573099415,-12,-23.285714285714285,-23.285714285714285,12.60735171261487,POTENTIALLY_READY,-23,12.328,-0.2857142857142847,0.2794828601558539,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Shangri-La_hard,hard,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-23,12.328,,,THE_WEEKLY course-rating-only evidence
+Shangri-La_hard,hard,KWT_PLUS_WEEKLY,171,105,-10.678362573099415,-12,-23.285714285714285,-23.285714285714285,12.60735171261487,POTENTIALLY_READY,-23,12.328,-0.2857142857142847,0.2794828601558539,local combined simulation; Weekly never enters personal indexes
+Sweetopia_easy,easy,KWT_ONLY,176,99,-13.210227272727273,-14,-19.90909090909091,-19.90909090909091,6.698863636363637,POTENTIALLY_READY,-19.909,6.699,,,historical Phase 68 KWT provenance
+Sweetopia_easy,easy,KWT_PLUS_S14W05_12,176,99,-13.210227272727273,-14,-19.90909090909091,-19.90909090909091,6.698863636363637,POTENTIALLY_READY,-19.909,6.699,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Sweetopia_easy,easy,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-19.909,6.699,,,THE_WEEKLY course-rating-only evidence
+Sweetopia_easy,easy,KWT_PLUS_WEEKLY,176,99,-13.210227272727273,-14,-19.90909090909091,-19.90909090909091,6.698863636363637,POTENTIALLY_READY,-19.909,6.699,0,0,local combined simulation; Weekly never enters personal indexes
+Sweetopia_hard,hard,KWT_ONLY,176,99,-8.920454545454545,-10,-19.045454545454547,-19.045454545454547,10.125000000000002,POTENTIALLY_READY,-19.045,10.125,,,historical Phase 68 KWT provenance
+Sweetopia_hard,hard,KWT_PLUS_S14W05_12,176,99,-8.920454545454545,-10,-19.045454545454547,-19.045454545454547,10.125000000000002,POTENTIALLY_READY,-19.045,10.125,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Sweetopia_hard,hard,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-19.045,10.125,,,THE_WEEKLY course-rating-only evidence
+Sweetopia_hard,hard,KWT_PLUS_WEEKLY,176,99,-8.920454545454545,-10,-19.045454545454547,-19.045454545454547,10.125000000000002,POTENTIALLY_READY,-19.045,10.125,0,0,local combined simulation; Weekly never enters personal indexes
+Temple at Zerzura_easy,easy,KWT_ONLY,212,103,-17.12264150943396,-17,-25.26923076923077,-25.26923076923077,8.146589259796809,POTENTIALLY_READY,-25.269,8.147,,,historical Phase 68 KWT provenance
+Temple at Zerzura_easy,easy,KWT_PLUS_S14W05_12,212,103,-17.12264150943396,-17,-25.26923076923077,-25.26923076923077,8.146589259796809,POTENTIALLY_READY,-25.269,8.147,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Temple at Zerzura_easy,easy,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-25.269,8.147,,,THE_WEEKLY course-rating-only evidence
+Temple at Zerzura_easy,easy,KWT_PLUS_WEEKLY,212,103,-17.12264150943396,-17,-25.26923076923077,-25.26923076923077,8.146589259796809,POTENTIALLY_READY,-25.269,8.147,0,0,local combined simulation; Weekly never enters personal indexes
+Temple at Zerzura_hard,hard,KWT_ONLY,212,103,-6.726415094339623,-7.5,-16.807692307692307,-16.807692307692307,10.081277213352685,POTENTIALLY_READY,-16.808,10.081,,,historical Phase 68 KWT provenance
+Temple at Zerzura_hard,hard,KWT_PLUS_S14W05_12,212,103,-6.726415094339623,-7.5,-16.807692307692307,-16.807692307692307,10.081277213352685,POTENTIALLY_READY,-16.808,10.081,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Temple at Zerzura_hard,hard,WEEKLY_ONLY,86,86,-9.744186046511627,-11,-17.727272727272727,-17.727272727272727,7.983086680761099,POTENTIALLY_READY,-16.808,10.081,-0.91958041958042,-2.0981905325915857,THE_WEEKLY course-rating-only evidence
+Temple at Zerzura_hard,hard,KWT_PLUS_WEEKLY,298,189,-7.597315436241611,-8,-17.27777777777778,-17.27777777777778,9.680462341536167,POTENTIALLY_READY,-16.808,10.081,-0.47008547008547197,-0.4008148718165181,local combined simulation; Weekly never enters personal indexes
+Tethys Station_easy,easy,KWT_ONLY,164,93,-17.798780487804876,-19,-25.15,-25.15,7.351219512195122,POTENTIALLY_READY,-25.15,7.351,,,historical Phase 68 KWT provenance
+Tethys Station_easy,easy,KWT_PLUS_S14W05_12,164,93,-17.798780487804876,-19,-25.15,-25.15,7.351219512195122,POTENTIALLY_READY,-25.15,7.351,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Tethys Station_easy,easy,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-25.15,7.351,,,THE_WEEKLY course-rating-only evidence
+Tethys Station_easy,easy,KWT_PLUS_WEEKLY,164,93,-17.798780487804876,-19,-25.15,-25.15,7.351219512195122,POTENTIALLY_READY,-25.15,7.351,0,0,local combined simulation; Weekly never enters personal indexes
+Tethys Station_hard,hard,KWT_ONLY,164,93,-8.134146341463415,-9,-19.6,-19.6,11.465853658536586,POTENTIALLY_READY,-19.6,11.466,,,historical Phase 68 KWT provenance
+Tethys Station_hard,hard,KWT_PLUS_S14W05_12,164,93,-8.134146341463415,-9,-19.6,-19.6,11.465853658536586,POTENTIALLY_READY,-19.6,11.466,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Tethys Station_hard,hard,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-19.6,11.466,,,THE_WEEKLY course-rating-only evidence
+Tethys Station_hard,hard,KWT_PLUS_WEEKLY,164,93,-8.134146341463415,-9,-19.6,-19.6,11.465853658536586,POTENTIALLY_READY,-19.6,11.466,0,0,local combined simulation; Weekly never enters personal indexes
+Tiki à Coco_easy,easy,KWT_ONLY,49,49,-13.612244897959183,-14,-20.333333333333332,-20.333333333333332,6.721088435374149,PROVISIONAL,,,,,historical Phase 68 KWT provenance
+Tiki à Coco_easy,easy,KWT_PLUS_S14W05_12,94,67,-12.787234042553191,-13,-19.916666666666668,-19.916666666666668,7.129432624113477,POTENTIALLY_READY,,,0.4166666666666643,0.40834418873932776,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Tiki à Coco_easy,easy,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,,,,,THE_WEEKLY course-rating-only evidence
+Tiki à Coco_easy,easy,KWT_PLUS_WEEKLY,94,67,-12.787234042553191,-13,-19.916666666666668,-19.916666666666668,7.129432624113477,POTENTIALLY_READY,,,0.4166666666666643,0.40834418873932776,local combined simulation; Weekly never enters personal indexes
+Tiki à Coco_hard,hard,KWT_ONLY,49,49,-6.489795918367347,-7,-16.333333333333332,-16.333333333333332,9.843537414965986,PROVISIONAL,,,,,historical Phase 68 KWT provenance
+Tiki à Coco_hard,hard,KWT_PLUS_S14W05_12,94,67,-6.24468085106383,-7,-15.333333333333334,-15.333333333333334,9.088652482269504,POTENTIALLY_READY,,,0.9999999999999982,-0.7548849326964824,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Tiki à Coco_hard,hard,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,,,,,THE_WEEKLY course-rating-only evidence
+Tiki à Coco_hard,hard,KWT_PLUS_WEEKLY,94,67,-6.24468085106383,-7,-15.333333333333334,-15.333333333333334,9.088652482269504,POTENTIALLY_READY,,,0.9999999999999982,-0.7548849326964824,local combined simulation; Weekly never enters personal indexes
+Tokyo_easy,easy,KWT_ONLY,105,72,-15.99047619047619,-16,-22.46153846153846,-22.46153846153846,6.471062271062269,POTENTIALLY_READY,-22.462,6.471,,,historical Phase 68 KWT provenance
+Tokyo_easy,easy,KWT_PLUS_S14W05_12,105,72,-15.99047619047619,-16,-22.46153846153846,-22.46153846153846,6.471062271062269,POTENTIALLY_READY,-22.462,6.471,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Tokyo_easy,easy,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-22.462,6.471,,,THE_WEEKLY course-rating-only evidence
+Tokyo_easy,easy,KWT_PLUS_WEEKLY,105,72,-15.99047619047619,-16,-22.46153846153846,-22.46153846153846,6.471062271062269,POTENTIALLY_READY,-22.462,6.471,0,0,local combined simulation; Weekly never enters personal indexes
+Tokyo_hard,hard,KWT_ONLY,105,72,-5.428571428571429,-6,-15.846153846153847,-15.846153846153847,10.417582417582418,POTENTIALLY_READY,-15.846,10.418,,,historical Phase 68 KWT provenance
+Tokyo_hard,hard,KWT_PLUS_S14W05_12,105,72,-5.428571428571429,-6,-15.846153846153847,-15.846153846153847,10.417582417582418,POTENTIALLY_READY,-15.846,10.418,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Tokyo_hard,hard,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-15.846,10.418,,,THE_WEEKLY course-rating-only evidence
+Tokyo_hard,hard,KWT_PLUS_WEEKLY,105,72,-5.428571428571429,-6,-15.846153846153847,-15.846153846153847,10.417582417582418,POTENTIALLY_READY,-15.846,10.418,0,0,local combined simulation; Weekly never enters personal indexes
+Tourist Trap_easy,easy,KWT_ONLY,230,110,-17.43913043478261,-18,-22.321428571428573,-22.321428571428573,4.882298136645964,POTENTIALLY_READY,-22.321,4.882,,,historical Phase 68 KWT provenance
+Tourist Trap_easy,easy,KWT_PLUS_S14W05_12,230,110,-17.43913043478261,-18,-22.321428571428573,-22.321428571428573,4.882298136645964,POTENTIALLY_READY,-22.321,4.882,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Tourist Trap_easy,easy,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-22.321,4.882,,,THE_WEEKLY course-rating-only evidence
+Tourist Trap_easy,easy,KWT_PLUS_WEEKLY,230,110,-17.43913043478261,-18,-22.321428571428573,-22.321428571428573,4.882298136645964,POTENTIALLY_READY,-22.321,4.882,0,0,local combined simulation; Weekly never enters personal indexes
+Tourist Trap_hard,hard,KWT_ONLY,230,110,-11.2,-12,-18.714285714285715,-18.714285714285715,7.514285714285716,POTENTIALLY_READY,-18.714,7.514,,,historical Phase 68 KWT provenance
+Tourist Trap_hard,hard,KWT_PLUS_S14W05_12,230,110,-11.2,-12,-18.714285714285715,-18.714285714285715,7.514285714285716,POTENTIALLY_READY,-18.714,7.514,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Tourist Trap_hard,hard,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-18.714,7.514,,,THE_WEEKLY course-rating-only evidence
+Tourist Trap_hard,hard,KWT_PLUS_WEEKLY,230,110,-11.2,-12,-18.714285714285715,-18.714285714285715,7.514285714285716,POTENTIALLY_READY,-18.714,7.514,0,0,local combined simulation; Weekly never enters personal indexes
+Upside Town_easy,easy,KWT_ONLY,144,78,-14.958333333333334,-16,-22.666666666666668,-22.666666666666668,7.708333333333334,POTENTIALLY_READY,-22.667,7.708,,,historical Phase 68 KWT provenance
+Upside Town_easy,easy,KWT_PLUS_S14W05_12,144,78,-14.958333333333334,-16,-22.666666666666668,-22.666666666666668,7.708333333333334,POTENTIALLY_READY,-22.667,7.708,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Upside Town_easy,easy,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-22.667,7.708,,,THE_WEEKLY course-rating-only evidence
+Upside Town_easy,easy,KWT_PLUS_WEEKLY,144,78,-14.958333333333334,-16,-22.666666666666668,-22.666666666666668,7.708333333333334,POTENTIALLY_READY,-22.667,7.708,0,0,local combined simulation; Weekly never enters personal indexes
+Upside Town_hard,hard,KWT_ONLY,144,78,-8.666666666666666,-9,-19.666666666666668,-19.666666666666668,11.000000000000002,POTENTIALLY_READY,-19.667,11,,,historical Phase 68 KWT provenance
+Upside Town_hard,hard,KWT_PLUS_S14W05_12,144,78,-8.666666666666666,-9,-19.666666666666668,-19.666666666666668,11.000000000000002,POTENTIALLY_READY,-19.667,11,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Upside Town_hard,hard,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-19.667,11,,,THE_WEEKLY course-rating-only evidence
+Upside Town_hard,hard,KWT_PLUS_WEEKLY,144,78,-8.666666666666666,-9,-19.666666666666668,-19.666666666666668,11.000000000000002,POTENTIALLY_READY,-19.667,11,0,0,local combined simulation; Weekly never enters personal indexes
+Venice_easy,easy,KWT_ONLY,217,101,-13.253456221198157,-14,-19.51851851851852,-19.51851851851852,6.2650622973203625,POTENTIALLY_READY,-19.519,6.265,,,historical Phase 68 KWT provenance
+Venice_easy,easy,KWT_PLUS_S14W05_12,217,101,-13.253456221198157,-14,-19.51851851851852,-19.51851851851852,6.2650622973203625,POTENTIALLY_READY,-19.519,6.265,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Venice_easy,easy,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-19.519,6.265,,,THE_WEEKLY course-rating-only evidence
+Venice_easy,easy,KWT_PLUS_WEEKLY,217,101,-13.253456221198157,-14,-19.51851851851852,-19.51851851851852,6.2650622973203625,POTENTIALLY_READY,-19.519,6.265,0,0,local combined simulation; Weekly never enters personal indexes
+Venice_hard,hard,KWT_ONLY,215,101,-7.972093023255814,-9,-17.76923076923077,-17.76923076923077,9.797137745974956,POTENTIALLY_READY,-17.769,9.797,,,historical Phase 68 KWT provenance
+Venice_hard,hard,KWT_PLUS_S14W05_12,215,101,-7.972093023255814,-9,-17.76923076923077,-17.76923076923077,9.797137745974956,POTENTIALLY_READY,-17.769,9.797,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Venice_hard,hard,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-17.769,9.797,,,THE_WEEKLY course-rating-only evidence
+Venice_hard,hard,KWT_PLUS_WEEKLY,215,101,-7.972093023255814,-9,-17.76923076923077,-17.76923076923077,9.797137745974956,POTENTIALLY_READY,-17.769,9.797,0,0,local combined simulation; Weekly never enters personal indexes
+Viva Las Elvis_easy,easy,KWT_ONLY,154,85,-13.727272727272727,-14,-21.157894736842106,-21.157894736842106,7.43062200956938,POTENTIALLY_READY,-21.158,7.431,,,historical Phase 68 KWT provenance
+Viva Las Elvis_easy,easy,KWT_PLUS_S14W05_12,154,85,-13.727272727272727,-14,-21.157894736842106,-21.157894736842106,7.43062200956938,POTENTIALLY_READY,-21.158,7.431,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Viva Las Elvis_easy,easy,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-21.158,7.431,,,THE_WEEKLY course-rating-only evidence
+Viva Las Elvis_easy,easy,KWT_PLUS_WEEKLY,154,85,-13.727272727272727,-14,-21.157894736842106,-21.157894736842106,7.43062200956938,POTENTIALLY_READY,-21.158,7.431,0,0,local combined simulation; Weekly never enters personal indexes
+Viva Las Elvis_hard,hard,KWT_ONLY,154,85,-8.727272727272727,-9.5,-19.894736842105264,-19.894736842105264,11.167464114832537,POTENTIALLY_READY,-19.895,11.167,,,historical Phase 68 KWT provenance
+Viva Las Elvis_hard,hard,KWT_PLUS_S14W05_12,154,85,-8.727272727272727,-9.5,-19.894736842105264,-19.894736842105264,11.167464114832537,POTENTIALLY_READY,-19.895,11.167,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Viva Las Elvis_hard,hard,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-19.895,11.167,,,THE_WEEKLY course-rating-only evidence
+Viva Las Elvis_hard,hard,KWT_PLUS_WEEKLY,154,85,-8.727272727272727,-9.5,-19.894736842105264,-19.894736842105264,11.167464114832537,POTENTIALLY_READY,-19.895,11.167,0,0,local combined simulation; Weekly never enters personal indexes
+Wallace & Gromit_easy,easy,KWT_ONLY,215,98,-17.11627906976744,-17,-24.73076923076923,-24.73076923076923,7.61449016100179,POTENTIALLY_READY,-24.731,7.614,,,historical Phase 68 KWT provenance
+Wallace & Gromit_easy,easy,KWT_PLUS_S14W05_12,215,98,-17.11627906976744,-17,-24.73076923076923,-24.73076923076923,7.61449016100179,POTENTIALLY_READY,-24.731,7.614,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Wallace & Gromit_easy,easy,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-24.731,7.614,,,THE_WEEKLY course-rating-only evidence
+Wallace & Gromit_easy,easy,KWT_PLUS_WEEKLY,215,98,-17.11627906976744,-17,-24.73076923076923,-24.73076923076923,7.61449016100179,POTENTIALLY_READY,-24.731,7.614,0,0,local combined simulation; Weekly never enters personal indexes
+Wallace & Gromit_hard,hard,KWT_ONLY,215,98,-5.595348837209302,-7,-15.538461538461538,-15.538461538461538,9.943112701252236,POTENTIALLY_READY,-15.538,9.943,,,historical Phase 68 KWT provenance
+Wallace & Gromit_hard,hard,KWT_PLUS_S14W05_12,215,98,-5.595348837209302,-7,-15.538461538461538,-15.538461538461538,9.943112701252236,POTENTIALLY_READY,-15.538,9.943,0,0,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Wallace & Gromit_hard,hard,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-15.538,9.943,,,THE_WEEKLY course-rating-only evidence
+Wallace & Gromit_hard,hard,KWT_PLUS_WEEKLY,215,98,-5.595348837209302,-7,-15.538461538461538,-15.538461538461538,9.943112701252236,POTENTIALLY_READY,-15.538,9.943,0,0,local combined simulation; Weekly never enters personal indexes
+Widow’s Walkabout_easy,easy,KWT_ONLY,160,89,-17.9875,-18,-24.75,-24.75,6.762499999999999,POTENTIALLY_READY,-24.75,6.762,,,historical Phase 68 KWT provenance
+Widow’s Walkabout_easy,easy,KWT_PLUS_S14W05_12,213,108,-17.802816901408452,-18,-25.115384615384617,-25.115384615384617,7.312567713976165,POTENTIALLY_READY,-24.75,6.762,-0.36538461538461675,0.5500677139761656,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Widow’s Walkabout_easy,easy,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-24.75,6.762,,,THE_WEEKLY course-rating-only evidence
+Widow’s Walkabout_easy,easy,KWT_PLUS_WEEKLY,213,108,-17.802816901408452,-18,-25.115384615384617,-25.115384615384617,7.312567713976165,POTENTIALLY_READY,-24.75,6.762,-0.36538461538461675,0.5500677139761656,local combined simulation; Weekly never enters personal indexes
+Widow’s Walkabout_hard,hard,KWT_ONLY,160,89,-8.6125,-9.5,-18.5,-18.5,9.8875,POTENTIALLY_READY,-18.5,9.888,,,historical Phase 68 KWT provenance
+Widow’s Walkabout_hard,hard,KWT_PLUS_S14W05_12,213,108,-8.629107981220658,-10,-18.46153846153846,-18.46153846153846,9.832430480317802,POTENTIALLY_READY,-18.5,9.888,0.0384615384615401,-0.05506951968219731,local simulation; supplied Season 14 rows lack authoritative source IDs/round IDs
+Widow’s Walkabout_hard,hard,WEEKLY_ONLY,0,0,,,,,,INSUFFICIENT,-18.5,9.888,,,THE_WEEKLY course-rating-only evidence
+Widow’s Walkabout_hard,hard,KWT_PLUS_WEEKLY,213,108,-8.629107981220658,-10,-18.46153846153846,-18.46153846153846,9.832430480317802,POTENTIALLY_READY,-18.5,9.888,0.0384615384615401,-0.05506951968219731,local combined simulation; Weekly never enters personal indexes

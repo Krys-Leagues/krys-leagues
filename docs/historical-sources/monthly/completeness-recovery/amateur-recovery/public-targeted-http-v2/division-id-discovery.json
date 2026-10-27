@@ -1,0 +1,26 @@
+{
+    "captured_at":  "2026-09-08T12:02:41.3913996Z",
+    "method":  "Public APEX period 55; bounded candidate scan 1..180; exact rendered labels accepted only",
+    "discovery_period":  "2024 September",
+    "discovery_period_id":  55,
+    "candidate_scan_min":  1,
+    "candidate_scan_max":  180,
+    "mappings":  [
+                     {
+                         "division":  "Amateur 1",
+                         "source_id":  26,
+                         "rendered_label":  "Amateur 1 Leaders"
+                     },
+                     {
+                         "division":  "Amateur 2",
+                         "source_id":  27,
+                         "rendered_label":  "Amateur 2 Leaders"
+                     },
+                     {
+                         "division":  "Amateur 3",
+                         "source_id":  28,
+                         "rendered_label":  "Amateur 3 Leaders"
+                     }
+                 ],
+    "target_cells":  35
+}

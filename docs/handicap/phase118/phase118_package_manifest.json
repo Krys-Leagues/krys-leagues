@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "phase118-updated-handicap-review-v1",
+  "productionProject": "jfbndcwdsvsjgnzwvexp",
+  "phase117RunId": "9a9a4bc4-e43d-55d4-84fb-a83c0b757681",
+  "sourceZipSha256": "E599CF6DF746F6C60C9718FBB73486396055567B738ED1A6EEB5808D2E2E46CE",
+  "phase117ManifestSha256": "E808D8459AC131E384CCA0F2D44ED230B8513EA61671149322EDDEA1972230E3",
+  "modelVersion": "krys-handicap-candidate-a-v1",
+  "referenceSlope": 8.515,
+  "inputs": {
+    "phase68": "8440A1D1DCB4C09283F64235F5A85567E59D677DC6494EAB58E1FFB5EE2499CE",
+    "phase117": "0A9FD1032FA87C2D92E628B83DDB6F9089D5C81F3AB0C24929F030892870E186",
+    "weekly": "F313109B254D51717CB8F5FF0CF7B2D3C77F2FD123E83B0056951F8C378B0BFC",
+    "phase104Ratings": "DBF39EB1FCDACDE7D7239B6033A453AFDD534ED71C4E4B5BB1ACF2F11C9F7440",
+    "phase104Indexes": "1FD4222036A298A9F3D22D82F1E73D6F5825759F0B8DC40D76AADDF740EC2443",
+    "canonicalNames": "1991A4D8E398856E3A6D29DA9D30DD5C06337C60508F8E06E8ABE0D8F46B2152"
+  },
+  "counts": {
+    "historicalKwtRows": 13550,
+    "newKwtRows": 728,
+    "combinedKwtRows": 14276,
+    "weeklyRows": 844,
+    "completePairs": 7138,
+    "incompletePairs": 2,
+    "oldIndexCandidates": 157,
+    "revisedIndexCandidates": 166,
+    "blockedPlayers": 0,
+    "readyCourseCandidates": 78,
+    "provisionalCourseCandidates": 2,
+    "blockedOrUnratedCourseCandidates": 1,
+    "largeIndexMovements": 33
+  },
+  "outputChecksums": {
+    "courseComparison": "EC7BC533087D80BC1DEED9B3BF4E92D38D8FA820358729CCE54846A826CF45C5",
+    "playerComparison": "7FAC352D2D24EF647A93DC3D05F115DC2E13BFF3F265E4F3D71FCA8B3F710AE7",
+    "exceptions": "9216657D8D6498B6605EC4290442D1B10223488574790BA108554730B1808028",
+    "report": "67857FD2E8004FE84827FEA75FCD5E5B085C8EB7A2902DA453C2A8594A366054"
+  },
+  "status": "LOCAL_ONLY_DRAFT_QUARANTINED_NOT_FOR_PUBLICATION"
+}

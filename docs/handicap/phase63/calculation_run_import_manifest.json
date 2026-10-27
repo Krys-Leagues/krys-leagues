@@ -1,0 +1,13 @@
+{
+  "id": "5a57560c-3548-54a8-879c-8fc516a85f26",
+  "label": "phase60-run-ad45a0fec187721d",
+  "policyVersion": "krys-handicap-approved-policy-v1",
+  "modelVersion": "krys-course-rating-elite-lowest-12-v1",
+  "sourcePackageRef": "phase60-local-reviewed-evidence-v1",
+  "chronologyPolicy": "course-rating evidence only; no player-index snapshots",
+  "status": "DRAFT",
+  "source_package_ref": "phase61-local-rating-snapshot-import-v1",
+  "provenance_row_count": 14394,
+  "snapshot_count": 169,
+  "blocked_snapshot_count": 0
+}

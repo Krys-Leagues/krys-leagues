@@ -1,0 +1,35 @@
+{
+  "schema_version": "phase134-rating-reconciliation-v1",
+  "status": "BLOCKED_MISSING_EXACT_PRODUCTION_LINEAGE",
+  "production_project": "jfbndcwdsvsjgnzwvexp",
+  "phase130_batch_sha256": "52D2D88FD821F231148FCCC1C90C85BF32D34FA9156C2A8C2F3D75CD2CF53C0B",
+  "phase125_manifest_sha256": "09382A8C7901F549377ADE119E3DF5068CD40A9C8FF9629F572DA5FE7EFB22A6",
+  "source_files": {
+    "phase104_rating_inventory_sha256": "DBF39EB1FCDACDE7D7239B6033A453AFDD534ED71C4E4B5BB1ACF2F11C9F7440",
+    "phase126_index_candidates_sha256": "8A5512DEDB2763E982357851836163CB6E9B0BD8DFFFA7B08C21C0787B35D992",
+    "phase121_candidates_sha256": "224E5113A227F929C992F043FA85A91EEEFC39FDBADD3F16DA242CB86AC17ECC"
+  },
+  "counts": {
+    "pending_ratings": 73,
+    "pending_exact_production_ratings": 58,
+    "pending_blocked_ratings": 15,
+    "owner_approved_ratings": 5,
+    "owner_exact_production_ratings": 3,
+    "owner_blocked_value_mismatches": 2,
+    "exact_production_rows_total": 61,
+    "blocked_rating_rows_total": 17,
+    "index_candidates": 166,
+    "blocked_index_candidates": 132,
+    "revalidatable_index_candidates": 34
+  },
+  "generated_files": {
+    "rating_snapshot_reconciliation.csv": "83BF22144F249ADB3C6A1FD355915A57D4AA5DA9CA5F498FA81BCEC402DCBE4E",
+    "rating_snapshot_blockers.csv": "81EF8DC0DA656439C604FA59C4233FC12B17FEB61F2C9C208C308AD7804D4410",
+    "index_dependency_reconciliation.csv": "1982F5D7A8B2869EBA495E93D37E30B1544EA24430A5F51F379D812B4A7645B0",
+    "production_exact_rating_decision_rows.csv": "53AFD20CB4261363514299E790AFF988F5D7381FB0A3DEE6A9AB20C638B2C7C1",
+    "production_rating_decision_installation.sql": "566B8C040904B8B19C9F3FF78FEEB39E58E4CB318E986B5BB5EB50E1B9D6BD81",
+    "production_preflight.sql": "809C979E76B80F0B8CC8BC46E833F0290478EFB2930F99B24481D3523862A581",
+    "production_postflight.sql": "6BAA2B412EA5B0AF74968A666C2EC8D26214FC98392A75498D6B0D7495F6A7FD",
+    "reconciliation_report.md": "8E27E6D273CCAE839CA9380714EEB0673EAF1821B4F14102EAD35B127B1B1222"
+  }
+}

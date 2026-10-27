@@ -1,0 +1,90 @@
+{
+  "package": "repaired historical Monthlies source package",
+  "schema_version": "repaired-monthly-v2-score-only",
+  "generated_at": "2026-09-08T01:27:21.1678352Z",
+  "generated_by": "generate-repaired-package.ps1",
+  "source_scope": {
+    "old_source": "website-recovery/monthly-website-score-observations.csv",
+    "fresh_source": "completeness-recovery/full-public-score-recovery/all-completed-monthly-score-observations.tsv",
+    "finalized_periods": "2024 August through 2026 August as preserved fresh completed scope",
+    "excluded_periods": "2024 January through 2024 July UNKNOWN"
+  },
+  "finalization": {
+    "finalizedThrough": "2026 August",
+    "currentIncompletePeriod": "2026 September",
+    "activePeriodPolicy": "Only periods through finalizedThrough are importable; the current period and later periods remain excluded until explicitly finalized.",
+    "currentPeriodReason": "September 2026 is the active Monthly and is not finished. September scores are excluded from historical import.",
+    "legacyManifestNote": "The old website-recovery manifest remains historical provenance only and is not the repaired package finalization gate."
+  },
+  "logical_merge": {
+    "key": "period_id|division_id|source_player_id (fallback exact source name)|course|difficulty",
+    "counts": {
+      "SCORED_TO_BLANK_REVIEW": 0,
+      "LEGACY_AUGUST_EXCLUDED": 240,
+      "BLANK_TO_SCORED_REVIEW": 1,
+      "NEW_ONLY": 15279,
+      "NUMERIC_CONFLICT_REVIEW": 0,
+      "EXACT_BOTH": 384,
+      "OLD_ONLY": 6660
+    }
+  },
+  "import_ready": {
+    "duplicate_fingerprints": 0,
+    "negative_scores": 16916,
+    "blank_unplayed": 0,
+    "quarantined_rows": 1,
+    "pending_amateur_rows": 0,
+    "exact_both_included": 254,
+    "legacy_august_excluded": 240,
+    "old_only_included": 5736,
+    "zero_scores": 95,
+    "total_logical_observations": 17462,
+    "numeric_conflict_review": 0,
+    "scored_to_blank_review": 0,
+    "blank_to_scored_review": 1,
+    "malformed": 0,
+    "blank_unplayed_evidence_excluded": 4909,
+    "played_scored": 17462,
+    "new_only_included": 11472,
+    "positive_scores": 451
+  },
+  "exclusions": [
+    "Amateur 1-3 pending source IDs; zero rows included",
+    "Semi Pro 4 no proven participation; non-blocking",
+    "2024 January-July UNKNOWN; zero rows included",
+    "One Elite Atlantis source-drift row quarantined"
+  ],
+  "semantics": {
+    "played": "Numeric score present, including zero",
+    "unplayed": "Blank course slot; evidence-only and excluded from score import",
+    "zero": "Valid numeric score, distinct from blank",
+    "negative": "Valid numeric score",
+    "positive": "Valid numeric score",
+    "score_field": "score_numeric is numeric for every import-ready row; blank score slots are preserved only in repaired-monthly-unplayed-evidence.tsv"
+  },
+  "evidence": {
+    "derived_logical_observations": 22371,
+    "blank_unplayed_evidence_file": "repaired-monthly-unplayed-evidence.tsv",
+    "blank_unplayed_evidence_rows": 4909
+  },
+  "provenance": {
+    "old": "Original retained website recovery",
+    "fresh": "Fresh public rendered recovery",
+    "exact_both": "One logical observation with both source attestations",
+    "old_only": "Preserved",
+    "new_only": "Included if uncontested",
+    "review": "Excluded until resolved"
+  },
+  "file_sha256": {
+    "repaired-monthly-provenance.tsv": "fcec21bd433f7c4e4b8ef626e4d055b7717732cffeed0e104ea45f270312f431",
+    "repaired-monthly-merge-ledger.tsv": "da85ffc9ae4dac1b08c3c871d1fe1a35fca44155c29018c5bd82f78d2d1a7d0b",
+    "repaired-monthly-exclusions.tsv": "ba3e09d5d4711a53288de04c62fe6d24c088cfa2bb2db9bcd4b5d7c803f260cd",
+    "repaired-monthly-unplayed-evidence.tsv": "3cdb45ec60cab9e809d1c67fcc8931753eae0c9c784ac3a9ef98c4a3bf693bb2",
+    "repaired-monthly-observations.tsv": "4e927b17503d4acce7d9e3dcc9b4344e780d277c7bf7658da8cbf7c5161837e0",
+    "repaired-monthly-review-quarantine.tsv": "9d42a221918b77406cd20b0ac01823804fd4626428e63fb2a0a2048e7b10e6f4"
+  },
+  "source_sha256": {
+    "old_csv": "ed87dfb65719a0c7100563038787507cd1a01a73a31d9ae4ed69e9dac78169c7",
+    "fresh_tsv": "01ef68f5d0822f62284a19dd7dbe3b9afa0b537e224cd94dd03ea6027a5c5d57"
+  }
+}
