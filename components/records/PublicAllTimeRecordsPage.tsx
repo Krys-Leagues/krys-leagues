@@ -122,7 +122,7 @@ export default function PublicAllTimeRecordsPage() {
   }
 
   return <PublicRecordsShell dataTour="leaderboards-page">
-    <nav className={styles.nav}><Link href="/" className={styles.button}>← Krys Leagues</Link><Link href="/leaderboards/climbers" className={styles.button}>CLIMBERS</Link><Link href="/records/submit" className={`${styles.button} ${styles.primaryButton}`}>SUBMIT ALL-TIME SCORE</Link><TourThisArea tourId="leaderboards" /></nav>
+    <nav className={styles.nav}><Link href="/" className={styles.button}>← Krys Leagues</Link><Link href="/leaderboards/climbers" className={styles.button}>CLIMBERS</Link><Link href="/majors/masters/championship" className={styles.button}>MASTERS CHAMPIONSHIP</Link><Link href="/records/submit" className={`${styles.button} ${styles.primaryButton}`}>SUBMIT ALL-TIME SCORE</Link><TourThisArea tourId="leaderboards" /></nav>
     <PublicRecordsHero eyebrow="Krys Leagues · All-Time Records" title="KRYS LEAGUES ALL-TIME LEADERBOARDS" description="Choose one base map, the course difficulty, and any boards you want to compare. Pending player submissions appear provisionally until an admin verifies the evidence." />
     <section className={`${styles.glass} ${styles.pad} ${styles.recordsControls}`} aria-label="All-Time leaderboard controls">
       <label className={styles.selectWrap} data-tour="leaderboard-course">BASE MAP<select className={styles.select} value={baseMap} onChange={(event) => setBaseMap(event.target.value)}>{maps.map((map) => <option key={map} value={map}>{map}</option>)}</select></label>
