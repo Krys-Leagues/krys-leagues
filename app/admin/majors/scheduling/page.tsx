@@ -28,6 +28,7 @@ import {
   type GlobalPlayerDirectoryEntry,
 } from "@/lib/identity/globalPlayerDirectory"
 import { supabase } from "@/lib/supabase"
+import { getMajorVipEligiblePlayers } from "@/lib/majorVipEligibility"
 import styles from "./page.module.css"
 
 type AdminSection = "setup" | `day-${1 | 2 | 3 | 4}` | "weekend" | "results" | "testers"
@@ -52,6 +53,7 @@ export default function MajorSchedulingAdminPage() {
   const [groups, setGroups] = useState<MajorScheduleGroup[]>([])
   const [members, setMembers] = useState<MajorScheduleGroupMember[]>([])
   const [placements, setPlacements] = useState<MajorFinalPlacement[]>([])
+  const [prioritySourcePlacements, setPrioritySourcePlacements] = useState<MajorFinalPlacement[]>([])
   const [testers, setTesters] = useState<MajorTestTester[]>([])
   const [globalPlayers, setGlobalPlayers] = useState<GlobalPlayerDirectoryEntry[]>([])
   const [message, setMessage] = useState("")
@@ -62,7 +64,7 @@ export default function MajorSchedulingAdminPage() {
     const dayResult = await supabase.from("major_play_days").select("*").eq("major_event_id", id).order("day_number")
     const loadedDays = (dayResult.data as MajorPlayDay[] | null) || []
     const dayIds = loadedDays.map((day) => day.id)
-    const [slotResult, standardTimeResult, entryResult, weekendResult, groupResult, placementResult, testerResult] = await Promise.all([
+    const [slotResult, standardTimeResult, entryResult, weekendResult, groupResult, placementResult, testerResult, eventConfigResult] = await Promise.all([
       dayIds.length ? supabase.from("major_time_slots").select("*").in("play_day_id", dayIds).order("starts_at") : Promise.resolve({ data: [], error: null }),
       supabase.from("major_standard_signup_times").select("*").eq("major_event_id", id).eq("is_active", true).order("local_time"),
       supabase.from("major_entries").select("*").eq("major_event_id", id).order("player_screen_name_snapshot"),
@@ -70,9 +72,14 @@ export default function MajorSchedulingAdminPage() {
       supabase.from("major_schedule_groups").select("*").eq("major_event_id", id).order("group_label"),
       supabase.from("major_final_placements").select("*").eq("major_event_id", id),
       supabase.rpc("get_major_test_testers", { p_major_event_id: id }),
+      supabase.from("major_events").select("priority_source_event_id").eq("id", id).maybeSingle(),
     ])
     const loadedEntries = (entryResult.data as MajorEntry[] | null) || []
     const loadedGroups = (groupResult.data as MajorScheduleGroup[] | null) || []
+    const prioritySourceEventId = (eventConfigResult.data as { priority_source_event_id?: string | null } | null)?.priority_source_event_id
+    const priorityPlacementResult = prioritySourceEventId
+      ? await supabase.from("major_final_placements").select("*").eq("major_event_id", prioritySourceEventId)
+      : { data: [], error: null }
     const [choiceResult, memberResult] = await Promise.all([
       loadedEntries.length ? supabase.from("major_entry_day_choices").select("*").in("entry_id", loadedEntries.map((entry) => entry.id)) : Promise.resolve({ data: [], error: null }),
       loadedGroups.length ? supabase.from("major_schedule_group_members").select("*").in("group_id", loadedGroups.map((group) => group.id)) : Promise.resolve({ data: [], error: null }),
@@ -86,8 +93,9 @@ export default function MajorSchedulingAdminPage() {
     setGroups(loadedGroups)
     setMembers((memberResult.data as MajorScheduleGroupMember[] | null) || [])
     setPlacements((placementResult.data as MajorFinalPlacement[] | null) || [])
+    setPrioritySourcePlacements((priorityPlacementResult.data as MajorFinalPlacement[] | null) || [])
     setTesters((testerResult.data as MajorTestTester[] | null) || [])
-    setMessage(dayResult.error?.message || slotResult.error?.message || standardTimeResult.error?.message || entryResult.error?.message || choiceResult.error?.message || weekendResult.error?.message || groupResult.error?.message || memberResult.error?.message || placementResult.error?.message || testerResult.error?.message || "")
+    setMessage(dayResult.error?.message || slotResult.error?.message || standardTimeResult.error?.message || entryResult.error?.message || choiceResult.error?.message || weekendResult.error?.message || groupResult.error?.message || memberResult.error?.message || placementResult.error?.message || testerResult.error?.message || eventConfigResult.error?.message || priorityPlacementResult.error?.message || "")
   }, [])
 
   const reloadEvents = useCallback(async (preferred?: string) => {
@@ -413,6 +421,7 @@ export default function MajorSchedulingAdminPage() {
         onCopyThursdayTimes={copyThursdayTimes}
         onApplyStandardTimes={applyStandardTimes}
         onSaveInformation={saveInformation}
+        prioritySourcePlacements={prioritySourcePlacements}
       />}
 
       {selectedEvent && activeDayNumber && <DayWorkspace
@@ -461,7 +470,7 @@ export default function MajorSchedulingAdminPage() {
   </main>
 }
 
-function EventSetup({ event, events, days, standardTimes, onSaveOpening, onReleaseSpots, onSaveLockHours, onSaveDay, onSaveStandardTime, onRemoveStandardTime, onCopyThursdayTimes, onApplyStandardTimes, onSaveInformation }: {
+function EventSetup({ event, events, days, standardTimes, onSaveOpening, onReleaseSpots, onSaveLockHours, onSaveDay, onSaveStandardTime, onRemoveStandardTime, onCopyThursdayTimes, onApplyStandardTimes, onSaveInformation, prioritySourcePlacements }: {
   event: MajorEvent
   events: MajorEvent[]
   days: MajorPlayDay[]
@@ -475,6 +484,7 @@ function EventSetup({ event, events, days, standardTimes, onSaveOpening, onRelea
   onCopyThursdayTimes: () => Promise<void>
   onApplyStandardTimes: () => Promise<void>
   onSaveInformation: (form: HTMLFormElement) => Promise<void>
+  prioritySourcePlacements: MajorFinalPlacement[]
 }) {
   const informationFields = [
     { name: "signup", label: "Signup instructions", value: event.signup_instructions },
@@ -485,6 +495,8 @@ function EventSetup({ event, events, days, standardTimes, onSaveOpening, onRelea
     { name: "rooms", label: "Room and play rules", value: event.room_rules },
     { name: "stream", label: "Stream information", value: event.stream_information },
   ]
+  const prioritySource = events.find((item) => item.id === event.priority_source_event_id)
+  const eligibleVipPlayers = getMajorVipEligiblePlayers(prioritySourcePlacements)
   return <section className={styles.workspace}>
     <div className={styles.sectionHeading}><div><p className={styles.step}>Step 1</p><h2>Event setup</h2><p>Open the field, set official dates, and explain the tournament in plain language.</p></div><span className={styles.hardCap}>Hard maximum: 100</span></div>
 
@@ -502,6 +514,11 @@ function EventSetup({ event, events, days, standardTimes, onSaveOpening, onRelea
         <label className={styles.check}><input name="priority_enabled" type="checkbox" defaultChecked={event.priority_signup_enabled} /> Enable previous-Major priority signup</label>
         <button className={styles.primaryButton}>Save signup opening</button>
       </form>
+
+      <section className={styles.panel} aria-labelledby="priority-eligibility-heading">
+        <div className={styles.inlineHeading}><div><p className={styles.step}>VIP verification</p><h3 id="priority-eligibility-heading">Official Top 10 priority group</h3><p>Source: {prioritySource?.name || "No previous Major selected"}. Only finalized Main Event placements 1–10 qualify; every player tied at the cutoff remains eligible.</p></div><strong>{eligibleVipPlayers.length} eligible player{eligibleVipPlayers.length === 1 ? "" : "s"}</strong></div>
+        {eligibleVipPlayers.length ? <div className={styles.playerChips}>{eligibleVipPlayers.map((player) => <span key={player.playerId}>{player.screenName} · T{player.placement}</span>)}</div> : <p className={styles.slotWarning}>No verified eligible players are available. Keep VIP priority disabled until the configured source Major has finalized Main Event Top 10 results.</p>}
+      </section>
 
       <div className={styles.panel}>
         <h3>Player time changes</h3>
@@ -602,8 +619,8 @@ function DayWorkspace({ event, dayNumber, day, slots, entries, groups, members, 
         <details className={styles.overridePanel}><summary>Move a player to another time</summary>{selectedEntries.map((entry) => <label key={entry.id}>{entry.player_screen_name_snapshot}<select defaultValue={slot.id} onChange={(e) => void onMovePlayer(entry.id, day.id, e.target.value)}>{daySlots.filter((option) => option.is_available || option.id === slot.id).map((option) => <option key={option.id} value={option.id}>{formatMajorLocalTime(option.starts_at, event.schedule_timezone)}{option.is_available ? "" : " — disabled"}</option>)}</select></label>)}</details>
 
         <div className={styles.roomBuilder}><div className={styles.roomBuilderHeading}><div><h3>Rooms</h3><p>Target three players; two is workable. Save privately until ready.</p></div><span>{selectedEntries.filter((entry) => !assignedIds.has(entry.id)).length} unassigned</span></div>
-          {slotGroups.map((group) => <RoomForm key={group.id} group={group} slot={slot} dayNumber={dayNumber} selectedEntries={selectedEntries} allGroups={slotGroups} namingGroups={dayGroups} isTestEvent={event.is_test_event} members={members} onSave={onSaveGroup} onDelete={onDeleteGroup} />)}
-          <RoomForm group={null} slot={slot} dayNumber={dayNumber} selectedEntries={selectedEntries.filter((entry) => !assignedIds.has(entry.id))} allGroups={slotGroups} namingGroups={dayGroups} isTestEvent={event.is_test_event} members={members} onSave={onSaveGroup} onDelete={onDeleteGroup} />
+          {slotGroups.map((group) => <RoomForm key={group.id} group={group} slot={slot} dayNumber={dayNumber} selectedEntries={selectedEntries} allGroups={slotGroups} namingGroups={groups} isTestEvent={event.is_test_event} members={members} onSave={onSaveGroup} onDelete={onDeleteGroup} />)}
+          <RoomForm group={null} slot={slot} dayNumber={dayNumber} selectedEntries={selectedEntries.filter((entry) => !assignedIds.has(entry.id))} allGroups={slotGroups} namingGroups={groups} isTestEvent={event.is_test_event} members={members} onSave={onSaveGroup} onDelete={onDeleteGroup} />
         </div>
       </article>
     })}</div></>}

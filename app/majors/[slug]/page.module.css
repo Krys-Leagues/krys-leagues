@@ -319,10 +319,12 @@
 .dayCard legend span { display: inline-block; margin-right: 8px; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; }
 .dayContext { margin: 0 0 10px; color: var(--muted); font-size: 0.75rem; }
 .slotHeader { display: grid; grid-template-columns: 54px minmax(80px, .7fr) minmax(140px, 1.3fr); gap: 10px; padding: 0 11px 5px; color: var(--muted); font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; }
+.slotList { max-height: min(48vh, 560px); overflow-y: auto; padding: 2px 6px 2px 0; scrollbar-color: #8f4765 rgba(0, 0, 0, .25); }
 .slotLabel { display: grid; grid-template-columns: 54px minmax(80px, .7fr) minmax(140px, 1.3fr); align-items: center; gap: 10px; margin: 7px 0; padding: 11px; border: 1px solid #573443; border-radius: 9px; background: rgba(21, 15, 18, 0.9); cursor: pointer; }
 .slotLabel:hover, .selected { border-color: var(--accent); background: rgba(83, 28, 53, 0.75); }
 .slotLabel input { width: 17px; height: 17px; accent-color: var(--accent); }
 .slotName { color: var(--muted); font-size: .84rem; }
+.slotName small { color: var(--muted); font-size: .68rem; font-weight: 700; letter-spacing: 0; text-transform: none; }
 .localDateTime { display: grid; gap: 2px; color: #fff; }
 .localDateTime > strong { font-size: .9rem; }
 .localDateTime > b { font-size: 1.08rem; }
@@ -395,6 +397,7 @@
   .hero { padding: 18px; }
   .eyebrow { letter-spacing: 0.13em; }
   .slotHeader { display: none; }
+  .slotList { max-height: 52vh; padding-right: 2px; }
   .slotLabel { grid-template-columns: 32px minmax(70px, .7fr) minmax(125px, 1.3fr); align-items: flex-start; }
   .reviewActions { grid-template-columns: 1fr; }
   .signupProgress { grid-template-columns: repeat(2, 1fr); margin-bottom: 22px; }

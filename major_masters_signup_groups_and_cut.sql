@@ -442,6 +442,17 @@ begin
   if p_priority_signup_enabled and (saved.slug in ('major-1','masters') or lower(saved.name) in ('major 1','masters')) then
     raise exception 'Priority signup is disabled for the first Major.';
   end if;
+  if p_priority_signup_enabled and not exists(
+    select 1
+    from public.major_final_placements placement
+    where placement.major_event_id=p_priority_source_event_id
+      and placement.weekend_field='main'
+      and placement.field_placement between 1 and 10
+      and placement.result_status='completed'
+      and placement.is_finalized
+  ) then
+    raise exception 'Priority signup requires a finalized Top 10 Main Event leaderboard.';
+  end if;
   if p_priority_signup_enabled and not saved.is_test_event
     and exists(select 1 from public.major_events where id=p_priority_source_event_id and is_test_event)
   then raise exception 'TEST participation cannot provide eligibility for a real Major.'; end if;
@@ -524,7 +535,16 @@ begin
   end if;
   if signup_event.public_signup_opens_at is not null and now()<signup_event.public_signup_opens_at then
     if not signup_event.priority_signup_enabled or signup_event.priority_signup_opens_at is null or now()<signup_event.priority_signup_opens_at
-      or signup_event.priority_source_event_id is null or not exists(select 1 from public.major_entries where major_event_id=signup_event.priority_source_event_id and player_id=matched_player.id and status not in ('withdrawn','declined'))
+      or signup_event.priority_source_event_id is null or not exists(
+        select 1
+        from public.major_final_placements placement
+        where placement.major_event_id=signup_event.priority_source_event_id
+          and placement.player_id=matched_player.id
+          and placement.weekend_field='main'
+          and placement.field_placement between 1 and 10
+          and placement.result_status='completed'
+          and placement.is_finalized
+      )
     then raise exception 'Public signup has not opened yet.'; end if;
   end if;
   if signup_event.public_signup_opens_at is not null and now()>=signup_event.public_signup_opens_at and signup_event.public_capacity_adjusted_at is null then
