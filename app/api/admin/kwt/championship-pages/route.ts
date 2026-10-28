@@ -53,7 +53,7 @@ export async function POST(request: Request) {
     if (action === "create") {
       const season = Number(body.seasonNumber), week = Number(body.weekNumber), course = String(body.courseCode || "").trim()
       if (!Number.isInteger(season) || season < 1 || !Number.isInteger(week) || week < 1 || !course) return errorResponse("Season, week, and course are required.")
-      const inserted = await client.from("kwt_championship_pages").insert({ season_number: season, week_number: week, course_code: course, title: String(body.title || "KWT Championship Story").trim(), article_title: String(body.articleTitle || "").trim(), story_body: String(body.storyBody || ""), created_by: authorization.user.id }).select("*").single()
+      const inserted = await client.from("kwt_championship_pages").insert({ season_number: season, week_number: week, course_code: course, title: String(body.title || "KWT Championship Story").trim(), article_title: String(body.articleTitle || "").trim(), story_body: String(body.storyBody || ""), supporting_media: Array.isArray(body.supportingMedia) ? body.supportingMedia : [], created_by: authorization.user.id }).select("*").single()
       if (inserted.error) return errorResponse(inserted.error.code === "23505" ? "A page already exists for that season, week, and course." : inserted.error.message, inserted.error.code === "23505" ? 409 : 503)
       await audit(client, inserted.data.id, "draft_created", authorization.user.id, inserted.data)
       return NextResponse.json({ page: inserted.data }, { status: 201 })

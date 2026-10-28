@@ -20,4 +20,17 @@ test("published KWT memories use the canonical award image and profile links", (
   assert.match(api, /eq\("status", "published"\)/)
   assert.match(api, /api\/trophies\/kwt-awards/)
   assert.match(api, /players\//)
+  assert.match(api, /loadCommittedKwtKiwiRows/)
+  assert.match(publicPage, /VERIFIED SCORECARD ACHIEVEMENTS/)
+  assert.match(publicPage, /Kiwi achievements/)
+})
+
+test("the championship write-up remains an explicit draft editor with media captions", () => {
+  const editor = readFileSync("app/admin/kwt/championship-pages/page.tsx", "utf8")
+  const route = readFileSync("app/api/admin/kwt/championship-pages/route.ts", "utf8")
+  assert.match(editor, /CHAMPIONSHIP WRITE-UP|Full write-up/)
+  assert.match(editor, /Optional photographs and captions/)
+  assert.match(editor, /Preview draft/)
+  assert.match(route, /supporting_media/)
+  assert.match(route, /status === "published"/)
 })

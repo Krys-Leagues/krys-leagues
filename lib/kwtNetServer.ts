@@ -6,7 +6,8 @@ import { buildKwtNetResults, type KwtNetResult } from "@/lib/kwtNetLeaderboard"
 import { pointsForVerifiedRank, standardCompetitionRanks } from "@/lib/kwtNetCompetition"
 import { adaptProductionOperationalRows, selectFrozenPublishedHandicaps, validateVerifiedWeekSetup, type KwtWeekSetupMetadata, type ProductionOperationalResult, type ProductionPlayer, type PublishedHandicap, type VerifiedWeekSetup } from "@/lib/kwtNetProductionAdapter"
 import { createServerSupabaseClient } from "@/lib/supabase/server"
-import { KWT_SEASON_15_WEEK_01_RATING_REFERENCES, verifiedWeek01Badges } from "@/lib/kwtSeason15Week01Verification"
+import { KWT_SEASON_15_WEEK_01_RATING_REFERENCES } from "@/lib/kwtSeason15Week01Verification"
+import { badgesByPlayer, loadCommittedKwtKiwiRows } from "@/lib/kwt/kiwiAchievementsServer"
 
 export type KwtNetPublicPayload = {
   state: "AVAILABLE" | "UNAVAILABLE"
@@ -55,7 +56,7 @@ export async function loadVerifiedKwtNetPayload(): Promise<KwtNetPublicPayload> 
     if (!season || !week) return unavailable("NO_VERIFIED_EVENT")
     const setup = parseWeekSetup(setupResponse.data.label, setupResponse.data.start_date, setupResponse.data.end_date, season, week, "", "")
     if (!setup) return unavailable("NO_VERIFIED_EVENT")
-    const courseResponse = await client.from("all_time_courses").select("code,base_map,difficulty,display_name,active").in("code", [setup.easyCourseCode, setup.hardCourseCode]).eq("active", true)
+    const courseResponse = await client.from("all_time_courses").select("code,base_map,difficulty,display_name,hole_pars,active").in("code", [setup.easyCourseCode, setup.hardCourseCode]).eq("active", true)
     if (courseResponse.error || (courseResponse.data ?? []).length !== 2) return unavailable("NO_VERIFIED_EVENT")
     const ratingReferences = setup.eventIdentifier === "KWTS15W01" && setup.easyCourseCode === "RCE" && setup.hardCourseCode === "RCH"
       ? await loadApprovedWeek01Ratings(client)
@@ -80,9 +81,13 @@ export async function loadVerifiedKwtNetPayload(): Promise<KwtNetPublicPayload> 
     const viewerHandicap = viewerId ? frozenHandicaps.find((row) => row.canonical_player_id === viewerId) : undefined
     const viewerAllowance = viewerHandicap ? publicAllowance(viewerHandicap.resulting_index, verifiedSetup) : null
     const adapted = adaptProductionOperationalRows(raw, (playersResponse.data ?? []) as ProductionPlayer[], frozenHandicaps, verifiedSetup)
+    const kiwiRows = setup.eventIdentifier === "KWTS15W01" && setup.easyCourseCode === "RCE" && setup.hardCourseCode === "RCH"
+      ? await loadCommittedKwtKiwiRows({ season, week, eventIdentifier: setup.eventIdentifier, easyCourseCode: setup.easyCourseCode, hardCourseCode: setup.hardCourseCode, client })
+      : []
+    const kiwiByPlayer = badgesByPlayer(kiwiRows)
     const inputs = adapted.inputs.map((input) => ({
       ...input,
-      badges: setup.eventIdentifier === "KWTS15W01" && setup.easyCourseCode === "RCE" && setup.hardCourseCode === "RCH" ? verifiedWeek01Badges(input.playerId) : [],
+      badges: kiwiByPlayer.get(input.playerId) ?? [],
     }))
     const baseRows = buildKwtNetResults(event, inputs)
     const completed = baseRows.filter((row) => row.combinedNet !== null)
