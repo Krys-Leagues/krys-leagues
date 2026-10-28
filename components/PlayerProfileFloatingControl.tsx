@@ -45,9 +45,12 @@ export default function PlayerProfileFloatingControl() {
   }, [])
 
   useEffect(() => {
-    void loadPlayer()
+    const initialLoad = window.setTimeout(() => void loadPlayer(), 0)
     const { data: listener } = supabase.auth.onAuthStateChange(() => void loadPlayer())
-    return () => listener.subscription.unsubscribe()
+    return () => {
+      window.clearTimeout(initialLoad)
+      listener.subscription.unsubscribe()
+    }
   }, [loadPlayer])
 
   if (!player || pathname.startsWith("/admin") || pathname.startsWith("/api") || pathname.startsWith("/auth")) return null
