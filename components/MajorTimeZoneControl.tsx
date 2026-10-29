@@ -39,9 +39,9 @@ export default function MajorTimeZoneControl({ timeZone, saving, message, saveTi
 
   return <section aria-label="Your Local Time Zone" style={{ margin: compact ? "10px 0" : "14px 0", padding: compact ? "10px 12px" : "12px 14px", border: "1px solid rgba(120, 210, 220, .35)", borderRadius: 10, background: "rgba(3, 26, 35, .58)", color: "#e8ffff" }}>
     <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "end" }}>
-      <label style={{ display: "grid", gap: 3, fontSize: 12, flex: "1 1 230px" }}>
+      <label style={{ display: "grid", gap: 3, fontSize: 12, minWidth: 0, flex: "1 1 230px" }}>
         <strong>Your Local Time Zone</strong>
-        <select value={draft} onChange={(event) => setDraft(event.target.value)} aria-label="Your Local Time Zone" style={{ minHeight: 34, padding: "6px 8px", borderRadius: 6, border: "1px solid rgba(180, 230, 235, .45)", background: "rgba(0, 0, 0, .28)", color: "inherit" }}>
+        <select value={draft} onChange={(event) => setDraft(event.target.value)} aria-label="Your Local Time Zone" style={{ width: "100%", boxSizing: "border-box", minHeight: 34, padding: "6px 8px", borderRadius: 6, border: "1px solid rgba(180, 230, 235, .45)", background: "rgba(0, 0, 0, .28)", color: "inherit" }}>
           {options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
         </select>
       </label>
