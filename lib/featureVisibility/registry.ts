@@ -12,7 +12,10 @@ export const FEATURE_ROUTES: readonly FeatureRoute[] = [
   // admin mutations protected by their own routes; do not hide the approved
   // Overall Leaderboards entry behind the private feature gate.
   { key: "records", path: "/records", visibility: "live" },
-  { key: "tournaments", path: "/tournaments", visibility: "private" },
+  // Bracket pages remain protected in staging: anonymous visitors are denied,
+  // while an approved staging tester or site admin can verify the real roster
+  // and registration flow. Vercel Deployment Protection remains independent.
+  { key: "tournaments", path: "/tournaments", visibility: "tester" },
   { key: "invitationals", path: "/invitationals", visibility: "live" },
   { key: "kwt", path: "/kwt", visibility: "live" },
   { key: "monthlies", path: "/monthlies", visibility: "live" },
