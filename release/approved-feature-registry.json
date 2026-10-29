@@ -30,13 +30,17 @@
       "authoritativeFor": ["/"],
       "routes": ["/"],
       "sourceFiles": ["app/page.tsx", "components/home/MgaHomepageBanner.tsx", "components/navigation/ArtworkNavigation.tsx", "components/navigation/artwork-navigation.css", "lib/artworkPageMaps.ts"],
-      "artwork": [{"path": "public/main-hub-approved.jpg", "sha256": "EE16574A32BF7091414F487D64C0ADAAF081537F8E948C969B75547E7AA2826F"}],
+      "artwork": [
+        {"path": "public/main-hub-approved.jpg", "sha256": "EE16574A32BF7091414F487D64C0ADAAF081537F8E948C969B75547E7AA2826F"},
+        {"path": "public/approved-pages/the mga open registration nov 1st.png", "sha256": "4E16EA16AD3CAD95692DD80822443DD37E97963ECCE182547DE8136BCB5C3056", "width": 2172, "height": 724, "approvalState": "PENDING OWNER REVIEW"}
+      ],
       "requiredVisibleText": ["Krys Leagues Main Hub", "Player Profiles", "League Play", "KWT", "Hall of Champions"],
       "requiredInteractions": ["artwork navigation targets resolve to approved local or external destinations", "Course Challenges and MGA Open entries remain visible"],
       "acceptanceCriteria": ["approved artwork is unchanged", "desktop and mobile navigation are usable", "no legacy button-only homepage is introduced"],
       "dataPreservation": ["no player, score, trophy, or registration writes"],
       "security": ["admin entry remains protected"],
-      "checkpoint": {"commit": "2252ff7ec162476189f4f31b48c03add0e024ba6", "deploymentId": null, "previewUrl": null},
+      "checkpoint": {"commit": "ece93d1c7121314eab06ef732f78f00c07dff0e9", "deploymentId": null, "previewUrl": null},
+      "pendingOwnerReview": {"commit": "ece93d1c7121314eab06ef732f78f00c07dff0e9", "artworkPath": "public/approved-pages/the mga open registration nov 1st.png", "dimensions": {"width": 2172, "height": 724}, "linkDestination": "/majors/major-2", "previewDeploymentId": null, "previewUrl": null},
       "screenshots": {"desktop": [], "mobile": []},
       "approval": {"ownerApproved": false, "approvalDate": null, "evidence": [], "notes": "Source-backed inventory exists; exact owner approval evidence is not stored in this repository."},
       "evidenceGaps": ["owner-approved desktop screenshot", "owner-approved mobile screenshot", "exact approval record"]
