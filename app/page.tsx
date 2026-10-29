@@ -1,5 +1,6 @@
 
 import { ArtworkNavigation } from "@/components/navigation/ArtworkNavigation"
+import MgaHomepageBanner from "@/components/home/MgaHomepageBanner"
 import { mainHubArtwork } from "@/lib/artworkPageMaps"
 import Image from "next/image"
 import Link from "next/link"
@@ -28,21 +29,7 @@ export default function HomePage() {
               draggable={false}
             />
           </Link>
-              <Link
-                href="/majors/major-2"
-                className="artwork-navigation__mga-link"
-                aria-label="The MGA Open — view registration"
-              >
-                <Image
-                  className="artwork-navigation__mga-artwork"
-                  src="/approved-pages/the mga open.jpg"
-                  alt="The MGA Open registration artwork"
-                  width={2048}
-                  height={682}
-                  priority
-                  draggable={false}
-                />
-              </Link>
+              <MgaHomepageBanner />
           <div className="artwork-navigation__admin-treatment">
             <span className="artwork-navigation__admin-accent" aria-hidden="true" />
             <Link href="/admin" className="artwork-navigation__admin-link">

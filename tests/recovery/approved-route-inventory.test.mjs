@@ -81,6 +81,7 @@ test("approved artwork assets remain present and non-empty", () => {
 test("public navigation targets real local routes or approved external destinations", () => {
   const map = read("lib/artworkPageMaps.ts")
   const homepage = read("app/page.tsx")
+  const mgaBanner = read("components/home/MgaHomepageBanner.tsx")
   const expected = [
     'href: "/players"',
     'href: "/league-play"',
@@ -93,7 +94,8 @@ test("public navigation targets real local routes or approved external destinati
     'href: "/kwt/records"',
   ]
   for (const target of expected) assert.match(map, new RegExp(target.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")), `missing target ${target}`)
-  assert.match(homepage, /href="\/majors\/major-2"/)
+  assert.match(homepage, /<MgaHomepageBanner \/>/)
+  assert.match(mgaBanner, /href="\/majors\/major-2"/)
   assert.match(map, /oraclecloudapps\.com\/ords\/r\/wmgt\/kwt\/home/)
 })
 
