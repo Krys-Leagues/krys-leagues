@@ -24,6 +24,37 @@ The command creates a new `codex/job-player-profiles` branch and a separate work
 
 Each job must commit its own changes. Do not deploy its worktree directly to the shared staging alias.
 
+## Per-feature known-good registry
+
+`release/approved-feature-registry.json` is the version-controlled contract for the approved public and admin feature families. It records routes, source files, original artwork SHA-256 values, visible behavior, interactions, preservation rules, security requirements, checkpoint commits, screenshots, evidence gaps, and owner approval state.
+
+Every entry starts as `PENDING OWNER REVIEW`. The verifier never infers approval from Production presence, a staging Preview, HTTP 200, a successful build, or an older commit. The current MGA Open implementation is explicitly marked staging-authoritative, but remains pending until its exact owner approval evidence is recorded in the registry.
+
+Run the registry gate with:
+
+```powershell
+node scripts/verify-feature-registry.mjs --candidate <FULL_COMMIT_SHA> --changed-from 2252ff7ec162476189f4f31b48c03add0e024ba6
+```
+
+The gate fails closed when a required route/source file disappears, an artwork hash changes, a candidate is not descended from its feature checkpoint, required markers are missing, or unreviewed paths are changed. It also rejects `APPROVED` entries without explicit dated owner evidence.
+
+After the owner approves one exact Preview, record only that feature version. This preserves the previous checkpoint in `feature.history`:
+
+```powershell
+node scripts/record-feature-approval.mjs `
+  --feature <FEATURE_ID> `
+  --commit <FULL_COMMIT_SHA> `
+  --deployment-id <VERCEL_DEPLOYMENT_ID> `
+  --preview-url https://<deployment>.vercel.app `
+  --approval-date YYYY-MM-DD `
+  --evidence docs/approval.md,tests/evidence.json `
+  --desktop-screenshots evidence/desktop.png `
+  --mobile-screenshots evidence/mobile.png `
+  --owner-approved
+```
+
+The approval command captures fresh artwork hashes and screenshot references, refuses missing owner approval, non-Preview URLs, short SHAs, missing evidence, unknown features, and candidates that fail the registry gate. It does not deploy, change aliases, modify databases, or approve other features.
+
 ## Validate a candidate
 
 From the job worktree:
