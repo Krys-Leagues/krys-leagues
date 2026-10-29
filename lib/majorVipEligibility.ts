@@ -24,6 +24,7 @@ export function getMajorVipEligiblePlayers(placements: ReadonlyArray<MajorVipPla
       placement.is_finalized
       && placement.result_status === "completed"
       && placement.weekend_field === "main"
+      && placement.field_placement !== null
       && Number.isInteger(placement.field_placement)
       && placement.field_placement >= 1
       && placement.field_placement <= 10
