@@ -64,6 +64,52 @@
   opacity: 0.72;
 }
 
+.mga {
+  --accent: #f3cf70;
+  --accent2: #17694b;
+  --ink: #fffaf0;
+  --muted: #d9d4c4;
+  --panel: rgba(5, 18, 26, 0.9);
+  background: #03131b;
+}
+
+.mga .atmosphere {
+  background-image:
+    linear-gradient(180deg, rgba(2, 13, 22, 0.22), rgba(2, 13, 22, 0.48)),
+    linear-gradient(90deg, rgba(2, 13, 22, 0.28), transparent 28%, transparent 72%, rgba(2, 13, 22, 0.32)),
+    url("/approved-pages/gardens-of-babylon-background.png");
+  background-position: center, center, center 32%;
+  background-size: cover, cover, cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-color: #03131b;
+}
+
+.mga .atmosphere::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(4, 15, 22, 0.24), transparent 30%, transparent 70%, rgba(4, 15, 22, 0.28));
+}
+
+.mga .hero {
+  border-color: rgba(243, 207, 112, 0.7);
+  background: linear-gradient(145deg, rgba(3, 18, 26, 0.3), rgba(5, 29, 34, 0.4) 68%);
+  backdrop-filter: blur(12px);
+}
+
+.mga .contentCard,
+.mga .signupCard {
+  border-color: rgba(243, 207, 112, 0.52);
+  background: rgba(3, 17, 24, 0.42);
+  backdrop-filter: blur(12px);
+}
+
+.mga .commitmentCard {
+  background: rgba(2, 13, 18, 0.34);
+  backdrop-filter: blur(9px);
+}
+
 .mastersScene { position: absolute; inset: 0; }
 
 .blossomTree {
@@ -220,6 +266,10 @@
   box-shadow: inset 0 0 34px rgba(0, 0, 0, 0.46), 0 14px 28px rgba(0, 0, 0, 0.32);
 }
 
+.mgaBrandRow {
+  border-bottom-color: rgba(231, 193, 92, 0.72);
+}
+
 .featureSheen {
   position: absolute;
   inset: 0;
@@ -237,6 +287,12 @@
   min-height: 150px;
   padding-bottom: 22px;
   border-bottom: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.mga .brandRow {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: clamp(12px, 2vw, 24px);
 }
 
 .masters .brandRow {
@@ -272,6 +328,8 @@
 
 .eventTitle { margin: 4px 0; font-family: Georgia, "Times New Roman", serif; font-size: clamp(2.2rem, 7vw, 5rem); line-height: .95; text-transform: uppercase; text-shadow: 0 3px 0 #000, 0 0 30px color-mix(in srgb, var(--accent) 40%, transparent); }
 .eventIdentity { margin: 10px 0 0; color: var(--ink); font-family: Georgia, serif; font-size: clamp(1rem, 2.4vw, 1.45rem); font-weight: 900; letter-spacing: .12em; }
+.headerDescription { max-width: 620px; margin: 12px 0 0; color: var(--muted); font-size: clamp(.88rem, 1.7vw, 1.08rem); line-height: 1.45; text-shadow: 0 2px 8px #000; }
+.mgaCup { width: clamp(82px, 14vw, 176px); height: auto; max-height: 245px; object-fit: contain; filter: drop-shadow(0 12px 20px rgba(0, 0, 0, .65)); }
 
 .statusRow { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 9px; margin: 22px 0 10px; }
 .badge { padding: 7px 11px; border: 1px solid #6b5660; border-radius: 999px; background: #21151b; font-size: 0.72rem; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; }
@@ -281,11 +339,13 @@
 .capacity { margin-left: auto; color: var(--accent); font-weight: 900; }
 .meta { position: relative; color: var(--muted); line-height: 1.55; }
 .description { position: relative; max-width: 760px; font-size: 1.08rem; line-height: 1.65; }
+.allSkillLevels { display: block; margin-top: 10px; color: #ffe5a0; font-size: clamp(.9rem, 2vw, 1.1rem); letter-spacing: .16em; text-align: center; text-shadow: 0 2px 9px #000; }
 
 .commitmentCard { margin-top: 24px; padding: clamp(17px, 3vw, 26px); border: 1px solid color-mix(in srgb, var(--accent) 55%, #111); border-radius: 15px; background: rgba(0, 0, 0, .34); }
 .commitmentCard h2 { margin: 4px 0 17px; font-family: Georgia, serif; }
 .commitmentCard > p:not(.eyebrow) { color: var(--muted); line-height: 1.55; }
 .commitmentCard > p strong { color: var(--ink); }
+.mgaExplanation { max-width: 780px; margin: 5px 0; color: var(--ink) !important; font-size: clamp(1rem, 2vw, 1.16rem); line-height: 1.55 !important; text-shadow: 0 2px 8px #000; }
 .roundList { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 18px; }
 .roundList p { display: grid; gap: 4px; margin: 0; padding: 12px; border-left: 3px solid var(--accent); background: rgba(40, 125, 80, .16); }
 .roundList span { color: var(--muted); font-size: .84rem; }
@@ -314,6 +374,11 @@
   background: linear-gradient(155deg, rgba(22, 73, 47, 0.2), rgba(7, 6, 7, 0.91) 42%);
 }
 
+.mga .dayCard {
+  border-color: rgba(83, 215, 201, .72);
+  background: linear-gradient(155deg, rgba(22, 73, 47, 0.24), rgba(4, 24, 31, 0.5) 42%);
+}
+
 .dayCard:disabled { opacity: 0.76; }
 .dayCard legend { padding: 0 8px; font-family: Georgia, serif; font-weight: 800; }
 .dayCard legend span { display: inline-block; margin-right: 8px; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; }
@@ -330,11 +395,31 @@
 .localDateTime > b { font-size: 1.08rem; }
 .localDateTime em { width: fit-content; margin-top: 4px; padding: 3px 6px; border-radius: 999px; background: #49360d; color: #ffe29a; font-size: .65rem; font-style: normal; font-weight: 900; }
 .slotLabel small { display: block; margin-top: 3px; color: var(--accent); font-size: .68rem; font-weight: 700; }
+.slotPicker { display: grid; gap: 8px; }
+.slotPickerLabel { color: var(--accent); font-size: .82rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+.slotSelect { width: 100%; min-height: 48px; padding: 12px 42px 12px 13px; border: 1px solid #8f4765; border-radius: 10px; background: #160d12; color: #fff; font: inherit; font-weight: 800; }
+.slotSelect:focus { outline: 3px solid color-mix(in srgb, var(--accent) 42%, transparent); outline-offset: 2px; }
+.selectedTime { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; margin: 0; padding: 10px 12px; border-left: 3px solid var(--accent); border-radius: 7px; background: rgba(40, 125, 80, .18); color: #fff; }
+.selectedTime span { color: var(--muted); }
 .assignment { padding: 10px; border: 1px solid #3d9366; border-radius: 8px; background: #0d3523; color: #d6ffe7; font-weight: 900; }
 .locked { color: #f6c65b; font-weight: 900; }
 .lockDeadline { display: grid; gap: 3px; margin: 13px 0 0; padding: 10px; border-radius: 8px; background: rgba(0, 0, 0, .38); color: var(--muted); font-size: .8rem; }
 .lockDeadline strong { color: #fff; font-size: .9rem; }
 .lockDeadline span { color: var(--accent); }
+
+.mga .badge { border-color: rgba(110, 225, 209, .62); background: rgba(4, 48, 58, .78); }
+.mga .priority { border-color: rgba(243, 207, 112, .72); background: rgba(61, 46, 13, .78); color: #ffedb0; }
+.mga .timezone { border: 1px solid rgba(110, 225, 209, .48); background: rgba(5, 67, 75, .62); color: #e8ffff; }
+.mga .notice { border-left-color: #6fe4d2; background: rgba(7, 67, 78, .62); color: #e9ffff; }
+.mga .slotPickerLabel { color: #8ee9dc; }
+.mga .slotSelect { border-color: #55d8cf; background: #062a34; color: #efffff; }
+.mga .selectedTime { background: rgba(7, 93, 79, .42); }
+.mga .assignment { border-color: #55d8cf; background: rgba(7, 67, 58, .72); color: #e9ffff; }
+.mga .primaryButton { border-color: #9bd9c7; background: linear-gradient(#17694b, #0b3c3b); }
+.mga .dayCard legend span, .mga .roomCard header span, .mga .roomCard h4, .mga .roomDetail small { color: #8ee9dc; }
+.mga .roomCard { border-color: rgba(83, 215, 201, .62); background: linear-gradient(145deg, rgba(17, 70, 44, .36), rgba(4, 24, 31, .58)); }
+.mga .roomCard header, .mga .roomDetail { border-color: rgba(83, 215, 201, .36); }
+.mga .entrant { border-color: rgba(83, 215, 201, .42); background: rgba(3, 32, 40, .54); }
 
 .primaryButton {
   width: 100%;
@@ -391,6 +476,9 @@
   .page { padding: 14px 10px 50px; }
   .brandRow { align-items: flex-start; gap: 13px; min-height: 115px; }
   .logo { width: 84px; }
+  .mga .brandRow { gap: 8px; }
+  .mga .logo { width: clamp(68px, 18vw, 92px); }
+  .mgaCup { width: clamp(58px, 16vw, 88px); max-height: 150px; }
   .days { grid-template-columns: 1fr; }
   .roomGrid { grid-template-columns: 1fr; }
   .capacity { width: 100%; margin-left: 0; }
@@ -408,6 +496,7 @@
   .miniGolfStyle { margin-top: 10px; letter-spacing: .15em; }
   .roundList { grid-template-columns: 1fr; }
   .mastersFeature { min-height: 185px; background-position: center, center, 62% 1%; background-size: cover, cover, 285% auto; }
+  .mga .atmosphere { background-position: center, center, center 28%; }
   .bench { right: 2%; transform: scale(0.72); }
   .blossomTree { width: 80%; }
 }
