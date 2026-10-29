@@ -52,4 +52,6 @@ test("MGA homepage status is personalized only after authenticated eligibility c
 test("approved MGA artwork bytes remain unchanged in the candidate", () => {
   const artwork = readFileSync(resolve(root, "public/approved-pages/the mga open registration nov 1st.png"))
   assert.equal(createHash("sha256").update(artwork).digest("hex").toUpperCase(), "4E16EA16AD3CAD95692DD80822443DD37E97963ECCE182547DE8136BCB5C3056")
+  const previousArtwork = readFileSync(resolve(root, "public/approved-pages/the mga open.jpg"))
+  assert.equal(createHash("sha256").update(previousArtwork).digest("hex").toUpperCase(), "35E66D4F0A386CBFA0689B980BD3AA0B8D3204C0619A40FD16060A47013296FD")
 })
