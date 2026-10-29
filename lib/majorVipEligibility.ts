@@ -20,7 +20,7 @@ export type MajorVipEligiblePlayer = {
  */
 export function getMajorVipEligiblePlayers(placements: ReadonlyArray<MajorVipPlacement>): MajorVipEligiblePlayer[] {
   return placements
-    .filter((placement) => (
+    .filter((placement): placement is MajorVipPlacement & { field_placement: number } => (
       placement.is_finalized
       && placement.result_status === "completed"
       && placement.weekend_field === "main"
