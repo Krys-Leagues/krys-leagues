@@ -86,6 +86,13 @@ test("MGA Open keeps the approved course section and removes only the duplicate 
   assert.doesNotMatch(signupPage, /Choose one independent time for Thursday, Friday, Saturday, and Sunday\./u)
 })
 
+test("MGA Open keeps its introduction inside the single signup panel", () => {
+  assert.match(signupPage, /\{mgaOpen && <>\s*<p className=\{styles\.eyebrow\}>YOU ARE SIGNING UP FOR THE MGA OPEN/u)
+  assert.match(signupPage, /<section className=\{styles\.signupCard\}>[\s\S]*?mgaExplanation[\s\S]*?MajorTimeZoneControl/u)
+  assert.match(signupPage, /Official round date: \{formatPlayDate\(day\.play_date\)\}\{mgaOpen \? ` · \$\{dayName\.course\}`/u)
+  assert.match(signupPage, /\{!mgaOpen && <section className=\{styles\.commitmentCard\}>/u)
+})
+
 test("MGA Open presents the approved friendly time-zone selector", () => {
   assert.match(timezoneControl, /Your Local Time Zone/u)
   assert.match(timezoneControl, /All playing times will be shown in your selected time zone\./u)
