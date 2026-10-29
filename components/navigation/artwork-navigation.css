@@ -80,10 +80,6 @@
   transition: filter 160ms ease, transform 160ms ease;
 }
 
-.artwork-navigation__mga-section {
-  width: 100%;
-}
-
 .artwork-navigation__mga-link:hover,
 .artwork-navigation__mga-link:focus-visible {
   filter: brightness(1.12);
