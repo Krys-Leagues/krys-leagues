@@ -29,7 +29,7 @@
       "status": "PENDING OWNER REVIEW",
       "authoritativeFor": ["/"],
       "routes": ["/"],
-      "sourceFiles": ["app/page.tsx", "components/navigation/ArtworkNavigation.tsx", "lib/artworkPageMaps.ts"],
+      "sourceFiles": ["app/page.tsx", "components/home/MgaHomepageBanner.tsx", "components/navigation/ArtworkNavigation.tsx", "components/navigation/artwork-navigation.css", "lib/artworkPageMaps.ts"],
       "artwork": [{"path": "public/main-hub-approved.jpg", "sha256": "EE16574A32BF7091414F487D64C0ADAAF081537F8E948C969B75547E7AA2826F"}],
       "requiredVisibleText": ["Krys Leagues Main Hub", "Player Profiles", "League Play", "KWT", "Hall of Champions"],
       "requiredInteractions": ["artwork navigation targets resolve to approved local or external destinations", "Course Challenges and MGA Open entries remain visible"],
