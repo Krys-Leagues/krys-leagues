@@ -74,12 +74,9 @@
 .artwork-navigation__mga-link {
   display: block;
   width: 50%;
-  aspect-ratio: 2048 / 682;
+  aspect-ratio: 2048 / 430;
   margin-inline: auto;
   overflow: hidden;
-  border: 1px solid rgba(250, 204, 21, 0.72);
-  border-radius: clamp(12px, 1.6vw, 22px);
-  box-shadow: 0 0 18px rgba(250, 204, 21, 0.28), 0 12px 28px rgba(0, 0, 0, 0.45);
   transition: filter 160ms ease, transform 160ms ease;
 }
 
@@ -101,7 +98,9 @@
 .artwork-navigation__mga-artwork {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 52%;
   user-select: none;
 }
 
@@ -370,7 +369,7 @@
 
   .artwork-navigation__mga-link {
     width: 92%;
-    aspect-ratio: 2048 / 682;
+    aspect-ratio: 2048 / 430;
   }
 
   .artwork-navigation__admin-treatment {
