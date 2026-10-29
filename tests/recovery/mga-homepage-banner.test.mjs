@@ -14,16 +14,18 @@ test("homepage keeps Course Challenges above the compact MGA signup banner", () 
   assert.ok(page.indexOf("course-challenges\/course-challenges-hub-extension-preview.png") < page.indexOf("<MgaHomepageBanner />"))
 })
 
-test("MGA homepage banner preserves the original asset and signup route", () => {
+test("MGA homepage banner preserves the original asset and compact signup route", () => {
   const component = read("components/home/MgaHomepageBanner.tsx")
   const css = read("components/navigation/artwork-navigation.css")
+  const page = read("app/page.tsx")
   assert.match(component, /href="\/majors\/major-2"/)
   assert.match(component, /approved-pages\/the mga open\.jpg/)
-  assert.match(component, /General registration opens/)
-  assert.match(component, /VIP priority registration is open for eligible Masters finalists/)
   assert.doesNotMatch(component, /COMING SOON/i)
-  assert.match(css, /\.artwork-navigation__mga-link[\s\S]*aspect-ratio: 2048 \/ 430/)
-  assert.match(css, /\.artwork-navigation__mga-status-panel[\s\S]*background: rgba\(4, 8, 23, 0\.96\)/)
+  assert.doesNotMatch(component, /mga-status-panel|mga-status-copy|mga-status-cta/u)
+  assert.match(css, /\.artwork-navigation__mga-link[\s\S]*width: 50%[\s\S]*aspect-ratio: 2048 \/ 682/)
+  assert.doesNotMatch(css, /mga-status-panel|mga-status-title|mga-status-copy|mga-status-cta/u)
+  assert.ok(page.indexOf("<MgaHomepageBanner />") < page.indexOf("<YouTubeLiveLauncher />"))
+  assert.ok(page.indexOf("<YouTubeLiveLauncher />") < page.indexOf("ADMIN LOGIN"))
 })
 
 test("MGA homepage status is personalized only after authenticated eligibility checks", () => {

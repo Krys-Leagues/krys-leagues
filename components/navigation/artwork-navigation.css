@@ -73,15 +73,13 @@
 
 .artwork-navigation__mga-link {
   display: block;
-  position: relative;
-  width: min(94%, 1220px);
-  aspect-ratio: 2048 / 430;
+  width: 50%;
+  aspect-ratio: 2048 / 682;
   margin-inline: auto;
   overflow: hidden;
   border: 1px solid rgba(250, 204, 21, 0.72);
   border-radius: clamp(12px, 1.6vw, 22px);
   box-shadow: 0 0 18px rgba(250, 204, 21, 0.28), 0 12px 28px rgba(0, 0, 0, 0.45);
-  background: #080b1a;
   transition: filter 160ms ease, transform 160ms ease;
 }
 
@@ -103,47 +101,8 @@
 .artwork-navigation__mga-artwork {
   display: block;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center 52%;
+  height: auto;
   user-select: none;
-}
-
-.artwork-navigation__mga-status-panel {
-  position: absolute;
-  inset: 34% 24% 28%;
-  display: grid;
-  place-content: center;
-  gap: clamp(2px, 0.35vw, 6px);
-  padding: clamp(5px, 0.9vw, 14px) clamp(10px, 2vw, 30px);
-  border: 1px solid rgba(250, 204, 21, 0.82);
-  border-radius: clamp(8px, 1vw, 16px);
-  background: rgba(4, 8, 23, 0.96);
-  box-shadow: 0 0 16px rgba(0, 0, 0, 0.7), inset 0 0 14px rgba(250, 204, 21, 0.08);
-  color: #fff7d6;
-  text-align: center;
-  pointer-events: none;
-}
-
-.artwork-navigation__mga-status-title {
-  color: #ffe08a;
-  font-size: clamp(14px, 2.1vw, 30px);
-  letter-spacing: 0.08em;
-  line-height: 1;
-  text-shadow: 0 0 10px rgba(250, 204, 21, 0.5);
-}
-
-.artwork-navigation__mga-status-copy {
-  font-size: clamp(10px, 1.15vw, 18px);
-  font-weight: 800;
-  line-height: 1.2;
-}
-
-.artwork-navigation__mga-status-cta {
-  color: #7deaff;
-  font-size: clamp(9px, 0.9vw, 14px);
-  font-weight: 900;
-  letter-spacing: 0.12em;
 }
 
 .artwork-navigation__featured-course-link span {
@@ -410,17 +369,8 @@
   }
 
   .artwork-navigation__mga-link {
-    width: 100%;
-    aspect-ratio: 2048 / 560;
-  }
-
-  .artwork-navigation__mga-status-panel {
-    inset: 27% 10% 23%;
-    padding-inline: 8px;
-  }
-
-  .artwork-navigation__mga-status-copy {
-    font-size: clamp(9px, 2.6vw, 14px);
+    width: 92%;
+    aspect-ratio: 2048 / 682;
   }
 
   .artwork-navigation__admin-treatment {

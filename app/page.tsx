@@ -1,5 +1,6 @@
 
 import { ArtworkNavigation } from "@/components/navigation/ArtworkNavigation"
+import YouTubeLiveLauncher from "@/components/announcements/YouTubeLiveLauncher"
 import MgaHomepageBanner from "@/components/home/MgaHomepageBanner"
 import { mainHubArtwork } from "@/lib/artworkPageMaps"
 import Image from "next/image"
@@ -29,7 +30,8 @@ export default function HomePage() {
               draggable={false}
             />
           </Link>
-              <MgaHomepageBanner />
+          <MgaHomepageBanner />
+          <YouTubeLiveLauncher />
           <div className="artwork-navigation__admin-treatment">
             <span className="artwork-navigation__admin-accent" aria-hidden="true" />
             <Link href="/admin" className="artwork-navigation__admin-link">
