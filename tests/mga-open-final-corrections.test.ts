@@ -7,6 +7,7 @@ import assert from "node:assert/strict"
 const root = resolve(import.meta.dirname, "..")
 const signupPage = readFileSync(resolve(root, "app/majors/[slug]/page.tsx"), "utf8")
 const signupCss = readFileSync(resolve(root, "app/majors/[slug]/page.module.css"), "utf8")
+const timezoneControl = readFileSync(resolve(root, "components/MajorTimeZoneControl.tsx"), "utf8")
 
 test("MGA Open uses the approved Gardens of Babylon display and continuous slot picker", () => {
   assert.match(signupPage, /Gardens of Babylon Easy/u)
@@ -71,7 +72,7 @@ test("MGA Open keeps the approved course section and removes only the duplicate 
   assert.match(signupPage, /You are signing up to play four rounds/u)
   assert.match(signupPage, /Gardens of Babylon Easy/u)
   assert.match(signupPage, /Gardens of Babylon Hard/u)
-  assert.match(signupPage, /Player-local time:/u)
+  assert.doesNotMatch(signupPage, /Player-local time:/u)
   assert.match(signupPage, /General registration opens/u)
   assert.match(signupPage, /YOU ARE SIGNING UP FOR THE MGA OPEN/u)
   assert.match(signupPage, /The MGA Open is our second Major Championship/u)
@@ -83,6 +84,17 @@ test("MGA Open keeps the approved course section and removes only the duplicate 
   assert.doesNotMatch(signupPage, /Your Thursday, Friday, Saturday, and Sunday choices are independent\./u)
   assert.doesNotMatch(signupPage, /event\.signup_instructions/u)
   assert.doesNotMatch(signupPage, /Choose one independent time for Thursday, Friday, Saturday, and Sunday\./u)
+})
+
+test("MGA Open presents the approved friendly time-zone selector", () => {
+  assert.match(timezoneControl, /Your Local Time Zone/u)
+  assert.match(timezoneControl, /All playing times will be shown in your selected time zone\./u)
+  assert.match(timezoneControl, /New York \(Eastern Time\)/u)
+  assert.match(timezoneControl, /London \(United Kingdom\)/u)
+  assert.match(timezoneControl, /Madrid \(Central European Time\)/u)
+  assert.match(timezoneControl, /Confirm/u)
+  assert.doesNotMatch(timezoneControl, /IANA timezone identifier|browser detected|event fallback/u)
+  assert.doesNotMatch(signupPage, /Player-local time:/u)
 })
 
 test("MGA Open outer and inner panels remain translucent for background visibility", () => {

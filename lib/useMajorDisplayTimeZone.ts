@@ -33,7 +33,7 @@ export function useMajorDisplayTimeZone() {
         setTimeZone(result.data)
         setSource("saved")
       } else if (result.error) {
-        setMessage("Your saved timezone could not be loaded; browser timezone is being used until you confirm it.")
+        setMessage("We couldn't load your saved time zone. Please choose one and confirm.")
       }
       setLoading(false)
     })()
@@ -44,7 +44,7 @@ export function useMajorDisplayTimeZone() {
   const saveTimeZone = useCallback(async (requested: string) => {
     const nextTimeZone = requested.trim()
     if (!isValidIanaTimeZone(nextTimeZone)) {
-      setMessage("Enter a valid IANA timezone identifier, such as America/New_York or Europe/London.")
+      setMessage("Please choose a valid time zone.")
       return false
     }
     setMessage("")
@@ -63,7 +63,7 @@ export function useMajorDisplayTimeZone() {
     setSavedTimeZone(nextTimeZone)
     setTimeZone(nextTimeZone)
     setSource("saved")
-    setMessage("Timezone saved for your future Major schedules.")
+    setMessage("Your time zone was saved.")
     return true
   }, [authenticated])
 

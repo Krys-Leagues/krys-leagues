@@ -154,7 +154,6 @@ export default function MajorDetailPage() {
       </section>
       {(event.signup_open || schedule.length > 0) && <section className={styles.signupCard}>
         <MajorTimeZoneControl key={`${displayTimeZone.timeZone}:${displayTimeZone.source}`} {...displayTimeZone} />
-        <p className={styles.timezone}>Player-local time: <strong>{localTimeZone}</strong></p>
         {schedule.length > 0 && <p className={styles.assignment}>{event.weekend_status_published_at ? <>Weekend status: <strong>{weekendStatus === "main" ? "Masters Main Event" : weekendStatus === "secondary" ? secondaryFieldName : "Weekend field status pending"}</strong></> : <strong>Weekend field status pending</strong>}</p>}
         {signupState === "upcoming" && <p className={styles.notice}>Public signup opens {formatMajorLocalDateTime(signupStatus?.public_signup_opens_at || null, localTimeZone)}. Priority access is not active for this first Major.</p>}
         {signupState === "priority" && <p className={styles.notice}>Priority registration is restricted to verified eligible players. General registration opens {formatMajorLocalDateTime(signupStatus?.public_signup_opens_at || null, localTimeZone)}.</p>}
