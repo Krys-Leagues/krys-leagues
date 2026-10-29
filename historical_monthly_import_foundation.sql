@@ -1,0 +1,277 @@
+begin;
+
+create table if not exists public.historical_monthly_imports (
+  id uuid primary key default gen_random_uuid(),
+  source_filename text not null check (btrim(source_filename) <> ''),
+  source_sha256 text not null unique check (source_sha256 = lower(source_sha256) and source_sha256 ~ '^[0-9a-f]{64}$'),
+  parser_version text not null check (btrim(parser_version) <> ''),
+  source_row_count integer not null check (source_row_count > 0),
+  applied_row_count integer not null check (applied_row_count > 0),
+  committed_by uuid null references auth.users(id) on delete set null,
+  committed_at timestamptz not null default now()
+);
+
+create table if not exists public.historical_monthly_score_observations (
+  id uuid primary key default gen_random_uuid(),
+  historical_monthly_import_id uuid not null references public.historical_monthly_imports(id) on delete cascade,
+  source_fingerprint text not null unique check (btrim(source_fingerprint) <> ''),
+  source_row integer not null check (source_row > 0),
+  period_year integer not null check (period_year between 1900 and 2200),
+  period_month integer not null check (period_month between 1 and 12),
+  period_id integer null check (period_id is null or period_id > 0),
+  division text not null check (btrim(division) <> ''),
+  historical_player_name text not null check (btrim(historical_player_name) <> ''),
+  canonical_player_id uuid not null references public.players(id) on delete restrict,
+  source_player_id text null,
+  course_name text not null check (btrim(course_name) <> ''),
+  difficulty text not null check (difficulty in ('easy', 'hard')),
+  score integer not null,
+  hole_in_ones integer null check (hole_in_ones is null or hole_in_ones >= 0),
+  course_placement integer null check (course_placement is null or course_placement > 0),
+  course_points integer null,
+  overall_placement integer null check (overall_placement is null or overall_placement > 0),
+  courses_played integer null check (courses_played is null or courses_played >= 0),
+  total_strokes integer null,
+  overall_hole_in_ones integer null check (overall_hole_in_ones is null or overall_hole_in_ones >= 0),
+  overall_points integer null,
+  source_url text not null check (btrim(source_url) <> ''),
+  raw_source jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  unique (historical_monthly_import_id, source_row)
+);
+
+create index if not exists historical_monthly_scores_player_idx
+  on public.historical_monthly_score_observations(canonical_player_id, period_year, period_month, division);
+create index if not exists historical_monthly_scores_period_idx
+  on public.historical_monthly_score_observations(period_year, period_month, division);
+create index if not exists historical_monthly_scores_import_idx
+  on public.historical_monthly_score_observations(historical_monthly_import_id);
+
+do $historical_monthly_schema_check$
+declare
+  v_missing text;
+begin
+  if to_regclass('public.players') is null
+     or to_regprocedure('public.is_current_user_site_admin()') is null
+     or to_regprocedure('public.resolve_canonical_player_id(uuid)') is null then
+    raise exception 'Historical Monthly prerequisites are missing: players and Global Identity must be installed first';
+  end if;
+
+  select string_agg(required.table_name || '.' || required.column_name, ', ' order by required.table_name, required.column_name)
+  into v_missing
+  from (values
+    ('historical_monthly_imports', 'id'),
+    ('historical_monthly_imports', 'source_filename'),
+    ('historical_monthly_imports', 'source_sha256'),
+    ('historical_monthly_imports', 'parser_version'),
+    ('historical_monthly_imports', 'source_row_count'),
+    ('historical_monthly_imports', 'applied_row_count'),
+    ('historical_monthly_score_observations', 'id'),
+    ('historical_monthly_score_observations', 'historical_monthly_import_id'),
+    ('historical_monthly_score_observations', 'source_fingerprint'),
+    ('historical_monthly_score_observations', 'source_row'),
+    ('historical_monthly_score_observations', 'period_year'),
+    ('historical_monthly_score_observations', 'period_month'),
+    ('historical_monthly_score_observations', 'division'),
+    ('historical_monthly_score_observations', 'historical_player_name'),
+    ('historical_monthly_score_observations', 'canonical_player_id'),
+    ('historical_monthly_score_observations', 'course_name'),
+    ('historical_monthly_score_observations', 'difficulty'),
+    ('historical_monthly_score_observations', 'score'),
+    ('historical_monthly_score_observations', 'raw_source')
+  ) required(table_name, column_name)
+  where not exists (
+    select 1
+    from information_schema.columns column_info
+    where column_info.table_schema = 'public'
+      and column_info.table_name = required.table_name
+      and column_info.column_name = required.column_name
+  );
+
+  if v_missing is not null then
+    raise exception 'Incompatible Historical Monthly schema; missing columns: %', v_missing;
+  end if;
+
+  if not exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'historical_monthly_score_observations'
+      and column_name = 'canonical_player_id'
+      and data_type = 'uuid'
+      and is_nullable = 'NO'
+  ) then
+    raise exception 'Incompatible Historical Monthly schema; canonical_player_id must be a non-null uuid';
+  end if;
+end;
+$historical_monthly_schema_check$;
+
+alter table public.historical_monthly_imports enable row level security;
+alter table public.historical_monthly_score_observations enable row level security;
+revoke all on public.historical_monthly_imports, public.historical_monthly_score_observations from public, anon, authenticated;
+grant select on public.historical_monthly_imports, public.historical_monthly_score_observations to authenticated;
+
+drop policy if exists "Site admins can read historical Monthly imports" on public.historical_monthly_imports;
+create policy "Site admins can read historical Monthly imports"
+  on public.historical_monthly_imports for select to authenticated
+  using (public.is_current_user_site_admin());
+
+drop policy if exists "Site admins can read historical Monthly scores" on public.historical_monthly_score_observations;
+create policy "Site admins can read historical Monthly scores"
+  on public.historical_monthly_score_observations for select to authenticated
+  using (public.is_current_user_site_admin());
+
+create or replace function public.commit_historical_monthly_preview(
+  p_source_filename text,
+  p_source_sha256 text,
+  p_parser_version text,
+  p_source_row_count integer,
+  p_rows jsonb
+)
+returns table(historical_monthly_import_id uuid, idempotent boolean, applied_row_count integer, source_row_count integer)
+language plpgsql security definer set search_path to '' as $function$
+declare
+  v_user uuid := auth.uid();
+  v_import public.historical_monthly_imports%rowtype;
+  v_row jsonb;
+  v_player uuid;
+  v_canonical_player uuid;
+  v_count integer := 0;
+  v_row_key text;
+  v_source_row text;
+begin
+  if v_user is null or not public.is_current_user_site_admin() then
+    raise exception 'Administrator authorization is required' using errcode = '42501';
+  end if;
+  if p_source_filename is null or btrim(p_source_filename) = '' then
+    raise exception 'Source filename is required';
+  end if;
+  if p_source_sha256 is null or lower(btrim(p_source_sha256)) !~ '^[0-9a-f]{64}$' then
+    raise exception 'A lowercase SHA-256 is required';
+  end if;
+  if p_parser_version is null or btrim(p_parser_version) = '' then
+    raise exception 'Parser version is required';
+  end if;
+  if p_source_row_count is null or p_source_row_count <= 0 then
+    raise exception 'A positive source row count is required';
+  end if;
+  if p_rows is null or jsonb_typeof(p_rows) <> 'array' or jsonb_array_length(p_rows) = 0 then
+    raise exception 'At least one reviewed Monthly score observation is required';
+  end if;
+  if p_source_row_count < jsonb_array_length(p_rows) then
+    raise exception 'Applied Monthly rows cannot exceed the source row count';
+  end if;
+
+  perform pg_advisory_xact_lock(hashtextextended('historical-monthly:' || lower(btrim(p_source_sha256)), 0));
+  select * into v_import
+  from public.historical_monthly_imports
+  where source_sha256 = lower(btrim(p_source_sha256));
+
+  if found then
+    if v_import.source_filename is distinct from btrim(p_source_filename)
+       or v_import.parser_version is distinct from btrim(p_parser_version)
+       or v_import.source_row_count is distinct from p_source_row_count
+       or v_import.applied_row_count is distinct from jsonb_array_length(p_rows) then
+      raise exception 'Monthly source SHA conflicts with the existing filename, parser version, or row counts';
+    end if;
+    if (select count(distinct incoming.value->>'rowKey') from jsonb_array_elements(p_rows) as incoming(value)) <> jsonb_array_length(p_rows)
+       or exists (select 1 from jsonb_array_elements(p_rows) as incoming(value) where coalesce(incoming.value->>'rowKey', '') = '') then
+      raise exception 'Monthly source SHA payload contains duplicate or blank source fingerprints';
+    end if;
+    if exists (
+      select 1
+      from jsonb_array_elements(p_rows) as incoming(value)
+      where not exists (
+        select 1
+        from public.historical_monthly_score_observations score
+        where score.historical_monthly_import_id = v_import.id
+          and score.source_fingerprint = incoming.value->>'rowKey'
+          and score.raw_source = incoming.value
+      )
+    ) or exists (
+      select 1
+      from public.historical_monthly_score_observations score
+      where score.historical_monthly_import_id = v_import.id
+        and not exists (
+          select 1
+          from jsonb_array_elements(p_rows) as incoming(value)
+          where incoming.value->>'rowKey' = score.source_fingerprint
+        )
+    ) then
+      raise exception 'Monthly source SHA conflicts with the existing reviewed source fingerprints';
+    end if;
+    historical_monthly_import_id := v_import.id;
+    idempotent := true;
+    applied_row_count := v_import.applied_row_count;
+    source_row_count := v_import.source_row_count;
+    return next;
+    return;
+  end if;
+
+  insert into public.historical_monthly_imports(source_filename, source_sha256, parser_version, source_row_count, applied_row_count, committed_by)
+  values (btrim(p_source_filename), lower(btrim(p_source_sha256)), btrim(p_parser_version), p_source_row_count, jsonb_array_length(p_rows), v_user)
+  returning * into v_import;
+
+  for v_row in select value from jsonb_array_elements(p_rows) loop
+    v_row_key := nullif(btrim(v_row->>'rowKey'), '');
+    if v_row_key is null then raise exception 'Every Monthly row requires a source fingerprint'; end if;
+    v_source_row := nullif(v_row->>'sourceRow', '');
+    if v_source_row is null or v_source_row !~ '^\d+$' or v_source_row::integer <= 0 then raise exception 'Every Monthly row requires a positive source row number'; end if;
+    if nullif(v_row->>'historicalName', '') is null or nullif(v_row->>'courseName', '') is null then raise exception 'Every Monthly row requires its exact historical name and course name'; end if;
+    if nullif(v_row->>'year', '') is null or v_row->>'year' !~ '^\d+$' or (v_row->>'year')::integer not between 1900 and 2200 then raise exception 'Every Monthly row requires a valid period year'; end if;
+    if nullif(v_row->>'month', '') is null or v_row->>'month' !~ '^\d+$' or (v_row->>'month')::integer not between 1 and 12 then raise exception 'Every Monthly row requires a valid period month'; end if;
+    if v_row->>'difficulty' not in ('easy', 'hard') then raise exception 'Every Monthly row requires difficulty easy or hard'; end if;
+    if nullif(v_row->>'score', '') is null or v_row->>'score' !~ '^-?\d+$' then raise exception 'Every applied Monthly row requires an integer score'; end if;
+    begin
+      v_player := (v_row->>'canonicalPlayerId')::uuid;
+    exception when invalid_text_representation then
+      raise exception 'Every Monthly row requires a valid canonical Global Player UUID';
+    end;
+    v_canonical_player := public.resolve_canonical_player_id(v_player);
+    if v_canonical_player is null or not exists(select 1 from public.players where id = v_canonical_player) then
+      raise exception 'Selected player % does not resolve to a canonical Global Player', v_player;
+    end if;
+    if exists(select 1 from public.historical_monthly_score_observations score where score.source_fingerprint = v_row_key) then
+      raise exception 'Monthly source fingerprint % already exists in another import', v_row_key;
+    end if;
+
+    insert into public.historical_monthly_score_observations(
+      historical_monthly_import_id, source_fingerprint, source_row, period_year, period_month, period_id,
+      division, historical_player_name, canonical_player_id, source_player_id, course_name, difficulty,
+      score, hole_in_ones, course_placement, course_points, overall_placement, courses_played,
+      total_strokes, overall_hole_in_ones, overall_points, source_url, raw_source
+    ) values (
+      v_import.id, v_row_key, v_source_row::integer, (v_row->>'year')::integer, (v_row->>'month')::integer,
+      nullif(v_row->>'periodId', '')::integer, btrim(v_row->>'division'), v_row->>'historicalName',
+      v_canonical_player, nullif(v_row->>'sourcePlayerId', ''), btrim(v_row->>'courseName'), v_row->>'difficulty',
+      (v_row->>'score')::integer, nullif(v_row->>'holeInOnes', '')::integer, nullif(v_row->>'coursePlacement', '')::integer,
+      nullif(v_row->>'coursePoints', '')::integer, nullif(v_row->>'overallPlacement', '')::integer,
+      nullif(v_row->>'coursesPlayed', '')::integer, nullif(v_row->>'totalStrokes', '')::integer,
+      nullif(v_row->>'overallHn1', '')::integer, nullif(v_row->>'overallPoints', '')::integer,
+      btrim(v_row->>'sourceUrl'), v_row
+    );
+    v_count := v_count + 1;
+  end loop;
+
+  historical_monthly_import_id := v_import.id;
+  idempotent := false;
+  applied_row_count := v_count;
+  source_row_count := p_source_row_count;
+  return next;
+end;
+$function$;
+
+revoke all on function public.commit_historical_monthly_preview(text, text, text, integer, jsonb) from public, anon, authenticated;
+grant execute on function public.commit_historical_monthly_preview(text, text, text, integer, jsonb) to authenticated;
+
+do $historical_monthly_foundation_check$
+begin
+  if to_regclass('public.players') is null
+     or to_regprocedure('public.is_current_user_site_admin()') is null
+     or to_regprocedure('public.resolve_canonical_player_id(uuid)') is null then
+    raise exception 'Historical Monthly foundation requires site-admin authorization and canonical player identity functions';
+  end if;
+end;
+$historical_monthly_foundation_check$;
+
+commit;

@@ -1,0 +1,930 @@
+,Unnamed: 0,Unnamed: 1,Unnamed: 2,Unnamed: 3,Unnamed: 4,Unnamed: 5,Unnamed: 6,Unnamed: 7,Unnamed: 8,Unnamed: 9,Unnamed: 10,Unnamed: 11,Unnamed: 12,Unnamed: 13,Unnamed: 14,Unnamed: 15,Unnamed: 16,Unnamed: 17,Unnamed: 18,Unnamed: 19,Unnamed: 20,Unnamed: 21
+0,Krys' Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+1,,WEEK 59,P,W,L,PTS,STROKES,CBE,CBH,Total,W,L,BBE,BBH,Total,W,L,MWE,MWH,Total,W,L
+2,1st,KRYS,2,2,0,6,-74,-21,-14,-35,1,,-24,-15,-39,1,,,,0,,
+3,2nd,DAWNSOPHIA,2,1,1,3,-52,,,0,,,-16,-14,-30,,1,-19,-3,-22,1,
+4,3rd,MULLIGAN,2,0,2,0,-45,-19,-5,-24,,1,,,0,,,-13,-8,-21,,1
+5,4th,KCROB,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+6,,,,,,,,,,,,,,,,,,,,,,
+7,Krys' Pro League Division 2,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+8,,WEEK 59,P,W,L,PTS,STROKES,CBE,CBH,Total,W,L,BBE,BBH,Total,W,L,MWE,MWH,Total,W,L
+9,5th,CHIPNPUTT,1,1,0,3,-32,,,0,,,-20,-12,-32,1,,,,0,,
+10,6th,NUTTYGRANDPA,1,0,1,0,-31,,,0,,,-20,-11,-31,,1,,,0,,
+11,7th,TRICKYDICKY,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+12,8th,CHELL1843,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+13,,,,,,,,,,,,,,,,,,,,,,
+14,Krys' Pro League Division 3,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+15,,WEEK 59,P,W,L,PTS,STROKES,CBE,CBH,Total,W,L,BBE,BBH,Total,W,L,MWE,MWH,Total,W,L
+16,9th,CHICAGOBRY,3,3,0,9,-64,-19,-15,-34,1,,-12,-6,-18,1,,-8,-4,-12,1,
+17,10th,SJ,3,2,1,6,-45,-18,0,-18,1,,-8,-2,-10,,1,-14,-3,-17,1,
+18,11th,ITSYOURWORLD,3,1,2,3,-38,-8,-2,-10,,1,-16,-5,-21,1,,-11,4,-7,,1
+19,12th,MASTER_KP,3,0,3,0,-38,-25,0,-25,,1,-4,5,1,,1,-15,1,-14,,1
+20,,,,,,,,,,,,,,,,,,,,,,
+21,Krys' Semi-Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+22,,WEEK 59,P,W,L,PTS,STROKES,CBE,CBH,Total,W,L,BBE,BBH,Total,W,L,MWE,MWH,Total,W,L
+23,1st,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+24,2nd,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+25,3rd,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+26,4th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+27,,,,,,,,,,,,,,,,,,,,,,
+28,Krys' Semi-Pro League Division 2,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+29,,WEEK 59,P,W,L,PTS,STROKES,CBE,CBH,Total,W,L,BBE,BBH,Total,W,L,MWE,MWH,Total,W,L
+30,5th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+31,6th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+32,7th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+33,8th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+34,,,,,,,,,,,,,,,,,,,,,,
+35,Krys' Semi-Pro League Division 3,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+36,,WEEK 59,P,W,L,PTS,STROKES,CBE,CBH,Total,W,L,BBE,BBH,Total,W,L,MWE,MWH,Total,W,L
+37,9th ,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+38,10th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+39,11th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+40,12th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+41,,,,,,,,,,,,,,,,,,,,,,
+42,Krys' Amateur League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+43,,WEEK 59,P,W,L,PTS,STROKES,CBE,CBH,Total,W,L,BBE,BBH,Total,W,L,MWE,MWH,Total,W,L
+44,1st,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+45,2nd,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+46,3rd,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+47,4th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+48,,,,,,,,,,,,,,,,,,,,,,
+49,Krys' Amateur League Division 1,,,,,,,,,,,,,,,,,,,,,
+50,Krys' Amateur League Division 2,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+51,,WEEK 59,P,W,L,PTS,STROKES,,,Total,W,L,,,Total,W,L,,,Total,W,L
+52,5th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+53,6th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+54,7th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+55,8th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+56,,,,,,,,,,,,,,,,,,,,,,
+57,ENDS WEDNESDAY  11:59 BST,,,,,,,,,,,,,,,,,,,,,
+58,Krys' EUROPEAN - Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+59,,WEEK 59,P,W,L,PTS,STROKES,,,Total,W,L,,,Total,W,L,,,Total,W,L
+60,1st,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+61,2nd,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+62,3rd,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+63,4th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+,ENDS WEDNESDAY    11:59 PST,Unnamed: 1,Unnamed: 2,Unnamed: 3,Unnamed: 4,Unnamed: 5,Unnamed: 6,Unnamed: 7,Unnamed: 8,Unnamed: 9,Unnamed: 10,Unnamed: 11,Unnamed: 12,Unnamed: 13,Unnamed: 14,Unnamed: 15,Unnamed: 16,Unnamed: 17,Unnamed: 18,Unnamed: 19,Unnamed: 20,Unnamed: 21
+0,Krys' Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+1,,WEEK 60,P,W,L,PTS,STROKES,LAB E,LAB H,Total,W,L,QVE,QVH,Total,W,L,GBE,GBH,Total,W,L
+2,1st,MULLIGAN,3,2,1,6,-89,-27,-14,-41,1,,-14,-9,-23,1,,-25,0,-25,,1
+3,2nd,KRYS,3,2,1,6,-87,-22,-9,-31,1,,-17,-4,-21,,1,-18,-17,-35,1,
+4,3rd,CHIPNPUTT,3,2,1,6,-63,-9,-9,-18,,1,-9,-15,-24,1,,-15,-6,-21,1,
+5,4th,DAWNSOPHIA,3,0,3,0,-45,-17,-4,-21,,1,-6,-6,-12,,1,-15,3,-12,,1
+6,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+7,Krys' Pro League Division 2,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+8,,WEEK 60,P,W,L,PTS,STROKES,LAB E,LAB H,Total,W,L,QVE,QVH,Total,W,L,GBE,GBH,Total,W,L
+9,5th,TRICKYDICKY,3,3,0,9,-101,-21,-11,-32,1,,-15,-21,-36,1,,-26,-7,-33,1,
+10,6th,CHICAGOBRY,3,2,1,6,-93,-13,-10,-23,,1,-18,-14,-32,1,,-22,-16,-38,1,
+11,7th,KCROB,3,1,2,3,-72,-18,,-18,1,,-15,-14,-29,,1,-21,-4,-25,,1
+12,8th,NUTTYGRANDPA,3,0,3,0,-60,-15,,-15,,1,-10,-9,-19,,1,-14,-12,-26,,1
+13,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+14,Krys' Pro League Division 3,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+15,,WEEK 60,P,W,L,PTS,STROKES,LAB E,LAB H,Total,W,L,QVE,QVH,Total,W,L,GBE,GBH,Total,W,L
+16,9th,MASTER_KP,3,3,0,9,-42,-16,-3,-19,1,,-14,-11,-25,1,,-2,4,2,1,
+17,10th,CHELL1843,3,1,2,3,-36,-6,1,-5,,1,-10,-8,-18,,1,-6,-7,-13,1,
+18,11th,ITSYOURWORLD,3,1,2,3,-22,4,-6,-2,,1,-9,-7,-16,1,,-9,5,-4,,1
+19,12th,SJ,3,1,2,3,17,5,-1,4,1,,-3,7,4,,1,-12,21,9,,1
+20,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+21,Krys' Semi-Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+22,,WEEK 60,P,W,L,PTS,STROKES,LAB E,LAB H,Total,W,L,QVE,QVH,Total,W,L,GBE,GBH,Total,W,L
+23,1st,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+24,2nd,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+25,3rd,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+26,4th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+27,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+28,Krys' Semi-Pro League Division 2,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+29,,WEEK 60,P,W,L,PTS,STROKES,LAB E,LAB H,Total,W,L,QVE,QVH,Total,W,L,GBE,GBH,Total,W,L
+30,5th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+31,6th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+32,7th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+33,8th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+34,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+35,Krys' Semi-Pro League Division 3,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+36,,WEEK 60,P,W,L,PTS,STROKES,LAB E,LAB H,Total,W,L,QVE,QVH,Total,W,L,GBE,GBH,Total,W,L
+37,9th ,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+38,10th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+39,11th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+40,12th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+41,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+42,Krys' Amateur League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+43,,WEEK 60,P,W,L,PTS,STROKES,LAB E,LAB H,Total,W,L,QVE,QVH,Total,W,L,GBE,GBH,Total,W,L
+44,1st,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+45,2nd,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+46,3rd,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+47,4th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+48,,,,,,,,,,,,,,,,,,,,,,
+49,Krys' Amateur League Division 1,,,,,,,,,,,,,,,,,,,,,
+50,Krys' Amateur League Division 2,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+51,,WEEK 60,P,W,L,PTS,STROKES,,,Total,W,L,,,Total,W,L,,,Total,W,L
+52,5th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+53,6th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+54,7th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+55,8th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+56,,,,,,,,,,,,,,,,,,,,,,
+57,ENDS WEDNESDAY  11:59 BST,,,,,,,,,,,,,,,,,,,,,
+58,Krys' EUROPEAN - Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+59,,WEEK 60,P,W,L,PTS,STROKES,,,Total,W,L,,,Total,W,L,,,Total,W,L
+60,1st,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+61,2nd,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+62,3rd,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+63,4th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+,ENDS WEDNESDAY    11:59 PST,Unnamed: 1,Unnamed: 2,Unnamed: 3,Unnamed: 4,Unnamed: 5,Unnamed: 6,Unnamed: 7,Unnamed: 8,Unnamed: 9,Unnamed: 10,Unnamed: 11,Unnamed: 12,Unnamed: 13,Unnamed: 14,Unnamed: 15,Unnamed: 16,Unnamed: 17,Unnamed: 18,Unnamed: 19,Unnamed: 20,Unnamed: 21
+0,Krys' Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+1,,WEEK 61,P,W,L,PTS,STROKES,MYST E,MYST H,Total,W,L,STE,STH,Total,W,L,WWE,WWH,Total,W,L
+2,1st,MULLIGAN,3,3,0,9,-108,-26,-14,-40,1,,-17,-21,-38,1,,-21,-9,-30,1,
+3,2nd,KRYS,3,2,1,6,-103,-21,-8,-29,,1,-18,-19,-37,1,,-23,-14,-37,1,
+4,3rd,TRICKYDICKY,3,1,2,3,-92,-17,-14,-31,1,,-18,-15,-33,,1,-17,-11,-28,,1
+5,4th,CHIPNPUTT,3,0,3,0,-66,-17,-9,-26,,1,-14,-11,-25,,1,-14,-1,-15,,1
+6,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+7,Krys' Pro League Division 2,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+8,,WEEK 61,P,W,L,PTS,STROKES,MYST E,MYST H,Total,W,L,STE,STH,Total,W,L,WWE,WWH,Total,W,L
+9,5th,SQUEEZYJIBBZ,2,2,0,6,-58,-23,-16,-39,1,,,,0,,,-10,-9,-19,1,
+10,6th,MASTER_KP,3,1,2,3,-57,-11,-9,-20,,1,-9,-2,-11,,1,-18,-8,-26,1,
+11,7th,DAWNSOPHIA,2,1,1,3,-37,,,0,,,-12,-8,-20,1,,-16,-1,-17,,1
+12,8th,CHICAGOBRY,1,0,1,0,-19,,,0,,,,,0,,,-13,-6,-19,,1
+13,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+14,Krys' Pro League Division 3,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+15,,WEEK 61,P,W,L,PTS,STROKES,MYST E,MYST H,Total,W,L,STE,STH,Total,W,L,WWE,WWH,Total,W,L
+16,9th,TALISMAN,3,3,0,9,-82,-21,-5,-26,1,,-17,-11,-28,1,,-16,-12,-28,1,
+17,10th,NUTTYGRANDPA,3,2,1,6,-61,-21,-8,-29,1,,-13,-3,-16,,1,-14,-2,-16,1,
+18,11th,CHELL1843,3,1,2,3,-34,-12,-12,-24,,1,-1,-5,-6,1,,-3,-1,-4,,1
+19,12th,ITSYOURWORLD,3,0,3,0,-19,-11,0,-11,,1,-3,9,6,,1,-13,-1,-14,,1
+20,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+21,Krys' Semi-Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+22,,WEEK 61,P,W,L,PTS,STROKES,MYST E,MYST H,Total,W,L,STE,STH,Total,W,L,WWE,WWH,Total,W,L
+23,1st,FLASH473,3,3,0,9,-84,-19,-12,-31,1,,-14,-15,-29,1,,-18,-6,-24,1,
+24,2nd,DARDAR3366,3,1,2,3,-26,-12,3,-9,,1,-3,-8,-11,1,,-10,4,-6,,1
+25,3rd,SJ ,3,1,2,3,-24,-12,-5,-17,1,,-11,-5,-16,,1,-9,18,9,,1
+26,4th,COSMICCYPHER,3,1,2,3,3,-13,7,-6,,1,-5,6,1,,1,-10,18,8,1,
+27,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+28,Krys' Semi-Pro League Division 2,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+29,,WEEK 61,P,W,L,PTS,STROKES,MYST E,MYST H,Total,W,L,STE,STH,Total,W,L,WWE,WWH,Total,W,L
+30,5th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+31,6th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+32,7th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+33,8th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+34,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+35,Krys' Semi-Pro League Division 3,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+36,,WEEK 61,P,W,L,PTS,STROKES,MYST E,MYST H,Total,W,L,STE,STH,Total,W,L,WWE,WWH,Total,W,L
+37,9th ,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+38,10th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+39,11th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+40,12th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+41,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+42,Krys' Amateur League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+43,,WEEK 61,P,W,L,PTS,STROKES,MYST E,MYST H,Total,W,L,STE,STH,Total,W,L,WWE,WWH,Total,W,L
+44,1st,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+45,2nd,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+46,3rd,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+47,4th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+48,,,,,,,,,,,,,,,,,,,,,,
+49,Krys' Amateur League Division 1,,,,,,,,,,,,,,,,,,,,,
+50,Krys' Amateur League Division 2,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+51,,WEEK 61,P,W,L,PTS,STROKES,,,Total,W,L,,,Total,W,L,,,Total,W,L
+52,5th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+53,6th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+54,7th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+55,8th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+56,,,,,,,,,,,,,,,,,,,,,,
+57,ENDS WEDNESDAY  11:59 BST,,,,,,,,,,,,,,,,,,,,,
+58,Krys' EUROPEAN - Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+59,,WEEK 61,P,W,L,PTS,STROKES,,,Total,W,L,,,Total,W,L,,,Total,W,L
+60,1st,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+61,2nd,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+62,3rd,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+63,4th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+,Unnamed: 0,Unnamed: 1,Unnamed: 2,Unnamed: 3,Unnamed: 4,Unnamed: 5,Unnamed: 6,Unnamed: 7,Unnamed: 8,Unnamed: 9,Unnamed: 10,Unnamed: 11,Unnamed: 12,Unnamed: 13,Unnamed: 14,Unnamed: 15,Unnamed: 16,Unnamed: 17,Unnamed: 18,Unnamed: 19,Unnamed: 20,Unnamed: 21
+0,Krys' Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+1,,WEEK 62,P,W,L,PTS,STROKES,AME,AMH,Total,W,L,TTE,TTH,Total,W,L,SLE,SLH,Total,W,L
+2,1st,SQUEEZYJIBBZ,3,2,1,6,-119,-21,-16,-37,,1,-17,-16,-33,1,,-27,-22,-49,1,
+3,2nd,KRYS,3,2,1,6,-112,-25,-15,-40,1,,-21,-14,-35,1,,-24,-13,-37,,1
+4,3rd,TRICKYDICKY,3,1,2,3,-112,-23,-19,-42,1,,-21,-14,-35,,1,-21,-14,-35,,1
+5,4th,MULLIGAN,3,1,2,3,-110,-24,-10,-34,,1,-18,-14,-32,,1,-30,-14,-44,1,
+6,,,,,,,,,,,,,,,,,,,,,,
+7,Krys' Pro League Division 2,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+8,,WEEK 62,P,W,L,PTS,STROKES,AME,AMH,Total,W,L,TTE,TTH,Total,W,L,SLE,SLH,Total,W,L
+9,5th,CHIPNPUTT,3,2,1,6,-112,-27,-18,-45,1,,-20,-5,-25,,1,-28,-14,-42,1,
+10,6th,TALISMAN,3,2,1,6,-108,-22,-18,-40,1,,-17,-18,-35,1,,-16,-17,-33,,1
+11,7th,MASTER_KP,3,2,1,6,-94,-21,-16,-37,,1,-18,-4,-22,1,,-24,-11,-35,1,
+12,8th,DAWNSOPHIA,3,0,3,0,-76,-19,-19,-38,,1,-15,-3,-18,,1,-15,-5,-20,,1
+13,,,,,,,,,,,,,,,,,,,,,,
+14,Krys' Pro League Division 3,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+15,,WEEK 62,P,W,L,PTS,STROKES,AME,AMH,Total,W,L,TTE,TTH,Total,W,L,SLE,SLH,Total,W,L
+16,9th,CHICAGOBRY,3,3,0,9,-108,-23,-22,-45,1,,-19,-12,-31,1,,-20,-12,-32,1,
+17,10th,NUTTYGRANDPA,3,2,1,6,-107,-22,-16,-38,,1,-17,-11,-28,1,,-23,-18,-41,1,
+18,11th,FLASH473,3,1,2,3,-93,-23,-11,-34,1,,-16,-5,-21,,1,-21,-17,-38,,1
+19,12th,CHELL1843,3,0,3,0,-65,-16,-9,-25,,1,-15,-5,-20,,1,-15,-5,-20,,1
+20,,,,,,,,,,,,,,,,,,,,,,
+21,Krys' Semi-Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+22,,WEEK 62,P,W,L,PTS,STROKES,AME,AMH,Total,W,L,TTE,TTH,Total,W,L,SLE,SLH,Total,W,L
+23,1st,SJ,3,3,0,9,-71,-18,2,-16,1,,-16,-8,-24,1,,-21,-10,-31,1,
+24,2nd,ITSYOURWORLD,3,2,1,6,-80,-19,-11,-30,1,,-17,-11,-28,1,,-15,-7,-22,,1
+25,3rd,DARDAR3366,3,1,2,3,-52,-17,-7,-24,,1,-12,1,-11,,1,-15,-2,-17,1,
+26,4th,COSMICCYPHER,3,0,3,0,-44,-20,5,-15,,1,-16,-9,-25,,1,-16,12,-4,,1
+27,,,,,,,,,,,,,,,,,,,,,,
+28,Krys' Semi-Pro League Division 2,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+29,,WEEK 62,P,W,L,PTS,STROKES,AME,AMH,Total,W,L,TTE,TTH,Total,W,L,SLE,SLH,Total,W,L
+30,5th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+31,6th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+32,7th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+33,8th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+34,,,,,,,,,,,,,,,,,,,,,,
+35,Krys' Semi-Pro League Division 3,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+36,,WEEK 62,P,W,L,PTS,STROKES,AME,AMH,Total,W,L,TTE,TTH,Total,W,L,SLE,SLH,Total,W,L
+37,9th ,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+38,10th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+39,11th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+40,12th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+41,,,,,,,,,,,,,,,,,,,,,,
+42,Krys' Amateur League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+43,,WEEK 62,P,W,L,PTS,STROKES,AME,AMH,Total,W,L,TTE,TTH,Total,W,L,SLE,SLH,Total,W,L
+44,1st,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+45,2nd,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+46,3rd,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+47,4th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+48,,,,,,,,,,,,,,,,,,,,,,
+49,Krys' Amateur League Division 1,,,,,,,,,,,,,,,,,,,,,
+50,Krys' Amateur League Division 2,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+51,,WEEK 62,P,W,L,PTS,STROKES,,,Total,W,L,,,Total,W,L,,,Total,W,L
+52,5th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+53,6th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+54,7th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+55,8th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+56,,,,,,,,,,,,,,,,,,,,,,
+57,ENDS WEDNESDAY  11:59 BST,,,,,,,,,,,,,,,,,,,,,
+58,Krys' EUROPEAN - Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+59,,WEEK 62,P,W,L,PTS,STROKES,,,Total,W,L,,,Total,W,L,,,Total,W,L
+60,1st,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+61,2nd,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+62,3rd,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+63,4th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+,ENDS WEDNESDAY    11:59 PST,Unnamed: 1,Unnamed: 2,Unnamed: 3,Unnamed: 4,Unnamed: 5,Unnamed: 6,Unnamed: 7,Unnamed: 8,Unnamed: 9,Unnamed: 10,Unnamed: 11,Unnamed: 12,Unnamed: 13,Unnamed: 14,Unnamed: 15,Unnamed: 16,Unnamed: 17,Unnamed: 18,Unnamed: 19,Unnamed: 20,Unnamed: 21
+0,Krys' Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+1,,WEEK 63,P,W,L,PTS,STROKES,ALE,ALH,Total,W,L,OGE,OGH,Total,W,L,20E,20H,Total,W,L
+2,1st,SQUEEZYJIBBZ,3,3,0,9,-69,-21,-18,-39,1,,-18,-12,-30,1,,0,0,0,1,
+3,2nd,KRYS,3,1,2,3,-94,-15,-18,-33,,1,-21,-18,-39,1,,-16,-6,-22,,1
+4,3rd,CHIPNPUTT,3,1,2,3,-85,-16,-8,-24,,1,-14,-12,-26,,1,-19,-16,-35,1,
+5,4th,TRICKYDICKY,3,1,2,3,-73,-19,-19,-38,1,,-20,-15,-35,,1,0,0,0,,1
+6,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+7,Krys' Pro League Division 2,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+8,,WEEK 63,P,W,L,PTS,STROKES,ALE,ALH,Total,W,L,OGE,OGH,Total,W,L,20E,20H,Total,W,L
+9,5th,TALISMAN,3,3,0,9,-107,-17,-20,-37,1,,-20,-14,-34,1,,-18,-18,-36,1,
+10,6th,MULLIGAN,3,2,1,6,-89,-15,-14,-29,,1,-15,-16,-31,1,,-16,-13,-29,1,
+11,7th,CHICAGOBRY,3,1,2,3,-89,-15,-14,-29,1,,-14,-14,-28,,1,-22,-10,-32,,1
+12,8th,MASTER_KP,3,0,3,0,-66,-14,-14,-28,,1,-15,-13,-28,,1,-11,1,-10,,1
+13,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+14,Krys' Pro League Division 3,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+15,,WEEK 63,P,W,L,PTS,STROKES,ALE,ALH,Total,W,L,OGE,OGH,Total,W,L,20E,20H,Total,W,L
+16,9th,DAWNSOPHIA,2,2,0,6,-50,---,---,0,,,-13,-9,-22,1,,-22,-6,-28,1,
+17,10th,SJ,2,1,1,3,-31,-10,-8,-18,1,,-10,-3,-13,,1,---,---,0,,
+18,11th,FLASH473,2,0,2,0,-8,-6,-11,-17,,1,---,---,0,,,-2,11,9,,1
+19,12th,NUTTYGRANDPA,0,0,0,0,0,---,---,0,,,---,---,0,,,---,---,0,,
+20,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+21,Krys' Semi-Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+22,,WEEK 63,P,W,L,PTS,STROKES,ALE,ALH,Total,W,L,OGE,OGH,Total,W,L,20E,20H,Total,W,L
+23,1st,ITSYOURWORLD,2,2,0,6,-51,---,---,0,,,-15,-13,-28,1,,-11,-12,-23,1,
+24,2nd,DARDAR3366,2,1,1,3,-23,-7,-4,-11,1,,-17,5,-12,,1,---,---,0,,
+25,3rd,COSMICCYPHER,2,0,2,0,-23,-8,-2,-10,,1,---,---,0,,,-9,-4,-13,,1
+26,4th,CHELL1843,0,0,0,0,0,---,---,0,,,---,---,0,,,---,---,0,,
+27,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+28,Krys' Semi-Pro League Division 2,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+29,,WEEK 63,P,W,L,PTS,STROKES,ALE,ALH,Total,W,L,OGE,OGH,Total,W,L,20E,20H,Total,W,L
+30,5th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+31,6th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+32,7th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+33,8th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+34,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+35,Krys' Semi-Pro League Division 3,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+36,,WEEK 63,P,W,L,PTS,STROKES,ALE,ALH,Total,W,L,OGE,OGH,Total,W,L,20E,20H,Total,W,L
+37,9th ,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+38,10th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+39,11th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+40,12th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+41,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+42,Krys' Amateur League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+43,,WEEK 63,P,W,L,PTS,STROKES,ALE,ALH,Total,W,L,OGE,OGH,Total,W,L,20E,20H,Total,W,L
+44,1st,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+45,2nd,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+46,3rd,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+47,4th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+48,,,,,,,,,,,,,,,,,,,,,,
+49,Krys' Amateur League Division 1,,,,,,,,,,,,,,,,,,,,,
+50,Krys' Amateur League Division 2,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+51,,WEEK 63,P,W,L,PTS,STROKES,,,Total,W,L,,,Total,W,L,,,Total,W,L
+52,5th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+53,6th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+54,7th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+55,8th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+56,,,,,,,,,,,,,,,,,,,,,,
+57,ENDS WEDNESDAY  11:59 BST,,,,,,,,,,,,,,,,,,,,,
+58,Krys' EUROPEAN - Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+59,,WEEK 63,P,W,L,PTS,STROKES,,,Total,W,L,,,Total,W,L,,,Total,W,L
+60,1st,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+61,2nd,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+62,3rd,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+63,4th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+,ENDS WEDNESDAY    11:59 PST,Unnamed: 1,Unnamed: 2,Unnamed: 3,Unnamed: 4,Unnamed: 5,Unnamed: 6,Unnamed: 7,Unnamed: 8,Unnamed: 9,Unnamed: 10,Unnamed: 11,Unnamed: 12,Unnamed: 13,Unnamed: 14,Unnamed: 15,Unnamed: 16,Unnamed: 17,Unnamed: 18,Unnamed: 19,Unnamed: 20,Unnamed: 21
+0,Krys' Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+1,,WEEK 64,P,W,L,PTS,STROKES,SSE,SSH,Total,W,L,STE,STH,Total,W,L,ZZE,ZZH,Total,W,L
+2,1st,KRYS,3,2,1,6,-91,-17,-13,-30,,1,-16,-13,-29,1,,-23,-9,-32,1,
+3,2nd,SQUEEZYJIBBZ,2,2,0,6,-33,-13,-2,-15,1,,---,---,0,,,-12,-6,-18,1,
+4,3rd,TALISMAN,2,1,1,3,-60,-18,-16,-34,1,,---,---,0,,,-20,-6,-26,,1
+5,4th,CHIPNPUTT,3,0,3,0,-44,-16,5,-11,,1,-11,-6,-17,,1,-14,-2,-16,,1
+6,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+7,Krys' Pro League Division 2,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+8,,WEEK 64,P,W,L,PTS,STROKES,SSE,SSH,Total,W,L,STE,STH,Total,W,L,ZZE,ZZH,Total,W,L
+9,5th,TRICKYDICKY,3,3,0,9,-91,-21,-18,-39,1,,-13,-14,-27,1,,-14,-11,-25,1,
+10,6th,CHICAGOBRY,3,2,1,6,-73,-17,-11,-28,1,,-17,-11,-28,1,,-16,-1,-17,,1
+11,7th,MULLIGAN,3,1,2,3,-94,-23,-14,-37,,1,-18,-8,-26,,1,-17,-14,-31,1,
+12,8th,DAWNSOPHIA,3,0,3,0,-67,-16,-3,-19,,1,-15,-5,-20,,1,-21,-7,-28,,1
+13,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+14,Krys' Pro League Division 3,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+15,,WEEK 64,P,W,L,PTS,STROKES,SSE,SSH,Total,W,L,STE,STH,Total,W,L,ZZE,ZZH,Total,W,L
+16,9th,MASTER_KP,3,3,0,9,-52,-18,-7,-25,1,,-7,-3,-10,1,,-16,-1,-17,1,
+17,10th,ITSYOURWORLD,3,2,1,6,-46,-18,-9,-27,1,,-11,3,-8,,1,-13,2,-11,1,
+18,11th,FLASH473,2,0,2,0,-32,-13,-9,-22,,1,---,---,0,,,-10,0,-10,,1
+19,12th,SJ,2,0,2,0,-15,-14,3,-11,,1,---,---,0,,,-2,-2,-4,,1
+20,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+21,Krys' Semi-Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+22,,WEEK 64,P,W,L,PTS,STROKES,SSE,SSH,Total,W,L,STE,STH,Total,W,L,ZZE,ZZH,Total,W,L
+23,1st,NUTTYGRANDPA,3,3,0,9,-67,-15,-2,-17,1,,-17,-10,-27,1,,-13,-10,-23,1,
+24,2nd,CHELL1843,3,2,1,6,-48,-16,0,-16,1,,-14,-9,-23,,1,-15,6,-9,1,
+25,3rd,COSMICCYPHER,3,1,2,3,6,-11,13,2,,1,-8,3,-5,1,,-5,14,9,,1
+26,4th,DARDAR3366,3,0,3,0,-3,-16,1,-15,,1,3,-2,1,,1,-7,18,11,,1
+27,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+28,Krys' Semi-Pro League Division 2,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+29,,WEEK 64,P,W,L,PTS,STROKES,SSE,SSH,Total,W,L,STE,STH,Total,W,L,ZZE,ZZH,Total,W,L
+30,5th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+31,6th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+32,7th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+33,8th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+34,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+35,Krys' Semi-Pro League Division 3,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+36,,WEEK 64,P,W,L,PTS,STROKES,SSE,SSH,Total,W,L,STE,STH,Total,W,L,ZZE,ZZH,Total,W,L
+37,9th ,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+38,10th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+39,11th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+40,12th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+41,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+42,Krys' Amateur League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+43,,WEEK 64,P,W,L,PTS,STROKES,SSE,SSH,Total,W,L,STE,STH,Total,W,L,ZZE,ZZH,Total,W,L
+44,1st,JTVC,3,3,0,9,-103,-21,-16,-37,1,,-13,-18,-31,1,,-22,-13,-35,1,
+45,2nd,LANCEALOT,1,0,1,0,-54,-20,-4,-24,,1,,,0,,,-21,-9,-30,,
+46,3rd,PHARO_23,1,0,1,0,1,,,0,,,-4,5,1,,1,-9,9,0,,
+47,4th,DARKBATTLEKAT,1,0,1,0,17,,,0,,,,,0,,,7,10,17,,1
+48,,,,,,,,,,,,,,,,,,,,,,
+49,Krys' Amateur League Division 1,,,,,,,,,,,,,,,,,,,,,
+50,Krys' Amateur League Division 2,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+51,,WEEK 64,P,W,L,PTS,STROKES,-21,-16,Total,W,L,-13,-18,Total,W,L,-22,-13,Total,W,L
+52,5th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+53,6th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+54,7th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+55,8th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+56,,,,,,,,,,,,,,,,,,,,,,
+57,ENDS WEDNESDAY  11:59 BST,,,,,,,,,,,,,,,,,,,,,
+58,Krys' EUROPEAN - Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+59,,WEEK 64,P,W,L,PTS,STROKES,,,Total,W,L,,,Total,W,L,,,Total,W,L
+60,1st,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+61,2nd,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+62,3rd,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+63,4th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+,ENDS WEDNESDAY    11:59 PST,Unnamed: 1,Unnamed: 2,Unnamed: 3,Unnamed: 4,Unnamed: 5,Unnamed: 6,Unnamed: 7,Unnamed: 8,Unnamed: 9,Unnamed: 10,Unnamed: 11,Unnamed: 12,Unnamed: 13,Unnamed: 14,Unnamed: 15,Unnamed: 16,Unnamed: 17,Unnamed: 18,Unnamed: 19,Unnamed: 20,Unnamed: 21
+0,Krys' Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+1,,WEEK 65,P,W,L,PTS,STROKES,EDE,EDH,Total,W,L,TSE,TSH,Total,W,L,ATE,ATH,Total,W,L
+2,1st,TRICKYDICKY,3,2,1,6,-107,-20,-19,-39,1,,-21,-14,-35,1,,-21,-12,-33,,1
+3,2nd,KRYS,3,2,1,6,-104,-18,-13,-31,1,,-20,-15,-35,,1,-25,-13,-38,1,
+4,3rd,SQUEEZYJIBBZ,3,2,1,6,-66,-18,-12,-30,,1,,,0,1,,-23,-13,-36,1,
+5,4th,TALISMAN,3,0,3,0,-52,-11,-4,-15,,1,,,0,,1,-21,-16,-37,,1
+6,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+7,Krys' Pro League Division 2,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+8,,WEEK 65,P,W,L,PTS,STROKES,EDE,EDH,Total,W,L,TSE,TSH,Total,W,L,ATE,ATH,Total,W,L
+9,5th,JTVC,3,3,0,9,-136,-25,-20,-45,1,,-23,-21,-44,1,,-25,-22,-47,1,
+10,6th,CHIPNPUTT,3,2,1,6,-65,-11,-1,-12,,1,-13,-14,-27,1,,-18,-8,-26,1,
+11,7th,MULLIGAN,3,1,2,3,-79,-17,-16,-33,1,,-18,-8,-26,,1,-18,-2,-20,,1
+12,8th,MASTER_KP,3,0,3,0,-51,-9,-10,-19,,1,-11,-3,-14,,1,-18,0,-18,,1
+13,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+14,Krys' Pro League Division 3,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+15,,WEEK 65,P,W,L,PTS,STROKES,EDE,EDH,Total,W,L,TSE,TSH,Total,W,L,ATE,ATH,Total,W,L
+16,9th,NUTTYGRANDPA,3,3,0,9,-83,-20,-5,-25,1,,-18,-13,-31,1,,-19,-8,-27,1,
+17,10th,DAWNSOPHIA,3,2,1,6,-63,-11,-12,-23,1,,-12,-5,-17,,1,-17,-6,-23,1,
+18,11th,ITSYOURWORLD,3,1,2,3,-43,-7,-7,-14,,1,-9,-7,-16,1,,-14,1,-13,,1
+19,12th,FLASH473,3,0,3,0,-48,-17,1,-16,,1,-16,4,-12,,1,-16,-4,-20,,1
+20,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+21,Krys' Semi-Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+22,,WEEK 65,P,W,L,PTS,STROKES,EDE,EDH,Total,W,L,TSE,TSH,Total,W,L,ATE,ATH,Total,W,L
+23,1st,LANCEALOT,1,1,0,3,-31,,,0,,,,,0,,,-20,-11,-31,1,
+24,2nd,COSMICCYPHER,1,1,0,3,-13,,,0,,,-8,-5,-13,1,,,,0,,
+25,3rd,SJ,1,1,0,3,-11,-12,1,-11,1,,,,0,,,,,0,,
+26,4th,CHELL1843,3,0,3,0,-21,-7,4,-3,,1,-15,6,-9,,1,-14,5,-9,,1
+27,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+28,Krys' Semi-Pro League Division 2,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+29,,WEEK 65,P,W,L,PTS,STROKES,EDE,EDH,Total,W,L,TSE,TSH,Total,W,L,ATE,ATH,Total,W,L
+30,5th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+31,6th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+32,7th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+33,8th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+34,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+35,Krys' Semi-Pro League Division 3,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+36,,WEEK 65,P,W,L,PTS,STROKES,EDE,EDH,Total,W,L,TSE,TSH,Total,W,L,ATE,ATH,Total,W,L
+37,9th ,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+38,10th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+39,11th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+40,12th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+41,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+42,Krys' Amateur League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+43,,WEEK 65,P,W,L,PTS,STROKES,EDE,EDH,Total,W,L,TSE,TSH,Total,W,L,ATE,ATH,Total,W,L
+44,1st,DARDAR3366,2,2,0,6,-16,-2,-6,-8,1,,,,0,,,-12,4,-8,1,
+45,2nd,DARKBATTLEKAT,1,0,1,0,-4,,,0,,,,,0,,,-14,10,-4,,1
+46,3rd,PHARO_23,1,0,1,0,9,-1,10,9,,1,,,0,,,,,0,,
+47,4th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+,ENDS WEDNESDAY    11:59 PST,Unnamed: 1,Unnamed: 2,Unnamed: 3,Unnamed: 4,Unnamed: 5,Unnamed: 6,Unnamed: 7,Unnamed: 8,Unnamed: 9,Unnamed: 10,Unnamed: 11,Unnamed: 12,Unnamed: 13,Unnamed: 14,Unnamed: 15,Unnamed: 16,Unnamed: 17,Unnamed: 18,Unnamed: 19,Unnamed: 20,Unnamed: 21
+0,Krys' Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+1,,WEEK 66,P,W,L,PTS,STROKES,LLE,LLH,Total,W,L,BBE,BBH,Total,W,L,QVE,QVH,Total,W,L
+2,1st,JTVC,3,3,0,9,-118,-22,-23,-45,1,,-22,-15,-37,1,,-17,-19,-36,1,
+3,2nd,KRYS,2,1,1,3,-74,-25,-20,-45,1,,,,0,,,-12,-17,-29,,1
+4,3rd,TRICKYDICKY,2,0,2,0,-64,-21,-16,-37,,1,-19,-8,-27,,1,,,0,,
+5,4th,SQUEEZYJIBBZ,1,0,1,0,-32,-19,-13,-32,,1,,,0,,,,,0,,
+6,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+7,Krys' Pro League Division 2,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+8,,WEEK 66,P,W,L,PTS,STROKES,LLE,LLH,Total,W,L,BBE,BBH,Total,W,L,QVE,QVH,Total,W,L
+9,5th,MULLIGAN,2,2,0,6,-73,-19,-20,-39,1,,-22,-12,-34,1,,,,0,,
+10,6th,TALISMAN,2,2,0,6,-62,-16,-15,-31,1,,-16,-15,-31,1,,,,0,,
+11,7th,CHIPNPUTT,3,1,2,3,-58,-3,-7,-10,,1,-16,-11,-27,,1,-12,-9,-21,1,
+12,8th,NUTTYGRANDPA,3,0,3,0,-50,-19,-1,-20,,1,-20,-5,-25,,1,-7,2,-5,,1
+13,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+14,Krys' Pro League Division 3,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+15,,WEEK 66,P,W,L,PTS,STROKES,LLE,LLH,Total,W,L,BBE,BBH,Total,W,L,QVE,QVH,Total,W,L
+16,9th,MASTER_KP,3,3,0,9,-69,-21,-8,-29,1,,-18,-8,-26,1,,-15,1,-14,1,
+17,10th,DAWNSOPHIA,3,2,1,6,-66,-15,-2,-17,,1,-14,-8,-22,1,,-14,-13,-27,1,
+18,11th,FLASH473,3,1,2,3,-60,-19,-17,-36,1,,-15,0,-15,,1,-12,3,-9,,1
+19,12th,ITSYOURWORLD,3,0,3,0,-48,-17,-12,-29,,1,-15,2,-13,,1,-7,1,-6,,1
+20,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+21,Krys' Semi-Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+22,,WEEK 66,P,W,L,PTS,STROKES,LLE,LLH,Total,W,L,BBE,BBH,Total,W,L,QVE,QVH,Total,W,L
+23,1st,SJ,2,1,1,3,-23,-11,2,-9,,1,-10,-4,-14,1,,,,0,,
+24,2nd,DARDAR3366,1,1,0,3,-11,-11,0,-11,1,,,,0,,,,,0,,
+25,3rd,COSMICCYPHER,1,0,1,0,-12,,,0,,,-11,-1,-12,,1,,,0,,
+26,4th,LANCEALOT,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+27,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+28,Krys' Amateur League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+29,,WEEK 66,P,W,L,PTS,STROKES,LLE,LLH,Total,W,L,BBE,BBH,Total,W,L,QVE,QVH,Total,W,L
+30,1st,CHELL1843,1,1,0,3,-19,-14,-5,-19,1,,,,0,,,,,0,,
+31,2nd,DARKBATTLEKAT,1,0,1,0,-9,-5,-4,-9,,1,,,0,,,,,0,,
+32,3rd,PHARO_23,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+33,4th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+,ENDS WEDNESDAY    11:59 PST,Unnamed: 1,Unnamed: 2,Unnamed: 3,Unnamed: 4,Unnamed: 5,Unnamed: 6,Unnamed: 7,Unnamed: 8,Unnamed: 9,Unnamed: 10,Unnamed: 11,Unnamed: 12,Unnamed: 13,Unnamed: 14,Unnamed: 15,Unnamed: 16,Unnamed: 17,Unnamed: 18,Unnamed: 19,Unnamed: 20,Unnamed: 21
+0,Krys' Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+1,,WEEK 67,P,W,L,PTS,STROKES,GBE,GBH,Total,W,L,MWE,MWH,Total,W,L,JCE,JCH,Total,W,L
+2,1st,JTVC,3,3,0,9,-111,-19,-16,-35,1,,-20,-19,-39,1,,-20,-17,-37,1,
+3,2nd,KRYS,3,2,1,6,-99,-10,-19,-29,,1,-19,-12,-31,1,,-18,-21,-39,1,
+4,3rd,TRICKYDICKY,3,1,2,3,-102,-25,-19,-44,1,,-11,-14,-25,,1,-19,-14,-33,,1
+5,4th,MULLIGAN,3,0,3,0,-81,-16,-15,-31,,1,-19,-5,-24,,1,-18,-8,-26,,1
+6,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+7,Krys' Pro League Division 2,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+8,,WEEK 67,P,W,L,PTS,STROKES,GBE,GBH,Total,W,L,MWE,MWH,Total,W,L,JCE,JCH,Total,W,L
+9,5th,MASTER_KP,3,1,2,3,-67,-19,3,-16,,1,-15,-13,-28,1,,-13,-10,-23,,1
+10,6th,SQUEEZYJIBBZ,2,1,1,3,-56,-23,-14,-37,1,,-18,-1,-19,,1,,,0,,
+11,7th,TALISMAN,2,1,1,3,-50,-18,-6,-24,,1,,,0,,,-18,-8,-26,1,
+12,8th,CHIPNPUTT,1,1,0,3,-29,-17,-12,-29,1,,,,0,,,,,0,,
+13,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+14,Krys' Pro League Division 3,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+15,,WEEK 67,P,W,L,PTS,STROKES,GBE,GBH,Total,W,L,MWE,MWH,Total,W,L,JCE,JCH,Total,W,L
+16,9th,NUTTYGRANDPA,3,3,0,9,-67,-11,-16,-27,1,,-15,-1,-16,1,,-17,-7,-24,1,
+17,10th,DAWNSOPHIA,3,1,2,3,-73,-21,-3,-24,,1,-16,-8,-24,,1,-17,-8,-25,1,
+18,11th,FLASH473,3,1,2,3,-56,-15,0,-15,,1,-17,-9,-26,1,,-12,-3,-15,,1
+19,12th,ITSYOURWORLD,3,1,2,3,-54,-19,-13,-32,1,,-11,0,-11,,1,-11,0,-11,,1
+20,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+21,Krys' Semi-Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+22,,WEEK 67,P,W,L,PTS,STROKES,GBE,GBH,Total,W,L,MWE,MWH,Total,W,L,JCE,JCH,Total,W,L
+23,1st,CHELL1843,2,2,0,6,-36,,,0,,,-17,-5,-22,1,,-17,3,-14,1,
+24,2nd,COSMICCYPHER,2,1,1,3,-33,-15,-7,-22,1,,,,0,,,-3,-8,-11,,1
+25,3rd,LANCEALOT,1,1,0,3,-23,,,0,,,,,0,,,-18,-5,-23,1,
+26,4th,DARDAR3366,3,0,3,0,-14,-11,6,-5,,1,-5,2,-3,,1,-16,10,-6,,1
+27,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+28,Krys' Amateur League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+29,,WEEK 67,P,W,L,PTS,STROKES,GBE,GBH,Total,W,L,MWE,MWH,Total,W,L,JCE,JCH,Total,W,L
+30,1st,CORY,1,1,0,3,-28,,,0,,,,,0,,,-17,-11,-28,1,
+31,2nd,DARKBATTLEKAT,1,0,1,0,-26,,,0,,,,,0,,,-15,-11,-26,,1
+32,3rd,PHARO_23,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+33,4th,CHIPDANCER,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+,ENDS WEDNESDAY    11:59 PST,Unnamed: 1,Unnamed: 2,Unnamed: 3,Unnamed: 4,Unnamed: 5,Unnamed: 6,Unnamed: 7,Unnamed: 8,Unnamed: 9,Unnamed: 10,Unnamed: 11,Unnamed: 12,Unnamed: 13,Unnamed: 14,Unnamed: 15,Unnamed: 16,Unnamed: 17,Unnamed: 18,Unnamed: 19,Unnamed: 20,Unnamed: 21
+0,Krys' Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+1,,WEEK 68,P,W,L,PTS,STROKES,CBE,CBH,Total,W,L,WWE,WWH,Total,W,L,STE,STH,Total,W,L
+2,1st,KRYS,3,3,0,9,-93,-20,-13,-33,1,,-23,-12,-35,1,,-17,-8,-25,1,
+3,2nd,TRICKYDICKY,3,2,1,6,-88,-22,-18,-40,1,,-21,-8,-29,,1,-13,-6,-19,1,
+4,3rd,JTVC,3,1,2,3,-38,---,---,0,,1,-21,-17,-38,1,,---,---,0,,1
+5,4th,MASTER_KP,3,0,3,0,-68,-21,-4,-25,,1,-20,-11,-31,,1,-11,-1,-12,,1
+6,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+7,Krys' Pro League Division 2,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+8,,WEEK 68,P,W,L,PTS,STROKES,CBE,CBH,Total,W,L,WWE,WWH,Total,W,L,STE,STH,Total,W,L
+9,5th,MULLIGAN,2,1,1,3,-64,-18,-8,-26,,1,-22,-16,-38,1,,---,---,0,,
+10,6th,SQUEEZYJIBBZ,1,1,0,3,-31,-20,-11,-31,1,,---,---,0,,,---,---,0,,
+11,7th,NUTTYGRANDPA,2,1,1,3,-12,-23,-13,-36,1,,17,7,24,,1,---,---,0,,
+12,8th,CHIPNPUTT,1,0,1,0,-30,-23,-7,-30,,1,---,---,0,,,---,---,0,,
+13,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+14,Krys' Pro League Division 3,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+15,,WEEK 68,P,W,L,PTS,STROKES,CBE,CBH,Total,W,L,WWE,WWH,Total,W,L,STE,STH,Total,W,L
+16,9th,TALISMAN,3,3,0,9,-96,-24,-22,-46,1,,-17,-9,-26,1,,-14,-10,-24,1,
+17,10th,FLASH473,3,2,1,6,-70,-21,-6,-27,1,,-21,-7,-28,1,,-9,-6,-15,,1
+18,11th,DAWNSOPHIA,3,1,2,3,-72,-23,8,-15,,1,-20,-7,-27,,1,-17,-13,-30,1,
+19,12th,CHELL1843,3,0,3,0,-57,-19,-7,-26,,1,-14,-9,-23,,1,-9,1,-8,,1
+20,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+21,Krys' Semi-Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+22,,WEEK 68,P,W,L,PTS,STROKES,CBE,CBH,Total,W,L,WWE,WWH,Total,W,L,STE,STH,Total,W,L
+23,1st,CORY,3,3,0,9,-77,-25,-5,-30,1,,-16,-15,-31,1,,-15,-1,-16,1,
+24,2nd,LANCEALOT,2,1,1,3,-54,-20,-9,-29,,1,-15,-10,-25,1,,---,---,0,,
+25,3rd,COSMICCYPHER,2,0,2,0,-41,-17,-3,-20,,,-16,-5,-21,,1,-2,2,0,,1
+26,4th,ITSYOURWORLD,1,0,1,0,-38,-15,-5,-20,,,-12,-6,-18,,1,---,---,0,,
+27,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+28,Krys' Amateur League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+29,,WEEK 68,P,W,L,PTS,STROKES,CBE,CBH,Total,W,L,WWE,WWH,Total,W,L,STE,STH,Total,W,L
+30,1st,CHIPDANCER,2,2,0,6,-37,---,---,0,,,-19,-6,-25,1,,-12,0,-12,1,
+31,2nd,DARDAR3366,3,1,2,3,-18,-16,-6,-22,1,,-8,13,5,,1,-1,0,-1,,1
+32,3rd,PHARO_23,1,1,0,3,-9,---,---,0,,,---,---,0,,,-15,6,-9,1,
+33,4th,DARKBATTLEKAT,2,0,2,0,-13,-14,2,-12,,1,---,---,0,,,-5,4,-1,,1
+,ENDS WEDNESDAY    11:59 PST,Unnamed: 1,Unnamed: 2,Unnamed: 3,Unnamed: 4,Unnamed: 5,Unnamed: 6,Unnamed: 7,Unnamed: 8,Unnamed: 9,Unnamed: 10,Unnamed: 11,Unnamed: 12,Unnamed: 13,Unnamed: 14,Unnamed: 15,Unnamed: 16,Unnamed: 17,Unnamed: 18,Unnamed: 19,Unnamed: 20,Unnamed: 21
+0,Krys' Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+1,,WEEK 69,P,W,L,PTS,STROKES,TTE,TTH,Total,W,L,SLE,SLH,Total,W,L,LAB E ,LAB H,Total,W,L
+2,1st,MULLIGAN,2,2,0,6,-75,,,0,,,-29,-19,-48,1,,-19,-8,-27,1,
+3,2nd,KRYS,3,1,2,3,-110,-19,-7,-26,,1,-31,-12,-43,,1,-24,-17,-41,1,
+4,3rd,TRICKYDICKY,3,1,2,3,-97,-21,-18,-39,1,,-27,-13,-40,,1,-14,-4,-18,,1
+5,4th,JTVC,2,1,1,3,-79,,,0,,,-29,-18,-47,1,,-23,-9,-32,,1
+6,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+7,Krys' Pro League Division 2,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+8,,WEEK 69,P,W,L,PTS,STROKES,TTE,TTH,Total,W,L,SLE,SLH,Total,W,L,LAB E ,LAB H,Total,W,L
+9,5th,TALISMAN,3,2,1,6,-98,-18,-12,-30,,1,-26,-15,-41,1,,-15,-12,-27,1,
+10,6th,NUTTYGRANDPA,2,2,0,6,-53,-17,-17,-34,1,,,,0,,,-14,-5,-19,1,
+11,7th,SQUEEZYJIBBZ,2,1,1,3,-27,,,0,1,,,,0,,,-18,-9,-27,,1
+12,8th,MASTER_KP,3,0,3,0,-37,,,0,,1,-21,-10,-31,,1,-3,-3,-6,,1
+13,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+14,Krys' Pro League Division 3,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+15,,WEEK 69,P,W,L,PTS,STROKES,TTE,TTH,Total,W,L,SLE,SLH,Total,W,L,LAB E ,LAB H,Total,W,L
+16,9th,CHIPNPUTT,3,2,1,6,-88,-18,-13,-31,,1,-17,-15,-32,1,,-17,-8,-25,1,
+17,10th,FLASH473,3,2,1,6,-86,-19,-14,-33,1,,-17,-14,-31,1,,-15,-7,-22,,1
+18,11th,DAWNSOPHIA,3,1,2,3,-84,-18,-13,-31,1,,-17,-14,-31,,1,-14,-8,-22,,1
+19,12th,CORY,3,1,2,3,-68,-19,3,-16,,1,-23,-7,-30,,1,-14,-8,-22,1,
+20,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+21,Krys' Semi-Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+22,,WEEK 69,P,W,L,PTS,STROKES,TTE,TTH,Total,W,L,SLE,SLH,Total,W,L,LAB E ,LAB H,Total,W,L
+23,1st,CHIPDANCER,1,1,0,3,-31,,,0,,,-20,-11,-31,1,,---,---,0,,
+24,2nd,COSMICCYPHER,1,1,0,3,-16,,,0,,,---,---,0,,,-20,4,-16,1,
+25,3rd,CHELL1843,2,0,2,0,-32,---,---,0,,,-17,-11,-28,,1,-5,1,-4,,1
+26,4th,BYE,0,0,0,0,0,---,---,0,,,---,---,0,,,---,---,0,,
+27,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+28,Krys' Semi-Pro League Division 2,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+29,,WEEK 69,P,W,L,PTS,STROKES,TTE,TTH,Total,W,L,SLE,SLH,Total,W,L,LAB E ,LAB H,Total,W,L
+30,5th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+31,6th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+32,7th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+33,8th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+34,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+35,Krys' Semi-Pro League Division 3,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+36,,WEEK 69,P,W,L,PTS,STROKES,TTE,TTH,Total,W,L,SLE,SLH,Total,W,L,LAB E ,LAB H,Total,W,L
+37,9th ,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+38,10th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+39,11th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+40,12th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+41,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+42,Krys' Amateur League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+43,,WEEK 69,P,W,L,PTS,STROKES,TTE,TTH,Total,W,L,SLE,SLH,Total,W,L,LAB E ,LAB H,Total,W,L
+44,1st,DARKBATTLEKAT,3,2,1,6,-49,-16,-11,-27,1,,-18,1,-17,1,,1,-6,-5,,1
+45,2nd,ITSYOURWORLD,2,1,1,3,-46,-16,-7,-23,,,-18,6,-12,,1,-12,1,-11,1,
+46,3rd,DARDAR3366,2,1,1,3,-42,-8,-6,-14,,,-13,1,-12,,1,-16,0,-16,1,
+47,4th,PHARO_23,3,1,2,3,-32,-17,2,-15,,1,-14,-2,-16,1,,2,-3,-1,,1
+,ENDS WEDNESDAY    11:59 PST,Unnamed: 1,Unnamed: 2,Unnamed: 3,Unnamed: 4,Unnamed: 5,Unnamed: 6,Unnamed: 7,Unnamed: 8,Unnamed: 9,Unnamed: 10,Unnamed: 11,Unnamed: 12,Unnamed: 13,Unnamed: 14,Unnamed: 15,Unnamed: 16,Unnamed: 17,Unnamed: 18,Unnamed: 19,Unnamed: 20,Unnamed: 21
+0,Krys' Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+1,,WEEK 70,P,W,L,PTS,STROKES,OGE,OGH,Total,W,L,20E,20H,Total,W,L,MYST E,MYST H,Total,W,L
+2,1st,KRYS,3,2,1,6,-108,-18,-14,-32,,1,-19,-16,-35,1,,-23,-18,-41,1,
+3,2nd,MULLIGAN,3,2,1,6,-101,-19,-17,-36,1,,-25,-13,-38,1,,-16,-11,-27,,1
+4,3rd,TRICKYDICKY,2,1,1,4,-101,-18,-13,-31,0,0,-17,-17,-34,,1,-16,-20,-36,1,
+5,4th,TALISMAN,2,0,2,1,-65,-18,-13,-31,0,0,x,x,0,,1,-20,-14,-34,,1
+6,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+7,Krys' Pro League Division 2,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+8,,WEEK 70,P,W,L,PTS,STROKES,OGE,OGH,Total,W,L,20E,20H,Total,W,L,MYST E,MYST H,Total,W,L
+9,5th,JTVC,3,3,0,9,-117,-19,-19,-38,1,,-21,-16,-37,1,,-22,-20,-42,1,
+10,6th,CHIPNPUTT,3,1,2,3,-87,-18,-12,-30,,1,-17,-3,-20,,1,-20,-17,-37,1,
+11,7th,SQUEEZYJIBBZ,3,1,2,3,-68,-18,-19,-37,1,,0,0,0,,1,-24,-7,-31,,1
+12,8th,NUTTYGRANDPA,3,0,3,0,-31,-14,-5,-19,,1,0,0,0,,1,-16,4,-12,,1
+13,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+14,Krys' Pro League Division 3,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+15,,WEEK 70,P,W,L,PTS,STROKES,OGE,OGH,Total,W,L,20E,20H,Total,W,L,MYST E,MYST H,Total,W,L
+16,9th,CHIPDANCER,3,3,0,9,-84,-16,-14,-30,1,,-16,-9,-25,1,,-20,-9,-29,1,
+17,10th,MASTER_KP,3,2,1,6,-74,-20,-9,-29,1,,-13,-5,-18,,1,-11,-16,-27,1,
+18,11th,DAWNSOPHIA,3,1,2,3,-75,-19,-9,-28,,1,-16,-12,-28,1,,-14,-5,-19,,1
+19,12th,FLASH473,3,0,3,0,-63,-18,-9,-27,,1,-23,-2,-25,,1,-13,2,-11,,1
+20,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+21,Krys' Semi-Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+22,,WEEK 70,P,W,L,PTS,STROKES,OGE,OGH,Total,W,L,20E,20H,Total,W,L,MYST E,MYST H,Total,W,L
+23,1st,COSMICCYPHER,3,2,1,3,-38,x,x,0,,1,-16,-1,-17,1,,-15,-6,-21,1,
+24,2nd,CHELL1843,3,1,2,0,-41,-17,-8,-25,1,,-12,-4,-16,,1,x,x,0,,1
+25,3rd,DARKBATTLEKAT,3,0,3,0,-31,-12,-4,-16,,1,-10,4,-6,,1,-5,-4,-9,,1
+26,4th,CORY,3,1,2,-3,-21,x,x,0,,1,-15,-6,-21,1,,x,x,0,,1
+27,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+28,Krys' Amateur League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+29,,WEEK 70,P,W,L,PTS,STROKES,OGE,OGH,Total,W,L,20E,20H,Total,W,L,MYST E,MYST H,Total,W,L
+30,1st,ITSYOURWORLD,2,2,0,6,-50,-12,-8,-20,1,,---,---,0,,,-17,-13,-30,1,
+31,2nd,PHARO_23,2,0,2,0,-18,---,---,0,,,x,x,0,,1,-14,-4,-18,,1
+32,3rd,DARDAR3366,2,0,2,0,-14,-11,-3,-14,,1,x,x,0,,1,---,---,0,,
+33,4th,----------------------------,0,0,0,0,0,---,---,0,,,---,---,0,,,---,---,0,,
+,ENDS WEDNESDAY    11:59 PST,Unnamed: 1,Unnamed: 2,Unnamed: 3,Unnamed: 4,Unnamed: 5,Unnamed: 6,Unnamed: 7,Unnamed: 8,Unnamed: 9,Unnamed: 10,Unnamed: 11,Unnamed: 12,Unnamed: 13,Unnamed: 14,Unnamed: 15,Unnamed: 16,Unnamed: 17,Unnamed: 18,Unnamed: 19,Unnamed: 20,Unnamed: 21
+0,Krys' Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+1,,WEEK 70,P,W,L,PTS,STROKES,OGE,OGH,Total,W,L,20E,20H,Total,W,L,MYST E,MYST H,Total,W,L
+2,1st,KRYS,3,2,1,6,-108,-18,-14,-32,,1,-19,-16,-35,1,,-23,-18,-41,1,
+3,2nd,MULLIGAN,3,2,1,6,-101,-19,-17,-36,1,,-25,-13,-38,1,,-16,-11,-27,,1
+4,3rd,TRICKYDICKY,2,1,1,4,-101,-18,-13,-31,0,0,-17,-17,-34,,1,-16,-20,-36,1,
+5,4th,TALISMAN,2,0,2,1,-65,-18,-13,-31,0,0,x,x,0,,1,-20,-14,-34,,1
+6,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+7,Krys' Pro League Division 2,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+8,,WEEK 70,P,W,L,PTS,STROKES,OGE,OGH,Total,W,L,20E,20H,Total,W,L,MYST E,MYST H,Total,W,L
+9,5th,JTVC,3,3,0,9,-117,-19,-19,-38,1,,-21,-16,-37,1,,-22,-20,-42,1,
+10,6th,CHIPNPUTT,3,1,2,3,-87,-18,-12,-30,,1,-17,-3,-20,,1,-20,-17,-37,1,
+11,7th,SQUEEZYJIBBZ,3,1,2,3,-68,-18,-19,-37,1,,0,0,0,,1,-24,-7,-31,,1
+12,8th,NUTTYGRANDPA,3,0,3,0,-31,-14,-5,-19,,1,0,0,0,,1,-16,4,-12,,1
+13,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+14,Krys' Pro League Division 3,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+15,,WEEK 70,P,W,L,PTS,STROKES,OGE,OGH,Total,W,L,20E,20H,Total,W,L,MYST E,MYST H,Total,W,L
+16,9th,CHIPDANCER,3,3,0,9,-84,-16,-14,-30,1,,-16,-9,-25,1,,-20,-9,-29,1,
+17,10th,MASTER_KP,3,2,1,6,-74,-20,-9,-29,1,,-13,-5,-18,,1,-11,-16,-27,1,
+18,11th,DAWNSOPHIA,3,1,2,3,-75,-19,-9,-28,,1,-16,-12,-28,1,,-14,-5,-19,,1
+19,12th,FLASH473,3,0,3,0,-63,-18,-9,-27,,1,-23,-2,-25,,1,-13,2,-11,,1
+20,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+21,Krys' Semi-Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+22,,WEEK 70,P,W,L,PTS,STROKES,OGE,OGH,Total,W,L,20E,20H,Total,W,L,MYST E,MYST H,Total,W,L
+23,1st,COSMICCYPHER,3,2,1,3,-38,x,x,0,,1,-16,-1,-17,1,,-15,-6,-21,1,
+24,2nd,CHELL1843,3,1,2,0,-41,-17,-8,-25,1,,-12,-4,-16,,1,x,x,0,,1
+25,3rd,DARKBATTLEKAT,3,0,3,0,-31,-12,-4,-16,,1,-10,4,-6,,1,-5,-4,-9,,1
+26,4th,CORY,3,1,2,-3,-21,x,x,0,,1,-15,-6,-21,1,,x,x,0,,1
+27,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+28,Krys' Amateur League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+29,,WEEK 70,P,W,L,PTS,STROKES,OGE,OGH,Total,W,L,20E,20H,Total,W,L,MYST E,MYST H,Total,W,L
+30,1st,ITSYOURWORLD,2,2,0,6,-50,-12,-8,-20,1,,---,---,0,,,-17,-13,-30,1,
+31,2nd,PHARO_23,2,0,2,0,-18,---,---,0,,,x,x,0,,1,-14,-4,-18,,1
+32,3rd,DARDAR3366,2,0,2,0,-14,-11,-3,-14,,1,x,x,0,,1,---,---,0,,
+33,4th,----------------------------,0,0,0,0,0,---,---,0,,,---,---,0,,,---,---,0,,
+,ENDS WEDNESDAY    11:59 PST,Unnamed: 1,Unnamed: 2,Unnamed: 3,Unnamed: 4,Unnamed: 5,Unnamed: 6,Unnamed: 7,Unnamed: 8,Unnamed: 9,Unnamed: 10,Unnamed: 11,Unnamed: 12,Unnamed: 13,Unnamed: 14,Unnamed: 15,Unnamed: 16,Unnamed: 17,Unnamed: 18,Unnamed: 19,Unnamed: 20,Unnamed: 21
+0,Krys' Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+1,,WEEK 71,P,W,L,PTS,STROKES,ALE,ALH,Total,W,L,80 E,80 H,Total,W,L,ILE,ILH,Total,W,L
+2,1st,JTVC,3,3,0,9,-93,-20,-14,-34,1,,-24,-6,-30,1,,-11,-18,-29,1,
+3,2nd,KRYS,3,2,1,6,-98,-21,-19,-40,1,,-18,-10,-28,,1,-16,-14,-30,1,
+4,3rd,TRICKYDICKY,3,1,2,3,-80,-14,-13,-27,,1,-20,-13,-33,1,,-15,-5,-20,,1
+5,4th,MULLIGAN,3,0,3,0,-55,-14,-12,-26,,1,-12,1,-11,,1,-16,-2,-18,,1
+6,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+7,Krys' Pro League Division 2,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+8,,WEEK 71,P,W,L,PTS,STROKES,ALE,ALH,Total,W,L,80 E,80 H,Total,W,L,ILE,ILH,Total,W,L
+9,5th,CHIPNPUTT,2,2,0,6,-63,-13,-16,-29,1,,-14,-6,-20,1,,-8,-6,-14,,
+10,6th,SQUEEZYJIBBZ,2,1,1,3,-50,-19,-15,-34,1,,-14,-2,-16,,1,,,0,,
+11,7th,CHIPDANCER,1,0,1,0,-21,-7,-14,-21,,1,,,0,,,,,0,,
+12,8th,TALISMAN,1,0,1,0,-12,-15,3,-12,,1,,,0,,,,,0,,
+13,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+14,Krys' Pro League Division 3,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+15,,WEEK 71,P,W,L,PTS,STROKES,ALE,ALH,Total,W,L,80 E,80 H,Total,W,L,ILE,ILH,Total,W,L
+16,9th,DAWNSOPHIA,3,2,1,6,-54,-14,-10,-24,1,,-15,0,-15,,1,-15,0,-15,1,
+17,10th,MASTER_KP,3,2,1,6,-53,-9,-16,-25,1,,-17,-5,-22,1,,-7,1,-6,,1
+18,11th,NUTTYGRANDPA,3,1,2,3,-56,-11,-11,-22,,1,-18,-8,-26,1,,-6,-2,-8,,1
+19,12th,COSMICCYPHER,3,1,2,3,-33,-7,-14,-21,,1,0,0,0,,1,-8,-4,-12,1,
+20,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+21,Krys' Semi-Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+22,,WEEK 71,P,W,L,PTS,STROKES,ALE,ALH,Total,W,L,80 E,80 H,Total,W,L,ILE,ILH,Total,W,L
+23,1st,FLASH473,3,2,1,6,-58,-13,-15,-28,1,,-13,-3,-16,1,,-13,-1,-14,,1
+24,2nd,CHELL1843,3,2,1,6,-47,-21,-4,-25,,1,-12,-3,-15,1,,-11,4,-7,1,
+25,3rd,DARKBATTLEKAT,3,1,2,3,-47,-6,-11,-17,,1,-18,5,-13,,1,-6,-11,-17,1,
+26,4th,ITSYOURWORLD,3,1,2,3,-34,-12,-10,-22,1,,-15,2,-13,,1,-3,4,1,,1
+27,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+28,Krys' Semi-Pro League Division 2,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+29,,WEEK 71,P,W,L,PTS,STROKES,ALE,ALH,Total,W,L,80 E,80 H,Total,W,L,ILE,ILH,Total,W,L
+30,5th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+31,6th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+32,7th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+33,8th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+34,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+35,Krys' Semi-Pro League Division 3,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+36,,WEEK 71,P,W,L,PTS,STROKES,ALE,ALH,Total,W,L,80 E,80 H,Total,W,L,ILE,ILH,Total,W,L
+37,9th ,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+38,10th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+39,11th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+40,12th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+41,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+42,Krys' Amateur League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+43,,WEEK 71,P,W,L,PTS,STROKES,ALE,ALH,Total,W,L,80 E,80 H,Total,W,L,ILE,ILH,Total,W,L
+44,1st,CORY,3,2,1,6,-49,-9,-10,-19,1,,-8,-9,-17,,1,-9,-4,-13,1,
+45,2nd,BACON,3,2,1,6,-41,,,0,,1,-18,-7,-25,1,,-13,-3,-16,1,
+46,3rd,PHARO_23,3,1,2,3,-35,-8,-7,-15,,1,-4,-4,-8,1,,-11,-1,-12,,1
+47,4th,DARDAR3366,3,1,2,3,-9,-13,0,-13,1,,-1,6,5,,1,-3,2,-1,,1
+,ENDS WEDNESDAY    11:59 PST,Unnamed: 1,Unnamed: 2,Unnamed: 3,Unnamed: 4,Unnamed: 5,Unnamed: 6,Unnamed: 7,Unnamed: 8,Unnamed: 9,Unnamed: 10,Unnamed: 11,Unnamed: 12,Unnamed: 13,Unnamed: 14,Unnamed: 15,Unnamed: 16,Unnamed: 17,Unnamed: 18,Unnamed: 19,Unnamed: 20,Unnamed: 21
+0,Krys' Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+1,,WEEK 72,P,W,L,PTS,STROKES,ZZE,ZZH,Total,W,L,UTE,UTH,Total,W,L,SSE,SSH,Total,W,L
+2,1st,JTVC,3,3,0,9,-106,-22,-18,-40,1,,-20,-12,-32,1,,-21,-13,-34,1,
+3,2nd,KRYS,3,2,1,6,-97,-20,-13,-33,,1,-17,-11,-28,1,,-21,-15,-36,1,
+4,3rd,TRICKYDICKY,3,1,2,3,-68,-15,-8,-23,1,,-8,-13,-21,,1,-17,-7,-24,,1
+5,4th,CHIPNPUTT,3,0,3,0,-37,-16,-5,-21,,1,-9,11,2,,1,-13,-5,-18,,1
+6,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+7,Krys' Pro League Division 2,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+8,,WEEK 72,P,W,L,PTS,STROKES,ZZE,ZZH,Total,W,L,UTE,UTH,Total,W,L,SSE,SSH,Total,W,L
+9,5th,MULLIGAN,3,2,1,6,-92,-19,-4,-23,,1,-19,-20,-39,1,,-16,-14,-30,1,
+10,6th,SQUEEZYJIBBZ,2,2,0,3,-64,-16,-17,-33,1,,,,0,,,-22,-9,-31,1,
+11,7th,DAWNSOPHIA,3,1,2,3,-62,-18,-9,-27,1,,-10,-6,-16,,1,-13,-6,-19,,1
+12,8th,CHIPDANCER,2,0,2,0,-42,-16,-3,-19,,1,,,0,,,-20,-3,-23,,1
+13,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+14,Krys' Pro League Division 3,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+15,,WEEK 72,P,W,L,PTS,STROKES,ZZE,ZZH,Total,W,L,UTE,UTH,Total,W,L,SSE,SSH,Total,W,L
+16,9th,TALISMAN,3,2,1,6,-95,-19,-10,-29,,1,-18,-20,-38,1,,-17,-11,-28,1,
+17,10th,MASTER_KP,3,3,0,9,-69,-23,-8,-31,1,,-12,-9,-21,1,,-14,-3,-17,1,
+18,11th,NUTTYGRANDPA,2,0,2,0,-22,,,0,,,-8,-2,-10,,1,-9,-3,-12,,1
+19,12th,DARKBATTLEKAT,2,0,2,0,-18,,,0,,,-10,8,-2,,1,-14,-2,-16,,1
+20,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+21,Krys' Semi-Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+22,,WEEK 72,P,W,L,PTS,STROKES,ZZE,ZZH,Total,W,L,UTE,UTH,Total,W,L,SSE,SSH,Total,W,L
+23,1st,DARDAR3366,3,1,2,3,-19,0,7,7,,1,-15,6,-9,,1,-14,-3,-17,1,
+24,2nd,CORY,1,1,0,3,-19,,,0,,,-13,-6,-19,1,,,,0,,
+25,3rd,PHARO_23,1,1,0,3,-7,-14,7,-7,1,,,,0,,,,,0,,
+26,4th,JUCIE WRLD,1,0,1,0,0,,,0,,,,,0,,,0,0,0,,1
+27,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+28,Krys' Semi-Pro League Division 2,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+29,,WEEK 72,P,W,L,PTS,STROKES,ZZE,ZZH,Total,W,L,UTE,UTH,Total,W,L,SSE,SSH,Total,W,L
+30,5th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+31,6th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+32,7th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+33,8th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+34,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+35,Krys' Semi-Pro League Division 3,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+36,,WEEK 72,P,W,L,PTS,STROKES,ZZE,ZZH,Total,W,L,UTE,UTH,Total,W,L,SSE,SSH,Total,W,L
+37,9th ,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+38,10th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+39,11th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+40,12th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+41,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+42,Krys' Amateur League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+43,,WEEK 72,P,W,L,PTS,STROKES,ZZE,ZZH,Total,W,L,UTE,UTH,Total,W,L,SSE,SSH,Total,W,L
+44,1st,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+45,2nd,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+46,3rd,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+47,4th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+48,,,,,,,,,,,,,,,,,,,,,,
+49,Krys' Amateur League Division 1,,,,,,,,,,,,,,,,,,,,,
+50,Krys' Amateur League Division 2,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+51,,WEEK 72,P,W,L,PTS,STROKES,,,Total,W,L,,,Total,W,L,,,Total,W,L
+52,5th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+53,6th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+54,7th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+55,8th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+56,,,,,,,,,,,,,,,,,,,,,,
+57,ENDS WEDNESDAY  11:59 BST,,,,,,,,,,,,,,,,,,,,,
+58,Krys' EUROPEAN - Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+59,,WEEK 72,P,W,L,PTS,STROKES,,,Total,W,L,,,Total,W,L,,,Total,W,L
+60,1st,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+61,2nd,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+62,3rd,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+63,4th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+,WEEK,Unnamed: 1,Unnamed: 2,Unnamed: 3
+0,81,MYST,WIDOWS,20K
+1,80,GOTHIC,TEMPLE,SWEETOPIA
+2,79,TOURIST TRAP,SEAGULL,ICE LAIR
+3,78,80 DAYS,SHANGRI-LA,ALFHEIM
+4,77,,,MEOW WOLF
+5,76,CHERRY,LAB,Q. VALLEY
+6,75,,ARIZONA,JOURNEY
+7,74,BOGEYS ,ATLANTIS,GARDENS
+8,73,EL DORADO,LASER LAIR,TETHYS
+9,72,TEMPLE,UPSIDE TOWN,SEAGULL
+10,71,ALFHEIM,80 DAYS,ICE LAIR
+11,70,GOTHIC,20K,MYST
+12,69,TOURIST TRAP,SHANGRI-LA,LAB
+13,68,CHERRY,WIDOWS,SWEETOPIA
+14,67,GARDENS,MEOW WOLF,JOURNEY
+15,66,LASER LAIR,BOGEYS ,Q. VALLEY
+16,65,EL DORADO,TETHYS,ATLANTIS
+17,64,SEAGULL,SWEETOPIA,TEMPLE
+18,63,ALFHEIM,GOTHIC,20K
+19,62,ARIZONA,TOURIST TRAP,SHANGRI-LA
+20,61,MYST,SWEETOPIA,WIDOWS
+21,60,GARDENS,Q. VALLEY,LAB
+22,59,CHERRY,BOGEYS ,MEOW WOLF
+,ENDS WEDNESDAY    11:59 PST,Unnamed: 1,Unnamed: 2,Unnamed: 3,Unnamed: 4,Unnamed: 5,Unnamed: 6,Unnamed: 7,Unnamed: 8,Unnamed: 9,Unnamed: 10,Unnamed: 11,Unnamed: 12,Unnamed: 13,Unnamed: 14,Unnamed: 15,Unnamed: 16,Unnamed: 17,Unnamed: 18,Unnamed: 19,Unnamed: 20,Unnamed: 21
+0,Krys' Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+1,,WEEK 73,P,W,L,PTS,STROKES,EDE,EDH,Total,W,L,LLE,LLH,Total,W,L,TSE,TSH,Total,W,L
+2,1st,JTVC,3,3,0,9,-128,-24,-18,-42,1,,-19,-21,-40,1,,-23,-23,-46,1,
+3,2nd,TRICKYDICKY,3,1,2,3,-107,-20,-13,-33,1,,-20,-16,-36,,1,-25,-13,-38,,1
+4,3rd,KRYS,3,1,2,3,-105,-23,-12,-35,,1,-21,-16,-37,1,,-22,-11,-33,,1
+5,4th,MULLIGAN,3,1,2,3,-96,-19,-10,-29,,1,-19,-7,-26,,1,-24,-17,-41,1,
+6,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+7,Krys' Pro League Division 2,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+8,,WEEK 73,P,W,L,PTS,STROKES,EDE,EDH,Total,W,L,LLE,LLH,Total,W,L,TSE,TSH,Total,W,L
+9,5th,SQUEEZYJIBBZ,3,2,1,6,-74,-15,-2,-17,1,,-16,-14,-30,1,,-17,-10,-27,,1
+10,6th,MASTER_KP,3,2,1,6,-67,-9,-1,-10,,1,-16,-11,-27,1,,-17,-13,-30,1,
+11,7th,DAWNSOPHIA,3,1,2,3,-60,-16,-9,-25,1,,-10,-4,-14,,1,-19,-2,-21,,1
+12,8th,CHIPNPUTT,3,1,2,3,-46,-12,10,-2,,1,-20,1,-19,,1,-18,-7,-25,1,
+13,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+14,Krys' Pro League Division 3,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+15,,WEEK 73,P,W,L,PTS,STROKES,EDE,EDH,Total,W,L,LLE,LLH,Total,W,L,TSE,TSH,Total,W,L
+16,9th,NUTTYGRANDPA,3,3,0,9,-73,-15,3,-12,1,,-20,-11,-31,1,,-21,-9,-30,1,
+17,10th,CHIPDANCER,3,2,1,6,-60,-11,-3,-14,1,,-21,-8,-29,1,,-10,-7,-17,,1
+18,11th,TALISMAN,3,1,2,3,-43,--,--,0,,1,-15,-6,-21,,1,-17,-5,-22,1,
+19,12th,DARDAR3366,3,0,3,0,-30,-14,10,-4,,1,-8,1,-7,,1,-15,-4,-19,,1
+20,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+21,Krys' Semi-Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+22,,WEEK 73,P,W,L,PTS,STROKES,EDE,EDH,Total,W,L,LLE,LLH,Total,W,L,TSE,TSH,Total,W,L
+23,1st,DARKBATTLEKAT,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+24,2nd,CORY,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+25,3rd,PHARO_23,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+26,4th,JUCIE WRLD,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+27,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+28,Krys' Semi-Pro League Division 2,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+29,,WEEK 73,P,W,L,PTS,STROKES,EDE,EDH,Total,W,L,LLE,LLH,Total,W,L,TSE,TSH,Total,W,L
+30,5th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+31,6th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+32,7th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+33,8th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+34,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+35,Krys' Semi-Pro League Division 3,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+36,,WEEK 73,P,W,L,PTS,STROKES,EDE,EDH,Total,W,L,LLE,LLH,Total,W,L,TSE,TSH,Total,W,L
+37,9th ,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+38,10th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+39,11th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+40,12th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+41,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+42,Krys' Amateur League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+43,,WEEK 73,P,W,L,PTS,STROKES,EDE,EDH,Total,W,L,LLE,LLH,Total,W,L,TSE,TSH,Total,W,L
+44,1st,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+45,2nd,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+46,3rd,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+47,4th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+48,,,,,,,,,,,,,,,,,,,,,,
+49,Krys' Amateur League Division 1,,,,,,,,,,,,,,,,,,,,,
+50,Krys' Amateur League Division 2,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+51,,WEEK 73,P,W,L,PTS,STROKES,,,Total,W,L,,,Total,W,L,,,Total,W,L
+52,5th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+53,6th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+54,7th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+55,8th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+56,,,,,,,,,,,,,,,,,,,,,,
+57,ENDS WEDNESDAY  11:59 BST,,,,,,,,,,,,,,,,,,,,,
+58,Krys' EUROPEAN - Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+59,,WEEK 73,P,W,L,PTS,STROKES,,,Total,W,L,,,Total,W,L,,,Total,W,L
+60,1st,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+61,2nd,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+62,3rd,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+63,4th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+,ENDS WEDNESDAY    11:59 PST,Unnamed: 1,Unnamed: 2,Unnamed: 3,Unnamed: 4,Unnamed: 5,Unnamed: 6,Unnamed: 7,Unnamed: 8,Unnamed: 9,Unnamed: 10,Unnamed: 11,Unnamed: 12,Unnamed: 13,Unnamed: 14,Unnamed: 15,Unnamed: 16,Unnamed: 17,Unnamed: 18,Unnamed: 19,Unnamed: 20,Unnamed: 21
+0,Krys' Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+1,,WEEK 74,P,W,L,PTS,STROKES,1,2,Total,W,L,1,2,Total,W,L,1,2,Total,W,IT
+2,1st,JTVC,3,3,0,9,-93,-14,-18,-32,1,,-17,-11,-28,1,,-21,-12,-33,1,
+3,2nd,TRICKYDICKY,3,2,1,6,-87,-5,-19,-24,,1,-15,-26,-41,1,,-12,-10,-22,1,
+4,3rd,KRYS,3,1,2,3,-88,-14,-15,-29,1,,-8,-26,-34,,1,-10,-15,-25,,1
+5,4th,SQUEEZYJIBBZ,3,0,3,0,-50,-10,-11,-21,,1,-7,-8,-15,,1,-5,-9,-14,,1
+6,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+7,Krys' Pro League Division 2,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+8,,WEEK 74,P,W,L,PTS,STROKES,1,2,Total,W,L,1,2,Total,W,L,1,2,Total,W,L
+9,5th,MULLIGAN,2,2,0,3,-75,-28,-16,-44,1,,--,--,0,,,-16,-15,-31,1,
+10,6th,MASTER_KP,2,1,1,0,-67,-23,-14,-37,,1,-20,-10,-30,1,,--,--,0,,
+11,7th,DAWNSOPHIA,3,0,3,0,-60,-16,1,-15,,1,-13,-7,-20,,1,-19,-6,-25,,1
+12,8th,NUTTYGRANDPA,1,1,0,0,-26,-20,-6,-26,1,,--,--,0,,,--,--,0,,
+13,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+14,Krys' Pro League Division 3,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+15,,WEEK 74,P,W,L,PTS,STROKES,1,2,Total,W,L,1,2,Total,W,L,1,2,Total,W,L
+16,9th,CHIPNPUTT,1,1,0,3,-36,,,0,,,-22,-14,-36,1,,,,0,,
+17,10th,DARDAR3366,1,0,1,0,-35,,,0,,,-19,-16,-35,,1,,,0,,
+18,11th,CHIPDANCER,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+19,12th,TALISMAN,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+20,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+21,Krys' Semi-Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+22,,WEEK 74,P,W,L,PTS,STROKES,1,2,Total,W,L,1,2,Total,W,L,1,2,Total,W,L
+23,1st,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+24,2nd,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+25,3rd,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+26,4th,,0,0,0,0,0,,,0,,,,,0,,,,,0,,
+,ENDS WEDNESDAY    11:59 PST,Unnamed: 1,Unnamed: 2,Unnamed: 3,Unnamed: 4,Unnamed: 5,Unnamed: 6,Unnamed: 7,Unnamed: 8,Unnamed: 9,Unnamed: 10,Unnamed: 11,Unnamed: 12,Unnamed: 13,Unnamed: 14,Unnamed: 15,Unnamed: 16,Unnamed: 17,Unnamed: 18,Unnamed: 19,Unnamed: 20,Unnamed: 21
+0,Krys' Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+1,,WEEK 76,P,W,L,PTS,STROKES,CBE,CBH,Total,W,L,AME,AMH,Total,W,L,JCE,JCH,Total,W,L
+2,1st,MULLIGAN,3,3,0,9,-109,-23,-14,-37,1,,-21,-18,-39,1,,-17,-16,-33,1,
+3,2nd,JTVC,3,2,1,6,-114,-22,-15,-37,,1,-24,-18,-42,1,,-16,-19,-35,1,
+4,3rd,DAWNSOPHIA,3,1,2,3,-74,-17,-15,-32,1,,-15,-9,-24,,1,-12,-6,-18,,1
+5,4th,KRYS,3,0,3,0,-93,-22,-8,-30,,1,-21,-14,-35,,1,-18,-10,-28,,1
+6,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+7,Krys' Pro League Division 2,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+8,,WEEK 76,P,W,L,PTS,STROKES,CBE,CBH,Total,W,L,AME,AMH,Total,W,L,JCE,JCH,Total,W,L
+9,5th,TRICKYDICKY,3,3,0,9,-112,-21,-15,-36,1,,-25,-19,-44,1,,-20,-12,-32,1,
+10,6th,MASTER_KP,3,2,1,6,-92,-22,-10,-32,,1,-22,-12,-34,1,,-17,-9,-26,1,
+11,7th,TALISMAN,2,0,2,0,-60,,,0,,,-20,-19,-39,,1,-14,-7,-21,,1
+12,8th,CHIPNPUTT,2,0,2,0,-53,,,0,,,-25,-7,-32,,1,-16,-5,-21,,1
+13,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+14,Krys' Pro League Division 3,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+15,,WEEK 76,P,W,L,PTS,STROKES,CBE,CBH,Total,W,L,AME,AMH,Total,W,L,JCE,JCH,Total,W,L
+16,9th,CHIPDANCER,3,3,0,9,-108,-27,-13,-40,1,,-24,-16,-40,1,,-15,-13,-28,1,
+17,10th,SARAHLOO,3,2,1,6,-92,-20,-10,-30,1,,-21,-18,-39,1,,-16,-7,-23,,1
+18,11th,NUTTYGRANDPA,3,1,2,3,-68,-25,6,-19,,1,-18,-14,-32,,1,-13,-4,-17,1,
+19,12th,DARDAR3366,3,0,3,0,-30,-12,-5,-17,,1,-12,15,3,,1,-10,-6,-16,,1
+20,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+21,Krys' Semi-Pro League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+22,,WEEK 76,P,W,L,PTS,STROKES,CBE,CBH,Total,W,L,AME,AMH,Total,W,L,JCE,JCH,Total,W,L
+23,1st,DARKBATTLEKAT,1,1,0,3,-23,-16,-7,-23,1,,--,--,0,,,--,--,0,,
+24,2nd,SKORPZZ,2,1,1,3,-16,-18,12,-6,,1,--,---,0,,,-9,-1,-10,1,
+25,3rd,NIC790,1,0,1,0,9,---,---,0,,,---,---,0,,,-5,14,9,,1
+26,4th,ARCADE1UP,0,0,0,0,0,---,---,0,,,---,---,0,,,--,--,0,,
+27,ENDS WEDNESDAY    11:59 PST,,,,,,,,,,,,,,,,,,,,,
+28,Krys' Amateur League Division 1,,,,,,,STROKE COUNT BY COURSE,,,,,,,,,,,,,,
+29,,WEEK 76,P,W,L,PTS,STROKES,CBE,CBH,Total,W,L,AME,AMH,Total,W,L,JCE,JCH,Total,W,L
+30,1st,LAKE180 ,3,3,0,9,-106,-25,-11,-36,1,,-25,-15,-40,1,,-17,-13,-30,1,
+31,2nd,SLABDADDY,3,2,1,6,-78,-24,-7,-31,,1,-18,-10,-28,1,,-14,-5,-19,1,
+32,3rd,FRITHY2,3,1,2,3,-25,-14,6,-8,1,,-15,-4,-19,,1,-6,8,2,,1
+33,4th,LADYTEA,3,0,3,0,-12,-7,3,-4,,1,-5,6,1,,1,-9,0,-9,,1
+

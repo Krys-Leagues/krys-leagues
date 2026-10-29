@@ -1,0 +1,36 @@
+{
+  "exported_at": "2026-08-25",
+  "workbooks": {
+    "PRO WEEK CURRENT": {
+      "id": "1X8IM5qjBFTDyNgP8tl4eYBry9aFgK0cGj-B1sl2ddNI",
+      "tabs": [
+        {"name":"COURSELIST BY WEEK","sheet_id":"1481652002","rows":63,"columns":222},
+        {"name":"COURSE ","sheet_id":"2046360454","rows":64,"columns":18},
+        {"name":"MASTER COURSES ","sheet_id":"34275858","rows":69,"columns":18},
+        {"name":"CURRENT  SCORECARD ","sheet_id":"284166972","rows":66,"columns":63},
+        {"name":"S12","sheet_id":"2138061538","rows":66,"columns":63},
+        {"name":"S11","sheet_id":"139721681","rows":66,"columns":63},
+        {"name":"S10","sheet_id":"808181826","rows":66,"columns":63},
+        {"name":"S9","sheet_id":"1877840282","rows":66,"columns":63},
+        {"name":"S8","sheet_id":"1043484971","rows":66,"columns":63},
+        {"name":"S7","sheet_id":"1837758001","rows":66,"columns":63},
+        {"name":"S6","sheet_id":"1865587111","rows":66,"columns":63},
+        {"name":"W5","sheet_id":"448385125","rows":65,"columns":63},
+        {"name":"S4","sheet_id":"478408343","rows":65,"columns":63},
+        {"name":"S3","sheet_id":"1306253034","rows":65,"columns":63},
+        {"name":"S2","sheet_id":"1400366593","rows":65,"columns":63},
+        {"name":"S1","sheet_id":"1936202746","rows":65,"columns":63}
+      ]
+    },
+    "PAST PRO WEEKS": {
+      "id": "1_8hrH2tnCCFGFOC5YbYwI8i4umZyZtAS7GZcoShDGeM",
+      "tabs": [],
+      "tab_metadata_status": "connector metadata unavailable; raw export preserved"
+    },
+    "past pro weeks 60+": {
+      "id": "1nD0G1Nyt1qm7e3_3UM6dRwHb6kRNaXnRX8pzygT1tJ4",
+      "tabs": "See raw export; metadata inventory includes 19 pages and known tab IDs in prior audit"
+    }
+  }
+}
+

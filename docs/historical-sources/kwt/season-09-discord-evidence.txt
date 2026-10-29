@@ -1,0 +1,2007 @@
+KWT SEASON 9 HISTORICAL RESULTS — AUTHORITATIVE DISCORD EVIDENCE HANDOFF
+
+WORKSPACE / SAFETY
+Work only in:
+C:\Users\kryst\krys-leagues-v2
+
+Preserve all existing uncommitted work.
+
+DO NOT:
+- reset
+- clean
+- stash
+- overwrite unrelated work
+- push
+- deploy
+- run Production SQL
+- mutate Production
+- commit unless Krys explicitly approves
+
+This is LOCAL V2 historical-import work only.
+
+============================================================
+SOURCE-OF-TRUTH RULES
+============================================================
+
+The following Season 9 information was copied directly from the original historical KWT Discord result posts.
+
+Treat every explicitly stated fact below as authoritative historical competition evidence.
+
+SAVE ALL OF IT.
+
+Do NOT reduce these records to winners or Top 3 summaries.
+
+The historical model/parser must be capable of preserving:
+
+- season
+- week
+- course
+- division
+- every explicitly published placement
+- placements below Top 3
+- ties
+- skipped positions caused by ties
+- Best Easy score and all tied recipients
+- Best Hard score and all tied recipients
+- Overall standings
+- Overall Best Easy/Hard when explicitly posted
+- promotions
+- promotion destination
+- unusual multi-division promotions exactly as posted
+- Coconut badges
+- Diamond badges
+- stated ace counts
+- Cactus badges
+- Duck badges
+- Beetle badges
+- badge multiplicities such as X2
+- special historical recognition
+- New Player annotations
+- exact historical Discord/source username
+- canonical player UUID separately
+- source message provenance
+- unknown/not-supplied versus an explicit zero
+
+DO NOT "correct" unusual historical facts.
+
+If Discord says:
+1st A + B
+3rd C
+
+then preserve two 1sts followed by 3rd.
+
+If it says four players are 10th, preserve all four at 10th.
+
+If an apparently strange promotion is explicitly stated, preserve it.
+
+If a category was not present in the supplied source, that means UNKNOWN / NOT SUPPLIED.
+It does NOT mean zero.
+
+============================================================
+IDENTITY RULE
+============================================================
+
+Canonical identity is public.players.id UUID.
+
+Preserve the exact historical Discord handle separately from canonical identity.
+
+Krys has explicitly verified these aliases:
+
+rimblas -> El Jorge
+harry2939 -> Maximus
+g8r4l -> Shooter McGavin
+
+Those historical handles must resolve to those players' EXISTING canonical UUIDs.
+
+Do not create:
+- Rimblas as another player
+- Harry2939 as another player
+- G8R4L as another player
+
+But RETAIN those historical source handles as provenance/aliases.
+
+Do NOT assume other apparent name variants are the same person merely because they look similar.
+
+For example:
+wvueers257585 and stewiestewie must NOT automatically be merged unless canonical identity / verified alias evidence proves it.
+
+Historical matching must allow:
+- active players
+- inactive players
+- archived players
+- Memorial players
+
+============================================================
+CSV VERSUS DISCORD AUTHORITY
+============================================================
+
+KWT CSV Easy/Hard round scores remain authoritative for historical Easy/Hard SCORE observations.
+
+However later-downloaded CSV:
+- Rank Code
+- Division
+- Pos
+
+are NOT authoritative historical rank/division information because those values could change after the historical week.
+
+The Discord result posts below ARE authoritative for historical:
+- divisions
+- placements
+- ties
+- promotions
+- badges
+- Best Easy/Hard recognition
+- Overall results
+- season-end standings
+- other explicitly published competition facts
+
+Never overwrite these Discord historical results with later CSV rank/division/Pos.
+
+Historical KWT imports earn ZERO Climbers.
+
+============================================================
+SEASON 9 WEEK 1 — ARIZONA MODERN
+============================================================
+
+AMATEUR
+
+1st @sticky.80
+2nd @roknhorsebrat
+3rd @chell1843 + @andrew_holmes.
+5th @putty2754 + @rubberduck1791
+7th @sweetpeach88
+8th @indianchief_ + @slabdaddy9236
+10th @guyb024
+
+Best Easy:
+-25 @roknhorsebrat
+
+Best Hard:
+-21 @andrew_holmes.
+
+Promotions -> Semi-Pro:
+@sticky.80
+@roknhorsebrat
+@chell1843
+@andrew_holmes.
+
+
+SEMI-PRO
+
+1st @badwolff_1
+2nd @linushoeren + @g8r4l
+4th @kcrob
+5th @alyssa38 + @d3bb13
+7th @dmd_enditnow + @steviewonderful1979
+9th @wvueers257585 + @dawnsophia + @laurentdelf
+
+Best Easy:
+-26 @badwolff_1 + @linushoeren
+
+Best Hard:
+-21 @g8r4l
+
+Promotions -> Pro:
+@badwolff_1
+@linushoeren
+@g8r4l
+
+
+PRO
+
+1st @gomarino13
+2nd @stewiestewie
+3rd @deebee64 + @mulligan3775 + @yankeedude1123
+6th @larryr___
+7th @neoimpossible + @yuk1n
+9th @harry2939
+10th @squeezyjibbz
+
+Best Easy:
+-27 @gomarino13
+
+Best Hard:
+-23 @stewiestewie
+
+
+ELITE
+
+1st @zanetti.4
+2nd @_indy__
+3rd @bigja33 + @rimblas
+5th @gobson04
+6th @princess_bankshot
+7th @leanin2it
+
+Best Easy:
+-28 @_indy__ + @bigja33
+
+Best Hard:
+-25 @zanetti.4 + @rimblas
+
+
+OVERALL TOP 10
+
+1st @zanetti.4
+2nd @_indy__
+3rd @bigja33 + @rimblas
+5th @gomarino13
+6th @gobson04 + @stewiestewie
+8th @princess_bankshot
+9th @badwolff_1
+10th @deebee64 + @linushoeren + @mulligan3775 + @g8r4l + @yankeedude1123
+
+
+BADGES
+
+Coconut:
+@sticky.80
+@g8r4l
+@gomarino13
+@squeezyjibbz
+@zanetti.4
+@_indy__
+@bigja33
+@rimblas
+@princess_bankshot
+
+Diamond:
+7 ACES — @stewiestewie
+
+Cactus:
+@sweetpeach88 X2
+@stewiestewie
+@mulligan3775
+
+Duck:
+@trickydicky0491
+@zanetti.4
+
+Beetle:
+@andrew_holmes.
+@musicalatv
+@slappy0088
+@trickydicky0491
+
+
+============================================================
+SEASON 9 WEEK 2 — MARS GARDENS
+============================================================
+
+AMATEUR
+
+1st @sweetpeach88 + @sandtrap24
+3rd @wickedshack
+4th @jennem.
+5th @slabdaddy9236
+6th @ryanl503 + @indianchief_
+8th @master_kp
+9th @nuttygrandpa
+10th @rubberduck1791
+
+Best Easy:
+-19 @master_kp
+
+Best Hard:
+-15 @sweetpeach88
+
+Promotions -> Semi-Pro:
+@sweetpeach88
+@sandtrap24
+@wickedshack
+
+
+SEMI-PRO
+
+1st @sticky.80
+2nd @lynniebodd
+3rd @sfreitag68
+4th @dawnsophia
+5th @roknhorsebrat
+6th @wvueers257585 + @laurentdelf
+8th @alyssa38
+9th @andrew_holmes.
+10th @steviewonderful1979
+
+Best Easy:
+-19 @sticky.80 + @dawnsophia + @laurentdelf
+
+Best Hard:
+-17 @sticky.80
+
+Promotion -> Pro:
+@sticky.80
+
+
+PRO
+
+1st @mulligan3775
+2nd @neoimpossible
+3rd @gomarino13 + @harry2939
+5th @sarahloo1971
+6th @matt916
+7th @deebee64
+8th @slappy0088
+9th @larryr___ + @g8r4l
+
+Best Easy:
+-21 @matt916 + @larryr___
+
+Best Hard:
+-19 @mulligan3775
+
+Promotion -> Elite:
+@mulligan3775
+
+
+ELITE
+
+1st @zanetti.4
+2nd @_indy__
+3rd @bigja33 + @derby_daz
+5th @princess_bankshot
+6th @gobson04
+7th @rimblas
+
+Best Easy:
+-23 @_indy__
+
+Best Hard:
+-22 @zanetti.4
+
+
+OVERALL
+
+1st @zanetti.4
+2nd @_indy__
+3rd @mulligan3775
+4th @sticky.80
+5th @neoimpossible
+6th @bigja33 + @derby_daz + @gomarino13 + @harry2939
+10th @princess_bankshot + @sarahloo1971
+
+Best Easy:
+-23 @_indy__
+
+Best Hard:
+-22 @zanetti.4
+
+
+BADGES
+
+Coconut:
+@zanetti.4
+@derby_daz
+
+Diamond:
+5 ACES — @sandtrap24
+
+Cactus:
+@sticky.80
+@sandtrap24 X2
+@wickedshack
+
+Duck:
+@zanetti.4
+@mulligan3775
+@harry2939
+@deebee64
+@larryr___
+@laurentdelf
+@wickedshack
+@slabdaddy9236
+
+Beetle:
+NOT SUPPLIED / UNKNOWN
+
+
+============================================================
+SEASON 9 WEEK 3 — QUIXOTE VALLEY
+============================================================
+
+AMATEUR
+
+1st @awkward3sauce
+2nd @nuttygrandpa + @savruby
+4th @plucky1971
+5th @master_kp
+6th @small_fry521
+7th @indianchief_
+8th @awesome_kris
+9th @guyb024
+10th @jennem.
+
+Best Easy:
+-15 @jennem.
+
+Best Hard:
+-15 @awkward3sauce
+
+Promotions -> Semi-Pro:
+@awkward3sauce
+@nuttygrandpa
+@savruby
+@plucky1971
+@master_kp
+
+
+SEMI-PRO
+
+1st @alyssa38
+2nd @wvueers257585
+3rd @lynniebodd + @wickedshack
+5th @dawnsophia + @laurentdelf + @stoneyman69
+8th @serenitymoon.1
+9th @kcrob
+10th @sweetpeach88 + @sandtrap24
+
+Best Easy:
+-16 @alyssa38 + @wickedshack
+
+Best Hard:
+-21 @laurentdelf
+
+Promotion -> Elite:
+@alyssa38
+
+Promotion -> Pro:
+@wvueers257585
+
+
+PRO
+
+1st @harry2939
+2nd @knockoutg
+3rd @trickydicky0491
+4th @badwolff_1 + @larryr___
+6th @pmwillo
+7th @deebee64 + @slappy0088
+9th @linushoeren
+10th @neoimpossible
+
+Best Easy:
+-17 @harry2939 + @g8r4l
+
+Best Hard:
+-18 @harry2939
+
+Promotion -> Elite:
+@harry2939
+
+
+ELITE
+
+1st @zanetti.4
+2nd @princess_bankshot
+3rd @_indy__
+4th @bigja33 + @derby_daz
+6th @mulligan3775
+7th @rimblas
+
+Best Easy:
+-19 @zanetti.4
+
+Best Hard:
+-23 @zanetti.4
+
+
+OVERALL TOP 10
+
+1st @zanetti.4
+2nd @alyssa38 + @harry2939
+4th @princess_bankshot
+5th @wvueers257585
+6th @knockoutg
+7th @_indy__ + @trickydicky0491
+9th @badwolff_1 + @larryr___
+
+Best Easy:
+-19 @zanetti.4
+
+Best Hard:
+-23 @zanetti.4
+
+
+BADGES
+
+Coconut:
+@zanetti.4
+@alyssa38
+@trickydicky0491
+@larryr___
+
+Diamond:
+5 ACES — @zanetti.4
+
+Cactus:
+@wvueers257585 X2
+@knockoutg
+@trickydicky0491
+@pmwillo
+@awesome_kris
+@g8r4l
+@zoedarlin
+
+Duck:
+@zanetti.4
+@trickydicky0491
+@wickedshack
+@rimblas
+
+Beetle:
+@bigja33
+
+
+============================================================
+SEASON 9 WEEK 4 — BOGEY'S BONANZA
+============================================================
+
+AMATEUR
+
+1st @hatchtag101
+2nd @jennem.
+3rd @awesome_kris
+4th @slabdaddy9236
+5th @indianchief_
+6th @musicalatv
+7th @griprip
+8th @kd0017
+9th @laraaki.
+10th @wendywwyndemere2020
+
+Best Easy:
+-21 @jennem.
+
+Best Hard:
+-14 @hatchtag101
+
+Promotions -> Semi-Pro:
+@hatchtag101
+@jennem.
+
+
+SEMI-PRO
+
+1st @kcrob
+2nd @dmd_enditnow
+3rd @sweetpeach88
+4th @laurentdelf
+5th @d3bb13 + @stoneyman69
+7th @plucky1971
+8th @roknhorsebrat
+9th @savruby
+10th @wickedshack
+
+Best Easy:
+-23 @dmd_enditnow
+
+Best Hard:
+-28 @kcrob
+
+Promotion -> Elite:
+@kcrob
+
+IMPORTANT:
+The source explicitly says -28 Hard and explicitly promotes KCRob from Semi-Pro to Elite.
+DO NOT "fix" either fact.
+
+
+PRO
+
+1st @pmwillo
+2nd @gomarino13 + @yuk1n
+4th @knockoutg
+5th @linushoeren
+6th @wvueers257585
+7th @larryr___ + @sarahloo1971 + @trickydicky0491
+10th @slappy0088
+
+Best Easy:
+-25 @stewiestewie
+
+Best Hard:
+-23 @pmwillo
+
+Promotion -> Elite:
+@pmwillo
+
+
+ELITE
+
+1st @zanetti.4
+2nd @_indy__
+3rd @princess_bankshot
+4th @gobson04
+5th @harry2939
+6th @bigja33
+7th @alyssa38
+8th @rimblas
+
+Best Easy:
+-30 @zanetti.4
+
+Best Hard:
+-25 @zanetti.4
+
+
+OVERALL
+
+1st @zanetti.4 — -55
+2nd @pmwillo — -47
+2nd @kcrob — -47
+4th @_indy__ — -44
+5th @princess_bankshot — -43
+6th @gobson04 — -42
+7th @gomarino13 — -41
+7th @harry2939 — -41
+7th @yuk1n — -41
+10th @bigja33 — -38
+
+Best Easy:
+-30 @zanetti.4
+
+Best Hard:
+-28 @kcrob
+
+Preserve the published Overall score totals as historical facts.
+
+
+BADGES
+
+Coconut:
+@pmwillo
+@kcrob
+
+Diamond:
+10 ACES — @zanetti.4
+
+Cactus:
+@alyssa38
+@griprip
+@earthling303
+@thomasshumaker
+
+Duck:
+source notation:
+"3 - @zanetti.4"
+
+plus:
+@knockoutg
+@g8r4l
+@laraaki.
+
+Preserve "3 - @zanetti.4" exactly as source evidence.
+Do NOT guess whether it means X3 unless separate evidence proves that.
+
+Beetle:
+@pmwillo
+@_indy__
+@alyssa38
+@rimblas
+@sweetpeach88
+@awesome_kris
+@musicalatv
+
+
+============================================================
+SEASON 9 WEEK 5 — JOURNEY TO THE CENTER OF THE EARTH
+============================================================
+
+AMATEUR
+
+1st @guyb024
+2nd @tiger.hoods
+3rd @griprip
+4th @kd0017 + @zoedarlin
+6th @indianchief_
+7th @slabdaddy9236
+8th @kill_er_bee
+9th @wendywwyndemere2020
+10th @tommygunnfund
+
+Best Easy:
+-18 @guyb024
+
+Best Hard:
+-12 @guyb024
+
+Promotions -> Semi-Pro:
+@guyb024
+@tiger.hoods
+
+
+SEMI-PRO
+
+1st @hatchtag101
+2nd @wickedshack
+3rd @roknhorsebrat
+4th @laurentdelf
+5th @stoneyman69
+6th @nuttygrandpa
+7th @jennem.
+8th @dmd_enditnow
+9th @d3bb13 + @lynniebodd + @serenitymoon.1
+
+Best Easy:
+-19 @wickedshack
+
+Best Hard:
+-13 @hatchtag101
+
+
+PRO
+
+1st @yuk1n
+2nd @linushoeren + @neoimpossible + @sarahloo1971
+5th @g8r4l
+6th @gomarino13
+7th @.mammothrept
+8th @knockoutg
+9th @larryr___
+10th @deebee64
+
+Best Easy:
+-24 @yuk1n
+
+Best Hard:
+-18 @yuk1n + @gomarino13
+
+Promotion -> Elite:
+@yuk1n
+
+
+ELITE
+
+1st @zanetti.4
+2nd @bigja33 + @_indy__
+4th @princess_bankshot
+5th @gobson04
+6th @harry2939 + @mulligan3775
+8th @kcrob
+9th @alyssa38 + @pmwillo + @rimblas
+
+Best Easy:
+-22 @zanetti.4 + @_indy__ + @gobson04
+
+Best Hard:
+-20 @zanetti.4 + @bigja33
+
+
+OVERALL
+
+1st @yuk1n + @zanetti.4
+3rd @bigja33 + @_indy__
+5th @princess_bankshot
+6th @gobson04
+7th @linushoeren + @neoimpossible + @sarahloo1971
+10th @g8r4l
+
+Best Easy:
+-24 @yuk1n
+
+Best Hard:
+-20 @zanetti.4 + @bigja33
+
+
+BADGES
+
+Coconut:
+@zanetti.4
+@bigja33
+@neoimpossible
+
+Diamond:
+4 ACES — @yuk1n + @gobson04
+
+Cactus:
+@neoimpossible
+@gomarino13
+@indianchief_
+
+Duck:
+X2 @yuk1n
+X2 @gobson04
+@bigja33
+@linushoeren
+@jennem.
+@serenitymoon.1
+
+Beetle:
+NOT SUPPLIED / UNKNOWN
+
+
+============================================================
+SEASON 9 WEEK 6 — UPSIDE TOWN
+============================================================
+
+AMATEUR
+
+1st @browner27
+2nd @earthling303 + @slabdaddy9236
+4th @small_fry521 + @kd0017 + @wendywwyndemere2020
+7th @indianchief_
+8th @southern_jenn_76
+9th @laraaki.
+10th @realjb2001
+
+Best Easy:
+-22 @browner27
+
+Best Hard:
+-9 @southern_jenn_76
+
+Promotion -> Semi-Pro:
+@browner27
+
+
+SEMI-PRO
+
+1st @guyb024
+2nd @master_kp + @andrew_holmes.
+4th @lynniebodd
+5th @d3bb13 + @plucky1971 + @roknhorsebrat
+8th @dawnsophia + @wickedshack
+10th @serenitymoon.1
+
+Best Easy:
+-23 @lynniebodd
+
+Best Hard:
+-15 @master_kp
+
+
+PRO
+
+1st @larryr___
+2nd @linushoeren + @g8r4l
+4th @gomarino13
+5th @slappy0088
+6th @sarahloo1971
+7th @matt916
+8th @knockoutg
+9th @deebee64 + @.mammothrept
+
+Best Easy:
+-22 @larryr___ + @linushoeren
+
+Best Hard:
+-19 @g8r4l
+
+
+ELITE
+
+1st @zanetti.4
+2nd @_indy__
+3rd @derby_daz + @rimblas + @mulligan3775
+6th @leanin2it
+7th @gobson04 + @princess_bankshot
+9th @alyssa38
+10th @bigja33 + @harry2939
+
+Best Easy:
+-24 @zanetti.4
+
+Best Hard:
+-21 @zanetti.4
+
+
+OVERALL
+
+1st @zanetti.4
+2nd @_indy__
+3rd @derby_daz + @rimblas + @mulligan3775
+6th @larryr___ + @leanin2it
+8th @gobson04 + @linushoeren + @princess_bankshot + @g8r4l
+
+Best Easy:
+-24 @zanetti.4
+
+Best Hard:
+-21 @zanetti.4
+
+
+BADGES
+
+Coconut:
+@zanetti.4
+@mulligan3775
+@larryr___
+@g8r4l
+@slappy0088
+@sarahloo1971
+
+Diamond:
+5 ACES — @zanetti.4
+
+Cactus:
+@gobson04
+@gomarino13
+@sweetpeach88
+@slabdaddy9236
+@southern_jenn_76
+
+Duck:
+X2 @linushoeren
+@zanetti.4
+@derby_daz
+@larryr___
+@leanin2it
+@princess_bankshot
+@g8r4l
+@gomarino13
+@matt916
+@plucky1971
+@sweetpeach88
+@wendywwyndemere2020
+@realjb2001
+
+Beetle:
+@derby_daz
+@small_fry521
+
+
+============================================================
+SEASON 9 WEEK 7 — CRYSTAL LAIR
+============================================================
+
+AMATEUR
+
+1st @slabdaddy9236
+2nd @earthling303
+3rd @djtwigg
+4th @stewiestewie
+5th @serenitymoon.1
+6th @ryanl503
+7th @indianchief_
+8th @wendywwyndemere2020 + @zoedarlin
+10th @tommygunnfund
+
+Best Easy:
+-15 @slabdaddy9236 + @laraaki.
+
+Best Hard:
+-11 @slabdaddy9236
+
+Promotion -> Semi-Pro:
+@slabdaddy9236
+
+
+SEMI-PRO
+
+1st @roknhorsebrat
+2nd @duckk7770
+3rd @wickedshack
+4th @andrew_holmes.
+5th @sandtrap24
+6th @guyb024
+7th @jennem.
+8th @dawnsophia
+9th @dmd_enditnow + @.mammothrept + @sweetpeach88
+
+Best Easy:
+-20 @sandtrap24 + @sweetpeach88
+
+Best Hard:
+-15 @roknhorsebrat + @duckk7770
+
+Promotion -> Pro:
+@roknhorsebrat
+
+
+PRO
+
+1st @trickydicky0491
+2nd @larryr___
+3rd @linushoeren
+4th @sarahloo1971
+5th @neoimpossible
+6th @kcrob
+7th @deebee64
+8th @wvueers257585 + @leanin2it + @g8r4l
+
+Best Easy:
+-25 @trickydicky0491
+
+Best Hard:
+-20 @linushoeren
+
+
+ELITE
+
+1st @zanetti.4
+2nd @rimblas + @_indy__
+4th @bigja33
+5th @gobson04
+6th @gomarino13
+7th @mulligan3775
+8th @princess_bankshot
+9th @harry2939
+10th @yuk1n
+
+Best Easy:
+-25 @_indy__
+
+Best Hard:
+-25 @zanetti.4
+
+
+OVERALL
+
+Source explicitly states:
+"WITH HIS 7TH WIN OF THE SEASON"
+
+1st @zanetti.4
+2nd @rimblas + @_indy__
+4th @bigja33 + @trickydicky0491
+6th @gobson04
+7th @larryr___
+8th @gomarino13 + @linushoeren
+10th @roknhorsebrat + @sarahloo1971
+
+No Overall Best Easy/Hard line was supplied in this result section.
+Do not infer one.
+
+Special historical recognition:
+@zanetti.4 — 7TH WIN OF THE SEASON
+
+
+BADGES
+
+Coconut:
+@zanetti.4
+@_indy__
+@bigja33
+@larryr___
+@djtwigg
+
+Diamond:
+10 ACES — @zanetti.4
+
+Cactus:
+@bigja33
+@gobson04
+@gomarino13
+@deebee64
+@slabdaddy9236
+@sweetpeach88
+@ryanl503
+@wendywwyndemere2020
+
+Duck:
+X2 @rimblas
+@zanetti.4
+@_indy__
+@sarahloo1971
+@mulligan3775
+@yuk1n
+@badwolff_1
+@laraaki.
+@d3bb13
+
+Beetle:
+NOT SUPPLIED / UNKNOWN
+
+
+============================================================
+SEASON 9 WEEK 8 — ATLANTIS
+============================================================
+
+IMPORTANT SOURCE-PROVENANCE RULE FOR THIS WEEK:
+
+Season 9 Week 8 is ONE competition week/event.
+
+Krys originally published the Week 8 results as multiple consecutive Discord posts:
+- Amateur
+- Semi-Pro
+- Pro
+- Elite
+- badges
+- Overall
+
+DO NOT create separate historical competition events from those messages.
+
+Model this as:
+
+ONE:
+Season 9 / Week 8 / Atlantis competition event
+
+with MULTIPLE Discord source messages attached to that one event.
+
+Each Discord message should retain its own source-message provenance if message-level provenance is supported.
+
+This week is NOT "partial" merely because the evidence was split across several posts.
+
+
+AMATEUR
+
+1st @blutes87
+2nd @sfreitag68
+3rd @andyp1970_a
+4th @indianchief_
+5th @chell1843
+6th @griprip + @ryanl503 + @ultrafox_lynne
+9th @wendywwyndemere2020
+10th @tommygunnfund
+
+Best Easy:
+-22 @blutes87
+
+Best Hard:
+-16 @sfreitag68
+
+Promotion -> Pro:
+@blutes87
+
+Promotions -> Semi-Pro:
+@sfreitag68
+@andyp1970_a
+@indianchief_
+
+
+SEMI-PRO
+
+1st @dawnsophia
+2nd @badwolff_1
+3rd @dmd_enditnow + @guyb024 + @lynniebodd + @serenitymoon.1 + @slabdaddy9236 + @wickedshack
+9th @d3bb13
+10th @.mammothrept + @plucky1971
+
+Best Easy:
+-23 @dawnsophia
+
+Best Hard:
+-12 @badwolff_1
+
+
+PRO
+
+1st @neoimpossible
+2nd @deebee64 + @larryr___ + @trickydicky0491
+5th @sarahloo1971
+6th @g8r4l
+7th @kcrob
+8th @wvueers257585
+9th @linushoeren + @roknhorsebrat
+
+Best Easy:
+-23 @neoimpossible + @deebee64
+
+Best Hard:
+-18 @neoimpossible
+
+
+ELITE
+
+1st @zanetti.4
+2nd @_indy__
+3rd @derby_daz
+4th @gomarino13
+5th @gobson04
+6th @bigja33
+7th @mulligan3775 + @yuk1n
+9th @princess_bankshot
+10th @pmwillo
+
+Best Easy:
+-27 @zanetti.4 + @_indy__
+
+Best Hard:
+-19 @gobson04
+
+
+OVERALL
+
+Source explicitly states:
+1ST @zanetti.4 — "8TH WIN THIS SEASON!"
+
+1st @zanetti.4
+2nd @_indy__
+3rd @derby_daz
+4th @neoimpossible
+5th @gomarino13
+6th @blutes87 + @gobson04
+8th @bigja33
+9th @mulligan3775 + @yuk1n
+
+Best Easy:
+-27 @zanetti.4 + @_indy__
+
+Best Hard:
+-19 @gobson04
+
+Special historical recognition:
+@zanetti.4 — 8TH WIN THIS SEASON
+
+
+BADGES
+
+Coconut:
+@_indy__
+@derby_daz
+@neoimpossible
+@mulligan3775
+
+Cactus:
+@gobson04
+@badwolff_1
+@harry2939
+@serenitymoon.1
+
+Diamond:
+8 ACES — @zanetti.4
+
+Duck:
+NOT SUPPLIED IN THE RECOVERED WEEK 8 POSTS / UNKNOWN
+
+Beetle:
+NOT SUPPLIED IN THE RECOVERED WEEK 8 POSTS / UNKNOWN
+
+Do NOT turn absent Duck/Beetle evidence into zero.
+
+
+============================================================
+SEASON 9 WEEK 9 — EL DORADO
+============================================================
+
+AMATEUR
+
+1st @chell1843
+2nd @.rolyt
+3rd @awkward3sauce
+4th @awesome_kris
+5th @abagofchip. — source annotation: "New Player"
+6th @rubberduck1791
+7th @griprip + @darlava — @darlava source annotation: "New Player"
+9th @small_fry521
+10th @kd0017 + @zoedarlin
+
+Best Easy:
+-25 @chell1843
+
+Best Hard:
+-16 @.rolyt
+
+Promotions -> Pro:
+@chell1843
+@.rolyt
+
+Promotion -> Semi-Pro:
+@awkward3sauce
+
+Preserve the two explicit "New Player" source annotations.
+
+
+SEMI-PRO
+
+1st @indianchief_
+2nd @d3bb13
+3rd @browner27
+4th @laurentdelf
+5th @.mammothrept + @wickedshack
+7th @nuttygrandpa
+8th @serenitymoon.1
+9th @dmd_enditnow
+10th @lynniebodd
+
+Best Easy:
+-22 @wickedshack
+
+Best Hard:
+-19 @d3bb13
+
+
+PRO
+
+1st @g8r4l
+2nd @wvueers257585
+3rd @slappy0088
+4th @deebee64 + @larryr___
+6th @sarahloo1971
+7th @knockoutg
+8th @alyssa38
+9th @kcrob + @neoimpossible
+
+Best Easy:
+-23 @g8r4l
+
+Best Hard:
+-16 @sarahloo1971
+
+
+ELITE
+
+1st @zanetti.4
+2nd @bigja33
+3rd @rimblas + @_indy__
+5th @gomarino13
+6th @derby_daz + @gobson04
+8th @princess_bankshot
+9th @harry2939
+10th @pmwillo
+
+Best Easy:
+-26 @zanetti.4
+
+Best Hard:
+-21 @rimblas + @zanetti.4
+
+
+OVERALL
+
+1st @zanetti.4
+2nd @bigja33
+3rd @rimblas + @_indy__
+5th @gomarino13
+6th @chell1843 + @derby_daz + @gobson04
+9th @.rolyt + @g8r4l
+
+No Overall Best Easy/Hard line was supplied.
+Do not infer one.
+
+
+BADGES
+
+Coconut:
+@zanetti.4
+@bigja33
+@slappy0088
+
+Diamond:
+5 ACES — @zanetti.4
+
+Cactus:
+@zanetti.4
+@bigja33
+@.rolyt
+@g8r4l
+@knockoutg
+@lynniebodd
+@mulligan3775
+@sfreitag68
+
+Duck:
+@rimblas
+@gobson04
+@wvueers257585
+@zoedarlin
+
+Beetle:
+@awkward3sauce
+@.mammothrept
+
+
+============================================================
+SEASON 9 WEEK 10 — ALFHEIM
+============================================================
+
+AMATEUR
+
+1st @hatchtag101
+2nd @gopats37
+3rd @master_kp + @paulv966
+5th @ryanl503
+6th @musicalatv + @zoedarlin
+8th @griprip
+9th @small_fry521 + @kd0017
+
+Best Easy:
+-21 @hatchtag101
+
+Best Hard:
+-20 @hatchtag101
+
+Promotion -> Pro:
+@hatchtag101
+
+Promotion -> Semi-Pro:
+@gopats37
+
+
+SEMI-PRO
+
+1st @browner27
+2nd @guyb024 + @laurentdelf + @nuttygrandpa
+5th @.mammothrept
+6th @wickedshack
+7th @sweetpeach88
+8th @andyp1970_a + @lynniebodd + @plucky1971
+
+Best Easy:
+-20 @nuttygrandpa
+
+Best Hard:
+-21 @browner27
+
+Promotion -> Pro:
+@browner27
+
+
+PRO
+
+1st @g8r4l
+2nd @neoimpossible
+3rd @blutes87
+4th @wvueers257585
+5th @kcrob
+6th @trickydicky0491
+7th @linushoeren + @sarahloo1971
+9th @deebee64 + @larryr___
+
+Best Easy:
+-19 @g8r4l + @neoimpossible + @blutes87
+
+Best Hard:
+-25 @g8r4l
+
+Promotion -> Elite:
+@g8r4l
+
+
+ELITE
+
+1st @_indy__
+2nd @gobson04
+3rd @princess_bankshot
+4th @zanetti.4
+5th @harry2939
+6th @bigja33
+7th @rimblas
+8th @pmwillo + @gomarino13 + @mulligan3775
+
+Best Easy:
+-25 @_indy__
+
+Best Hard:
+-23 @_indy__ + @gobson04
+
+
+OVERALL
+
+1st @_indy__
+2nd @gobson04
+3rd @g8r4l
+4th @hatchtag101 + @neoimpossible
+6th @blutes87 + @princess_bankshot
+8th @wvueers257585 + @zanetti.4
+10th @browner27 + @harry2939
+
+No explicit Overall Best Easy/Hard lines supplied.
+Do not infer them.
+
+
+BADGES
+
+Coconut:
+@_indy__
+@gobson04
+@hatchtag101
+@neoimpossible
+@wvueers257585
+@bigja33
+@nuttygrandpa
+@sarahloo1971
+@serenitymoon.1
+
+Diamond:
+8 ACES — @gobson04
+
+Cactus:
+@wvueers257585
+@.mammothrept
+@sarahloo1971
+@deebee64
+@sfreitag68
+
+Duck:
+@_indy__
+@browner27
+
+Beetle:
+NOT SUPPLIED / UNKNOWN
+
+
+============================================================
+SEASON 9 WEEK 11 — ICE LAIR
+============================================================
+
+AMATEUR
+
+1st @ryanl503
+2nd @savruby
+3rd @kd0017 + @paulv966
+5th @master_kp
+6th @griprip
+7th @rubberduck1791
+8th @small_fry521 + @ultrafox_lynne + @zoedarlin
+
+Best Easy:
+-18 @ryanl503
+
+Best Hard:
+-11 @savruby
+
+Promotions -> Semi-Pro:
+@ryanl503
+@savruby
+
+
+SEMI-PRO
+
+1st @laurentdelf + @.mammothrept
+3rd @sweetpeach88
+4th @slabdaddy9236
+5th @stoneyman69
+6th @andyp1970_a + @lynniebodd
+8th @plucky1971
+9th @nuttygrandpa
+10th @d3bb13
+
+Best Easy:
+-18 @laurentdelf + @andyp1970_a
+
+Best Hard:
+-15 @.mammothrept
+
+Promotions -> Pro:
+@laurentdelf
+@.mammothrept
+
+
+PRO
+
+1st @neoimpossible
+2nd @blutes87
+3rd @browner27
+4th @sarahloo1971
+5th @larryr___
+6th @deebee64
+7th @kcrob
+8th @alyssa38
+9th @roknhorsebrat
+10th @wvueers257585
+
+Best Easy:
+-19 @neoimpossible
+
+Best Hard:
+-16 @neoimpossible
+
+
+ELITE
+
+1st @zanetti.4
+2nd @gobson04
+3rd @gomarino13
+4th @bigja33
+5th @_indy__
+6th @rimblas + @g8r4l
+8th @mulligan3775
+9th @harry2939
+
+Best Easy:
+-23 @gobson04 + @rimblas
+
+Best Hard:
+-20 @zanetti.4
+
+
+OVERALL TOP 10
+
+1st @zanetti.4
+2nd @gobson04
+3rd @gomarino13
+4th @bigja33 + @neoimpossible
+6th @_indy__
+7th @blutes87
+8th @rimblas + @laurentdelf + @.mammothrept + @g8r4l
+
+Best Overall Easy:
+-23 @rimblas + @gobson04
+
+Best Overall Hard:
+-20 @zanetti.4
+
+
+BADGES
+
+Coconut:
+@zanetti.4
+@gobson04
+@.mammothrept
+
+Diamond:
+5 ACES — @_indy__
+
+Cactus:
+@gomarino13
+@neoimpossible
+@_indy__
+@blutes87
+@rimblas
+@laurentdelf
+@browner27
+@larryr___
+@mulligan3775
+@nuttygrandpa
+@small_fry521
+
+Duck:
+@gomarino13
+@bigja33
+@_indy__
+@slabdaddy9236
+@stoneyman69
+@savruby
+@nuttygrandpa
+@thomasshumaker
+
+Beetle:
+@savruby
+@sandtrap24
+
+
+============================================================
+SEASON 9 WEEK 12 — VIVA LAS ELVIS
+============================================================
+
+AMATEUR
+
+1st @paulv966
+2nd @wendywwyndemere2020
+3rd @small_fry521
+4th @master_kp
+5th @kd0017
+6th @cory_the_great
+7th @griprip
+8th @southern_jenn_76
+9th @zoedarlin
+10th @earthling303
+
+Best Easy:
+-16 @paulv966 + @small_fry521
+
+Best Hard:
+-13 @paulv966
+
+Promotions -> Semi-Pro:
+@paulv966
+@wendywwyndemere2020
+
+
+SEMI-PRO
+
+1st @wickedshack
+2nd @badwolff_1 + @ryanl503
+4th @guyb024 + @lynniebodd + @savruby
+8th @d3bb13
+9th @sandtrap24
+10th @andyp1970_a + @dawnsophia
+
+Best Easy:
+-17 @badwolff_1 + @guyb024
+
+Best Hard:
+-16 @wickedshack + @lynniebodd
+
+Promotion -> Pro:
+@wickedshack
+
+
+PRO
+
+1st @laurentdelf
+2nd @alyssa38 + @neoimpossible
+4th @blutes87 + @wvueers257585
+6th @larryr___ + @sarahloo1971
+8th @deebee64
+9th @chell1843
+10th @knockoutg
+
+Best Easy:
+-18 @wvueers257585
+
+Best Hard:
+-15 @alyssa38
+
+
+ELITE
+
+1st @zanetti.4
+2nd @gobson04 + @_indy__
+4th @gomarino13
+5th @bigja33
+6th @rimblas
+7th @harry2939
+8th @g8r4l
+9th @pmwillo
+10th @mulligan3775
+
+Best Easy:
+-25 @zanetti.4
+
+Best Hard:
+-20 @gobson04 + @gomarino13 + @_indy__
+
+
+OVERALL TOP 10
+
+1st @zanetti.4
+2nd @gobson04 + @_indy__
+4th @gomarino13
+5th @bigja33
+6th @rimblas
+7th @harry2939
+8th @laurentdelf + @g8r4l + @wickedshack
+
+Best Overall Easy:
+-25 @zanetti.4
+
+Best Overall Hard:
+-20 @gomarino13 + @_indy__ + @gobson04
+
+
+BADGES
+
+Coconut:
+@zanetti.4
+@gobson04
+@_indy__
+
+Diamond:
+8 ACES — @gomarino13 + @rimblas
+
+Cactus:
+NOT SUPPLIED / UNKNOWN
+
+Duck:
+@zanetti.4
+@gomarino13
+@rimblas
+@ryanl503
+@wendywwyndemere2020
+@plucky1971
+
+Beetle:
+@zanetti.4
+@gomarino13
+@blutes87
+@sandtrap24
+@chell1843
+
+
+============================================================
+SEASON 9 FINAL RESULTS
+============================================================
+
+These are season-final historical standings.
+
+They are NOT Week 12 results and must be modeled separately from Week 12.
+
+SEASON 9 CHAMPION
+
+Source explicitly states:
+
+"This season's CHAMP with 11 weekly wins out of 12 weeks of play is @zanetti.4"
+
+Store:
+
+Season 9 Champion:
+@zanetti.4
+
+Historical recognition:
+11 weekly wins out of 12 weeks of play
+
+Do NOT replace that explicit source fact with a recalculation.
+
+
+ELITE SEASON 9 TOP 10
+
+1st @zanetti.4
+2nd @_indy__
+3rd @gobson04
+4th @bigja33
+5th @gomarino13
+6th @rimblas
+7th @princess_bankshot
+8th @harry2939
+9th @g8r4l
+10th @mulligan3775
+
+
+PRO SEASON 9 TOP 10
+
+1st @neoimpossible
+2nd @larryr___
+3rd @sarahloo1971
+4th @kcrob + @linushoeren
+6th @wvueers257585
+7th @alyssa38
+8th @laurentdelf
+9th @trickydicky0491 + @wickedshack
+
+
+SEMI-PRO SEASON 9 TOP 10
+
+1st @lynniebodd
+2nd @dawnsophia
+3rd @guyb024
+4th @d3bb13
+5th @sweetpeach88
+6th @badwolff_1 + @nuttygrandpa
+8th @slabdaddy9236
+9th @dmd_enditnow
+10th @indianchief_
+
+
+AMATEUR SEASON 9 TOP 10
+
+1st @master_kp
+2nd @griprip
+3rd @stewiestewie
+4th @kd0017
+5th @small_fry521
+6th @zoedarlin
+7th @awesome_kris
+8th @matt916 + @rubberduck1791
+10th @earthling303
+
+
+SEASON 9 OVERALL TOP 10
+
+1st @zanetti.4
+2nd @_indy__
+3rd @gobson04
+4th @bigja33
+5th @gomarino13
+6th @rimblas
+7th @princess_bankshot + @neoimpossible
+9th @harry2939
+10th @g8r4l
+
+
+============================================================
+SEASON 9 COMPLETENESS
+============================================================
+
+Discord historical evidence now exists for:
+
+Week 1 — Arizona Modern — YES
+Week 2 — Mars Gardens — YES
+Week 3 — Quixote Valley — YES
+Week 4 — Bogey's Bonanza — YES
+Week 5 — Journey to the Center of the Earth — YES
+Week 6 — Upside Town — YES
+Week 7 — Crystal Lair — YES
+Week 8 — Atlantis — YES
+Week 9 — El Dorado — YES
+Week 10 — Alfheim — YES
+Week 11 — Ice Lair — YES
+Week 12 — Viva Las Elvis — YES
+Season 9 Final Results — YES
+
+Season 9 therefore has Discord result evidence for ALL 12 WEEKS plus the final season standings.
+
+Week 8 is ONE event with multiple consecutive Discord source messages.
+
+============================================================
+IMPLEMENTATION REQUIREMENTS
+============================================================
+
+Extend/build the KWT Discord historical result evidence parser/model so these records can be stored without information loss.
+
+The representation must support at minimum:
+
+1. KWT season/week event.
+2. Course name.
+3. Multiple Discord source messages for one event.
+4. Raw source text/provenance.
+5. Source Discord handle.
+6. Canonical player UUID.
+7. Division.
+8. Explicit numerical placement.
+9. Multiple players tied at one placement.
+10. Skipped ranks.
+11. Top-10 depth.
+12. Best Easy award and score.
+13. Best Hard award and score.
+14. Multiple tied award recipients.
+15. Overall placements separately from division placements.
+16. Overall Best Easy/Hard.
+17. Promotion events.
+18. Promotion destination division.
+19. Direct division jumps exactly as posted.
+20. Badge type.
+21. Badge recipient.
+22. Badge multiplicity such as X2.
+23. Diamond ace count.
+24. Source annotations such as "New Player".
+25. Historical recognition such as:
+    - 7th win of season
+    - 8th win of season
+    - Season Champion
+    - 11 weekly wins out of 12
+26. Unknown/not-supplied state distinct from explicit zero.
+27. Parser/source warnings without discarding the underlying evidence.
+
+Do NOT require every fact to be parsed perfectly before retaining the source.
+
+If parser confidence is uncertain:
+- keep raw source evidence
+- flag the individual fact for review
+- do not silently drop it
+- do not invent a correction
+
+============================================================
+RECONCILIATION / REVIEW
+============================================================
+
+After implementing Season 9 locally, report:
+
+- all 12 weeks recognized
+- Season 9 finals recognized
+- course associated with each week
+- number of division placement facts
+- number of Overall placement facts
+- number of Best Easy facts
+- number of Best Hard facts
+- number of promotion facts
+- number of Coconut facts
+- number of Diamond facts
+- number of Cactus facts
+- number of Duck facts
+- number of Beetle facts
+- badge multiplicities preserved
+- special recognition facts preserved
+- New Player annotations preserved
+- identities resolved
+- aliases used
+- unresolved historical identities
+- ambiguous identities
+- parser warnings
+- source ambiguities
+- any conflicts with contemporaneous evidence
+- any conflicts with KWT score CSV observations
+- confirmation that later CSV Rank/Division/Pos were NOT substituted for Discord history
+
+Specifically verify:
+
+rimblas -> El Jorge
+harry2939 -> Maximus
+g8r4l -> Shooter McGavin
+
+Do not guess any other alias.
+
+Run the relevant:
+- KWT importer/parser tests
+- competition importer tests
+- Climbers tests
+- All-Time tests if affected
+- TypeScript
+- targeted ESLint
+- git diff/check
+
+Do not get sidetracked by known unrelated repo-wide lint errors.
+
+============================================================
+STOP POINT
+============================================================
+
+Do NOT Apply these historical records to Production yet.
+
+Do NOT execute migrations.
+
+Do NOT deploy.
+
+Do NOT push.
+
+Do NOT commit unless Krys approves.
+
+Stop after:
+1. local implementation
+2. parser/tests
+3. Season 9 structured preview
+4. reconciliation report
+
+Krys will review the Season 9 reconciliation before the next step.
+
+Also preserve this Season 9 evidence durably in the V2 worktree so Krys does NOT have to manually recover/re-paste these Discord posts again.

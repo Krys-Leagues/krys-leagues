@@ -1,0 +1,17 @@
+{
+  "normalizedFiles": 124,
+  "parsedRows": 7177,
+  "parserErrors": 2,
+  "parserWarnings": 4,
+  "duplicateRows": 0,
+  "errors": [
+    "KWT11W04.csv row 59: Player, Easy/Hard course codes, and integer Easy/Hard scores are required.",
+    "KWT4W07.csv row 54: Player, Easy/Hard course codes, and integer Easy/Hard scores are required."
+  ],
+  "warnings": [
+    "KWT14W02.csv row 34: rank “NEW” is preserved as unknown.",
+    "KWT14W03.csv row 24: rank “NEW” is preserved as unknown.",
+    "KWT14W03.csv row 30: rank “NEW” is preserved as unknown.",
+    "KWT14W04.csv row 21: rank “NEW” is preserved as unknown."
+  ]
+}

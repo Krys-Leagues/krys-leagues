@@ -1,0 +1,2776 @@
+KWT SEASONS 10 AND 11 — AUTHORITATIVE DISCORD HISTORICAL EVIDENCE
+
+WORKSPACE
+C:\Users\kryst\krys-leagues-v2
+
+Continue the same safe local-only historical reconciliation workflow already used for Season 9.
+
+DO NOT:
+- reset
+- clean
+- stash
+- overwrite unrelated work
+- run SQL
+- mutate Production
+- deploy
+- push
+- commit unless Krys explicitly approves
+
+Preserve the raw handoff verbatim in docs/historical-sources/kwt/ before parsing it.
+
+============================================================
+SOURCE TRUTH
+============================================================
+
+These facts came from original historical Discord KWT result posts copied by Krys.
+
+Discord result-post text is authoritative for explicitly stated:
+- divisions
+- placements
+- ties
+- deeper ranks
+- Best Easy / Best Hard recognition
+- Overall standings
+- Overall Best Easy / Best Hard
+- promotions
+- demotions
+- badges
+- badge multiplicities
+- ace counts
+- special recognition
+- season-final awards
+
+Do not “correct” strange-looking historical results.
+
+Later-downloaded KWT CSV:
+- Easy score
+- Hard score
+are authoritative score observations.
+
+Later CSV:
+- Rank Code
+- Division
+- Pos
+are NOT authoritative historical standings and must never overwrite Discord history.
+
+Unknown/not retained is different from explicit zero.
+
+Historical KWT imports earn ZERO Climbers.
+
+============================================================
+VERIFIED HISTORICAL ALIASES
+============================================================
+
+rimblas -> El Jorge
+harry2939 -> Maximus
+g8r4l -> Shooter McGavin
+
+Preserve the original Discord handle as source provenance while resolving facts to the existing canonical player UUID.
+
+Do not infer other aliases without verified canonical identity evidence.
+
+============================================================
+KWT SEASON 10
+============================================================
+
+------------------------------------------------------------
+SEASON 10 WEEK 1 — LASER LAIR
+------------------------------------------------------------
+
+AMATEUR
+
+1st @yankeedude1123
+2nd @djtwigg
+3rd @awesome_kris
+4th @master_kp + @realjb2001
+6th @small_fry521
+7th @rubberduck1791
+8th @corydoesshots
+9th @griprip
+10th @kill_er_bee + @southern_jenn_76
+
+Best Easy:
+-21 @awesome_kris
+
+Best Hard:
+-17 @yankeedude1123
+
+Promotion -> Semi-Pro:
+@yankeedude1123
+
+Cactus:
+@griprip
+@southern_jenn_76
+
+
+SEMI-PRO
+
+1st @duckk7770
+2nd @sfreitag68
+3rd @d3bb13
+4th @guyb024
+5th @gopats37 + @lynniebodd
+7th @paulv966
+8th @plucky1971
+9th @roknhorsebrat
+10th @knockoutg
+
+Best Easy:
+-26 @duckk7770
+
+Best Hard:
+-20 @sfreitag68
+
+Promotions -> Pro:
+@duckk7770
+@sfreitag68
+
+Coconut:
+@duckk7770
+@sfreitag68
+@guyb024
+
+Cactus:
+@plucky1971
+@.mammothrept
+
+
+PRO
+
+1st @blutes87
+2nd @derby_daz
+3rd @pmwillo
+4th @wvueers257585 + @deebee64 + @yuk1n
+7th @hatchtag101
+8th @alyssa38 + @laurentdelf
+10th @kcrob + @sarahloo1971
+
+Best Easy:
+-25 @derby_daz
+
+Best Hard:
+-23 @blutes87
+
+Coconut:
+@deebee64
+
+Cactus:
+@laurentdelf
+
+Duck:
+@larryr___
+
+
+ELITE
+
+1st @_indy__
+2nd @zanetti.4
+3rd @bigja33
+4th @rimblas
+5th @gobson04 + @gomarino13
+7th @neoimpossible
+8th @mulligan3775
+9th @g8r4l
+10th @harry2939
+
+Best Easy:
+-28 @_indy__
+
+Best Hard:
+-25 @_indy__
+
+Coconut:
+@bigja33
+@gobson04
+
+Diamond:
+@_indy__
+
+Cactus:
+@_indy__
+@gobson04
+
+Duck:
+@zanetti.4
+
+
+OVERALL
+
+1st @_indy__
+2nd @zanetti.4
+3rd @bigja33
+4th @blutes87 + @rimblas
+6th @gobson04 + @gomarino13
+8th @duckk7770
+9th @derby_daz + @neoimpossible + @sfreitag68
+
+Best Overall Easy:
+-28 @_indy__
+
+Best Overall Hard:
+-25 @_indy__
+
+Source states:
+Coconut — 6 out of 59 players
+Diamond — 14 @INDY
+
+Preserve that wording/value exactly.
+
+
+------------------------------------------------------------
+SEASON 10 WEEK 2 — TOURIST TRAP
+------------------------------------------------------------
+
+AMATEUR
+
+1st @djtwigg
+2nd @griprip
+3rd @master_kp
+4th @rubberduck1791
+5th @small_fry521
+6th @realjb2001
+7th @ultrafox_lynne + @zoedarlin
+9th @klpfnp
+10th @kill_er_bee + @southern_jenn_76
+
+Best Easy:
+-19 @griprip
+
+Best Hard:
+-14 @djtwigg
+
+Promotions -> Semi-Pro:
+@djtwigg
+@griprip
+
+
+SEMI-PRO
+
+1st @yankeedude1123
+2nd @knockoutg + @roknhorsebrat
+4th @d3bb13 + @nuttygrandpa
+6th @ryanl503
+7th @paulv966
+8th @jennem.
+9th @guyb024 + @stoneyman69
+
+Best Easy:
+-20 @knockoutg + @d3bb13 + @ryanl503
+
+Best Hard:
+-16 @yankeedude1123
+
+
+PRO
+
+1st @hatchtag101
+2nd @wickedshack
+3rd @deebee64 + @duckk7770 + @yuk1n
+6th @pmwillo + @sfreitag68
+8th @wvueers257585
+9th @alyssa38 + @kcrob + @laurentdelf
+
+Best Easy:
+-24 @hatchtag101
+
+Best Hard:
+-18 @wickedshack + @pmwillo
+
+Promotion -> Elite:
+@hatchtag101
+
+
+ELITE
+
+1st @zanetti.4
+2nd @gobson04
+3rd @bigja33 + @_indy__ + @harry2939
+6th @mulligan3775
+7th @princess_bankshot
+8th @g8r4l
+9th @gomarino13
+10th @rimblas
+
+Best Easy:
+-27 @zanetti.4
+
+Best Hard:
+-20 @_indy__
+
+
+OVERALL
+
+1st @zanetti.4
+2nd @hatchtag101 + @gobson04
+4th @bigja33 + @_indy__ + @harry2939
+7th @mulligan3775 + @wickedshack
+9th @deebee64 + @duckk7770 + @yuk1n
+
+Best Overall Easy:
+-27 @zanetti.4
+
+Best Overall Hard:
+-20 @_indy__
+
+
+BADGES
+
+Coconut:
+@nuttygrandpa
+@hatchtag101
+@wickedshack
+@deebee64
+@duckk7770
+@yuk1n
+@sfreitag68
+@wvueers257585
+@harry2939
+
+Cactus:
+@zoedarlin
+@ryanl503
+@indianchief_
+@sarahloo1971
+@zanetti.4
+@gomarino13
+
+Diamond:
+@zanetti.4
+
+
+------------------------------------------------------------
+SEASON 10 WEEK 3 — HOLIDAY HIDEAWAY
+------------------------------------------------------------
+
+AMATEUR
+
+1st @desert_rat575
+2nd @awesome_kris
+3rd @kd0017 + @zoedarlin
+5th @small_fry521
+6th @earthling303 + @rubberduck1791
+8th @master_kp
+9th @tommygunnfund + @klpfnp
+
+Best Easy:
+-17 @desert_rat575
+
+Best Hard:
+-8 @desert_rat575
+
+Promotions -> Semi-Pro:
+@desert_rat575
+@awesome_kris
+
+
+SEMI-PRO
+
+1st @yankeedude1123
+2nd @stewiestewie
+3rd @d3bb13
+4th @lynniebodd + @.mammothrept
+6th @sweetpeach88
+7th @indianchief_ + @slabdaddy9236
+9th @guyb024 + @knockoutg + @roknhorsebrat
+
+Best Easy:
+-19 @yankeedude1123
+
+Best Hard:
+-11 @yankeedude1123 + @stewiestewie
+
+Promotions -> Pro:
+@yankeedude1123
+@stewiestewie
+
+
+PRO
+
+1st @blutes87
+2nd @yuk1n
+3rd @deebee64
+4th @larryr___
+5th @laurentdelf
+6th @sarahloo1971
+7th @wickedshack
+8th @alyssa38
+9th @wvueers257585 + @kcrob
+
+Best Easy:
+-19 @laurentdelf
+
+Best Hard:
+-16 @blutes87
+
+Promotion -> Elite:
+@blutes87
+
+
+ELITE
+
+1st @_indy__
+2nd @bigja33 + @zanetti.4
+4th @harry2939
+5th @gomarino13
+6th @hatchtag101 + @g8r4l
+8th @rimblas + @mulligan3775
+10th @gobson04 + @neoimpossible + @princess_bankshot
+
+
+OVERALL
+
+1st @_indy__
+2nd @blutes87
+3rd @bigja33 + @zanetti.4
+5th @harry2939 + @yankeedude1123
+7th @gomarino13 + @stewiestewie + @yuk1n
+10th @hatchtag101 + @g8r4l
+
+Best Overall Easy:
+-21 @_indy__
+
+Best Overall Hard:
+-20 @_indy__
+
+
+BADGES
+
+Coconut:
+@yuk1n
+@_indy__
+
+Diamond:
+@_indy__
+
+Cactus:
+@master_kp
+@_indy__
+@small_fry521
+@southern_jenn_76
+@sweetpeach88
+@indianchief_
+@savruby
+@griprip
+
+Preserve malformed/repeated emoji formatting from raw evidence rather than interpreting it.
+
+
+------------------------------------------------------------
+SEASON 10 WEEK 4 — GARDENS OF BABYLON — 61 PLAYERS
+------------------------------------------------------------
+
+AMATEUR
+
+1st @earthling303
+2nd @small_fry521 + @zoedarlin
+4th @realjb2001
+5th @musicalatv
+6th @kd0017
+7th @southern_jenn_76
+8th @kill_er_bee
+9th @master_kp
+10th @klpfnp
+
+Best Easy:
+-18 @realjb2001
+
+Best Hard:
+-15 @earthling303
+
+Promotion -> Semi-Pro:
+@earthling303
+
+
+SEMI-PRO
+
+1st @paulv966
+2nd @.mammothrept
+3rd @nuttygrandpa
+4th @serenitymoon.1
+5th @lynniebodd + @plucky1971 + @roknhorsebrat + @stoneyman69
+9th @d3bb13 + @desert_rat575
+
+Best Easy:
+-22 @paulv966 + @.mammothrept + @desert_rat575 + @griprip
+
+Best Hard:
+-17 @paulv966
+
+Promotion -> Pro:
+@paulv966
+
+
+PRO
+
+1st @yuk1n
+2nd @pmwillo
+3rd @trickydicky0491
+4th @larryr___
+5th @kcrob
+6th @laurentdelf + @yankeedude1123
+8th @wvueers257585
+9th @wickedshack
+10th @sarahloo1971
+
+Best Easy:
+-26 @pmwillo
+
+Best Hard:
+-20 @yuk1n
+
+
+ELITE
+
+1st @_indy__
+2nd @gobson04 + @zanetti.4
+4th @rimblas
+5th @blutes87
+6th @gomarino13
+7th @harry2939
+8th @bigja33 + @mulligan3775
+10th @neoimpossible + @princess_bankshot
+
+Best Easy:
+-27 @_indy__ + @zanetti.4
+
+Best Hard:
+-22 @_indy__
+
+
+OVERALL
+
+1st @_indy__
+2nd @gobson04 + @zanetti.4
+4th @rimblas + @yuk1n
+6th @blutes87
+7th @pmwillo + @gomarino13
+9th @harry2939
+10th @paulv966
+
+Best Overall Easy:
+-27 @_indy__ + @zanetti.4
+
+Best Overall Hard:
+-22 @_indy__
+
+
+BADGES
+
+Coconut:
+@_indy__
+@rimblas
+@yuk1n
+
+Diamond:
+7 — @gobson04
+
+Cactus:
+@zanetti.4
+@yankeedude1123
+@nuttygrandpa
+@indianchief_
+@master_kp
+@tommygunnfund
+
+Duck:
+@pmwillo
+@.mammothrept
+
+
+------------------------------------------------------------
+SEASON 10 WEEK 5 — TOKYO — 64 PLAYERS
+------------------------------------------------------------
+
+AMATEUR
+
+1st @southern_jenn_76
+2nd @small_fry521
+3rd @kd0017 + @rubberduck1791
+5th @master_kp
+6th @ladytea.
+7th @tommygunnfund
+8th @zoedarlin
+9th @kill_er_bee
+
+Best Easy:
+-19 @southern_jenn_76
+
+Best Hard:
+-4 @southern_jenn_76 + @small_fry521
+
+Promotion -> Semi-Pro:
+@southern_jenn_76
+
+
+SEMI-PRO
+
+1st @badwolff_1
+2nd @slabdaddy9236
+3rd @desert_rat575
+4th @dawnsophia + @.mammothrept
+6th @plucky1971
+7th @indianchief_ + @ryanl503
+9th @andyp1970_a + @griprip + @stoneyman69
+
+Best Easy:
+-22 @slabdaddy9236
+
+Best Hard:
+-11 @badwolff_1
+
+
+PRO
+
+1st @yankeedude1123
+2nd @derby_daz
+3rd @yuk1n
+4th @leanin2it + @hhaus
+6th @pmwillo + @sarahloo1971
+8th @slappy0088 + @trickydicky0491
+10th @laurentdelf
+
+Best Easy:
+-23 @yankeedude1123
+
+Best Hard:
+-16 @yuk1n
+
+Promotion -> Elite:
+@yankeedude1123
+
+
+ELITE
+
+1st @zanetti.4
+2nd @_indy__
+3rd @blutes87 + @g8r4l
+5th @rimblas
+6th @gobson04 + @gomarino13 + @princess_bankshot
+9th @mulligan3775
+10th @bigja33
+
+Best Easy:
+-26 @zanetti.4
+
+Best Hard:
+-16 @_indy__ + @rimblas
+
+
+OVERALL
+
+1st @zanetti.4
+2nd @_indy__ + @yankeedude1123
+4th @blutes87 + @derby_daz + @g8r4l
+7th @rimblas + @yuk1n
+9th @hhaus + @leanin2it
+
+Best Overall Easy:
+-26 @zanetti.4
+
+Best Overall Hard:
+-16 @rimblas + @yuk1n + @_indy__
+
+
+BADGES
+
+Coconut:
+@_indy__
+@blutes87
+@yuk1n
+@hhaus
+
+Diamond:
+11 ACES — @badwolff_1
+
+Cactus:
+@zanetti.4
+@pmwillo
+@.mammothrept
+
+Duck:
+@yankeedude1123
+@gomarino13
+@princess_bankshot
+@pmwillo
+
+Beetle:
+@sweetpeach88
+@ladytea.
+
+
+------------------------------------------------------------
+SEASON 10 WEEK 6 — 8 BIT LAIR — 51 PLAYERS
+------------------------------------------------------------
+
+AMATEUR
+
+1st @zoedarlin
+2nd @kd0017
+3rd @ultrafox_lynne
+4th @kill_er_bee
+5th @tommygunnfund
+
+Best Easy:
+-11 @zoedarlin
+
+Best Hard:
+-8 @zoedarlin
+
+Promotion -> Semi-Pro:
+@zoedarlin
+
+
+SEMI-PRO
+
+1st @desert_rat575
+2nd @knockoutg
+3rd @jennem. + @slabdaddy9236
+5th @lynniebodd
+6th @roknhorsebrat
+7th @chell1843 + @ryanl503 + @savruby
+10th @sweetpeach88
+
+Best Easy:
+-19 @plucky1971
+
+Best Hard:
+-13 @jennem.
+
+
+PRO
+
+1st @larryr___
+2nd @derby_daz
+3rd @leanin2it
+4th @slappy0088
+5th @pmwillo + @laurentdelf
+7th @paulv966
+8th @sarahloo1971
+9th @wvueers257585
+10th @wickedshack
+
+Best Easy:
+-22 @leanin2it
+
+Best Hard:
+-19 @larryr___
+
+
+ELITE
+
+1st @zanetti.4
+2nd @_indy__
+3rd @rimblas
+4th @blutes87 + @mulligan3775
+6th @harry2939
+7th @bigja33 + @gobson04 + @princess_bankshot
+10th @gomarino13 + @neoimpossible
+
+Best Easy:
+-25 @zanetti.4 + @_indy__
+
+Best Hard:
+-19 @zanetti.4
+
+
+OVERALL
+
+1st @zanetti.4
+2nd @_indy__
+3rd @rimblas
+4th @larryr___
+5th @derby_daz
+6th @blutes87 + @mulligan3775 + @leanin2it
+9th @harry2939
+10th @bigja33 + @gobson04 + @princess_bankshot
+
+Best Overall Easy:
+-25 @_indy__ + @zanetti.4
+
+Best Overall Hard:
+-19 @larryr___ + @zanetti.4
+
+
+BADGES
+
+Coconut:
+@zanetti.4
+@rimblas
+@derby_daz
+@princess_bankshot
+
+Diamond:
+9 ACES — @zanetti.4
+
+Cactus:
+@slappy0088
+@desert_rat575
+@neoimpossible
+@roknhorsebrat
+
+Duck:
+@pmwillo
+@slabdaddy9236
+
+Beetle:
+@zanetti.4
+@larryr___
+@derby_daz
+@knockoutg
+@chell1843
+
+
+------------------------------------------------------------
+SEASON 10 WEEK 7 — RAPTOR CLIFF'S — 55 PLAYERS
+------------------------------------------------------------
+
+IMPORTANT:
+The source used ordered TOP 3 groups rather than explicit numeric placements in several sections.
+Preserve ordered published groups.
+Do NOT manufacture 1st/2nd/3rd numbers where not explicitly supplied.
+
+AMATEUR PUBLISHED TOP 3
+
+@linushoeren
+@small_fry521
+@wendywwyndemere2020
+
+Best Easy:
+-23 @linushoeren
+
+Best Hard:
+-9 @linushoeren
+
+Promotion -> Elite:
+@linushoeren
+
+Promotions -> Semi-Pro:
+@small_fry521
+@wendywwyndemere2020
+
+
+SEMI-PRO PUBLISHED TOP 3
+
+@slappy0088
+@duckk7770
+@kcrob
+
+Best Easy:
+-20 @trickydicky0491
+
+Best Hard:
+-14 @kcrob
+
+Promotions -> Pro:
+@slappy0088
+@duckk7770
+
+
+PRO PUBLISHED TOP 3
+
+@derby_daz
+@wickedshack
+@deebee64
+
+Best Easy:
+-18 @derby_daz
+
+Best Hard:
+-10 @derby_daz
+
+
+ELITE PUBLISHED TOP 3
+
+@zanetti.4
+@_indy__
+@harry2939
+
+Best Easy:
+-25 @zanetti.4
+
+Best Hard:
+-17 @_indy__
+
+
+OVERALL PUBLISHED GROUP
+
+Source label says OVERALL 1ST, followed by:
+@zanetti.4
+@_indy__
+@linushoeren
+
+Do not invent individual placements beyond the source structure.
+
+Best Overall Easy:
+-25 @zanetti.4
+
+Best Overall Hard:
+-17 @_indy__
+
+
+BADGES
+
+Coconut:
+@zanetti.4
+@_indy__
+@harry2939
+
+Diamond:
+6 ACES — @zanetti.4
+
+Cactus:
+@zanetti.4
+@gomarino13
+@slappy0088
+@small_fry521
+@sarahloo1971
+@trickydicky0491
+@ryanl503
+
+Duck:
+@bigja33
+@derby_daz
+@kcrob
+@stoneyman69
+
+Beetle:
+@zanetti.4
+@deebee64
+@princess_bankshot
+@sarahloo1971
+@roknhorsebrat
+@klpfnp
+
+
+------------------------------------------------------------
+SEASON 10 WEEK 8 — WALLACE & GROMIT — 56 PLAYERS
+------------------------------------------------------------
+
+AMATEUR PUBLISHED TOP GROUP
+
+@.metum
+@stewiestewie
+@kd0017
+
+Best Easy:
+-20 @.metum + @stewiestewie
+
+Best Hard:
+-17 @.metum
+
+Promotions -> Pro:
+@.metum
+@stewiestewie
+
+
+SEMI-PRO PUBLISHED TOP GROUP
+
+@trickydicky0491
+@plucky1971
+@indianchief_
+@stoneyman69
+
+The source called this "TOP 3" while listing four names.
+Preserve all four.
+Do not invent numerical placements.
+
+Best Easy:
+-24 @trickydicky0491
+
+Best Hard:
+-10 @kcrob
+
+
+PRO PUBLISHED TOP 3
+
+@derby_daz
+@desert_rat575
+@deebee64
+
+Best Easy:
+-24 @derby_daz + @desert_rat575
+
+Best Hard:
+-13 @larryr___
+
+
+ELITE PUBLISHED TOP 3
+
+@zanetti.4
+@gomarino13
+@_indy__
+
+Best Easy:
+-27 @gomarino13
+
+Best Hard:
+-19 @zanetti.4
+
+
+OVERALL PUBLISHED GROUP
+
+@zanetti.4
+@gomarino13
+@_indy__
+
+Best Overall Easy:
+-27 @gomarino13
+
+Best Overall Hard:
+-19 @zanetti.4
+
+
+BADGES
+
+Coconut:
+@zanetti.4
+@blutes87
+@gobson04
+@bigja33
+@.metum
+
+Diamond:
+11 ACES — @derby_daz
+
+Cactus:
+@.metum
+@derby_daz
+@desert_rat575
+@plucky1971
+
+Duck:
+@gomarino13
+@blutes87
+@derby_daz
+@d3bb13
+@.mammothrept
+@griprip
+
+Beetle:
+@_indy__
+@mulligan3775
+
+
+------------------------------------------------------------
+SEASON 10 WEEK 9 — SEAGULL STACKS — 60 PLAYERS
+------------------------------------------------------------
+
+AMATEUR PUBLISHED TOP 3
+
+@dmd_enditnow
+@sandtrap24
+@mrdachshund81
+
+Best Easy:
+-20 @sandtrap24
+
+Best Hard:
+-14 @dmd_enditnow
+
+Promotion exactly as posted -> Pro:
+@dmd_enditnow
+
+
+SEMI-PRO PUBLISHED TOP GROUP
+
+@stoneyman69
+@trickydicky0491
+@nuttygrandpa
+@serenitymoon.1
+@zoedarlin
+
+The source called this TOP 3 while publishing five names.
+Preserve all five as the source group.
+Do not manufacture numeric placements.
+
+Best Easy:
+-22 @stoneyman69 + @trickydicky0491
+
+Best Hard:
+-16 @stoneyman69
+
+Promotion -> Pro:
+@stoneyman69
+
+
+PRO PUBLISHED TOP 3
+
+@princess_bankshot
+@pmwillo
+@g8r4l
+
+Best Easy:
+-21 @g8r4l + @stewiestewie + @wickedshack
+
+Best Hard:
+-19 @princess_bankshot
+
+
+ELITE PUBLISHED TOP 3
+
+@zanetti.4
+@bigja33
+@rimblas
+
+Best Easy:
+-23 @zanetti.4 + @bigja33 + @rimblas
+
+Best Hard:
+-21 @zanetti.4
+
+
+OVERALL PUBLISHED GROUP
+
+Source says OVERALL 1ST followed by:
+@zanetti.4
+@bigja33
+@rimblas
+
+Preserve group/source wording rather than manufacturing placements.
+
+Best Overall Easy:
+-23 @zanetti.4 + @rimblas + @bigja33
+
+Best Overall Hard:
+-21 @zanetti.4
+
+
+BADGES
+
+Coconut:
+@bigja33
+@rimblas
+@_indy__
+@stoneyman69
+@blutes87
+@dmd_enditnow
+@nuttygrandpa
+
+Diamond:
+5 ACES — @zanetti.4
+
+Cactus:
+@rimblas
+@zoedarlin
+@hatchtag101
+@musicalatv
+
+Duck:
+@zanetti.4
+@bigja33
+@zoedarlin
+@wendywwyndemere2020
+
+Beetle:
+@zanetti.4
+@bigja33
+@princess_bankshot
+@larryr___
+
+
+------------------------------------------------------------
+SEASON 10 WEEK 10 — LABYRINTH — 59 PLAYERS
+------------------------------------------------------------
+
+The Top 3 sections were ordered-name lists without explicit numbered placements.
+Preserve as ordered published groups.
+
+AMATEUR TOP 3
+
+@andyp1970_a
+@mrdachshund81
+@master_kp
+
+Best Easy:
+-20 @master_kp
+
+Best Hard:
+-14 @andyp1970_a
+
+Promotions -> Semi-Pro:
+@andyp1970_a
+@mrdachshund81
+@master_kp
+
+
+SEMI-PRO TOP 3
+
+@plucky1971
+@kcrob
+@sarahloo1971
+
+Best Easy:
+-23 @trickydicky0491
+
+The retained source line was mislabeled AMA TOP HARD while appearing in this section:
+-16 @kcrob
+
+Preserve the source-context warning.
+Do not silently rewrite it.
+
+
+PRO TOP 3
+
+@derby_daz
+@g8r4l
+@slappy0088
+
+Best Easy:
+-25 @g8r4l
+
+Best Hard:
+-19 @derby_daz
+
+
+ELITE TOP 3
+
+@bigja33
+@_indy__
+@zanetti.4
+
+Best Easy:
+-24 @mulligan3775
+
+Best Hard:
+-24 @_indy__
+
+
+OVERALL TOP 3
+
+@bigja33
+@_indy__
+@zanetti.4
+
+Best Overall Easy:
+-25 @g8r4l
+
+Best Overall Hard:
+-24 @_indy__
+
+
+BADGES
+
+Coconut:
+@derby_daz
+@duckk7770
+
+Diamond:
+7 ACES — @_indy__ + @zanetti.4
+
+Cactus:
+@pmwillo
+@rimblas
+@.metum
+@larryr___
+@ultrafox_lynne
+@.mammothrept
+
+Beetle:
+@_indy__
+@rimblas
+@princess_bankshot
+
+Duck:
+UNKNOWN / NOT RETAINED.
+The source header was not clearly populated and no reliable recipient list is retained.
+Do not convert to zero.
+
+
+------------------------------------------------------------
+SEASON 10 WEEK 11 — CHERRY BLOSSOM — 60 PLAYERS
+------------------------------------------------------------
+
+Top 3 lines were ordered names without explicit numeric placement labels.
+Preserve ordered published groups.
+
+AMATEUR TOP 3
+
+@strokelimitreached
+@realjb2001
+@awesome_kris
+
+Best Easy:
+-23 @strokelimitreached
+
+Best Hard:
+-12 @strokelimitreached
+
+Promotion -> Semi-Pro:
+@strokelimitreached
+
+
+SEMI-PRO TOP 3
+
+@sweetpeach88
+@kcrob
+@slabdaddy9236
+
+Best Easy:
+-28 @sweetpeach88
+
+Best Hard:
+-20 @slabdaddy9236
+
+Promotions -> Pro:
+@sweetpeach88
+@kcrob
+@slabdaddy9236
+
+
+PRO TOP 3
+
+@g8r4l
+@wickedshack
+@derby_daz
+
+Best Easy:
+-27 @larryr___
+
+Best Hard:
+-22 @g8r4l
+
+
+ELITE TOP 3
+
+@zanetti.4
+@_indy__
+@gobson04
+
+Best Easy:
+-33 @zanetti.4
+
+Best Hard:
+-25 @zanetti.4 + @_indy__
+
+
+OVERALL TOP 3
+
+@zanetti.4
+@_indy__
+@gobson04
+
+Best Overall Easy:
+-33 @zanetti.4
+
+Best Overall Hard:
+-25 @zanetti.4 + @_indy__
+
+
+BADGES
+
+Badge information was present in the original result material, but the individual S10 W11 badge-recipient lines are NOT retained in this handoff.
+
+Store:
+BADGE EVIDENCE = UNKNOWN / NOT RETAINED
+
+Do NOT create zero badges.
+
+
+------------------------------------------------------------
+SEASON 10 WEEK 12 — TEMPLE AT ZERZURA — 52 PLAYERS
+------------------------------------------------------------
+
+AMATEUR
+
+1st @gatorsfan89
+2nd @gopats37
+3rd @hhaus
+
+Best Easy:
+-18 @gatorsfan89
+
+Best Hard:
+-11 @gatorsfan89 + @gopats37
+
+Promotions -> Semi-Pro:
+@gatorsfan89
+@gopats37
+
+
+SEMI-PRO
+
+1st @trickydicky0491
+2nd @nuttygrandpa
+3rd @paulv966
+
+Best Easy:
+-27 @trickydicky0491
+
+Best Hard:
+-17 @trickydicky0491
+
+Promotion exactly as posted -> Elite:
+@trickydicky0491
+
+
+PRO
+
+1st @derby_daz
+2nd @pmwillo
+3rd @g8r4l
+
+Best Easy:
+-25 @pmwillo + @g8r4l
+
+Best Hard:
+-18 @derby_daz
+
+
+ELITE
+
+Retained source is incomplete after:
+1st @_indy__
+
+Do NOT manufacture the rest of the Elite placements from later CSV data.
+
+
+OVERALL
+
+1st @_indy__
+2nd @rimblas
+3rd @trickydicky0491
+
+Best Overall Easy:
+-28 @_indy__
+
+Best Overall Hard:
+-20 @_indy__
+
+
+BADGES
+
+Coconut:
+@_indy__
+@rimblas
+@trickydicky0491
+@derby_daz
+@g8r4l
+@zanetti.4
+@wvueers257585
+@alyssa38
+@gopats37
+
+Diamond:
+7 ACES —
+@trickydicky0491
+@derby_daz
+@nuttygrandpa
+
+Cactus:
+@rimblas
+@trickydicky0491
+@derby_daz
+@nuttygrandpa
+@wvueers257585
+@gatorsfan89
+@chell1843
+
+Duck:
+@g8r4l
+@alyssa38
+@chell1843
+@larryr___
+
+Beetle:
+@_indy__
+@wvueers257585
+@neoimpossible
+@mulligan3775
+@wendywwyndemere2020
+@earthling303
+@kill_er_bee
+
+
+------------------------------------------------------------
+SEPARATE SEASON 10-ERA DIVISION MOVEMENT EVIDENCE
+------------------------------------------------------------
+
+This is authoritative historical movement evidence but its exact effective week was NOT proven in the retained surrounding source.
+
+Do NOT assign it to a specific week until source context proves the timing.
+
+Promotion -> Elite based on points:
+@yuk1n
+
+Demotion -> Pro:
+@g8r4l
+@neoimpossible
+@princess_bankshot
+
+Promotion -> Pro:
+@d3bb13
+@desert_rat575
+
+Demotion -> Semi-Pro:
+@sarahloo1971
+@duckk7770
+@kcrob
+@alyssa38
+@sfreitag68
+@leanin2it
+@slappy0088
+@trickydicky0491
+
+Demotion -> Amateur:
+@awesome_kris
+@djtwigg
+@dmd_enditnow
+@stewiestewie
+@earthling303
+@gopats37
+@southern_jenn_76
+@badwolff_1
+@dawnsophia
+@sandtrap24
+@wendywwyndemere2020
+@.rolyt
+@linushoeren
+@hhaus
+
+
+============================================================
+KWT SEASON 11
+============================================================
+
+No S11 Week 1 or Week 2 Discord result-post evidence was supplied in this recovered set.
+
+Do NOT label those as something Krys must manually recover.
+Just record:
+S11 W1 Discord evidence — not supplied in this collection
+S11 W2 Discord evidence — not supplied in this collection
+
+Do not manufacture historical standings from later CSV Rank/Division/Pos.
+
+
+------------------------------------------------------------
+SEASON 11 WEEK 3 — MYST — 62 PLAYERS
+------------------------------------------------------------
+
+AMATEUR
+
+1st @realjb2001
+2nd @nic790
+3rd @small_fry521
+
+Best Easy:
+-23 @realjb2001 + @nic790 + @small_fry521 + @djtwigg
+
+Best Hard:
+-12 @ultrafox_lynne
+
+
+SEMI-PRO
+
+1st @hatchtag101
+2nd @slappy0088
+3rd @knockoutg
+
+Best Easy:
+-29 @hatchtag101
+
+Best Hard:
+-20 @slappy0088
+
+Promotions -> Pro:
+@hatchtag101
+@slappy0088
+
+
+PRO
+
+1st @pmwillo
+2nd @duckk7770
+3rd @princess_bankshot
+
+Best Easy:
+-25 @pmwillo + @duckk7770
+
+Best Hard:
+-21 @pmwillo
+
+Promotion -> Elite:
+@pmwillo
+
+
+ELITE
+
+1st @_indy__
+2nd @gobson04 + @zanetti.4
+
+Best Easy:
+-26 @gobson04 + @bigja33 + @gomarino13 + @g8r4l
+
+Best Hard:
+-25 @_indy__
+
+
+OVERALL
+
+1st @_indy__
+2nd @pmwillo + @gobson04 + @zanetti.4
+
+Best Overall Easy:
+-29 @hatchtag101
+
+Best Overall Hard:
+-25 @_indy__
+
+
+BADGES
+
+Badge facts were supplied in the original Discord result post but their full recipient lines are NOT retained in this handoff.
+
+BADGES = UNKNOWN / NOT RETAINED
+
+Do NOT create zero badges.
+
+
+------------------------------------------------------------
+SEASON 11 WEEK 4 — VENICE — 58 PLAYERS
+------------------------------------------------------------
+
+AMATEUR
+
+1st @realjb2001
+2nd @indianchief_
+3rd @badwolff_1
+
+Best Easy:
+-16 @realjb2001 + @indianchief_
+
+Best Hard:
+-13 @realjb2001
+
+Promotion -> Semi-Pro:
+@realjb2001
+
+
+SEMI-PRO
+
+1st @linushoeren
+2nd @boggiraffe + @plucky1971
+
+Best Easy:
+-21 @boggiraffe
+
+Best Hard:
+-15 @linushoeren
+
+Promotion -> Pro:
+@linushoeren
+
+
+PRO
+
+1st @.metum
+2nd @gopats37
+3rd @wvueers257585
+
+Best Easy:
+-20 @stewiestewie
+
+Best Hard:
+-20 @gopats37
+
+IMPORTANT:
+Do not automatically assume @wvueers257585 and @stewiestewie are the same identity.
+
+
+ELITE
+
+1st @rimblas
+2nd @zanetti.4
+3rd @_indy__
+
+Best Easy:
+-24 @rimblas
+
+Best Hard:
+-20 @_indy__
+
+
+OVERALL
+
+1st @rimblas
+2nd @zanetti.4
+3rd @_indy__
+
+Best Overall Easy:
+-24 @rimblas
+
+Best Overall Hard:
+-20 @_indy__ + @gopats37
+
+
+BADGES
+
+Coconut:
+@rimblas
+@zanetti.4
+@gomarino13
+@gopats37
+@realjb2001
+@trickydicky0491
+@indianchief_
+
+Diamond:
+source retained as 4 —
+@rimblas
+@yuk1n
+
+Preserve the raw value/wording; do not reinterpret "4" without raw-source confirmation.
+
+Cactus:
+@rimblas
+@gopats37 X2
+@g8r4l
+@stewiestewie
+@yankeedude1123
+
+Duck:
+@rimblas X3
+@yuk1n X2
+@boggiraffe
+@paulv966
+@realjb2001
+@laurentdelf
+@pmwillo
+@d3bb13
+@master_kp
+@larryr___
+@alyssa38
+
+
+------------------------------------------------------------
+SEASON 11 WEEK 5 — SHANGRI-LA — 61 PLAYERS
+------------------------------------------------------------
+
+AMATEUR
+
+1st @awesome_kris
+2nd @small_fry521
+3rd @dmd_enditnow
+
+Best Easy:
+-25 @dmd_enditnow
+
+Best Hard:
+-14 @awesome_kris
+
+Promotion -> Semi-Pro:
+@awesome_kris
+
+
+SEMI-PRO
+
+1st @paulv966
+2nd @sweetpeach88
+3rd @nuttygrandpa
+
+Best Easy:
+-25 @paulv966 + @sweetpeach88 + @sarahloo1971
+
+Best Hard:
+-18 @paulv966 + @master_kp
+
+
+PRO
+
+1st @.metum
+2nd @gopats37
+3rd @pmwillo
+
+Best Easy:
+-31 @.metum
+
+Best Hard:
+-24 @.metum
+
+Promotions -> Elite:
+@.metum
+@gopats37
+
+
+ELITE
+
+1st @_indy__
+2nd @rimblas + @gobson04
+
+Best Easy:
+-33 @_indy__
+
+Best Hard:
+-26 @rimblas
+
+
+OVERALL
+
+1st @_indy__
+2nd @.metum
+3rd @gopats37
+
+Best Overall Easy:
+-33 @_indy__
+
+Best Overall Hard:
+-26 @rimblas
+
+
+-50 CLUB
+
+@_indy__ — -56
+@.metum — -55
+@gopats37 — -52
+@pmwillo — -51
+@rimblas — -51
+@gobson04 — -51
+@yuk1n — -50
+@zanetti.4 — -50
+
+Preserve -50 Club as an explicit historical award/recognition category.
+
+
+BADGES
+
+Badge facts existed in the original source but full individual badge-recipient lines are NOT retained in this handoff.
+
+BADGES = UNKNOWN / NOT RETAINED
+
+Do NOT create zero badges.
+
+
+------------------------------------------------------------
+SEASON 11 WEEK 6 — VIVA LAS ELVIS — 50 PLAYERS
+------------------------------------------------------------
+
+AMATEUR
+
+1st @rubberduck1791
+2nd @small_fry521
+3rd @raccoonswhisker
+
+Best Easy:
+-19 @rubberduck1791
+
+Best Hard:
+-12 @raccoonswhisker
+
+
+SEMI-PRO
+
+1st @gatorsfan89
+2nd @alyssa38 + @realjb2001
+
+Best Easy:
+-17 @gatorsfan89
+
+Best Hard:
+-16 @alyssa38
+
+
+PRO
+
+1st @larryr___
+2nd @wvueers257585
+3rd @deebee64
+
+Best Easy:
+-22 @larryr___
+
+Best Hard:
+-21 @wvueers257585
+
+
+ELITE
+
+1st @zanetti.4
+2nd @bigja33
+3rd @_indy__
+
+Best Easy:
+-25 @bigja33
+
+Best Hard:
+-24 @zanetti.4 + @_indy__
+
+
+OVERALL
+
+Source retained:
+1st @zanetti.4
+followed by @bigja33 + @_indy__
+
+Do NOT manufacture exact 2nd/3rd placement assignments if the raw post did not explicitly state them.
+
+
+BADGES
+
+Coconut:
+@zanetti.4
+@bigja33
+@leanin2it
+@gobson04
+@larryr___
+@trickydicky0491
+@laurentdelf
+
+Diamond:
+9 ACES — @rimblas
+
+Cactus:
+@bigja33
+@gopats37
+@laurentdelf
+@wickedshack
+@paulv966
+
+Duck:
+source header indicates 0 and no recipients were listed.
+
+Preserve as explicit zero only if the stored raw source confirms the zero header.
+
+Beetle:
+@gopats37
+@trickydicky0491
+@jennem.
+
+
+------------------------------------------------------------
+SEASON 11 WEEK 7 — ALICE'S ADVENTURES IN WONDERLAND — 53 PLAYERS
+------------------------------------------------------------
+
+AMATEUR
+
+1st @badwolff_1 + @kd0017
+3rd @indianchief_ + @sfreitag68
+
+Best Easy:
+-16 @slugjug33 + @raccoonswhisker
+
+Best Hard:
+-5 @nic790
+
+Preserve tied 1st followed by 3rd.
+
+
+SEMI-PRO
+
+1st @knockoutg + @dawnsophia
+3rd @chell1843
+
+Best Easy:
+-19 @dawnsophia
+
+Best Hard:
+-9 @knockoutg
+
+Promotions -> Pro:
+@knockoutg
+@dawnsophia
+
+
+PRO
+
+1st @wickedshack
+2nd @neoimpossible + @pmwillo
+
+Best Easy:
+-22 @pmwillo
+
+Best Hard:
+-7 @wickedshack
+
+
+ELITE
+
+1st @gomarino13
+2nd @zanetti.4
+3rd @blutes87 + @yankeedude1123 + @yuk1n
+
+Best Easy:
+-23 @yankeedude1123
+
+Best Hard:
+-16 @g8r4l
+
+
+OVERALL
+
+1st @gomarino13
+2nd @zanetti.4
+3rd @blutes87 + @yankeedude1123 + @yuk1n
+
+Best Overall Easy:
+-23 @yankeedude1123
+
+Best Overall Hard:
+-16 @g8r4l
+
+
+BADGES
+
+Coconut:
+NONE
+
+Diamond:
+2 ACES —
+@boggiraffe
+@kd0017
+@sfreitag68
+@nuttygrandpa
+@_indy__
+@gomarino13
+
+Cactus:
+@deebee64
+@_indy__
+@serenitymoon.1
+@sfreitag68
+@nuttygrandpa
+
+Duck:
+@yankeedude1123
+@rimblas
+@_indy__
+@stewiestewie
+@kd0017
+@nic790
+@nuttygrandpa
+@boggiraffe
+
+Beetle:
+@g8r4l X2
+@chell1843 X2
+@blutes87
+@nic790
+
+
+------------------------------------------------------------
+SEASON 11 WEEK 8 — AROUND THE WORLD IN 80 DAYS — 59 PLAYERS
+------------------------------------------------------------
+
+AMATEUR
+
+1st @dmd_enditnow
+2nd @badwolff_1
+3rd @djtwigg + @indianchief_
+
+Best Easy:
+-18 @dmd_enditnow
+
+Best Hard:
+-9 @badwolff_1
+
+Promotions -> Semi-Pro:
+@dmd_enditnow
+@badwolff_1
+
+
+SEMI-PRO
+
+1st @jennem.
+2nd @master_kp
+3rd @lynniebodd
+
+Best Easy:
+-20 @master_kp
+
+Best Hard:
+-12 @jennem.
+
+
+PRO
+
+1st @linushoeren + @neoimpossible
+3rd @laurentdelf
+
+Best Easy:
+-25 @linushoeren
+
+Best Hard:
+-10 @neoimpossible + @laurentdelf
+
+
+ELITE
+
+1st @zanetti.4
+2nd @gobson04
+3rd @rimblas
+
+Best Easy:
+-24 @gobson04
+
+Best Hard:
+-22 @zanetti.4
+
+
+OVERALL
+
+1st @zanetti.4
+2nd @gobson04
+3rd @rimblas
+
+Best Overall Easy:
+-25 @linushoeren
+
+Best Overall Hard:
+-22 @zanetti.4
+
+
+BADGES
+
+Coconut:
+@zanetti.4
+
+Diamond:
+9 ACES —
+@rimblas
+@linushoeren
+
+Cactus:
+@rimblas
+@stoneyman69
+@gatorsfan89
+@awesome_kris
+
+Duck:
+@zanetti.4
+@linushoeren
+@neoimpossible
+@gopats37
+@dawnsophia
+@knockoutg
+@badwolff_1
+@raccoonswhisker
+
+Beetle:
+@linushoeren
+@neoimpossible
+@zoedarlin
+
+
+------------------------------------------------------------
+SEASON 11 WEEK 9 — MOUNT OLYMPUS — 62 PLAYERS
+------------------------------------------------------------
+
+AMATEUR
+
+1st @lake
+2nd @indianchief_ + @sfreitag68
+
+Best Easy:
+-21 @lake
+
+Best Hard:
+-10 @lake
+
+Promotion -> Semi-Pro:
+@lake
+
+
+SEMI-PRO
+
+1st @badwolff_1 + @boggiraffe
+3rd @gatorsfan89 + @plucky1971
+
+Best Easy:
+-19 @gatorsfan89
+
+Best Hard:
+-18 @boggiraffe
+
+
+PRO
+
+1st @laurentdelf
+2nd @princess_bankshot
+3rd @slappy0088
+
+Best Easy:
+-24 @wickedshack
+
+Best Hard:
+-17 @laurentdelf
+
+
+ELITE
+
+1st @trickydicky0491
+2nd @gomarino13
+3rd @blutes87
+
+Best Easy:
+-26 @trickydicky0491 + @leanin2it
+
+Best Hard:
+-19 @trickydicky0491 + @gomarino13 + @blutes87 + @_indy__
+
+
+OVERALL
+
+1st @trickydicky0491
+2nd @gomarino13
+3rd @blutes87
+
+Best Overall Easy:
+-26 @trickydicky0491 + @leanin2it
+
+Best Overall Hard:
+-19 @trickydicky0491 + @gomarino13 + @blutes87 + @_indy__
+
+
+BADGES
+
+AMATEUR:
+Cactus — @sfreitag68
+Diamond — @sfreitag68
+
+SEMI-PRO:
+Cactus — @roknhorsebrat
+Duck — @stoneyman69
+
+PRO:
+Coconut — @laurentdelf, @slappy0088, @stewiestewie, @wvueers257585
+Diamond — 3 ACES @larryr___
+Cactus — @larryr___
+Duck — @princess_bankshot, @slappy0088, @knockoutg
+
+ELITE:
+Coconut — @trickydicky0491, @gomarino13, @blutes87, @zanetti.4
+Diamond — @yuk1n
+Cactus — @trickydicky0491, @rimblas
+Duck — @gomarino13, @rimblas
+
+No Beetle facts are retained for this week.
+Treat as unknown, not zero.
+
+
+------------------------------------------------------------
+SEASON 11 WEEK 10 — TETHYS STATION — 52 PLAYERS
+------------------------------------------------------------
+
+AMATEUR
+
+1st @slugjug33
+2nd @kill_er_bee + @wendywwyndemere2020
+
+Best Easy:
+-22 @slugjug33
+
+Best Hard:
+-4 @slugjug33
+
+
+SEMI-PRO
+
+1st @badwolff_1
+2nd @d3bb13
+3rd @sarahloo1971
+
+Best Easy:
+-25 @realjb2001
+
+Best Hard:
+-24 @badwolff_1
+
+Promotion -> Pro:
+@badwolff_1
+
+
+PRO
+
+IMPORTANT:
+The original post explicitly published FOUR 1ST-PLACE names:
+
+1st @pmwillo
+1st @knockoutg
+1st @linushoeren
+1st @wickedshack
+
+Preserve all four as 1st.
+Do NOT manufacture 2nd/3rd.
+
+Best Easy:
+-24 @pmwillo
+
+Best Hard:
+-16 @knockoutg + @linushoeren + @laurentdelf
+
+
+ELITE
+
+1st @julian1830
+2nd @zanetti.4
+3rd @matt916
+
+Best Easy:
+-28 @matt916
+
+Best Hard:
+-24 @julian1830 + @zanetti.4
+
+
+OVERALL
+
+1st @julian1830
+2nd @zanetti.4
+3rd @matt916
+
+Best Overall Easy:
+-28 @matt916
+
+Best Overall Hard:
+-24 @julian1830 + @zanetti.4 + @badwolff_1
+
+
+RETAINED BADGE FACTS
+
+Amateur:
+Cactus — @nic790
+Duck — @awinters86
+
+Semi-Pro:
+Coconut — @badwolff_1 + @sarahloo1971
+Cactus — @sarahloo1971 + @plucky1971 + @slabdaddy9236
+Beetle — @badwolff_1
+
+Pro:
+Duck — @wvueers257585
+
+Other S11 W10 badge categories/recipients are not fully retained here.
+Do NOT infer them.
+
+
+TROPHY EVIDENCE
+
+Contemporaneous trophy image confirms:
+@julian1830 — S11 W10 — 1st
+
+
+------------------------------------------------------------
+SEASON 11 WEEK 11 — WIDOWS WALKABOUT — 50 PLAYERS
+------------------------------------------------------------
+
+AMATEUR
+
+1st @fry_lock
+2nd @dbcq
+3rd @indianchief_
+
+Best Easy:
+-22 @fry_lock
+
+Best Hard:
+-7 @dbcq
+
+
+SEMI-PRO
+
+1st @plucky1971
+2nd @strokelimitreached
+3rd @paulv966
+
+Best Easy:
+-26 @plucky1971
+
+Best Hard:
+-17 @plucky1971
+
+Promotion -> Pro:
+@plucky1971
+
+
+PRO
+
+1st @princess_bankshot
+2nd @laurentdelf
+3rd @slappy0088
+
+Best Easy:
+-24 @slappy0088
+
+Best Hard:
+-20 @princess_bankshot
+
+
+ELITE
+
+Source explicitly says ties are shown from standings.
+
+1st @julian1830
+2nd @bigja33 + @rimblas
+3rd @maximus + @zanetti.4
+
+Best Easy:
+-29 @julian1830
+
+Best Hard:
+-22 @bigja33
+
+
+OVERALL
+
+1st @julian1830
+2nd @bigja33 + @rimblas
+3rd @maximus + @zanetti.4
+
+Best Overall Easy:
+-29 @julian1830
+
+Best Overall Hard:
+-22 @bigja33
+
+
+BADGES
+
+Coconut:
+@bigja33
+@maximus
+@paulv966
+
+Diamond:
+@rimblas
+@julian1830
+
+Cactus:
+@mully
+@yankeedude1123
+@slabdaddy9236
+@indianchief_
+@jrt1976
+
+Duck:
+@rimblas
+@zanetti.4
+@princess_bankshot
+@gomarino13
+@strokelimitreached
+@wendywwyndemere2020
+
+Beetle:
+@julian1830
+@bigja33
+@_indy__
+@gomarino33
+@realjb2001
+@ultrafox_lynne
+
+IMPORTANT:
+Preserve @gomarino13 and @gomarino33 as separate source handles until canonical identity resolution proves whether they belong to the same player.
+
+
+TROPHY EVIDENCE
+
+Contemporaneous trophy image confirms:
+@julian1830 — S11 W11 — 1st
+
+
+------------------------------------------------------------
+SEASON 11 WEEK 12 — MEOW WOLF — 50 PLAYERS
+------------------------------------------------------------
+
+AMATEUR
+
+1st @fry_lock
+2nd @indianchief_
+3rd @nic79
+
+Best Easy:
+-17 @fry_lock
+
+Best Hard:
+-13 @fry_lock
+
+Promotion -> Semi-Pro:
+@fry_lock
+
+
+SEMI-PRO
+
+1st @master_kp
+2nd @d3bb13
+3rd @sticky.80
+
+Best Easy:
+-22 @master_kp
+
+Best Hard:
+-16 @sticky.80
+
+
+PRO
+
+1st @slappy0088
+2nd @princess_bankshot
+3rd @dabigwillo
+
+Best Easy:
+-22 @chipnputt
+
+Best Hard:
+-19 @slappy0088
+
+Promotion -> Elite:
+@slappy0088
+
+
+ELITE
+
+1st @julian1830
+2nd @_indy__
+3rd @leanin2it
+
+Best Easy:
+-22 @leanin2it
+
+Best Hard:
+-23 @julian1830
+
+
+OVERALL
+
+1st @julian1830
+2nd @_indy__
+3rd @leanin2it
+3rd @slappy0088
+
+Preserve BOTH published 3rds.
+
+Best Overall Easy:
+-22 @leanin2it + @master_kp + @chipnputt
+
+Best Overall Hard:
+-23 @julian1830
+
+
+BADGES
+
+Coconut:
+@julian1830
+@_indy__
+@leanin2it
+@slappy0088
+@gobson04
+@princess_bankshot
+@yankeedude1123
+@dabigwillo
+
+Diamond:
+@julian1830
+@yankeedude1123
+
+Cactus:
+@leanin2it
+@slappy0088
+@nic79
+@larryr___
+@yankeedude1123
+
+Duck:
+@gobson04
+@gomarino13
+@larryr___
+@maximus
+@master_kp
+@d3bb13
+
+Beetle:
+NONE
+
+
+TROPHY EVIDENCE
+
+Contemporaneous trophy confirms:
+@julian1830 — S11 W12 — 1st
+
+
+============================================================
+SEASON 11 FINAL DIVISION AWARDS
+============================================================
+
+These are SEASON-FINAL awards.
+They are NOT Week 12 standings.
+
+AMATEUR FINAL
+
+1st @indianchief_
+2nd @nic079
+3rd @raccoonswhisker
+
+
+SEMI-PRO FINAL
+
+1st @badwolff_1
+1st @d3bb13
+3rd @paulv966
+
+IMPORTANT:
+The trophy evidence visibly shows TWO 1ST PLACE awards.
+
+Preserve both 1sts.
+Do NOT invent a 2nd-place player.
+Do NOT invent an unstated tie explanation.
+
+
+PRO FINAL
+
+1st @dabigwillo
+2nd @princess_bankshot
+3rd @laurentdelf
+
+
+ELITE FINAL
+
+1st @zanetti.4
+2nd @_indy__
+3rd El Jorge
+3rd @bigja33
+
+El Jorge is canonical identity for historical source alias @rimblas.
+
+Preserve BOTH published 3rds.
+
+
+============================================================
+IMPLEMENTATION / RECONCILIATION REQUIREMENTS
+============================================================
+
+Use the same lossless Discord-evidence architecture already created for Season 9.
+
+Preserve raw evidence separately from parsed facts.
+
+Support:
+- multiple source messages per event
+- explicit ranks
+- ties
+- skipped ranks
+- ordered Top groups without invented numerical placements
+- deeper ranks
+- division standings
+- Overall standings
+- Best Easy/Hard
+- tied Best-score recipients
+- promotions
+- demotions
+- destination division
+- special movement reasons
+- badge categories
+- badge multiplicities
+- ace counts
+- explicit zero versus unknown
+- special recognition
+- season-final standings/awards
+- trophy corroboration
+- source handle + canonical UUID
+- parser warnings
+- ambiguity without data loss
+
+For incomplete or uncertain evidence:
+- preserve raw source
+- store warning
+- do not invent data
+- do not silently discard the fact
+
+============================================================
+EXPECTED COVERAGE
+============================================================
+
+SEASON 10:
+W1 YES
+W2 YES
+W3 YES
+W4 YES
+W5 YES
+W6 YES
+W7 YES
+W8 YES
+W9 YES
+W10 YES
+W11 YES
+W12 YES
+
+S10 W11 badge recipients are not fully retained in this handoff.
+S10 W12 Elite body is incomplete after INDY 1st.
+Preserve those as source gaps.
+
+Separate movement evidence exists but effective week is unproven.
+
+SEASON 11:
+W1 — no Discord result evidence supplied in this collection
+W2 — no Discord result evidence supplied in this collection
+W3 YES
+W4 YES
+W5 YES
+W6 YES
+W7 YES
+W8 YES
+W9 YES
+W10 YES
+W11 YES
+W12 YES
+Season 11 final division awards YES
+
+S11 W3 badge recipients are not fully retained.
+S11 W5 badge recipients are not fully retained.
+S11 W10 only retained badge facts should be imported; missing categories remain unknown.
+
+============================================================
+VERIFICATION
+============================================================
+
+After local implementation, report separately for S10 and S11:
+
+- weeks recognized
+- source sections retained
+- division placement facts
+- Overall placement facts
+- season-final placement facts
+- Best Easy recipient facts
+- Best Hard recipient facts
+- promotions
+- demotions
+- Coconut facts
+- Diamond facts
+- Cactus facts
+- Duck facts
+- Beetle facts
+- explicit badge multiplicities
+- explicit zero categories
+- unknown categories
+- special recognitions
+- aliases used
+- canonical identities resolved
+- unresolved identities
+- ambiguous identities
+- source warnings
+- CSV score matches
+- CSV score conflicts
+- confirmation later CSV Rank/Division/Pos were not substituted
+
+Specifically verify:
+rimblas -> El Jorge
+harry2939 -> Maximus
+g8r4l -> Shooter McGavin
+
+Run:
+- KWT/competition importer tests
+- Discord evidence tests
+- Climbers tests
+- Monthly tests
+- All-Time tests if affected
+- TypeScript
+- targeted ESLint
+- git diff --check
+
+STOP after local implementation + reconciliation preview.
+
+Apply remains disabled.
+
+No SQL.
+No migrations.
+No Production writes.
+No commit.
+No push.
+No deployment.
+
+Preserve these source files durably so Krys does not have to manually recover and repaste these historical Discord posts again.

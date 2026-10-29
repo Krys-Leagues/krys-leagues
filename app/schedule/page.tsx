@@ -1,0 +1,272 @@
+"use client"
+
+import { useEffect, useState } from "react"
+import { loadCanonicalPlayerDisplays, type CanonicalPlayerDisplay } from "@/lib/canonicalPlayerDisplay"
+import { fetchPublicSchedule } from "@/lib/public/scheduleRead"
+
+type ScheduleRow = {
+  id: string
+  league_type: string | null
+  division: string | null
+  season_number: number | null
+  game: string | null
+  course: string | null
+  player1_id: string | null
+  player2_id: string | null
+}
+
+export default function SchedulePage() {
+  const [schedule, setSchedule] = useState<ScheduleRow[]>([])
+  const [players, setPlayers] = useState<CanonicalPlayerDisplay[]>([])
+  const [division, setDivision] = useState("Stroke D1")
+  const [seasonNumber, setSeasonNumber] = useState("59")
+  const [posting, setPosting] = useState(false)
+  const [generating, setGenerating] = useState(false)
+
+  async function loadData() {
+    const { data: scheduleData } = await fetchPublicSchedule<ScheduleRow>()
+
+    setSchedule(scheduleData)
+    const sourcePlayerIds = (scheduleData || []).flatMap((row) =>
+      [row.player1_id, row.player2_id].filter((id): id is string => Boolean(id)),
+    )
+    const playerResponse = await loadCanonicalPlayerDisplays(sourcePlayerIds)
+    setPlayers(playerResponse.data)
+  }
+
+  useEffect(() => {
+    void Promise.resolve().then(loadData)
+  }, [])
+
+  function getPlayerName(id: string | null) {
+    if (!id) return "Unavailable Player"
+    return players.find((player) => player.source_player_id === id && player.eligible)?.screen_name || "Unavailable Player"
+  }
+
+  const filteredSchedule = schedule.filter(
+    (m) =>
+      m.division === division &&
+      Number(m.season_number) === Number(seasonNumber)
+  )
+
+  const games = ["1", "2", "3"]
+
+  async function postToDiscord() {
+    setPosting(true)
+
+    const messageLines: string[] = []
+
+    messageLines.push(`📅 **${division} Season ${seasonNumber} Schedule**`)
+    messageLines.push("")
+
+    games.forEach((gameNumber) => {
+      const gameMatches = filteredSchedule.filter(
+        (m) => String(m.game) === gameNumber
+      )
+
+      if (gameMatches.length > 0) {
+        messageLines.push(`**Game ${gameNumber}**`)
+
+        gameMatches.forEach((match) => {
+          messageLines.push(
+            `${getPlayerName(match.player1_id)} vs ${getPlayerName(
+              match.player2_id
+            )} — ${match.course}`
+          )
+        })
+
+        messageLines.push("")
+      }
+    })
+
+    const content = messageLines.join("\n")
+
+    const res = await fetch("/api/post-schedule", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ content, division }),
+    })
+
+    setPosting(false)
+
+    if (!res.ok) {
+      alert("Discord post failed")
+      return
+    }
+
+    alert("Schedule posted to Discord!")
+  }
+
+  async function generateMatches() {
+    setGenerating(true)
+
+    const res = await fetch("/api/create-matches", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        matches: filteredSchedule.map((m) => ({
+          league_type: m.league_type || division,
+          division: m.division,
+          player1_id: m.player1_id,
+          player2_id: m.player2_id,
+          player1_score: null,
+          player2_score: null,
+          player1_points: null,
+          player2_points: null,
+          player1_total_holes: null,
+          player2_total_holes: null,
+        })),
+      }),
+    })
+
+    setGenerating(false)
+
+    if (!res.ok) {
+      alert("Failed to generate matches")
+      return
+    }
+
+    alert("Matches created successfully!")
+  }
+
+  async function deleteScheduledMatch(id: string) {
+    const confirmDelete = confirm("Delete this scheduled match?")
+
+    if (!confirmDelete) return
+
+    const response = await fetch("/api/delete-schedule", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    })
+
+    if (!response.ok) {
+      alert("Delete failed")
+      return
+    }
+
+    setSchedule((current) =>
+      current.filter((match) => match.id !== id)
+    )
+  }
+
+  return (
+    <main style={{ padding: 24 }}>
+      <h1>Schedule</h1>
+
+      <label>Division</label>
+      <br />
+      <select value={division} onChange={(e) => setDivision(e.target.value)}>
+        <option>Stroke D1</option>
+        <option>Stroke D2</option>
+        <option>Stroke D3</option>
+        <option>Stroke D4</option>
+        <option>Stroke D5</option>
+
+        <option>Match Play D1</option>
+        <option>Match Play D2</option>
+        <option>Match Play D3</option>
+        <option>Match Play D4</option>
+        <option>Match Play D5</option>
+        <option>Match Play D6</option>
+
+        <option>Amateur D1</option>
+        <option>Semi Pro D1</option>
+        <option>Pro D1</option>
+        <option>Pro D2</option>
+        <option>Pro D3</option>
+
+        <option>Doubles Elite</option>
+        <option>Doubles D1</option>
+        <option>Doubles D2</option>
+        <option>Doubles D3</option>
+        <option>Doubles D4</option>
+        <option>Doubles D5</option>
+        <option>Doubles D6</option>
+
+        <option>PYP D1</option>
+        <option>PYP D2</option>
+        <option>PYP D3</option>
+        <option>PYP D4</option>
+        <option>PYP D5</option>
+      </select>
+
+      <br /><br />
+
+      <label>Season</label>
+      <br />
+      <input
+        value={seasonNumber}
+        onChange={(e) => setSeasonNumber(e.target.value)}
+      />
+
+      <br /><br />
+
+      <button onClick={postToDiscord} disabled={posting}>
+        {posting ? "Posting..." : "Post Schedule to Discord"}
+      </button>
+
+      <br /><br />
+
+      <button onClick={generateMatches} disabled={generating}>
+        {generating ? "Generating..." : "Generate Matches"}
+      </button>
+
+      <br /><br />
+
+      {filteredSchedule.length === 0 ? (
+        <p>No scheduled matches for this division.</p>
+      ) : (
+        games.map((gameNumber) => {
+          const gameMatches = filteredSchedule.filter(
+            (m) => String(m.game) === gameNumber
+          )
+
+          if (gameMatches.length === 0) return null
+
+          return (
+            <div key={gameNumber}>
+              <h2>Game {gameNumber}</h2>
+
+              <table border={1} cellPadding={8}>
+                <thead>
+                  <tr>
+                    <th>Player 1</th>
+                    <th>Player 2</th>
+                    <th>Course</th>
+                    <th>Delete</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {gameMatches.map((match) => (
+                    <tr key={match.id}>
+                      <td>{getPlayerName(match.player1_id)}</td>
+                      <td>{getPlayerName(match.player2_id)}</td>
+                      <td>{match.course}</td>
+                      <td>
+                        <button
+                          onClick={() =>
+                            deleteScheduledMatch(match.id)
+                          }
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              <br />
+            </div>
+          )
+        })
+      )}
+    </main>
+  )
+}

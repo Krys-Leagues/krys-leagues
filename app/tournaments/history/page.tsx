@@ -1,0 +1,10 @@
+import Link from "next/link"
+import { ARCHIVED_TOURNAMENTS, fetchTourneyBotPreview } from "@/lib/tourneyBot"
+import styles from "../current/page.module.css"
+
+export const dynamic = "force-dynamic"
+
+export default async function TournamentHistoryPage() {
+  const tournaments = await Promise.all(ARCHIVED_TOURNAMENTS.map(fetchTourneyBotPreview))
+  return <main className={styles.page}><div className={styles.shell}><Link href="/tournaments" className={styles.back}>← Bracket Tournaments</Link><header className={styles.header}><p className={styles.eyebrow}>Krys Leagues results archive</p><h1>Past Tournament Winners</h1><p>Public results from completed bracket tournaments. Trophy honors remain in the shared Hall of Champions.</p></header>{tournaments.map((tournament) => <article className={styles.previewCard} key={tournament.id}><div className={styles.previewHeader}><div><p className={styles.eyebrow}>Archived tournament</p><h2>{tournament.name}</h2></div><span className={tournament.available ? styles.live : styles.unavailable}>{tournament.status}</span></div>{!tournament.available ? <p className={styles.empty}>{tournament.error}</p> : <><p className={styles.meta}>{tournament.participantCount === null ? "Participant count unavailable" : `${tournament.participantCount} participants`}</p>{tournament.champion && <p><strong>Champion:</strong> {tournament.champion}</p>}{tournament.standings.length > 0 ? <section className={styles.standings}><h3>Final standings</h3>{tournament.standings.map((entry, index) => <p key={`${entry.name}-${index}`}><strong>{entry.place || `${index + 1}.`}</strong> {entry.name}{entry.score ? ` · ${entry.score}` : ""}</p>)}</section> : <p className={styles.empty}>No additional public final standings were reported.</p>}</>}<a className={styles.fullBracket} href={tournament.url} target="_blank" rel="noopener noreferrer">View Full Bracket →</a></article>)}<p><Link href="/champions?category=bracket&amp;from=tournaments" className={styles.fullBracket}>Open Bracket Hall of Champions →</Link></p></div></main>
+}

@@ -1,0 +1,69 @@
+{
+  "manifest_version": 1,
+  "generated_at": "2026-08-25",
+  "read_only": true,
+  "sources": [
+    {
+      "workbook": "PRO WEEK CURRENT",
+      "sheet_id": "1X8IM5qjBFTDyNgP8tl4eYBry9aFgK0cGj-B1sl2ddNI",
+      "url": "https://docs.google.com/spreadsheets/d/1X8IM5qjBFTDyNgP8tl4eYBry9aFgK0cGj-B1sl2ddNI/edit",
+      "raw_export": "raw-pro-week-current.txt",
+      "raw_sha256": "236CE4FA3813B56C0149033B2E45A1BD224FA7B9211BCF417350D8028C191160",
+      "page_count": 85
+    },
+    {
+      "workbook": "PAST PRO WEEKS",
+      "sheet_id": "1_8hrH2tnCCFGFOC5YbYwI8i4umZyZtAS7GZcoShDGeM",
+      "url": "https://docs.google.com/spreadsheets/d/1_8hrH2tnCCFGFOC5YbYwI8i4umZyZtAS7GZcoShDGeM/edit",
+      "raw_export": "raw-past-pro-weeks.txt",
+      "raw_sha256": "F3A23C2F62628CE029CF8BFFE82CDFE46707F809389395F79A2E93BEAC195EE3",
+      "page_count": 59,
+      "tab_metadata": "unavailable from connector; raw export retained"
+    },
+    {
+      "workbook": "past pro weeks 60+",
+      "sheet_id": "1nD0G1Nyt1qm7e3_3UM6dRwHb6kRNaXnRX8pzygT1tJ4",
+      "url": "https://docs.google.com/spreadsheets/d/1nD0G1Nyt1qm7e3_3UM6dRwHb6kRNaXnRX8pzygT1tJ4/edit",
+      "raw_export": "raw-past-pro-weeks-60-plus.txt",
+      "raw_sha256": "AD42F545399B2F2A483196715E314FCEC74F2A5303C9DFA22C535D79F109AC2D",
+      "page_count": 19
+    }
+  ],
+  "artifacts": [
+    {"path":"raw-pro-week-current.txt","sha256":"236CE4FA3813B56C0149033B2E45A1BD224FA7B9211BCF417350D8028C191160"},
+    {"path":"raw-past-pro-weeks.txt","sha256":"F3A23C2F62628CE029CF8BFFE82CDFE46707F809389395F79A2E93BEAC195EE3"},
+    {"path":"raw-past-pro-weeks-60-plus.txt","sha256":"AD42F545399B2F2A483196715E314FCEC74F2A5303C9DFA22C535D79F109AC2D"},
+    {"path":"historical-pro-scorecards.csv","sha256":"1F99DBCDA50A855B734316871C60AF8C151A59E26100E09D9519F0BC23C3D20A"},
+    {"path":"historical-pro-season-pairings.csv","sha256":"BA100D6A72FFDEE475959EF041F7F7A88CF188C780856E7F8A84271E14F2CCD4"},
+    {"path":"historical-pro-conflicts.csv","sha256":"E05CF0490C38570065E1F53AA61E3C29B5914A97363289B75951DECA542CB5D7"},
+    {"path":"historical-pro-missing-periods.csv","sha256":"4279BAC8107EB2BCC3D1FEE36419CF492144A536223F4F9C898786D34C6D7288"},
+    {"path":"historical-pro-current-incomplete.csv","sha256":"FE3EEB9D70601F66FF8B96E19EBF1372A92A661746619D49ED7B29BD95530CF0"},
+    {"path":"tab-inventory.json","sha256":"1E619B627D31DC8D50360A132D15D5A905A1B009AC6AB2A2646D33ECEFDEB197"}
+  ],
+  "audit_counts": {
+    "completed_seasons": 12,
+    "available_weekly_periods": 132,
+    "missing_weekly_periods": 5,
+    "primary_player_period_rows": 1732,
+    "primary_published_standings_rows": 439,
+    "primary_easy_hard_score_observations": 8522,
+    "unique_exact_historical_names": 121,
+    "duplicate_score_observations_beyond_first": 196,
+    "conflicting_keys": 34,
+    "conflicting_raw_observations": 68,
+    "season_pairing_artifact_rows": 342,
+    "season_pairing_source_confirmed_pairings": 327,
+    "season_pairing_game_1": 109,
+    "season_pairing_game_2": 109,
+    "season_pairing_game_3": 109,
+    "season_pairing_played": 240,
+    "season_pairing_scheduled_unplayed": 0,
+    "season_pairing_partial": 87,
+    "season_pairing_ambiguous_or_unpaired_records": 15,
+    "season_pairing_text_color_fields": "effectiveFormat.textFormat.foregroundColor and userEnteredFormat.textFormat.foregroundColor; left-side score-entry cells only",
+    "season_pairing_seasons_included": "1-12",
+    "season_pairing_season_13_excluded": true,
+    "season_13_status": "CURRENT / INCOMPLETE / NOT IMPORTABLE",
+    "conflict_policy": "Week 107 variants excluded pending Krys review"
+  }
+}

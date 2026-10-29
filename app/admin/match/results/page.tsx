@@ -1,0 +1,486 @@
+"use client"
+
+import { useEffect, useMemo, useState } from "react"
+import { useRouter } from "next/navigation"
+import { supabase } from "@/lib/supabase"
+import { fetchAdminSchedule } from "@/lib/admin/scheduleRead"
+
+type SeasonRow = {
+  id: string
+  season_number: number
+  is_active: boolean
+}
+
+type ScheduleMatch = {
+  id: string
+  season_id: string
+  division_number: number
+  division: string
+  game_number: number
+  game: string
+  course: string | null
+  player1: string
+  player2: string
+  player1_name: string | null
+  player2_name: string | null
+  player1_id: string
+  player2_id: string
+}
+
+type ResultRow = {
+  schedule_id: string
+  player1_hw: number | null
+  player2_hw: number | null
+}
+
+type DeletedResultRow = {
+  result_deleted: boolean
+}
+
+export default function MatchResultsPage() {
+  const router = useRouter()
+  const [seasons, setSeasons] = useState<SeasonRow[]>([])
+  const [seasonId, setSeasonId] = useState("")
+  const [divisionNumber, setDivisionNumber] = useState("")
+  const [scheduledMatches, setScheduledMatches] = useState<ScheduleMatch[]>([])
+  const [resultsBySchedule, setResultsBySchedule] = useState<Map<string, ResultRow>>(new Map())
+  const [selectedScheduleId, setSelectedScheduleId] = useState("")
+  const [score1, setScore1] = useState("")
+  const [score2, setScore2] = useState("")
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [error, setError] = useState("")
+  const [message, setMessage] = useState("")
+
+  useEffect(() => {
+    void loadSeasons()
+  }, [])
+
+  useEffect(() => {
+    if (seasonId) void loadFixtures(seasonId)
+    // loadFixtures is intentionally driven only by the selected managed season.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seasonId])
+
+  async function loadSeasons() {
+    setLoading(true)
+    setError("")
+
+    const { data, error: seasonError } = await supabase
+      .from("seasons")
+      .select("id, season_number, is_active")
+      .eq("league_type", "match")
+      .is("division", null)
+      .order("is_active", { ascending: false })
+      .order("season_number", { ascending: false })
+
+    if (seasonError) {
+      setError(`Could not load Match seasons: ${seasonError.message}`)
+      setLoading(false)
+      return
+    }
+
+    const candidateSeasons = (data || []) as SeasonRow[]
+    let loadedSeasons: SeasonRow[] = []
+
+    if (candidateSeasons.length > 0) {
+      const { data: rosterData, error: rosterError } = await supabase
+        .from("match_roster_versions")
+        .select("season_id")
+        .in("season_id", candidateSeasons.map((item) => item.id))
+        .eq("status", "approved")
+
+      if (rosterError) {
+        setError(`Could not load managed Match seasons: ${rosterError.message}`)
+        setLoading(false)
+        return
+      }
+
+      const managedSeasonIds = new Set(
+        (rosterData || []).map((roster) => roster.season_id as string)
+      )
+      loadedSeasons = candidateSeasons.filter((item) => managedSeasonIds.has(item.id))
+    }
+
+    const requestedSeasonId = new URLSearchParams(window.location.search)
+      .get("seasonId")
+      ?.trim()
+    setSeasons(loadedSeasons)
+    setSeasonId((current) => {
+      if (loadedSeasons.some((item) => item.id === current)) return current
+      if (loadedSeasons.some((item) => item.id === requestedSeasonId)) {
+        return requestedSeasonId || ""
+      }
+      return loadedSeasons[0]?.id || ""
+    })
+    setLoading(false)
+  }
+
+  async function loadFixtures(selectedSeasonId: string) {
+    setLoading(true)
+    setError("")
+
+    const { data: rosterData, error: rosterError } = await supabase
+      .from("match_roster_versions")
+      .select("id")
+      .eq("season_id", selectedSeasonId)
+      .eq("status", "approved")
+      .maybeSingle()
+
+    if (rosterError || !rosterData) {
+      setError(rosterError ? `Could not load the approved Match roster: ${rosterError.message}` : "An approved Match roster is required for result entry.")
+      setLoading(false)
+      return
+    }
+
+    const { data, error: fixtureError } = await fetchAdminSchedule<ScheduleMatch>({
+      league_type: "match",
+      season_id: selectedSeasonId,
+      match_roster_version_id: rosterData.id,
+      require_real_players: true,
+    })
+
+    if (fixtureError) {
+      setError(`Could not load managed Match fixtures: ${fixtureError.message}`)
+      setLoading(false)
+      return
+    }
+
+    const fixtures = (data || []) as ScheduleMatch[]
+    const fixtureIds = fixtures.map((fixture) => fixture.id)
+    let resultRows: ResultRow[] = []
+
+    if (fixtureIds.length > 0) {
+      const resultResponse = await fetch(`/api/admin/players?view=results&league_type=match&schedule_ids=${encodeURIComponent(fixtureIds.join(","))}`, { credentials: "same-origin", cache: "no-store" })
+      const resultPayload = await resultResponse.json() as { results?: ResultRow[]; error?: string }
+      const resultData = resultPayload.results || []
+      const resultError = resultResponse.ok ? null : new Error(resultPayload.error || "Results could not be loaded.")
+
+      if (resultError) {
+        setError(`Could not load Match results: ${resultError.message}`)
+        setLoading(false)
+        return
+      }
+
+      resultRows = (resultData || []) as ResultRow[]
+    }
+
+    const availableDivisions = Array.from(
+      new Set(fixtures.map((fixture) => fixture.division_number))
+    ).sort((a, b) => a - b)
+
+    setScheduledMatches(fixtures)
+    setResultsBySchedule(new Map(resultRows.map((result) => [result.schedule_id, result])))
+    setDivisionNumber((current) =>
+      availableDivisions.includes(Number(current))
+        ? current
+        : availableDivisions[0]?.toString() || ""
+    )
+    resetPickedMatch()
+    setLoading(false)
+  }
+
+  function resetPickedMatch() {
+    setSelectedScheduleId("")
+    setScore1("")
+    setScore2("")
+  }
+
+  function hasCompletedResult(scheduleId: string) {
+    const result = resultsBySchedule.get(scheduleId)
+    return Boolean(
+      result &&
+        result.player1_hw !== null &&
+        result.player2_hw !== null
+    )
+  }
+
+  function handlePickMatch(scheduleId: string) {
+    setSelectedScheduleId(scheduleId)
+    setError("")
+    setMessage("")
+
+    const existingResult = resultsBySchedule.get(scheduleId)
+    const hasStoredScores =
+      existingResult?.player1_hw !== null &&
+      existingResult?.player1_hw !== undefined &&
+      existingResult.player2_hw !== null
+    setScore1(hasStoredScores ? String(existingResult.player1_hw) : "")
+    setScore2(hasStoredScores ? String(existingResult.player2_hw) : "")
+  }
+
+  function parseScore(value: string, label: string) {
+    if (value.trim() === "") throw new Error(`${label} is required.`)
+    if (!/^-?\d+$/.test(value.trim())) {
+      throw new Error(`${label} must be a whole number.`)
+    }
+
+    const parsed = Number(value.trim())
+    if (!Number.isSafeInteger(parsed)) {
+      throw new Error(`${label} must be a valid whole number.`)
+    }
+    return parsed
+  }
+
+  async function handleSubmit() {
+    if (!selectedMatch) {
+      setError("Select a managed Match fixture before saving a result.")
+      return
+    }
+
+    let player1Score: number
+    let player2Score: number
+
+    try {
+      player1Score = parseScore(score1, `${player1Name} HW`)
+      player2Score = parseScore(score2, `${player2Name} HW`)
+    } catch (validationError) {
+      setError(validationError instanceof Error ? validationError.message : "Enter valid scores.")
+      return
+    }
+
+    setSaving(true)
+    setError("")
+    setMessage("")
+
+    const { error: saveError } = await supabase.rpc("save_match_result", {
+      p_schedule_id: selectedMatch.id,
+      p_player1_hw: player1Score,
+      p_player2_hw: player2Score,
+    })
+
+    if (saveError) {
+      setError(`Result save failed: ${saveError.message}`)
+      setSaving(false)
+      return
+    }
+
+    try {
+      const { error: standingsError } = await supabase.rpc("rebuild_match_standings", {
+        p_season_id: selectedMatch.season_id,
+        p_division_number: selectedMatch.division_number,
+      })
+      if (standingsError) throw standingsError
+      await loadFixtures(selectedMatch.season_id)
+      setMessage("Match result saved. Standings were recalculated.")
+    } catch (standingsError) {
+      await loadFixtures(selectedMatch.season_id)
+      setError(
+        `Match result was saved, but standings rebuild failed: ${
+          standingsError instanceof Error
+            ? standingsError.message
+            : typeof standingsError === "object" && standingsError && "message" in standingsError
+              ? String(standingsError.message)
+              : "Unknown error."
+        }`
+      )
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function handleDeleteResult() {
+    if (!selectedMatch || !correctingResult || deleting) return
+    if (
+      !window.confirm(
+        `Delete the submitted result for ${player1Name} vs ${player2Name}? The fixture will become unplayed.`
+      )
+    ) return
+
+    setDeleting(true)
+    setError("")
+    setMessage("")
+
+    const { data, error: deleteError } = await supabase
+      .rpc("delete_match_result", {
+        p_schedule_id: selectedMatch.id,
+      })
+      .single()
+
+    if (deleteError) {
+      setError(`Result deletion failed: ${deleteError.message}`)
+      setDeleting(false)
+      return
+    }
+
+    await loadFixtures(selectedMatch.season_id)
+    setMessage(
+      (data as DeletedResultRow | null)?.result_deleted
+        ? "Submitted result deleted. The fixture is unplayed and standings were rebuilt."
+        : "No submitted result remained for this fixture."
+    )
+    setDeleting(false)
+  }
+
+  const divisions = useMemo(
+    () => Array.from(new Set(scheduledMatches.map((fixture) => fixture.division_number))).sort((a, b) => a - b),
+    [scheduledMatches]
+  )
+  const visibleMatches = useMemo(
+    () => scheduledMatches.filter((fixture) => fixture.division_number === Number(divisionNumber)),
+    [divisionNumber, scheduledMatches]
+  )
+  const selectedMatch = scheduledMatches.find((fixture) => fixture.id === selectedScheduleId) || null
+  const player1Name = selectedMatch?.player1_name || selectedMatch?.player1 || "Player 1"
+  const player2Name = selectedMatch?.player2_name || selectedMatch?.player2 || "Player 2"
+  const selectedResult = selectedMatch
+    ? resultsBySchedule.get(selectedMatch.id)
+    : undefined
+  const correctingResult = Boolean(
+    selectedResult &&
+      selectedResult.player1_hw !== null &&
+      selectedResult.player2_hw !== null
+  )
+
+  return (
+    <main style={page}>
+      <div style={container}>
+        <div style={topBar}>
+          <button onClick={() => router.push("/admin/match")} style={backButtonPrimary}>
+            ← Match Hub
+          </button>
+          <button onClick={() => router.push("/admin")} style={backButtonSecondary}>
+            ← Admin
+          </button>
+          {seasonId && (
+            <>
+              <button
+                onClick={() => router.push(`/admin/match/schedule?seasonId=${encodeURIComponent(seasonId)}`)}
+                style={backButtonSecondary}
+              >
+                View Schedule &amp; Images
+              </button>
+              <button
+                onClick={() => router.push(`/admin/match/standings?seasonId=${encodeURIComponent(seasonId)}`)}
+                style={backButtonSecondary}
+              >
+                View Scorecard / Standings
+              </button>
+            </>
+          )}
+        </div>
+
+        <div style={card}>
+          <h1 style={title}>Match Results Admin</h1>
+          <p style={subtitle}>Pick a managed fixture, enter both players&apos; Holes Won, and save.</p>
+
+          <section style={section}>
+            <h2 style={sectionTitle}>League Info</h2>
+            <div style={grid}>
+              <div>
+                <label style={label}>Season</label>
+                <select value={seasonId} onChange={(event) => setSeasonId(event.target.value)} style={input}>
+                  {seasons.map((season) => (
+                    <option key={season.id} value={season.id}>Season {season.season_number}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label style={label}>Division</label>
+                <select value={divisionNumber} onChange={(event) => { setDivisionNumber(event.target.value); resetPickedMatch() }} style={input}>
+                  {divisions.map((division) => (
+                    <option key={division} value={division}>Match D{division}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </section>
+
+          <section style={section}>
+            <h2 style={sectionTitle}>Match</h2>
+            <label style={label}>Pick Match</label>
+            <select value={selectedScheduleId} onChange={(event) => handlePickMatch(event.target.value)} style={wideInput}>
+              <option value="">Select match</option>
+              {visibleMatches.map((match) => {
+                const completed = hasCompletedResult(match.id)
+                return (
+                  <option key={match.id} value={match.id}>
+                    {match.player1_name || match.player1} vs {match.player2_name || match.player2}{completed ? " — Result entered" : ""}
+                  </option>
+                )
+              })}
+            </select>
+
+            {selectedMatch && (
+              <div style={matchCard}>
+                <div style={matchText}>{player1Name}</div>
+                <div style={vsText}>vs</div>
+                <div style={matchText}>{player2Name}</div>
+                <div style={courseText}>Division: {selectedMatch.division}</div>
+                <div style={courseText}>Game: {selectedMatch.game}</div>
+                <div style={courseText}>Course: {selectedMatch.course || "Not set"}</div>
+              </div>
+            )}
+          </section>
+
+          <section style={section}>
+            <h2 style={sectionTitle}>Holes Won</h2>
+            {correctingResult && (
+              <p style={existingResultNotice}>
+                Existing submitted result — edit the stored HW below or delete the result.
+              </p>
+            )}
+            <div style={grid}>
+              <div>
+                <label style={label}>{player1Name} HW</label>
+                <input value={score1} onChange={(event) => setScore1(event.target.value)} inputMode="numeric" style={input} />
+              </div>
+              <div>
+                <label style={label}>{player2Name} HW</label>
+                <input value={score2} onChange={(event) => setScore2(event.target.value)} inputMode="numeric" style={input} />
+              </div>
+            </div>
+          </section>
+
+          <button onClick={handleSubmit} disabled={saving || loading || !selectedMatch} style={submitButton}>
+            {saving ? "Saving..." : correctingResult ? "Update Submitted Score" : "Submit Result"}
+          </button>
+
+          {correctingResult && (
+            <div style={destructiveArea}>
+              <button
+                type="button"
+                onClick={() => void handleDeleteResult()}
+                disabled={saving || deleting}
+                style={deleteButton}
+              >
+                {deleting ? "Deleting Result..." : "Delete Result"}
+              </button>
+            </div>
+          )}
+
+          {loading && <p style={infoText}>Loading managed Match fixtures...</p>}
+          {error && <p role="alert" style={errorText}>{error}</p>}
+          {message && <p role="status" style={successText}>{message}</p>}
+        </div>
+      </div>
+    </main>
+  )
+}
+
+const page: React.CSSProperties = { minHeight: "100vh", background: "black", color: "white", display: "flex", justifyContent: "center" }
+const container: React.CSSProperties = { width: "100%", maxWidth: 1100, padding: 30 }
+const topBar: React.CSSProperties = { display: "flex", gap: 10, marginBottom: 20 }
+const backButtonPrimary: React.CSSProperties = { padding: "10px 16px", background: "#2563eb", border: "none", borderRadius: 8, color: "white", fontWeight: 700, cursor: "pointer" }
+const backButtonSecondary: React.CSSProperties = { padding: "10px 16px", background: "#222", border: "1px solid #555", borderRadius: 8, color: "white", cursor: "pointer" }
+const card: React.CSSProperties = { background: "#050505", border: "1px solid #333", borderRadius: 18, padding: 28, boxShadow: "0 0 30px rgba(255,255,255,0.08)" }
+const title: React.CSSProperties = { fontSize: 38, margin: 0 }
+const subtitle: React.CSSProperties = { marginTop: 8, color: "#aaa", fontSize: 16 }
+const section: React.CSSProperties = { marginTop: 28 }
+const sectionTitle: React.CSSProperties = { fontSize: 24, marginBottom: 14 }
+const grid: React.CSSProperties = { display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 18 }
+const label: React.CSSProperties = { display: "block", marginBottom: 8, color: "#ddd", fontWeight: 700 }
+const input: React.CSSProperties = { width: "100%", padding: 14, background: "#111", color: "white", border: "1px solid #555", borderRadius: 10, fontSize: 18 }
+const wideInput: React.CSSProperties = { ...input, fontSize: 20 }
+const matchCard: React.CSSProperties = { marginTop: 18, padding: 22, background: "#111", border: "1px solid #444", borderRadius: 14, textAlign: "center" }
+const matchText: React.CSSProperties = { fontSize: 28, fontWeight: 800 }
+const vsText: React.CSSProperties = { margin: "8px 0", color: "#aaa", fontSize: 18 }
+const courseText: React.CSSProperties = { marginTop: 8, color: "#ccc", fontSize: 18 }
+const submitButton: React.CSSProperties = { marginTop: 30, padding: 16, width: "100%", background: "#16a34a", border: "none", borderRadius: 12, color: "white", fontSize: 20, fontWeight: 800, cursor: "pointer" }
+const infoText: React.CSSProperties = { marginTop: 16, color: "#bbb" }
+const errorText: React.CSSProperties = { marginTop: 16, color: "#fca5a5", whiteSpace: "pre-wrap" }
+const successText: React.CSSProperties = { marginTop: 16, color: "#86efac", whiteSpace: "pre-wrap" }
+const existingResultNotice: React.CSSProperties = { padding: 12, color: "#fde68a", background: "#2a1f05", border: "1px solid #92400e", borderRadius: 8 }
+const destructiveArea: React.CSSProperties = { marginTop: 24, paddingTop: 18, borderTop: "1px solid #7f1d1d" }
+const deleteButton: React.CSSProperties = { padding: "11px 16px", background: "transparent", color: "#fca5a5", border: "1px solid #b91c1c", borderRadius: 9, fontWeight: 800, cursor: "pointer" }
