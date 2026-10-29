@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "centralBaselineCommit": "2252ff7ec162476189f4f31b48c03add0e024ba6",
+  "centralBaselineBranch": "codex/automated-recovery-20261029",
+  "productionDomains": ["krysleagues.com", "www.krysleagues.com"],
+  "productionDatabaseProject": "jfbndcwdsvsjgnzwvexp",
+  "stagingDatabaseProject": "jiekoqgegqcbqaobisvm",
+  "requiredRoutes": [
+    "/", "/players", "/league-play", "/match-play", "/stroke", "/doubles", "/pyp", "/skins", "/amateur-pro",
+    "/kwt", "/kwt/upcoming", "/kwt/records", "/tournaments", "/tournaments/current", "/tournaments/history",
+    "/invitationals", "/majors", "/champions", "/course-challenges", "/records", "/records/single", "/records/combined", "/leaderboards"
+  ],
+  "requiredFiles": [
+    "app/page.tsx", "app/players/page.tsx", "app/league-play/page.tsx", "app/match-play/page.tsx", "app/stroke/page.tsx",
+    "app/doubles/page.tsx", "app/pyp/page.tsx", "app/skins/page.tsx", "app/amateur-pro/page.tsx", "app/kwt/page.tsx",
+    "app/kwt/upcoming/page.tsx", "app/kwt/records/page.tsx", "app/tournaments/page.tsx", "app/tournaments/current/page.tsx",
+    "app/tournaments/history/page.tsx", "app/invitationals/page.tsx", "app/majors/page.tsx", "app/majors/[slug]/page.tsx",
+    "app/champions/page.tsx", "app/course-challenges/page.tsx", "app/records/page.tsx", "app/records/single/page.tsx",
+    "app/records/combined/page.tsx", "app/leaderboards/page.tsx", "app/admin/page.tsx", "app/admin/majors/scheduling/page.tsx",
+    "components/MajorTimeZoneControl.tsx", "components/navigation/ArtworkNavigation.tsx", "lib/artworkPageMaps.ts"
+  ],
+  "requiredAssets": [
+    "public/main-hub-approved.jpg", "public/approved-pages/player-profiles-approved.jpg", "public/approved-pages/league-play-approved.png",
+    "public/approved-pages/match-play-approved.jpg", "public/approved-pages/stroke-play-approved.jpg", "public/approved-pages/doubles-approved.jpg",
+    "public/approved-pages/pyp-approved.jpg", "public/approved-pages/skins-approved.jpg", "public/approved-pages/amateur-to-pro-approved.jpg",
+    "public/approved-pages/kwt-hub-approved.png", "public/approved-pages/bracket-tournaments-approved.png", "public/approved-pages/invitationals-approved.jpg",
+    "public/approved-pages/overall-leaderboards-approved.jpg", "public/approved-pages/hall-of-champions-approved.jpg", "public/approved-pages/the mga open.jpg",
+    "public/approved-pages/gardens-of-babylon-background.png", "public/approved-pages/mga-cup.png"
+  ],
+  "sourceMarkers": [
+    ["app/page.tsx", "<MgaHomepageBanner />"], ["app/page.tsx", "ArtworkNavigation"], ["app/players/page.tsx", "search"],
+    ["app/kwt/page.tsx", "kwtArtwork"], ["app/majors/[slug]/page.tsx", "MajorTimeZoneControl"],
+    ["components/MajorTimeZoneControl.tsx", "Your Local Time Zone"], ["components/MajorTimeZoneControl.tsx", "supportedValuesOf"],
+    ["components/home/MgaHomepageBanner.tsx", "href=\"/majors/major-2\""],
+    ["components/navigation/ArtworkNavigation.tsx", "data-approved-artwork-page"], ["lib/artworkPageMaps.ts", "id: \"main-hub\""],
+    ["lib/artworkPageMaps.ts", "id: \"kwt-hub\""]
+  ],
+  "protectedOperations": [
+    "production-deployment", "production-database-write", "production-migration", "shared-staging-alias-change",
+    "destructive-migration", "authorization-or-credential-change"
+  ]
+}

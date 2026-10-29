@@ -16,7 +16,9 @@
     "test:monthly-import": "node --experimental-strip-types --test lib/importer/adapters/monthlyWebsiteAdapter.test.ts",
     "test:trophy-import": "node --experimental-strip-types --test lib/trophies/trophyImport.test.ts lib/trophies/trophyMedia.test.ts lib/trophies/pendingTrophyAssignments.test.ts",
     "test:all-time": "node --experimental-strip-types --test tests/all-time/*.test.ts",
-    "test:recovery": "node --test tests/recovery/source-completeness.test.mjs tests/recovery/approved-route-inventory.test.mjs tests/recovery/public-board-preservation.test.mjs tests/recovery/mga-homepage-banner.test.mjs"
+    "test:recovery": "node --test tests/recovery/source-completeness.test.mjs tests/recovery/approved-route-inventory.test.mjs tests/recovery/public-board-preservation.test.mjs tests/recovery/mga-homepage-banner.test.mjs",
+    "test:isolation": "node --test tests/recovery/isolation-safety.test.mjs tests/recovery/approved-route-inventory.test.mjs tests/recovery/source-completeness.test.mjs",
+    "verify:release-safety": "node scripts/verify-release-safety.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",
