@@ -10,10 +10,10 @@ export default function MgaHomepageBanner() {
     >
       <Image
         className="artwork-navigation__mga-artwork"
-        src="/approved-pages/the mga open.jpg"
+        src="/approved-pages/the mga open registration nov 1st.png"
         alt="Gardens of Babylon artwork for The MGA Open"
-        width={2048}
-        height={682}
+        width={2172}
+        height={724}
         priority
         draggable={false}
       />
