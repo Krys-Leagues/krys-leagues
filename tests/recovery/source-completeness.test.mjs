@@ -38,6 +38,7 @@ const requiredAssets = [
   "public/approved-pages/bracket-tournaments-approved.png",
   "public/approved-pages/kwt-hub-approved.png",
   "public/approved-pages/the mga open.jpg",
+  "public/approved-pages/the mga open registration nov 1st.png",
   "public/approved-pages/gardens-of-babylon-background.png",
   "public/approved-pages/mga-cup.png",
 ]
@@ -67,5 +68,5 @@ test("KWT artwork keeps all four public destinations", () => {
 test("homepage exposes the live MGA Open entry artwork", () => {
   const source = fs.readFileSync(path.join(repoRoot, "components/home/MgaHomepageBanner.tsx"), "utf8")
   assert.match(source, /href="\/majors\/major-2"/)
-  assert.match(source, /approved-pages\/the mga open\.jpg/)
+  assert.match(source, /approved-pages\/the mga open registration nov 1st\.png/)
 })

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict"
+import { execFileSync } from "node:child_process"
 import { readFileSync } from "node:fs"
 import { resolve } from "node:path"
 import test from "node:test"
@@ -6,7 +7,7 @@ import { validateRegistry } from "../../scripts/verify-feature-registry.mjs"
 
 const root = resolve(import.meta.dirname, "../..")
 const registry = JSON.parse(readFileSync(resolve(root, "release/approved-feature-registry.json"), "utf8"))
-const head = "54882a8877f43afe06b54846e7c70d04c90ef017"
+const head = execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim()
 const baseline = "2252ff7ec162476189f4f31b48c03add0e024ba6"
 
 test("registry inventories every requested feature family without inferred approval", () => {
