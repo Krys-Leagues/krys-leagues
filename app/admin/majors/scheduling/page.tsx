@@ -3,8 +3,6 @@
 import Link from "next/link"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import {
-  formatMajorDeadline,
-  formatMajorLocalTime,
   isMajorDayLocked,
   majorEventLocalTimeToIso,
   toDateTimeLocal,
@@ -29,6 +27,9 @@ import {
 } from "@/lib/identity/globalPlayerDirectory"
 import { supabase } from "@/lib/supabase"
 import { getMajorVipEligiblePlayers } from "@/lib/majorVipEligibility"
+import MajorTimeZoneControl from "@/components/MajorTimeZoneControl"
+import { formatMajorLocalDateTime } from "@/lib/majorTimeZone"
+import { useMajorDisplayTimeZone } from "@/lib/useMajorDisplayTimeZone"
 import styles from "./page.module.css"
 
 type AdminSection = "setup" | `day-${1 | 2 | 3 | 4}` | "weekend" | "results" | "testers"
@@ -58,6 +59,7 @@ export default function MajorSchedulingAdminPage() {
   const [globalPlayers, setGlobalPlayers] = useState<GlobalPlayerDirectoryEntry[]>([])
   const [message, setMessage] = useState("")
   const selectedEvent = events.find((event) => event.id === eventId)
+  const displayTimeZone = useMajorDisplayTimeZone()
 
   const loadSchedule = useCallback(async (id: string) => {
     if (!id) return
@@ -399,6 +401,7 @@ export default function MajorSchedulingAdminPage() {
         <div><p className={styles.eyebrow}>Krys Leagues tournament control</p><h1>Major schedule & rooms</h1><p>Setup → Day → Times → Players → Rooms → Publish</p></div>
         <label className={styles.eventPicker}>Tournament<select value={eventId} onChange={(event) => { setEventId(event.target.value); setActiveSection("setup"); void loadSchedule(event.target.value) }}>{events.map((event) => <option key={event.id} value={event.id}>{event.is_test_event ? "TEST EVENT — " : ""}{event.name}</option>)}</select></label>
       </header>
+      <MajorTimeZoneControl key={`${displayTimeZone.timeZone}:${displayTimeZone.source}`} {...displayTimeZone} compact />
 
       {selectedEvent?.is_test_event && <div className={styles.testBanner}><strong>TEST EVENT</strong><span>TEST DATA — NOT OFFICIAL</span></div>}
       {message && <div className={styles.message}>{message}</div>}
@@ -422,6 +425,7 @@ export default function MajorSchedulingAdminPage() {
         onApplyStandardTimes={applyStandardTimes}
         onSaveInformation={saveInformation}
         prioritySourcePlacements={prioritySourcePlacements}
+        displayTimeZone={displayTimeZone.timeZone}
       />}
 
       {selectedEvent && activeDayNumber && <DayWorkspace
@@ -441,6 +445,7 @@ export default function MajorSchedulingAdminPage() {
         onSaveGroup={saveGroup}
         onDeleteGroup={deleteGroup}
         onPublishDay={publishDay}
+        displayTimeZone={displayTimeZone.timeZone}
       />}
 
       {selectedEvent && activeSection === "weekend" && <WeekendField
@@ -449,6 +454,7 @@ export default function MajorSchedulingAdminPage() {
         weekend={weekend}
         onSetStatus={setWeekendStatus}
         onPublish={publishWeekendField}
+        displayTimeZone={displayTimeZone.timeZone}
       />}
 
       {selectedEvent && activeSection === "results" && <Results
@@ -470,7 +476,7 @@ export default function MajorSchedulingAdminPage() {
   </main>
 }
 
-function EventSetup({ event, events, days, standardTimes, onSaveOpening, onReleaseSpots, onSaveLockHours, onSaveDay, onSaveStandardTime, onRemoveStandardTime, onCopyThursdayTimes, onApplyStandardTimes, onSaveInformation, prioritySourcePlacements }: {
+function EventSetup({ event, events, days, standardTimes, onSaveOpening, onReleaseSpots, onSaveLockHours, onSaveDay, onSaveStandardTime, onRemoveStandardTime, onCopyThursdayTimes, onApplyStandardTimes, onSaveInformation, prioritySourcePlacements, displayTimeZone }: {
   event: MajorEvent
   events: MajorEvent[]
   days: MajorPlayDay[]
@@ -485,6 +491,7 @@ function EventSetup({ event, events, days, standardTimes, onSaveOpening, onRelea
   onApplyStandardTimes: () => Promise<void>
   onSaveInformation: (form: HTMLFormElement) => Promise<void>
   prioritySourcePlacements: MajorFinalPlacement[]
+  displayTimeZone: string
 }) {
   const informationFields = [
     { name: "signup", label: "Signup instructions", value: event.signup_instructions },
@@ -528,7 +535,7 @@ function EventSetup({ event, events, days, standardTimes, onSaveOpening, onRelea
         </form>
         <div className={styles.deadlineList}>{DAY_NAMES.map((name, index) => {
           const day = days.find((item) => item.day_number === index + 1)
-          return <div key={name.short}><strong>{name.short}</strong><span>{day?.selection_locks_at ? `${formatMajorDeadline(day.selection_locks_at, event.schedule_timezone)} · ${event.schedule_timezone}` : "Add an available time to calculate the deadline"}</span></div>
+          return <div key={name.short}><strong>{name.short}</strong><span>{day?.selection_locks_at ? `${formatMajorLocalDateTime(day.selection_locks_at, displayTimeZone)} · ${displayTimeZone}` : "Add an available time to calculate the deadline"}</span></div>
         })}</div>
       </div>
     </div>
@@ -560,7 +567,7 @@ function EventSetup({ event, events, days, standardTimes, onSaveOpening, onRelea
   </section>
 }
 
-function DayWorkspace({ event, dayNumber, day, slots, entries, groups, members, choicesBySlot, onAddSlot, onEditSlot, onSetSlotAvailability, onRemoveSlot, onMovePlayer, onSaveGroup, onDeleteGroup, onPublishDay }: {
+function DayWorkspace({ event, dayNumber, day, slots, entries, groups, members, choicesBySlot, onAddSlot, onEditSlot, onSetSlotAvailability, onRemoveSlot, onMovePlayer, onSaveGroup, onDeleteGroup, onPublishDay, displayTimeZone }: {
   event: MajorEvent
   dayNumber: number
   day?: MajorPlayDay
@@ -577,6 +584,7 @@ function DayWorkspace({ event, dayNumber, day, slots, entries, groups, members, 
   onSaveGroup: (slot: MajorTimeSlot, form: HTMLFormElement, group: MajorScheduleGroup | null, publish: boolean) => Promise<void>
   onDeleteGroup: (id: string) => Promise<void>
   onPublishDay: (day: MajorPlayDay) => Promise<void>
+  displayTimeZone: string
 }) {
   const name = DAY_NAMES[dayNumber - 1]
   if (!day) return <section className={styles.workspace}><div className={styles.emptyState}><h2>{name.title}</h2><p>Configure this day’s official date and label in Event Setup first.</p></div></section>
@@ -585,7 +593,7 @@ function DayWorkspace({ event, dayNumber, day, slots, entries, groups, members, 
   const published = dayGroups.length > 0 && dayGroups.every((group) => group.is_published)
 
   return <section className={styles.workspace}>
-    <div className={styles.sectionHeading}><div><p className={styles.step}>Day {dayNumber}</p><h2>{name.title}</h2><p>{day.play_date} · Times entered in {event.schedule_timezone}</p></div><div className={styles.lockSummary}><strong>{isMajorDayLocked(day) ? "Player choices locked" : "Player choices open"}</strong><span>{day.selection_locks_at ? `${formatMajorDeadline(day.selection_locks_at, event.schedule_timezone)} · ${event.schedule_timezone}` : "Add a time to calculate the deadline"}</span></div></div>
+    <div className={styles.sectionHeading}><div><p className={styles.step}>Day {dayNumber}</p><h2>{name.title}</h2><p>{day.play_date} · Times entered in {event.schedule_timezone}</p></div><div className={styles.lockSummary}><strong>{isMajorDayLocked(day) ? "Player choices locked" : "Player choices open"}</strong><span>{day.selection_locks_at ? `${formatMajorLocalDateTime(day.selection_locks_at, displayTimeZone)} · ${displayTimeZone}` : "Add a time to calculate the deadline"}</span></div></div>
 
     <div className={styles.dayActions}><form onSubmit={(e) => { e.preventDefault(); void onAddSlot(day, e.currentTarget) }}><label>Add signup time<input name="time" type="time" required /><small>Times entered in: {event.schedule_timezone}. Official date: {day.play_date}.</small></label><label>Optional plain-language label<input name="label" placeholder="Featured time" /></label><button className={styles.primaryButton}>Add signup time</button></form><button type="button" className={styles.publishButton} onClick={() => void onPublishDay(day)}>{published ? `${name.short} rooms published` : `Publish ${name.short} rooms`}</button></div>
 
@@ -594,7 +602,7 @@ function DayWorkspace({ event, dayNumber, day, slots, entries, groups, members, 
         const playerCount = (choicesBySlot.get(slot.id) || []).length
         const roomCount = groups.filter((group) => group.time_slot_id === slot.id).length
         return <form key={slot.id} className={`${styles.managerCard} ${!slot.is_available ? styles.disabledSlot : ""}`} onSubmit={(e) => { e.preventDefault(); void onEditSlot(slot, e.currentTarget) }}>
-          <header><div><strong>{formatMajorLocalTime(slot.starts_at, event.schedule_timezone)}</strong><span>{slot.is_available ? "Available" : "Disabled"}</span></div><b>{playerCount} selected</b></header>
+          <header><div><strong>{formatMajorLocalDateTime(slot.starts_at, displayTimeZone)}</strong><span>{slot.is_available ? "Available" : "Disabled"}</span></div><b>{playerCount} selected</b></header>
           <small>UTC reference: {new Date(slot.starts_at).toISOString()}</small>
           <label>Event-local time<input name="time" type="time" defaultValue={toMajorEventTimeInput(slot.starts_at, event.schedule_timezone)} required /><small>Keeps the official {name.short} date: {day.play_date}.</small></label>
           <label>Optional label<input name="label" defaultValue={slot.label || ""} /></label>
@@ -602,7 +610,7 @@ function DayWorkspace({ event, dayNumber, day, slots, entries, groups, members, 
           {!slot.is_available && playerCount > 0 && <p className={styles.slotWarning}>{playerCount} existing selection{playerCount === 1 ? " is" : "s are"} preserved. Move {playerCount === 1 ? "this player" : "these players"} with the admin override below.</p>}
         </form>
       })}</div>}
-      <p className={styles.deadlineNote}><strong>{name.short} selections lock:</strong> {day.selection_locks_at ? `${formatMajorDeadline(day.selection_locks_at, event.schedule_timezone)} · ${event.schedule_timezone}` : "No available time exists, so no calculated deadline is set."}</p>
+      <p className={styles.deadlineNote}><strong>{name.short} selections lock:</strong> {day.selection_locks_at ? `${formatMajorLocalDateTime(day.selection_locks_at, displayTimeZone)} · ${displayTimeZone}` : "No available time exists, so no calculated deadline is set."}</p>
     </section>
 
     {daySlots.length > 0 && <><div className={styles.countSectionHeading}><p className={styles.step}>Players → rooms</p><h3>Signup counts and room builder</h3><p>Counts are guidance only. Signup times have no player capacity.</p></div><div className={styles.slotStack}>{daySlots.map((slot) => {
@@ -614,9 +622,9 @@ function DayWorkspace({ event, dayNumber, day, slots, entries, groups, members, 
       const guidance = count === 1 ? "Needs attention" : count === 2 ? "Workable minimum" : count === 3 ? "Preferred room size" : count > 3 ? "Multiple rooms needed" : "No players yet"
       const tone = count === 3 ? styles.preferred : count === 2 ? styles.workable : count === 0 ? styles.quiet : styles.attention
       return <article key={slot.id} className={`${styles.timeCard} ${!slot.is_available ? styles.disabledSlot : ""}`}>
-        <header><div><p className={styles.slotTime}>{formatMajorLocalTime(slot.starts_at, event.schedule_timezone)}</p><span>{slot.label || name.fallback} · {slot.is_available ? "AVAILABLE" : "DISABLED"}</span></div><div className={`${styles.countBadge} ${tone}`}><strong>{count} {count === 1 ? "player" : "players"}</strong><span>{guidance}</span></div></header>
+        <header><div><p className={styles.slotTime}>{formatMajorLocalDateTime(slot.starts_at, displayTimeZone)}</p><span>{slot.label || name.fallback} · {slot.is_available ? "AVAILABLE" : "DISABLED"}</span></div><div className={`${styles.countBadge} ${tone}`}><strong>{count} {count === 1 ? "player" : "players"}</strong><span>{guidance}</span></div></header>
         <div className={styles.playerChips}>{selectedEntries.length ? selectedEntries.map((entry) => <span key={entry.id}>{entry.player_screen_name_snapshot}</span>) : <em>No one has selected this time.</em>}</div>
-        <details className={styles.overridePanel}><summary>Move a player to another time</summary>{selectedEntries.map((entry) => <label key={entry.id}>{entry.player_screen_name_snapshot}<select defaultValue={slot.id} onChange={(e) => void onMovePlayer(entry.id, day.id, e.target.value)}>{daySlots.filter((option) => option.is_available || option.id === slot.id).map((option) => <option key={option.id} value={option.id}>{formatMajorLocalTime(option.starts_at, event.schedule_timezone)}{option.is_available ? "" : " — disabled"}</option>)}</select></label>)}</details>
+        <details className={styles.overridePanel}><summary>Move a player to another time</summary>{selectedEntries.map((entry) => <label key={entry.id}>{entry.player_screen_name_snapshot}<select defaultValue={slot.id} onChange={(e) => void onMovePlayer(entry.id, day.id, e.target.value)}>{daySlots.filter((option) => option.is_available || option.id === slot.id).map((option) => <option key={option.id} value={option.id}>{formatMajorLocalDateTime(option.starts_at, displayTimeZone)}{option.is_available ? "" : " — disabled"}</option>)}</select></label>)}</details>
 
         <div className={styles.roomBuilder}><div className={styles.roomBuilderHeading}><div><h3>Rooms</h3><p>Target three players; two is workable. Save privately until ready.</p></div><span>{selectedEntries.filter((entry) => !assignedIds.has(entry.id)).length} unassigned</span></div>
           {slotGroups.map((group) => <RoomForm key={group.id} group={group} slot={slot} dayNumber={dayNumber} selectedEntries={selectedEntries} allGroups={slotGroups} namingGroups={groups} isTestEvent={event.is_test_event} members={members} onSave={onSaveGroup} onDelete={onDeleteGroup} />)}
@@ -661,14 +669,15 @@ function RoomForm({ group, slot, dayNumber, selectedEntries, allGroups, namingGr
   </form>
 }
 
-function WeekendField({ event, entries, weekend, onSetStatus, onPublish }: {
+function WeekendField({ event, entries, weekend, onSetStatus, onPublish, displayTimeZone }: {
   event: MajorEvent
   entries: MajorEntry[]
   weekend: MajorWeekendStatus[]
   onSetStatus: (entryId: string, status: MajorWeekendStatus["competition_status"]) => Promise<void>
   onPublish: () => Promise<void>
+  displayTimeZone: string
 }) {
-  return <section className={styles.workspace}><div className={styles.sectionHeading}><div><p className={styles.step}>Friday cut</p><h2>Weekend field</h2><p>Stage decisions privately. Both fields continue Saturday and Sunday.</p></div>{event.weekend_status_published_at ? <span className={styles.complete}>Published {formatMajorDeadline(event.weekend_status_published_at, event.schedule_timezone)}</span> : <button type="button" className={styles.publishButton} onClick={() => void onPublish()}>Publish weekend field</button>}</div>
+  return <section className={styles.workspace}><div className={styles.sectionHeading}><div><p className={styles.step}>Friday cut</p><h2>Weekend field</h2><p>Stage decisions privately. Both fields continue Saturday and Sunday.</p></div>{event.weekend_status_published_at ? <span className={styles.complete}>Published {formatMajorLocalDateTime(event.weekend_status_published_at, displayTimeZone)} · {displayTimeZone}</span> : <button type="button" className={styles.publishButton} onClick={() => void onPublish()}>Publish weekend field</button>}</div>
     {!event.weekend_status_published_at && <div className={styles.privacyNotice}><strong>Private staging</strong><p>Players see “Weekend field status pending.” Saturday/Sunday field and room details remain hidden until publication.</p></div>}
     <div className={styles.playerTable}>{entries.map((entry) => <label key={entry.id}><span><strong>{entry.player_screen_name_snapshot}</strong><small>{entry.player_id}</small></span><select value={weekend.find((item) => item.entry_id === entry.id)?.competition_status || "pending"} onChange={(e) => void onSetStatus(entry.id, e.target.value as MajorWeekendStatus["competition_status"])}><option value="pending">Pending</option><option value="main">Main Event</option><option value="secondary">{event.secondary_trophy_display_name || "Secondary trophy field"}</option></select></label>)}</div>
   </section>
