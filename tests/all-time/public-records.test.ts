@@ -8,8 +8,10 @@ const read = (path: string) => readFileSync(path, "utf8")
 
 test("public Records is a hub for Single and Combined without Admin importer links", () => {
   const page = read("app/records/page.tsx")
-  assert.match(page, /href="\/records\/single"/)
-  assert.match(page, /href="\/records\/combined"/)
+  const artworkMap = read("lib/artworkPageMaps.ts")
+  assert.match(artworkMap, /href: "\/records\/single"/)
+  assert.match(artworkMap, /href: "\/records\/combined"/)
+  assert.match(page, /overallLeaderboardsArtwork/)
   assert.doesNotMatch(page, /admin\/records|Import CSV|identity review/i)
   assert.match(read("app/records/single/page.tsx"), /PublicSingleRecordsPage/)
 })

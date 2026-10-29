@@ -37,10 +37,10 @@ test("nested routes inherit the parent feature state", () => {
 
 test("registry keeps only explicitly protected V1 routes private", () => {
   assert.equal(FEATURE_ROUTES.some((route) => route.visibility === "tester"), false)
-  for (const path of ["/solo", "/records", "/tournaments"]) {
+  for (const path of ["/solo", "/tournaments"]) {
     assert.equal(FEATURE_ROUTES.find((route) => route.path === path)?.visibility, "private")
   }
-  for (const path of ["/amateur-pro", "/amateur-pro-standings", "/skins", "/skins-standings", "/course-challenges", "/invitationals", "/kwt", "/monthlies"]) {
+  for (const path of ["/amateur-pro", "/amateur-pro-standings", "/skins", "/skins-standings", "/course-challenges", "/invitationals", "/kwt", "/monthlies", "/records"]) {
     assert.equal(FEATURE_ROUTES.find((route) => route.path === path)?.visibility, "live")
   }
 })

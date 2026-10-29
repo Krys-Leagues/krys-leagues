@@ -8,7 +8,10 @@ export const FEATURE_ROUTES: readonly FeatureRoute[] = [
   { key: "skins", path: "/skins-standings", visibility: "live" },
   { key: "skins", path: "/skins", visibility: "live" },
   { key: "course_challenges", path: "/course-challenges", visibility: "live" },
-  { key: "records", path: "/records", visibility: "private" },
+  // The records artwork and read APIs are public player-facing surfaces. Keep
+  // admin mutations protected by their own routes; do not hide the approved
+  // Overall Leaderboards entry behind the private feature gate.
+  { key: "records", path: "/records", visibility: "live" },
   { key: "tournaments", path: "/tournaments", visibility: "private" },
   { key: "invitationals", path: "/invitationals", visibility: "live" },
   { key: "kwt", path: "/kwt", visibility: "live" },
