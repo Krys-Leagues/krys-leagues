@@ -145,14 +145,19 @@ export default function MajorDetailPage() {
       {!mgaOpen && <p className={styles.meta}>{event.year || "Year to be announced"} · {formatMajorLocalDateTime(event.starts_at, localTimeZone)}</p>}
       {!mgaOpen && displayDescription && <p className={styles.description}>{displayDescription}</p>}
       {mgaOpen && <strong className={styles.allSkillLevels}>ALL SKILL LEVELS WELCOME!</strong>}
-      <section className={styles.commitmentCard}>
-        <p className={styles.eyebrow}>{mgaOpen ? "YOU ARE SIGNING UP FOR THE MGA OPEN" : "You are signing up to play four rounds"}</p>
-        {mgaOpen ? <><p className={styles.mgaExplanation}>The MGA Open is our second Major Championship, played over four rounds in a PGA-style format.</p><p className={styles.mgaExplanation}>Choose your preferred playing time for each round.</p></> : <h2>One 18-hole round each day</h2>}
+      {!mgaOpen && <section className={styles.commitmentCard}>
+        <p className={styles.eyebrow}>You are signing up to play four rounds</p>
+        <h2>One 18-hole round each day</h2>
         <div className={styles.roundList}>{dayLabels.map((day) => <p key={day.day}><strong>{day.day} — {day.round}</strong><span>{day.course}</span></p>)}</div>
         <p>Everyone plays Thursday and Friday. After Friday, the field is divided for the weekend.</p>
         <p>Players who do not make the Main field are <strong>not eliminated from the Major.</strong> They continue Saturday and Sunday in the Secondary field for its separate trophy.</p>
-      </section>
+      </section>}
       {(event.signup_open || schedule.length > 0) && <section className={styles.signupCard}>
+        {mgaOpen && <>
+          <p className={styles.eyebrow}>YOU ARE SIGNING UP FOR THE MGA OPEN</p>
+          <p className={styles.mgaExplanation}>The MGA Open is our second Major Championship, played over four rounds in a PGA-style format.</p>
+          <p className={styles.mgaExplanation}>Choose your preferred playing time for each round.</p>
+        </>}
         <MajorTimeZoneControl key={`${displayTimeZone.timeZone}:${displayTimeZone.source}`} {...displayTimeZone} />
         {schedule.length > 0 && <p className={styles.assignment}>{event.weekend_status_published_at ? <>Weekend status: <strong>{weekendStatus === "main" ? "Masters Main Event" : weekendStatus === "secondary" ? secondaryFieldName : "Weekend field status pending"}</strong></> : <strong>Weekend field status pending</strong>}</p>}
         {signupState === "upcoming" && <p className={styles.notice}>Public signup opens {formatMajorLocalDateTime(signupStatus?.public_signup_opens_at || null, localTimeZone)}. Priority access is not active for this first Major.</p>}
@@ -166,7 +171,7 @@ export default function MajorDetailPage() {
           const savedSlotHasBegun = savedSlot ? isMajorSlotStarted(savedSlot.starts_at, currentTime) : false
            const dayName = dayLabels[day.day_number - 1]
           return <fieldset key={day.id} className={styles.dayCard} disabled={locked || signupDisabled}>
-            <legend><span>{dayName.day}</span>{dayName.round}</legend><p className={styles.dayContext}>Official round date: {formatPlayDate(day.play_date)}</p>
+            <legend><span>{dayName.day}</span>{dayName.round}</legend><p className={styles.dayContext}>Official round date: {formatPlayDate(day.play_date)}{mgaOpen ? ` · ${dayName.course}` : ""}</p>
             {daySlots.length ? <div className={styles.slotPicker}><label className={styles.slotPickerLabel} htmlFor={`slot-${day.id}`}>Choose Your Time Slot</label><select id={`slot-${day.id}`} className={styles.slotSelect} value={choices[day.id] || ""} onChange={(selection) => { setChoices((old) => ({ ...old, [day.id]: selection.target.value })); setReviewing(false) }}><option value="">Select an available time…</option>{daySlots.map((slot) => { const dateShift = mgaOpen ? "" : localDateShift(day.play_date, slot.starts_at, localTimeZone); const started = isMajorSlotStarted(slot.starts_at, currentTime); const selected = choices[day.id] === slot.id; return <option key={slot.id} value={slot.id} disabled={started && !selected}>Time Slot {slotNumbers.get(slot.id) || "—"} · {formatMajorLocalDate(slot.starts_at, localTimeZone)} · {formatMajorLocalTimeWithZone(slot.starts_at, localTimeZone)}{dateShift ? ` · ${dateShift}` : ""}{started && !selected ? " · passed" : ""}</option> })}</select>{choices[day.id] && (() => { const selectedSlot = daySlots.find((slot) => slot.id === choices[day.id]); return selectedSlot ? <p className={styles.selectedTime}><strong>Selected: Time Slot {slotNumbers.get(selectedSlot.id) || "—"}</strong><span>{formatMajorLocalDate(selectedSlot.starts_at, localTimeZone)} · {formatMajorLocalTimeWithZone(selectedSlot.starts_at, localTimeZone)}</span></p> : null })()}</div> : <p className={styles.notice}>No times available yet.</p>}
             {!mgaOpen && <p className={styles.lockDeadline}>Player time changes lock individually 12 hours before the selected slot starts.<span>{localTimeZone}</span></p>}
             {locked && <p className={styles.locked}>{savedSlotHasBegun ? "Selected time has started" : "Selected time is locked — tournament admins can still help"}</p>}
