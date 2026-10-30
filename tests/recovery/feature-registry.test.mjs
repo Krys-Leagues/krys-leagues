@@ -21,13 +21,13 @@ test("registry inventories every requested feature family without inferred appro
   assert.ok(pendingFeatures.every((feature) => feature.approval.ownerApproved === false))
 })
 
-test("approved homepage MGA Open banner is independently checkpointed", () => {
+test("approved homepage MGA Championship banner is independently checkpointed", () => {
   const banner = registry.features.find((feature) => feature.id === "homepage-mga-open-banner")
   assert.equal(banner.scope, "banner only; the surrounding homepage remains pending owner review")
-  assert.equal(banner.checkpoint.commit, "8e58a6caa365ac350335e1ee6d3a572ac9c323fa")
-  assert.equal(banner.checkpoint.deploymentId, "dpl_7aNR1Ve5DjUizWQh5FtEyR68xj1a")
+  assert.equal(banner.checkpoint.commit, "e8f2ca08277363b6f088f5967a5f32287613e1e1")
+  assert.equal(banner.checkpoint.deploymentId, null)
   assert.equal(banner.artwork[0].approvalState, "APPROVED")
-  assert.equal(banner.artwork[0].sha256, "4E16EA16AD3CAD95692DD80822443DD37E97963ECCE182547DE8136BCB5C3056")
+  assert.equal(banner.artwork[0].sha256, "CB38060E2F4CA23F71C81BE4600DFD65F2E643D06AFA065B33DBBEF7DDBBC279")
   assert.equal(banner.requiredInteractions[1], "entire banner links to /majors/major-2")
 })
 
