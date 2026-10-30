@@ -375,6 +375,35 @@
       "screenshots": {"desktop": [], "mobile": []},
       "approval": {"ownerApproved": false, "approvalDate": null, "evidence": [], "notes": "Pending explicit registry approval."},
       "evidenceGaps": ["authorized and unauthorized browser evidence", "exact approval record"]
+    },
+    {
+      "id": "mga-open-registration-schedule",
+      "name": "MGA Open registration schedule interface",
+      "status": "APPROVED",
+      "scope": "schedule interface only; authenticated VIP submission, non-VIP rejection, and Production launch remain pending verification",
+      "authoritativeFor": ["/majors/major-2", "/majors/major-2/vip"],
+      "routes": ["/majors/major-2", "/majors/major-2/vip"],
+      "sourceFiles": ["app/majors/[slug]/page.tsx", "app/majors/[slug]/page.module.css", "app/majors/[slug]/vip/page.tsx", "app/api/majors/home-banner/route.ts", "components/MajorTimeZoneControl.tsx", "lib/majorTimeZone.ts", "lib/useMajorDisplayTimeZone.ts", "lib/authReturnTo.ts", "lib/authReturnTo.test.ts", "app/auth/callback/page.tsx", "tests/mga-open-final-corrections.test.ts"],
+      "artwork": [
+        {"path": "public/approved-pages/the mga open.jpg", "sha256": "35E66D4F0A386CBFA0689B980BD3AA0B8D3204C0619A40FD16060A47013296FD", "approvalState": "APPROVED"},
+        {"path": "public/approved-pages/gardens-of-babylon-background.png", "sha256": "FB96B707EF834DDE5672CBF9ED3A67DE5A3DA354263FEC7F78501DA12F12AEE8", "approvalState": "APPROVED"},
+        {"path": "public/approved-pages/mga-cup.png", "sha256": "692B2F5E12B3A2432E328D65AFA4E07ADAAF4249793D328A83AAA159DB1B6D8D", "approvalState": "APPROVED"}
+      ],
+      "requiredVisibleText": ["The MGA Open", "Your Local Time Zone", "Confirm", "November 12–15, 2026"],
+      "requiredInteractions": ["worldwide timezone selector", "Thursday slots 1–12", "Friday slots 13–24", "Saturday slots 25–36", "Sunday slots 37–48", "four selected times shown on review", "regular and unlisted VIP entry points share one event and schedule"],
+      "acceptanceCriteria": ["schedule controls remain available before registration opens", "only final registration submission is eligibility-gated", "VIP messaging is confined to the unlisted VIP route", "the original schedule artwork and UTC schedule remain unchanged"],
+      "dataPreservation": ["preserve Major 2 event, 48 slots, registrations, capacity, waitlist, duplicate prevention, and 12-hour locks"],
+      "security": ["final signup RPC remains the authorization boundary", "admin access does not grant VIP eligibility", "authenticated VIP submission and non-VIP rejection remain pending verification"],
+      "checkpoint": {"commit": "d156d63dee7d37dcade1e3d22c7ae49a9c491c2e", "deploymentId": "dpl_4EPP7VfwE3ZifWfthKoeCnFDC3CE", "previewUrl": "https://krys-leagues-5kx5nt6rh-krys-leagues-projects.vercel.app"},
+      "sourceMarkers": [
+        {"file": "app/majors/[slug]/page.tsx", "text": "const showSignupControls = mgaOpen || event.signup_open || schedule.length > 0"},
+        {"file": "app/majors/[slug]/page.tsx", "text": "const signupDisabled = !canSubmitSignup"},
+        {"file": "app/majors/[slug]/page.tsx", "text": "data-schedule-control=\"true\""},
+        {"file": "app/majors/[slug]/vip/page.tsx", "text": "MajorDetailPage"}
+      ],
+      "screenshots": {"desktop": [], "mobile": []},
+      "approval": {"ownerApproved": true, "approvalDate": "2026-10-29", "evidence": ["Owner personally tested and approved commit d156d63dee7d37dcade1e3d22c7ae49a9c491c2e", "Private Preview dpl_4EPP7VfwE3ZifWfthKoeCnFDC3CE browser evidence recorded in release/evidence/mga-open-registration-schedule-approval.md"], "notes": "Approval is limited to the schedule interface. Authenticated VIP submission, non-VIP rejection, and Production launch remain pending verification."},
+      "evidenceGaps": ["authenticated VIP submission", "authenticated non-VIP rejection", "Production launch approval"]
     }
   ]
 }

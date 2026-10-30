@@ -11,12 +11,14 @@ const head = execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "
 const baseline = "2252ff7ec162476189f4f31b48c03add0e024ba6"
 
 test("registry inventories every requested feature family without inferred approval", () => {
-  assert.equal(registry.features.length, 20)
+  assert.equal(registry.features.length, 21)
   assert.ok(registry.features.some((feature) => feature.id === "majors-mga-open"))
   assert.ok(registry.features.some((feature) => feature.id === "trophy-studio-importer"))
   assert.ok(registry.features.some((feature) => feature.id === "homepage-mga-open-banner" && feature.status === "APPROVED"))
-  assert.ok(registry.features.filter((feature) => feature.id !== "homepage-mga-open-banner").every((feature) => feature.status === "PENDING OWNER REVIEW"))
-  assert.ok(registry.features.filter((feature) => feature.id !== "homepage-mga-open-banner").every((feature) => feature.approval.ownerApproved === false))
+  assert.ok(registry.features.some((feature) => feature.id === "mga-open-registration-schedule" && feature.status === "APPROVED"))
+  const pendingFeatures = registry.features.filter((feature) => !["homepage-mga-open-banner", "mga-open-registration-schedule"].includes(feature.id))
+  assert.ok(pendingFeatures.every((feature) => feature.status === "PENDING OWNER REVIEW"))
+  assert.ok(pendingFeatures.every((feature) => feature.approval.ownerApproved === false))
 })
 
 test("approved homepage MGA Open banner is independently checkpointed", () => {
@@ -27,6 +29,26 @@ test("approved homepage MGA Open banner is independently checkpointed", () => {
   assert.equal(banner.artwork[0].approvalState, "APPROVED")
   assert.equal(banner.artwork[0].sha256, "4E16EA16AD3CAD95692DD80822443DD37E97963ECCE182547DE8136BCB5C3056")
   assert.equal(banner.requiredInteractions[1], "entire banner links to /majors/major-2")
+})
+
+test("MGA schedule approval is narrower than the full Majors approval", () => {
+  const schedule = registry.features.find((feature) => feature.id === "mga-open-registration-schedule")
+  assert.equal(schedule.scope, "schedule interface only; authenticated VIP submission, non-VIP rejection, and Production launch remain pending verification")
+  assert.equal(schedule.checkpoint.commit, "d156d63dee7d37dcade1e3d22c7ae49a9c491c2e")
+  assert.equal(schedule.checkpoint.deploymentId, "dpl_4EPP7VfwE3ZifWfthKoeCnFDC3CE")
+  assert.deepEqual(schedule.routes, ["/majors/major-2", "/majors/major-2/vip"])
+  assert.ok(schedule.requiredInteractions.includes("Thursday slots 1–12"))
+  assert.ok(schedule.requiredInteractions.includes("Sunday slots 37–48"))
+  assert.equal(schedule.evidenceGaps.includes("authenticated VIP submission"), true)
+  assert.equal(schedule.evidenceGaps.includes("authenticated non-VIP rejection"), true)
+  assert.equal(schedule.evidenceGaps.includes("Production launch approval"), true)
+})
+
+test("approved MGA schedule markers fail closed when its controls are removed", () => {
+  const candidate = structuredClone(registry)
+  candidate.features.find((feature) => feature.id === "mga-open-registration-schedule").sourceMarkers[0].text = "missing schedule control marker"
+  const result = validateRegistry(candidate, { candidateCommit: head })
+  assert.ok(result.errors.some((error) => error.includes("mga-open-registration-schedule source marker is missing")))
 })
 
 test("replacing or removing the approved homepage MGA banner fails closed", () => {
