@@ -44,3 +44,39 @@ test("withdrawn and did-not-finish records do not require invented placements", 
 
   assert.equal(summary.canFinalize, true)
 })
+
+test("all classified Main Event entries are finalized, not only the VIP Top 10", () => {
+  const allEntries = Array.from({ length: 57 }, (_, index) => ({ id: `entry-${index + 1}` }))
+  const allMain = allEntries.map((entry) => ({ entry_id: entry.id, competition_status: "main" as const }))
+  const allPlacements = allEntries.map((entry, index) => ({
+    entry_id: entry.id,
+    weekend_field: "main" as const,
+    field_placement: index + 1,
+    result_status: "completed" as const,
+    is_finalized: false,
+  }))
+
+  const summary = summarizeMajorFinalizationField("main", allEntries, allMain, allPlacements)
+
+  assert.equal(summary.totalEntries, 57)
+  assert.equal(summary.toFinalizeEntries, 57)
+  assert.equal(summary.entryIdsToFinalize.length, 57)
+  assert.equal(summary.unresolvedClassificationEntryIds.length, 0)
+  assert.equal(summary.canFinalize, true)
+})
+
+test("an unclassified entry blocks either field instead of being silently excluded", () => {
+  const summary = summarizeMajorFinalizationField("main", entries, [
+    { entry_id: "main-1", competition_status: "main" as const },
+    { entry_id: "main-2", competition_status: "main" as const },
+    { entry_id: "secondary-1", competition_status: "pending" as const },
+  ], [
+    { entry_id: "main-1", weekend_field: "main", field_placement: 1, result_status: "completed", is_finalized: false },
+    { entry_id: "main-2", weekend_field: "main", field_placement: 2, result_status: "completed", is_finalized: false },
+  ])
+
+  assert.deepEqual(summary.unresolvedClassificationEntryIds, ["secondary-1"])
+  assert.equal(summary.toFinalizeEntries, 2)
+  assert.equal(summary.isFinalized, false)
+  assert.equal(summary.canFinalize, false)
+})

@@ -14,6 +14,9 @@ export type MajorFinalizationSummary = {
   field: MajorFinalizationField
   totalEntries: number
   finalizedEntries: number
+  toFinalizeEntries: number
+  entryIdsToFinalize: string[]
+  unresolvedClassificationEntryIds: string[]
   unresolvedEntryIds: string[]
   isFinalized: boolean
   canFinalize: boolean
@@ -33,20 +36,31 @@ export function summarizeMajorFinalizationField(
   weekend: readonly WeekendLike[],
   placements: readonly PlacementLike[],
 ): MajorFinalizationSummary {
+  const statusByEntry = new Map(weekend.map((item) => [item.entry_id, item.competition_status]))
+  const unresolvedClassificationEntryIds = entries
+    .filter((entry) => !statusByEntry.has(entry.id) || statusByEntry.get(entry.id) === "pending")
+    .map((entry) => entry.id)
   const stagedIds = new Set(weekend.filter((item) => item.competition_status === field).map((item) => item.entry_id))
   const fieldEntries = entries.filter((entry) => stagedIds.has(entry.id))
   const placementByEntry = new Map(placements.map((placement) => [placement.entry_id, placement]))
-  const unresolvedEntryIds = fieldEntries
+  const unresolvedResultEntryIds = fieldEntries
     .filter((entry) => !resultIsReady(placementByEntry.get(entry.id), field))
     .map((entry) => entry.id)
   const finalizedEntries = fieldEntries.filter((entry) => placementByEntry.get(entry.id)?.is_finalized).length
+  const entryIdsToFinalize = fieldEntries
+    .filter((entry) => !placementByEntry.get(entry.id)?.is_finalized)
+    .map((entry) => entry.id)
+  const unresolvedEntryIds = [...unresolvedClassificationEntryIds, ...unresolvedResultEntryIds]
 
   return {
     field,
     totalEntries: fieldEntries.length,
     finalizedEntries,
+    toFinalizeEntries: entryIdsToFinalize.length,
+    entryIdsToFinalize,
+    unresolvedClassificationEntryIds,
     unresolvedEntryIds,
-    isFinalized: fieldEntries.length > 0 && finalizedEntries === fieldEntries.length,
+    isFinalized: fieldEntries.length > 0 && finalizedEntries === fieldEntries.length && unresolvedClassificationEntryIds.length === 0,
     canFinalize: fieldEntries.length > 0 && unresolvedEntryIds.length === 0,
   }
 }
