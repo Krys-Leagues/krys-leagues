@@ -88,6 +88,7 @@ test("MGA priority registration is usable only after the personalized VIP check"
   assert.match(signupPage, /if \(vipEntry\) \{/u)
   assert.match(signupPage, /const showSignupControls = !mgaOpen \|\| event\.signup_open \|\| schedule\.length > 0/u)
   assert.match(signupPage, /const canSubmitSignup = !mgaOpen \|\| signupState === "open" \|\| signupState === "priority"/u)
+  assert.match(signupPage, /\{\(mgaOpen \|\| event\.signup_open \|\| schedule\.length > 0\) && <section className=\{styles\.signupCard\}>/u)
   assert.match(signupPage, /Sign in with Discord to check VIP registration eligibility/u)
   assert.match(signupPage, /\{showSignupControls && <>/u)
   assert.match(signupPage, /The RPC remains the source of truth for final eligibility and signup/u)

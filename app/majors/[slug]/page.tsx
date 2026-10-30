@@ -182,7 +182,7 @@ export default function MajorDetailPage() {
         <p>Everyone plays Thursday and Friday. After Friday, the field is divided for the weekend.</p>
         <p>Players who do not make the Main field are <strong>not eliminated from the Major.</strong> They continue Saturday and Sunday in the Secondary field for its separate trophy.</p>
       </section>}
-      {(event.signup_open || schedule.length > 0) && <section className={styles.signupCard}>
+      {(mgaOpen || event.signup_open || schedule.length > 0) && <section className={styles.signupCard}>
         {mgaOpen && <>
           <p className={styles.eyebrow}>YOU ARE SIGNING UP FOR THE MGA OPEN</p>
           <p className={styles.mgaExplanation}>The MGA Open is our second Major Championship, played over four rounds in a PGA-style format.</p>
