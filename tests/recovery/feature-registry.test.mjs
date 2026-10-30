@@ -11,11 +11,22 @@ const head = execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "
 const baseline = "2252ff7ec162476189f4f31b48c03add0e024ba6"
 
 test("registry inventories every requested feature family without inferred approval", () => {
-  assert.equal(registry.features.length, 19)
+  assert.equal(registry.features.length, 20)
   assert.ok(registry.features.some((feature) => feature.id === "majors-mga-open"))
   assert.ok(registry.features.some((feature) => feature.id === "trophy-studio-importer"))
-  assert.ok(registry.features.every((feature) => feature.status === "PENDING OWNER REVIEW"))
-  assert.ok(registry.features.every((feature) => feature.approval.ownerApproved === false))
+  assert.ok(registry.features.some((feature) => feature.id === "homepage-mga-open-banner" && feature.status === "APPROVED"))
+  assert.ok(registry.features.filter((feature) => feature.id !== "homepage-mga-open-banner").every((feature) => feature.status === "PENDING OWNER REVIEW"))
+  assert.ok(registry.features.filter((feature) => feature.id !== "homepage-mga-open-banner").every((feature) => feature.approval.ownerApproved === false))
+})
+
+test("approved homepage MGA Open banner is independently checkpointed", () => {
+  const banner = registry.features.find((feature) => feature.id === "homepage-mga-open-banner")
+  assert.equal(banner.scope, "banner only; the surrounding homepage remains pending owner review")
+  assert.equal(banner.checkpoint.commit, "8e58a6caa365ac350335e1ee6d3a572ac9c323fa")
+  assert.equal(banner.checkpoint.deploymentId, "dpl_7aNR1Ve5DjUizWQh5FtEyR68xj1a")
+  assert.equal(banner.artwork[0].approvalState, "APPROVED")
+  assert.equal(banner.artwork[0].sha256, "4E16EA16AD3CAD95692DD80822443DD37E97963ECCE182547DE8136BCB5C3056")
+  assert.equal(banner.requiredInteractions[1], "entire banner links to /majors/major-2")
 })
 
 test("current candidate passes route, artwork, and checkpoint verification", () => {

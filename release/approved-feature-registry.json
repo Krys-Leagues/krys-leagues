@@ -46,6 +46,26 @@
       "evidenceGaps": ["owner-approved desktop screenshot", "owner-approved mobile screenshot", "exact approval record"]
     },
     {
+      "id": "homepage-mga-open-banner",
+      "name": "Homepage MGA Open registration banner",
+      "status": "APPROVED",
+      "authoritativeFor": ["/"],
+      "scope": "banner only; the surrounding homepage remains pending owner review",
+      "routes": ["/"],
+      "sourceFiles": ["components/home/MgaHomepageBanner.tsx"],
+      "artwork": [
+        {"path": "public/approved-pages/the mga open registration nov 1st.png", "sha256": "4E16EA16AD3CAD95692DD80822443DD37E97963ECCE182547DE8136BCB5C3056", "width": 2172, "height": 724, "approvalState": "APPROVED"}
+      ],
+      "requiredVisibleText": ["The MGA Open — view registration"],
+      "requiredInteractions": ["compact placement beneath Course Challenges", "entire banner links to /majors/major-2", "YouTube and Admin Login remain below"],
+      "acceptanceCriteria": ["exact approved artwork bytes are preserved", "no extra border, overlay, container, or padding is introduced", "banner remains compact and responsive"],
+      "dataPreservation": ["no player, score, trophy, registration, or signup-page changes"],
+      "security": ["banner navigation does not bypass MGA Open authentication or server-side eligibility rules"],
+      "checkpoint": {"commit": "8e58a6caa365ac350335e1ee6d3a572ac9c323fa", "deploymentId": "dpl_7aNR1Ve5DjUizWQh5FtEyR68xj1a", "previewUrl": "https://krys-leagues-op39gr816-krys-leagues-projects.vercel.app"},
+      "approval": {"ownerApproved": true, "approvalDate": "2026-10-29", "evidence": ["Owner visually reviewed and approved private Preview deployment dpl_7aNR1Ve5DjUizWQh5FtEyR68xj1a", "Verified click-through to /majors/major-2"], "notes": "Approval is limited to this homepage MGA Open banner. The homepage feature and Majors/MGA Open system remain pending owner review."},
+      "evidenceGaps": []
+    },
+    {
       "id": "player-profiles",
       "name": "Player Profiles and searchable directory",
       "status": "PENDING OWNER REVIEW",
