@@ -10,7 +10,7 @@ export default function MgaHomepageBanner() {
     >
       <Image
         className="artwork-navigation__mga-artwork"
-        src="/approved-pages/the mga open registration nov 1st.png"
+        src="/approved-pages/The MGA Championship_ Golden Temple Banner.png"
         alt="Gardens of Babylon artwork for The MGA Championship"
         width={2172}
         height={724}

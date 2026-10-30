@@ -20,7 +20,7 @@ test("MGA homepage banner preserves the original asset and compact signup route"
   const page = read("app/page.tsx")
   const mgaCss = css.match(/\.artwork-navigation__mga-link \{[\s\S]*?\n\}/u)?.[0] || ""
   assert.match(component, /href="\/majors\/major-2"/)
-  assert.match(component, /approved-pages\/the mga open registration nov 1st\.png/)
+  assert.match(component, /approved-pages\/The MGA Championship_ Golden Temple Banner\.png/)
   assert.match(component, /width=\{2172\}/u)
   assert.match(component, /height=\{724\}/u)
   assert.match(component, /<Link[\s\S]*href="\/majors\/major-2"/u)
@@ -49,9 +49,9 @@ test("MGA homepage status is personalized only after authenticated eligibility c
   assert.doesNotMatch(route, /insert\s+into|update\s+public\.|delete\s+from/i)
 })
 
-test("approved MGA artwork bytes remain unchanged in the candidate", () => {
-  const artwork = readFileSync(resolve(root, "public/approved-pages/the mga open registration nov 1st.png"))
-  assert.equal(createHash("sha256").update(artwork).digest("hex").toUpperCase(), "4E16EA16AD3CAD95692DD80822443DD37E97963ECCE182547DE8136BCB5C3056")
+test("approved MGA Championship artwork bytes remain unchanged in the candidate", () => {
+  const artwork = readFileSync(resolve(root, "public/approved-pages/The MGA Championship_ Golden Temple Banner.png"))
+  assert.equal(createHash("sha256").update(artwork).digest("hex").toUpperCase(), "CB38060E2F4CA23F71C81BE4600DFD65F2E643D06AFA065B33DBBEF7DDBBC279")
   const previousArtwork = readFileSync(resolve(root, "public/approved-pages/the mga open.jpg"))
   assert.equal(createHash("sha256").update(previousArtwork).digest("hex").toUpperCase(), "35E66D4F0A386CBFA0689B980BD3AA0B8D3204C0619A40FD16060A47013296FD")
 })
