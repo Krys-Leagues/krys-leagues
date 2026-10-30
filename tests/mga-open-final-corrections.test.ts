@@ -37,27 +37,30 @@ test("MGA Open uses the supplied trophy with transparent background", () => {
   assert.match(signupPage, /className=\{styles\.mgaCup\}/u)
 })
 
-test("MGA Open keeps player-facing copy clean and does not expose a personal VIP badge", () => {
+test("MGA Open shows personalized VIP status without exposing eligibility mechanics", () => {
   assert.match(signupPage, /The MGA Open — Four rounds, November 12–15, 2026\./u)
   assert.match(signupPage, /const displayDescription = mgaOpen/u)
   assert.match(signupPage, /!mgaOpen && <p className=\{styles\.meta\}/u)
-  assert.match(signupPage, /signupState === "priority" \? "Priority registration"/u)
+  assert.match(signupPage, /mgaOpen && signupState === "priority" \? "VIP REGISTRATION OPEN"/u)
   assert.match(signupPage, /signupState === "priority" \? "priority" : signupState/u)
+  assert.match(signupPage, /fetch\("\/api\/majors\/home-banner", \{ cache: "no-store" \}\)/u)
+  assert.match(signupPage, /General registration opens/u)
   assert.doesNotMatch(signupPage, /Staging configuration; Production registration remains closed\./u)
   assert.doesNotMatch(signupPage, />Priority signup is open for eligible previous-Major players\./u)
+  assert.doesNotMatch(signupPage, /Priority registration is restricted to verified eligible players/u)
 })
 
-test("MGA priority registration leaves the signup form usable for eligible VIP players", () => {
-  assert.match(signupPage, /signupState !== "open" && signupState !== "priority"/u)
-  assert.doesNotMatch(signupPage, /const signupDisabled = priorityWindow/u)
-  assert.match(signupPage, /The RPC remains the source of truth for eligibility/u)
+test("MGA priority registration is usable only after the personalized VIP check", () => {
+  assert.match(signupPage, /const showSignupControls = !mgaOpen \|\| schedule\.length > 0 \|\| signupState === "open" \|\| signupState === "priority"/u)
+  assert.match(signupPage, /\{showSignupControls && <>/u)
+  assert.match(signupPage, /The RPC remains the source of truth for final eligibility and signup/u)
 })
 
 test("MGA Open uses the supplied Gardens of Babylon screenshot as the page background", () => {
   assert.doesNotMatch(signupPage, /mgaFeature/u)
   assert.match(signupCss, /url\("\/approved-pages\/gardens-of-babylon-background\.png"\)/u)
   assert.match(signupCss, /background-attachment: fixed/u)
-  assert.match(signupCss, /\.mga \.contentCard,\s*\.mga \.signupCard[\s\S]*background: rgba\(3, 17, 24, 0\.42\)/u)
+  assert.match(signupCss, /\.mga \.contentCard,\s*\.mga \.signupCard[\s\S]*background: rgba\(3, 17, 24, 0\.14\)/u)
 })
 
 test("MGA Open background asset preserves the supplied source bytes", () => {
@@ -115,7 +118,9 @@ test("MGA Open presents the approved friendly time-zone selector", () => {
 })
 
 test("MGA Open outer and inner panels remain translucent for background visibility", () => {
-  assert.match(signupCss, /\.mga \.hero[\s\S]*rgba\(3, 18, 26, 0\.3\)/u)
-  assert.match(signupCss, /\.mga \.contentCard,\s*\.mga \.signupCard[\s\S]*rgba\(3, 17, 24, 0\.42\)/u)
-  assert.match(signupCss, /\.mga \.dayCard[\s\S]*rgba\(4, 24, 31, 0\.5\)/u)
+  assert.match(signupCss, /\.mga \{[\s\S]*background: rgba\(3, 19, 27, 0\.08\)/u)
+  assert.match(signupCss, /\.mga \.hero[\s\S]*rgba\(3, 18, 26, 0\.12\)/u)
+  assert.match(signupCss, /\.mga \.contentCard,\s*\.mga \.signupCard[\s\S]*rgba\(3, 17, 24, 0\.14\)/u)
+  assert.match(signupCss, /\.mga \.dayCard[\s\S]*rgba\(4, 24, 31, 0\.16\)/u)
+  assert.match(signupCss, /\.mga \.hero h1,[\s\S]*text-shadow: 0 2px 9px rgba\(0, 0, 0, 0\.9\)/u)
 })

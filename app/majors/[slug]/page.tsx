@@ -47,10 +47,22 @@ export default function MajorDetailPage() {
     const dayIds = loadedDays.map((day) => day.id)
     const slotResult = dayIds.length ? await supabase.from("major_time_slots").select("*").in("play_day_id", dayIds).eq("is_available", true).order("starts_at") : { data: [], error: null }
     const statusResult = await supabase.rpc("get_major_signup_status", { p_major_event_id: loadedEvent.id })
+    let loadedSignupStatus = statusResult.data as MajorSignupStatus | null
+    if (loadedEvent.slug.trim().toLowerCase() === "major-2") {
+      try {
+        const personalizedStatus = await fetch("/api/majors/home-banner", { cache: "no-store" })
+        const personalizedPayload = personalizedStatus.ok ? await personalizedStatus.json() as { state?: MajorSignupStatus["state"] } : null
+        if (personalizedPayload?.state) loadedSignupStatus = loadedSignupStatus ? { ...loadedSignupStatus, state: personalizedPayload.state } : null
+        else if (loadedSignupStatus?.state === "priority") loadedSignupStatus = { ...loadedSignupStatus, state: "upcoming" }
+      } catch {
+        // Fail closed for the VIP-only window if the personalized status check is unavailable.
+        if (loadedSignupStatus?.state === "priority") loadedSignupStatus = { ...loadedSignupStatus, state: "upcoming" }
+      }
+    }
     setEntries((entryResult.data as PublicMajorEntry[] | null) || [])
     setDays(loadedDays)
     setSlots((slotResult.data as MajorTimeSlot[] | null) || [])
-    setSignupStatus(statusResult.data as MajorSignupStatus | null)
+    setSignupStatus(loadedSignupStatus)
     const user = await supabase.auth.getUser()
     if (user.data.user) {
       const result = await supabase.rpc("get_my_major_signup_schedule", { p_major_event_id: loadedEvent.id })
@@ -102,18 +114,19 @@ export default function MajorDetailPage() {
   const dayLabels = mgaOpen ? MGA_DAY_LABELS : MASTERS_DAY_LABELS
   const testEvent = event.is_test_event
   const signupState = signupStatus?.state || (event.signup_open ? "open" : "closed")
-  const signupBadge = signupState === "priority" ? "Priority registration" : `Signup ${signupState}`
+  const signupBadge = mgaOpen && signupState === "priority" ? "VIP REGISTRATION OPEN" : signupState === "priority" ? "Priority registration" : `Signup ${signupState}`
   const signupBadgeState = signupState === "priority" ? "priority" : signupState
   const priorityWindow = mgaOpen && signupState === "priority"
-  // Priority registration is a real signup window for eligible VIP players.
-  // The RPC remains the source of truth for eligibility; the UI must not
-  // disable the form for every player while that window is open.
+  const showSignupControls = !mgaOpen || schedule.length > 0 || signupState === "open" || signupState === "priority"
+  // The personalized server check gates VIP-only controls for the MGA Open.
+  // The RPC remains the source of truth for final eligibility and signup.
   const signupDisabled = schedule.length > 0
     ? !event.signup_open
-    : signupState !== "open" && signupState !== "priority"
+    : !showSignupControls
   const weekendStatus = schedule[0]?.weekend_competition_status || "pending"
   const secondaryFieldName = event.secondary_trophy_display_name || "Secondary Trophy Field"
   const localTimeZone = displayTimeZone.timeZone
+  const generalRegistrationMessage = mgaOpen ? `General registration opens ${formatMgaPublicOpening(signupStatus?.public_signup_opens_at || null)}.` : `Public signup opens ${formatMajorLocalDateTime(signupStatus?.public_signup_opens_at || null, localTimeZone)}.`
   const allFourSelected = days.length === 4 && days.every((day) => Boolean(choices[day.id]))
   const currentSignupStep = schedule.length > 0 ? 3 : reviewing ? 2 : 1
   const publishedRooms = days
@@ -141,7 +154,7 @@ export default function MajorDetailPage() {
       </section>
       <div className={`${styles.brandRow} ${mgaOpen ? styles.mgaBrandRow : ""}`}><Image src="/league-media/BIG LOGO TRANSPARENT.png" width={136} height={136} alt="Krys Leagues" className={styles.logo} priority /><div><h2 className={styles.eventTitle}>{testEvent ? "TEST EVENT" : masters ? "THE MASTERS" : event.name}</h2><p className={styles.eventIdentity}>{testEvent ? "TEST DATA — NOT OFFICIAL" : masters ? "MINI GOLF MASTERS" : "MAJOR CHAMPIONSHIP"}</p><p className={styles.subtitle}>{testEvent ? "The real Major workflow, rehearsed safely" : masters ? "CHERRY BLOSSOM" : mgaOpen ? "GARDENS OF BABYLON" : "Four-round mini golf championship"}</p>{mgaOpen && <p className={styles.headerDescription}>{displayDescription}</p>}</div>{mgaOpen && <Image src="/approved-pages/mga-cup.png" width={2064} height={2752} alt="MGA Cup trophy" className={styles.mgaCup} priority />}</div>
       {masters && <div className={styles.mastersFeature} role="img" aria-label="Cherry Blossom course artwork from the Masters scorecard"><div className={styles.featureSheen} /></div>}
-      <div className={styles.statusRow}><span className={styles.badge}>{event.status}</span>{!priorityWindow && <span className={`${styles.badge} ${styles[signupBadgeState]}`}>{signupBadge}</span>}<span className={styles.capacity}>{signupStatus?.capacity ? `${signupStatus.spots_claimed} / ${signupStatus.capacity} spots claimed` : `${entries.length} claimed · field capacity not set`}</span></div>
+      <div className={styles.statusRow}><span className={styles.badge}>{event.status}</span>{!(priorityWindow && !mgaOpen) && <span className={`${styles.badge} ${styles[signupBadgeState]}`}>{signupBadge}</span>}<span className={styles.capacity}>{signupStatus?.capacity ? `${signupStatus.spots_claimed} / ${signupStatus.capacity} spots claimed` : `${entries.length} claimed · field capacity not set`}</span></div>
       {!mgaOpen && <p className={styles.meta}>{event.year || "Year to be announced"} · {formatMajorLocalDateTime(event.starts_at, localTimeZone)}</p>}
       {!mgaOpen && displayDescription && <p className={styles.description}>{displayDescription}</p>}
       {mgaOpen && <strong className={styles.allSkillLevels}>ALL SKILL LEVELS WELCOME!</strong>}
@@ -158,11 +171,12 @@ export default function MajorDetailPage() {
           <p className={styles.mgaExplanation}>The MGA Open is our second Major Championship, played over four rounds in a PGA-style format.</p>
           <p className={styles.mgaExplanation}>Choose your preferred playing time for each round.</p>
         </>}
-        <MajorTimeZoneControl key={`${displayTimeZone.timeZone}:${displayTimeZone.source}`} {...displayTimeZone} />
+        {showSignupControls && <MajorTimeZoneControl key={`${displayTimeZone.timeZone}:${displayTimeZone.source}`} {...displayTimeZone} />}
         {schedule.length > 0 && <p className={styles.assignment}>{event.weekend_status_published_at ? <>Weekend status: <strong>{weekendStatus === "main" ? "Masters Main Event" : weekendStatus === "secondary" ? secondaryFieldName : "Weekend field status pending"}</strong></> : <strong>Weekend field status pending</strong>}</p>}
-        {signupState === "upcoming" && <p className={styles.notice}>Public signup opens {formatMajorLocalDateTime(signupStatus?.public_signup_opens_at || null, localTimeZone)}. Priority access is not active for this first Major.</p>}
-        {signupState === "priority" && <p className={styles.notice}>Priority registration is restricted to verified eligible players. General registration opens {formatMajorLocalDateTime(signupStatus?.public_signup_opens_at || null, localTimeZone)}.</p>}
+        {signupState === "upcoming" && <p className={styles.notice}>{generalRegistrationMessage}</p>}
+        {signupState === "priority" && <p className={styles.notice}>{mgaOpen ? <>VIP REGISTRATION OPEN. {generalRegistrationMessage}</> : generalRegistrationMessage}</p>}
         {signupState === "full" && schedule.length === 0 && <p className={styles.notice}>The current field is full.</p>}
+        {showSignupControls && <>
         {days.length !== 4 ? <p className={styles.notice}>Tournament staff is still configuring the four-day schedule.</p> : <div className={styles.days}>{days.map((day) => {
           const mine = schedule.find((choice) => choice.play_day_id === day.id)
           const daySlots = slots.filter((slot) => slot.play_day_id === day.id)
@@ -178,7 +192,8 @@ export default function MajorDetailPage() {
           </fieldset>
         })}</div>}
         {days.length === 4 && !reviewing && <button onClick={() => setReviewing(true)} disabled={saving || signupDisabled || !allFourSelected} className={styles.primaryButton}>{schedule.length ? "REVIEW MY UPDATED TIMES" : "REVIEW MY 4 DAY SIGNUP"}</button>}
-        {reviewing && <section className={styles.signupReview}><p className={styles.eyebrow}>You’re almost in</p><h3>Confirm your four playing times</h3><div>{days.map((day) => {
+        </>}
+        {showSignupControls && reviewing && <section className={styles.signupReview}><p className={styles.eyebrow}>You’re almost in</p><h3>Confirm your four playing times</h3><div>{days.map((day) => {
           const slot = slots.find((item) => item.id === choices[day.id])
            return <p key={day.id}><span>{dayLabels[day.day_number - 1].day}</span><strong>{slot ? <>{formatMajorLocalDate(slot.starts_at, localTimeZone)}<small>{formatMajorLocalTimeWithZone(slot.starts_at, localTimeZone)}</small></> : "Not selected"}</strong></p>
         })}</div><p className={styles.reviewHelp}>These are preferred scheduling times. Each saved slot independently locks player move-out 12 hours before it starts; a new slot must not have started.</p><div className={styles.reviewActions}><button type="button" className={styles.secondaryButton} onClick={() => setReviewing(false)}>Change a time</button><button type="button" onClick={signup} disabled={saving || signupDisabled || !allFourSelected} className={styles.primaryButton}>{saving ? "Saving…" : schedule.length ? "CONFIRM UPDATED TIMES" : testEvent ? "CONFIRM MY TEST ENTRY" : masters ? "CONFIRM MY MASTERS ENTRY" : "CONFIRM MY MAJOR ENTRY"}</button></div></section>}
@@ -221,6 +236,11 @@ const SIGNUP_STEPS = ["Learn about the Major", "Choose 4 times", "Review", "Regi
 
 function formatPlayDate(value: string) {
   return new Intl.DateTimeFormat(undefined, { weekday: "short", month: "short", day: "numeric", year: "numeric", timeZone: "UTC" }).format(new Date(`${value}T12:00:00Z`))
+}
+
+function formatMgaPublicOpening(value: string | null) {
+  if (!value) return "the public opening date to be announced"
+  return new Intl.DateTimeFormat("en-US", { month: "long", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: "America/New_York", timeZoneName: "short" }).format(new Date(value))
 }
 
 function localDateShift(playDate: string, startsAt: string, timeZone: string) {

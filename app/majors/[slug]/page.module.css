@@ -70,7 +70,7 @@
   --ink: #fffaf0;
   --muted: #d9d4c4;
   --panel: rgba(5, 18, 26, 0.9);
-  background: #03131b;
+  background: rgba(3, 19, 27, 0.08);
 }
 
 .mga .atmosphere {
@@ -94,20 +94,30 @@
 
 .mga .hero {
   border-color: rgba(243, 207, 112, 0.7);
-  background: linear-gradient(145deg, rgba(3, 18, 26, 0.3), rgba(5, 29, 34, 0.4) 68%);
+  background: linear-gradient(145deg, rgba(3, 18, 26, 0.12), rgba(5, 29, 34, 0.16) 68%);
   backdrop-filter: blur(12px);
 }
 
 .mga .contentCard,
 .mga .signupCard {
   border-color: rgba(243, 207, 112, 0.52);
-  background: rgba(3, 17, 24, 0.42);
+  background: rgba(3, 17, 24, 0.14);
   backdrop-filter: blur(12px);
 }
 
 .mga .commitmentCard {
-  background: rgba(2, 13, 18, 0.34);
+  background: rgba(2, 13, 18, 0.14);
   backdrop-filter: blur(9px);
+}
+
+.mga .hero h1,
+.mga .hero h2,
+.mga .hero h3,
+.mga .hero p,
+.mga .hero label,
+.mga .hero legend,
+.mga .hero strong {
+  text-shadow: 0 2px 9px rgba(0, 0, 0, 0.9);
 }
 
 .mastersScene { position: absolute; inset: 0; }
@@ -376,7 +386,7 @@
 
 .mga .dayCard {
   border-color: rgba(83, 215, 201, .72);
-  background: linear-gradient(155deg, rgba(22, 73, 47, 0.24), rgba(4, 24, 31, 0.5) 42%);
+  background: linear-gradient(155deg, rgba(22, 73, 47, 0.12), rgba(4, 24, 31, 0.16) 42%);
 }
 
 .dayCard:disabled { opacity: 0.76; }
