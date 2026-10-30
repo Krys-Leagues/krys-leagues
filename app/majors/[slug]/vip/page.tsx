@@ -1,7 +1,7 @@
 import MajorDetailPage from "../page"
 
 export const metadata = {
-  title: "MGA Open VIP Registration | Krys Leagues",
+  title: "MGA Championship VIP Registration | Krys Leagues",
   robots: "noindex, nofollow",
 }
 

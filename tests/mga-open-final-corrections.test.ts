@@ -39,7 +39,7 @@ test("MGA Open uses the supplied trophy with transparent background", () => {
 })
 
 test("MGA Open shows personalized VIP status without exposing eligibility mechanics", () => {
-  assert.match(signupPage, /The MGA Open — Four rounds, November 12–15, 2026\./u)
+  assert.match(signupPage, /The MGA Championship — Four rounds, November 12–15, 2026\./u)
   assert.match(signupPage, /const displayDescription = mgaOpen/u)
   assert.match(signupPage, /!mgaOpen && <p className=\{styles\.meta\}/u)
   assert.match(signupPage, /signupState === "priority" \? "VIP REGISTRATION OPEN"/u)
@@ -154,8 +154,8 @@ test("MGA Open keeps the approved course section and removes only the duplicate 
   assert.match(signupPage, /Gardens of Babylon Hard/u)
   assert.doesNotMatch(signupPage, /Player-local time:/u)
   assert.match(signupPage, /General registration opens/u)
-  assert.match(signupPage, /YOU ARE SIGNING UP FOR THE MGA OPEN/u)
-  assert.match(signupPage, /The MGA Open is our second Major Championship/u)
+  assert.match(signupPage, /YOU ARE SIGNING UP FOR THE MGA CHAMPIONSHIP/u)
+  assert.match(signupPage, /The MGA Championship is our second Major Championship/u)
   assert.match(signupPage, /Choose your preferred playing time for each round\./u)
   assert.match(signupPage, /!mgaOpen && <p className=\{styles\.lockDeadline\}/u)
   assert.match(signupPage, /const dateShift = mgaOpen \? ""/u)
@@ -167,7 +167,7 @@ test("MGA Open keeps the approved course section and removes only the duplicate 
 })
 
 test("MGA Open keeps its introduction inside the single signup panel", () => {
-  assert.match(signupPage, /\{mgaOpen && <>\s*<p className=\{styles\.eyebrow\}>YOU ARE SIGNING UP FOR THE MGA OPEN/u)
+  assert.match(signupPage, /\{mgaOpen && <>\s*<p className=\{styles\.eyebrow\}>YOU ARE SIGNING UP FOR THE MGA CHAMPIONSHIP/u)
   assert.match(signupPage, /<section className=\{styles\.signupCard\}>[\s\S]*?mgaExplanation[\s\S]*?MajorTimeZoneControl/u)
   assert.match(signupPage, /Official round date: \{formatPlayDate\(day\.play_date\)\}\{mgaOpen \? ` · \$\{dayName\.course\}`/u)
   assert.match(signupPage, /\{!mgaOpen && <section className=\{styles\.commitmentCard\}>/u)

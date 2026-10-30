@@ -407,7 +407,7 @@ export default function MajorSchedulingAdminPage() {
         return
       }
     }
-    setMessage(`${label} finalized independently. ${field === "main" ? "The finalized Main Event Top 10 is now eligible to feed MGA Open priority rules." : "Main Event remains unchanged."}`)
+    setMessage(`${label} finalized independently. ${field === "main" ? "The finalized Main Event Top 10 is now eligible to feed MGA Championship priority rules." : "Main Event remains unchanged."}`)
     await loadSchedule(eventId)
   }
 
@@ -778,7 +778,7 @@ function Results({ entries, weekend, placements, onSave, onFinalize }: {
       : ""
   return <section className={styles.workspace}><div className={styles.sectionHeading}><div><p className={styles.step}>Permanent history</p><h2>Results</h2><p>Finalize Main Event and Secondary Event independently. Ties such as T3 are supported.</p></div></div>
     <div className={styles.twoColumn}>
-      {summaries.map((summary) => { const label = summary.field === "main" ? "Main Event" : "Secondary Event"; return <section key={summary.field} className={styles.panel}><h3>{label}: {statusLabel(summary)}</h3><p className={styles.help}>{summary.field === "main" ? `This finalizes the complete Main Event field, not just the Top 10. The finalized Top 10 is separately used for MGA Open priority; Secondary Event stays pending.` : "Keep pending until the confirmed Secondary Event results are supplied."}</p><button type="button" className={styles.primaryButton} disabled={summary.isFinalized || !summary.canFinalize} onClick={() => void onFinalize(summary.field)}>FINALIZE {label.toUpperCase()} ({summary.toFinalizeEntries})</button>{unresolvedLabel(summary) && <p className={styles.slotWarning}>{unresolvedLabel(summary)}</p>}</section> })}
+      {summaries.map((summary) => { const label = summary.field === "main" ? "Main Event" : "Secondary Event"; return <section key={summary.field} className={styles.panel}><h3>{label}: {statusLabel(summary)}</h3><p className={styles.help}>{summary.field === "main" ? `This finalizes the complete Main Event field, not just the Top 10. The finalized Top 10 is separately used for MGA Championship priority; Secondary Event stays pending.` : "Keep pending until the confirmed Secondary Event results are supplied."}</p><button type="button" className={styles.primaryButton} disabled={summary.isFinalized || !summary.canFinalize} onClick={() => void onFinalize(summary.field)}>FINALIZE {label.toUpperCase()} ({summary.toFinalizeEntries})</button>{unresolvedLabel(summary) && <p className={styles.slotWarning}>{unresolvedLabel(summary)}</p>}</section> })}
       <section className={styles.panel}><h3>Trophy Awards: Pending</h3><p className={styles.help}>Trophy publication is a separate protected workflow and is not changed by either finalization action.</p></section>
     </div>
     <p className={styles.help}>Loaded {entries.length} Masters entries for review. Finalization is blocked until every entry has an approved Main or Secondary classification and a valid result status.</p><div className={styles.resultList}>{sortedEntries.map((entry) => {

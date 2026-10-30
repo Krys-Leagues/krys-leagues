@@ -178,8 +178,8 @@ export default function MajorDetailPage() {
   if (!event) return <main className={styles.loading}><Link href="/majors">← Four Majors</Link>{slug === "test" ? <><h1>TEST EVENT</h1><p>Authenticated trusted-tester access is required. TEST DATA — NOT OFFICIAL.</p><button onClick={signIn} className={styles.primaryButton}>Sign in with Discord</button></> : <p>{message}</p>}</main>
 
   const masters = isMastersScorecardTheme(event)
-  const mgaOpen = event.slug.trim().toLowerCase() === "major-2" || event.name.trim().toLowerCase().includes("mga open")
-  const displayDescription = mgaOpen ? "The MGA Open — Four rounds, November 12–15, 2026." : event.description
+  const mgaOpen = event.slug.trim().toLowerCase() === "major-2" || event.name.trim().toLowerCase().includes("mga championship") || event.name.trim().toLowerCase().includes("mga open")
+  const displayDescription = mgaOpen ? "The MGA Championship — Four rounds, November 12–15, 2026." : event.description
   const dayLabels = mgaOpen ? MGA_DAY_LABELS : MASTERS_DAY_LABELS
   const testEvent = event.is_test_event
   const signupState = signupStatus?.state || (event.signup_open ? "open" : "closed")
@@ -250,8 +250,8 @@ export default function MajorDetailPage() {
       </section>}
       {(mgaOpen || event.signup_open || schedule.length > 0) && <section className={styles.signupCard}>
         {mgaOpen && <>
-          <p className={styles.eyebrow}>YOU ARE SIGNING UP FOR THE MGA OPEN</p>
-          <p className={styles.mgaExplanation}>The MGA Open is our second Major Championship, played over four rounds in a PGA-style format.</p>
+          <p className={styles.eyebrow}>YOU ARE SIGNING UP FOR THE MGA CHAMPIONSHIP</p>
+          <p className={styles.mgaExplanation}>The MGA Championship is our second Major Championship, played over four rounds in a PGA-style format.</p>
           <p className={styles.mgaExplanation}>Choose your preferred playing time for each round.</p>
         </>}
         {showSignupControls && <MajorTimeZoneControl key={`${displayTimeZone.timeZone}:${displayTimeZone.source}`} {...displayTimeZone} />}

@@ -6,12 +6,12 @@ export default function MgaHomepageBanner() {
     <Link
       href="/majors/major-2"
       className="artwork-navigation__mga-link"
-      aria-label="The MGA Open — view registration"
+      aria-label="The MGA Championship — view registration"
     >
       <Image
         className="artwork-navigation__mga-artwork"
         src="/approved-pages/the mga open registration nov 1st.png"
-        alt="Gardens of Babylon artwork for The MGA Open"
+        alt="Gardens of Babylon artwork for The MGA Championship"
         width={2172}
         height={724}
         priority
