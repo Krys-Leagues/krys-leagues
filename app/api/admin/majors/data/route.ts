@@ -2,6 +2,8 @@ import "server-only"
 
 import { createClient } from "@supabase/supabase-js"
 import { authorizeSiteAdminMutation } from "@/lib/auth/siteAdminMutation"
+import { createServerSupabaseClient } from "@/lib/supabase/server"
+import { isMgaChampionshipEvent } from "@/lib/majorOwnerVip"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -51,7 +53,8 @@ export async function GET(request: Request) {
       if (dayResult.error) return json({ error: dayResult.error.message }, 503)
       const days = dayResult.data || []
       const dayIds = days.map((day) => day.id)
-      const [slotResult, standardTimeResult, entryResult, weekendResult, groupResult, placementResult, testerResult, eventConfigResult] = await Promise.all([
+      const sessionClient = await createServerSupabaseClient()
+      const [slotResult, standardTimeResult, entryResult, weekendResult, groupResult, placementResult, testerResult, eventConfigResult, ownerStatusResult] = await Promise.all([
         dayIds.length ? supabase.from("major_time_slots").select("*").in("play_day_id", dayIds).order("starts_at") : Promise.resolve({ data: [], error: null }),
         supabase.from("major_standard_signup_times").select("*").eq("major_event_id", eventId).eq("is_active", true).order("local_time"),
         supabase.from("major_entries").select("*").eq("major_event_id", eventId).order("player_screen_name_snapshot"),
@@ -59,17 +62,32 @@ export async function GET(request: Request) {
         supabase.from("major_schedule_groups").select("*").eq("major_event_id", eventId).order("group_label"),
         supabase.from("major_final_placements").select("*").eq("major_event_id", eventId),
         supabase.rpc("get_major_test_testers", { p_major_event_id: eventId }),
-        supabase.from("major_events").select("priority_source_event_id").eq("id", eventId).maybeSingle(),
+        supabase.from("major_events").select("priority_source_event_id,slug,name").eq("id", eventId).maybeSingle(),
+        sessionClient.rpc("is_current_user_major_vip_owner"),
       ])
       const entries = entryResult.data || []
       const groups = groupResult.data || []
       const prioritySourceEventId = eventConfigResult.data?.priority_source_event_id || null
-      const [choiceResult, memberResult, priorityPlacementResult] = await Promise.all([
+      const eventIsMgaChampionship = isMgaChampionshipEvent(eventConfigResult.data)
+      const [choiceResult, memberResult, priorityPlacementResult, ownerVipResult] = await Promise.all([
         entries.length ? supabase.from("major_entry_day_choices").select("*").in("entry_id", entries.map((entry) => entry.id)) : Promise.resolve({ data: [], error: null }),
         groups.length ? supabase.from("major_schedule_group_members").select("*").in("group_id", groups.map((group) => group.id)) : Promise.resolve({ data: [], error: null }),
         prioritySourceEventId ? supabase.from("major_final_placements").select("*").eq("major_event_id", prioritySourceEventId) : Promise.resolve({ data: [], error: null }),
+        eventIsMgaChampionship ? supabase.from("major_owner_vip_list_entries").select("player_id,added_at,added_by").eq("major_event_id", eventId).eq("is_active", true).order("added_at") : Promise.resolve({ data: [], error: null }),
       ])
-      const error = slotResult.error || standardTimeResult.error || entryResult.error || weekendResult.error || groupResult.error || placementResult.error || testerResult.error || eventConfigResult.error || choiceResult.error || memberResult.error || priorityPlacementResult.error
+      const ownerVipRows = ownerVipResult.data || []
+      const ownerVipPlayerIds = ownerVipRows.map((row) => row.player_id)
+      const ownerVipPlayerResult = ownerVipPlayerIds.length
+        ? await supabase.from("players").select("id,screen_name").in("id", ownerVipPlayerIds)
+        : { data: [], error: null }
+      const ownerVipPlayersById = new Map((ownerVipPlayerResult.data || []).map((player) => [player.id, player.screen_name]))
+      const ownerVipList = ownerVipRows.map((row) => ({
+        player_id: row.player_id,
+        player_screen_name: ownerVipPlayersById.get(row.player_id) || "Unknown canonical player",
+        added_at: row.added_at,
+        added_by: row.added_by,
+      }))
+      const error = slotResult.error || standardTimeResult.error || entryResult.error || weekendResult.error || groupResult.error || placementResult.error || testerResult.error || eventConfigResult.error || ownerStatusResult.error || choiceResult.error || memberResult.error || priorityPlacementResult.error || ownerVipResult.error || ownerVipPlayerResult.error
       if (error) return json({ error: error.message }, 503)
       return json({
         days,
@@ -82,6 +100,8 @@ export async function GET(request: Request) {
         members: memberResult.data || [],
         placements: placementResult.data || [],
         prioritySourcePlacements: priorityPlacementResult.data || [],
+        ownerVipList,
+        ownerCanEditVipList: Boolean(ownerStatusResult.data) && eventIsMgaChampionship,
         testers: testerResult.data || [],
       })
     }

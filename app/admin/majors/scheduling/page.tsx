@@ -28,12 +28,13 @@ import { supabase } from "@/lib/supabase"
 import { fetchMajorAdminData, mutateMajorAdminData } from "@/lib/admin/majorAdminData"
 import { getMajorVipEligiblePlayers } from "@/lib/majorVipEligibility"
 import { summarizeMajorFinalizationField, type MajorFinalizationField } from "@/lib/majorFinalization"
+import { isMgaChampionshipEvent, ownerVipSearchMatches, type MajorOwnerVipListEntry } from "@/lib/majorOwnerVip"
 import MajorTimeZoneControl from "@/components/MajorTimeZoneControl"
 import { formatMajorLocalDateTime } from "@/lib/majorTimeZone"
 import { useMajorDisplayTimeZone } from "@/lib/useMajorDisplayTimeZone"
 import styles from "./page.module.css"
 
-type AdminSection = "setup" | `day-${1 | 2 | 3 | 4}` | "weekend" | "results" | "testers"
+type AdminSection = "setup" | `day-${1 | 2 | 3 | 4}` | "weekend" | "results" | "vip" | "testers"
 
 const DAY_NAMES = [
   { short: "Thursday", title: "Thursday — Round 1", fallback: "Round 1" },
@@ -56,6 +57,8 @@ export default function MajorSchedulingAdminPage() {
   const [members, setMembers] = useState<MajorScheduleGroupMember[]>([])
   const [placements, setPlacements] = useState<MajorFinalPlacement[]>([])
   const [prioritySourcePlacements, setPrioritySourcePlacements] = useState<MajorFinalPlacement[]>([])
+  const [ownerVipList, setOwnerVipList] = useState<MajorOwnerVipListEntry[]>([])
+  const [ownerCanEditVipList, setOwnerCanEditVipList] = useState(false)
   const [testers, setTesters] = useState<MajorTestTester[]>([])
   const [globalPlayers, setGlobalPlayers] = useState<GlobalPlayerDirectoryEntry[]>([])
   const [message, setMessage] = useState("")
@@ -76,6 +79,8 @@ export default function MajorSchedulingAdminPage() {
         members: MajorScheduleGroupMember[]
         placements: MajorFinalPlacement[]
         prioritySourcePlacements: MajorFinalPlacement[]
+        ownerVipList: MajorOwnerVipListEntry[]
+        ownerCanEditVipList: boolean
         testers: MajorTestTester[]
       }>("schedule", { eventId: id })
       setDays(payload.days || [])
@@ -88,6 +93,8 @@ export default function MajorSchedulingAdminPage() {
       setMembers(payload.members || [])
       setPlacements(payload.placements || [])
       setPrioritySourcePlacements(payload.prioritySourcePlacements || [])
+      setOwnerVipList(payload.ownerVipList || [])
+      setOwnerCanEditVipList(Boolean(payload.ownerCanEditVipList))
       setTesters(payload.testers || [])
       setMessage("")
     } catch (error) {
@@ -140,7 +147,7 @@ export default function MajorSchedulingAdminPage() {
       p_minimum_public_spots_at_open: data.get("public_minimum") ? Number(data.get("public_minimum")) : null,
       p_priority_signup_enabled: data.get("priority_enabled") === "on",
       p_priority_signup_opens_at: data.get("priority_open") ? new Date(String(data.get("priority_open"))).toISOString() : null,
-      p_priority_source_event_id: data.get("priority_source") ? String(data.get("priority_source")) : null,
+      p_priority_source_event_id: selectedEvent && isMgaChampionshipEvent(selectedEvent) ? null : (data.get("priority_source") ? String(data.get("priority_source")) : null),
       p_schedule_timezone: String(data.get("timezone")),
     })
     if (showResult(result.error, "Signup opening settings saved.")) await reloadEvents(eventId)
@@ -438,12 +445,22 @@ export default function MajorSchedulingAdminPage() {
     if (showResult(result.error, listed ? "TEST event listed for trusted testers." : "TEST event hidden from the Majors listing.")) await reloadEvents(eventId)
   }
 
+  async function setOwnerVipPlayer(playerId: string, isActive: boolean) {
+    const result = await supabase.rpc("set_major_owner_vip_list_entry", {
+      p_major_event_id: eventId,
+      p_player_id: playerId,
+      p_is_active: isActive,
+    })
+    if (showResult(result.error, isActive ? "Player added to the owner VIP list." : "Player removed from the owner VIP list.")) await loadSchedule(eventId)
+  }
+
   const navigation: Array<{ id: AdminSection; label: string }> = [
     { id: "setup", label: "1. Event setup" },
     ...DAY_NAMES.map((day, index) => ({ id: `day-${index + 1}` as AdminSection, label: `${index + 2}. ${day.title}` })),
     { id: "weekend", label: "6. Weekend field" },
     { id: "results", label: "7. Results" },
-    ...(selectedEvent?.is_test_event ? [{ id: "testers" as AdminSection, label: "8. Testers" }] : []),
+    ...(selectedEvent && isMgaChampionshipEvent(selectedEvent) ? [{ id: "vip" as AdminSection, label: "8. Owner VIP list" }] : []),
+    ...(selectedEvent?.is_test_event ? [{ id: "testers" as AdminSection, label: `${selectedEvent && isMgaChampionshipEvent(selectedEvent) ? "9" : "8"}. Testers` }] : []),
   ]
 
   const activeDayNumber = activeSection.startsWith("day-") ? Number(activeSection.slice(4)) : null
@@ -518,6 +535,13 @@ export default function MajorSchedulingAdminPage() {
         onFinalize={finalizeField}
       />}
 
+      {selectedEvent && activeSection === "vip" && isMgaChampionshipEvent(selectedEvent) && <OwnerVipList
+        globalPlayers={globalPlayers}
+        entries={ownerVipList}
+        canEdit={ownerCanEditVipList}
+        onSetPlayer={setOwnerVipPlayer}
+      />}
+
       {selectedEvent?.is_test_event && activeSection === "testers" && <Testers
         event={selectedEvent}
         testers={testers}
@@ -554,6 +578,7 @@ function EventSetup({ event, events, days, standardTimes, onSaveOpening, onRelea
     { name: "rooms", label: "Room and play rules", value: event.room_rules },
     { name: "stream", label: "Stream information", value: event.stream_information },
   ]
+  const ownerManagedVip = isMgaChampionshipEvent(event)
   const prioritySource = events.find((item) => item.id === event.priority_source_event_id)
   const eligibleVipPlayers = getMajorVipEligiblePlayers(prioritySourcePlacements)
   return <section className={styles.workspace}>
@@ -568,15 +593,14 @@ function EventSetup({ event, events, days, standardTimes, onSaveOpening, onRelea
           <label>Guaranteed public spots at opening<input name="public_minimum" type="number" min="1" max="100" defaultValue={event.minimum_public_spots_at_open || ""} placeholder="Optional" /></label>
           <label>Event reference timezone<input name="timezone" defaultValue={event.schedule_timezone || "America/New_York"} required /></label>
           <label>Future priority opening<input name="priority_open" type="datetime-local" defaultValue={toDateTimeLocal(event.priority_signup_opens_at)} /></label>
-          <label>Previous Major for priority<select name="priority_source" defaultValue={event.priority_source_event_id || ""}><option value="">None — first Major</option>{events.filter((item) => item.id !== event.id && !item.is_test_event).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
+          {!ownerManagedVip && <label>Previous Major for priority<select name="priority_source" defaultValue={event.priority_source_event_id || ""}><option value="">None — first Major</option>{events.filter((item) => item.id !== event.id && !item.is_test_event).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>}
         </div>
-        <label className={styles.check}><input name="priority_enabled" type="checkbox" defaultChecked={event.priority_signup_enabled} /> Enable previous-Major priority signup</label>
+        <label className={styles.check}><input name="priority_enabled" type="checkbox" defaultChecked={event.priority_signup_enabled} /> {ownerManagedVip ? "Enable owner-managed VIP priority signup" : "Enable previous-Major priority signup"}</label>
         <button className={styles.primaryButton}>Save signup opening</button>
       </form>
 
       <section className={styles.panel} aria-labelledby="priority-eligibility-heading">
-        <div className={styles.inlineHeading}><div><p className={styles.step}>VIP verification</p><h3 id="priority-eligibility-heading">Official Top 10 priority group</h3><p>Source: {prioritySource?.name || "No previous Major selected"}. Only finalized Main Event placements 1–10 qualify; every player tied at the cutoff remains eligible.</p></div><strong>{eligibleVipPlayers.length} eligible player{eligibleVipPlayers.length === 1 ? "" : "s"}</strong></div>
-        {eligibleVipPlayers.length ? <div className={styles.playerChips}>{eligibleVipPlayers.map((player) => <span key={player.playerId}>{player.screenName} · T{player.placement}</span>)}</div> : <p className={styles.slotWarning}>No verified eligible players are available. Keep VIP priority disabled until the configured source Major has finalized Main Event Top 10 results.</p>}
+        {ownerManagedVip ? <><div className={styles.inlineHeading}><div><p className={styles.step}>VIP verification</p><h3 id="priority-eligibility-heading">Owner-managed VIP priority</h3><p>THE MGA CHAMPIONSHIP uses the protected Owner VIP List. Finalized Masters placements and previous-Major source settings do not grant early access here.</p></div><strong>Manage in Owner VIP list</strong></div><p className={styles.help}>Only the designated Owner account can add or remove canonical Global Players. All other administrators can review the section but cannot edit it.</p></> : <><div className={styles.inlineHeading}><div><p className={styles.step}>VIP verification</p><h3 id="priority-eligibility-heading">Official Top 10 priority group</h3><p>Source: {prioritySource?.name || "No previous Major selected"}. Only finalized Main Event placements 1–10 qualify; every player tied at the cutoff remains eligible.</p></div><strong>{eligibleVipPlayers.length} eligible player{eligibleVipPlayers.length === 1 ? "" : "s"}</strong></div>{eligibleVipPlayers.length ? <div className={styles.playerChips}>{eligibleVipPlayers.map((player) => <span key={player.playerId}>{player.screenName} · T{player.placement}</span>)}</div> : <p className={styles.slotWarning}>No verified eligible players are available. Keep VIP priority disabled until the configured source Major has finalized Main Event Top 10 results.</p>}</>}
       </section>
 
       <div className={styles.panel}>
@@ -762,6 +786,35 @@ function Results({ entries, weekend, placements, onSave, onFinalize }: {
     const staged = weekend.find((item) => item.entry_id === entry.id)?.competition_status || "pending"
     return <article key={entry.id} className={styles.resultCard}><header><strong>{result?.player_screen_name_snapshot || entry.player_screen_name_snapshot}</strong><small>{result?.player_id || entry.player_id}</small></header>{result?.is_finalized ? <div className={styles.finalResult}><strong>{result.is_tied ? "T" : ""}{result.field_placement || "—"}</strong><span>{result.weekend_field === "main" ? "Main Event" : "Secondary field"} · {result.result_status}{result.is_winner ? " · Official winner" : ""}</span><em>Finalized — immutable history</em></div> : <form onSubmit={(e) => { e.preventDefault(); void onSave(entry.id, e.currentTarget) }}><label>Field<select name="field" defaultValue={result?.weekend_field || (staged === "main" || staged === "secondary" ? staged : "")} required><option value="">Stage weekend field first</option><option value="main">Main Event</option><option value="secondary">Secondary field</option></select></label><label>Placement<input name="placement" type="number" min="1" defaultValue={result?.field_placement || ""} /></label><label>Status<select name="result_status" defaultValue={result?.result_status || "pending"}><option value="pending">Pending</option><option value="completed">Completed</option><option value="did_not_finish">Did not finish</option><option value="withdrawn">Withdrawn</option><option value="disqualified">Disqualified</option></select></label><label className={styles.check}><input name="tied" type="checkbox" defaultChecked={result?.is_tied} /> Tied placement</label><label className={styles.check}><input name="winner" type="checkbox" defaultChecked={result?.is_winner} /> Official winner</label><label className={styles.check}><input name="finalize" type="checkbox" /> Finalize permanently</label><button className={styles.primaryButton}>Save result</button></form>}</article>
   })}</div></section>
+}
+
+function OwnerVipList({ globalPlayers, entries, canEdit, onSetPlayer }: {
+  globalPlayers: GlobalPlayerDirectoryEntry[]
+  entries: MajorOwnerVipListEntry[]
+  canEdit: boolean
+  onSetPlayer: (playerId: string, isActive: boolean) => Promise<void>
+}) {
+  const [search, setSearch] = useState("")
+  const [selectedPlayerId, setSelectedPlayerId] = useState("")
+  const listedIds = useMemo(() => new Set(entries.map((entry) => entry.player_id)), [entries])
+  const matches = useMemo(
+    () => globalPlayers.filter((player) => player.active && ownerVipSearchMatches(player.screenName, search)).slice(0, 20),
+    [globalPlayers, search],
+  )
+  const selectedPlayer = globalPlayers.find((player) => player.id === selectedPlayerId)
+
+  return <section className={styles.workspace}>
+    <div className={styles.sectionHeading}><div><p className={styles.step}>THE MGA CHAMPIONSHIP</p><h2>Owner VIP list</h2><p>Manage early-access eligibility using canonical Global Players. This list is separate from Masters finalization and is checked server-side.</p></div><span className={canEdit ? styles.complete : styles.private}>{canEdit ? "Owner editing enabled" : "Read-only for this admin"}</span></div>
+    {!canEdit && <div className={styles.privacyNotice}><strong>Owner-only editing</strong><p>This administrator can review the complete list, but only the designated Owner account can add or remove players.</p></div>}
+    <div className={styles.panel}>
+      <h3>Add an eligible VIP</h3>
+      <p className={styles.help}>Search by exact or partial screen name, select the canonical UUID, then confirm the add. Duplicate entries are prevented by the protected database key.</p>
+      <label>Search Global Players<input value={search} onChange={(event) => { setSearch(event.target.value); setSelectedPlayerId("") }} placeholder="Search screen name…" disabled={!canEdit} /></label>
+      {canEdit && search.trim() && <div className={styles.playerSearchResults}>{matches.length ? matches.map((player) => <button key={player.id} type="button" className={selectedPlayerId === player.id ? styles.selectedPlayer : ""} onClick={() => setSelectedPlayerId(player.id)} disabled={listedIds.has(player.id)}><span><strong>{player.screenName}</strong><small>Canonical player UUID: {player.id}</small></span><em>{listedIds.has(player.id) ? "Already listed" : "Select"}</em></button>) : <p className={styles.help}>No active canonical Global Player matches that screen name.</p>}</div>}
+      {canEdit && selectedPlayer && <div className={styles.selectedPlayerSummary}><span><strong>{selectedPlayer.screenName}</strong><small>Canonical player UUID: {selectedPlayer.id}</small></span><button type="button" className={styles.primaryButton} onClick={() => { void onSetPlayer(selectedPlayer.id, true).then(() => { setSearch(""); setSelectedPlayerId("") }) }}>Add to Owner VIP list</button></div>}
+    </div>
+    <div className={styles.panel}><div className={styles.inlineHeading}><div><h3>Current VIP list</h3><p className={styles.help}>Active entries for THE MGA CHAMPIONSHIP. Add/remove actions are recorded with the acting account and timestamp.</p></div><strong>{entries.length} eligible player{entries.length === 1 ? "" : "s"}</strong></div>{entries.length ? <div className={styles.testerList}>{entries.map((entry) => <div key={entry.player_id}><span><strong>{entry.player_screen_name}</strong><small>Canonical player UUID: {entry.player_id} · Added {new Date(entry.added_at).toLocaleString()}</small></span>{canEdit && <button type="button" className={styles.dangerButton} onClick={() => void onSetPlayer(entry.player_id, false)}>Remove</button>}</div>)}</div> : <p className={styles.emptyState}>No owner-managed VIP players have been added yet.</p>}</div>
+  </section>
 }
 
 function Testers({ event, testers, globalPlayers, onAdd, onRemove, onSetListing }: {
