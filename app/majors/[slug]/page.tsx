@@ -34,6 +34,7 @@ export default function MajorDetailPage() {
   const [reviewing, setReviewing] = useState(false)
   const [signupStatus, setSignupStatus] = useState<MajorSignupStatus | null>(null)
   const [authenticated, setAuthenticated] = useState(false)
+  const [siteAdmin, setSiteAdmin] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const displayTimeZone = useMajorDisplayTimeZone()
 
@@ -55,6 +56,23 @@ export default function MajorDetailPage() {
       try {
         const sessionResult = await supabase.auth.getSession()
         setAuthenticated(Boolean(sessionResult.data.session?.user))
+        setSiteAdmin(false)
+        if (sessionResult.data.session?.access_token) {
+          try {
+            const adminResponse = await fetch("/api/auth/admin-authorization", {
+              headers: { Authorization: `Bearer ${sessionResult.data.session.access_token}` },
+              cache: "no-store",
+            })
+            if (adminResponse.ok) {
+              const adminPayload = await adminResponse.json() as { siteAdmin?: boolean }
+              setSiteAdmin(Boolean(adminPayload.siteAdmin))
+            }
+          } catch {
+            setSiteAdmin(false)
+          }
+        } else {
+          setSiteAdmin(false)
+        }
         if (vipEntry) {
           const personalizedStatus = await fetch("/api/majors/home-banner", {
             cache: "no-store",
@@ -140,6 +158,7 @@ export default function MajorDetailPage() {
   const signupDisabled = schedule.length > 0
     ? !event.signup_open
     : !canSubmitSignup
+  const canChooseSlots = !signupDisabled || siteAdmin
   const weekendStatus = schedule[0]?.weekend_competition_status || "pending"
   const secondaryFieldName = event.secondary_trophy_display_name || "Secondary Trophy Field"
   const localTimeZone = displayTimeZone.timeZone
@@ -203,14 +222,14 @@ export default function MajorDetailPage() {
           const locked = savedSlot ? isMajorSlotMoveOutLocked(savedSlot.starts_at, currentTime) : false
           const savedSlotHasBegun = savedSlot ? isMajorSlotStarted(savedSlot.starts_at, currentTime) : false
            const dayName = dayLabels[day.day_number - 1]
-          return <fieldset key={day.id} className={styles.dayCard} disabled={locked || signupDisabled}>
+          return <fieldset key={day.id} className={styles.dayCard} disabled={locked || !canChooseSlots}>
             <legend><span>{dayName.day}</span>{dayName.round}</legend><p className={styles.dayContext}>Official round date: {formatPlayDate(day.play_date)}{mgaOpen ? ` · ${dayName.course}` : ""}</p>
             {daySlots.length ? <div className={styles.slotPicker}><label className={styles.slotPickerLabel} htmlFor={`slot-${day.id}`}>Choose Your Time Slot</label><select id={`slot-${day.id}`} className={styles.slotSelect} value={choices[day.id] || ""} onChange={(selection) => { setChoices((old) => ({ ...old, [day.id]: selection.target.value })); setReviewing(false) }}><option value="">Select an available time…</option>{daySlots.map((slot) => { const dateShift = mgaOpen ? "" : localDateShift(day.play_date, slot.starts_at, localTimeZone); const started = isMajorSlotStarted(slot.starts_at, currentTime); const selected = choices[day.id] === slot.id; return <option key={slot.id} value={slot.id} disabled={started && !selected}>Time Slot {slotNumbers.get(slot.id) || "—"} · {formatMajorLocalDate(slot.starts_at, localTimeZone)} · {formatMajorLocalTimeWithZone(slot.starts_at, localTimeZone)}{dateShift ? ` · ${dateShift}` : ""}{started && !selected ? " · passed" : ""}</option> })}</select>{choices[day.id] && (() => { const selectedSlot = daySlots.find((slot) => slot.id === choices[day.id]); return selectedSlot ? <p className={styles.selectedTime}><strong>Selected: Time Slot {slotNumbers.get(selectedSlot.id) || "—"}</strong><span>{formatMajorLocalDate(selectedSlot.starts_at, localTimeZone)} · {formatMajorLocalTimeWithZone(selectedSlot.starts_at, localTimeZone)}</span></p> : null })()}</div> : <p className={styles.notice}>No times available yet.</p>}
             {!mgaOpen && <p className={styles.lockDeadline}>Player time changes lock individually 12 hours before the selected slot starts.<span>{localTimeZone}</span></p>}
             {locked && <p className={styles.locked}>{savedSlotHasBegun ? "Selected time has started" : "Selected time is locked — tournament admins can still help"}</p>}
           </fieldset>
         })}</div>}
-        {days.length === 4 && !reviewing && <button onClick={() => setReviewing(true)} disabled={saving || signupDisabled || !allFourSelected} className={styles.primaryButton}>{schedule.length ? "REVIEW MY UPDATED TIMES" : "REVIEW MY 4 DAY SIGNUP"}</button>}
+        {days.length === 4 && !reviewing && <button onClick={() => setReviewing(true)} disabled={saving || !canChooseSlots || !allFourSelected} className={styles.primaryButton}>{schedule.length ? "REVIEW MY UPDATED TIMES" : "REVIEW MY 4 DAY SIGNUP"}</button>}
         </>}
         {showSignupControls && reviewing && <section className={styles.signupReview}><p className={styles.eyebrow}>You’re almost in</p><h3>Confirm your four playing times</h3><div>{days.map((day) => {
           const slot = slots.find((item) => item.id === choices[day.id])

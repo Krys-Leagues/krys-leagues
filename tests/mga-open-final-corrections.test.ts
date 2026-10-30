@@ -83,6 +83,14 @@ test("Majors admins retain independent full schedule access", () => {
   assert.doesNotMatch(schedulingPage, /get_major_signup_status|signupState|priorityWindow/u)
 })
 
+test("site admins can browse slot controls without bypassing registration gates", () => {
+  assert.match(signupPage, /api\/auth\/admin-authorization/u)
+  assert.match(signupPage, /setSiteAdmin\(Boolean\(adminPayload\.siteAdmin\)\)/u)
+  assert.match(signupPage, /const canChooseSlots = !signupDisabled \|\| siteAdmin/u)
+  assert.match(signupPage, /disabled=\{locked \|\| !canChooseSlots\}/u)
+  assert.match(signupPage, /disabled=\{saving \|\| signupDisabled \|\| !allFourSelected\}/u)
+})
+
 test("MGA priority registration is usable only after the personalized VIP check", () => {
   assert.match(signupPage, /const vipEntry = pathname\.endsWith\("\/vip"\)/u)
   assert.match(signupPage, /if \(vipEntry\) \{/u)
