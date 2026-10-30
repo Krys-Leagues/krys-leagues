@@ -94,6 +94,8 @@ test("site admins can browse slot controls without bypassing registration gates"
   assert.match(signupPage, /data-disabled-reason=/u)
   assert.match(signupPage, /data-schedule-access=/u)
   assert.match(signupPage, /administrator authorization could not be verified/u)
+  assert.match(signupPage, /SIGN IN AS ADMINISTRATOR/u)
+  assert.match(signupPage, /createDiscordAuthCallbackUrl\("admin", currentInternalReturnTo\(\)/u)
   assert.match(signupPage, /disabled=\{saving \|\| signupDisabled \|\| !allFourSelected\}/u)
 })
 

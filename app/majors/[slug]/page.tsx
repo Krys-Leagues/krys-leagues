@@ -5,7 +5,7 @@ import Image from "next/image"
 import { useParams, usePathname } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
 import { isMajorSlotMoveOutLocked, isMajorSlotStarted, isMastersScorecardTheme, type MajorDayChoice, type MajorEvent, type MajorPlayDay, type MajorSignupStatus, type MajorTimeSlot } from "@/lib/majors"
-import { createDiscordAuthCallbackUrl } from "@/lib/authReturnTo"
+import { createDiscordAuthCallbackUrl, currentInternalReturnTo } from "@/lib/authReturnTo"
 import MajorTimeZoneControl from "@/components/MajorTimeZoneControl"
 import { formatMajorLocalDate, formatMajorLocalDateTime, formatMajorLocalTimeWithZone } from "@/lib/majorTimeZone"
 import { supabase } from "@/lib/supabase"
@@ -152,6 +152,13 @@ export default function MajorDetailPage() {
     await supabase.auth.signInWithOAuth({ provider: "discord", options: { redirectTo: createDiscordAuthCallbackUrl("player") } })
   }
 
+  async function signInAsAdmin() {
+    await supabase.auth.signInWithOAuth({
+      provider: "discord",
+      options: { redirectTo: createDiscordAuthCallbackUrl("admin", currentInternalReturnTo() || undefined) },
+    })
+  }
+
   async function signup() {
     if (!event) return
     setSaving(true); setMessage("")
@@ -256,7 +263,7 @@ export default function MajorDetailPage() {
         {vipEntry && authenticated && signupState === "upcoming" && <p className={styles.notice}>VIP registration is not available for this account. {generalRegistrationMessage}</p>}
         {signupState === "priority" && <p className={styles.notice}>{mgaOpen ? <>VIP REGISTRATION OPEN. {generalRegistrationMessage}</> : generalRegistrationMessage}</p>}
         {signupState === "full" && schedule.length === 0 && <p className={styles.notice}>The current field is full.</p>}
-        {mgaOpen && scheduleAccessMessage && <p className={styles.scheduleAccess} role="status" data-schedule-access={siteAdminCheck}>{scheduleAccessMessage}</p>}
+        {mgaOpen && scheduleAccessMessage && <div className={styles.scheduleAccess} role="status" data-schedule-access={siteAdminCheck}><span>{scheduleAccessMessage}</span>{siteAdminCheck === "signed_out" && <button type="button" onClick={signInAsAdmin} className={styles.secondaryButton}>SIGN IN AS ADMINISTRATOR</button>}</div>}
         {showSignupControls && <>
         {days.length !== 4 ? <p className={styles.notice}>Tournament staff is still configuring the four-day schedule.</p> : <div className={styles.days}>{days.map((day) => {
           const mine = schedule.find((choice) => choice.play_day_id === day.id)
