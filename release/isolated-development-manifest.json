@@ -7,7 +7,7 @@
   "stagingDatabaseProject": "jiekoqgegqcbqaobisvm",
   "reviewedStagingMigrations": [
     {
-      "file": "supabase/migrations/20261030100000_owner_managed_mga_vip_list.sql",
+      "file": "supabase/migrations/20261030100705_owner_managed_mga_vip_list.sql",
       "sha256": "3564b44e88c590013ae8da64cba6761cdccbfecb513176b886513b01583a03a2",
       "project": "jiekoqgegqcbqaobisvm",
       "productionAllowed": false
