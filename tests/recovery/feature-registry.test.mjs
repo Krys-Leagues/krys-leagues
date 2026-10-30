@@ -29,6 +29,18 @@ test("approved homepage MGA Open banner is independently checkpointed", () => {
   assert.equal(banner.requiredInteractions[1], "entire banner links to /majors/major-2")
 })
 
+test("replacing or removing the approved homepage MGA banner fails closed", () => {
+  const bannerHashChanged = structuredClone(registry)
+  bannerHashChanged.features.find((feature) => feature.id === "homepage-mga-open-banner").artwork[0].sha256 = "0".repeat(64)
+  const changedResult = validateRegistry(bannerHashChanged, { candidateCommit: head })
+  assert.ok(changedResult.errors.some((error) => error.includes("homepage-mga-open-banner artwork hash mismatch")))
+
+  const bannerRemoved = structuredClone(registry)
+  bannerRemoved.features.find((feature) => feature.id === "homepage-mga-open-banner").artwork[0].path = "public/approved-pages/missing-mga-banner.png"
+  const removedResult = validateRegistry(bannerRemoved, { candidateCommit: head })
+  assert.ok(removedResult.errors.some((error) => error.includes("homepage-mga-open-banner missing artwork")))
+})
+
 test("current candidate passes route, artwork, and checkpoint verification", () => {
   const result = validateRegistry(registry, { candidateCommit: head, changedFrom: baseline })
   assert.deepEqual(result.errors, [])
