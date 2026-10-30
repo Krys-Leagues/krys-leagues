@@ -58,7 +58,10 @@ function CallbackHandler() {
         try {
           const permissions = await hasAdminAccess(session.access_token)
           if (permissions?.siteAdmin) {
-            router.replace(next?.startsWith("/admin") ? next : "/admin/command-center")
+            // Site admins may authenticate from an admin route or from a
+            // protected player-facing admin workflow such as MGA scheduling.
+            // `next` has already passed safeInternalReturnTo validation.
+            router.replace(next || "/admin/command-center")
             return
           }
           if (permissions?.soloAdmin) {

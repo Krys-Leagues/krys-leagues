@@ -26,8 +26,10 @@ function authCallbackOrigin() {
 
   const currentOrigin = window.location.origin
   const currentHost = window.location.hostname.toLowerCase()
-  const previewOrigin = toOrigin(process.env.NEXT_PUBLIC_VERCEL_URL)
-  if (currentHost.endsWith(PREVIEW_HOST_SUFFIX) && previewOrigin) return previewOrigin
+  // A Vercel preview URL is deployment-specific. A build-time preview value
+  // can point at another preview or a shared alias, so preserve the exact
+  // host the player started from.
+  if (currentHost.endsWith(PREVIEW_HOST_SUFFIX)) return currentOrigin
 
   const siteOrigin = toOrigin(process.env.NEXT_PUBLIC_SITE_URL)
   if (siteOrigin && APPROVED_SITE_HOSTS.has(currentHost)) return siteOrigin

@@ -66,10 +66,13 @@ test("MGA VIP status can verify the signed-in browser session without weakening 
 
 test("OAuth callback prefers the exact Vercel Preview host without exposing tokens", () => {
   const authReturnTo = readFileSync(resolve(root, "lib/authReturnTo.ts"), "utf8")
-  assert.match(authReturnTo, /NEXT_PUBLIC_VERCEL_URL/u)
   assert.match(authReturnTo, /krys-leagues-projects\.vercel\.app/u)
+  assert.match(authReturnTo, /currentHost\.endsWith\(PREVIEW_HOST_SUFFIX\)\) return currentOrigin/u)
+  assert.doesNotMatch(authReturnTo, /NEXT_PUBLIC_VERCEL_URL/u)
   assert.match(authReturnTo, /AUTH_CALLBACK_PATH, authCallbackOrigin\(\) \|\| window\.location\.origin/u)
   assert.doesNotMatch(authReturnTo, /access_token|refresh_token|VERCEL_SHARE|_vercel_share/u)
+  const callbackPage = readFileSync(resolve(root, "app/auth/callback/page.tsx"), "utf8")
+  assert.match(callbackPage, /permissions\?\.siteAdmin[\s\S]*router\.replace\(next \|\| "\/admin\/command-center"\)/u)
 })
 
 test("Majors admins retain independent full schedule access", () => {
@@ -89,13 +92,14 @@ test("site admins can browse slot controls without bypassing registration gates"
   assert.match(signupPage, /setSiteAdmin\(authorized\)/u)
   assert.match(signupPage, /supabase\.auth\.onAuthStateChange/u)
   assert.match(signupPage, /TOKEN_REFRESHED/u)
-  assert.match(signupPage, /const canChooseSlots = !signupDisabled \|\| siteAdmin/u)
-  assert.match(signupPage, /disabled=\{locked \|\| !canChooseSlots\}/u)
+  assert.match(signupPage, /Schedule browsing is intentionally independent from registration/u)
+  assert.match(signupPage, /disabled=\{locked\}/u)
   assert.match(signupPage, /data-disabled-reason=/u)
   assert.match(signupPage, /data-schedule-access=/u)
-  assert.match(signupPage, /administrator authorization could not be verified/u)
+  assert.match(signupPage, /registration remains protected/u)
   assert.match(signupPage, /SIGN IN AS ADMINISTRATOR/u)
   assert.match(signupPage, /createDiscordAuthCallbackUrl\("admin", currentInternalReturnTo\(\)/u)
+  assert.match(signupPage, /disabled=\{saving \|\| !allFourSelected\}/u)
   assert.match(signupPage, /disabled=\{saving \|\| signupDisabled \|\| !allFourSelected\}/u)
 })
 
