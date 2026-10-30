@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import { useParams } from "next/navigation"
+import { useParams, usePathname } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
 import { isMajorSlotMoveOutLocked, isMajorSlotStarted, isMastersScorecardTheme, type MajorDayChoice, type MajorEvent, type MajorPlayDay, type MajorSignupStatus, type MajorTimeSlot } from "@/lib/majors"
 import { createDiscordAuthCallbackUrl } from "@/lib/authReturnTo"
@@ -20,6 +20,8 @@ type PublicMajorEntry = {
 
 export default function MajorDetailPage() {
   const { slug } = useParams<{ slug: string }>()
+  const pathname = usePathname()
+  const vipEntry = pathname.endsWith("/vip")
   const [event, setEvent] = useState<MajorEvent | null>(null)
   const [entries, setEntries] = useState<PublicMajorEntry[]>([])
   const [days, setDays] = useState<MajorPlayDay[]>([])
@@ -31,6 +33,7 @@ export default function MajorDetailPage() {
   const [saving, setSaving] = useState(false)
   const [reviewing, setReviewing] = useState(false)
   const [signupStatus, setSignupStatus] = useState<MajorSignupStatus | null>(null)
+  const [authenticated, setAuthenticated] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const displayTimeZone = useMajorDisplayTimeZone()
 
@@ -51,15 +54,20 @@ export default function MajorDetailPage() {
     if (loadedEvent.slug.trim().toLowerCase() === "major-2") {
       try {
         const sessionResult = await supabase.auth.getSession()
-        const personalizedStatus = await fetch("/api/majors/home-banner", {
-          cache: "no-store",
-          headers: sessionResult.data.session?.access_token
-            ? { Authorization: `Bearer ${sessionResult.data.session.access_token}` }
-            : undefined,
-        })
-        const personalizedPayload = personalizedStatus.ok ? await personalizedStatus.json() as { state?: MajorSignupStatus["state"] } : null
-        if (personalizedPayload?.state) loadedSignupStatus = loadedSignupStatus ? { ...loadedSignupStatus, state: personalizedPayload.state } : null
-        else if (loadedSignupStatus?.state === "priority") loadedSignupStatus = { ...loadedSignupStatus, state: "upcoming" }
+        setAuthenticated(Boolean(sessionResult.data.session?.user))
+        if (vipEntry) {
+          const personalizedStatus = await fetch("/api/majors/home-banner", {
+            cache: "no-store",
+            headers: sessionResult.data.session?.access_token
+              ? { Authorization: `Bearer ${sessionResult.data.session.access_token}` }
+              : undefined,
+          })
+          const personalizedPayload = personalizedStatus.ok ? await personalizedStatus.json() as { state?: MajorSignupStatus["state"] } : null
+          if (personalizedPayload?.state) loadedSignupStatus = loadedSignupStatus ? { ...loadedSignupStatus, state: personalizedPayload.state } : null
+          else if (loadedSignupStatus?.state === "priority") loadedSignupStatus = { ...loadedSignupStatus, state: "upcoming" }
+        } else if (loadedSignupStatus?.state === "priority") {
+          loadedSignupStatus = { ...loadedSignupStatus, state: "upcoming" }
+        }
       } catch {
         // Fail closed for the VIP-only window if the personalized status check is unavailable.
         if (loadedSignupStatus?.state === "priority") loadedSignupStatus = { ...loadedSignupStatus, state: "upcoming" }
@@ -70,6 +78,7 @@ export default function MajorDetailPage() {
     setSlots((slotResult.data as MajorTimeSlot[] | null) || [])
     setSignupStatus(loadedSignupStatus)
     const user = await supabase.auth.getUser()
+    setAuthenticated(Boolean(user.data.user))
     if (user.data.user) {
       const result = await supabase.rpc("get_my_major_signup_schedule", { p_major_event_id: loadedEvent.id })
       const mine = (result.data as MajorDayChoice[] | null) || []
@@ -79,7 +88,7 @@ export default function MajorDetailPage() {
     setMessage(eventResult.error?.message || entryResult.error?.message || dayResult.error?.message || slotResult.error?.message || "")
     setCurrentTime(Date.now())
     setLoading(false)
-  }, [slug])
+  }, [slug, vipEntry])
 
   useEffect(() => {
     // Initial client-side Supabase synchronization for the route parameter.
@@ -121,15 +130,16 @@ export default function MajorDetailPage() {
   const testEvent = event.is_test_event
   const signupState = signupStatus?.state || (event.signup_open ? "open" : "closed")
   const signupBadge = mgaOpen
-    ? signupState === "priority" ? "VIP REGISTRATION OPEN" : signupState === "upcoming" ? "" : `Signup ${signupState}`
+    ? vipEntry && signupState === "priority" ? "VIP REGISTRATION OPEN" : signupState === "upcoming" ? "" : `Signup ${signupState}`
     : signupState === "priority" ? "Priority registration" : `Signup ${signupState}`
   const signupBadgeState = signupState === "priority" ? "priority" : signupState
-  const showSignupControls = !mgaOpen || schedule.length > 0 || signupState === "open" || signupState === "priority"
-  // The personalized server check gates VIP-only controls for the MGA Open.
+  const showSignupControls = !mgaOpen || event.signup_open || schedule.length > 0
+  const canSubmitSignup = !mgaOpen || signupState === "open" || signupState === "priority"
+  // The personalized server check gates VIP-only submission on the unlisted entry point.
   // The RPC remains the source of truth for final eligibility and signup.
   const signupDisabled = schedule.length > 0
     ? !event.signup_open
-    : !showSignupControls
+    : !canSubmitSignup
   const weekendStatus = schedule[0]?.weekend_competition_status || "pending"
   const secondaryFieldName = event.secondary_trophy_display_name || "Secondary Trophy Field"
   const localTimeZone = displayTimeZone.timeZone
@@ -181,6 +191,8 @@ export default function MajorDetailPage() {
         {showSignupControls && <MajorTimeZoneControl key={`${displayTimeZone.timeZone}:${displayTimeZone.source}`} {...displayTimeZone} />}
         {schedule.length > 0 && <p className={styles.assignment}>{event.weekend_status_published_at ? <>Weekend status: <strong>{weekendStatus === "main" ? "Masters Main Event" : weekendStatus === "secondary" ? secondaryFieldName : "Weekend field status pending"}</strong></> : <strong>Weekend field status pending</strong>}</p>}
         {signupState === "upcoming" && <p className={styles.notice}>{generalRegistrationMessage}</p>}
+        {vipEntry && !authenticated && <p className={styles.notice}>Sign in with Discord to check VIP registration eligibility.<button type="button" onClick={signIn} className={styles.secondaryButton}>SIGN IN WITH DISCORD</button></p>}
+        {vipEntry && authenticated && signupState === "upcoming" && <p className={styles.notice}>VIP registration is not available for this account. {generalRegistrationMessage}</p>}
         {signupState === "priority" && <p className={styles.notice}>{mgaOpen ? <>VIP REGISTRATION OPEN. {generalRegistrationMessage}</> : generalRegistrationMessage}</p>}
         {signupState === "full" && schedule.length === 0 && <p className={styles.notice}>The current field is full.</p>}
         {showSignupControls && <>

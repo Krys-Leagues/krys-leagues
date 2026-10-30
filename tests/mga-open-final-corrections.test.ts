@@ -6,6 +6,7 @@ import assert from "node:assert/strict"
 
 const root = resolve(import.meta.dirname, "..")
 const signupPage = readFileSync(resolve(root, "app/majors/[slug]/page.tsx"), "utf8")
+const vipPage = readFileSync(resolve(root, "app/majors/[slug]/vip/page.tsx"), "utf8")
 const signupCss = readFileSync(resolve(root, "app/majors/[slug]/page.module.css"), "utf8")
 const timezoneControl = readFileSync(resolve(root, "components/MajorTimeZoneControl.tsx"), "utf8")
 
@@ -83,9 +84,22 @@ test("Majors admins retain independent full schedule access", () => {
 })
 
 test("MGA priority registration is usable only after the personalized VIP check", () => {
-  assert.match(signupPage, /const showSignupControls = !mgaOpen \|\| schedule\.length > 0 \|\| signupState === "open" \|\| signupState === "priority"/u)
+  assert.match(signupPage, /const vipEntry = pathname\.endsWith\("\/vip"\)/u)
+  assert.match(signupPage, /if \(vipEntry\) \{/u)
+  assert.match(signupPage, /const showSignupControls = !mgaOpen \|\| event\.signup_open \|\| schedule\.length > 0/u)
+  assert.match(signupPage, /const canSubmitSignup = !mgaOpen \|\| signupState === "open" \|\| signupState === "priority"/u)
+  assert.match(signupPage, /Sign in with Discord to check VIP registration eligibility/u)
   assert.match(signupPage, /\{showSignupControls && <>/u)
   assert.match(signupPage, /The RPC remains the source of truth for final eligibility and signup/u)
+  assert.match(vipPage, /robots: "noindex, nofollow"/u)
+  assert.match(vipPage, /MajorDetailPage/u)
+})
+
+test("general and VIP entry points share one Major 2 workflow", () => {
+  assert.match(vipPage, /MajorDetailPage/u)
+  assert.match(signupPage, /supabase\.rpc\("signup_for_major_with_slots"/u)
+  assert.match(signupPage, /p_major_event_id: event\.id/u)
+  assert.doesNotMatch(vipPage, /create.*major|insert.*major_events|major_event_id.*new/u)
 })
 
 test("MGA Open uses the supplied Gardens of Babylon screenshot as the page background", () => {
