@@ -11,12 +11,12 @@ const head = execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "
 const baseline = "2252ff7ec162476189f4f31b48c03add0e024ba6"
 
 test("registry inventories every requested feature family without inferred approval", () => {
-  assert.equal(registry.features.length, 21)
+  assert.equal(registry.features.length, 22)
   assert.ok(registry.features.some((feature) => feature.id === "majors-mga-open"))
   assert.ok(registry.features.some((feature) => feature.id === "trophy-studio-importer"))
   assert.ok(registry.features.some((feature) => feature.id === "homepage-mga-open-banner" && feature.status === "APPROVED"))
   assert.ok(registry.features.some((feature) => feature.id === "mga-open-registration-schedule" && feature.status === "APPROVED"))
-  const pendingFeatures = registry.features.filter((feature) => !["homepage-mga-open-banner", "mga-open-registration-schedule"].includes(feature.id))
+  const pendingFeatures = registry.features.filter((feature) => !["homepage-mga-open-banner", "mga-open-registration-schedule", "player-hub-artwork-layout"].includes(feature.id))
   assert.ok(pendingFeatures.every((feature) => feature.status === "PENDING OWNER REVIEW"))
   assert.ok(pendingFeatures.every((feature) => feature.approval.ownerApproved === false))
 })
