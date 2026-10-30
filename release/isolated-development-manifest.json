@@ -5,6 +5,14 @@
   "productionDomains": ["krysleagues.com", "www.krysleagues.com"],
   "productionDatabaseProject": "jfbndcwdsvsjgnzwvexp",
   "stagingDatabaseProject": "jiekoqgegqcbqaobisvm",
+  "reviewedStagingMigrations": [
+    {
+      "file": "supabase/migrations/20261030100000_owner_managed_mga_vip_list.sql",
+      "sha256": "3564b44e88c590013ae8da64cba6761cdccbfecb513176b886513b01583a03a2",
+      "project": "jiekoqgegqcbqaobisvm",
+      "productionAllowed": false
+    }
+  ],
   "requiredRoutes": [
     "/", "/players", "/league-play", "/match-play", "/stroke", "/doubles", "/pyp", "/skins", "/amateur-pro",
     "/kwt", "/kwt/upcoming", "/kwt/records", "/tournaments", "/tournaments/current", "/tournaments/history",

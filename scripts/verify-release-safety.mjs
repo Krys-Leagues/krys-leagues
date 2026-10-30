@@ -1,4 +1,5 @@
 import { execFileSync, spawnSync } from "node:child_process"
+import { createHash } from "node:crypto"
 import { existsSync, readFileSync, statSync } from "node:fs"
 import { dirname, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
@@ -19,7 +20,19 @@ const head = git(["rev-parse", "HEAD"])
 if (expectedCommit && head.toLowerCase() !== expectedCommit.toLowerCase()) errors.push(`HEAD ${head} does not match expected candidate ${expectedCommit}.`)
 if (spawnSync("git", ["merge-base", "--is-ancestor", baseline, "HEAD"], { cwd: root }).status !== 0) errors.push(`Candidate HEAD is not descended from approved baseline ${baseline}.`)
 const migrationDiff = git(["diff", "--name-status", `${baseline}..HEAD`, "--", "supabase/migrations"])
-if (migrationDiff) errors.push(`Candidate changes Supabase migrations without a separately reviewed staging migration:\n${migrationDiff}`)
+if (migrationDiff) {
+  const reviewed = new Map((manifest.reviewedStagingMigrations || []).map((item) => [item.file, item]))
+  for (const line of migrationDiff.split(/\r?\n/).filter(Boolean)) {
+    const [status, file] = line.split(/\s+/, 2)
+    const record = reviewed.get(file)
+    if (status !== "A" || !record || record.project !== manifest.stagingDatabaseProject || record.productionAllowed !== false) {
+      errors.push(`Candidate changes Supabase migrations without a separately reviewed staging migration:\n${line}`)
+      continue
+    }
+    const digest = createHash("sha256").update(readFileSync(resolve(root, file))).digest("hex")
+    if (digest !== record.sha256.toLowerCase()) errors.push(`Reviewed staging migration checksum mismatch: ${file}`)
+  }
+}
 
 for (const file of manifest.requiredFiles) if (!existsSync(resolve(root, file))) errors.push(`Missing required source file: ${file}`)
 for (const file of manifest.requiredAssets) {
