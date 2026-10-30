@@ -51,7 +51,7 @@ export async function GET(request: Request) {
       if (dayResult.error) return json({ error: dayResult.error.message }, 503)
       const days = dayResult.data || []
       const dayIds = days.map((day) => day.id)
-      const [slotResult, standardTimeResult, entryResult, weekendResult, groupResult, placementResult, testerResult] = await Promise.all([
+      const [slotResult, standardTimeResult, entryResult, weekendResult, groupResult, placementResult, testerResult, eventConfigResult] = await Promise.all([
         dayIds.length ? supabase.from("major_time_slots").select("*").in("play_day_id", dayIds).order("starts_at") : Promise.resolve({ data: [], error: null }),
         supabase.from("major_standard_signup_times").select("*").eq("major_event_id", eventId).eq("is_active", true).order("local_time"),
         supabase.from("major_entries").select("*").eq("major_event_id", eventId).order("player_screen_name_snapshot"),
@@ -59,14 +59,17 @@ export async function GET(request: Request) {
         supabase.from("major_schedule_groups").select("*").eq("major_event_id", eventId).order("group_label"),
         supabase.from("major_final_placements").select("*").eq("major_event_id", eventId),
         supabase.rpc("get_major_test_testers", { p_major_event_id: eventId }),
+        supabase.from("major_events").select("priority_source_event_id").eq("id", eventId).maybeSingle(),
       ])
       const entries = entryResult.data || []
       const groups = groupResult.data || []
-      const [choiceResult, memberResult] = await Promise.all([
+      const prioritySourceEventId = eventConfigResult.data?.priority_source_event_id || null
+      const [choiceResult, memberResult, priorityPlacementResult] = await Promise.all([
         entries.length ? supabase.from("major_entry_day_choices").select("*").in("entry_id", entries.map((entry) => entry.id)) : Promise.resolve({ data: [], error: null }),
         groups.length ? supabase.from("major_schedule_group_members").select("*").in("group_id", groups.map((group) => group.id)) : Promise.resolve({ data: [], error: null }),
+        prioritySourceEventId ? supabase.from("major_final_placements").select("*").eq("major_event_id", prioritySourceEventId) : Promise.resolve({ data: [], error: null }),
       ])
-      const error = slotResult.error || standardTimeResult.error || entryResult.error || weekendResult.error || groupResult.error || placementResult.error || testerResult.error || choiceResult.error || memberResult.error
+      const error = slotResult.error || standardTimeResult.error || entryResult.error || weekendResult.error || groupResult.error || placementResult.error || testerResult.error || eventConfigResult.error || choiceResult.error || memberResult.error || priorityPlacementResult.error
       if (error) return json({ error: error.message }, 503)
       return json({
         days,
@@ -78,6 +81,7 @@ export async function GET(request: Request) {
         groups,
         members: memberResult.data || [],
         placements: placementResult.data || [],
+        prioritySourcePlacements: priorityPlacementResult.data || [],
         testers: testerResult.data || [],
       })
     }

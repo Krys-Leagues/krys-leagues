@@ -78,9 +78,11 @@ test("OAuth callback prefers the exact Vercel Preview host without exposing toke
 test("Majors admins retain independent full schedule access", () => {
   const adminLayout = readFileSync(resolve(root, "app/admin/layout.tsx"), "utf8")
   const schedulingPage = readFileSync(resolve(root, "app/admin/majors/scheduling/page.tsx"), "utf8")
+  const adminDataRoute = readFileSync(resolve(root, "app/api/admin/majors/data/route.ts"), "utf8")
   assert.match(adminLayout, /admin-authorization/u)
   assert.match(adminLayout, /permissions\.siteAdmin/u)
-  assert.match(schedulingPage, /major_time_slots/u)
+  assert.match(schedulingPage, /fetchMajorAdminData/u)
+  assert.match(adminDataRoute, /major_time_slots/u)
   assert.match(schedulingPage, /MajorTimeZoneControl/u)
   assert.match(schedulingPage, /setSlots\(/u)
   assert.doesNotMatch(schedulingPage, /get_major_signup_status|signupState|priorityWindow/u)

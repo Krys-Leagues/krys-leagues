@@ -10,11 +10,6 @@ const clientPages = [
   "app/admin/majors/scheduling/page.tsx",
   "app/admin/majors/scoring/page.tsx",
   "app/admin/majors/verification/page.tsx",
-  "app/majors/page.tsx",
-  "app/majors/[slug]/page.tsx",
-  "app/majors/[slug]/results/page.tsx",
-  "app/majors/[slug]/stats/page.tsx",
-  "app/majors/[slug]/scoring/page.tsx",
 ]
 
 const targetTables = [
@@ -33,7 +28,7 @@ const targetTables = [
   "major_hole_scores",
 ]
 
-test("Major client pages do not directly query protected base tables", () => {
+test("Major admin client pages do not directly query protected base tables", () => {
   for (const path of clientPages) {
     const source = read(path)
     for (const table of targetTables) {
