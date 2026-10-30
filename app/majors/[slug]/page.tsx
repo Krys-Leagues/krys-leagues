@@ -187,13 +187,14 @@ export default function MajorDetailPage() {
     ? vipEntry && signupState === "priority" ? "VIP REGISTRATION OPEN" : signupState === "upcoming" ? "" : `Signup ${signupState}`
     : signupState === "priority" ? "Priority registration" : `Signup ${signupState}`
   const signupBadgeState = signupState === "priority" ? "priority" : signupState
-  const showSignupControls = !mgaOpen || event.signup_open || schedule.length > 0
+  // MGA viewers may always browse and plan against the real four-day
+  // schedule. Registration authorization remains enforced only at submit time
+  // by the final button gate and signup RPC.
+  const showSignupControls = mgaOpen || event.signup_open || schedule.length > 0
   const canSubmitSignup = !mgaOpen || signupState === "open" || signupState === "priority"
   // The personalized server check gates VIP-only submission on the unlisted entry point.
   // The RPC remains the source of truth for final eligibility and signup.
-  const signupDisabled = schedule.length > 0
-    ? !event.signup_open
-    : !canSubmitSignup
+  const signupDisabled = !canSubmitSignup
   // Schedule browsing is intentionally independent from registration
   // eligibility. The final signup RPC remains the authorization boundary.
   const scheduleAccessMessage = siteAdmin
@@ -258,7 +259,7 @@ export default function MajorDetailPage() {
         {signupState === "upcoming" && <p className={styles.notice}>{generalRegistrationMessage}</p>}
         {vipEntry && !authenticated && <p className={styles.notice}>Sign in with Discord to check VIP registration eligibility.<button type="button" onClick={signIn} className={styles.secondaryButton}>SIGN IN WITH DISCORD</button></p>}
         {vipEntry && authenticated && signupState === "upcoming" && <p className={styles.notice}>VIP registration is not available for this account. {generalRegistrationMessage}</p>}
-        {signupState === "priority" && <p className={styles.notice}>{mgaOpen ? <>VIP REGISTRATION OPEN. {generalRegistrationMessage}</> : generalRegistrationMessage}</p>}
+        {vipEntry && signupState === "priority" && <p className={styles.notice}>VIP REGISTRATION OPEN. {generalRegistrationMessage}</p>}
         {signupState === "full" && schedule.length === 0 && <p className={styles.notice}>The current field is full.</p>}
         {mgaOpen && scheduleAccessMessage && <div className={styles.scheduleAccess} role="status" data-schedule-access={siteAdminCheck}><span>{scheduleAccessMessage}</span>{siteAdminCheck === "signed_out" && <button type="button" onClick={signInAsAdmin} className={styles.secondaryButton}>SIGN IN AS ADMINISTRATOR</button>}</div>}
         {showSignupControls && <>

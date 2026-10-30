@@ -106,7 +106,7 @@ test("site admins can browse slot controls without bypassing registration gates"
 test("MGA priority registration is usable only after the personalized VIP check", () => {
   assert.match(signupPage, /const vipEntry = pathname\.endsWith\("\/vip"\)/u)
   assert.match(signupPage, /if \(vipEntry\) \{/u)
-  assert.match(signupPage, /const showSignupControls = !mgaOpen \|\| event\.signup_open \|\| schedule\.length > 0/u)
+  assert.match(signupPage, /const showSignupControls = mgaOpen \|\| event\.signup_open \|\| schedule\.length > 0/u)
   assert.match(signupPage, /const canSubmitSignup = !mgaOpen \|\| signupState === "open" \|\| signupState === "priority"/u)
   assert.match(signupPage, /\{\(mgaOpen \|\| event\.signup_open \|\| schedule\.length > 0\) && <section className=\{styles\.signupCard\}>/u)
   assert.match(signupPage, /Sign in with Discord to check VIP registration eligibility/u)
@@ -114,6 +114,14 @@ test("MGA priority registration is usable only after the personalized VIP check"
   assert.match(signupPage, /The RPC remains the source of truth for final eligibility and signup/u)
   assert.match(vipPage, /robots: "noindex, nofollow"/u)
   assert.match(vipPage, /MajorDetailPage/u)
+})
+
+test("regular MGA registration hides VIP messaging while keeping the full schedule visible", () => {
+  assert.match(signupPage, /const showSignupControls = mgaOpen \|\| event\.signup_open \|\| schedule\.length > 0/u)
+  assert.match(signupPage, /const signupDisabled = !canSubmitSignup/u)
+  assert.match(signupPage, /vipEntry && signupState === "priority" && <p className=\{styles\.notice\}>VIP REGISTRATION OPEN/u)
+  assert.doesNotMatch(signupPage, /\{signupState === "priority" && <p/u)
+  assert.match(signupPage, /disabled=\{saving \|\| signupDisabled \|\| !allFourSelected\}/u)
 })
 
 test("general and VIP entry points share one Major 2 workflow", () => {
