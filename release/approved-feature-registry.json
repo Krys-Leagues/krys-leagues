@@ -60,7 +60,7 @@
       "requiredInteractions": ["compact placement beneath Course Challenges", "entire banner links to /majors/major-2", "YouTube and Admin Login remain below"],
       "acceptanceCriteria": ["exact approved artwork bytes are preserved", "no extra border, overlay, container, or padding is introduced", "banner remains compact and responsive"],
       "dataPreservation": ["no player, score, trophy, registration, or signup-page changes"],
-      "security": ["banner navigation does not bypass MGA Open authentication or server-side eligibility rules"],
+      "security": ["banner navigation does not bypass MGA Championship authentication or server-side eligibility rules"],
       "checkpoint": {"commit": "e8f2ca08277363b6f088f5967a5f32287613e1e1", "deploymentId": null, "previewUrl": null},
       "approval": {"ownerApproved": true, "approvalDate": "2026-10-30", "evidence": ["Owner supplied and approved the exact replacement artwork", "Verified source hash CB38060E2F4CA23F71C81BE4600DFD65F2E643D06AFA065B33DBBEF7DDBBC279 and dimensions 2172x724"], "notes": "Approval is limited to this homepage MGA Championship banner. The new private Preview remains pending owner visual review; the homepage feature and Majors system remain outside this checkpoint."},
       "evidenceGaps": []
