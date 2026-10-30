@@ -27,6 +27,7 @@ import {
 import { supabase } from "@/lib/supabase"
 import { fetchMajorAdminData, mutateMajorAdminData } from "@/lib/admin/majorAdminData"
 import { getMajorVipEligiblePlayers } from "@/lib/majorVipEligibility"
+import { summarizeMajorFinalizationField, type MajorFinalizationField } from "@/lib/majorFinalization"
 import MajorTimeZoneControl from "@/components/MajorTimeZoneControl"
 import { formatMajorLocalDateTime } from "@/lib/majorTimeZone"
 import { useMajorDisplayTimeZone } from "@/lib/useMajorDisplayTimeZone"
@@ -363,6 +364,47 @@ export default function MajorSchedulingAdminPage() {
     if (showResult(result.error, "Major result saved.")) await loadSchedule(eventId)
   }
 
+  async function finalizeField(field: MajorFinalizationField) {
+    const summary = summarizeMajorFinalizationField(field, entries, weekend, placements)
+    const label = field === "main" ? "Main Event" : "Secondary Event"
+    if (summary.isFinalized) {
+      setMessage(`${label} is already finalized. Finalized history cannot be rewritten through normal controls.`)
+      return
+    }
+    if (!summary.canFinalize) {
+      setMessage(`${label} cannot be finalized yet. Review the ${summary.unresolvedEntryIds.length} unresolved classification${summary.unresolvedEntryIds.length === 1 ? "" : "s"} first.`)
+      return
+    }
+    if (!window.confirm(`FINALIZE ${label.toUpperCase()}? This will permanently finalize only ${label} records. ${field === "main" ? "Secondary Event remains pending." : "Main Event history will not be changed."}`)) return
+
+    const placementByEntry = new Map(placements.map((placement) => [placement.entry_id, placement]))
+    const stagedIds = new Set(weekend.filter((item) => item.competition_status === field).map((item) => item.entry_id))
+    const pendingEntries = entries.filter((entry) => stagedIds.has(entry.id) && !placementByEntry.get(entry.id)?.is_finalized)
+    for (const entry of pendingEntries) {
+      const placement = placementByEntry.get(entry.id)
+      if (!placement) {
+        setMessage(`${label} stopped: ${entry.id} has no placement record.`)
+        return
+      }
+      const result = await supabase.rpc("save_major_final_placement", {
+        p_entry_id: entry.id,
+        p_weekend_field: field,
+        p_field_placement: placement.field_placement,
+        p_result_status: placement.result_status,
+        p_is_tied: placement.is_tied,
+        p_is_winner: placement.is_winner,
+        p_finalize: true,
+      })
+      if (result.error) {
+        setMessage(`${label} stopped after ${pendingEntries.indexOf(entry)} record${pendingEntries.indexOf(entry) === 1 ? "" : "s"}: ${result.error.message}`)
+        await loadSchedule(eventId)
+        return
+      }
+    }
+    setMessage(`${label} finalized independently. ${field === "main" ? "The finalized Main Event Top 10 is now eligible to feed MGA Open priority rules." : "Main Event remains unchanged."}`)
+    await loadSchedule(eventId)
+  }
+
   async function saveInformation(form: HTMLFormElement) {
     const data = new FormData(form)
     const value = (name: string) => String(data.get(name) || "")
@@ -474,6 +516,7 @@ export default function MajorSchedulingAdminPage() {
         weekend={weekend}
         placements={placements}
         onSave={savePlacement}
+        onFinalize={finalizeField}
       />}
 
       {selectedEvent?.is_test_event && activeSection === "testers" && <Testers
@@ -686,13 +729,31 @@ function WeekendField({ event, entries, weekend, onSetStatus, onPublish, display
   </section>
 }
 
-function Results({ entries, weekend, placements, onSave }: {
+function Results({ entries, weekend, placements, onSave, onFinalize }: {
   entries: MajorEntry[]
   weekend: MajorWeekendStatus[]
   placements: MajorFinalPlacement[]
   onSave: (entryId: string, form: HTMLFormElement) => Promise<void>
+  onFinalize: (field: MajorFinalizationField) => Promise<void>
 }) {
-  return <section className={styles.workspace}><div className={styles.sectionHeading}><div><p className={styles.step}>Permanent history</p><h2>Results</h2><p>Main and Secondary placements stay separate. Ties such as T3 are supported.</p></div></div><div className={styles.resultList}>{entries.map((entry) => {
+  const summaries = ["main", "secondary"].map((field) => summarizeMajorFinalizationField(field as MajorFinalizationField, entries, weekend, placements))
+  const placementByEntry = new Map(placements.map((placement) => [placement.entry_id, placement]))
+  const fieldByEntry = new Map(weekend.map((item) => [item.entry_id, item.competition_status]))
+  const sortedEntries = [...entries].sort((a, b) => {
+    const fieldOrder = { main: 0, secondary: 1, pending: 2 }
+    const aField = fieldByEntry.get(a.id) || "pending"
+    const bField = fieldByEntry.get(b.id) || "pending"
+    return fieldOrder[aField] - fieldOrder[bField]
+      || (placementByEntry.get(a.id)?.field_placement ?? Number.MAX_SAFE_INTEGER) - (placementByEntry.get(b.id)?.field_placement ?? Number.MAX_SAFE_INTEGER)
+      || a.player_screen_name_snapshot.localeCompare(b.player_screen_name_snapshot)
+  })
+  const statusLabel = (summary: ReturnType<typeof summarizeMajorFinalizationField>) => summary.isFinalized ? "Finalized" : summary.totalEntries ? `${summary.finalizedEntries}/${summary.totalEntries} finalized` : "Pending"
+  return <section className={styles.workspace}><div className={styles.sectionHeading}><div><p className={styles.step}>Permanent history</p><h2>Results</h2><p>Finalize Main Event and Secondary Event independently. Ties such as T3 are supported.</p></div></div>
+    <div className={styles.twoColumn}>
+      {summaries.map((summary) => { const label = summary.field === "main" ? "Main Event" : "Secondary Event"; return <section key={summary.field} className={styles.panel}><h3>{label}: {statusLabel(summary)}</h3><p className={styles.help}>{summary.field === "main" ? "Only this action can create the finalized Top-10 VIP source for MGA Open. Secondary Event stays pending." : "Keep pending until the confirmed Secondary Event results are supplied."}</p><button type="button" className={styles.primaryButton} disabled={summary.isFinalized || !summary.canFinalize} onClick={() => void onFinalize(summary.field)}>FINALIZE {label.toUpperCase()}</button>{summary.unresolvedEntryIds.length > 0 && <p className={styles.slotWarning}>{summary.unresolvedEntryIds.length} unresolved classification{summary.unresolvedEntryIds.length === 1 ? "" : "s"} must be reviewed below.</p>}</section> })}
+      <section className={styles.panel}><h3>Trophy Awards: Pending</h3><p className={styles.help}>Trophy publication is a separate protected workflow and is not changed by either finalization action.</p></section>
+    </div>
+    <div className={styles.resultList}>{sortedEntries.map((entry) => {
     const result = placements.find((item) => item.entry_id === entry.id)
     const staged = weekend.find((item) => item.entry_id === entry.id)?.competition_status || "pending"
     return <article key={entry.id} className={styles.resultCard}><header><strong>{result?.player_screen_name_snapshot || entry.player_screen_name_snapshot}</strong><small>{result?.player_id || entry.player_id}</small></header>{result?.is_finalized ? <div className={styles.finalResult}><strong>{result.is_tied ? "T" : ""}{result.field_placement || "—"}</strong><span>{result.weekend_field === "main" ? "Main Event" : "Secondary field"} · {result.result_status}{result.is_winner ? " · Official winner" : ""}</span><em>Finalized — immutable history</em></div> : <form onSubmit={(e) => { e.preventDefault(); void onSave(entry.id, e.currentTarget) }}><label>Field<select name="field" defaultValue={result?.weekend_field || (staged === "main" || staged === "secondary" ? staged : "")} required><option value="">Stage weekend field first</option><option value="main">Main Event</option><option value="secondary">Secondary field</option></select></label><label>Placement<input name="placement" type="number" min="1" defaultValue={result?.field_placement || ""} /></label><label>Status<select name="result_status" defaultValue={result?.result_status || "pending"}><option value="pending">Pending</option><option value="completed">Completed</option><option value="did_not_finish">Did not finish</option><option value="withdrawn">Withdrawn</option><option value="disqualified">Disqualified</option></select></label><label className={styles.check}><input name="tied" type="checkbox" defaultChecked={result?.is_tied} /> Tied placement</label><label className={styles.check}><input name="winner" type="checkbox" defaultChecked={result?.is_winner} /> Official winner</label><label className={styles.check}><input name="finalize" type="checkbox" /> Finalize permanently</label><button className={styles.primaryButton}>Save result</button></form>}</article>
