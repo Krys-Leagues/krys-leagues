@@ -63,6 +63,14 @@ test("MGA VIP status can verify the signed-in browser session without weakening 
   assert.doesNotMatch(route, /disable.*RLS|service_role.*client.*browser/i)
 })
 
+test("OAuth callback prefers the exact Vercel Preview host without exposing tokens", () => {
+  const authReturnTo = readFileSync(resolve(root, "lib/authReturnTo.ts"), "utf8")
+  assert.match(authReturnTo, /NEXT_PUBLIC_VERCEL_URL/u)
+  assert.match(authReturnTo, /krys-leagues-projects\.vercel\.app/u)
+  assert.match(authReturnTo, /AUTH_CALLBACK_PATH, authCallbackOrigin\(\) \|\| window\.location\.origin/u)
+  assert.doesNotMatch(authReturnTo, /access_token|refresh_token|VERCEL_SHARE|_vercel_share/u)
+})
+
 test("Majors admins retain independent full schedule access", () => {
   const adminLayout = readFileSync(resolve(root, "app/admin/layout.tsx"), "utf8")
   const schedulingPage = readFileSync(resolve(root, "app/admin/majors/scheduling/page.tsx"), "utf8")

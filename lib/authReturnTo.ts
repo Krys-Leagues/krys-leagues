@@ -1,6 +1,39 @@
 const AUTH_RETURN_TO_STORAGE_KEY = "krys-leagues:auth-return-to"
 const AUTH_CALLBACK_PATH = "/auth/callback"
 const MAX_RETURN_TO_LENGTH = 2048
+const PREVIEW_HOST_SUFFIX = "-krys-leagues-projects.vercel.app"
+const APPROVED_SITE_HOSTS = new Set(["krysleagues.com", "www.krysleagues.com"])
+
+function toOrigin(value: string | undefined) {
+  if (!value) return null
+  const candidate = value.startsWith("http://") || value.startsWith("https://") ? value : `https://${value}`
+  try {
+    const parsed = new URL(candidate)
+    if (parsed.pathname !== "/" || parsed.search || parsed.hash || parsed.username || parsed.password) return null
+    const host = parsed.hostname.toLowerCase()
+    const isLocal = host === "localhost" || host === "127.0.0.1"
+    const isApprovedPreview = host.endsWith(PREVIEW_HOST_SUFFIX)
+    const isApprovedSite = APPROVED_SITE_HOSTS.has(host)
+    if ((parsed.protocol !== "https:" && !isLocal) || (!isLocal && !isApprovedPreview && !isApprovedSite)) return null
+    return parsed.origin
+  } catch {
+    return null
+  }
+}
+
+function authCallbackOrigin() {
+  if (typeof window === "undefined") return null
+
+  const currentOrigin = window.location.origin
+  const currentHost = window.location.hostname.toLowerCase()
+  const previewOrigin = toOrigin(process.env.NEXT_PUBLIC_VERCEL_URL)
+  if (currentHost.endsWith(PREVIEW_HOST_SUFFIX) && previewOrigin) return previewOrigin
+
+  const siteOrigin = toOrigin(process.env.NEXT_PUBLIC_SITE_URL)
+  if (siteOrigin && APPROVED_SITE_HOSTS.has(currentHost)) return siteOrigin
+
+  return currentOrigin
+}
 
 function hasUnsafePathSyntax(value: string) {
   return (
@@ -48,7 +81,7 @@ export function createDiscordAuthCallbackUrl(type: "admin" | "player", returnTo?
   if (destination) window.sessionStorage.setItem(AUTH_RETURN_TO_STORAGE_KEY, destination)
   else window.sessionStorage.removeItem(AUTH_RETURN_TO_STORAGE_KEY)
 
-  const callback = new URL(AUTH_CALLBACK_PATH, window.location.origin)
+  const callback = new URL(AUTH_CALLBACK_PATH, authCallbackOrigin() || window.location.origin)
   callback.searchParams.set("type", type)
   if (destination) callback.searchParams.set("next", destination)
   return callback.toString()
