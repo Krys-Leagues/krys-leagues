@@ -63,7 +63,7 @@
       "dataPreservation": ["no player, score, trophy, registration, or signup-page changes"],
       "security": ["appearance checkpoint does not approve or alter navigation authorization"],
       "checkpoint": {"commit": "624a1a5b5bf208587bcf316559a217f0557dfb26", "deploymentId": null, "previewUrl": null},
-      "approval": {"ownerApproved": true, "approvalDate": "2026-10-30", "evidence": ["Owner visually approved the Player Hub artwork and layout appearance"], "notes": "This checkpoint covers appearance only. Button destinations and functionality require separate verification."},
+      "approval": {"ownerApproved": true, "approvalDate": "2026-10-30", "evidence": ["Owner visually approved the Player Hub artwork and layout appearance", "release/evidence/player-hub-artwork-layout-approval.md"], "notes": "This checkpoint covers appearance only. Button destinations and functionality require separate verification."},
       "evidenceGaps": ["independent button destination and functionality verification"]
     },
     {
