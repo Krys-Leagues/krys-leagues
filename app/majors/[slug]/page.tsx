@@ -18,6 +18,8 @@ type PublicMajorEntry = {
   status: "registered" | "confirmed" | "waitlisted"
 }
 
+type SiteAdminCheck = "unknown" | "checking" | "authorized" | "signed_out" | "not_authorized" | "unavailable"
+
 export default function MajorDetailPage() {
   const { slug } = useParams<{ slug: string }>()
   const pathname = usePathname()
@@ -35,8 +37,37 @@ export default function MajorDetailPage() {
   const [signupStatus, setSignupStatus] = useState<MajorSignupStatus | null>(null)
   const [authenticated, setAuthenticated] = useState(false)
   const [siteAdmin, setSiteAdmin] = useState(false)
+  const [siteAdminCheck, setSiteAdminCheck] = useState<SiteAdminCheck>("unknown")
   const [currentTime, setCurrentTime] = useState(0)
   const displayTimeZone = useMajorDisplayTimeZone()
+
+  const refreshSiteAdminAccess = useCallback(async (knownSession?: Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"]) => {
+    const session = knownSession === undefined
+      ? (await supabase.auth.getSession()).data.session
+      : knownSession
+
+    setAuthenticated(Boolean(session?.user))
+    if (!session?.access_token) {
+      setSiteAdmin(false)
+      setSiteAdminCheck("signed_out")
+      return
+    }
+
+    setSiteAdminCheck("checking")
+    try {
+      const adminResponse = await fetch("/api/auth/admin-authorization", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        cache: "no-store",
+      })
+      const adminPayload = await adminResponse.json().catch(() => ({})) as { siteAdmin?: boolean; reason?: string }
+      const authorized = adminResponse.ok && Boolean(adminPayload.siteAdmin)
+      setSiteAdmin(authorized)
+      setSiteAdminCheck(authorized ? "authorized" : adminResponse.status === 403 ? "not_authorized" : "unavailable")
+    } catch {
+      setSiteAdmin(false)
+      setSiteAdminCheck("unavailable")
+    }
+  }, [])
 
   const loadEvent = useCallback(async () => {
     const eventResult = await supabase.from("major_events").select("*").eq("slug", slug).maybeSingle()
@@ -55,24 +86,7 @@ export default function MajorDetailPage() {
     if (loadedEvent.slug.trim().toLowerCase() === "major-2") {
       try {
         const sessionResult = await supabase.auth.getSession()
-        setAuthenticated(Boolean(sessionResult.data.session?.user))
-        setSiteAdmin(false)
-        if (sessionResult.data.session?.access_token) {
-          try {
-            const adminResponse = await fetch("/api/auth/admin-authorization", {
-              headers: { Authorization: `Bearer ${sessionResult.data.session.access_token}` },
-              cache: "no-store",
-            })
-            if (adminResponse.ok) {
-              const adminPayload = await adminResponse.json() as { siteAdmin?: boolean }
-              setSiteAdmin(Boolean(adminPayload.siteAdmin))
-            }
-          } catch {
-            setSiteAdmin(false)
-          }
-        } else {
-          setSiteAdmin(false)
-        }
+        void refreshSiteAdminAccess(sessionResult.data.session)
         if (vipEntry) {
           const personalizedStatus = await fetch("/api/majors/home-banner", {
             cache: "no-store",
@@ -106,13 +120,28 @@ export default function MajorDetailPage() {
     setMessage(eventResult.error?.message || entryResult.error?.message || dayResult.error?.message || slotResult.error?.message || "")
     setCurrentTime(Date.now())
     setLoading(false)
-  }, [slug, vipEntry])
+  }, [refreshSiteAdminAccess, slug, vipEntry])
 
   useEffect(() => {
     // Initial client-side Supabase synchronization for the route parameter.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadEvent()
   }, [loadEvent])
+
+  useEffect(() => {
+    if (slug !== "major-2") return
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((authEvent) => {
+      if (authEvent === "SIGNED_IN" || authEvent === "SIGNED_OUT" || authEvent === "TOKEN_REFRESHED" || authEvent === "USER_UPDATED") {
+        // Supabase advises deferring follow-up work from inside this callback.
+        window.setTimeout(() => { void refreshSiteAdminAccess() }, 0)
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [refreshSiteAdminAccess, slug])
 
   useEffect(() => {
     const clock = window.setInterval(() => setCurrentTime(Date.now()), 60_000)
@@ -159,6 +188,19 @@ export default function MajorDetailPage() {
     ? !event.signup_open
     : !canSubmitSignup
   const canChooseSlots = !signupDisabled || siteAdmin
+  const scheduleAccessMessage = signupDisabled && !siteAdmin
+    ? siteAdminCheck === "checking"
+      ? "Checking your schedule access…"
+      : siteAdminCheck === "signed_out"
+        ? "Time-slot selection is disabled until registration opens. Sign in as an authorized administrator to browse the schedule early."
+        : siteAdminCheck === "not_authorized"
+          ? "Time-slot selection is disabled because this account is not authorized to browse the schedule early."
+          : siteAdminCheck === "unavailable"
+            ? "Time-slot selection is temporarily disabled because administrator authorization could not be verified."
+            : "Time-slot selection is disabled until registration opens."
+    : siteAdmin
+      ? "Administrator schedule view enabled. Choosing times here does not bypass VIP or registration approval."
+      : ""
   const weekendStatus = schedule[0]?.weekend_competition_status || "pending"
   const secondaryFieldName = event.secondary_trophy_display_name || "Secondary Trophy Field"
   const localTimeZone = displayTimeZone.timeZone
@@ -214,6 +256,7 @@ export default function MajorDetailPage() {
         {vipEntry && authenticated && signupState === "upcoming" && <p className={styles.notice}>VIP registration is not available for this account. {generalRegistrationMessage}</p>}
         {signupState === "priority" && <p className={styles.notice}>{mgaOpen ? <>VIP REGISTRATION OPEN. {generalRegistrationMessage}</> : generalRegistrationMessage}</p>}
         {signupState === "full" && schedule.length === 0 && <p className={styles.notice}>The current field is full.</p>}
+        {mgaOpen && scheduleAccessMessage && <p className={styles.scheduleAccess} role="status" data-schedule-access={siteAdminCheck}>{scheduleAccessMessage}</p>}
         {showSignupControls && <>
         {days.length !== 4 ? <p className={styles.notice}>Tournament staff is still configuring the four-day schedule.</p> : <div className={styles.days}>{days.map((day) => {
           const mine = schedule.find((choice) => choice.play_day_id === day.id)
@@ -222,7 +265,7 @@ export default function MajorDetailPage() {
           const locked = savedSlot ? isMajorSlotMoveOutLocked(savedSlot.starts_at, currentTime) : false
           const savedSlotHasBegun = savedSlot ? isMajorSlotStarted(savedSlot.starts_at, currentTime) : false
            const dayName = dayLabels[day.day_number - 1]
-          return <fieldset key={day.id} className={styles.dayCard} disabled={locked || !canChooseSlots}>
+          return <fieldset key={day.id} className={styles.dayCard} data-schedule-control="true" data-disabled-reason={locked ? "slot_locked" : !canChooseSlots ? siteAdminCheck : "enabled"} disabled={locked || !canChooseSlots}>
             <legend><span>{dayName.day}</span>{dayName.round}</legend><p className={styles.dayContext}>Official round date: {formatPlayDate(day.play_date)}{mgaOpen ? ` · ${dayName.course}` : ""}</p>
             {daySlots.length ? <div className={styles.slotPicker}><label className={styles.slotPickerLabel} htmlFor={`slot-${day.id}`}>Choose Your Time Slot</label><select id={`slot-${day.id}`} className={styles.slotSelect} value={choices[day.id] || ""} onChange={(selection) => { setChoices((old) => ({ ...old, [day.id]: selection.target.value })); setReviewing(false) }}><option value="">Select an available time…</option>{daySlots.map((slot) => { const dateShift = mgaOpen ? "" : localDateShift(day.play_date, slot.starts_at, localTimeZone); const started = isMajorSlotStarted(slot.starts_at, currentTime); const selected = choices[day.id] === slot.id; return <option key={slot.id} value={slot.id} disabled={started && !selected}>Time Slot {slotNumbers.get(slot.id) || "—"} · {formatMajorLocalDate(slot.starts_at, localTimeZone)} · {formatMajorLocalTimeWithZone(slot.starts_at, localTimeZone)}{dateShift ? ` · ${dateShift}` : ""}{started && !selected ? " · passed" : ""}</option> })}</select>{choices[day.id] && (() => { const selectedSlot = daySlots.find((slot) => slot.id === choices[day.id]); return selectedSlot ? <p className={styles.selectedTime}><strong>Selected: Time Slot {slotNumbers.get(selectedSlot.id) || "—"}</strong><span>{formatMajorLocalDate(selectedSlot.starts_at, localTimeZone)} · {formatMajorLocalTimeWithZone(selectedSlot.starts_at, localTimeZone)}</span></p> : null })()}</div> : <p className={styles.notice}>No times available yet.</p>}
             {!mgaOpen && <p className={styles.lockDeadline}>Player time changes lock individually 12 hours before the selected slot starts.<span>{localTimeZone}</span></p>}

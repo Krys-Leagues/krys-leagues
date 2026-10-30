@@ -421,6 +421,7 @@
 .mga .priority { border-color: rgba(243, 207, 112, .72); background: rgba(61, 46, 13, .78); color: #ffedb0; }
 .mga .timezone { border: 1px solid rgba(110, 225, 209, .48); background: rgba(5, 67, 75, .62); color: #e8ffff; }
 .mga .notice { border-left-color: #6fe4d2; background: rgba(7, 67, 78, .62); color: #e9ffff; }
+.mga .scheduleAccess { margin: 14px 0 0; padding: 10px 12px; border: 1px solid rgba(110, 225, 209, .5); border-radius: 9px; background: rgba(3, 38, 48, .72); color: #e8ffff; font-size: .9rem; line-height: 1.45; text-shadow: 0 1px 4px #000; }
 .mga .slotPickerLabel { color: #8ee9dc; }
 .mga .slotSelect { border-color: #55d8cf; background: #062a34; color: #efffff; }
 .mga .selectedTime { background: rgba(7, 93, 79, .42); }

@@ -85,9 +85,15 @@ test("Majors admins retain independent full schedule access", () => {
 
 test("site admins can browse slot controls without bypassing registration gates", () => {
   assert.match(signupPage, /api\/auth\/admin-authorization/u)
-  assert.match(signupPage, /setSiteAdmin\(Boolean\(adminPayload\.siteAdmin\)\)/u)
+  assert.match(signupPage, /const refreshSiteAdminAccess = useCallback/u)
+  assert.match(signupPage, /setSiteAdmin\(authorized\)/u)
+  assert.match(signupPage, /supabase\.auth\.onAuthStateChange/u)
+  assert.match(signupPage, /TOKEN_REFRESHED/u)
   assert.match(signupPage, /const canChooseSlots = !signupDisabled \|\| siteAdmin/u)
   assert.match(signupPage, /disabled=\{locked \|\| !canChooseSlots\}/u)
+  assert.match(signupPage, /data-disabled-reason=/u)
+  assert.match(signupPage, /data-schedule-access=/u)
+  assert.match(signupPage, /administrator authorization could not be verified/u)
   assert.match(signupPage, /disabled=\{saving \|\| signupDisabled \|\| !allFourSelected\}/u)
 })
 
