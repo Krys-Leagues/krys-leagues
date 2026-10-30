@@ -50,7 +50,13 @@ export default function MajorDetailPage() {
     let loadedSignupStatus = statusResult.data as MajorSignupStatus | null
     if (loadedEvent.slug.trim().toLowerCase() === "major-2") {
       try {
-        const personalizedStatus = await fetch("/api/majors/home-banner", { cache: "no-store" })
+        const sessionResult = await supabase.auth.getSession()
+        const personalizedStatus = await fetch("/api/majors/home-banner", {
+          cache: "no-store",
+          headers: sessionResult.data.session?.access_token
+            ? { Authorization: `Bearer ${sessionResult.data.session.access_token}` }
+            : undefined,
+        })
         const personalizedPayload = personalizedStatus.ok ? await personalizedStatus.json() as { state?: MajorSignupStatus["state"] } : null
         if (personalizedPayload?.state) loadedSignupStatus = loadedSignupStatus ? { ...loadedSignupStatus, state: personalizedPayload.state } : null
         else if (loadedSignupStatus?.state === "priority") loadedSignupStatus = { ...loadedSignupStatus, state: "upcoming" }
@@ -114,9 +120,10 @@ export default function MajorDetailPage() {
   const dayLabels = mgaOpen ? MGA_DAY_LABELS : MASTERS_DAY_LABELS
   const testEvent = event.is_test_event
   const signupState = signupStatus?.state || (event.signup_open ? "open" : "closed")
-  const signupBadge = mgaOpen && signupState === "priority" ? "VIP REGISTRATION OPEN" : signupState === "priority" ? "Priority registration" : `Signup ${signupState}`
+  const signupBadge = mgaOpen
+    ? signupState === "priority" ? "VIP REGISTRATION OPEN" : signupState === "upcoming" ? "" : `Signup ${signupState}`
+    : signupState === "priority" ? "Priority registration" : `Signup ${signupState}`
   const signupBadgeState = signupState === "priority" ? "priority" : signupState
-  const priorityWindow = mgaOpen && signupState === "priority"
   const showSignupControls = !mgaOpen || schedule.length > 0 || signupState === "open" || signupState === "priority"
   // The personalized server check gates VIP-only controls for the MGA Open.
   // The RPC remains the source of truth for final eligibility and signup.
@@ -154,7 +161,7 @@ export default function MajorDetailPage() {
       </section>
       <div className={`${styles.brandRow} ${mgaOpen ? styles.mgaBrandRow : ""}`}><Image src="/league-media/BIG LOGO TRANSPARENT.png" width={136} height={136} alt="Krys Leagues" className={styles.logo} priority /><div><h2 className={styles.eventTitle}>{testEvent ? "TEST EVENT" : masters ? "THE MASTERS" : event.name}</h2><p className={styles.eventIdentity}>{testEvent ? "TEST DATA — NOT OFFICIAL" : masters ? "MINI GOLF MASTERS" : "MAJOR CHAMPIONSHIP"}</p><p className={styles.subtitle}>{testEvent ? "The real Major workflow, rehearsed safely" : masters ? "CHERRY BLOSSOM" : mgaOpen ? "GARDENS OF BABYLON" : "Four-round mini golf championship"}</p>{mgaOpen && <p className={styles.headerDescription}>{displayDescription}</p>}</div>{mgaOpen && <Image src="/approved-pages/mga-cup.png" width={2064} height={2752} alt="MGA Cup trophy" className={styles.mgaCup} priority />}</div>
       {masters && <div className={styles.mastersFeature} role="img" aria-label="Cherry Blossom course artwork from the Masters scorecard"><div className={styles.featureSheen} /></div>}
-      <div className={styles.statusRow}><span className={styles.badge}>{event.status}</span>{!(priorityWindow && !mgaOpen) && <span className={`${styles.badge} ${styles[signupBadgeState]}`}>{signupBadge}</span>}<span className={styles.capacity}>{signupStatus?.capacity ? `${signupStatus.spots_claimed} / ${signupStatus.capacity} spots claimed` : `${entries.length} claimed · field capacity not set`}</span></div>
+      <div className={styles.statusRow}><span className={styles.badge}>{event.status}</span>{signupBadge && <span className={`${styles.badge} ${styles[signupBadgeState]}`}>{signupBadge}</span>}<span className={styles.capacity}>{signupStatus?.capacity ? `${signupStatus.spots_claimed} / ${signupStatus.capacity} spots claimed` : `${entries.length} claimed · field capacity not set`}</span></div>
       {!mgaOpen && <p className={styles.meta}>{event.year || "Year to be announced"} · {formatMajorLocalDateTime(event.starts_at, localTimeZone)}</p>}
       {!mgaOpen && displayDescription && <p className={styles.description}>{displayDescription}</p>}
       {mgaOpen && <strong className={styles.allSkillLevels}>ALL SKILL LEVELS WELCOME!</strong>}

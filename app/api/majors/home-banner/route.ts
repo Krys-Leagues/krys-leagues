@@ -37,7 +37,7 @@ function isEligiblePlacement(row: { weekend_field: string | null; field_placemen
     && row.is_finalized
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const supabase = publicClient()
     const eventResult = await supabase
@@ -71,7 +71,11 @@ export async function GET() {
       && now < publicOpening
     ) {
       const authClient = await createServerSupabaseClient()
-      const userResult = await authClient.auth.getUser()
+      const authorization = request.headers.get("authorization")
+      const accessToken = authorization?.match(/^Bearer\s+(.+)$/i)?.[1] || null
+      const userResult = accessToken
+        ? await authClient.auth.getUser(accessToken)
+        : await authClient.auth.getUser()
       if (userResult.data.user) {
         const canonicalResult = await authClient.rpc("current_user_canonical_player_id")
         const canonicalPlayerId = typeof canonicalResult.data === "string" ? canonicalResult.data : null
