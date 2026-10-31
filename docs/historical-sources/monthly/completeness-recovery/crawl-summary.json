@@ -1,0 +1,59 @@
+{
+  "crawlTimestamp": "2026-09-04T13:12:25.365Z",
+  "scope": {
+    "from": "2024 January",
+    "to": "2026 July",
+    "finalizedMonths": 31,
+    "visitedDivisionViews": 248,
+    "bridgePeriodExcluded": "2026 August"
+  },
+  "source": {
+    "baseUrl": "https://dqvo64m7q9ujvqa-wmgt23ai.adb.us-ashburn-1.oraclecloudapps.com/ords/r/wmgt/monthly/home",
+    "periodRequestParameter": "g_currently_month_id",
+    "divisionRequestItem": "P1_LEAGUE_ID",
+    "divisionLabelsObserved": ["Master", "Elite", "Pro 1", "Pro 2", "Pro 3", "Semi Pro 1", "Beginner", "Welcome"]
+  },
+  "renderedTotals": {
+    "leaderRows": 1671,
+    "courseTables": 1205,
+    "observations": 12167,
+    "scoredObservations": 9468,
+    "missingScoreObservations": 2699,
+    "malformedRows": 0,
+    "negativeScoreObservations": 9266,
+    "navigationOrSelectionFailures": 0
+  },
+  "renderedStates": {
+    "availableEmptyViews": 87,
+    "leaderOnlyViews": 2,
+    "viewsWithCourseRows": 159,
+    "viewsWithFewerThanEightCourseTables": 16
+  },
+  "identityAudit": {
+    "historicalScreenNamesObservedInRenderedTables": 194,
+    "blankPlayerCellsObserved": 11,
+    "exactCanonicalMatches": "NOT_RUN",
+    "aliasOrMappedMatches": "NOT_RUN",
+    "ambiguousMatches": "NOT_RUN",
+    "unresolvedMatches": "NOT_RUN",
+    "identityDecisionsMade": 0
+  },
+  "evidenceSha256": {
+    "authoritative-coverage-inventory.tsv": "598d10082b1624e6d963c4306b13280c9d3b09d2ed8df01890591b1a72f67ab1",
+    "crawl-methodology.md": "b57be8ac6654df3206cbc71c651cef01bc38d3b110c7475e84132929721373b8",
+    "old-vs-fresh-diff.md": "ebe0fb2a9521d7a58d0f2d9319bd027ed632874c0cd8cd9c2276ee626bb0c915",
+    "README.md": "652583891d06ebee8b9b8bb70a064ef02aeb2405797cb3aa4e21ebeacf262287"
+  },
+  "knownHistoricalDivisionsNotExposedByCurrentSelector": [
+    "2026 March — Semi Pro 2",
+    "2026 March — Semi Pro 3",
+    "2026 April — Semi Pro 2",
+    "2026 May — Semi Pro 2",
+    "2026 May — Semi Pro 3",
+    "2026 June — Semi Pro 2"
+  ],
+  "evidenceLimitations": [
+    "The in-app browser did not support content export, so the new evidence area preserves the structured coverage inventory and methodology but not a local cell-level raw/rendered capture file.",
+    "The live source is currently changed relative to the retained crawl; count deltas are reported as observed source differences, not silently attributed historical repairs."
+  ]
+}

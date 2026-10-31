@@ -1,0 +1,151 @@
+Skip to Main Content
+Kry's Monthlies
+Search
+0 results
+Install App
+About
+nobody
+	
+2026 May
+83/63 players
+COMPLETED
+	
+Overall Leaders - 2026 May
+Pos	Player	League	Courses
+Played	Total
+Strokes	HN1's	Points
+1	mini_G	Pro 1	8	-168	27	1,617
+2	leanin2it	Pro 3	8	-148	19	1,579
+3	KillERBee	Semi Pro 2	8	-53	8	1,568
+3	plucky✌	Pro 2	8	-132	18	1,568
+5	GREATSEER5024	Semi Pro 1	8	-104	14	1,554
+6	IMJOMAMA	Semi Pro 2	8	-44	7	1,537
+7	The Real JB	Pro 2	8	-124	16	1,516
+8	Zanetti	Master	8	-175	26	1,496
+9	WendyW(Wyndemere2020)	Semi Pro 2	8	-24	7	1,487
+10	El Jorge	Master	8	-169	28	1,448
+1 - 10
+Welcome Leaders
+League
+- Select -
+Master
+Elite
+Pro 1
+Pro 2
+Pro 3
+Semi Pro 1
+Beginner
+Welcome
+Pos	Player	Courses
+Played	Total
+Strokes	HN1's	Points
+1
+	Shooter_McGavin	2	-39	4	404
+	Derby_Daz	0			
+	Puffin	0			
+	AndyP1970	0			
+	Woofmaster521 (Kathy)	0			
+	SHANNON_OLIVEOWL	0			
+	YUK1N	0			
+	Chicagobry	0			
+1 - 8
+ Players at risk of relegation
+  Point change since last report.
+ Quixote Valley
+#	Player	Score	HN1	Points
+	YUK1N			
+	Derby_Daz			
+	Shooter_McGavin			
+	SHANNON_OLIVEOWL			
+	Woofmaster521 (Kathy)			
+	AndyP1970			
+	Puffin			
+	Chicagobry			
+ Quixote Valley Hard
+#	Player	Score	HN1	Points
+	YUK1N			
+	Derby_Daz			
+	AndyP1970			
+	Puffin			
+	Chicagobry			
+	Shooter_McGavin			
+	SHANNON_OLIVEOWL			
+	Woofmaster521 (Kathy)			
+ Atlantis
+#	Player	Score	HN1	Points
+1	Shooter_McGavin	-23	3	203
+	Derby_Daz			
+	SHANNON_OLIVEOWL			
+	Chicagobry			
+	AndyP1970			
+	Puffin			
+	YUK1N			
+	Woofmaster521 (Kathy)			
+ Atlantis Hard
+#	Player	Score	HN1	Points
+	YUK1N			
+	Derby_Daz			
+	Woofmaster521 (Kathy)			
+	Puffin			
+	Chicagobry			
+	Shooter_McGavin			
+	SHANNON_OLIVEOWL			
+	AndyP1970			
+ Raptor Cliff's
+#	Player	Score	HN1	Points
+1	Shooter_McGavin	-16	1	201
+	Derby_Daz			
+	Puffin			
+	Chicagobry			
+	Woofmaster521 (Kathy)			
+	SHANNON_OLIVEOWL			
+	YUK1N			
+	AndyP1970			
+ Raptor Cliff's - Hard
+#	Player	Score	HN1	Points
+	YUK1N			
+	Derby_Daz			
+	Woofmaster521 (Kathy)			
+	Puffin			
+	Chicagobry			
+	Shooter_McGavin			
+	SHANNON_OLIVEOWL			
+	AndyP1970			
+ Tokyo
+#	Player	Score	HN1	Points
+	YUK1N			
+	Derby_Daz			
+	AndyP1970			
+	Puffin			
+	Woofmaster521 (Kathy)			
+	Chicagobry			
+	SHANNON_OLIVEOWL			
+	Shooter_McGavin			
+ Tokyo - Hard
+#	Player	Score	HN1	Points
+	YUK1N			
+	Derby_Daz			
+	Woofmaster521 (Kathy)			
+	SHANNON_OLIVEOWL			
+	Shooter_McGavin			
+	Chicagobry			
+	Puffin			
+	AndyP1970			
+2026 May Courses
+
+
+QVE - Quixote Valley
+QVH - Quixote Valley Hard
+
+
+ATE - Atlantis
+ATH - Atlantis Hard
+
+
+RCE - Raptor Cliff's
+RCH - Raptor Cliff's - Hard
+
+
+TOE - Tokyo
+TOH - Tokyo - Hard
+Release 1.2 Built with  using Oracle APEX

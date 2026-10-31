@@ -1,0 +1,138 @@
+Skip to Main Content
+Kry's Monthlies
+Search
+0 results
+Install App
+About
+nobody
+	
+2025 June
+106/94 players
+COMPLETED
+	
+Overall Leaders - 2025 June
+Pos	Player	League	Courses
+Played	Total
+Strokes	HN1's	Points
+1	Blutes87	Pro 2	8	-162	13	1,603
+2	4-cough	Pro 3	8	-164	14	1,594
+3	Heisenberg	Beginner	8	-60	3	1,583
+4	KillERBee	Amateur 2	8	-48	7	1,567
+5	steven2018	Pro 1	8	-166	16	1,566
+6	GuyB22	Semi Pro 3	8	-135	7	1,557
+7	Raccoons Whisker	Amateur 3	8	-110	2	1,542
+8	MAMAGOATZ	Amateur 1	8	-85	6	1,526
+8	TILTBOMB	Amateur 3	8	-92	6	1,526
+10	YODA	Pro 1	8	-167	10	1,520
+1 - 10
+Semi Pro 2 Leaders
+League
+- Select -
+Master
+Elite
+Pro 1
+Pro 2
+Pro 3
+Semi Pro 1
+Beginner
+Welcome
+114
+Pos	Player	Courses
+Played	Total
+Strokes	HN1's	Points
+1
+	BERT	8	-112	2	1,482
+2
+	Chelle💯	7	-105	7	1,357
+3
+	Andrew_Holmes	6	-82	5	1,085
+4
+	fake4real	6	-58	3	1,023
+5
+	Savy	5	-68	4	944
+	ANDRIA77	0			
+1 - 6
+ Players at risk of relegation
+  Point change since last report.
+ Arizona Modern
+#	Player	Score	HN1	Points
+1	Chelle💯	-22	1	201
+2	BERT	-21	0	190
+3	Andrew_Holmes	-18	1	181
+	fake4real			
+	ANDRIA77			
+	Savy			
+ Arizona Modern Hard
+#	Player	Score	HN1	Points
+1	Andrew_Holmes	-21	1	201
+2	Chelle💯	-17	2	192
+3	Savy	-16	1	181
+4	BERT	-14	0	170
+5	fake4real	-8	1	161
+	ANDRIA77			
+ Quixote Valley
+#	Player	Score	HN1	Points
+1	Chelle💯	-14	1	201
+2	Savy	-13	1	191
+3	BERT	-13	0	180
+4	Andrew_Holmes	-12	1	171
+5	fake4real	-10	0	160
+	ANDRIA77			
+ Quixote Valley Hard
+#	Player	Score	HN1	Points
+1	Savy	-14	1	201
+2	Chelle💯	-13	2	192
+3	BERT	-12	0	180
+4	fake4real	-8	1	171
+5	Andrew_Holmes	-7	0	160
+	ANDRIA77			
+ Venice
+#	Player	Score	HN1	Points
+1	Chelle💯	-15	1	201
+2	BERT	-15	0	190
+3	fake4real	-14	0	180
+	Andrew_Holmes			
+	ANDRIA77			
+	Savy			
+ Venice - Hard
+#	Player	Score	HN1	Points
+1	BERT	-13	1	201
+2	fake4real	-8	1	191
+	ANDRIA77			
+	Andrew_Holmes			
+	Chelle💯			
+	Savy			
+ Mars Gardens
+#	Player	Score	HN1	Points
+1	Andrew_Holmes	-17	1	201
+2	Chelle💯	-15	0	190
+3	Savy	-14	1	181
+4	BERT	-12	0	170
+5	fake4real	-10	0	160
+	ANDRIA77			
+ Mars Gardens - Hard
+#	Player	Score	HN1	Points
+1	BERT	-12	1	201
+2	Savy	-11	0	190
+3	Chelle💯	-9	0	180
+4	Andrew_Holmes	-7	1	171
+	ANDRIA77			
+	fake4real			
+2025 June Courses
+
+
+AME - Arizona Modern
+AMH - Arizona Modern Hard
+
+
+QVE - Quixote Valley
+QVH - Quixote Valley Hard
+
+
+VNE - Venice
+VNH - Venice - Hard
+
+
+MGE - Mars Gardens
+MGH - Mars Gardens - Hard
+Release 1.2 Built with  using Oracle APEX

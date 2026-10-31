@@ -1,0 +1,214 @@
+Skip to Main Content
+Kry's Monthlies
+Search
+0 results
+Install App
+About
+nobody
+	
+2025 August
+117/96 players
+COMPLETED
+	
+Overall Leaders - 2025 August
+Pos	Player	League	Courses
+Played	Total
+Strokes	HN1's	Points
+1	mini_G	Pro 3	8	-191	24	1,604
+2	𝙹𝚞𝚕𝚒𝚊𝚗	Pro 2	8	-198	28	1,588
+3	Audrey	Amateur 2	8	-40	5	1,575
+4	JUICE_WRLD	Pro 3	8	-184	23	1,573
+4	Zanetti	Pro 2	8	-197	23	1,573
+6	SubZero	Amateur 1	8	-113	11	1,541
+7	ZoeDarlin	Amateur 1	8	-105	10	1,540
+8	Blutes87	Elite	8	-176	15	1,535
+9	GuyB22	Semi Pro 1	8	-121	11	1,511
+10	POLANECE	Master	8	-175	21	1,501
+1 - 10
+Welcome Leaders
+League
+- Select -
+Master
+Elite
+Pro 1
+Pro 2
+Pro 3
+Semi Pro 1
+Beginner
+Welcome
+Pos	Player	Courses
+Played	Total
+Strokes	HN1's	Points
+1
+	Awkward3Sauce	2	-26	1	401
+	bendybear	0			
+	Empzurg	0			
+	sirtacoman13	0			
+	SQUEEZY_JIBBZ	0			
+	LLABB23_LISA	0			
+	KYLE	0			
+	Chachi Mendelo	0			
+	GALICE1975	0			
+	SKEETER78	0			
+	CHERIE_ROSE	0			
+	RINTARA	0			
+	Merged into 8189	0			
+	Captain	0			
+	PUTT_FOR_DOH	0			
+1 - 15
+ Players at risk of relegation
+  Point change since last report.
+ El Dorado
+#	Player	Score	HN1	Points
+1	Awkward3Sauce	-14	1	201
+	Empzurg			
+	bendybear			
+	sirtacoman13			
+	SQUEEZY_JIBBZ			
+	KYLE			
+	Merged into 8189			
+	GALICE1975			
+	LLABB23_LISA			
+	RINTARA			
+	CHERIE_ROSE			
+	Chachi Mendelo			
+	SKEETER78			
+	Captain			
+	PUTT_FOR_DOH			
+ El Dorado Hard
+#	Player	Score	HN1	Points
+1	Awkward3Sauce	-12	0	200
+	Empzurg			
+	bendybear			
+	SQUEEZY_JIBBZ			
+	sirtacoman13			
+	SKEETER78			
+	GALICE1975			
+	Merged into 8189			
+	KYLE			
+	RINTARA			
+	CHERIE_ROSE			
+	PUTT_FOR_DOH			
+	Chachi Mendelo			
+	Captain			
+	LLABB23_LISA			
+ Atlantis
+#	Player	Score	HN1	Points
+	Captain			
+	KYLE			
+	Awkward3Sauce			
+	bendybear			
+	SQUEEZY_JIBBZ			
+	Empzurg			
+	GALICE1975			
+	Chachi Mendelo			
+	LLABB23_LISA			
+	CHERIE_ROSE			
+	Merged into 8189			
+	PUTT_FOR_DOH			
+	RINTARA			
+	SKEETER78			
+	sirtacoman13			
+ Atlantis Hard
+#	Player	Score	HN1	Points
+	Captain			
+	SKEETER78			
+	sirtacoman13			
+	Awkward3Sauce			
+	Empzurg			
+	SQUEEZY_JIBBZ			
+	LLABB23_LISA			
+	KYLE			
+	RINTARA			
+	CHERIE_ROSE			
+	Merged into 8189			
+	PUTT_FOR_DOH			
+	GALICE1975			
+	Chachi Mendelo			
+	bendybear			
+ Alfheim
+#	Player	Score	HN1	Points
+	Captain			
+	KYLE			
+	Empzurg			
+	bendybear			
+	Awkward3Sauce			
+	SQUEEZY_JIBBZ			
+	CHERIE_ROSE			
+	GALICE1975			
+	Chachi Mendelo			
+	Merged into 8189			
+	LLABB23_LISA			
+	RINTARA			
+	SKEETER78			
+	PUTT_FOR_DOH			
+	sirtacoman13			
+ Alfheim Hard
+#	Player	Score	HN1	Points
+	Captain			
+	Chachi Mendelo			
+	Awkward3Sauce			
+	bendybear			
+	SQUEEZY_JIBBZ			
+	sirtacoman13			
+	SKEETER78			
+	RINTARA			
+	Merged into 8189			
+	CHERIE_ROSE			
+	LLABB23_LISA			
+	GALICE1975			
+	KYLE			
+	PUTT_FOR_DOH			
+	Empzurg			
+ Ice Lair
+#	Player	Score	HN1	Points
+	Captain			
+	Merged into 8189			
+	Awkward3Sauce			
+	SQUEEZY_JIBBZ			
+	bendybear			
+	sirtacoman13			
+	GALICE1975			
+	PUTT_FOR_DOH			
+	CHERIE_ROSE			
+	Chachi Mendelo			
+	SKEETER78			
+	RINTARA			
+	LLABB23_LISA			
+	KYLE			
+	Empzurg			
+ Ice Lair - Hard
+#	Player	Score	HN1	Points
+	Captain			
+	Chachi Mendelo			
+	SQUEEZY_JIBBZ			
+	sirtacoman13			
+	Empzurg			
+	bendybear			
+	LLABB23_LISA			
+	GALICE1975			
+	Merged into 8189			
+	KYLE			
+	SKEETER78			
+	RINTARA			
+	PUTT_FOR_DOH			
+	CHERIE_ROSE			
+	Awkward3Sauce			
+2025 August Courses
+
+
+EDE - El Dorado
+EDH - El Dorado Hard
+
+
+ATE - Atlantis
+ATH - Atlantis Hard
+
+
+ALE - Alfheim
+ALH - Alfheim Hard
+
+
+ILE - Ice Lair
+ILH - Ice Lair - Hard
+Release 1.2 Built with  using Oracle APEX

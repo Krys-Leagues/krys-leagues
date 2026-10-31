@@ -1,0 +1,47 @@
+{
+  "source": "https://dqvo64m7q9ujvqa-wmgt23ai.adb.us-ashburn-1.oraclecloudapps.com/ords/r/wmgt/kwt/view-results",
+  "sourceMethod": "read-only P60_WEEK filter; KR Thursday Night Racing excluded",
+  "seasons": 11,
+  "weeks": 124,
+  "playerWeekRows": 7179,
+  "easyScoreObservations": 7179,
+  "hardScoreObservations": 7177,
+  "totalScoreObservations": 7179,
+  "uniqueHistoricalNames": 213,
+  "exactAutomaticIdentityCandidates": 202,
+  "missingIdentities": 5,
+  "ambiguousIdentities": 6,
+  "duplicateSources": 0,
+  "duplicateRows": 0,
+  "conflictingScoreObservations": 0,
+  "blockedMalformedRows": 2,
+  "garbledNames": 0,
+  "missingEasyScores": 0,
+  "missingHardScores": 2,
+  "incorrectTotals": 0,
+  "partialSourceVariants": 0,
+  "earliestSeasonWeek": "4-W01",
+  "latestSeasonWeek": "14-W04",
+  "note": "Historical rank is the rank band printed in each event result row; current directory rank was not used. Discord IDs were retained only when directly supplied by a row (none were supplied).",
+  "malformedRows": [
+    {
+      "sourceId": "KWT11W04",
+      "row": 58,
+      "missing": [
+        "hardScore"
+      ],
+      "incorrectTotal": false
+    },
+    {
+      "sourceId": "KWT4W07",
+      "row": 53,
+      "missing": [
+        "hardScore"
+      ],
+      "incorrectTotal": false
+    }
+  ],
+  "garbledRows": [],
+  "duplicateRowDetails": [],
+  "conflictDetails": []
+}

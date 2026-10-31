@@ -1,0 +1,424 @@
+{
+  "generated_at": "2026-09-08T12:55:06.914Z",
+  "source_payload": "amateur-extended/repaired-monthly-observations.tsv",
+  "source_payload_rows": 19015,
+  "scored_identities": 192,
+  "finalized_scope": "2024 August through 2026 August inclusive",
+  "excluded_periods": [
+    "2026 September and later (active/future; no source rows embedded)"
+  ],
+  "batch_count": 25,
+  "combined_totals": {
+    "source_rows": 19015,
+    "zero": 139,
+    "negative": 18172,
+    "positive": 704
+  },
+  "batches": [
+    {
+      "batch_number": 1,
+      "period_id": 54,
+      "period": "2024 August",
+      "periods": [
+        "2024 August"
+      ],
+      "source_rows": 713,
+      "zero": 9,
+      "negative": 685,
+      "positive": 19,
+      "sql_filename": "monthly-production-preflight-batch-01-period-54.sql",
+      "file_size_bytes": 322651,
+      "sha256": "8B9295BDC0F1E3B7AB145B15D926583686351EDE4AE7C1473C83BAB5C5DE2135",
+      "unique_payload_rows": 713
+    },
+    {
+      "batch_number": 2,
+      "period_id": 55,
+      "period": "2024 September",
+      "periods": [
+        "2024 September"
+      ],
+      "source_rows": 854,
+      "zero": 4,
+      "negative": 818,
+      "positive": 32,
+      "sql_filename": "monthly-production-preflight-batch-02-period-55.sql",
+      "file_size_bytes": 376757,
+      "sha256": "445160059115754244600F653337A876C9BA6DF832F2137F7D395532588E7554",
+      "unique_payload_rows": 854
+    },
+    {
+      "batch_number": 3,
+      "period_id": 56,
+      "period": "2024 October",
+      "periods": [
+        "2024 October"
+      ],
+      "source_rows": 684,
+      "zero": 5,
+      "negative": 658,
+      "positive": 21,
+      "sql_filename": "monthly-production-preflight-batch-03-period-56.sql",
+      "file_size_bytes": 302346,
+      "sha256": "12832533841B7404934FA03B8378AFCF3F97AD4DCDAA5B9CD08B7DEFBF4A969F",
+      "unique_payload_rows": 684
+    },
+    {
+      "batch_number": 4,
+      "period_id": 57,
+      "period": "2024 November",
+      "periods": [
+        "2024 November"
+      ],
+      "source_rows": 726,
+      "zero": 7,
+      "negative": 698,
+      "positive": 21,
+      "sql_filename": "monthly-production-preflight-batch-04-period-57.sql",
+      "file_size_bytes": 319822,
+      "sha256": "0DD3FEAD71FB6C91840A0E44C87778474768DB5F117B559A3925430987A5CE0E",
+      "unique_payload_rows": 726
+    },
+    {
+      "batch_number": 5,
+      "period_id": 58,
+      "period": "2024 December",
+      "periods": [
+        "2024 December"
+      ],
+      "source_rows": 700,
+      "zero": 7,
+      "negative": 672,
+      "positive": 21,
+      "sql_filename": "monthly-production-preflight-batch-05-period-58.sql",
+      "file_size_bytes": 308466,
+      "sha256": "8AE408121159D22DD610ECCCBFFCE553B2009AE686EBAFD9047928A335A3FAAC",
+      "unique_payload_rows": 700
+    },
+    {
+      "batch_number": 6,
+      "period_id": 81,
+      "period": "2025 January",
+      "periods": [
+        "2025 January"
+      ],
+      "source_rows": 885,
+      "zero": 7,
+      "negative": 846,
+      "positive": 32,
+      "sql_filename": "monthly-production-preflight-batch-06-period-81.sql",
+      "file_size_bytes": 392144,
+      "sha256": "8062745ECED4BEAF9A684BBF96067061A8A7ECE25C47E60963923931B6EE3A75",
+      "unique_payload_rows": 885
+    },
+    {
+      "batch_number": 7,
+      "period_id": 101,
+      "period": "2025 February",
+      "periods": [
+        "2025 February"
+      ],
+      "source_rows": 613,
+      "zero": 2,
+      "negative": 584,
+      "positive": 27,
+      "sql_filename": "monthly-production-preflight-batch-07-period-101.sql",
+      "file_size_bytes": 272049,
+      "sha256": "B4A62AD00F16A39045C46B8D271D24798DAA73A6CEE3CDA65D175CFDEFE1FEE0",
+      "unique_payload_rows": 613
+    },
+    {
+      "batch_number": 8,
+      "period_id": 121,
+      "period": "2025 March",
+      "periods": [
+        "2025 March"
+      ],
+      "source_rows": 757,
+      "zero": 4,
+      "negative": 734,
+      "positive": 19,
+      "sql_filename": "monthly-production-preflight-batch-08-period-121.sql",
+      "file_size_bytes": 340429,
+      "sha256": "56CA63474BF30E00AE4F216EA3911A0E848DC35D18EB4864A230ADCD4C2FCCBC",
+      "unique_payload_rows": 757
+    },
+    {
+      "batch_number": 9,
+      "period_id": 141,
+      "period": "2025 April",
+      "periods": [
+        "2025 April"
+      ],
+      "source_rows": 864,
+      "zero": 4,
+      "negative": 826,
+      "positive": 34,
+      "sql_filename": "monthly-production-preflight-batch-09-period-141.sql",
+      "file_size_bytes": 377672,
+      "sha256": "19B392358555D97B1BAF54ABAD5DF59AB5DD8FEFB5B79F731E7B2CCFD8C3E661",
+      "unique_payload_rows": 864
+    },
+    {
+      "batch_number": 10,
+      "period_id": 161,
+      "period": "2025 May",
+      "periods": [
+        "2025 May"
+      ],
+      "source_rows": 875,
+      "zero": 8,
+      "negative": 810,
+      "positive": 57,
+      "sql_filename": "monthly-production-preflight-batch-10-period-161.sql",
+      "file_size_bytes": 379944,
+      "sha256": "6B38E6A5CA73EA6C22CE097B356B546921001C7D3C3973ECB327C3970C5C273D",
+      "unique_payload_rows": 875
+    },
+    {
+      "batch_number": 11,
+      "period_id": 181,
+      "period": "2025 June",
+      "periods": [
+        "2025 June"
+      ],
+      "source_rows": 892,
+      "zero": 6,
+      "negative": 854,
+      "positive": 32,
+      "sql_filename": "monthly-production-preflight-batch-11-period-181.sql",
+      "file_size_bytes": 388020,
+      "sha256": "E566BEC48F6C064AA298FF439EE90456414A9AB214DDD5FE132ECAC65BC84FBB",
+      "unique_payload_rows": 892
+    },
+    {
+      "batch_number": 12,
+      "period_id": 201,
+      "period": "2025 July",
+      "periods": [
+        "2025 July"
+      ],
+      "source_rows": 896,
+      "zero": 5,
+      "negative": 839,
+      "positive": 52,
+      "sql_filename": "monthly-production-preflight-batch-12-period-201.sql",
+      "file_size_bytes": 397473,
+      "sha256": "0617B931A462EADB71A38CE8A926226A5CE1248513F304FDAF8C4BAF1E50E697",
+      "unique_payload_rows": 896
+    },
+    {
+      "batch_number": 13,
+      "period_id": 221,
+      "period": "2025 August",
+      "periods": [
+        "2025 August"
+      ],
+      "source_rows": 886,
+      "zero": 5,
+      "negative": 854,
+      "positive": 27,
+      "sql_filename": "monthly-production-preflight-batch-13-period-221.sql",
+      "file_size_bytes": 381364,
+      "sha256": "8790ED72F1472D4BBFF2418C354D7EEAF7ECEF66239036519FF82812C8995D24",
+      "unique_payload_rows": 886
+    },
+    {
+      "batch_number": 14,
+      "period_id": 241,
+      "period": "2025 September",
+      "periods": [
+        "2025 September"
+      ],
+      "source_rows": 846,
+      "zero": 9,
+      "negative": 811,
+      "positive": 26,
+      "sql_filename": "monthly-production-preflight-batch-14-period-241.sql",
+      "file_size_bytes": 374704,
+      "sha256": "B8BB9F614BB845E213FD4D68CA3C4E9EA7FA3028924B67611E1FB7462A8AABF5",
+      "unique_payload_rows": 846
+    },
+    {
+      "batch_number": 15,
+      "period_id": 261,
+      "period": "2025 October",
+      "periods": [
+        "2025 October"
+      ],
+      "source_rows": 883,
+      "zero": 9,
+      "negative": 828,
+      "positive": 46,
+      "sql_filename": "monthly-production-preflight-batch-15-period-261.sql",
+      "file_size_bytes": 390230,
+      "sha256": "86ED7B45284639BA2E174302D1CE354EDADA9F5765D98D8244A6FE05518EF629",
+      "unique_payload_rows": 883
+    },
+    {
+      "batch_number": 16,
+      "period_id": 281,
+      "period": "2025 November",
+      "periods": [
+        "2025 November"
+      ],
+      "source_rows": 832,
+      "zero": 3,
+      "negative": 793,
+      "positive": 36,
+      "sql_filename": "monthly-production-preflight-batch-16-period-281.sql",
+      "file_size_bytes": 376617,
+      "sha256": "62549BD7269BFE895CE9E92D41DBA841EB5F344B56E53BD9C4105C2443980F9E",
+      "unique_payload_rows": 832
+    },
+    {
+      "batch_number": 17,
+      "period_id": 301,
+      "period": "2025 December",
+      "periods": [
+        "2025 December"
+      ],
+      "source_rows": 786,
+      "zero": 4,
+      "negative": 762,
+      "positive": 20,
+      "sql_filename": "monthly-production-preflight-batch-17-period-301.sql",
+      "file_size_bytes": 342384,
+      "sha256": "7A1A1C19C777592D2FB7557B348765A8BC482B7AFDD1F2E6BE84D22D3D4002FC",
+      "unique_payload_rows": 786
+    },
+    {
+      "batch_number": 18,
+      "period_id": 321,
+      "period": "2026 January",
+      "periods": [
+        "2026 January"
+      ],
+      "source_rows": 816,
+      "zero": 6,
+      "negative": 760,
+      "positive": 50,
+      "sql_filename": "monthly-production-preflight-batch-18-period-321.sql",
+      "file_size_bytes": 371821,
+      "sha256": "B839461E3EC62E2EE137526D0B298905BEABE947854CD2130F3EA71B3AF536E1",
+      "unique_payload_rows": 816
+    },
+    {
+      "batch_number": 19,
+      "period_id": 341,
+      "period": "2026 February",
+      "periods": [
+        "2026 February"
+      ],
+      "source_rows": 739,
+      "zero": 5,
+      "negative": 711,
+      "positive": 23,
+      "sql_filename": "monthly-production-preflight-batch-19-period-341.sql",
+      "file_size_bytes": 327558,
+      "sha256": "A528D81FAEBB5EE6EC38888423D1DAE859C442114682783563DDBF023043377A",
+      "unique_payload_rows": 739
+    },
+    {
+      "batch_number": 20,
+      "period_id": 361,
+      "period": "2026 March",
+      "periods": [
+        "2026 March"
+      ],
+      "source_rows": 806,
+      "zero": 3,
+      "negative": 792,
+      "positive": 11,
+      "sql_filename": "monthly-production-preflight-batch-20-period-361.sql",
+      "file_size_bytes": 354129,
+      "sha256": "6AE5B4FC00D16E3ACFF8DD021B15894847EF52F82ABA25EA7CA38CBA0C75AA9E",
+      "unique_payload_rows": 806
+    },
+    {
+      "batch_number": 21,
+      "period_id": 381,
+      "period": "2026 April",
+      "periods": [
+        "2026 April"
+      ],
+      "source_rows": 739,
+      "zero": 7,
+      "negative": 709,
+      "positive": 23,
+      "sql_filename": "monthly-production-preflight-batch-21-period-381.sql",
+      "file_size_bytes": 323689,
+      "sha256": "09A6CFEDF1231A61300A7E9975A48ACE4601D7F4F8044F32BAB95DE60C4D55AC",
+      "unique_payload_rows": 739
+    },
+    {
+      "batch_number": 22,
+      "period_id": 401,
+      "period": "2026 May",
+      "periods": [
+        "2026 May"
+      ],
+      "source_rows": 637,
+      "zero": 8,
+      "negative": 610,
+      "positive": 19,
+      "sql_filename": "monthly-production-preflight-batch-22-period-401.sql",
+      "file_size_bytes": 278001,
+      "sha256": "1531C237F5C2AE1EF50F05DC91BFA021814C3662D002670CE632C747E1454E0C",
+      "unique_payload_rows": 637
+    },
+    {
+      "batch_number": 23,
+      "period_id": 421,
+      "period": "2026 June",
+      "periods": [
+        "2026 June"
+      ],
+      "source_rows": 575,
+      "zero": 4,
+      "negative": 558,
+      "positive": 13,
+      "sql_filename": "monthly-production-preflight-batch-23-period-421.sql",
+      "file_size_bytes": 258459,
+      "sha256": "CB7E94E8314BE70E9D069FB6D8527DA1A95EDCAD1B661CAB5EA4C8B057A7B7CA",
+      "unique_payload_rows": 575
+    },
+    {
+      "batch_number": 24,
+      "period_id": 441,
+      "period": "2026 July",
+      "periods": [
+        "2026 July"
+      ],
+      "source_rows": 639,
+      "zero": 5,
+      "negative": 608,
+      "positive": 26,
+      "sql_filename": "monthly-production-preflight-batch-24-period-441.sql",
+      "file_size_bytes": 283493,
+      "sha256": "3E55D98C1B6434D24A96504A2BF47396142284F693D1FECAABB7B0F1DED4F210",
+      "unique_payload_rows": 639
+    },
+    {
+      "batch_number": 25,
+      "period_id": 461,
+      "period": "2026 August",
+      "periods": [
+        "2026 August"
+      ],
+      "source_rows": 372,
+      "zero": 3,
+      "negative": 352,
+      "positive": 17,
+      "sql_filename": "monthly-production-preflight-batch-25-period-461.sql",
+      "file_size_bytes": 166010,
+      "sha256": "3D100C80BC899FEBAA1A21B7C3EF8FA1938BE28552522DDFE56314005E6BD3F9",
+      "unique_payload_rows": 372
+    }
+  ],
+  "unique_embedded_payload_rows": 19015,
+  "duplicate_embedded_payload_rows": 0,
+  "unique_source_logical_rows": 19015,
+  "duplicate_source_logical_rows": 0,
+  "source_row_provenance_duplicate_occurrences": 1290
+}

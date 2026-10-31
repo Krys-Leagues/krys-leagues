@@ -1,0 +1,18 @@
+.page { min-height: 100vh; background: #05020d; color: #fff; padding: clamp(16px, 3vw, 40px); }
+.shell { width: min(100%, 1100px); margin: 0 auto; }
+.back { display: inline-flex; color: #fff; text-decoration: none; border: 1px solid #b26cff; border-radius: 999px; padding: 10px 16px; background: #140927; font-weight: 800; }
+.back:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+.header { margin: 28px 0 22px; }
+.eyebrow { color: #4de8ff; letter-spacing: .16em; font-size: .78rem; font-weight: 800; }
+.header h1 { margin: 6px 0; font-size: clamp(2rem, 5vw, 4rem); }
+.header p { margin: 0; color: #c8bfe2; }
+.section { margin-top: 20px; padding: clamp(16px, 3vw, 28px); border: 1px solid #54378a; border-radius: 20px; background: linear-gradient(135deg, #100d2a, #130a22); box-shadow: 0 0 28px rgba(133, 48, 255, .15); }
+.section h2 { margin: 0 0 16px; font-size: clamp(1.2rem, 3vw, 2rem); }
+.feature, .board { display: block; width: 100%; height: auto; border-radius: 14px; object-fit: contain; }
+.board { background: #090615; }
+.empty { padding: 22px; border-radius: 12px; border: 1px dashed #76569d; color: #d8c9ed; background: rgba(0,0,0,.22); }
+.assetNote { display: block; margin-top: 10px; color: #8f81a9; font-size: .75rem; word-break: break-word; }
+.calendar { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+.week { display: flex; justify-content: space-between; gap: 12px; padding: 14px; border-radius: 12px; background: #0d1630; border: 1px solid #2d73aa; }
+.week span { color: #bfeeff; text-align: right; }
+@media (max-width: 520px) { .week { display: grid; gap: 4px; } .week span { text-align: left; } }

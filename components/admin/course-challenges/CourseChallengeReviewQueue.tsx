@@ -1,0 +1,231 @@
+"use client"
+
+import { useCallback, useEffect, useMemo, useState } from "react"
+import { courseChallengeGameModeError, normalizeCourseChallengeGameMode, type CourseChallengeGameMode } from "@/lib/courseChallenges/gameMode"
+import reviewStyles from "./CourseChallengeReviewQueue.module.css"
+
+type ReviewEvent = { id: string; action: string; from_status: string | null; to_status: string; reviewer_id: string | null; notes: string | null; created_at: string }
+type DuplicateMatch = { id: string; challengeKey: "level" | "ace" | "prestige"; level: number | null; aceStage: number | null; difficulty: string | null; status: string; createdAt: string; disposition: string; blocking: boolean; matchSources: Array<"proof" | "achievement"> }
+type PastCard = { id: string; challengeKey: "level" | "ace" | "prestige"; level: number; aceStage?: number | null; prestigeStage?: number | null; difficulty: string; status: string; proofPhotoUrl: string | null; calculatedTotal: number; relativeToPar: number; createdAt: string }
+type Requirement = { requirement?: { label?: string }; status?: string; passed?: boolean | null; reason?: string }
+type Submission = {
+  id: string; playerId: string; isOwnSubmission: boolean; playerName: string; courseSlug: string; courseName: string; challengeKey: "level" | "ace" | "prestige"; level: number; aceStage?: number | null; aceLabel?: string | null; prestigeStage?: number | null; prestigeLabel?: string | null; difficulty: "Easy" | "Hard";
+  proofPhotoUrl: string | null; holeScores: number[]; reviewedHoleScores: number[] | null; pars: number[] | null; calculatedTotal: number; relativeToPar: number; requirements: Requirement[]; levelRequirements: Array<{ label?: string }>; aceRequirements: Array<{ label?: string }>; status: string;
+  reviewReason: string | null; reviewNotes: string | null; roundDate: string | null; roundTime: string | null; gameMode: string | null; adminVerifiedGameMode: string | null;
+  enteredFinalScore: number | null; finalScoreCheck: string | null; createdAt: string | null; aceStageAtSubmission: number | null; possibleDuplicate: boolean; crossTrackReuse: boolean; duplicateMatches: DuplicateMatch[]; pastCards: PastCard[]; reviewEvents: ReviewEvent[];
+  allTimeProcessingStatus: string; allTimeProcessingResult: Record<string, unknown> | null; submissionSource: string; sourceMetadata: Record<string, unknown>;
+}
+
+type QueueProps = { showRejectedSection?: boolean; reviewDesk?: boolean }
+export default function CourseChallengeReviewQueue({ showRejectedSection = false, reviewDesk = false }: QueueProps) {
+  const [submissions, setSubmissions] = useState<Submission[]>([])
+  const [rejectedSubmissions, setRejectedSubmissions] = useState<Submission[]>([])
+  const [pendingCount, setPendingCount] = useState(0)
+  const [loading, setLoading] = useState(true)
+  const [rejectedLoading, setRejectedLoading] = useState(false)
+  const [rejectedLoaded, setRejectedLoaded] = useState(false)
+  const [message, setMessage] = useState("")
+  const [busyId, setBusyId] = useState<string | null>(null)
+  const [modes, setModes] = useState<Record<string, CourseChallengeGameMode>>({})
+  const [reviewNotes, setReviewNotes] = useState<Record<string, string>>({})
+  const [preview, setPreview] = useState<{ url: string; label: string } | null>(null)
+  const [previewScale, setPreviewScale] = useState(1)
+  const [previewRotation, setPreviewRotation] = useState(0)
+
+  const load = useCallback(async () => {
+    const response = await fetch("/api/admin/course-challenges", { cache: "no-store" })
+    const payload = await response.json() as { submissions?: Submission[]; pendingCount?: number; error?: string }
+    if (!response.ok) { setMessage(payload.error || "Course Challenge reviews could not be loaded."); setLoading(false); return }
+    const loadedSubmissions = payload.submissions || []
+    setSubmissions(loadedSubmissions)
+    setModes((current) => {
+      const next = { ...current }
+      for (const submission of loadedSubmissions) {
+        const persistedMode = normalizeCourseChallengeGameMode(submission.adminVerifiedGameMode)
+        if (!next[submission.id] && persistedMode) next[submission.id] = persistedMode
+      }
+      return next
+    })
+    setPendingCount(payload.pendingCount ?? 0)
+    setMessage("")
+    setLoading(false)
+  }, [])
+
+  const loadRejected = useCallback(async () => {
+    setRejectedLoading(true)
+    const response = await fetch("/api/admin/course-challenges?status=rejected", { cache: "no-store" })
+    const payload = await response.json() as { submissions?: Submission[]; error?: string }
+    if (!response.ok) {
+      setMessage(payload.error || "Rejected Course Challenge cards could not be loaded.")
+      setRejectedLoading(false)
+      return
+    }
+    setRejectedSubmissions(payload.submissions || [])
+    setRejectedLoaded(true)
+    setRejectedLoading(false)
+  }, [])
+
+  useEffect(() => {
+    let active = true
+    const initial = window.setTimeout(() => { if (active) void load() }, 0)
+    const timer = window.setInterval(() => { if (active) void load() }, 20_000)
+    return () => { active = false; window.clearTimeout(initial); window.clearInterval(timer) }
+  }, [load])
+
+  async function review(submission: Submission, action: "approve" | "reject" | "does_not_qualify_for_ace" | "return_to_review", approveAce = false, overrideDuplicateWarning = false) {
+    const mode = submission.challengeKey === "ace" ? null : modes[submission.id] || normalizeCourseChallengeGameMode(submission.adminVerifiedGameMode)
+    const modeError = courseChallengeGameModeError(submission.level, mode, submission.challengeKey)
+    if (action === "approve" && mode && modeError) { setMessage(modeError); return }
+    if (overrideDuplicateWarning && !window.confirm("APPROVE DESPITE DUPLICATE WARNING?\n\nYou are confirming that you visually reviewed this submission and determined it is legitimate.")) return
+    setBusyId(submission.id)
+    const response = await fetch("/api/admin/course-challenges", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: submission.id, action, gameMode: mode, visualOnly: action === "approve", approveAce, overrideDuplicateWarning, reviewNotes: reviewNotes[submission.id]?.trim() || null }) })
+    const payload = await response.json() as { error?: string; message?: string }
+    setMessage(response.ok ? payload.message || "Review saved." : payload.error || "Review failed.")
+    setBusyId(null)
+    if (response.ok) {
+      await load()
+      if (rejectedLoaded) await loadRejected()
+    }
+  }
+
+  function openPreview(next: { url: string; label: string }) {
+    setPreview(next)
+    setPreviewScale(1)
+    setPreviewRotation(0)
+  }
+
+  function togglePreviewFullscreen() {
+    const image = document.querySelector<HTMLElement>("[data-course-challenge-proof-viewer]")
+    if (!image) return
+    if (document.fullscreenElement) void document.exitFullscreen()
+    else void image.requestFullscreen()
+  }
+
+  async function verifyGameMode(submission: Submission, mode: CourseChallengeGameMode) {
+    const previousMode = modes[submission.id] || normalizeCourseChallengeGameMode(submission.adminVerifiedGameMode)
+    setModes((current) => ({ ...current, [submission.id]: mode }))
+    setBusyId(submission.id)
+    const response = await fetch("/api/admin/course-challenges", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: submission.id, action: "verify_game_mode", gameMode: mode }) })
+    const payload = await response.json() as { error?: string; message?: string; gameMode?: CourseChallengeGameMode }
+    if (!response.ok) {
+      setModes((current) => {
+        const next = { ...current }
+        if (previousMode) next[submission.id] = previousMode
+        else delete next[submission.id]
+        return next
+      })
+      setMessage(payload.error || "Admin game-mode verification could not be saved.")
+    } else {
+      setSubmissions((current) => current.map((item) => item.id === submission.id ? { ...item, adminVerifiedGameMode: payload.gameMode || mode } : item))
+      setMessage(payload.message || "Admin game mode saved.")
+    }
+    setBusyId(null)
+  }
+
+  const activeLabel = useMemo(() => reviewDesk ? "Pending reviews" : "Active reviews", [reviewDesk])
+  return <section style={{ display: "grid", gap: 18 }}>
+    <div style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
+      <div><h2 style={{ margin: 0 }}>Course Challenge {reviewDesk ? "Review Desk" : "Review Queue"}</h2><p style={{ color: "#fef3c7", fontWeight: 800 }}>{activeLabel}: {pendingCount}</p></div>
+      <span style={{ color: "#94a3b8", fontSize: 13 }}>Refreshes every 20 seconds</span>
+    </div>
+    {message && <p role="status" style={{ padding: 12, border: "1px solid #f59e0b66", borderRadius: 10, color: "#fde68a", whiteSpace: "pre-line" }}>{message}</p>}
+    {loading ? <p>Loading reviews…</p> : submissions.length === 0 ? <p>No pending Course Challenge submissions.</p> : submissions.map((submission) => <ReviewCard key={submission.id} submission={submission} mode={modes[submission.id]} setMode={(value) => verifyGameMode(submission, value)} reviewNote={reviewNotes[submission.id] || ""} setReviewNote={(value) => setReviewNotes((current) => ({ ...current, [submission.id]: value }))} busy={busyId === submission.id} onReview={review} onPreview={openPreview} />)}
+    {showRejectedSection && <details style={rejectedSection} onToggle={() => { if (!rejectedLoaded) void loadRejected() }}><summary style={rejectedSummary}>REJECTED CARDS{rejectedLoaded ? ` (${rejectedSubmissions.length})` : ""}</summary>{rejectedLoading ? <p>Loading rejected cards…</p> : !rejectedLoaded ? <p style={muted}>Expand to inspect rejected cards.</p> : rejectedSubmissions.length === 0 ? <p style={muted}>No rejected cards.</p> : rejectedSubmissions.map((submission) => <ReviewCard key={submission.id} submission={submission} mode={modes[submission.id]} setMode={(value) => verifyGameMode(submission, value)} reviewNote={reviewNotes[submission.id] || ""} setReviewNote={(value) => setReviewNotes((current) => ({ ...current, [submission.id]: value }))} busy={busyId === submission.id} onReview={review} onPreview={openPreview} />)}</details>}
+    {preview && <div role="dialog" aria-modal="true" onClick={() => setPreview(null)} style={modalBackdrop}><div data-course-challenge-proof-viewer onClick={(event) => event.stopPropagation()} style={modalPanel}><div style={viewerToolbar}><button type="button" onClick={() => setPreviewScale((value) => Math.max(0.5, value - 0.25))} style={viewerButton}>Zoom out</button><button type="button" onClick={() => { setPreviewScale(1); setPreviewRotation(0) }} style={viewerButton}>Fit / reset</button><button type="button" onClick={() => setPreviewScale((value) => Math.min(3, value + 0.25))} style={viewerButton}>Zoom in</button><button type="button" onClick={() => setPreviewRotation((value) => (value + 90) % 360)} style={viewerButton}>Rotate</button><button type="button" onClick={togglePreviewFullscreen} style={viewerButton}>Full screen</button><button type="button" onClick={() => setPreview(null)} style={closeButton}>Close</button></div><div style={viewerCanvas}><img src={preview.url} alt={preview.label} style={{ maxWidth: "100%", maxHeight: "78vh", objectFit: "contain", transform: `scale(${previewScale}) rotate(${previewRotation}deg)`, transformOrigin: "center center", cursor: previewScale > 1 ? "grab" : "default" }} /></div></div></div>}
+  </section>
+}
+
+function ReviewCard({ submission, mode, setMode, reviewNote, setReviewNote, busy, onReview, onPreview }: { submission: Submission; mode?: CourseChallengeGameMode; setMode: (value: CourseChallengeGameMode) => Promise<void>; reviewNote: string; setReviewNote: (value: string) => void; busy: boolean; onReview: (submission: Submission, action: "approve" | "reject" | "does_not_qualify_for_ace" | "return_to_review", approveAce?: boolean, overrideDuplicateWarning?: boolean) => Promise<void>; onPreview: (preview: { url: string; label: string }) => void }) {
+  const requiresAceVerification = submission.challengeKey === "ace" || Boolean(submission.aceStageAtSubmission)
+  const stageLabel = submission.challengeKey === "ace" ? submission.aceLabel || "Ace Track" : submission.challengeKey === "prestige" ? submission.prestigeLabel || "Prestige" : `Level ${submission.level}`
+  const modeError = courseChallengeGameModeError(submission.level, mode, submission.challengeKey)
+  const primaryRequirements = submission.challengeKey === "ace" ? submission.aceRequirements : submission.challengeKey === "prestige" ? submission.levelRequirements : submission.levelRequirements
+  const primaryRequirementTitle = submission.challengeKey === "ace" ? "ACE TRACK REQUIREMENT" : submission.challengeKey === "prestige" ? `${stageLabel.toUpperCase()} REQUIREMENT` : "LEVEL REQUIREMENT"
+  const canApproveAce = submission.challengeKey === "level" && submission.aceRequirements.length > 0
+  const achievementDuplicates = submission.duplicateMatches.filter((match) => match.blocking && match.disposition === "blocked_same_track")
+  const proofReuseWarnings = submission.duplicateMatches.filter((match) => match.blocking && match.matchSources.includes("proof") && match.disposition !== "blocked_same_track")
+  return <article style={card}>
+    <header style={header}><div><h3 style={{ margin: 0 }}>{submission.playerName} · {submission.courseName}</h3><p style={muted}>{stageLabel} · {submission.difficulty} · {submission.status.toUpperCase()}</p></div><strong style={{ color: submission.status === "rejected" ? "#fca5a5" : "#fde68a" }}>{submission.status}</strong></header>
+    {achievementDuplicates.length > 0 && <div style={warning}><strong>ACHIEVEMENT DUPLICATE — ADMIN REVIEW REQUIRED</strong><span>The exact course, difficulty, and achievement already has an approved use. Automatic approval is protected; an authorized reviewer may approve only after confirming the new submission is legitimate.</span>{achievementDuplicates.map((match) => <DuplicateDetail key={match.id} match={match} />)}</div>}
+    {proofReuseWarnings.length > 0 && <div style={warning}><strong>POSSIBLE DUPLICATE PROOF</strong><span>This image was used before, but that does not mean the current difficulty or achievement was already earned. Visually inspect the evidence before using the protected override.</span>{proofReuseWarnings.map((match) => <DuplicateDetail key={match.id} match={match} />)}</div>}
+    {submission.crossTrackReuse && <div style={information}><strong>ALLOWED CROSS-TRACK USE</strong><span>This card was previously used for a Level or Ace Track and is also eligible for the other track. This is not a blocking duplicate.</span></div>}
+    <p style={muted}>Submitted {submission.createdAt ? new Date(submission.createdAt).toLocaleString() : "—"} · Date/time is visually verified from the private scorecard image during review.</p>
+    <div className={reviewStyles.workspace}>
+      <div className={reviewStyles.proofPane}>
+        <span className={reviewStyles.eyebrow}>PRIVATE SCORECARD PROOF</span>
+        {submission.proofPhotoUrl ? <button type="button" onClick={() => onPreview({ url: submission.proofPhotoUrl || "", label: "Private scorecard evidence" })} style={proofButton}><img src={submission.proofPhotoUrl} alt="Private scorecard evidence" className={reviewStyles.proofImage} /><span>Open original private proof</span></button> : <p style={muted}>Private proof is unavailable for this submission.</p>}
+        <p style={summary}>Submission timestamp: <strong>{submission.createdAt ? new Date(submission.createdAt).toLocaleString() : "—"}</strong></p>
+      </div>
+      <div className={reviewStyles.reviewChecklist}>
+        <span className={reviewStyles.eyebrow}>VISUAL REVIEW CHECKLIST</span>
+        <p style={muted}>Review the image itself. No scores, total, date, time, or ace count need to be transcribed.</p>
+        <div style={requirementPanel}><strong>{primaryRequirementTitle}</strong>{primaryRequirements.length > 0 ? <ul style={requirementList}>{primaryRequirements.map((requirement, index) => <li key={index}>{requirement.label || "Configured requirement"}</li>)}</ul> : <p style={muted}>No configured requirement text is available for this submission.</p>}</div>
+        {submission.challengeKey === "level" && <div style={requirementPanel}><strong>ACE TRACK REQUIREMENT</strong>{submission.aceRequirements.length > 0 ? <ul style={requirementList}>{submission.aceRequirements.map((requirement, index) => <li key={index}>{requirement.label || "Configured Ace requirement"}</li>)}</ul> : <p style={muted}>No Ace approval is available for this submission.</p>}</div>}
+        <p style={muted}>The authorized admin makes the final visual decision using the private scorecard image and these configured requirements.</p>
+        <div className={reviewStyles.reviewFacts}><span>PLAYER <b>{submission.playerName}</b></span><span>COURSE <b>{submission.courseName}</b></span><span>TRACK <b>{stageLabel}</b></span><span>DIFFICULTY <b>{submission.difficulty}</b></span><span>DATE/TIME <b>VISUALLY VERIFIED FROM IMAGE</b></span><span>GAME MODE <b>{submission.challengeKey === "ace" ? "NOT REQUIRED" : mode ? mode.toUpperCase() : "ADMIN VERIFICATION REQUIRED"}</b></span></div>
+      </div>
+    </div>
+    {submission.requirements.length > 0 && <details style={storedRequirements}><summary>STORED REVIEW SNAPSHOT</summary><ul style={{ marginTop: 10 }}>{submission.requirements.map((item, index) => <li key={index}>{item.requirement?.label || "Requirement"}: {item.status || "needs review"}{item.reason ? ` — ${item.reason}` : ""}</li>)}</ul></details>}
+    {submission.reviewReason && <p style={reviewReason}>Review reason: {submission.reviewReason}</p>}
+    {submission.submissionSource === "discord_course_challenge_game" && <p style={information}>SOURCE: COURSE CHALLENGES DISCORD GAME · ROOM {String(submission.sourceMetadata.roomName || "UNASSIGNED")} · GAME {String(submission.sourceMetadata.gameId || "UNKNOWN")}</p>}
+    {submission.challengeKey !== "ace" && <p style={muted}>Stored Game Mode: {submission.gameMode || "not supplied by player"} · Admin verified: {submission.adminVerifiedGameMode?.toUpperCase() || "not verified"}</p>}
+    <PastCards submission={submission} onPreview={onPreview} />
+    {submission.status === "rejected" ? <button type="button" disabled={busy} onClick={() => void onReview(submission, "return_to_review")} style={buttonStyle("#92400e")}>RETURN TO REVIEW</button> : <div style={{ display: "grid", gap: 10 }}>
+      {submission.challengeKey !== "ace" && <fieldset disabled={busy} style={modeFieldset}><legend style={modeLegend}>GAME MODE</legend><div style={modeOptions}><label style={modeOption(mode === "solo")}><input type="radio" name={`mode-${submission.id}`} checked={mode === "solo"} onChange={() => void setMode("solo")} /> <span>SOLO</span></label><label style={modeOption(mode === "multiplayer")}><input type="radio" name={`mode-${submission.id}`} checked={mode === "multiplayer"} onChange={() => void setMode("multiplayer")} /> <span>MULTIPLAYER</span></label></div><small style={muted}>Optional admin reference. Practice Mode never qualifies; a missing player-supplied mode does not block approval.</small></fieldset>}
+      {submission.challengeKey === "level" && <fieldset style={aceFieldset}><legend>ACE TRACK</legend>{canApproveAce ? <small style={muted}>Optional: approve this same image for the displayed Ace requirement. No duplicate upload is required.</small> : <small style={muted}>No Ace stage was open when this card was submitted.</small>}</fieldset>}
+      {submission.isOwnSubmission && <p style={selfApprovalWarning}>You cannot approve your own Course Challenge submission.</p>}
+      {!submission.isOwnSubmission && modeError && mode && <p role="alert" style={modeError.includes("Multiplayer") && mode === "solo" ? modeWarning : modeNote}>{modeError}</p>}
+      {submission.possibleDuplicate && <label style={{ display: "grid", gap: 6 }}><span style={muted}>Optional admin override note</span><textarea value={reviewNote} onChange={(event) => setReviewNote(event.target.value)} rows={2} placeholder="Why this flagged submission is legitimate" style={reviewNoteInput} /></label>}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}><button type="button" data-course-challenge-approval disabled={busy || submission.isOwnSubmission || Boolean(mode && modeError) || submission.possibleDuplicate} onClick={() => void onReview(submission, "approve", submission.challengeKey === "ace")} style={buttonStyle("#047857")}>{submission.challengeKey === "ace" ? "APPROVE ACE" : "APPROVE LEVEL"}</button>{canApproveAce && <button type="button" disabled={busy || submission.isOwnSubmission || Boolean(mode && modeError) || submission.possibleDuplicate} onClick={() => void onReview(submission, "approve", true)} style={buttonStyle("#0f766e")}>APPROVE LEVEL + ACE</button>}{submission.challengeKey === "ace" && <button type="button" disabled={busy} onClick={() => void onReview(submission, "does_not_qualify_for_ace")} style={buttonStyle("#9f1239")}>DOES NOT QUALIFY FOR ACE</button>}<button type="button" disabled={busy} onClick={() => void onReview(submission, "reject")} style={buttonStyle("#991b1b")}>REJECT / NEEDS CORRECTION</button></div>
+      {submission.possibleDuplicate && !submission.isOwnSubmission && <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}><button type="button" disabled={busy || Boolean(mode && modeError)} onClick={() => void onReview(submission, "approve", submission.challengeKey === "ace", true)} style={buttonStyle("#b45309")}>APPROVE ANYWAY — VERIFIED BY ADMIN</button>{canApproveAce && <button type="button" disabled={busy || Boolean(mode && modeError)} onClick={() => void onReview(submission, "approve", true, true)} style={buttonStyle("#a16207")}>APPROVE LEVEL + ACE ANYWAY</button>}</div>}
+    </div>}
+    {submission.allTimeProcessingStatus === "processed" && submission.allTimeProcessingResult && <p style={result}>All-Time/Climbers processed: {String(submission.allTimeProcessingResult.classification || submission.allTimeProcessingResult.action || "complete")}</p>}
+  </article>
+}
+
+function DuplicateDetail({ match }: { match: DuplicateMatch }) {
+  const label = match.challengeKey === "ace" ? `Ace ${match.aceStage || "Track"}` : match.challengeKey === "prestige" ? "Prestige" : `Level ${match.level}`
+  return <small>Previous: {label} · {match.difficulty} · {match.status} · {new Date(match.createdAt).toLocaleString()} · Submission {match.id}</small>
+}
+
+function PastCards({ submission, onPreview }: { submission: Submission; onPreview: (preview: { url: string; label: string }) => void }) {
+  return <details style={pastCards}><summary>PAST CARDS ({submission.pastCards.length})</summary>{submission.pastCards.length === 0 ? <p style={muted}>No previous card for this player and course.</p> : <div style={pastGrid}>{submission.pastCards.map((card) => <div key={card.id} style={pastCard}>{card.proofPhotoUrl ? <button type="button" onClick={() => onPreview({ url: card.proofPhotoUrl || "", label: "Private past scorecard evidence" })} style={thumbButton}><img src={card.proofPhotoUrl} alt="Private past scorecard thumbnail" style={thumbnail} /></button> : <span style={thumbnailPlaceholder}>No proof</span>}<strong>{card.challengeKey === "ace" ? `Ace ${card.aceStage || ""}` : card.challengeKey === "prestige" ? `Prestige ${card.prestigeStage || ""}` : `L${card.level}`} · {card.difficulty}</strong><span>{card.status} · visual review history</span><small>{new Date(card.createdAt).toLocaleString()}</small></div>)}</div>}</details>
+}
+
+function buttonStyle(background: string): React.CSSProperties { return { border: 0, borderRadius: 9, padding: "10px 14px", background, color: "white", fontWeight: 800, cursor: "pointer" } }
+function modeOption(selected: boolean): React.CSSProperties { return { display: "flex", alignItems: "center", justifyContent: "center", gap: 8, minWidth: 150, padding: "12px 16px", border: `2px solid ${selected ? "#fbbf24" : "#64748b"}`, borderRadius: 10, background: selected ? "#78350f" : "#111827", color: selected ? "#fef3c7" : "#e2e8f0", fontWeight: 900, cursor: "pointer" } }
+
+const card: React.CSSProperties = { border: "1px solid #334155", borderRadius: 16, padding: 18, background: "#0f172a", display: "grid", gap: 10 }
+const rejectedSection: React.CSSProperties = { border: "1px solid #475569", borderRadius: 14, padding: 14, background: "#0b1220", display: "grid", gap: 12 }
+const rejectedSummary: React.CSSProperties = { cursor: "pointer", color: "#cbd5e1", fontWeight: 900, letterSpacing: "0.06em" }
+const header: React.CSSProperties = { display: "flex", flexWrap: "wrap", justifyContent: "space-between", gap: 10 }
+const muted: React.CSSProperties = { color: "#cbd5e1", margin: 0 }
+const summary: React.CSSProperties = { color: "#e2e8f0", margin: 0 }
+const reviewReason: React.CSSProperties = { color: "#fde68a", margin: 0 }
+const warning: React.CSSProperties = { display: "grid", gap: 5, color: "#fef3c7", background: "#78350f", border: "1px solid #f59e0b", borderRadius: 8, padding: 10, margin: 0 }
+const information: React.CSSProperties = { display: "grid", gap: 5, color: "#dbeafe", background: "#172554", border: "1px solid #3b82f6", borderRadius: 8, padding: 10, margin: 0 }
+const selfApprovalWarning: React.CSSProperties = { color: "#fecaca", background: "#450a0a", border: "1px solid #f87171", borderRadius: 8, padding: 10, fontWeight: 800, margin: 0 }
+const result: React.CSSProperties = { color: "#86efac", border: "1px solid #166534", borderRadius: 8, padding: 10, margin: 0 }
+const proofButton: React.CSSProperties = { display: "grid", gap: 5, justifyItems: "start", border: "1px solid #475569", borderRadius: 10, padding: 8, background: "#020617", color: "#c4b5fd", cursor: "pointer" }
+const storedRequirements: React.CSSProperties = { borderTop: "1px solid #334155", paddingTop: 10 }
+const requirementPanel: React.CSSProperties = { display: "grid", gap: 6, border: "1px solid #475569", borderRadius: 10, padding: 11, background: "#111827", color: "#f8fafc" }
+const requirementList: React.CSSProperties = { margin: 0, paddingLeft: 20, color: "#fde68a" }
+const modeFieldset: React.CSSProperties = { display: "grid", gap: 10, border: "1px solid #64748b", borderRadius: 12, padding: 14, background: "#020617" }
+const modeLegend: React.CSSProperties = { padding: "0 6px", color: "#f8fafc", fontWeight: 900, letterSpacing: "0.08em" }
+const modeOptions: React.CSSProperties = { display: "flex", flexWrap: "wrap", gap: 10 }
+const aceFieldset: React.CSSProperties = { display: "grid", gap: 7, border: "1px solid #475569", borderRadius: 10, padding: 10 }
+const modeNote: React.CSSProperties = { color: "#fef3c7", margin: 0 }
+const modeWarning: React.CSSProperties = { color: "#fecaca", background: "#450a0a", border: "1px solid #f87171", borderRadius: 8, padding: 10, fontWeight: 800, margin: 0 }
+const pastCards: React.CSSProperties = { borderTop: "1px solid #334155", paddingTop: 10 }
+const pastGrid: React.CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))", gap: 10, marginTop: 10 }
+const pastCard: React.CSSProperties = { display: "grid", gap: 4, border: "1px solid #475569", borderRadius: 8, padding: 8, color: "#e2e8f0", fontSize: 12 }
+const thumbButton: React.CSSProperties = { border: 0, padding: 0, background: "transparent", cursor: "pointer" }
+const thumbnail: React.CSSProperties = { width: "100%", height: 90, objectFit: "cover", borderRadius: 5 }
+const thumbnailPlaceholder: React.CSSProperties = { height: 90, display: "grid", placeItems: "center", background: "#1e293b", borderRadius: 5, color: "#94a3b8" }
+const modalBackdrop: React.CSSProperties = { position: "fixed", inset: 0, zIndex: 100, display: "grid", placeItems: "center", padding: 24, background: "#000c" }
+const modalPanel: React.CSSProperties = { position: "relative", maxWidth: "min(1000px, 100%)", maxHeight: "90vh", padding: 36, borderRadius: 14, background: "#0f172a" }
+const closeButton: React.CSSProperties = { position: "absolute", top: 8, right: 8, border: "1px solid #64748b", borderRadius: 7, padding: "5px 9px", background: "#1e293b", color: "white", cursor: "pointer" }
+const viewerToolbar: React.CSSProperties = { display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 10, paddingRight: 52 }
+const viewerButton: React.CSSProperties = { border: "1px solid #64748b", borderRadius: 7, padding: "6px 9px", background: "#1e293b", color: "white", cursor: "pointer" }
+const viewerCanvas: React.CSSProperties = { maxWidth: "min(1000px, 90vw)", maxHeight: "78vh", overflow: "auto", display: "grid", placeItems: "center", background: "#020617", borderRadius: 8, padding: 12 }
+const reviewNoteInput: React.CSSProperties = { width: "100%", border: "1px solid #f59e0b88", borderRadius: 8, padding: 10, background: "#0f172a", color: "#f8fafc", resize: "vertical" }

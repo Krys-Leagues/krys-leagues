@@ -1,0 +1,140 @@
+import { majorRoundDayLabel, type MajorDayChoice, type MajorPlayDay, type MajorRoomRosterMember } from "./majors.ts"
+
+export const MASTERS_ROOM_REMINDER_STORAGE_KEY = "krys-leagues:masters-room-gateway-visit-v2"
+
+export type MastersRoomReminderAssignment = {
+  eventId: string
+  entryId: string
+  playDayId: string
+  timeSlotId: string
+  groupLabel: string
+  startsAt: string
+  officialPlayDate: string
+  dayNumber: MajorPlayDay["day_number"]
+  roundLabel: string
+  roster: MajorRoomRosterMember[]
+  instructions: string | null
+}
+
+export type MastersRoomReminderDismissals = Record<string, string>
+
+const MASTERS_ROOM_REMINDER_EXCLUDED_PATHS = [
+  "/",
+  "/access-denied",
+  "/testing-access",
+] as const
+
+const MASTERS_ROOM_REMINDER_EXCLUDED_PREFIXES = [
+  "/admin",
+  "/auth",
+  "/api",
+  "/majors/masters-stream",
+] as const
+
+export function shouldRenderMastersRoomReminderOnPath(pathname: string | null) {
+  if (!pathname) return false
+  if (MASTERS_ROOM_REMINDER_EXCLUDED_PATHS.includes(pathname as (typeof MASTERS_ROOM_REMINDER_EXCLUDED_PATHS)[number])) return false
+  return !MASTERS_ROOM_REMINDER_EXCLUDED_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))
+}
+
+export function buildPublishedMastersRoomAssignments(
+  eventId: string,
+  schedule: MajorDayChoice[],
+  days: MajorPlayDay[],
+): MastersRoomReminderAssignment[] {
+  const daysById = new Map(days.map((day) => [day.id, day]))
+
+  return schedule.flatMap((choice) => {
+    const day = daysById.get(choice.play_day_id)
+    const roster = choice.room_roster || []
+
+    // The existing player schedule RPC exposes a group label and roster only
+    // for published rooms. Keep a second defensive size check here so an old
+    // or invalid solo room can never become a player-facing reminder.
+    if (!day || !choice.group_label || !choice.starts_at || roster.length < 2 || roster.length > 4) return []
+
+    return [{
+      eventId,
+      entryId: choice.entry_id,
+      playDayId: choice.play_day_id,
+      timeSlotId: choice.time_slot_id,
+      groupLabel: choice.group_label,
+      startsAt: choice.starts_at,
+      officialPlayDate: day.play_date,
+      dayNumber: day.day_number,
+      roundLabel: majorRoundDayLabel(day.day_number),
+      roster: [...roster],
+      instructions: choice.group_instructions?.trim() || null,
+    }]
+  }).sort((left, right) => left.dayNumber - right.dayNumber || left.startsAt.localeCompare(right.startsAt))
+}
+
+export function hasEligibleMastersRoomExperience(schedule: readonly MajorDayChoice[]) {
+  return schedule.length > 0
+}
+
+export function selectCurrentMastersRoomAssignment(
+  assignments: MastersRoomReminderAssignment[],
+  now = Date.now(),
+) {
+  const futureAssignment = assignments.find((assignment) => {
+    const startsAt = Date.parse(assignment.startsAt)
+    return Number.isFinite(startsAt) && startsAt > now
+  })
+  if (futureAssignment) return futureAssignment
+
+  // Keep the latest published room available after its scheduled start. This
+  // is especially important for a player's final round, which has no later
+  // assignment to become the next room.
+  return assignments.reduce<MastersRoomReminderAssignment | null>((latest, assignment) => {
+    const startsAt = Date.parse(assignment.startsAt)
+    if (!Number.isFinite(startsAt) || startsAt > now) return latest
+    if (!latest || startsAt > Date.parse(latest.startsAt)) return assignment
+    return latest
+  }, null)
+}
+
+export function mastersRoomReminderScope(assignment: MastersRoomReminderAssignment) {
+  return [assignment.eventId, assignment.entryId, assignment.playDayId].join(":")
+}
+
+export function mastersRoomAssignmentFingerprint(assignment: MastersRoomReminderAssignment) {
+  return JSON.stringify({
+    playDayId: assignment.playDayId,
+    timeSlotId: assignment.timeSlotId,
+    groupLabel: assignment.groupLabel,
+    startsAt: assignment.startsAt,
+    officialPlayDate: assignment.officialPlayDate,
+    dayNumber: assignment.dayNumber,
+    rosterPlayerIds: assignment.roster.map((member) => member.player_id).sort(),
+    ...(assignment.instructions ? { instructions: assignment.instructions } : {}),
+  })
+}
+
+export function shouldAutoOpenMastersRoomReminder(
+  assignment: MastersRoomReminderAssignment,
+  dismissals: MastersRoomReminderDismissals,
+) {
+  return dismissals[mastersRoomReminderScope(assignment)] !== mastersRoomAssignmentFingerprint(assignment)
+}
+
+export function dismissMastersRoomAssignment(
+  assignment: MastersRoomReminderAssignment,
+  dismissals: MastersRoomReminderDismissals,
+) {
+  return {
+    ...dismissals,
+    [mastersRoomReminderScope(assignment)]: mastersRoomAssignmentFingerprint(assignment),
+  }
+}
+
+export function parseMastersRoomReminderDismissals(value: string | null): MastersRoomReminderDismissals {
+  if (!value) return {}
+  try {
+    const parsed: unknown = JSON.parse(value)
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {}
+    return Object.fromEntries(Object.entries(parsed).filter((entry): entry is [string, string] => typeof entry[1] === "string"))
+  } catch {
+    return {}
+  }
+}

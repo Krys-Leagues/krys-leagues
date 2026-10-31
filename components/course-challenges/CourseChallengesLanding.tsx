@@ -1,0 +1,107 @@
+"use client"
+
+import Image from "next/image"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
+import type { CourseChallengeCourse } from "@/lib/courseChallenges/types"
+import CourseChallengesGuide from "./CourseChallengesGuide"
+import CourseChallengeCelebrations from "./CourseChallengeCelebrations"
+import styles from "./course-challenges.module.css"
+import PlayerProfileNavLink from "@/components/PlayerProfileNavLink"
+import DiscordSignInButton from "@/components/auth/DiscordSignInButton"
+
+const INTRO_STORAGE_KEY = "course-challenges-intro-dismissed-v1"
+
+export default function CourseChallengesLanding({ courses, comingSoonCourses }: { courses: CourseChallengeCourse[]; comingSoonCourses: CourseChallengeCourse[] }) {
+  const [showIntro, setShowIntro] = useState(false)
+  const [showRules, setShowRules] = useState(false)
+  const [openingCourse, setOpeningCourse] = useState<string | null>(null)
+  const router = useRouter()
+
+  useEffect(() => {
+    try {
+      // Client storage is intentionally read after hydration so the server and client markup stay stable.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setShowIntro(window.localStorage.getItem(INTRO_STORAGE_KEY) !== "dismissed")
+    } catch {
+      setShowIntro(true)
+    }
+  }, [])
+
+  function dismissIntro() {
+    try {
+      window.localStorage.setItem(INTRO_STORAGE_KEY, "dismissed")
+    } catch {
+      // The guide remains available from Rules / Help if browser storage is unavailable.
+    }
+    setShowIntro(false)
+  }
+
+  function beginCourseOpening(event: React.MouseEvent<HTMLAnchorElement>, slug: string) {
+    event.preventDefault()
+    if (openingCourse) return
+    setOpeningCourse(slug)
+    const delay = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 120 : 900
+    window.setTimeout(() => router.push(`/course-challenges/${slug}?open=1`), delay)
+  }
+
+  return <main className={styles.page}>
+    <div className={styles.shell}>
+      <div className={styles.backLinks}>
+        <Link href="/" className={styles.backLink}>← Krys Leagues</Link>
+        <DiscordSignInButton />
+        <Link href="/our-mission" className={styles.backLink}>Our Mission</Link>
+        <PlayerProfileNavLink className={styles.backLinkButton}>← Player Profile</PlayerProfileNavLink>
+      </div>
+      <h1 id="course-challenges-title" className="sr-only">Course Challenges</h1>
+      <Image
+        className={styles.heroImage}
+        src="/course-challenges/course-challenges-welcome-approved.png"
+        alt="Course Challenges welcome artwork"
+        width={1600}
+        height={900}
+        priority
+      />
+      <CourseChallengeCelebrations />
+      <section className={styles.courseList} aria-label="Available Course Challenges">
+        <h2 className="sr-only">Available courses</h2>
+        {courses.map((course) => <article className={styles.courseCard} data-book-opening={openingCourse === course.slug ? "true" : undefined} key={course.slug}>
+          <div className={styles.courseCardBackdrop} style={course.backgroundImage ? { backgroundImage: `url("${course.backgroundImage}")` } : undefined} aria-hidden="true" />
+          <div className={styles.courseCardContent}>
+            <Link href={`/course-challenges/${course.slug}`} className={styles.courseBookChoice} aria-label={`Choose ${course.name} course book`} aria-busy={openingCourse === course.slug} onClick={(event) => beginCourseOpening(event, course.slug)}>
+              <h2 className={styles.courseNameLink}>{course.name}</h2>
+            </Link>
+            <div className={styles.courseCardActions}><Link href={`/course-challenges/${course.slug}/community`} className={styles.communityLink}>Meet the challengers →</Link></div>
+          </div>
+        </article>)}
+      </section>
+      <section className={styles.comingSoon} aria-label="Coming soon">
+        <h2>COMING SOON</h2>
+        <div className={styles.comingSoonGrid}>
+          <article className={styles.comingSoonBook} aria-label="Widow’s Walkabout coming soon">
+            <span className={styles.comingSoonBookKicker}>COURSE CHALLENGE BOOK</span>
+            <h3>WIDOW&apos;S WALKABOUT</h3>
+            <span className={styles.comingSoonBadge}>COMING SOON</span>
+          </article>
+          {comingSoonCourses.map((course) => <article className={styles.comingSoonBook} aria-label={`${course.name} coming soon`} key={course.slug}>
+            <span className={styles.comingSoonBookKicker}>COURSE CHALLENGE BOOK</span>
+            <h3>{course.name}</h3>
+            <span className={styles.comingSoonBadge}>COMING SOON</span>
+          </article>)}
+        </div>
+      </section>
+      <div className={styles.buttonRow}>
+        <button type="button" className={styles.secondaryButton} onClick={() => setShowRules(true)}>Rules / Help</button>
+      </div>
+    </div>
+    {(showIntro || showRules) && <section className={styles.rulesOverlay} role="dialog" aria-modal="true" aria-labelledby="course-challenges-intro-title">
+      <div className={styles.rulesCard}>
+        <CourseChallengesGuide includeScorecardHelp={showRules} />
+        <div className={styles.buttonRow}>
+          <button type="button" className={styles.primaryButton} onClick={showIntro ? dismissIntro : () => setShowRules(false)}>{showIntro ? "Got it" : "Close"}</button>
+        </div>
+      </div>
+    </section>}
+  </main>
+}

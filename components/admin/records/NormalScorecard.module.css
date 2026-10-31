@@ -1,0 +1,106 @@
+.scorecardScroller {
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.scorecard {
+  width: 100%;
+  min-width: 930px;
+  border-collapse: separate;
+  border-spacing: 3px;
+  table-layout: fixed;
+}
+
+.scorecard th,
+.scorecard td {
+  min-width: 42px;
+  padding: 7px 3px;
+  border: 1px solid rgba(125, 211, 252, .18);
+  border-radius: 8px;
+  background: rgba(2, 6, 23, .58);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.scorecard th:first-child,
+.scorecard td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  min-width: 76px;
+  color: #bae6fd;
+  background: #0b1830;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.scorecard thead th {
+  color: #dbeafe;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.parCell {
+  color: #fde68a;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.scoreInput {
+  box-sizing: border-box;
+  width: 40px;
+  height: 42px;
+  padding: 4px;
+  border: 1px solid rgba(103, 232, 249, .45);
+  border-radius: 8px;
+  color: white;
+  background: rgba(15, 23, 42, .95);
+  text-align: center;
+  font-size: 17px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  appearance: textfield;
+}
+
+.scoreInput:focus {
+  outline: 3px solid rgba(34, 211, 238, .48);
+  outline-offset: 1px;
+  border-color: #67e8f9;
+}
+
+.scoreInput::-webkit-outer-spin-button,
+.scoreInput::-webkit-inner-spin-button {
+  margin: 0;
+  appearance: none;
+}
+
+.scorecardHint {
+  margin-top: 8px;
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+@media (max-width: 700px) {
+  .scorecard {
+    min-width: 760px;
+  }
+
+  .scorecard th,
+  .scorecard td {
+    min-width: 34px;
+    padding: 5px 2px;
+  }
+
+  .scorecard th:first-child,
+  .scorecard td:first-child {
+    min-width: 64px;
+  }
+
+  .scoreInput {
+    width: 34px;
+    height: 38px;
+    font-size: 15px;
+  }
+}

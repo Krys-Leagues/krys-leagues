@@ -1,0 +1,66 @@
+Skip to Main Content
+Kry's Monthlies
+Search
+0 results
+Install App
+About
+nobody
+	
+2025 January
+92/88 players
+COMPLETED
+	
+Overall Leaders - 2025 January
+Pos	Player	League	Courses
+Played	Total
+Strokes	HN1's	Points
+1	POLANECE	Amateur 1	8	-142	17	1,577
+2	Empzurg	Amateur 2	8	-133	10	1,570
+3	Jaynice	Amateur 3	8	-84	8	1,548
+4	DaisyShaw	Pro 2	8	-153	12	1,542
+5	bigja33	Pro 1	8	-148	14	1,494
+6	Fry_Lock	Amateur 3	8	-71	4	1,484
+7	Gobson	Elite	8	-165	15	1,475
+8	El Jorge	Master	8	-182	22	1,452
+9	yankeedude1123	Master	8	-176	23	1,443
+10	stewiestewie	Elite	8	-159	15	1,435
+1 - 10
+Beginner Leaders
+League
+- Select -
+Master
+Elite
+Pro 1
+Pro 2
+Pro 3
+Semi Pro 1
+Beginner
+Welcome
+ Players at risk of relegation
+  Point change since last report.
+ Tourist Trap
+ Tourist Trap Hard
+ Upside Town
+ Upside Town - Hard
+ Journey to the Center of the Earth
+ Center of the Earth - Hard
+ Alfheim
+ Alfheim Hard
+2025 January Courses
+
+
+TTE - Tourist Trap
+TTH - Tourist Trap Hard
+
+
+UTE - Upside Town
+UTH - Upside Town - Hard
+
+
+JCE - Journey to the Center of the Earth
+JCH - Center of the Earth - Hard
+
+
+ALE - Alfheim
+ALH - Alfheim Hard
+Release 1.2 Built with  using Oracle APEX

@@ -1,0 +1,166 @@
+Skip to Main Content
+Kry's Monthlies
+Search
+0 results
+Install App
+About
+nobody
+	
+2026 May
+83/63 players
+COMPLETED
+	
+Overall Leaders - 2026 May
+Pos	Player	League	Courses
+Played	Total
+Strokes	HN1's	Points
+1	mini_G	Pro 1	8	-168	27	1,617
+2	leanin2it	Pro 3	8	-148	19	1,579
+3	KillERBee	Semi Pro 2	8	-53	8	1,568
+3	plucky✌	Pro 2	8	-132	18	1,568
+5	GREATSEER5024	Semi Pro 1	8	-104	14	1,554
+6	IMJOMAMA	Semi Pro 2	8	-44	7	1,537
+7	The Real JB	Pro 2	8	-124	16	1,516
+8	Zanetti	Master	8	-175	26	1,496
+9	WendyW(Wyndemere2020)	Semi Pro 2	8	-24	7	1,487
+10	El Jorge	Master	8	-169	28	1,448
+1 - 10
+Pro 2 Leaders
+League
+- Select -
+Master
+Elite
+Pro 1
+Pro 2
+Pro 3
+Semi Pro 1
+Beginner
+Welcome
+Pos	Player	Courses
+Played	Total
+Strokes	HN1's	Points
+1
+	plucky✌	8	-132	18	1,568
+2
+	The Real JB	8	-124	16	1,516
+3
+	Alyssa38	8	-92	8	1,358
+4
+	SlugJug33	8	-98	11	1,351
+5
+	DMD-Enditnow	8	-104	6	1,336
+6
+	Chipnputt	8	-78	11	1,311
+7
+	Raccoons Whisker	8	-90	9	1,249
+	Master_KP	0			
+	YODA	0			
+1 - 9
+ Players at risk of relegation
+  Point change since last report.
+ Quixote Valley
+#	Player	Score	HN1	Points
+1	plucky✌	-16	2	202
+2	Chipnputt	-16	0	190
+2	Alyssa38	-16	0	190
+4	DMD-Enditnow	-15	0	170
+5	SlugJug33	-14	0	160
+5	The Real JB	-14	0	160
+5	Raccoons Whisker	-14	0	160
+	Master_KP			
+	YODA			
+ Quixote Valley Hard
+#	Player	Score	HN1	Points
+1	Chipnputt	-18	1	201
+2	plucky✌	-18	0	190
+3	The Real JB	-14	2	182
+4	DMD-Enditnow	-14	0	170
+5	Raccoons Whisker	-9	0	160
+6	SlugJug33	-7	0	150
+7	Alyssa38	0	0	140
+	YODA			
+	Master_KP			
+ Atlantis
+#	Player	Score	HN1	Points
+1	plucky✌	-23	4	204
+2	Chipnputt	-22	3	193
+3	The Real JB	-21	2	182
+3	SlugJug33	-21	2	182
+5	DMD-Enditnow	-21	1	161
+6	Alyssa38	-20	2	152
+7	Raccoons Whisker	-19	2	142
+	Master_KP			
+	YODA			
+ Atlantis Hard
+#	Player	Score	HN1	Points
+1	The Real JB	-13	1	201
+2	plucky✌	-12	1	191
+3	SlugJug33	-10	1	181
+4	DMD-Enditnow	-10	0	170
+5	Alyssa38	-8	0	160
+6	Raccoons Whisker	-7	1	151
+7	Chipnputt	2	0	140
+	YODA			
+	Master_KP			
+ Raptor Cliff's
+#	Player	Score	HN1	Points
+1	The Real JB	-20	2	202
+2	plucky✌	-18	3	193
+3	DMD-Enditnow	-17	2	182
+3	Alyssa38	-17	2	182
+5	Chipnputt	-15	3	163
+6	Raccoons Whisker	-15	1	151
+7	SlugJug33	-14	3	143
+	Master_KP			
+	YODA			
+ Raptor Cliff's - Hard
+#	Player	Score	HN1	Points
+1	plucky✌	-11	1	201
+2	Alyssa38	-8	1	191
+2	The Real JB	-8	1	191
+4	DMD-Enditnow	-8	0	170
+5	Raccoons Whisker	-7	2	162
+6	SlugJug33	-2	1	151
+7	Chipnputt	5	0	140
+	Master_KP			
+	YODA			
+ Tokyo
+#	Player	Score	HN1	Points
+1	SlugJug33	-19	3	203
+2	plucky✌	-18	5	195
+2	The Real JB	-18	5	195
+4	Alyssa38	-16	2	172
+4	Raccoons Whisker	-16	2	172
+6	DMD-Enditnow	-15	1	151
+7	Chipnputt	-14	3	143
+	Master_KP			
+	YODA			
+ Tokyo - Hard
+#	Player	Score	HN1	Points
+1	The Real JB	-16	3	203
+2	plucky✌	-16	2	192
+3	SlugJug33	-11	1	181
+4	Alyssa38	-7	1	171
+5	DMD-Enditnow	-4	2	162
+6	Raccoons Whisker	-3	1	151
+7	Chipnputt	0	1	141
+	YODA			
+	Master_KP			
+2026 May Courses
+
+
+QVE - Quixote Valley
+QVH - Quixote Valley Hard
+
+
+ATE - Atlantis
+ATH - Atlantis Hard
+
+
+RCE - Raptor Cliff's
+RCH - Raptor Cliff's - Hard
+
+
+TOE - Tokyo
+TOH - Tokyo - Hard
+Release 1.2 Built with  using Oracle APEX

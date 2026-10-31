@@ -1,0 +1,67 @@
+.page { min-height: 100vh; padding: 18px clamp(8px, 2vw, 30px) 44px; color: #fff4f8; background: radial-gradient(circle at 50% 0, #421023, #08080a 46%, #020304); }
+.shell { width: min(1540px, 100%); margin: auto; }
+.trackerNav { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.backLink { color: #ffb2d0; font-weight: 850; text-decoration: none; }
+.closeTracker { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 9px 14px; border: 1px solid #f472b6; border-radius: 999px; color: #fff; background: #581c3d; box-shadow: 0 8px 24px #0008; font-size: .78rem; font-weight: 950; letter-spacing: .035em; text-decoration: none; }
+.closeTracker span { font-size: 1.35rem; line-height: .7; }
+.backLink:hover, .backLink:focus-visible, .closeTracker:hover, .closeTracker:focus-visible { color: #fff; outline: 2px solid #ff70aa; outline-offset: 3px; }
+.testBanner { padding: 9px; color: #fff7ed; background: #7c2d12; text-align: center; font-weight: 900; }
+.ornateBoard { overflow: hidden; border: 2px solid #d2145b; border-radius: 14px; background: #030608; box-shadow: 0 24px 80px #000c, 0 0 28px #cc14545c; }
+.artHeader, .artFooter { width: 100%; background-image: url("/masters/masters-live-scoreboard-reference.png"); background-size: 100% auto; background-repeat: no-repeat; }
+.artHeader { aspect-ratio: 1676 / 304; background-position: top center; border-bottom: 2px solid #df145d; }
+.artFooter { aspect-ratio: 1676 / 245; background-position: bottom center; border-top: 2px solid #df145d; }
+.liveHeader { display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 14px clamp(12px, 3vw, 32px); border-bottom: 1px solid #7c1641; background: linear-gradient(90deg, #060b0e, #220813 55%, #06100e); }
+.liveHeader p, .liveHeader h1 { margin: 0; }
+.liveHeader p { color: #fa77aa; font-size: .72rem; font-weight: 900; letter-spacing: .18em; }
+.liveHeader h1 { margin-top: 3px; font-family: Georgia, serif; font-size: clamp(1.25rem, 3.3vw, 2.55rem); }
+.liveHeader > span { display: flex; align-items: center; gap: 6px; color: #ffd0e2; font-size: .78rem; font-weight: 950; }
+.liveHeader i { width: 8px; height: 8px; border-radius: 50%; background: #ff2e7e; box-shadow: 0 0 12px #ff2e7e; }
+.legend { display: flex; justify-content: space-between; gap: 12px; padding: 9px 15px; color: #d9c8cf; background: #0b0b0e; font-size: .74rem; }
+.legend p { margin: 0; }
+.legend p:last-child { white-space: nowrap; }
+.verifiedDot, .provisionalDot { display: inline-block; width: 8px; height: 8px; margin: 0 4px 0 10px; border-radius: 50%; }
+.verifiedDot { background: #58e7ad; }
+.provisionalDot { background: #ff4f93; }
+.tableScroll { max-height: 68vh; overflow: auto; scrollbar-color: #d21962 #0a0b0d; }
+.tableScroll table { width: 100%; min-width: 860px; border-collapse: collapse; table-layout: fixed; }
+.tableScroll thead { position: sticky; top: 0; z-index: 2; background: #090b0d; }
+.tableScroll th, .tableScroll td { padding: 10px 8px; border: 1px solid #a91450; text-align: center; }
+.tableScroll thead th { color: #ff82b3; font-family: Georgia, serif; font-size: clamp(.7rem, 1.2vw, .9rem); letter-spacing: .045em; }
+.tableScroll thead th:nth-child(1) { width: 8%; }
+.tableScroll thead th:nth-child(2) { width: 28%; text-align: left; }
+.tableScroll thead small { color: #f8bdd3; font-size: .62rem; }
+.tableScroll tbody tr { background: linear-gradient(90deg, #03080a, #08090b); }
+.tableScroll tbody tr:nth-child(even) { background: linear-gradient(90deg, #080c0d, #100a0e); }
+.tableScroll tbody tr[data-provisional] { box-shadow: inset 4px 0 #ff4f93; }
+.tableScroll tbody th { padding: 0; text-align: left; }
+.tableScroll tbody th button { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; min-height: 42px; padding: 8px 11px; border: 0; color: #fff; background: transparent; cursor: pointer; font: inherit; font-weight: 850; text-align: left; }
+.tableScroll tbody th button:hover, .tableScroll tbody th button:focus-visible { color: #ffb7d2; outline: 2px solid #ff70aa; outline-offset: -3px; }
+.tableScroll tbody th span { padding: 3px 5px; border: 1px solid #ff4f93; border-radius: 4px; color: #ff9ec3; font-size: .55rem; letter-spacing: .05em; }
+.score, .provisionalScore { font-size: 1rem; font-weight: 950; }
+.score { color: #a7f3d0; }
+.provisionalScore { color: #ff8ab7; }
+.provisionalScore small { margin-left: 4px; font-size: .54rem; vertical-align: top; }
+.overall { background: #160710; }
+.fieldNote { margin: 12px 0 0; color: #c8b7be; font-size: .8rem; text-align: center; }
+.loading { min-height: 100vh; display: grid; place-items: center; color: white; background: #050608; }
+.backdrop { position: fixed; z-index: 100; inset: 0; display: grid; place-items: center; padding: 15px; background: #000c; }
+.detail { width: min(760px, 100%); max-height: 86vh; overflow: auto; padding: clamp(18px, 4vw, 34px); border: 2px solid #dc1c66; border-radius: 14px; background: linear-gradient(140deg, #07120f, #220813); box-shadow: 0 25px 90px #000; }
+.detail > button { float: right; padding: 7px 12px; border: 1px solid #f472b6; border-radius: 7px; color: white; background: #581c3d; cursor: pointer; font-weight: 900; }
+.detail > p { margin: 0; color: #f472b6; font-size: .72rem; font-weight: 900; letter-spacing: .16em; }
+.detail h2 { margin: 6px 0 18px; font-family: Georgia, serif; font-size: 2rem; }
+.detailRounds { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.detailRounds article { display: grid; gap: 5px; padding: 12px; border: 1px solid #623147; border-radius: 8px; text-align: center; background: #08090b; }
+.detailRounds span, .detailRounds small { color: #c9b8bf; font-size: .65rem; }
+.detailRounds strong { color: #ff9ec3; font-size: 1.5rem; }
+.detailOverall { border-color: #f1bf4f !important; }
+@media (max-width: 700px) {
+  .page { padding: 8px 6px 76px; }
+  .trackerNav { align-items: stretch; }
+  .backLink { display: flex; align-items: center; padding: 8px 4px; font-size: .78rem; }
+  .closeTracker { min-height: 48px; padding-inline: 12px; font-size: .7rem; }
+  .liveHeader { align-items: flex-start; }
+  .legend { display: grid; }
+  .tableScroll { max-height: 62vh; }
+  .detailRounds { grid-template-columns: repeat(2, 1fr); }
+  .detailOverall { grid-column: 1 / -1; }
+}

@@ -1,0 +1,320 @@
+import assert from "node:assert/strict"
+import { readFile } from "node:fs/promises"
+import test from "node:test"
+
+import {
+  matchDiscordControlDivisions,
+  prepareMatchDiscordSnapshot,
+  runMatchDiscordSendExclusive,
+} from "./matchDiscord.ts"
+import type { PublicMatchPayload } from "./publicMatch.ts"
+
+const payload: PublicMatchPayload = {
+  current: {
+    season_number: 58,
+    division_count: 2,
+    standings: [
+      { season_number: 58, division_number: 1, rank: null, starting_rank: 2, player_screen_name: "Beta", played: 0, wins: 0, losses: 0, draws: 0, points: 0, holes_won: 0 },
+      { season_number: 58, division_number: 1, rank: null, starting_rank: 1, player_screen_name: "Alpha", played: 0, wins: 0, losses: 0, draws: 0, points: 0, holes_won: 0 },
+      { season_number: 58, division_number: 2, rank: 1, starting_rank: 3, player_screen_name: "Gamma", played: 1, wins: 1, losses: 0, draws: 0, points: 3, holes_won: 8 },
+    ],
+    schedule: [
+      { season_number: 58, division_number: 2, game_number: 1, player1_display_name: "Gamma", player2_display_name: "Delta", course: "Course B" },
+      { season_number: 58, division_number: 1, game_number: 2, player1_display_name: "Beta", player2_display_name: "Alpha", course: "Course A2" },
+      { season_number: 58, division_number: 1, game_number: 1, player1_display_name: "Alpha", player2_display_name: "Beta", course: "Course A1" },
+    ],
+  },
+  historical_seasons: [],
+  historical_standings: [],
+  historical_matchups: [],
+}
+
+const season58ControlPayload: PublicMatchPayload = {
+  ...payload,
+  current: {
+    ...payload.current,
+    division_count: 4,
+    standings: [1, 2, 3, 4].map((divisionNumber) => ({
+      season_number: 58,
+      division_number: divisionNumber,
+      rank: null,
+      starting_rank: 1,
+      player_screen_name: `D${divisionNumber} Player`,
+      played: 0,
+      wins: 0,
+      losses: 0,
+      draws: 0,
+      points: 0,
+      holes_won: 0,
+    })),
+    schedule: [
+      ...payload.current.schedule,
+      {
+        season_number: 58,
+        division_number: 5,
+        game_number: 1,
+        player1_display_name: "Schedule Only One",
+        player2_display_name: "Schedule Only Two",
+        course: "Schedule Only Course",
+      },
+    ],
+  },
+}
+
+test("authoritative current roster controls ignore legacy is_active and schedule-only divisions", () => {
+  const legacySeason = { season_number: 58, is_active: false }
+  assert.deepEqual(
+    matchDiscordControlDivisions(season58ControlPayload, legacySeason.season_number),
+    [1, 2, 3, 4],
+  )
+})
+
+test("past Match seasons never receive Discord controls", () => {
+  assert.deepEqual(matchDiscordControlDivisions(season58ControlPayload, 57), [])
+})
+
+test("an authoritative future D5 roster exposes the D5 control", () => {
+  const futureD5: PublicMatchPayload = {
+    ...season58ControlPayload,
+    current: {
+      ...season58ControlPayload.current,
+      season_number: 59,
+      division_count: 5,
+    },
+  }
+  assert.deepEqual(matchDiscordControlDivisions(futureD5, 59), [1, 2, 3, 4, 5])
+})
+
+test("snapshot contains only the requested current Match division", () => {
+  const snapshot = prepareMatchDiscordSnapshot(payload, 1, [
+    {
+      division_number: 1,
+      game_number: 1,
+      player1_display_name: "Alpha",
+      player2_display_name: "Beta",
+      course: "Course A1",
+      player1_holes_won: 7,
+      player2_holes_won: 4,
+    },
+  ])
+  assert.equal(snapshot.season_number, 58)
+  assert.equal(snapshot.division_number, 1)
+  assert.deepEqual(snapshot.standings.map((row) => row.player_screen_name), ["Alpha", "Beta"])
+  assert.deepEqual(snapshot.assignments.map((row) => row.game_number), [1, 2])
+  assert.ok(snapshot.standings.every((row) => row.division_number === 1))
+  assert.ok(snapshot.assignments.every((row) => row.division_number === 1))
+  assert.deepEqual(snapshot.assignments[0], {
+    ...payload.current.schedule[2],
+    player1_holes_won: 7,
+    player2_holes_won: 4,
+    completed: true,
+  })
+  assert.equal(snapshot.assignments[1]?.completed, false)
+  assert.equal(snapshot.assignments[1]?.player1_holes_won, null)
+  assert.equal(snapshot.assignments[1]?.player2_holes_won, null)
+})
+
+test("snapshot reuses approved preseason and live rank behavior", () => {
+  const preseason = prepareMatchDiscordSnapshot(payload, 1)
+  assert.deepEqual(preseason.standings.map((row) => row.displayed_rank), [1, 2])
+
+  const live = prepareMatchDiscordSnapshot(payload, 2)
+  assert.equal(live.standings[0]?.displayed_rank, 1)
+})
+
+test("server guard rejects a duplicate in-flight send but permits a later resend", async () => {
+  let releaseFirst = () => {}
+  const first = runMatchDiscordSendExclusive("season-58-d1", () => new Promise<number>((resolve) => {
+    releaseFirst = () => resolve(1)
+  }))
+  const duplicate = await runMatchDiscordSendExclusive("season-58-d1", async () => 2)
+  assert.deepEqual(duplicate, { status: "in-flight" })
+  releaseFirst()
+  assert.deepEqual(await first, { status: "completed", value: 1 })
+  assert.deepEqual(await runMatchDiscordSendExclusive("season-58-d1", async () => 3), { status: "completed", value: 3 })
+})
+
+test("Discord route is admin protected, reads authoritative public Match data, and returns safe fields", async () => {
+  const source = await readFile("app/api/admin/match/discord/route.ts", "utf8")
+  const auth = source.indexOf("await authorizeSiteAdminMutation()")
+  const denial = source.indexOf("return authorization.response")
+  const body = source.indexOf("await request.json()")
+  assert.ok(auth >= 0 && denial > auth && body > denial)
+  assert.match(source, /\.rpc\("get_public_match_play"\)/)
+  assert.doesNotMatch(source, /\.from\(/)
+  assert.doesNotMatch(source, /webhook/i)
+  assert.match(source, /\{ divisionNumber\?: unknown \}/)
+  assert.doesNotMatch(source, /body[^\n]*(?:channel|token|apiUrl)/i)
+  assert.match(source, /seasonNumber:/)
+  assert.match(source, /divisionNumber:/)
+  const successResponse = source.slice(source.indexOf("return NextResponse.json({\n    success: true"))
+  assert.doesNotMatch(successResponse, /botToken|channelId|Authorization/)
+})
+
+test("Discord bot token and division channels remain server-only", async () => {
+  const serverSource = await readFile("lib/matchDiscordServer.ts", "utf8")
+  const routeSource = await readFile("app/api/admin/match/discord/route.ts", "utf8")
+  const clientSource = await readFile("app/admin/match/results/page.tsx", "utf8")
+  for (let division = 1; division <= 5; division += 1) {
+    assert.match(
+      serverSource,
+      new RegExp(`${division}: "DISCORD_MATCH_D${division}_CHANNEL_ID"`),
+    )
+  }
+  assert.match(serverSource, /process\.env\.DISCORD_BOT_TOKEN/)
+  assert.match(serverSource, /Authorization: `Bot \$\{options\.botToken\}`/)
+  assert.match(serverSource, /\/channels\/\$\{encodeURIComponent\(options\.channelId\)\}\/messages/)
+  assert.doesNotMatch(serverSource, /webhook/i)
+  assert.doesNotMatch(routeSource, /process\.env|discord\.com\/api/)
+  assert.doesNotMatch(clientSource, /DISCORD_BOT_TOKEN|CHANNEL_ID|discord\.com\/api|webhook/i)
+  assert.match(clientSource, /supabase\.rpc\("get_public_match_play"\)/)
+  assert.match(clientSource, /authoritativeCurrentSeasonId/)
+  assert.doesNotMatch(clientSource, /selectedSeason\?\.is_active/)
+  assert.match(clientSource, /matchDiscordControlDivisions\(publicMatch, selectedSeason\?\.season_number \?\? null\)/)
+  assert.match(clientSource, /discordDivisions\.map\(\(division\) =>/)
+  assert.match(clientSource, /onClick=\{\(\) => void handleDiscordSend\(division\)\}/)
+  assert.doesNotMatch(clientSource, /useEffect\(\(\) => \{\s*void handleDiscordSend/)
+  const resultSaveFlow = clientSource.slice(
+    clientSource.indexOf("async function handleSubmit"),
+    clientSource.indexOf("async function handleDeleteResult"),
+  )
+  assert.doesNotMatch(resultSaveFlow, /handleDiscordSend|api\/admin\/match\/discord/)
+})
+
+test("admin Discord result detail is loaded server-side without changing public Match exposure", async () => {
+  const serverSource = await readFile("lib/matchDiscordServer.ts", "utf8")
+  const routeSource = await readFile("app/api/admin/match/discord/route.ts", "utf8")
+  const publicPageSource = await readFile("app/match-play/page.tsx", "utf8")
+
+  assert.match(serverSource, /\.from\("match_roster_versions"\)/)
+  assert.match(serverSource, /\.from\("schedule"\)/)
+  assert.match(serverSource, /\.from\("results"\)/)
+  assert.match(serverSource, /schedule_id, player1_hw, player2_hw/)
+  assert.match(routeSource, /loadMatchDiscordAssignmentResults\(/)
+  assert.match(routeSource, /prepareMatchDiscordSnapshot\(publicMatch, divisionNumber, assignmentResults\)/)
+  assert.doesNotMatch(publicPageSource, /from\("results"\)|player1_holes_won|player2_holes_won/)
+})
+
+test("Match manual-send feature contains no legacy webhook configuration", async () => {
+  const legacyVariablePrefix = ["DISCORD", "WEBHOOK", "MATCH"].join("_")
+  const files = [
+    "app/api/admin/match/discord/route.ts",
+    "app/admin/match/results/page.tsx",
+    "lib/matchDiscord.ts",
+    "lib/matchDiscordServer.ts",
+    "lib/matchDiscordSnapshot.tsx",
+  ]
+  for (const file of files) {
+    const source = await readFile(file, "utf8")
+    assert.doesNotMatch(source, new RegExp(legacyVariablePrefix))
+    assert.doesNotMatch(source, /webhookUrl|getMatchDiscordWebhook/i)
+  }
+})
+
+test("validated D1 can resolve only the D1 server channel configuration", async () => {
+  const serverSource = await readFile("lib/matchDiscordServer.ts", "utf8")
+  const routeSource = await readFile("app/api/admin/match/discord/route.ts", "utf8")
+  assert.match(serverSource, /1: "DISCORD_MATCH_D1_CHANNEL_ID"/)
+  assert.match(serverSource, /process\.env\[MATCH_DISCORD_CHANNELS\[divisionNumber\]\]/)
+  assert.match(routeSource, /getMatchDiscordChannelId\(divisionNumber\)/)
+  assert.doesNotMatch(routeSource, /channelId[^\n]*body|body[^\n]*channelId/)
+})
+
+test("Discord transport preserves PNG attachment metadata and exact API failures", async () => {
+  const serverSource = await readFile("lib/matchDiscordServer.ts", "utf8")
+  assert.match(serverSource, /new Blob\(\[options\.png\], \{ type: "image\/png" \}\)/)
+  assert.match(serverSource, /form\.append\(\s*"files\[0\]"/)
+  assert.match(serverSource, /match-season-\$\{options\.snapshot\.season_number\}-division-\$\{options\.snapshot\.division_number\}\.png/)
+  assert.match(serverSource, /const responseBody = await response\.text\(\)/)
+  assert.match(serverSource, /Discord returned status \$\{response\.status\}: \$\{detail\}/)
+  assert.match(serverSource, /MATCH_DISCORD_IMAGE_EMPTY/)
+  assert.match(serverSource, /MATCH_DISCORD_IMAGE_INVALID_PNG/)
+  assert.match(serverSource, /Discord returned success without a message id/)
+})
+
+test("public Match page has no Discord controls or send behavior", async () => {
+  const source = await readFile("app/match-play/page.tsx", "utf8")
+  assert.doesNotMatch(source, /SEND D\d TO DISCORD|api\/admin\/match\/discord|DISCORD_WEBHOOK/)
+})
+
+test("snapshot source contains required presentation fields and no private identifiers", async () => {
+  const source = await readFile("lib/matchDiscordSnapshot.tsx", "utf8")
+  assert.match(source, /MATCH DIVISION/)
+  assert.match(source, /COURSE ASSIGNMENTS/)
+  assert.match(source, /CURRENT STANDINGS/)
+  assert.match(source, /RANK/)
+  assert.match(source, /PLAYED/)
+  assert.match(source, /WINS/)
+  assert.match(source, /LOSSES/)
+  assert.match(source, /DRAWS/)
+  assert.match(source, /POINTS/)
+  assert.match(source, /HW/)
+  assert.match(source, /COMPLETED/)
+  assert.match(source, /NOT PLAYED/)
+  assert.match(source, /player1_holes_won/)
+  assert.match(source, /player2_holes_won/)
+  assert.match(source, /justifyContent: "center"[\s\S]*?MATCH DIVISION/)
+  assert.doesNotMatch(source, />P<|>W<|>L<|>D</)
+  assert.doesNotMatch(
+    source,
+    /snapshot\.(?:email|auth_user_id|player_id|discord_id|admin_notes|private_metadata)/i,
+  )
+})
+
+test("completed Match winners alone receive green name and HW styling", async () => {
+  const source = await readFile("lib/matchDiscordSnapshot.tsx", "utf8")
+
+  assert.match(source, /const winnerGreen = "#4ade80"/)
+  assert.match(source, /assignment\.completed[\s\S]*assignment\.player1_holes_won > assignment\.player2_holes_won/)
+  assert.match(source, /assignment\.completed[\s\S]*assignment\.player2_holes_won > assignment\.player1_holes_won/)
+  assert.match(source, /color: player1Won \? winnerGreen : "#f8fafc"/)
+  assert.match(source, /color: player2Won \? winnerGreen : "#f8fafc"/)
+  assert.doesNotMatch(source, />=/)
+})
+
+test("long player names keep protected columns without truncation", async () => {
+  const source = await readFile("lib/matchDiscordSnapshot.tsx", "utf8")
+  const longNamePayload: PublicMatchPayload = {
+    ...payload,
+    current: {
+      ...payload.current,
+      standings: [
+        { ...payload.current.standings[0]!, player_screen_name: "WILMA_FINGERDOO" },
+        { ...payload.current.standings[1]!, player_screen_name: "PRINCESS_BANKSHOT" },
+      ],
+      schedule: [{
+        season_number: 58,
+        division_number: 1,
+        game_number: 1,
+        player1_display_name: "WILMA_FINGERDOO",
+        player2_display_name: "PRINCESS_BANKSHOT",
+        course: "Quixote Valley Easy",
+      }],
+    },
+  }
+  const snapshot = prepareMatchDiscordSnapshot(longNamePayload, 1, [{
+    division_number: 1,
+    game_number: 1,
+    player1_display_name: "WILMA_FINGERDOO",
+    player2_display_name: "PRINCESS_BANKSHOT",
+    course: "Quixote Valley Easy",
+    player1_holes_won: 7,
+    player2_holes_won: 4,
+  }])
+
+  assert.equal(snapshot.assignments[0]?.player1_display_name, "WILMA_FINGERDOO")
+  assert.equal(snapshot.assignments[0]?.player2_display_name, "PRINCESS_BANKSHOT")
+  assert.equal(snapshot.assignments[0]?.player1_holes_won, 7)
+  assert.equal(snapshot.assignments[0]?.player2_holes_won, 4)
+  assert.equal(snapshot.assignments[0]?.course, "Quixote Valley Easy")
+
+  assert.match(source, /const playerNameStyle/)
+  assert.match(source, /cell\("18%", "flex-start"\)/)
+  assert.match(source, /fontSize: \(name\?\.length \|\| 0\) > 18 \? 14 : \(name\?\.length \|\| 0\) > 13 \? 16 : 18/)
+  assert.match(source, /wordBreak: "break-all"/)
+  assert.match(source, /cell\("20%", "flex-start"\)[\s\S]*?assignment\.course/)
+  assert.match(source, /cell\("14%"\)[\s\S]*?COMPLETED[\s\S]*?NOT PLAYED/)
+  assert.doesNotMatch(source, /textOverflow|ellipsis|slice\(|substring\(/)
+  assert.match(source, /playerNameStyle\(assignment\.player1_display_name, player1Won\)/)
+  assert.match(source, /playerNameStyle\(assignment\.player2_display_name, player2Won\)/)
+})

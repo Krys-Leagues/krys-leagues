@@ -1,0 +1,146 @@
+Skip to Main Content
+Kry's Monthlies
+Search
+0 results
+Install App
+About
+nobody
+	
+2026 May
+83/63 players
+COMPLETED
+	
+Overall Leaders - 2026 May
+Pos	Player	League	Courses
+Played	Total
+Strokes	HN1's	Points
+1	mini_G	Pro 1	8	-168	27	1,617
+2	leanin2it	Pro 3	8	-148	19	1,579
+3	KillERBee	Semi Pro 2	8	-53	8	1,568
+3	plucky✌	Pro 2	8	-132	18	1,568
+5	GREATSEER5024	Semi Pro 1	8	-104	14	1,554
+6	IMJOMAMA	Semi Pro 2	8	-44	7	1,537
+7	The Real JB	Pro 2	8	-124	16	1,516
+8	Zanetti	Master	8	-175	26	1,496
+9	WendyW(Wyndemere2020)	Semi Pro 2	8	-24	7	1,487
+10	El Jorge	Master	8	-169	28	1,448
+1 - 10
+Semi Pro 3 Leaders
+League
+- Select -
+Master
+Elite
+Pro 1
+Pro 2
+Pro 3
+Semi Pro 1
+Beginner
+Welcome
+115
+Pos	Player	Courses
+Played	Total
+Strokes	HN1's	Points
+1
+	Bethann	5	-23	3	963
+2
+	Maximus_PrimeIV	3	-50	5	605
+3
+	Gatorsfan89	1	-5	2	202
+3
+	sarahloo1971	1	-16	2	202
+	HaphazardOak007	0			
+	ANDOFGOD	0			
+	Fry_Lock	0			
+1 - 7
+ Players at risk of relegation
+  Point change since last report.
+ Quixote Valley
+#	Player	Score	HN1	Points
+1	Maximus_PrimeIV	-11	0	200
+2	Bethann	-6	0	190
+	Gatorsfan89			
+	HaphazardOak007			
+	ANDOFGOD			
+	Fry_Lock			
+	sarahloo1971			
+ Quixote Valley Hard
+#	Player	Score	HN1	Points
+1	sarahloo1971	-16	2	202
+	Bethann			
+	Gatorsfan89			
+	ANDOFGOD			
+	HaphazardOak007			
+	Maximus_PrimeIV			
+	Fry_Lock			
+ Atlantis
+#	Player	Score	HN1	Points
+1	Maximus_PrimeIV	-20	2	202
+2	Bethann	-17	2	192
+	Gatorsfan89			
+	ANDOFGOD			
+	HaphazardOak007			
+	sarahloo1971			
+	Fry_Lock			
+ Atlantis Hard
+#	Player	Score	HN1	Points
+1	Maximus_PrimeIV	-19	3	203
+2	Bethann	1	1	191
+	Gatorsfan89			
+	HaphazardOak007			
+	ANDOFGOD			
+	Fry_Lock			
+	sarahloo1971			
+ Raptor Cliff's
+#	Player	Score	HN1	Points
+	Bethann			
+	Fry_Lock			
+	Maximus_PrimeIV			
+	HaphazardOak007			
+	ANDOFGOD			
+	Gatorsfan89			
+	sarahloo1971			
+ Raptor Cliff's - Hard
+#	Player	Score	HN1	Points
+	Fry_Lock			
+	sarahloo1971			
+	Bethann			
+	HaphazardOak007			
+	Gatorsfan89			
+	ANDOFGOD			
+	Maximus_PrimeIV			
+ Tokyo
+#	Player	Score	HN1	Points
+1	Bethann	-6	0	200
+	Fry_Lock			
+	HaphazardOak007			
+	Gatorsfan89			
+	ANDOFGOD			
+	sarahloo1971			
+	Maximus_PrimeIV			
+ Tokyo - Hard
+#	Player	Score	HN1	Points
+1	Gatorsfan89	-5	2	202
+2	Bethann	5	0	190
+	ANDOFGOD			
+	HaphazardOak007			
+	sarahloo1971			
+	Maximus_PrimeIV			
+	Fry_Lock			
+2026 May Courses
+
+
+QVE - Quixote Valley
+QVH - Quixote Valley Hard
+
+
+ATE - Atlantis
+ATH - Atlantis Hard
+
+
+RCE - Raptor Cliff's
+RCH - Raptor Cliff's - Hard
+
+
+TOE - Tokyo
+TOH - Tokyo - Hard
+Release 1.2 Built with  using Oracle APEX

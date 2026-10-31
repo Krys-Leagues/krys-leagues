@@ -1,0 +1,72 @@
+import assert from "node:assert/strict"
+import test from "node:test"
+import { getAuthenticatedDiscordId, getAuthenticatedDiscordName, getDiscordPlayerLoginDestination } from "./discordPlayerLogin.ts"
+
+const canonicalId = "11111111-1111-1111-1111-111111111111"
+
+test("an exact resolved Discord identity reaches the canonical player's destination", () => {
+  assert.equal(getDiscordPlayerLoginDestination({
+    resolution_status: "matched",
+    canonical_player_id: canonicalId,
+  }, null), "/player-dashboard")
+})
+
+test("repeated resolution of one Discord identity remains idempotent", () => {
+  const resolution = { resolution_status: "matched" as const, canonical_player_id: canonicalId }
+  assert.deepEqual(Array.from({ length: 3 }, () => getDiscordPlayerLoginDestination(resolution, null)), [
+    "/player-dashboard",
+    "/player-dashboard",
+    "/player-dashboard",
+  ])
+})
+
+test("a no-match identity reaches only the approved onboarding path", () => {
+  const resolution = { resolution_status: "no_match" as const, canonical_player_id: null }
+  assert.equal(getDiscordPlayerLoginDestination(resolution, "/register?league=match"), "/register?league=match")
+  assert.equal(getDiscordPlayerLoginDestination(resolution, "/majors/example"), "/join")
+})
+
+test("an unmatched prelaunch login remains at the testing boundary", () => {
+  const resolution = { resolution_status: "no_match" as const, canonical_player_id: null }
+  assert.equal(
+    getDiscordPlayerLoginDestination(resolution, "/testing-access?next=%2Fplayers"),
+    "/testing-access?next=%2Fplayers",
+  )
+})
+
+test("conflicting or malformed identity evidence cannot select a player", () => {
+  assert.equal(getDiscordPlayerLoginDestination({ resolution_status: "conflict", canonical_player_id: null }, null), null)
+  assert.equal(getDiscordPlayerLoginDestination({ resolution_status: "matched", canonical_player_id: null }, null), null)
+  assert.equal(getDiscordPlayerLoginDestination(null, null), null)
+})
+
+test("Discord display names and screen names are not login inputs", () => {
+  assert.deepEqual(Object.keys({ resolution_status: "matched", canonical_player_id: canonicalId }).sort(), [
+    "canonical_player_id",
+    "resolution_status",
+  ])
+})
+
+test("Discord snowflakes remain strings and never fall back to the Supabase user UUID", () => {
+  const snowflake = "123456789012345678"
+  assert.equal(getAuthenticatedDiscordId({ identities: [{
+    provider: "discord",
+    identity_data: { provider_id: snowflake },
+  }] }), snowflake)
+  assert.equal(getAuthenticatedDiscordId({ identities: [{
+    provider: "email",
+    identity_data: { provider_id: "not-discord" },
+  }] }), "")
+})
+
+test("new-player Masters flow can use the authenticated Discord display name", () => {
+  assert.equal(getAuthenticatedDiscordName({
+    user_metadata: { global_name: "New Golfer", preferred_username: "new_golfer" },
+    identities: [{ provider: "discord", identity_data: { provider_id: "123" } }],
+  }), "New Golfer")
+  assert.equal(getAuthenticatedDiscordName({
+    user_metadata: { preferred_username: "new_golfer" },
+    identities: [{ provider: "discord", identity_data: { username: "discord_user" } }],
+  }), "new_golfer")
+  assert.equal(getAuthenticatedDiscordName({ user_metadata: {}, identities: [] }), "")
+})

@@ -1,0 +1,5 @@
+label	admin_order	public_source_id	status	evidence
+Semi Pro 4	45	UNRESOLVED	UNKNOWN	Admin Leagues grid exposes order 45 only; no source-ID column or public selector value; no guessed ID tested
+Amateur 1	50	UNRESOLVED	UNKNOWN	Admin Leagues grid exposes order 50 only; no source-ID column or public selector value; no guessed ID tested
+Amateur 2	60	UNRESOLVED	UNKNOWN	Admin Leagues grid exposes order 60 only; no source-ID column or public selector value; no guessed ID tested
+Amateur 3	70	UNRESOLVED	UNKNOWN	Admin Leagues grid exposes order 70 only; no source-ID column or public selector value; no guessed ID tested

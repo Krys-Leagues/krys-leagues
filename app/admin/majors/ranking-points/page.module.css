@@ -1,0 +1,31 @@
+.page { min-height: 100vh; padding: 18px clamp(12px, 3vw, 40px) 70px; color: #fff4f8; background: radial-gradient(circle at 50% 0, #421023, #08080a 46%, #020304); }
+.shell { width: min(1080px, 100%); margin: auto; }
+.nav, .sectionHeading { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+.nav { margin-bottom: 26px; }
+.back { color: #ffb2d0; font-size: .78rem; font-weight: 900; letter-spacing: .06em; text-decoration: none; }
+.header { margin-bottom: 22px; }
+.header h1, .explanation h2, .schedule h2 { margin: 0; font-family: Georgia, serif; }
+.header h1 { font-size: clamp(1.6rem, 4vw, 2.8rem); }
+.eyebrow { margin: 0 0 7px; color: #fa77aa; font-size: .68rem; font-weight: 950; letter-spacing: .18em; }
+.intro { max-width: 720px; margin: 10px 0 0; color: #d9c8cf; line-height: 1.6; }
+.explanation, .schedule { border: 1px solid #7c1641; border-radius: 14px; background: #030608; box-shadow: 0 18px 50px #0008; }
+.explanation { padding: 20px; background: linear-gradient(100deg, #090b0d, #220813 55%, #06100e); }
+.explanation ul { display: grid; gap: 8px; margin: 14px 0 0; padding-left: 20px; color: #d9c8cf; line-height: 1.5; }
+.schedule { margin-top: 18px; overflow: hidden; }
+.sectionHeading { padding: 17px 20px; border-bottom: 1px solid #7c1641; background: linear-gradient(90deg, #060b0e, #220813 55%, #06100e); }
+.sectionHeading h2 { font-size: clamp(1.1rem, 2vw, 1.65rem); }
+.sectionHeading > span { color: #ffd0e2; font-size: .74rem; font-weight: 950; }
+.tableScroll { overflow-x: auto; }
+.table { width: 100%; border-collapse: collapse; }
+.caption { padding: 14px 20px 8px; color: #c9b8bf; text-align: left; font-size: .82rem; }
+.table th, .table td { padding: 10px 20px; border-top: 1px solid #6f183e; text-align: left; }
+.table thead th { color: #ff82b3; font-family: Georgia, serif; font-size: .73rem; letter-spacing: .06em; }
+.table tbody tr:nth-child(even) { background: #100a0e; }
+.table tbody th { color: #ffd0e2; font-weight: 900; }
+.table tbody td { color: #a7f3d0; font-weight: 900; }
+@media (max-width: 520px) {
+  .page { padding-inline: 8px; }
+  .explanation { padding: 16px; }
+  .sectionHeading { padding-inline: 16px; }
+  .table th, .table td { padding-inline: 16px; }
+}
