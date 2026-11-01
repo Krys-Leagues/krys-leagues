@@ -24,6 +24,11 @@ export async function proxy(request: NextRequest) {
 
   if (pathname === "/access-denied") return session.response
 
+  // The Masters historical board is a presentation-only recovery surface. On Vercel,
+  // keep it behind Deployment Protection and expose it only on Preview deployments;
+  // production continues through the normal feature-access boundary.
+  if (pathname === "/masters/results/preview" && process.env.VERCEL_ENV === "preview") return session.response
+
   if (pathname === "/admin" || pathname.startsWith("/admin/")) {
     if (!session.user) {
       if (pathname === "/admin") return session.response
