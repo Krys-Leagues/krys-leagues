@@ -1,0 +1,282 @@
+{
+  "workbook": "PYP",
+  "spreadsheetId": "1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw",
+  "url": "https://docs.google.com/spreadsheets/d/1l-FgF1TiEp2oVGihLZlb2SHJTB6mioEcuB6hxGDGbzw/edit",
+  "historicalTabs": [
+    "S1",
+    "S2",
+    "S3",
+    "S4",
+    "s5",
+    "S6",
+    "S7",
+    "s8",
+    "s9",
+    "s10",
+    "11",
+    "12",
+    "13",
+    "14"
+  ],
+  "currentExcludedTabs": [
+    "Current divisions",
+    "Current COURSE MASTER"
+  ],
+  "tabs": [
+    {
+      "sheetId": 522665227,
+      "title": "Current COURSE MASTER",
+      "index": 0,
+      "sheetType": "GRID",
+      "gridProperties": {
+        "rowCount": 76,
+        "columnCount": 9,
+        "hideGridlines": true
+      }
+    },
+    {
+      "sheetId": 324539213,
+      "title": "Current divisions",
+      "index": 1,
+      "sheetType": "GRID",
+      "gridProperties": {
+        "rowCount": 56,
+        "columnCount": 54
+      }
+    },
+    {
+      "sheetId": 2009044749,
+      "title": "sc",
+      "index": 2,
+      "sheetType": "GRID",
+      "gridProperties": {
+        "rowCount": 1000,
+        "columnCount": 26
+      }
+    },
+    {
+      "sheetId": 242996877,
+      "title": "Trophies",
+      "index": 3,
+      "sheetType": "GRID",
+      "gridProperties": {
+        "rowCount": 1000,
+        "columnCount": 26
+      }
+    },
+    {
+      "sheetId": 1005096364,
+      "title": "14",
+      "index": 4,
+      "sheetType": "GRID",
+      "gridProperties": {
+        "rowCount": 56,
+        "columnCount": 54
+      }
+    },
+    {
+      "sheetId": 1083331331,
+      "title": "13",
+      "index": 5,
+      "sheetType": "GRID",
+      "gridProperties": {
+        "rowCount": 56,
+        "columnCount": 54
+      }
+    },
+    {
+      "sheetId": 1600540861,
+      "title": "12",
+      "index": 6,
+      "sheetType": "GRID",
+      "gridProperties": {
+        "rowCount": 56,
+        "columnCount": 54
+      }
+    },
+    {
+      "sheetId": 1806498582,
+      "title": "11",
+      "index": 7,
+      "sheetType": "GRID",
+      "gridProperties": {
+        "rowCount": 56,
+        "columnCount": 54
+      }
+    },
+    {
+      "sheetId": 1764790897,
+      "title": "11sc",
+      "index": 8,
+      "sheetType": "GRID",
+      "gridProperties": {
+        "rowCount": 1000,
+        "columnCount": 26
+      }
+    },
+    {
+      "sheetId": 1130581268,
+      "title": "s10",
+      "index": 9,
+      "sheetType": "GRID",
+      "gridProperties": {
+        "rowCount": 56,
+        "columnCount": 54
+      }
+    },
+    {
+      "sheetId": 148209357,
+      "title": "s9",
+      "index": 10,
+      "sheetType": "GRID",
+      "gridProperties": {
+        "rowCount": 56,
+        "columnCount": 54
+      }
+    },
+    {
+      "sheetId": 1325943840,
+      "title": "s8",
+      "index": 11,
+      "sheetType": "GRID",
+      "gridProperties": {
+        "rowCount": 56,
+        "columnCount": 54
+      }
+    },
+    {
+      "sheetId": 263109864,
+      "title": "S7",
+      "index": 12,
+      "sheetType": "GRID",
+      "gridProperties": {
+        "rowCount": 56,
+        "columnCount": 54
+      }
+    },
+    {
+      "sheetId": 606543101,
+      "title": "S6",
+      "index": 13,
+      "sheetType": "GRID",
+      "gridProperties": {
+        "rowCount": 56,
+        "columnCount": 54
+      }
+    },
+    {
+      "sheetId": 663651584,
+      "title": "s5",
+      "index": 14,
+      "sheetType": "GRID",
+      "gridProperties": {
+        "rowCount": 63,
+        "columnCount": 54
+      }
+    },
+    {
+      "sheetId": 12121589,
+      "title": "S4",
+      "index": 15,
+      "sheetType": "GRID",
+      "gridProperties": {
+        "rowCount": 63,
+        "columnCount": 54
+      }
+    },
+    {
+      "sheetId": 1851245356,
+      "title": "S3",
+      "index": 16,
+      "sheetType": "GRID",
+      "gridProperties": {
+        "rowCount": 63,
+        "columnCount": 54
+      }
+    },
+    {
+      "sheetId": 382041783,
+      "title": "S2",
+      "index": 17,
+      "sheetType": "GRID",
+      "gridProperties": {
+        "rowCount": 63,
+        "columnCount": 41
+      }
+    },
+    {
+      "sheetId": 1323020530,
+      "title": "S1",
+      "index": 18,
+      "sheetType": "GRID",
+      "gridProperties": {
+        "rowCount": 63,
+        "columnCount": 41
+      }
+    },
+    {
+      "sheetId": 534490246,
+      "title": "COURSE MASTER",
+      "index": 19,
+      "sheetType": "GRID",
+      "gridProperties": {
+        "rowCount": 69,
+        "columnCount": 9
+      }
+    },
+    {
+      "sheetId": 882532715,
+      "title": "5 sc",
+      "index": 20,
+      "sheetType": "GRID",
+      "gridProperties": {
+        "rowCount": 1153,
+        "columnCount": 26
+      }
+    },
+    {
+      "sheetId": 699101148,
+      "title": "Player List",
+      "index": 21,
+      "sheetType": "GRID",
+      "gridProperties": {
+        "rowCount": 1000,
+        "columnCount": 26
+      }
+    },
+    {
+      "sheetId": 530396165,
+      "title": " PICK YOUR POISON Info",
+      "index": 22,
+      "sheetType": "GRID",
+      "gridProperties": {
+        "rowCount": 27,
+        "columnCount": 2,
+        "hideGridlines": true
+      }
+    },
+    {
+      "sheetId": 1685297750,
+      "title": "Game annooucment",
+      "index": 23,
+      "sheetType": "GRID",
+      "gridProperties": {
+        "rowCount": 17,
+        "columnCount": 2,
+        "hideGridlines": true
+      }
+    },
+    {
+      "sheetId": 1585687059,
+      "title": "Rules",
+      "index": 24,
+      "sheetType": "GRID",
+      "gridProperties": {
+        "rowCount": 37,
+        "columnCount": 2,
+        "hideGridlines": true
+      }
+    }
+  ]
+}
+

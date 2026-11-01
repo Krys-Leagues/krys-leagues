@@ -1,0 +1,12 @@
+.card { min-width: 0; box-sizing: border-box; padding: clamp(14px, 1.5vw, 20px); border: 1px solid rgba(249,168,212,.55); border-radius: 20px; color: #fff7fb; background: radial-gradient(circle at 90% 0%, rgba(244,114,182,.28), transparent 34%), linear-gradient(145deg,#4c102f,#261026 52%,#170b1c); box-shadow: 0 18px 48px rgba(0,0,0,.5), inset 0 1px rgba(255,255,255,.12); }
+.eyebrow { margin: 0 0 6px; color: #f9a8d4; font-size: .68rem; font-weight: 900; letter-spacing: .16em; }
+.card h2 { margin: 0 0 12px; color: #fff; font-family: Georgia,serif; font-size: clamp(1rem,1.7vw,1.4rem); font-weight: 950; line-height: 1.08; }
+.videoFrame { overflow: hidden; border: 1px solid rgba(255,255,255,.28); border-radius: 13px; background: #050207; }
+.video { display: block; width: 100%; max-height: 420px; background: #050207; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.playButton,.watchAgain { min-height: 40px; padding: 9px 13px; border-radius: 999px; color: #fff; cursor: pointer; font: inherit; font-size: .7rem; font-weight: 900; letter-spacing: .05em; }
+.playButton { border: 1px solid #f9a8d4; background: #f9a8d4; color: #3b0a27; }
+.watchAgain { border: 1px solid rgba(255,255,255,.46); background: rgba(0,0,0,.28); }
+.playButton:hover,.watchAgain:hover,.playButton:focus-visible,.watchAgain:focus-visible { border-color: #fff; filter: brightness(1.1); }
+.playButton:focus-visible,.watchAgain:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+.note { margin: 9px 0 0; color: rgba(255,247,251,.76); font-size: .68rem; line-height: 1.35; }
