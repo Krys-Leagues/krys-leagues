@@ -10,18 +10,35 @@ import {
 import styles from "./page.module.css"
 
 const ROUND_LABELS = ["ROUND 1", "ROUND 2", "ROUND 3", "FINAL ROUND"] as const
+const SAFE_FOUR_MAJORS_FALLBACK = "/majors"
+const PROTECTED_FOUR_MAJORS_PREVIEW_HOST = "four-majors-cccm5jrz8-krys-leagues-projects.vercel.app"
+
+function getFourMajorsHubHref() {
+  const configured = process.env.NEXT_PUBLIC_FOUR_MAJORS_HUB_URL?.trim()
+  if (!configured) return SAFE_FOUR_MAJORS_FALLBACK
+
+  try {
+    const destination = new URL(configured)
+    if (destination.hostname === PROTECTED_FOUR_MAJORS_PREVIEW_HOST) return SAFE_FOUR_MAJORS_FALLBACK
+  } catch {
+    return SAFE_FOUR_MAJORS_FALLBACK
+  }
+
+  return configured
+}
 
 export default function MastersResultsPreviewPage() {
   const summary = summarizeMastersPreview()
   const players = summary.vipQualifiers
+  const fourMajorsHubHref = getFourMajorsHubHref()
 
   return (
     <main className={styles.page}>
       <div className={styles.blossomGlow} aria-hidden="true" />
       <div className={styles.shell}>
         <nav className={styles.nav} aria-label="Masters preview navigation">
-          <Link href="/majors/masters" className={styles.backLink}>
-            ← The Mini-Golf Masters
+          <Link href={fourMajorsHubHref} className={styles.backLink}>
+            ← Four Majors Hub
           </Link>
           <span className={styles.routeMark}>MASTERS-OWNED PREVIEW</span>
         </nav>
