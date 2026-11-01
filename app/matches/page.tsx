@@ -1,14 +1,9 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { supabase } from "@/lib/supabase"
 import { loadCanonicalPlayerDisplays, type CanonicalPlayerDisplay } from "@/lib/canonicalPlayerDisplay"
-
-type Player = {
-  id: string
-  screen_name: string
-}
 
 type ScheduledMatch = {
   id: string
@@ -72,11 +67,7 @@ export default function MatchesPage() {
   const [seasonNumber, setSeasonNumber] = useState("59")
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    loadData()
-  }, [])
-
-  async function loadData() {
+  const loadData = useCallback(async () => {
     setLoading(true)
 
     const [scheduleResponse, resultsResponse] =
@@ -105,7 +96,15 @@ export default function MatchesPage() {
     setSchedule(loadedSchedule)
     setResults(loadedResults)
     setLoading(false)
-  }
+  }, [])
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void loadData()
+    }, 0)
+
+    return () => window.clearTimeout(timer)
+  }, [loadData])
 
   const playerNames = useMemo(() => {
     const map = new Map<string, string>()

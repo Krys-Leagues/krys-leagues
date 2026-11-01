@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { supabase } from "@/lib/supabase"
 import { findCanonicalFamilyConflicts, loadCanonicalPlayerDisplays } from "@/lib/canonicalPlayerDisplay"
 
@@ -23,11 +23,6 @@ type StandingRow = {
   rank: number | null
 }
 
-type PlayerRow = {
-  id: string
-  screen_name: string
-}
-
 type Standing = {
   playerId: string
   player: string
@@ -46,11 +41,7 @@ export default function MatchStandingsPage() {
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState("")
 
-  useEffect(() => {
-    loadStandings()
-  }, [division, season])
-
-  async function loadStandings() {
+  const loadStandings = useCallback(async () => {
     const seasonNumber = Number(season)
 
     if (!seasonNumber) {
@@ -130,7 +121,15 @@ export default function MatchStandingsPage() {
     }
 
     setLoading(false)
-  }
+  }, [division, season])
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void loadStandings()
+    }, 0)
+
+    return () => window.clearTimeout(timer)
+  }, [loadStandings])
 
   return (
     <main style={page}>
