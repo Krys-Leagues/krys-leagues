@@ -33,6 +33,8 @@ release promotion are part of this recovery.
 
 Synthetic records and the extracted test suite are the verification path. The
 Production database was inspected read-only only. As of the recovery audit,
-Production Stroke season 63 has 45 scheduled fixtures but 23 stored results;
-its final scorecard is still a draft. Therefore it is evidence of recovered
-schema/workflow, not a completed Production season suitable for release.
+Production Stroke season 63 has 21 scheduled fixtures and 21 stored results,
+15 standings rows, and 15 final-scorecard entries; its final scorecard is
+still a draft and the historical Stroke source-backed tables are empty.
+Therefore it is evidence of recovered schema/workflow, not a completed
+Production season suitable for release.
