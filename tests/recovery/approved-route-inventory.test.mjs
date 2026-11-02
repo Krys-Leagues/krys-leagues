@@ -62,6 +62,7 @@ const assets = [
   "public/approved-pages/overall-leaderboards-approved.jpg",
   "public/approved-pages/hall-of-champions-approved.jpg",
   "public/approved-pages/the mga open.jpg",
+  "public/approved-pages/mga-registration-now-open-approved.png",
   "public/approved-pages/gardens-of-babylon-background.png",
 ]
 

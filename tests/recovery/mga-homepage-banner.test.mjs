@@ -20,7 +20,7 @@ test("MGA homepage banner preserves the original asset and compact signup route"
   const page = read("app/page.tsx")
   const mgaCss = css.match(/\.artwork-navigation__mga-link \{[\s\S]*?\n\}/u)?.[0] || ""
   assert.match(component, /href="https:\/\/mga-championship-independent\.vercel\.app\//)
-  assert.match(component, /approved-pages\/the mga open\.jpg/)
+  assert.match(component, /approved-pages\/mga-registration-now-open-approved\.png/)
   assert.doesNotMatch(component, /COMING SOON/i)
   assert.doesNotMatch(component, /mga-status-panel|mga-status-copy|mga-status-cta/u)
   assert.match(mgaCss, /width: 50%/u)
@@ -45,6 +45,6 @@ test("MGA homepage status is personalized only after authenticated eligibility c
 })
 
 test("approved MGA artwork bytes remain unchanged in the candidate", () => {
-  const artwork = readFileSync(resolve(root, "public/approved-pages/the mga open.jpg"))
-  assert.equal(createHash("sha256").update(artwork).digest("hex").toUpperCase(), "35E66D4F0A386CBFA0689B980BD3AA0B8D3204C0619A40FD16060A47013296FD")
+  const artwork = readFileSync(resolve(root, "public/approved-pages/mga-registration-now-open-approved.png"))
+  assert.equal(createHash("sha256").update(artwork).digest("hex").toUpperCase(), "611720F5213412D575823EEE5CE60B1C035E973D5EBF264AA7C93BB12F39F2C0")
 })
