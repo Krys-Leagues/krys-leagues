@@ -4,7 +4,21 @@ import type { ReactNode } from "react"
 import type { ArtworkPageDefinition } from "@/lib/artworkNavigation"
 import { artworkTargetStyle, validateArtworkTargets } from "@/lib/artworkNavigation"
 
-export function ArtworkNavigation({ definition, overlay }: { definition: ArtworkPageDefinition; overlay?: ReactNode }) {
+export function ArtworkNavigation({
+  definition,
+  overlay,
+  afterFrame,
+  hiddenTargetIds = [],
+  frameAspectRatio,
+  frameClassName,
+}: {
+  definition: ArtworkPageDefinition
+  overlay?: ReactNode
+  afterFrame?: ReactNode
+  hiddenTargetIds?: readonly string[]
+  frameAspectRatio?: string
+  frameClassName?: string
+}) {
   const errors = validateArtworkTargets(definition.targets)
   if (errors.length > 0) {
     throw new Error(`Invalid artwork navigation map for ${definition.title}: ${errors.join("; ")}`)
@@ -13,9 +27,10 @@ export function ArtworkNavigation({ definition, overlay }: { definition: Artwork
   return (
     <main className="artwork-navigation" data-approved-artwork-page={definition.id}>
       <h1 className="sr-only">{definition.title}</h1>
+      <div className="artwork-navigation__hub-stack">
       <div
-        className="artwork-navigation__frame"
-        style={{ aspectRatio: definition.aspectRatio }}
+        className={`artwork-navigation__frame${frameClassName ? ` ${frameClassName}` : ""}`}
+        style={{ aspectRatio: frameAspectRatio ?? definition.aspectRatio }}
         data-artwork-title={definition.title}
       >
         <Image
@@ -29,7 +44,7 @@ export function ArtworkNavigation({ definition, overlay }: { definition: Artwork
         />
         {overlay ? <div className="artwork-navigation__overlay">{overlay}</div> : null}
         <nav aria-label={`${definition.title} navigation`} className="artwork-navigation__targets">
-          {definition.targets.map((target) => (
+          {definition.targets.filter((target) => !hiddenTargetIds.includes(target.id)).map((target) => (
             <Link
               key={target.id}
               href={target.href}
@@ -42,6 +57,8 @@ export function ArtworkNavigation({ definition, overlay }: { definition: Artwork
             </Link>
           ))}
         </nav>
+      </div>
+      {afterFrame ? <div className="artwork-navigation__after-frame">{afterFrame}</div> : null}
       </div>
     </main>
   )

@@ -1,0 +1,90 @@
+name: Independent Production Verification
+
+on:
+  workflow_dispatch:
+    inputs:
+      zone_id:
+        description: "Manifest zone id"
+        required: true
+        type: string
+      deployment_url:
+        description: "Verified Production URL or deployment URL"
+        required: false
+        type: string
+      deployment_id:
+        description: "Vercel Production deployment id"
+        required: false
+        type: string
+      project_id:
+        description: "Vercel project ID"
+        required: false
+        type: string
+      repository:
+        description: "GitHub repository that produced the deployment"
+        required: false
+        type: string
+      commit_sha:
+        description: "Source commit reported by the deployment provider"
+        required: false
+        type: string
+  repository_dispatch:
+    types: [vercel-production-deployment]
+  deployment_status:
+
+concurrency:
+  # A repeated event for the same release replaces the in-flight check instead
+  # of creating parallel verifications. The verifier also emits this key in its
+  # report so retries are auditable and read-only.
+  group: independent-production-verification-${{ github.event.client_payload.zone_id || inputs.zone_id || github.event.repository.full_name || 'manual' }}-${{ github.event.client_payload.deployment_id || inputs.deployment_id || github.event.deployment.id || github.run_id }}-${{ github.event.client_payload.commit_sha || inputs.commit_sha || github.event.deployment.sha || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    if: >-
+      github.event_name != 'deployment_status' ||
+      (github.event.deployment_status.state == 'success' &&
+       (github.event.deployment.environment == 'production' || github.event.deployment.environment == 'Production'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - name: Run focused verifier
+        env:
+          VERIFICATION_ZONE: ${{ inputs.zone_id || github.event.client_payload.zone_id || github.event.deployment.payload.zone_id || '' }}
+          DEPLOYMENT_URL: ${{ inputs.deployment_url || github.event.client_payload.deployment_url || github.event.deployment_status.target_url || '' }}
+          DEPLOYMENT_ID: ${{ inputs.deployment_id || github.event.client_payload.deployment_id || github.event.deployment.id || '' }}
+          DEPLOYMENT_COMMIT_SHA: ${{ inputs.commit_sha || github.event.client_payload.commit_sha || github.event.deployment.sha || '' }}
+          DEPLOYMENT_PROJECT_ID: ${{ inputs.project_id || github.event.client_payload.project_id || github.event.deployment.payload.project_id || '' }}
+          DEPLOYMENT_REPOSITORY: ${{ inputs.repository || github.event.client_payload.repository || github.event.repository.full_name || github.event.deployment.payload.repository || '' }}
+          VERIFICATION_ENVIRONMENT: production
+          VERIFICATION_EVENT: ${{ github.event_name == 'repository_dispatch' }}
+        run: |
+          set -euo pipefail
+          fast_status=0
+          full_status=0
+          node scripts/verify-live-sites.mjs --mode fast --output production-verification-fast.json || fast_status=$?
+          node scripts/verify-live-sites.mjs --mode full --output production-verification-status.json || full_status=$?
+          if [ "$fast_status" -ne 0 ] || [ "$full_status" -ne 0 ]; then
+            exit 1
+          fi
+      - name: Publish status dashboard
+        if: always()
+        run: |
+          if [ -f production-verification-status.json ]; then
+            node -e 'const fs=require("fs"); const r=JSON.parse(fs.readFileSync("production-verification-status.json","utf8")); console.log(`### Independent Production Verification\n\n- Overall: **${r.status}**\n- Generated: ${r.generatedAt}\n- Status counts: ${JSON.stringify(r.statusCounts)}\n- Availability counts: ${JSON.stringify(r.availabilityCounts)}\n\n| Area | Status | Availability | URL | Issues |\n| --- | --- | --- | --- | --- |\n${[r.hub,...r.zones].map(z=>`| ${z.label} | ${z.status} | ${z.availability ?? "UNVERIFIED"} | ${z.productionUrl ?? "not recorded"} | ${(z.issues ?? []).length} |`).join("\n")}`)' >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Upload verification dashboard
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: independent-production-verification
+          path: production-verification-*.json
+          if-no-files-found: error

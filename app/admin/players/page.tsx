@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import PlayerAvatar from "@/components/PlayerAvatar"
+import { buildAdminPlayerIdentityDisplay } from "@/lib/adminPlayerIdentityDisplay"
 
 type Player = {
   id: string
@@ -129,6 +130,7 @@ export default function PlayersAdminPage() {
   const [savingRecognition, setSavingRecognition] = useState(false)
   const [recognitionError, setRecognitionError] = useState("")
   const [successMessage, setSuccessMessage] = useState("")
+  const [copiedIdentityValue, setCopiedIdentityValue] = useState("")
 
   useEffect(() => {
     loadPlayers()
@@ -600,6 +602,19 @@ export default function PlayersAdminPage() {
     setImporting(false)
   }
 
+  async function copyIdentityValue(value: string, copyKey: string) {
+    try {
+      await navigator.clipboard.writeText(value)
+      setCopiedIdentityValue(copyKey)
+      window.setTimeout(() => {
+        setCopiedIdentityValue((current) => current === copyKey ? "" : current)
+      }, 1500)
+    } catch {
+      setCopiedIdentityValue("")
+      alert("The value could not be copied. Please copy it manually.")
+    }
+  }
+
   const filteredPlayers = useMemo(() => {
     const q = normalizeName(search)
 
@@ -693,6 +708,7 @@ export default function PlayersAdminPage() {
         />
       </div>
 
+      <div style={tableScroll}>
       <table style={table}>
         <thead>
           <tr>
@@ -708,18 +724,50 @@ export default function PlayersAdminPage() {
             const identityLink = identityLinks.find((link) => link.historical_player_id === p.id)
             const currentStatus = identityLink ? "merged" : getPlayerStatus(p)
             const membershipLabels = playerMembershipLabels(p.id)
+            const destinationPlayer = identityLink
+              ? players.find((player) => player.id === identityLink.canonical_player_id)
+              : undefined
+            const identityDisplay = buildAdminPlayerIdentityDisplay(p, identityLink, destinationPlayer)
 
             return (
               <tr key={p.id}>
                 <td style={playerTd}>
                   <div style={playerIdentityCell}>
                     <PlayerAvatar screenName={p.screen_name} avatarPath={p.avatar_path} size={40} />
-                    <button
-                      onClick={() => router.push(`/admin/players/${p.id}`)}
-                      style={playerNameButton}
-                    >
-                      {p.screen_name}
-                    </button>
+                    <div style={playerIdentityDetails}>
+                      <button
+                        onClick={() => router.push(`/admin/players/${p.id}`)}
+                        style={playerNameButton}
+                      >
+                        {p.screen_name}
+                      </button>
+                      {identityDisplay.kind === "canonical" ? (
+                        <IdentityValueRow
+                          label="UUID"
+                          value={identityDisplay.canonicalUuid}
+                          copied={copiedIdentityValue === `uuid:${p.id}`}
+                          onCopy={() => void copyIdentityValue(identityDisplay.canonicalUuid, `uuid:${p.id}`)}
+                        />
+                      ) : (
+                        <div style={mergedIdentityDetails}>
+                          <IdentityValueRow
+                            label="Original record UUID"
+                            value={identityDisplay.originalUuid}
+                            copied={copiedIdentityValue === `original-uuid:${p.id}`}
+                            onCopy={() => void copyIdentityValue(identityDisplay.originalUuid, `original-uuid:${p.id}`)}
+                          />
+                          <IdentityValueRow
+                            label="Canonical UUID"
+                            value={identityDisplay.destinationUuid}
+                            copied={copiedIdentityValue === `canonical-uuid:${p.id}`}
+                            onCopy={() => void copyIdentityValue(identityDisplay.destinationUuid, `canonical-uuid:${p.id}`)}
+                          />
+                          <span style={mergedDestinationName}>
+                            Destination: {identityDisplay.destinationName || identityDisplay.destinationUuid}
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </td>
 
@@ -736,7 +784,15 @@ export default function PlayersAdminPage() {
 
                 <td style={td}>
                   {p.discord_id ? (
-                    <span style={discordLinkedBadge}>DISCORD LINKED</span>
+                    <div style={discordIdentityDetails}>
+                      <span style={discordLinkedBadge}>DISCORD LINKED</span>
+                      <IdentityValueRow
+                        label="DISCORD ID"
+                        value={p.discord_id}
+                        copied={copiedIdentityValue === `discord:${p.id}`}
+                        onCopy={() => void copyIdentityValue(p.discord_id!, `discord:${p.id}`)}
+                      />
+                    </div>
                   ) : (
                     <button type="button" style={addDiscordButton} onClick={() => openDiscordModal(p)}>
                       ADD DISCORD
@@ -778,6 +834,7 @@ export default function PlayersAdminPage() {
           })}
         </tbody>
       </table>
+      </div>
 
       {showAddPlayer && (
         <Modal title="Add Player" onClose={() => setShowAddPlayer(false)}>
@@ -1018,6 +1075,28 @@ function Modal({
   )
 }
 
+function IdentityValueRow({
+  label,
+  value,
+  copied,
+  onCopy,
+}: {
+  label: string
+  value: string
+  copied: boolean
+  onCopy: () => void
+}) {
+  return (
+    <div style={identityValueRow}>
+      <span style={identityValueLabel}>{label}:</span>
+      <code style={identityValue}>{value}</code>
+      <button type="button" style={copyButton} onClick={onCopy} aria-label={`Copy ${label}`}>
+        {copied ? "COPIED" : "COPY"}
+      </button>
+    </div>
+  )
+}
+
 const page: React.CSSProperties = {
   minHeight: "100vh",
   padding: 24,
@@ -1079,9 +1158,15 @@ const searchInput: React.CSSProperties = {
 }
 
 const table: React.CSSProperties = {
-  marginTop: 18,
+  marginTop: 0,
   borderCollapse: "collapse",
   width: "100%",
+}
+
+const tableScroll: React.CSSProperties = {
+  marginTop: 18,
+  overflowX: "auto",
+  WebkitOverflowScrolling: "touch",
 }
 
 const td: React.CSSProperties = {
@@ -1155,6 +1240,62 @@ const playerIdentityCell: React.CSSProperties = {
   alignItems: "center",
   gap: 10,
   minWidth: 0,
+}
+
+const playerIdentityDetails: React.CSSProperties = {
+  display: "grid",
+  gap: 4,
+  minWidth: 0,
+}
+
+const mergedIdentityDetails: React.CSSProperties = {
+  display: "grid",
+  gap: 3,
+  minWidth: 0,
+}
+
+const mergedDestinationName: React.CSSProperties = {
+  color: "#c4b5fd",
+  fontSize: 12,
+  fontWeight: 700,
+}
+
+const discordIdentityDetails: React.CSSProperties = {
+  display: "grid",
+  gap: 4,
+  minWidth: 170,
+}
+
+const identityValueRow: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  flexWrap: "wrap",
+  gap: 5,
+  minWidth: 0,
+}
+
+const identityValueLabel: React.CSSProperties = {
+  color: "#a1a1aa",
+  fontSize: 11,
+  fontWeight: 800,
+  whiteSpace: "nowrap",
+}
+
+const identityValue: React.CSSProperties = {
+  color: "#d4d4d8",
+  fontSize: 11,
+  overflowWrap: "anywhere",
+}
+
+const copyButton: React.CSSProperties = {
+  border: "1px solid #52525b",
+  borderRadius: 5,
+  padding: "2px 5px",
+  background: "#27272a",
+  color: "#e4e4e7",
+  cursor: "pointer",
+  fontSize: 10,
+  fontWeight: 800,
 }
 
 const actionsTd: React.CSSProperties = {
