@@ -14,6 +14,8 @@ This is a read-only release-safety layer for the Krys Leagues Main Hub and its i
 - `BLOCKED`: a route, destination, read-only check, artwork checksum, or provenance check failed.
 - `NOT_YET_LIVE`: reserved for a zone without a verified Production URL.
 
+Each report also carries `availability`: `PUBLIC`, `NOT_YET_PUBLIC`, `INACCESSIBLE`, or `BROKEN`. A 401/403 or a 404 on a zone whose Vercel custom-domain evidence is absent is reported as access/provenance uncertainty, not as a confirmed application defect. A failing route on an observed public domain is reported as `BROKEN` with the exact route and response.
+
 The workflow produces `production-verification-status.json` as the central status dashboard artifact and adds a compact table to the GitHub Actions summary.
 
 `provider-audit.json` is the read-only 2026-11-02 inventory snapshot. It records Vercel project/deployment evidence separately from Owner-approved baselines. A Vercel project or deployment observed by the connector is not treated as an approved release, and a GitHub 404 is kept as `UNVERIFIED` because it may represent private access or a naming mismatch.

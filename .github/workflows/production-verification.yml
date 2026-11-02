@@ -79,7 +79,7 @@ jobs:
         if: always()
         run: |
           if [ -f production-verification-status.json ]; then
-            node -e 'const fs=require("fs"); const r=JSON.parse(fs.readFileSync("production-verification-status.json","utf8")); console.log(`### Independent Production Verification\n\n- Overall: **${r.status}**\n- Generated: ${r.generatedAt}\n- Status counts: ${JSON.stringify(r.statusCounts)}\n\n| Area | Status | URL | Issues |\n| --- | --- | --- | --- |\n${[r.hub,...r.zones].map(z=>`| ${z.label} | ${z.status} | ${z.productionUrl ?? "not recorded"} | ${(z.issues ?? []).length} |`).join("\n")}`)' >> "$GITHUB_STEP_SUMMARY"
+            node -e 'const fs=require("fs"); const r=JSON.parse(fs.readFileSync("production-verification-status.json","utf8")); console.log(`### Independent Production Verification\n\n- Overall: **${r.status}**\n- Generated: ${r.generatedAt}\n- Status counts: ${JSON.stringify(r.statusCounts)}\n- Availability counts: ${JSON.stringify(r.availabilityCounts)}\n\n| Area | Status | Availability | URL | Issues |\n| --- | --- | --- | --- | --- |\n${[r.hub,...r.zones].map(z=>`| ${z.label} | ${z.status} | ${z.availability ?? "UNVERIFIED"} | ${z.productionUrl ?? "not recorded"} | ${(z.issues ?? []).length} |`).join("\n")}`)' >> "$GITHUB_STEP_SUMMARY"
           fi
       - name: Upload verification dashboard
         if: always()

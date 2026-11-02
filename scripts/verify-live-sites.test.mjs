@@ -1,6 +1,6 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
-import { checkBaseline, parseLinks, resolveZoneId, validateDeploymentEvent } from "./verify-live-sites.mjs"
+import { checkBaseline, classifyRoute, parseLinks, resolveZoneId, validateDeploymentEvent } from "./verify-live-sites.mjs"
 
 test("manifest baselines fail closed until a deployment and commit are recorded", () => {
   const issues = checkBaseline({ projectId: "prj_test", repository: "Krys-Leagues/test", approvedBaseline: { deploymentId: null, commitSha: null } }, { deploymentId: "dpl_test", commitSha: "abc", projectId: "prj_test", repository: "Krys-Leagues/test" })
@@ -35,4 +35,10 @@ test("repository-dispatch validation fails closed on incomplete provenance", () 
   const manifest = { hub: { id: "main-hub" }, zones: [{ id: "mga", projectId: "prj_mga", repository: "Krys-Leagues/mga" }] }
   const issues = validateDeploymentEvent(manifest, { projectId: "prj_mga", repository: "Krys-Leagues/mga" }, "mga")
   assert.deepEqual(issues, ["Deployment event is missing deployment_id.", "Deployment event is missing commit_sha."])
+})
+
+test("public access uncertainty is distinct from a confirmed broken public route", () => {
+  assert.equal(classifyRoute({ publicAccess: "NOT_YET_PUBLIC" }, { ok: false, status: 404 }), "NOT_YET_PUBLIC")
+  assert.equal(classifyRoute({ publicAccess: "PUBLIC_DOMAIN_OBSERVED" }, { ok: false, status: 404 }), "BROKEN_ROUTE")
+  assert.equal(classifyRoute({ publicAccess: "PUBLIC_DOMAIN_OBSERVED" }, { ok: false, status: 403 }), "INACCESSIBLE")
 })

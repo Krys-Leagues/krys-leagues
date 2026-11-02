@@ -1,6 +1,7 @@
 {
   "observedAt": "2026-11-02",
   "method": "read-only GitHub connector and Vercel project/deployment metadata",
+  "eventBridge": { "vercelWebhookListing": "BLOCKED_403", "githubDispatch": "NOT_EXECUTED_NO_WRITE_CAPABILITY", "productionTriggerActive": false },
   "github": {
     "centralRepository": { "repository": "Krys-Leagues/krys-leagues", "status": "VERIFIED" },
     "independentRepositories": { "status": "UNVERIFIED", "reason": "The connected account returned 404 for the manifest repository names; private access or repository naming cannot be inferred." }
@@ -14,8 +15,8 @@
     "approvedArtwork": { "path": "public/approved-pages/mga-registration-now-open-approved.png", "sha256": "611720F5213412D575823EEE5CE60B1C035E973D5EBF264AA7C93BB12F39F2C0", "status": "VERIFIED_FROM_APPROVED_RELEASE_EVIDENCE" }
   },
   "zones": {
-    "five-four-three-two-one": { "projectId": "prj_iSw7Bi26JruosXuY28VJwaWNcc7v", "projectStatus": "VERIFIED", "observedProductionDeployment": "dpl_9XuWoim9rCxwYTg9gPPf9SKFLhHw", "observedState": "READY", "observedCommitSha": "8be5b088ad479c5d38538f0c5c0601278d849f3f", "publicDomainStatus": "UNVERIFIED" },
-    "mga-championship": { "projectId": "prj_hQj33zk1KDRfOhWR6yfJbady6eRR", "projectStatus": "VERIFIED", "observedProductionDeployment": "dpl_Wn5oRHfmxiR3vu1YKMiZzM3CkStT", "observedState": "READY", "observedCommitSha": "d0744cc7154529d6a415de1af5847afc71f35025", "publicDomainStatus": "UNVERIFIED" },
+    "five-four-three-two-one": { "projectId": "prj_iSw7Bi26JruosXuY28VJwaWNcc7v", "projectStatus": "VERIFIED", "observedProductionDeployment": "dpl_9XuWoim9rCxwYTg9gPPf9SKFLhHw", "observedState": "READY", "observedCommitSha": "8be5b088ad479c5d38538f0c5c0601278d849f3f", "publicDomainStatus": "OBSERVED", "publicDomains": ["54321.krysleagues.com"] },
+    "mga-championship": { "projectId": "prj_hQj33zk1KDRfOhWR6yfJbady6eRR", "projectStatus": "VERIFIED", "observedProductionDeployment": "dpl_Wn5oRHfmxiR3vu1YKMiZzM3CkStT", "observedState": "READY", "observedCommitSha": "d0744cc7154529d6a415de1af5847afc71f35025", "publicDomainStatus": "OBSERVED", "publicDomains": ["mga-championship-independent.vercel.app"] },
     "player-profiles": { "projectId": "prj_JWE3orOsWg5I8ZGov1dESkjt8xAf", "projectStatus": "VERIFIED", "observedProductionDeployment": "dpl_7vHAadLf1kR89B48N76xtotmsTL4", "observedState": "ERROR", "publicDomainStatus": "UNVERIFIED" },
     "kwt": { "projectId": "prj_iOEKnC8k16Wm8Ac5JdoKilu3gh2Y", "projectStatus": "VERIFIED", "observedProductionDeployment": "dpl_FRNDuna37xuMGCXiJoj8pZeTCMAG", "observedState": "ERROR", "observedCommitSha": "36a4eb94da6f93af03de47a7d2926d5a77826d37", "publicDomainStatus": "UNVERIFIED" },
     "four-majors": { "projectId": "prj_Mbu52ClVAbRdjyYunPaI7WnlHrJk", "projectStatus": "VERIFIED", "observedProductionDeployment": "dpl_7cd3eRw5bLB8kRuYtmKf8daZ87HL", "observedState": "READY", "observedCommitSha": "736ad450f93c55521c9ce60bebb918a8853a9e8c", "publicDomainStatus": "UNVERIFIED" },

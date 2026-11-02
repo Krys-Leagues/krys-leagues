@@ -57,6 +57,15 @@ const checkUrl = async (url, expectedContentType) => {
   }
 }
 
+const classifyRoute = (zone, result) => {
+  if (result.ok) return "PUBLIC"
+  if (zone.publicAccess === "NOT_YET_PUBLIC" && [401, 403, 404].includes(result.status)) return "NOT_YET_PUBLIC"
+  if ([401, 403].includes(result.status)) return "INACCESSIBLE"
+  if (result.status === 404) return "BROKEN_ROUTE"
+  if (result.status >= 500) return "SERVER_ERROR"
+  return "UNREACHABLE"
+}
+
 const checkBaseline = (zone, deployment) => {
   const baseline = zone.approvedBaseline ?? {}
   const issues = []
@@ -126,9 +135,13 @@ const checkZone = async (zone, hub, deployment, options = {}) => {
     if (result.ok && path === "/") {
       for (const marker of zone.requiredMarkers ?? []) if (!result.body.includes(marker)) markerIssues.push(`Missing required marker ${JSON.stringify(marker)} on ${path}.`)
     }
-    routeResults.push({ path, ok: result.ok && markerIssues.length === 0, status: result.status, finalUrl: result.finalUrl, contentType: result.contentType, error: result.error, markerIssues })
+    const classification = classifyRoute(zone, result)
+    routeResults.push({ path, ok: result.ok && markerIssues.length === 0, classification, status: result.status, finalUrl: result.finalUrl, contentType: result.contentType, error: result.error, markerIssues })
     issues.push(...markerIssues)
-    if (!result.ok) issues.push(`${path} did not pass (${result.status || result.error}).`)
+    if (!result.ok) {
+      if (classification === "NOT_YET_PUBLIC") issues.push(`${path} is not publicly verified (${result.status || result.error}); this is classified as access/provenance uncertainty, not a confirmed application defect.`)
+      else issues.push(`${path} did not pass (${result.status || result.error}); classification: ${classification}.`)
+    }
     if (path === "/") {
       const links = parseLinks(result.body ?? "", result.finalUrl ?? zone.productionUrl)
       if (zone.backToHub) {
@@ -167,6 +180,13 @@ const checkZone = async (zone, hub, deployment, options = {}) => {
   const complete = healthy && provenanceIssues.length === 0 && artwork.issues.length === 0 && Boolean(zone.backToHub) && Boolean(zone.hubPath)
   const environment = deployment?.environment ?? "production"
   const healthyStatus = environment === "preview" ? "PREVIEW" : "LIVE"
+  const availability = zone.publicAccess === "NOT_YET_PUBLIC"
+    ? "NOT_YET_PUBLIC"
+    : routeResults.some((route) => route.classification === "INACCESSIBLE")
+      ? "INACCESSIBLE"
+      : routeResults.some((route) => route.classification === "BROKEN_ROUTE" || route.classification === "SERVER_ERROR" || route.classification === "UNREACHABLE")
+        ? "BROKEN"
+        : "PUBLIC"
   return {
     id: zone.id,
     label: zone.label,
@@ -174,6 +194,7 @@ const checkZone = async (zone, hub, deployment, options = {}) => {
     projectId: zone.projectId,
     productionUrl: zone.productionUrl,
     status: complete ? "COMPLETE" : healthy ? healthyStatus : "BLOCKED",
+    availability,
     environment,
     startedAt,
     routeResults,
@@ -194,7 +215,8 @@ const verifyManifest = async ({ manifest, zoneId, deployment, mode = "full" }) =
   for (const zone of selected) zones.push(await checkZone(zone, manifest.hub, zone.id === zoneId ? deployment : null, { enforceProvenance: true, mode, hubResult }))
   const all = [hub, ...zones]
   const statusCounts = Object.fromEntries([...new Set(all.map((item) => item.status))].map((status) => [status, all.filter((item) => item.status === status).length]))
-  return { generatedAt: new Date().toISOString(), mode, status: all.some((item) => item.status === "BLOCKED") ? "BLOCKED" : all.some((item) => item.status === "LIVE") ? "LIVE" : "COMPLETE", statusCounts, hub, zones }
+  const availabilityCounts = Object.fromEntries([...new Set(all.map((item) => item.availability ?? "UNVERIFIED"))].map((availability) => [availability, all.filter((item) => (item.availability ?? "UNVERIFIED") === availability).length]))
+  return { generatedAt: new Date().toISOString(), mode, status: all.some((item) => item.status === "BLOCKED") ? "BLOCKED" : all.some((item) => item.status === "LIVE") ? "LIVE" : "COMPLETE", statusCounts, availabilityCounts, hub, zones }
 }
 
 const main = async () => {
@@ -222,6 +244,6 @@ const main = async () => {
   if (report.status === "BLOCKED") process.exitCode = 1
 }
 
-export { checkArtwork, checkBaseline, checkZone, parseLinks, resolveZoneId, validateDeploymentEvent, verifyManifest }
+export { checkArtwork, checkBaseline, checkZone, classifyRoute, parseLinks, resolveZoneId, validateDeploymentEvent, verifyManifest }
 
 if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url))) await main()
