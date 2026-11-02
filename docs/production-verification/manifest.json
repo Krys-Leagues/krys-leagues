@@ -6,12 +6,22 @@
     "githubRepositoryAccess": "UNVERIFIED",
     "githubRepositoryAccessReason": "The connected GitHub account confirmed the central repository but returned not-found for the 12 independent repository names. No private-repository ownership or baseline was inferred.",
     "eventBridge": {
-      "status": "READY_FOR_OWNER_ACTIVATION",
+      "status": "RELAY_DEPLOYED_CREDENTIALS_PENDING",
       "acceptedEvents": ["deployment_status", "repository_dispatch:vercel-production-deployment", "workflow_dispatch"],
       "productionTriggerActive": false,
       "dedupeKey": "zone_id:deployment_id:commit_sha",
       "vercelWebhookAccess": "BLOCKED_403",
-      "githubDispatchAccess": "UNAVAILABLE_FROM_CONNECTED_READ_ONLY_TOOLING"
+      "githubDispatchAccess": "UNAVAILABLE_FROM_CONNECTED_READ_ONLY_TOOLING",
+      "relay": {
+        "provider": "Railway",
+        "projectId": "5787da6e-99e0-4c7e-b261-b343be01c817",
+        "environmentId": "9d882f96-8a79-4ce7-9173-dd5057b2748c",
+        "serviceId": "046fd1d1-c4e0-49cd-b8f0-0626e0f28d93",
+        "deploymentId": "1c85d5e9-53cd-4cb6-9a8e-fb814fa638bb",
+        "publicUrl": "https://production-verification-relay-production.up.railway.app",
+        "liveWebhookConfigured": false,
+        "credentialsConfigured": false
+      }
     }
   },
   "hub": {

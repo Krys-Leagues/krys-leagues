@@ -28,15 +28,15 @@ The workflow accepts:
 2. `repository_dispatch` with event type `vercel-production-deployment` and a payload containing `zone_id`, `deployment_url`, `deployment_id`, and `commit_sha`.
 3. Manual `workflow_dispatch` for controlled verification.
 
-The repository-dispatch path requires an Owner-configured Vercel-to-GitHub event bridge or GitHub App with least-privilege permission to dispatch this one event. The payload must include `zone_id`, `deployment_url`, `deployment_id`, `commit_sha`, `project_id`, and `repository`. The bridge must send only deployment metadata; it must not send secrets, database credentials, cookies, or player data. Until that bridge is configured and tested, automatic verification is not active; the workflow remains safely manual/event-ready.
+The repository-dispatch path is prepared through the isolated Railway Function documented in [`relay/production-verification/README.md`](../../relay/production-verification/README.md). Its verified destination is `https://production-verification-relay-production.up.railway.app`. The payload must include `zone_id`, `deployment_url`, `deployment_id`, `commit_sha`, `project_id`, and `repository`. The relay sends only deployment metadata; it does not send secrets, database credentials, cookies, or player data. Live Vercel delivery remains disabled until the two sealed relay variables are configured and the Owner enables the webhook.
 
 The workflow is event-safe: it validates repository-dispatch metadata against the manifest, emits a unique `zone_id:deployment_id:commit_sha` key, coalesces repeated events with GitHub Actions concurrency, runs a fast route check first, then a broader read-only audit, and never deploys or rolls back. The `deployment_status` path remains available for Vercel/GitHub integrations that emit authenticated GitHub deployment events.
 
 Owner activation checklist for the repository-dispatch bridge:
 
-1. Use an Owner-controlled GitHub App or least-privilege token that can dispatch only `vercel-production-deployment` to this repository; keep it outside the repository and never place it in the manifest.
-2. Configure the Vercel-to-GitHub relay/webhook for each participating project to send only `zone_id`, `deployment_url`, `deployment_id`, `project_id`, `repository`, and `commit_sha`.
-3. Store the relay credential in the relay's secret store, test one non-Production event, and confirm the Actions summary and artifact before enabling Production events.
+1. Store `VERCEL_WEBHOOK_SECRET` and a narrowly scoped `GITHUB_DISPATCH_TOKEN` in the Railway service secret store; never place either in this repository.
+2. Configure the Vercel team webhook for `deployment.succeeded` on the participating projects to `https://production-verification-relay-production.up.railway.app`.
+3. Send one signed synthetic/non-Production event, confirm the Actions summary and artifact, then enable Production events.
 4. Set `approvedBaseline` values only after the Owner reviews the exact Production deployment and commit. `observedProduction` values in the manifest are evidence, not approval.
 
 ## Baseline and release checklist
