@@ -4,7 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { supabase } from "@/lib/supabase"
-import { historicalCourseLabel, publicMatchDivisions, type PublicHistoricalMatchCourse, type PublicMatchPayload } from "@/lib/publicMatch"
+import { historicalCourseLabel, normalizePublicMatchPayload, publicMatchDivisions, type PublicHistoricalMatchCourse, type PublicMatchPayload } from "@/lib/publicMatch"
 import styles from "./match-play.module.css"
 
 export default function MatchPlayPage() {
@@ -21,10 +21,13 @@ export default function MatchPlayPage() {
       if (cancelled) return
       if (loadError) setError("Match Play history is temporarily unavailable.")
       else {
-        const loaded = payload as PublicMatchPayload
-        setData(loaded)
-        setHistoricalSeason(loaded.historical_seasons[0]?.season_number ?? null)
-        setCurrentDivision(publicMatchDivisions(loaded.current.standings)[0] ?? null)
+        const loaded = normalizePublicMatchPayload(payload)
+        if (!loaded) setError("Match Play history is temporarily unavailable.")
+        else {
+          setData(loaded)
+          setHistoricalSeason(loaded.historical_seasons[0]?.season_number ?? null)
+          setCurrentDivision(publicMatchDivisions(loaded.current.standings)[0] ?? null)
+        }
       }
       setLoading(false)
     })
