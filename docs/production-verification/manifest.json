@@ -1,0 +1,189 @@
+{
+  "schemaVersion": 1,
+  "description": "Independent Krys Leagues production verification inventory. This file is authoritative for project ownership, live URLs, and approved release provenance.",
+  "verificationPolicy": {
+    "observedAt": "2026-11-02",
+    "githubRepositoryAccess": "UNVERIFIED",
+    "githubRepositoryAccessReason": "The connected GitHub account confirmed the central repository but returned not-found for the 12 independent repository names. No private-repository ownership or baseline was inferred.",
+    "eventBridge": {
+      "status": "READY_FOR_OWNER_ACTIVATION",
+      "acceptedEvents": ["deployment_status", "repository_dispatch:vercel-production-deployment", "workflow_dispatch"],
+      "productionTriggerActive": false,
+      "dedupeKey": "zone_id:deployment_id:commit_sha"
+    }
+  },
+  "hub": {
+    "id": "main-hub",
+    "label": "Main Website Hub",
+    "repository": "Krys-Leagues/krys-leagues",
+    "projectId": "prj_kJFpXPoszhcRTUNjdQgpsA1ppFoH",
+    "productionUrl": "https://krysleagues.com",
+    "criticalRoutes": ["/"],
+    "requiredMarkers": ["Krys Leagues"],
+    "approvedBaseline": {
+      "deploymentId": "dpl_jqNtBjdKfwSfyoh2jnP2eRacoajA",
+      "commitSha": "cdb09db6a42391c327ef76036150e75e3bc97edd",
+      "artwork": []
+    },
+    "observedProduction": { "deploymentId": "dpl_jqNtBjdKfwSfyoh2jnP2eRacoajA", "commitSha": "cdb09db6a42391c327ef76036150e75e3bc97edd", "state": "READY", "observedAt": "2026-11-02" }
+  },
+  "zones": [
+    {
+      "id": "five-four-three-two-one",
+      "label": "5-4-3-2-1",
+      "repository": "Krys-Leagues/five-four-three-two-one-signups",
+      "projectId": "prj_iSw7Bi26JruosXuY28VJwaWNcc7v",
+      "productionUrl": "https://54321.krysleagues.com",
+      "hubPath": "/tournaments/5-4-3-2-1",
+      "criticalRoutes": ["/", "/tournaments/5-4-3-2-1", "/api/status"],
+      "requiredMarkers": ["5", "4", "3", "2", "1"],
+      "readOnlyChecks": [{ "path": "/api/status", "contentType": "application/json", "requiredJson": ["open", "capacity", "remaining"] }],
+      "backToHub": { "requiredLabel": "Back to Hub", "targetUrl": "https://krysleagues.com/" },
+      "approvedBaseline": { "deploymentId": null, "commitSha": null, "artwork": [] },
+      "observedProduction": { "deploymentId": "dpl_9XuWoim9rCxwYTg9gPPf9SKFLhHw", "commitSha": "8be5b088ad479c5d38538f0c5c0601278d849f3f", "state": "READY", "observedAt": "2026-11-02" }
+    },
+    {
+      "id": "mga-championship",
+      "label": "MGA Championship",
+      "repository": "Krys-Leagues/mga-championship-independent",
+      "projectId": "prj_hQj33zk1KDRfOhWR6yfJbady6eRR",
+      "productionUrl": "https://mga-championship-independent.vercel.app",
+      "hubPath": "/mga",
+      "backToHub": { "requiredLabel": "Back to Hub", "targetUrl": "https://krysleagues.com/" },
+      "criticalRoutes": ["/"],
+      "requiredMarkers": ["MGA"],
+      "approvedBaseline": { "deploymentId": null, "commitSha": null, "artwork": [] },
+      "observedProduction": { "deploymentId": "dpl_Wn5oRHfmxiR3vu1YKMiZzM3CkStT", "commitSha": "d0744cc7154529d6a415de1af5847afc71f35025", "state": "READY", "observedAt": "2026-11-02" }
+    },
+    {
+      "id": "player-profiles",
+      "label": "Player Profiles",
+      "repository": "Krys-Leagues/krys-leagues-player-profiles",
+      "projectId": "prj_JWE3orOsWg5I8ZGov1dESkjt8xAf",
+      "productionUrl": "https://krys-leagues-player-profiles.vercel.app",
+      "hubPath": "/player-profiles",
+      "backToHub": { "requiredLabel": "Back to Hub", "targetUrl": "https://krysleagues.com/" },
+      "criticalRoutes": ["/"],
+      "requiredMarkers": ["Player"],
+      "approvedBaseline": { "deploymentId": null, "commitSha": null, "artwork": [] },
+      "observedProduction": { "deploymentId": "dpl_7vHAadLf1kR89B48N76xtotmsTL4", "state": "ERROR", "observedAt": "2026-11-02" }
+    },
+    {
+      "id": "kwt",
+      "label": "KWT League Hub",
+      "repository": "Krys-Leagues/krys-kwt-league-hub",
+      "projectId": "prj_iOEKnC8k16Wm8Ac5JdoKilu3gh2Y",
+      "productionUrl": "https://krys-kwt-league-hub.vercel.app",
+      "hubPath": "/kwt",
+      "backToHub": { "requiredLabel": "Back to Hub", "targetUrl": "https://krysleagues.com/" },
+      "criticalRoutes": ["/"],
+      "requiredMarkers": ["KWT"],
+      "approvedBaseline": { "deploymentId": null, "commitSha": null, "artwork": [] },
+      "observedProduction": { "deploymentId": "dpl_FRNDuna37xuMGCXiJoj8pZeTCMAG", "commitSha": "36a4eb94da6f93af03de47a7d2926d5a77826d37", "state": "ERROR", "observedAt": "2026-11-02" }
+    },
+    {
+      "id": "four-majors",
+      "label": "Four Majors",
+      "repository": "Krys-Leagues/four-majors-hub",
+      "projectId": "prj_Mbu52ClVAbRdjyYunPaI7WnlHrJk",
+      "productionUrl": "https://four-majors-hub.vercel.app",
+      "hubPath": "/majors",
+      "backToHub": { "requiredLabel": "Back to Hub", "targetUrl": "https://krysleagues.com/" },
+      "criticalRoutes": ["/"],
+      "requiredMarkers": ["Majors"],
+      "approvedBaseline": { "deploymentId": null, "commitSha": null, "artwork": [] },
+      "observedProduction": { "deploymentId": "dpl_7cd3eRw5bLB8kRuYtmKf8daZ87HL", "commitSha": "736ad450f93c55521c9ce60bebb918a8853a9e8c", "state": "READY", "observedAt": "2026-11-02" }
+    },
+    {
+      "id": "bracket-tournaments",
+      "label": "Bracket Tournaments",
+      "repository": "Krys-Leagues/krys-leagues-bracket-tournaments",
+      "projectId": "prj_eLoOuRKhVR0GonyGauvgLhSvFj8o",
+      "productionUrl": "https://krys-leagues-bracket-tournaments.vercel.app",
+      "hubPath": "/tournaments",
+      "backToHub": { "requiredLabel": "Back to Hub", "targetUrl": "https://krysleagues.com/" },
+      "criticalRoutes": ["/"],
+      "requiredMarkers": ["Tournament"],
+      "approvedBaseline": { "deploymentId": null, "commitSha": null, "artwork": [] },
+      "observedProduction": { "deploymentId": "dpl_Azw6MQFX8fq5CDGHb9QUWD5mSN8w", "state": "ERROR", "observedAt": "2026-11-02" }
+    },
+    {
+      "id": "all-time-records",
+      "label": "All-Time Records",
+      "repository": "Krys-Leagues/krys-leagues-all-time-records",
+      "projectId": "prj_KUO7e7ihZCzUVRKUqOUphOOBpFEk",
+      "productionUrl": "https://krys-leagues-all-time-records.vercel.app",
+      "hubPath": "/records",
+      "backToHub": { "requiredLabel": "Back to Hub", "targetUrl": "https://krysleagues.com/" },
+      "criticalRoutes": ["/"],
+      "requiredMarkers": ["Records"],
+      "approvedBaseline": { "deploymentId": null, "commitSha": null, "artwork": [] },
+      "observedProduction": { "deploymentId": "dpl_A748HZAKyMjwQeZwkHsyLpRwZfxJ", "commitSha": "1c0d4812c70a287c9d578c646e59ddae1f787f32", "state": "ERROR", "observedAt": "2026-11-02" }
+    },
+    {
+      "id": "monthlies",
+      "label": "Monthlies",
+      "repository": "Krys-Leagues/krys-leagues-monthlies",
+      "projectId": "prj_3GYtgP6XVfKobDG2LqgGEsbysozr",
+      "productionUrl": "https://krys-leagues-monthlies.vercel.app",
+      "hubPath": "/monthlies",
+      "backToHub": { "requiredLabel": "Back to Hub", "targetUrl": "https://krysleagues.com/" },
+      "criticalRoutes": ["/"],
+      "requiredMarkers": ["Monthly"],
+      "approvedBaseline": { "deploymentId": null, "commitSha": null, "artwork": [] },
+      "observedProduction": { "deploymentId": "dpl_3vLVAPHKahSUf13JzHpJZRZEwJQ9", "state": "ERROR", "observedAt": "2026-11-02" }
+    },
+    {
+      "id": "pro-league",
+      "label": "Pro League",
+      "repository": "Krys-Leagues/krys-leagues-pro-league",
+      "projectId": "prj_U4EISRqsBAAWQJz83D2awnYrxqto",
+      "productionUrl": "https://krys-leagues-pro-league.vercel.app",
+      "hubPath": "/pro-league",
+      "backToHub": { "requiredLabel": "Back to Hub", "targetUrl": "https://krysleagues.com/" },
+      "criticalRoutes": ["/"],
+      "requiredMarkers": ["Pro"],
+      "approvedBaseline": { "deploymentId": null, "commitSha": null, "artwork": [] },
+      "observedProduction": { "state": "NO_PRODUCTION_DEPLOYMENT_OBSERVED", "observedAt": "2026-11-02" }
+    },
+    {
+      "id": "pyp",
+      "label": "PYP",
+      "repository": "Krys-Leagues/krys-pyp-standalone",
+      "projectId": "prj_lJAnkLbm2zxrpc7OuXuuBJx0SmLk",
+      "productionUrl": "https://krys-pyp-standalone.vercel.app",
+      "hubPath": "/pyp",
+      "backToHub": { "requiredLabel": "Back to Hub", "targetUrl": "https://krysleagues.com/" },
+      "criticalRoutes": ["/"],
+      "requiredMarkers": ["PYP"],
+      "approvedBaseline": { "deploymentId": null, "commitSha": null, "artwork": [] },
+      "observedProduction": { "deploymentId": "dpl_4iMFeFGueEUhBbc3vyGLzUvfsn7D", "state": "ERROR", "observedAt": "2026-11-02" }
+    },
+    {
+      "id": "doubles-league",
+      "label": "Doubles League",
+      "repository": "Krys-Leagues/krys-doubles-league-standalone",
+      "projectId": "prj_JntgxiSDhHv5L0TLclB2zKpx5boi",
+      "productionUrl": "https://krys-doubles-league-standalone.vercel.app",
+      "hubPath": "/doubles",
+      "backToHub": { "requiredLabel": "Back to Hub", "targetUrl": "https://krysleagues.com/" },
+      "criticalRoutes": ["/"],
+      "requiredMarkers": ["Doubles"],
+      "approvedBaseline": { "deploymentId": null, "commitSha": null, "artwork": [] },
+      "observedProduction": { "deploymentId": "dpl_GABgbZXaKtG8F9Nq5qW3SjAZFTKz", "state": "ERROR", "observedAt": "2026-11-02" }
+    },
+    {
+      "id": "course-challenges",
+      "label": "Course Challenges",
+      "repository": "Krys-Leagues/krys-course-challenges-recovery",
+      "projectId": "prj_94La98c2pD9ryhUjocAGSmHtg6e7",
+      "productionUrl": "https://krys-course-challenges-recovery.vercel.app",
+      "hubPath": "/course-challenges",
+      "backToHub": { "requiredLabel": "Back to Hub", "targetUrl": "https://krysleagues.com/" },
+      "criticalRoutes": ["/"],
+      "requiredMarkers": ["Course"],
+      "approvedBaseline": { "deploymentId": null, "commitSha": null, "artwork": [] },
+      "observedProduction": { "state": "NO_PRODUCTION_DEPLOYMENT_OBSERVED", "observedAt": "2026-11-02" }
+    }
+  ]
+}
