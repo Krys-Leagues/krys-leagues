@@ -120,13 +120,6 @@ export async function POST(request: Request) {
   if (body.action === "create") {
     const { data, error } = await authorization.supabase.rpc("admin_create_player", {
       p_screen_name: body.screen_name,
-      p_active: body.active ?? true,
-      p_status: body.status ?? "active",
-      p_league_type: body.league_type ?? null,
-      p_division: body.division ?? null,
-      p_discord_id: body.discord_id ?? null,
-      p_discord_username: body.discord_username ?? null,
-      p_discord_avatar: body.discord_avatar ?? null,
     })
     if (error) return Response.json({ error: error.message }, { status: 400 })
     return Response.json({ data }, { headers: { "Cache-Control": "no-store" } })
