@@ -19,7 +19,7 @@ test("MGA homepage banner preserves the original asset and compact signup route"
   const css = read("components/navigation/artwork-navigation.css")
   const page = read("app/page.tsx")
   const mgaCss = css.match(/\.artwork-navigation__mga-link \{[\s\S]*?\n\}/u)?.[0] || ""
-  assert.match(component, /href="\/majors\/major-2"/)
+  assert.match(component, /href="https:\/\/mga-championship-independent\.vercel\.app\//)
   assert.match(component, /approved-pages\/the mga open\.jpg/)
   assert.doesNotMatch(component, /COMING SOON/i)
   assert.doesNotMatch(component, /mga-status-panel|mga-status-copy|mga-status-cta/u)

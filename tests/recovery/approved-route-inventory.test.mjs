@@ -95,7 +95,7 @@ test("public navigation targets real local routes or approved external destinati
   ]
   for (const target of expected) assert.match(map, new RegExp(target.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")), `missing target ${target}`)
   assert.match(homepage, /<MgaHomepageBanner \/>/)
-  assert.match(mgaBanner, /href="\/majors\/major-2"/)
+  assert.match(mgaBanner, /href="https:\/\/mga-championship-independent\.vercel\.app\//)
   assert.match(map, /oraclecloudapps\.com\/ords\/r\/wmgt\/kwt\/home/)
 })
 

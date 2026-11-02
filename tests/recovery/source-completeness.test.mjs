@@ -66,6 +66,6 @@ test("KWT artwork keeps all four public destinations", () => {
 
 test("homepage exposes the live MGA Open entry artwork", () => {
   const source = fs.readFileSync(path.join(repoRoot, "components/home/MgaHomepageBanner.tsx"), "utf8")
-  assert.match(source, /href="\/majors\/major-2"/)
+  assert.match(source, /href="https:\/\/mga-championship-independent\.vercel\.app\//)
   assert.match(source, /approved-pages\/the mga open\.jpg/)
 })

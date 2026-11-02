@@ -5,7 +5,7 @@ export default function MgaHomepageBanner() {
   return (
     <section className="artwork-navigation__mga-section" aria-label="The MGA Open">
       <Link
-        href="/majors/major-2"
+        href="https://mga-championship-independent.vercel.app/"
         className="artwork-navigation__mga-link"
         aria-label="The MGA Open — view registration"
       >
