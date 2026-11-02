@@ -23,7 +23,9 @@ test("repeated resolution of one Discord identity remains idempotent", () => {
 test("a no-match identity reaches only the approved onboarding path", () => {
   const resolution = { resolution_status: "no_match" as const, canonical_player_id: null }
   assert.equal(getDiscordPlayerLoginDestination(resolution, "/register?league=match"), "/register?league=match")
-  assert.equal(getDiscordPlayerLoginDestination(resolution, "/majors/example"), "/join")
+  assert.equal(getDiscordPlayerLoginDestination(resolution, "/stroke"), "/stroke")
+  assert.equal(getDiscordPlayerLoginDestination(resolution, "/majors/example"), "/majors/example")
+  assert.equal(getDiscordPlayerLoginDestination(resolution, null), "/join")
 })
 
 test("an unmatched prelaunch login remains at the testing boundary", () => {

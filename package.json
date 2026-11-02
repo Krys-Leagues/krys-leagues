@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:stroke": "node --experimental-strip-types --test lib/scorecards/stroke*.test.ts tests/all-time/historical-stroke-v2-review.test.ts",
+    "test:stroke": "node --experimental-strip-types --test lib/scorecards/stroke*.test.ts tests/all-time/historical-stroke-v2-review.test.ts tests/public-stroke-board-recovery.test.ts lib/discordPlayerLogin.test.ts",
     "test:match-preview": "node --experimental-strip-types --test lib/importer/adapters/matchAdapter.test.ts",
     "test:stroke-history-preview": "node --experimental-strip-types --test lib/importer/adapters/historicalStrokeParser.test.ts",
     "test:competition-preview": "node --experimental-strip-types --test lib/importer/adapters/competitionPreview.test.ts lib/importer/adapters/kwtLibraryPreview.test.ts lib/importer/adapters/kwtDiscordEvidence.test.ts lib/importer/adapters/kwtDiscordStaging.test.ts lib/importer/adapters/kwtDiscordWeekReview.test.ts lib/importer/adapters/kwtDiscordReconciliation.test.ts",

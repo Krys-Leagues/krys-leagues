@@ -4,9 +4,14 @@
 
 This application was extracted from the latest intact Stroke Play line found in
 the existing Krys Leagues history: commit `7e4fca8bb096` (`Fix Stroke live
-board refresh after verification`, 2026-10-06). The extraction preserves the
-existing Stroke pages, scorecard workflow, SQL/RPC definitions, artwork, player
-screen names, and negative-score behavior.
+board refresh after verification`, 2026-10-06). The public website was then
+recovered from the later approved public-board line: `ec53f655` (`Forward-
+integrate public league boards for staging`, 2026-10-29), with its protected
+canonical-identity reader from `a4a72624` (`Restore approved Stroke public
+board presentation`, 2026-09-28). The approved background asset was
+introduced by `7a2033a7` (`Install approved Stroke Play artwork`, 2026-09-05).
+The extraction preserves the existing Stroke pages, scorecard workflow,
+SQL/RPC definitions, artwork, player screen names, and negative-score behavior.
 
 ## Recovered behavior
 
@@ -23,6 +28,12 @@ screen names, and negative-score behavior.
 - Global Players through the restricted `/api/admin/stroke/players` identity
   interface. It returns canonical identity fields, verified aliases, and
   identity links only; it does not expose unrelated memberships or tournaments.
+- The approved public Stroke board is rendered beneath the artwork and reads
+  current fixtures, results, standings, and canonical screen names through the
+  read-only `/api/public/league-board?kind=stroke` route.
+- Public Stroke routes no longer show the optional sign-in overlay, and a
+  Discord login preserves a safe requested Stroke destination even when the
+  player identity is not yet linked.
 
 ## Safety boundary
 

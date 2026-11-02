@@ -8,6 +8,7 @@ import { startDiscordSignIn } from "./DiscordSignInButton"
 
 const WELCOME_STORAGE_KEY = "krys-leagues:optional-sign-in-welcome-dismissed-v1"
 const WELCOME_STATE_ATTRIBUTE = "optionalSignInWelcome"
+const PUBLIC_STROKE_PATHS = ["/stroke", "/standings", "/matches", "/records", "/players"]
 
 function setWelcomeState(state: "checking" | "visible" | "settled") {
   document.documentElement.dataset[WELCOME_STATE_ATTRIBUTE] = state
@@ -19,7 +20,15 @@ export default function OptionalSignInWelcome() {
   const [error, setError] = useState("")
 
   useEffect(() => {
-    if (pathname.startsWith("/admin") || pathname.startsWith("/auth") || pathname.startsWith("/majors/masters-stream")) return
+    if (
+      pathname.startsWith("/admin") ||
+      pathname.startsWith("/auth") ||
+      pathname.startsWith("/majors/masters-stream") ||
+      PUBLIC_STROKE_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`))
+    ) {
+      setWelcomeState("settled")
+      return
+    }
     setWelcomeState("checking")
     let active = true
     void supabase.auth.getSession().then(({ data }) => {
