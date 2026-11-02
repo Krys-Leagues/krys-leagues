@@ -40,7 +40,7 @@ export default function MatchPlayPage() {
 
   return <main className={styles.page}>
     <div className={styles.shell}>
-      <nav className={styles.topNav}><Link href="/league-play">← League Play</Link><div><Link href="/matches">Matches &amp; Results</Link><Link href="/match-standings">Classic standings</Link></div></nav>
+      <nav className={styles.topNav}><Link href="/league-play">← League Play</Link><div><Link href="/matches">Matches &amp; Results</Link></div></nav>
       <header className={styles.hero}>
         <Image src="/league-media/BIG LOGO TRANSPARENT.png" alt="Krys Leagues logo" width={190} height={190} priority className={styles.logo} />
         <div><p className={styles.eyebrow}>KRYS LEAGUES</p><h1>MATCH PLAY</h1><p>Head-to-head mini golf. Current competition and frozen league history, together in one place.</p></div>
