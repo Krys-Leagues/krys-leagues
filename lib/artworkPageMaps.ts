@@ -92,3 +92,12 @@ export const kwtArtwork: ArtworkPageDefinition = {
     { id: "records", label: "Records", href: "/records", x: 10.9, y: 72.7, width: 80.9, height: 15.8 },
   ],
 }
+
+export const playerProfilesArtwork: ArtworkPageDefinition = {
+  id: "player-profiles",
+  title: "Krys Leagues Player Profiles",
+  imageSrc: "/approved-pages/player-profiles-approved.jpg",
+  imageAlt: "Krys Leagues Global Players search page for public player profiles, stats, trophies, history, and achievements",
+  aspectRatio: "2064 / 793",
+  targets: [],
+}
