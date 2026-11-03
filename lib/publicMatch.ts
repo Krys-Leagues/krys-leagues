@@ -21,6 +21,30 @@ export type PublicMatchPayload = {
   historical_courses: PublicHistoricalMatchCourse[]
 }
 
+function record(value: unknown): Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : {}
+}
+
+function array<T>(value: unknown): T[] {
+  return Array.isArray(value) ? value as T[] : []
+}
+
+export function normalizePublicMatchPayload(value: unknown): PublicMatchPayload | null {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) return null
+  const payload = record(value)
+  const current = record(payload.current)
+  return {
+    current: {
+      season_number: typeof current.season_number === "number" ? current.season_number : null,
+      division_count: typeof current.division_count === "number" ? current.division_count : null,
+      standings: array<PublicCurrentMatchStanding>(current.standings),
+    },
+    historical_seasons: array<PublicHistoricalMatchSeason>(payload.historical_seasons),
+    historical_standings: array<PublicHistoricalMatchStanding>(payload.historical_standings),
+    historical_courses: array<PublicHistoricalMatchCourse>(payload.historical_courses),
+  }
+}
+
 export function publicMatchDivisions(rows: Array<{ division_number: number }>) {
   return [...new Set(rows.map((row) => row.division_number))].sort((left, right) => left - right)
 }

@@ -1,7 +1,17 @@
 import assert from "node:assert/strict"
 import { readFileSync } from "node:fs"
 import test from "node:test"
-import { historicalCourseLabel, publicMatchDivisions } from "./publicMatch.ts"
+import { historicalCourseLabel, normalizePublicMatchPayload, publicMatchDivisions } from "./publicMatch.ts"
+
+test("incomplete public Match payloads render safely without changing valid records", () => {
+  assert.deepEqual(normalizePublicMatchPayload({ current: { standings: [] } }), {
+    current: { season_number: null, division_count: null, standings: [] },
+    historical_seasons: [],
+    historical_standings: [],
+    historical_courses: [],
+  })
+  assert.equal(normalizePublicMatchPayload(null), null)
+})
 
 test("public Match divisions include only populated values", () => {
   assert.deepEqual(publicMatchDivisions([{ division_number: 3 }, { division_number: 1 }, { division_number: 3 }]), [1, 3])
