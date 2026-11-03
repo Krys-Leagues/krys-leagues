@@ -80,7 +80,7 @@
 
 .artwork-navigation__mga-section {
   width: 100%;
-  margin-top: clamp(-30px, -2.4vw, -14px);
+  margin-top: -30px;
 }
 
 .artwork-navigation__mga-link:hover,
@@ -372,6 +372,10 @@
 
   .artwork-navigation__course-challenges-preview-banner {
     width: 92%;
+  }
+
+  .artwork-navigation__mga-section {
+    margin-top: -14px;
   }
 
 
