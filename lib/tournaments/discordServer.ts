@@ -51,6 +51,15 @@ export type DiscordVerification = {
 
 export type DiscordResult = { status: "sent" | "failed" | "not_configured"; id?: string; reason?: string }
 
+export type DiscordResourceProvisioning = {
+  status: "ready" | "created" | "failed" | "not_configured"
+  categoryId?: string
+  roleId?: string
+  matchChannelId?: string
+  created: { category: boolean; role: boolean; matchChannel: boolean }
+  reason?: string
+}
+
 function compactReason(body: DiscordBody | null, fallback: string) {
   return typeof body?.message === "string" && body.message.trim() ? body.message.trim().slice(0, 300) : fallback
 }
@@ -202,6 +211,62 @@ export function createTournamentDiscordAdapter(options: { token?: string | null;
     }
   }
 
+  async function ensureTournamentResources(): Promise<DiscordResourceProvisioning> {
+    if (!token) return { status: "not_configured", created: { category: false, role: false, matchChannel: false }, reason: "Discord bot credentials are not configured" }
+
+    const channelsResult = await request(`/guilds/${TOURNAMENT_GUILD_ID}/channels`)
+    const rolesResult = await request(`/guilds/${TOURNAMENT_GUILD_ID}/roles`)
+    if (channelsResult.error || rolesResult.error) {
+      return { status: "failed", created: { category: false, role: false, matchChannel: false }, reason: channelsResult.error || rolesResult.error || "Discord resource lookup failed" }
+    }
+
+    const channelRows = Array.isArray(channelsResult.body) ? channelsResult.body as unknown as GuildChannel[] : []
+    const roleRows = Array.isArray(rolesResult.body) ? rolesResult.body as unknown as GuildRole[] : []
+    let category = channelRows.find((channel) => channel.name === CATEGORY_NAME && channel.type === 4)
+    let role = roleRows.find((candidate) => candidate.name === PLAYER_ROLE_NAME)
+    let matchChannel = category?.id
+      ? channelRows.find((channel) => channel.name === MATCH_CHANNEL_NAME && channel.type === 0 && channel.parent_id === category?.id)
+      : undefined
+    const created = { category: false, role: false, matchChannel: false }
+
+    if (!category) {
+      const createdCategory = await request(`/guilds/${TOURNAMENT_GUILD_ID}/channels`, { method: "POST", body: JSON.stringify({ name: CATEGORY_NAME, type: 4 }) })
+      if (createdCategory.error || typeof createdCategory.body?.id !== "string") {
+        return { status: "failed", created, reason: createdCategory.error || "Discord did not return a category id" }
+      }
+      category = { id: createdCategory.body.id, name: CATEGORY_NAME, type: 4 }
+      created.category = true
+    }
+
+    if (!role) {
+      const createdRole = await request(`/guilds/${TOURNAMENT_GUILD_ID}/roles`, { method: "POST", body: JSON.stringify({ name: PLAYER_ROLE_NAME, permissions: "0", hoist: false, mentionable: false }) })
+      if (createdRole.error || typeof createdRole.body?.id !== "string") {
+        return { status: "failed", categoryId: typeof category.id === "string" ? category.id : undefined, created, reason: createdRole.error || "Discord did not return a player-role id" }
+      }
+      role = { id: createdRole.body.id, name: PLAYER_ROLE_NAME }
+      created.role = true
+    }
+
+    if (!matchChannel && typeof category.id === "string") {
+      const createdChannel = await request(`/guilds/${TOURNAMENT_GUILD_ID}/channels`, { method: "POST", body: JSON.stringify({ name: MATCH_CHANNEL_NAME, type: 0, parent_id: category.id }) })
+      if (createdChannel.error || typeof createdChannel.body?.id !== "string") {
+        return { status: "failed", categoryId: category.id, roleId: typeof role.id === "string" ? role.id : undefined, created, reason: createdChannel.error || "Discord did not return a match-channel id" }
+      }
+      matchChannel = { id: createdChannel.body.id, name: MATCH_CHANNEL_NAME, type: 0, parent_id: category.id }
+      created.matchChannel = true
+    }
+
+    const complete = typeof category.id === "string" && typeof role.id === "string" && typeof matchChannel?.id === "string"
+    return {
+      status: complete ? (created.category || created.role || created.matchChannel ? "created" : "ready") : "failed",
+      categoryId: typeof category.id === "string" ? category.id : undefined,
+      roleId: typeof role.id === "string" ? role.id : undefined,
+      matchChannelId: typeof matchChannel?.id === "string" ? matchChannel.id : undefined,
+      created,
+      reason: complete ? undefined : "Discord tournament resources are incomplete",
+    }
+  }
+
   async function createPrivateThread(input: { parentChannelId: string; matchId: string; playerIds: string[]; adminIds: string[]; body: string }): Promise<DiscordResult> {
     if (!token) return { status: "not_configured", reason: "Discord bot credentials are not configured" }
     const created = await request(`/channels/${encodeURIComponent(input.parentChannelId)}/threads`, { method: "POST", body: JSON.stringify({ name: `match-${input.matchId.slice(0, 8)}`, type: 12, invitable: false, auto_archive_duration: 1440 }) })
@@ -224,5 +289,5 @@ export function createTournamentDiscordAdapter(options: { token?: string | null;
     return { status: "sent", id: threadId }
   }
 
-  return { verifyConnection, createPrivateThread }
+  return { verifyConnection, ensureTournamentResources, createPrivateThread }
 }

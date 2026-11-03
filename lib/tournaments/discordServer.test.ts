@@ -130,3 +130,29 @@ test("Discord verification queues unique member lookups and retries 429 after th
   assert.equal(verification.verifiedPlayerCount, 2)
   assert.equal(verification.verifiedAdminCount, 1)
 })
+
+test("Discord resource provisioning is idempotent and creates only missing tournament resources", async () => {
+  const guildId = "1036296151651074168"
+  const createdPaths: string[] = []
+  const fetchImpl: typeof fetch = async (input, init) => {
+    const url = new URL(String(input))
+    const method = (init?.method || "GET").toUpperCase()
+    if (url.pathname === `/api/v10/guilds/${guildId}/channels` && method === "GET") return new Response(JSON.stringify([]), { status: 200 })
+    if (url.pathname === `/api/v10/guilds/${guildId}/roles` && method === "GET") return new Response(JSON.stringify([]), { status: 200 })
+    if (url.pathname === `/api/v10/guilds/${guildId}/channels` && method === "POST") {
+      createdPaths.push("channel")
+      const body = JSON.parse(String(init?.body || "{}")) as { type?: number }
+      return new Response(JSON.stringify({ id: body.type === 4 ? "category" : "match-channel" }), { status: 201 })
+    }
+    if (url.pathname === `/api/v10/guilds/${guildId}/roles` && method === "POST") {
+      createdPaths.push("role")
+      return new Response(JSON.stringify({ id: "role" }), { status: 200 })
+    }
+    return new Response(JSON.stringify({ message: "unexpected request" }), { status: 404 })
+  }
+
+  const provisioning = await createTournamentDiscordAdapter({ token: "preview-test-token", fetchImpl }).ensureTournamentResources()
+  assert.equal(provisioning.status, "created")
+  assert.deepEqual(provisioning.created, { category: true, role: true, matchChannel: true })
+  assert.deepEqual(createdPaths, ["channel", "role", "channel"])
+})

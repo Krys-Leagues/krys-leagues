@@ -63,7 +63,7 @@ export async function POST(request: Request) {
   const action = text(body?.action)
   const requestedTournamentId = text(body?.tournamentId)
   if (requestedTournamentId && requestedTournamentId !== TOURNAMENT_ID) return NextResponse.json({ error: "Unsupported tournament." }, { status: 403 })
-  if (!["verify", "create_thread"].includes(action)) return NextResponse.json({ error: "Unsupported tournament Discord action." }, { status: 400 })
+  if (!["verify", "ensure_resources", "create_thread"].includes(action)) return NextResponse.json({ error: "Unsupported tournament Discord action." }, { status: 400 })
 
   try {
     const client = trustedTournamentClient()
@@ -116,6 +116,12 @@ export async function POST(request: Request) {
     }
 
     if (process.env.TOURNAMENT_DISCORD_BRIDGE_CREATE_ENABLED !== "true") return NextResponse.json({ error: "Discord resource creation is disabled until final activation approval." }, { status: 423 })
+
+    if (action === "ensure_resources") {
+      const resources = await adapter.ensureTournamentResources()
+      return NextResponse.json(resources, { status: resources.status === "failed" ? 502 : 200, headers: { "Cache-Control": "no-store" } })
+    }
+
     const matchId = text(body?.matchId)
     if (!matchId) return NextResponse.json({ error: "A match is required." }, { status: 400 })
     const match = await loadMatch(client, matchId)
