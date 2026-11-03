@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
+import { KwtAreaNav } from "@/components/KwtAreaNav"
 import { supabase } from "@/lib/supabase"
 import { KWT_SEASON_TROPHY_BOARD_ASSET, KWT_WEEKLY_FEATURE_ASSET, SEASON_14_WEEKS, formatKwtWeekend, sortKwtCalendarWeeks, type KwtCalendarWeek } from "@/lib/kwtPublicContent"
 import styles from "./page.module.css"
@@ -39,6 +40,12 @@ export default function KWTUpcomingPage() {
           <h1>Upcoming Events</h1>
           <p>Configured KWT weekends and the latest weekly feature.</p>
         </header>
+        <KwtAreaNav title="Upcoming Events" items={[
+          { label: "Upcoming Events", description: "Approved KWT calendar and event information.", href: "/kwt/upcoming" },
+          { label: "Current Tournament", description: "Current Standard and NET areas.", href: "/kwt/current" },
+          { label: "Past Champions", description: "Verified winners, stories, and awards.", href: "/kwt/champions" },
+          { label: "Records", description: "Course and player record destinations.", href: "/kwt/records" },
+        ]} />
 
         <section className={styles.section} aria-labelledby="weekly-feature-title">
           <h2 id="weekly-feature-title">Current weekly feature</h2>

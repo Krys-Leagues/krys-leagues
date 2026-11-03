@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
+import { KwtAreaNav } from "@/components/KwtAreaNav"
 import { filterPublicKwtHistoryRows, formatKwtPlacement, type PublicKwtHistoryRow } from "@/lib/kwtHistory"
 import { loadPublicKwtHistory } from "@/lib/kwtHistoryServer"
 import styles from "./page.module.css"
@@ -63,6 +64,13 @@ export default async function KwtHistoryPage({ searchParams }: { searchParams: H
           <h1>KWT Score History</h1>
           <p>Official imported tournament results, preserved by season and week.</p>
         </header>
+        <KwtAreaNav title="KWT Results & History" items={[
+          { label: "Current Season", description: "Season 15 Standard standings and divisions.", href: "/kwt/current" },
+          { label: "Weekly Results", description: "Verified scorecards by season and week.", href: "/kwt/history" },
+          { label: "KWT NET", description: "Separate NET results and rankings.", href: "/kwt/net" },
+          { label: "Past Champions", description: "Historical winners and published awards.", href: "/kwt/champions" },
+          { label: "Records", description: "Verified course and player record destinations.", href: "/kwt/records" },
+        ]} />
 
         <form className={styles.filters} method="get" aria-label="Filter KWT score history">
           <label>

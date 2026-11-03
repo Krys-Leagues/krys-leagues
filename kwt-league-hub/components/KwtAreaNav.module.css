@@ -1,0 +1,18 @@
+.nav {
+  margin: 24px 0 28px;
+  padding: clamp(16px, 2.7vw, 25px);
+  border: 1px solid rgba(137, 96, 196, .58);
+  border-radius: 20px;
+  background: rgba(13, 8, 25, .94);
+}
+
+.kicker { margin: 0; color: #74eaff; font-size: .76rem; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-top: 14px; }
+.card { display: flex; min-height: 112px; flex-direction: column; gap: 7px; padding: 14px; color: #fff; border: 1px solid rgba(137, 96, 196, .65); border-radius: 15px; background: rgba(11, 7, 22, .96); text-decoration: none; transition: border-color 140ms ease, transform 140ms ease, background 140ms ease; }
+.card:hover, .card:focus-visible { border-color: #8deeff; background: rgba(26, 14, 48, .98); transform: translateY(-2px); }
+.card:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+.label { font-size: 1rem; font-weight: 900; }
+.description { flex: 1; color: #c9c1dc; font-size: .88rem; line-height: 1.4; }
+.action { color: #8deeff; font-size: .73rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+
+@media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
