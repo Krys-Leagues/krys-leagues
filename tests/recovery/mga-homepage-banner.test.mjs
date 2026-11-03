@@ -23,7 +23,7 @@ test("MGA homepage banner preserves the original asset and full signup route", (
   assert.match(component, /approved-pages\/mga-registration-now-open-approved\.png/)
   assert.doesNotMatch(component, /COMING SOON/i)
   assert.doesNotMatch(component, /mga-status-panel|mga-status-copy|mga-status-cta/u)
-  assert.match(mgaCss, /width: min\(100%, 2172px\)/u)
+  assert.match(mgaCss, /width: 50%/u)
   assert.match(mgaCss, /height: auto/u)
   assert.doesNotMatch(mgaCss, /aspect-ratio:/u)
   assert.doesNotMatch(mgaCss, /border:/u)

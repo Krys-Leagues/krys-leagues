@@ -60,7 +60,7 @@
 
 .artwork-navigation__course-challenges-preview-banner {
   display: block;
-  width: min(100%, 1364px);
+  width: 50%;
   height: auto;
   margin-inline: auto;
   user-select: none;
@@ -72,7 +72,7 @@
 
 .artwork-navigation__mga-link {
   display: block;
-  width: min(100%, 2172px);
+  width: 50%;
   height: auto;
   margin-inline: auto;
   transition: filter 160ms ease, transform 160ms ease;
@@ -366,7 +366,11 @@
   }
 
   .artwork-navigation__mga-link {
-    width: 100%;
+    width: 92%;
+  }
+
+  .artwork-navigation__course-challenges-preview-banner {
+    width: 92%;
   }
 
   .artwork-navigation__admin-treatment {

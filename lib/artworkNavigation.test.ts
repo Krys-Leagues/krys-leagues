@@ -57,8 +57,8 @@ test("Course Challenges banner preview precedes the preserved Admin Login action
   assert.ok(page.indexOf("course-challenges\/course-challenges-hub-extension-preview.png") < page.indexOf("ADMIN LOGIN"))
   assert.match(read("components/navigation/artwork-navigation.css"), /artwork-navigation__course-challenges-preview-banner/)
   assert.match(read("components/navigation/artwork-navigation.css"), /artwork-navigation__after-frame/)
-  assert.match(read("components/navigation/artwork-navigation.css"), /width: min\(100%, 1364px\)/)
-  assert.match(read("components/navigation/artwork-navigation.css"), /width: min\(100%, 2172px\)/)
+  assert.match(read("components/navigation/artwork-navigation.css"), /\.artwork-navigation__course-challenges-preview-banner \{[\s\S]*width: 50%/)
+  assert.match(read("components/navigation/artwork-navigation.css"), /\.artwork-navigation__mga-link \{[\s\S]*width: 50%/)
   assert.match(read("components/home/MgaHomepageBanner.tsx"), /mga-registration-now-open-approved\.png/)
 })
 
