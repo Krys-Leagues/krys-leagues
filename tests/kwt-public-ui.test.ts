@@ -14,6 +14,10 @@ test("KWT hub uses the approved artwork and preserves public card destinations",
   assert.doesNotMatch(map, /Krys Weekly Tournament/)
   assert.match(page, /ArtworkNavigation/)
   assert.match(page, /kwtArtwork/)
+  assert.match(page, /href: "\/kwt\/current"/)
+  assert.match(page, /href: "\/kwt\/champions"/)
+  assert.match(page, /hiddenTargetIds=\{\[\]\}/)
+  assert.doesNotMatch(page, /Official KWT areas|HubNavigation/)
   assert.match(map, /id: "current-tournament", label: "Current Tournament", href: "\/kwt\/net"/)
   assert.match(read("app/kwt/net/page.tsx"), /KWT_EXTERNAL_HOME/)
   assert.match(map, /href: "\/kwt\/upcoming"/)
@@ -47,6 +51,17 @@ test("KWT upcoming content has the approved dates and local navigation", () => {
   assert.match(page, /KWT_SEASON_TROPHY_BOARD_ASSET/)
   assert.match(page, /href="\/kwt"/)
   for (const date of ["2026-09-11", "2026-09-18", "2026-09-25", "2026-10-02", "2026-10-09", "2026-10-16"]) assert.match(content, new RegExp(date))
+})
+
+test("KWT area navigation keeps recovered sections inside the four primary areas", () => {
+  const current = read("app/kwt/current/page.tsx")
+  const upcoming = read("app/kwt/upcoming/page.tsx")
+  const champions = read("app/kwt/champions/page.tsx")
+  const records = read("app/kwt/records/page.tsx")
+  for (const label of ["Current Season", "Weekly Results", "Divisions", "Standard Leaderboards", "KWT NET"]) assert.match(current, new RegExp(label))
+  for (const label of ["Upcoming Events", "Current Tournament", "Past Champions", "Records"]) assert.match(upcoming, new RegExp(label))
+  for (const label of ["Previous Seasons", "Championships", "Trophies & Achievements", "Current Tournament"]) assert.match(champions, new RegExp(label))
+  for (const label of ["Course Records", "Player Record History", "Current Tournament", "Past Champions"]) assert.match(records, new RegExp(label))
 })
 
 test("KWT records use the cleaned player-facing title and searchable selector", () => {

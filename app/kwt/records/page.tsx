@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { KwtAreaNav } from "@/components/KwtAreaNav"
 import { useEffect, useMemo, useState } from "react"
 import { buildKwtCourseRecords, matchesKwtCourseQuery, KWT_DIFFICULTY_ORDER, KWT_RANK_ORDER, type KwtCourseRecord, type KwtCourseRecordEntry, type KwtCourseRecordRow, type KwtRank } from "@/lib/kwtRecords"
 import { supabase } from "@/lib/supabase"
@@ -74,6 +75,12 @@ export default function KWTRecordsPage() {
           <p style={eyebrow}>KRYS LEAGUES · KWT</p>
           <h1 style={title}>KWT Records</h1>
         </header>
+        <KwtAreaNav title="Records" items={[
+          { label: "Course Records", description: "Verified Easy, Hard, and combined KWT records.", href: "/kwt/records" },
+          { label: "Player Record History", description: "Canonical player profiles and record history.", href: "/players" },
+          { label: "Current Tournament", description: "Current Standard and NET standings.", href: "/kwt/current" },
+          { label: "Past Champions", description: "Historical winners, trophies, and achievements.", href: "/kwt/champions" },
+        ]} />
 
         <section style={section} aria-labelledby="records-title">
           <h2 id="records-title" style={srOnly}>Select Course</h2>
