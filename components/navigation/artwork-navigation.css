@@ -29,7 +29,7 @@
 
 .artwork-navigation__main-hub-actions {
   display: grid;
-  gap: clamp(8px, 1vw, 14px);
+  gap: clamp(6px, 0.8vw, 10px);
 }
 
 .artwork-navigation__featured-course-link,
@@ -60,7 +60,7 @@
 
 .artwork-navigation__course-challenges-preview-banner {
   display: block;
-  width: 50%;
+  width: 52%;
   height: auto;
   margin-inline: auto;
   user-select: none;
@@ -72,7 +72,7 @@
 
 .artwork-navigation__mga-link {
   display: block;
-  width: 50%;
+  width: 52%;
   height: auto;
   margin-inline: auto;
   transition: filter 160ms ease, transform 160ms ease;
@@ -80,6 +80,7 @@
 
 .artwork-navigation__mga-section {
   width: 100%;
+  margin-top: clamp(-18px, -2.4vw, -8px);
 }
 
 .artwork-navigation__mga-link:hover,
@@ -371,6 +372,10 @@
 
   .artwork-navigation__course-challenges-preview-banner {
     width: 92%;
+  }
+
+  .artwork-navigation__mga-section {
+    margin-top: clamp(-12px, -3vw, -6px);
   }
 
   .artwork-navigation__admin-treatment {
