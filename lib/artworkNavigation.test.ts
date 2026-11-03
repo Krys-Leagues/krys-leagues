@@ -28,6 +28,7 @@ test("approved artwork maps are valid and non-overlapping", () => {
 test("active Main Hub route is artwork-only and keeps the approved destinations", () => {
   const page = read("app/page.tsx")
   assert.equal(mainHubArtwork.id, "main-hub")
+  assert.equal(mainHubArtwork.imageSrc, "/approved-pages/main-hub-major-championships-approved.jpg")
   assert.match(page, /ArtworkNavigation/)
   assert.match(page, /mainHubArtwork/)
   assert.match(page, /course-challenges\/course-challenges-hub-extension-preview\.png/)
@@ -44,7 +45,7 @@ test("active Main Hub route is artwork-only and keeps the approved destinations"
     ["Monthlies", "https://dqvo64m7q9ujvqa-wmgt23ai.adb.us-ashburn-1.oraclecloudapps.com/ords/r/wmgt/monthly/home"],
     ["Bracket Tournaments", "https://54321.krysleagues.com"],
     ["Overall Leaderboards", "https://krys-leagues-all-time-records-krys-leagues-projects.vercel.app/"],
-    ["Invitationals", "/invitationals"],
+    ["Major Championships", "/majors"],
     ["Hall of Champions", "/champions"],
     ["Admin Login", "/admin"],
   ])
@@ -106,7 +107,7 @@ test("main hub has exactly the approved destinations", () => {
     "https://dqvo64m7q9ujvqa-wmgt23ai.adb.us-ashburn-1.oraclecloudapps.com/ords/r/wmgt/monthly/home",
     "https://54321.krysleagues.com",
     "https://krys-leagues-all-time-records-krys-leagues-projects.vercel.app/",
-    "/invitationals",
+    "/majors",
     "/champions",
     "/admin",
   ])

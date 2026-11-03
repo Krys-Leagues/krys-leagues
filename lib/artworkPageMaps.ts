@@ -3,7 +3,7 @@ import type { ArtworkHitbox, ArtworkPageDefinition, ArtworkTarget } from "./artw
 export const mainHubArtwork: ArtworkPageDefinition = {
   id: "main-hub",
   title: "Krys Leagues Main Hub",
-  imageSrc: "/main-hub-approved.jpg",
+  imageSrc: "/approved-pages/main-hub-major-championships-approved.jpg",
   imageAlt: "Krys Leagues main hub with nine navigation panels and an Admin Login panel",
   aspectRatio: "1664 / 938",
   targets: [
@@ -14,7 +14,7 @@ export const mainHubArtwork: ArtworkPageDefinition = {
     { id: "monthlies", label: "Monthlies", href: "https://dqvo64m7q9ujvqa-wmgt23ai.adb.us-ashburn-1.oraclecloudapps.com/ords/r/wmgt/monthly/home", external: true, x: 38.2, y: 69.3, width: 24.8, height: 8.5 },
     { id: "bracket-tournaments", label: "Bracket Tournaments", href: "https://54321.krysleagues.com", external: true, x: 64.0, y: 69.3, width: 24.8, height: 8.5 },
     { id: "overall-leaderboards", label: "Overall Leaderboards", href: "https://krys-leagues-all-time-records-krys-leagues-projects.vercel.app/", external: true, x: 11.9, y: 80.2, width: 24.8, height: 8.5 },
-    { id: "invitationals", label: "Invitationals", href: "/invitationals", x: 38.2, y: 80.2, width: 24.8, height: 8.5 },
+    { id: "invitationals", label: "Major Championships", href: "/majors", x: 38.2, y: 80.2, width: 24.8, height: 8.5 },
     { id: "hall-of-champions", label: "Hall of Champions", href: "/champions", x: 64.0, y: 80.2, width: 24.8, height: 8.5 },
     { id: "admin-login", label: "Admin Login", href: "/admin", x: 42.8, y: 90.7, width: 14.4, height: 7.0 },
   ],
