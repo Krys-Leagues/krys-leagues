@@ -55,3 +55,42 @@ test("Discord verification checks the bot, tournament structure, and requested m
   assert.equal(verification.parentChannelId, "match-channel")
   assert.equal(requestedPaths.some((path) => path.endsWith("/threads")), false)
 })
+
+test("Discord verification classifies each member response without exposing credentials", async () => {
+  const guildId = "1036296151651074168"
+  const fetchImpl: typeof fetch = async (input) => {
+    const url = new URL(String(input))
+    if (url.pathname === "/api/v10/users/@me") return new Response(JSON.stringify({ id: "bot" }), { status: 200 })
+    if (url.pathname === `/api/v10/guilds/${guildId}/channels`) return new Response(JSON.stringify([]), { status: 200 })
+    if (url.pathname === `/api/v10/guilds/${guildId}/roles`) return new Response(JSON.stringify([]), { status: 200 })
+    const id = url.pathname.split("/").pop()
+    if (id === "member") return new Response(JSON.stringify({ id }), { status: 200 })
+    if (id === "missing") return new Response(JSON.stringify({ code: 10007, message: "Unknown Member" }), { status: 404 })
+    if (id === "unknown") return new Response(JSON.stringify({ code: 10013, message: "Unknown User" }), { status: 404 })
+    if (id === "forbidden") return new Response(JSON.stringify({ code: 50001, message: "Missing Access" }), { status: 403 })
+    if (id === "unauthorized") return new Response(JSON.stringify({ code: 0, message: "401 test" }), { status: 401 })
+    if (id === "limited") return new Response(JSON.stringify({ retry_after: 0 }), { status: 429 })
+    if (id === "server-error") return new Response(JSON.stringify({ message: "Discord unavailable" }), { status: 503 })
+    return new Response(JSON.stringify({ message: "Unexpected response" }), { status: 418 })
+  }
+
+  const verification = await createTournamentDiscordAdapter({ token: "preview-test-token", fetchImpl }).verifyConnection({
+    playerIds: ["member", "missing", "unknown", "forbidden", "unauthorized", "limited", "server-error", "unexpected"],
+    adminIds: ["member"],
+  })
+
+  const byId = new Map((verification.memberResults || []).map((result) => [result.discordId, result]))
+  assert.equal(verification.botCheck?.classification, "CHECK_OK")
+  assert.equal(verification.channelsCheck?.classification, "CHECK_OK")
+  assert.equal(verification.rolesCheck?.classification, "CHECK_OK")
+  assert.deepEqual(byId.get("member"), { discordId: "member", classification: "CONFIRMED_GUILD_MEMBER", httpStatus: 200, discordCode: null })
+  assert.equal(byId.get("missing")?.classification, "NOT_IN_GUILD")
+  assert.equal(byId.get("unknown")?.classification, "UNKNOWN_DISCORD_USER")
+  assert.equal(byId.get("forbidden")?.classification, "BOT_PERMISSION_FAILURE")
+  assert.equal(byId.get("unauthorized")?.classification, "BOT_AUTHENTICATION_FAILURE")
+  assert.equal(byId.get("limited")?.classification, "DISCORD_RATE_LIMIT")
+  assert.equal(byId.get("server-error")?.classification, "DISCORD_API_FAILURE")
+  assert.equal(byId.get("unexpected")?.classification, "UNKNOWN_VERIFICATION_ERROR")
+  assert.equal(verification.verifiedPlayerCount, 1)
+  assert.equal(verification.verifiedAdminCount, 1)
+})

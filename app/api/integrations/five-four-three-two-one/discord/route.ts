@@ -74,7 +74,43 @@ export async function POST(request: Request) {
 
     if (action === "verify") {
       const verified = await adapter.verifyConnection({ playerIds, adminIds })
-      return NextResponse.json({ tournamentId: TOURNAMENT_ID, tournamentSlug: TOURNAMENT_SLUG, status: verified.status, expectedPlayerCount: roster.length, verifiedPlayerCount: verified.verifiedPlayerCount || 0, expectedAdminCount: ADMIN_SCREEN_NAMES.length, verifiedAdminCount: verified.verifiedAdminCount || 0, missingAdmins: ADMIN_SCREEN_NAMES.filter((name) => !admins.some((row) => row.screen_name === name)), botUserConfigured: verified.botUserConfigured || false, categoryFound: verified.categoryFound || false, matchChannelFound: verified.matchChannelFound || false, playerRoleFound: verified.playerRoleFound || false, reason: verified.reason }, { headers: { "Cache-Control": "no-store" } })
+      const rosterByDiscordId = new Map(roster.filter((row) => /^\d+$/.test(row.discord_id || "")).map((row) => [row.discord_id as string, row]))
+      const adminsByDiscordId = new Map(admins.filter((row) => /^\d+$/.test(row.discord_id || "")).map((row) => [row.discord_id as string, row]))
+      const memberDiagnostics = (verified.memberResults || []).map((result) => {
+        const rosterRow = rosterByDiscordId.get(result.discordId)
+        const adminRow = adminsByDiscordId.get(result.discordId)
+        const canonicalRow = rosterRow || adminRow
+        return {
+          identity: canonicalRow?.screen_name || "Unmatched configured Discord identity",
+          canonicalPlayerId: canonicalRow?.id || null,
+          administrator: Boolean(adminRow),
+          discordId: result.discordId,
+          classification: result.classification,
+          httpStatus: result.httpStatus,
+          discordCode: result.discordCode ?? null,
+          detail: result.detail || null,
+        }
+      })
+      return NextResponse.json({
+        tournamentId: TOURNAMENT_ID,
+        tournamentSlug: TOURNAMENT_SLUG,
+        guildId: "1036296151651074168",
+        status: verified.status,
+        expectedPlayerCount: roster.length,
+        verifiedPlayerCount: verified.verifiedPlayerCount || 0,
+        expectedAdminCount: ADMIN_SCREEN_NAMES.length,
+        verifiedAdminCount: verified.verifiedAdminCount || 0,
+        missingAdmins: ADMIN_SCREEN_NAMES.filter((name) => !admins.some((row) => row.screen_name === name)),
+        botUserConfigured: verified.botUserConfigured || false,
+        botCheck: verified.botCheck || null,
+        channelsCheck: verified.channelsCheck || null,
+        rolesCheck: verified.rolesCheck || null,
+        categoryFound: verified.categoryFound || false,
+        matchChannelFound: verified.matchChannelFound || false,
+        playerRoleFound: verified.playerRoleFound || false,
+        memberResults: memberDiagnostics,
+        reason: verified.reason,
+      }, { headers: { "Cache-Control": "no-store" } })
     }
 
     if (process.env.TOURNAMENT_DISCORD_BRIDGE_CREATE_ENABLED !== "true") return NextResponse.json({ error: "Discord resource creation is disabled until final activation approval." }, { status: 423 })
