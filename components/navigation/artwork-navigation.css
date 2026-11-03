@@ -29,7 +29,7 @@
 
 .artwork-navigation__main-hub-actions {
   display: grid;
-  gap: clamp(6px, 0.8vw, 10px);
+  gap: clamp(4px, 0.5vw, 8px);
 }
 
 .artwork-navigation__featured-course-link,

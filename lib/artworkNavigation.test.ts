@@ -61,6 +61,7 @@ test("Course Challenges banner preview precedes the preserved Admin Login action
   assert.match(read("components/navigation/artwork-navigation.css"), /\.artwork-navigation__mga-link \{[\s\S]*width: 52%/)
   assert.match(read("components/navigation/artwork-navigation.css"), /\.artwork-navigation__mga-link \{[\s\S]*aspect-ratio: 2048 \/ 430/)
   assert.match(read("components/navigation/artwork-navigation.css"), /\.artwork-navigation__mga-artwork \{[\s\S]*object-fit: cover/)
+  assert.match(read("components/navigation/artwork-navigation.css"), /\.artwork-navigation__main-hub-actions \{\s*display: grid;\s*gap: clamp\(4px, 0\.5vw, 8px\)/)
   assert.match(read("components/home/MgaHomepageBanner.tsx"), /mga-registration-now-open-approved\.png/)
 })
 
