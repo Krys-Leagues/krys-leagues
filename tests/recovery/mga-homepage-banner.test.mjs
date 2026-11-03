@@ -7,14 +7,14 @@ import { resolve } from "node:path"
 const root = resolve(import.meta.dirname, "../..")
 const read = (path) => readFileSync(resolve(root, path), "utf8")
 
-test("homepage keeps Course Challenges above the compact MGA signup banner", () => {
+test("homepage keeps the full Course Challenges banner above the full MGA signup banner", () => {
   const page = read("app/page.tsx")
   assert.match(page, /course-challenges\/course-challenges-hub-extension-preview\.png/)
   assert.match(page, /<MgaHomepageBanner \/>/)
   assert.ok(page.indexOf("course-challenges\/course-challenges-hub-extension-preview.png") < page.indexOf("<MgaHomepageBanner />"))
 })
 
-test("MGA homepage banner preserves the original asset and compact signup route", () => {
+test("MGA homepage banner preserves the original asset and full signup route", () => {
   const component = read("components/home/MgaHomepageBanner.tsx")
   const css = read("components/navigation/artwork-navigation.css")
   const page = read("app/page.tsx")
@@ -23,8 +23,9 @@ test("MGA homepage banner preserves the original asset and compact signup route"
   assert.match(component, /approved-pages\/mga-registration-now-open-approved\.png/)
   assert.doesNotMatch(component, /COMING SOON/i)
   assert.doesNotMatch(component, /mga-status-panel|mga-status-copy|mga-status-cta/u)
-  assert.match(mgaCss, /width: 50%/u)
-  assert.match(mgaCss, /aspect-ratio: 2048 \/ 430/u)
+  assert.match(mgaCss, /width: min\(100%, 2172px\)/u)
+  assert.match(mgaCss, /height: auto/u)
+  assert.doesNotMatch(mgaCss, /aspect-ratio:/u)
   assert.doesNotMatch(mgaCss, /border:/u)
   assert.doesNotMatch(mgaCss, /background:/u)
   assert.doesNotMatch(css, /mga-status-panel|mga-status-title|mga-status-copy|mga-status-cta/u)

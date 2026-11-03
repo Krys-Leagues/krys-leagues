@@ -28,7 +28,7 @@ test("approved artwork maps are valid and non-overlapping", () => {
 test("active Main Hub route is artwork-only and keeps the approved destinations", () => {
   const page = read("app/page.tsx")
   assert.equal(mainHubArtwork.id, "main-hub")
-  assert.equal(mainHubArtwork.imageSrc, "/approved-pages/main-hub-major-championships-approved.jpg")
+  assert.equal(mainHubArtwork.imageSrc, "/approved-pages/main-hub-major-championships-approved.png")
   assert.match(page, /ArtworkNavigation/)
   assert.match(page, /mainHubArtwork/)
   assert.match(page, /course-challenges\/course-challenges-hub-extension-preview\.png/)
@@ -57,6 +57,9 @@ test("Course Challenges banner preview precedes the preserved Admin Login action
   assert.ok(page.indexOf("course-challenges\/course-challenges-hub-extension-preview.png") < page.indexOf("ADMIN LOGIN"))
   assert.match(read("components/navigation/artwork-navigation.css"), /artwork-navigation__course-challenges-preview-banner/)
   assert.match(read("components/navigation/artwork-navigation.css"), /artwork-navigation__after-frame/)
+  assert.match(read("components/navigation/artwork-navigation.css"), /width: min\(100%, 1364px\)/)
+  assert.match(read("components/navigation/artwork-navigation.css"), /width: min\(100%, 2172px\)/)
+  assert.match(read("components/home/MgaHomepageBanner.tsx"), /mga-registration-now-open-approved\.png/)
 })
 
 test("Main Hub extension uses explicit lower-layer structure without a covering footer mask", () => {

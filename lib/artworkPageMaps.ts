@@ -3,7 +3,7 @@ import type { ArtworkHitbox, ArtworkPageDefinition, ArtworkTarget } from "./artw
 export const mainHubArtwork: ArtworkPageDefinition = {
   id: "main-hub",
   title: "Krys Leagues Main Hub",
-  imageSrc: "/approved-pages/main-hub-major-championships-approved.jpg",
+  imageSrc: "/approved-pages/main-hub-major-championships-approved.png",
   imageAlt: "Krys Leagues main hub with nine navigation panels and an Admin Login panel",
   aspectRatio: "1664 / 938",
   targets: [

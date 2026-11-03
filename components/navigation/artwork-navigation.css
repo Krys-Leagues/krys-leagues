@@ -60,10 +60,9 @@
 
 .artwork-navigation__course-challenges-preview-banner {
   display: block;
-  width: 50%;
+  width: min(100%, 1364px);
   height: auto;
   margin-inline: auto;
-  mix-blend-mode: screen;
   user-select: none;
 }
 
@@ -73,10 +72,9 @@
 
 .artwork-navigation__mga-link {
   display: block;
-  width: 50%;
-  aspect-ratio: 2048 / 430;
+  width: min(100%, 2172px);
+  height: auto;
   margin-inline: auto;
-  overflow: hidden;
   transition: filter 160ms ease, transform 160ms ease;
 }
 
@@ -98,9 +96,9 @@
 .artwork-navigation__mga-artwork {
   display: block;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center 52%;
+  height: auto;
+  object-fit: contain;
+  object-position: center;
   user-select: none;
 }
 
@@ -368,8 +366,7 @@
   }
 
   .artwork-navigation__mga-link {
-    width: 92%;
-    aspect-ratio: 2048 / 430;
+    width: 100%;
   }
 
   .artwork-navigation__admin-treatment {
