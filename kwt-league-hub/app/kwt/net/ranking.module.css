@@ -1,0 +1,14 @@
+.handicapCell{white-space:nowrap;font-variant-numeric:tabular-nums}
+.handicapCell>span{font-weight:950}
+.handicapCell small{display:block;margin-top:4px;font-size:.64rem;font-weight:900;letter-spacing:.06em}
+.badgeCell{vertical-align:middle;white-space:nowrap}
+.badgeContent{display:flex;align-items:center;gap:7px;min-height:42px}
+.specialBadge{display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;font-size:1.42rem;line-height:1}
+.goldKiwi{display:block;width:1.75rem;height:1.75rem;object-fit:contain}
+.divisionMedal{display:inline-flex;align-items:center;justify-content:center;width:2.15rem;height:2.15rem;border-radius:6px;font-size:1.36rem;line-height:1;box-shadow:0 1px 5px #0006}
+.eliteBadge{background:rgba(247,206,99,.16);border:1px solid rgba(247,206,99,.46);color:#fff0ac}
+.proBadge{background:rgba(255,139,125,.15);border:1px solid rgba(255,139,125,.42);color:#ffe0dc}
+.semiProBadge{background:rgba(115,200,255,.15);border:1px solid rgba(115,200,255,.42);color:#dff4ff}
+.amateurBadge{background:rgba(210,155,255,.16);border:1px solid rgba(210,155,255,.44);color:#f5e5ff}
+.provisionalBadge{background:rgba(200,214,216,.14);border:1px solid rgba(200,214,216,.38);color:#f0f8f9}
+.official{color:#bfeff7}
