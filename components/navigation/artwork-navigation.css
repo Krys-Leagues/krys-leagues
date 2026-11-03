@@ -80,7 +80,7 @@
 
 .artwork-navigation__mga-section {
   width: 100%;
-  margin-top: clamp(-18px, -2.4vw, -8px);
+  margin-top: -2.45%;
 }
 
 .artwork-navigation__mga-link:hover,
@@ -374,9 +374,6 @@
     width: 92%;
   }
 
-  .artwork-navigation__mga-section {
-    margin-top: clamp(-12px, -3vw, -6px);
-  }
 
   .artwork-navigation__admin-treatment {
     width: 88%;
