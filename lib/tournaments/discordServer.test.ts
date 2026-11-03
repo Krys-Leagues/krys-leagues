@@ -94,3 +94,39 @@ test("Discord verification classifies each member response without exposing cred
   assert.equal(verification.verifiedPlayerCount, 1)
   assert.equal(verification.verifiedAdminCount, 1)
 })
+
+test("Discord verification queues unique member lookups and retries 429 after the server delay", async () => {
+  const guildId = "1036296151651074168"
+  const memberAttempts = new Map<string, number>()
+  let activeMemberLookups = 0
+  let maxActiveMemberLookups = 0
+  const fetchImpl: typeof fetch = async (input) => {
+    const url = new URL(String(input))
+    if (url.pathname === "/api/v10/users/@me") return new Response(JSON.stringify({ id: "bot" }), { status: 200 })
+    if (url.pathname === `/api/v10/guilds/${guildId}/channels`) return new Response(JSON.stringify([]), { status: 200 })
+    if (url.pathname === `/api/v10/guilds/${guildId}/roles`) return new Response(JSON.stringify([]), { status: 200 })
+    const id = url.pathname.split("/").pop() || ""
+    activeMemberLookups += 1
+    maxActiveMemberLookups = Math.max(maxActiveMemberLookups, activeMemberLookups)
+    memberAttempts.set(id, (memberAttempts.get(id) || 0) + 1)
+    await new Promise((resolve) => setTimeout(resolve, 1))
+    activeMemberLookups -= 1
+    if (id === "limited" && memberAttempts.get(id) === 1) {
+      return new Response(JSON.stringify({ retry_after: 0, global: true }), { status: 429, headers: { "retry-after": "0", "x-ratelimit-global": "true" } })
+    }
+    return new Response(JSON.stringify({ id }), { status: 200 })
+  }
+
+  const verification = await createTournamentDiscordAdapter({ token: "preview-test-token", fetchImpl }).verifyConnection({
+    playerIds: ["limited", "limited", "member"],
+    adminIds: ["limited"],
+  })
+
+  const byId = new Map((verification.memberResults || []).map((result) => [result.discordId, result]))
+  assert.equal(maxActiveMemberLookups, 1)
+  assert.equal(memberAttempts.get("limited"), 2)
+  assert.equal(memberAttempts.get("member"), 1)
+  assert.equal(byId.get("limited")?.classification, "CONFIRMED_GUILD_MEMBER")
+  assert.equal(verification.verifiedPlayerCount, 2)
+  assert.equal(verification.verifiedAdminCount, 1)
+})

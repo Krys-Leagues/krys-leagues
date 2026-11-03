@@ -7,7 +7,7 @@ const PLAYER_ROLE_NAME = "5-4-3-2-1 Players"
 const MATCH_CHANNEL_NAME = "MATCH THREADS"
 const MAX_RETRIES = 2
 
-type DiscordBody = { id?: unknown; message?: unknown; code?: unknown }
+type DiscordBody = { id?: unknown; message?: unknown; code?: unknown; retry_after?: unknown; global?: unknown }
 type GuildChannel = { id?: unknown; name?: unknown; type?: unknown; parent_id?: unknown }
 type GuildRole = { id?: unknown; name?: unknown }
 
@@ -27,6 +27,8 @@ export type DiscordCheck = {
   httpStatus: number | null
   discordCode?: number | null
   detail?: string
+  retryAfterMs?: number | null
+  globalRateLimit?: boolean
 }
 
 export type DiscordMemberDiagnostic = DiscordCheck & { discordId: string }
@@ -57,22 +59,47 @@ function numericCode(body: DiscordBody | null) {
   return typeof body?.code === "number" ? body.code : null
 }
 
-function checkFromResponse(status: number, body: DiscordBody | null, okClassification: DiscordMemberClassification): DiscordCheck {
+function rateLimitDelayMs(body: DiscordBody | null, headers: Headers) {
+  const headerValue = headers.get("retry-after")
+  const bodyValue = typeof body?.retry_after === "number" ? body.retry_after : null
+  const fallbackValue = headers.get("x-ratelimit-reset-after")
+  const seconds = headerValue !== null
+    ? Number(headerValue)
+    : bodyValue !== null
+      ? bodyValue
+      : fallbackValue !== null
+        ? Number(fallbackValue)
+        : 0
+  return Number.isFinite(seconds) && seconds >= 0 ? Math.round(seconds * 1000) : 0
+}
+
+function isGlobalRateLimit(body: DiscordBody | null, headers: Headers) {
+  return body?.global === true || headers.get("x-ratelimit-global")?.toLowerCase() === "true"
+}
+
+function checkFromResponse(status: number, body: DiscordBody | null, okClassification: DiscordMemberClassification, headers = new Headers()): DiscordCheck {
   const code = numericCode(body)
   if (status >= 200 && status < 300) return { classification: okClassification, httpStatus: status, discordCode: code }
   if (status === 401) return { classification: "BOT_AUTHENTICATION_FAILURE", httpStatus: status, discordCode: code, detail: compactReason(body, "Discord rejected the bot credential") }
   if (status === 403) return { classification: "BOT_PERMISSION_FAILURE", httpStatus: status, discordCode: code, detail: compactReason(body, "Discord denied the bot request") }
-  if (status === 429) return { classification: "DISCORD_RATE_LIMIT", httpStatus: status, discordCode: code, detail: "Discord rate limited the read-only request" }
+  if (status === 429) return {
+    classification: "DISCORD_RATE_LIMIT",
+    httpStatus: status,
+    discordCode: code,
+    detail: "Discord rate limited the read-only request",
+    retryAfterMs: rateLimitDelayMs(body, headers),
+    globalRateLimit: isGlobalRateLimit(body, headers),
+  }
   if (status >= 500 && status <= 599) return { classification: "DISCORD_API_FAILURE", httpStatus: status, discordCode: code, detail: compactReason(body, "Discord returned a server error") }
   return { classification: "UNKNOWN_VERIFICATION_ERROR", httpStatus: status, discordCode: code, detail: compactReason(body, "Discord returned an unexpected response") }
 }
 
-function memberCheck(status: number, body: DiscordBody | null): DiscordCheck {
+function memberCheck(status: number, body: DiscordBody | null, headers = new Headers()): DiscordCheck {
   const code = numericCode(body)
   if (status >= 200 && status < 300) return { classification: "CONFIRMED_GUILD_MEMBER", httpStatus: status, discordCode: code }
   if (status === 404 && code === 10007) return { classification: "NOT_IN_GUILD", httpStatus: status, discordCode: code, detail: "Discord reports Unknown Member for this guild" }
   if (status === 404 && code === 10013) return { classification: "UNKNOWN_DISCORD_USER", httpStatus: status, discordCode: code, detail: "Discord reports Unknown User for this ID" }
-  return checkFromResponse(status, body, "CONFIRMED_GUILD_MEMBER")
+  return checkFromResponse(status, body, "CONFIRMED_GUILD_MEMBER", headers)
 }
 
 function config() {
@@ -87,25 +114,42 @@ export function createTournamentDiscordAdapter(options: { token?: string | null;
   const token = options.token === undefined ? defaults.token : options.token
   const adminIds = options.adminIds || defaults.adminIds
   const fetchImpl = options.fetchImpl || fetch
+  const successfulResponses = new Map<string, { body: DiscordBody | null; error: string | null; status: number; headers: Headers }>()
+  let globalCooldownUntil = 0
 
   async function request(path: string, init: RequestInit = {}) {
-    if (!token) return { body: null as DiscordBody | null, error: "Discord bot credentials are not configured", status: null as number | null }
+    if (!token) return { body: null as DiscordBody | null, error: "Discord bot credentials are not configured", status: null as number | null, headers: new Headers() }
+    const method = (init.method || "GET").toUpperCase()
+    if (method === "GET") {
+      const cached = successfulResponses.get(path)
+      if (cached) return cached
+    }
     let lastStatus = 0
     let lastBody: DiscordBody | null = null
+    let lastHeaders = new Headers()
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt += 1) {
+      const remainingGlobalCooldown = globalCooldownUntil - Date.now()
+      if (remainingGlobalCooldown > 0) await new Promise((resolve) => setTimeout(resolve, remainingGlobalCooldown))
       const response = await fetchImpl(`${DISCORD_API_BASE}${path}`, {
         ...init,
         headers: { Authorization: `Bot ${token}`, "Content-Type": "application/json", ...(init.headers || {}) },
       })
+      lastHeaders = response.headers
       const raw = await response.text().catch(() => "")
       try { lastBody = raw ? JSON.parse(raw) as DiscordBody : null } catch { lastBody = null }
-      if (response.ok) return { body: lastBody, error: null as string | null, status: response.status }
+      if (response.ok) {
+        const result = { body: lastBody, error: null as string | null, status: response.status, headers: lastHeaders }
+        if (method === "GET") successfulResponses.set(path, result)
+        return result
+      }
       lastStatus = response.status
-      if (![429, 500, 502, 503, 504].includes(response.status) || attempt === MAX_RETRIES) break
-      const retryAfter = Number(response.headers.get("retry-after") || "0")
-      if (retryAfter > 0 && retryAfter < 5) await new Promise((resolve) => setTimeout(resolve, Math.ceil(retryAfter * 1000)))
+      if (response.status !== 429 && ![500, 502, 503, 504].includes(response.status)) break
+      if (attempt === MAX_RETRIES) break
+      const retryAfterMs = response.status === 429 ? rateLimitDelayMs(lastBody, lastHeaders) : 0
+      if (response.status === 429 && isGlobalRateLimit(lastBody, lastHeaders)) globalCooldownUntil = Math.max(globalCooldownUntil, Date.now() + retryAfterMs)
+      if (retryAfterMs > 0) await new Promise((resolve) => setTimeout(resolve, retryAfterMs))
     }
-    return { body: lastBody, error: compactReason(lastBody, `Discord returned status ${lastStatus}`), status: lastStatus }
+    return { body: lastBody, error: compactReason(lastBody, `Discord returned status ${lastStatus}`), status: lastStatus, headers: lastHeaders }
   }
 
   async function verifyConnection(input: { playerIds: string[]; adminIds: string[] }): Promise<DiscordVerification> {
@@ -114,13 +158,14 @@ export function createTournamentDiscordAdapter(options: { token?: string | null;
     const channels = await request(`/guilds/${TOURNAMENT_GUILD_ID}/channels`)
     const roles = await request(`/guilds/${TOURNAMENT_GUILD_ID}/roles`)
     const ids = [...new Set([...input.playerIds, ...input.adminIds, ...adminIds])]
-    const members = await Promise.all(ids.map(async (playerId) => {
+    const members: DiscordMemberDiagnostic[] = []
+    for (const playerId of ids) {
       const result = await request(`/guilds/${TOURNAMENT_GUILD_ID}/members/${encodeURIComponent(playerId)}`)
       const diagnostic = result.status === null
         ? { classification: "BOT_AUTHENTICATION_FAILURE" as const, httpStatus: null, detail: result.error || "Discord bot credential is not configured" }
-        : memberCheck(result.status, result.body)
-      return { discordId: playerId, ...diagnostic }
-    }))
+        : memberCheck(result.status, result.body, result.headers)
+      members.push({ discordId: playerId, ...diagnostic })
+    }
     const channelRows = Array.isArray(channels.body) ? channels.body as unknown as GuildChannel[] : []
     const roleRows = Array.isArray(roles.body) ? roles.body as unknown as GuildRole[] : []
     const category = channelRows.find((channel) => channel.name === CATEGORY_NAME && channel.type === 4)
@@ -131,13 +176,13 @@ export function createTournamentDiscordAdapter(options: { token?: string | null;
     const verifiedAdminCount = new Set(input.adminIds.filter((id) => confirmedIds.has(id))).size
     const botCheck = bot.status === null
       ? { classification: "BOT_AUTHENTICATION_FAILURE" as const, httpStatus: null, detail: bot.error || "Discord bot credential is not configured" }
-      : checkFromResponse(bot.status, bot.body, "CHECK_OK")
+      : checkFromResponse(bot.status, bot.body, "CHECK_OK", bot.headers)
     const channelsCheck = channels.status === null
       ? { classification: "BOT_AUTHENTICATION_FAILURE" as const, httpStatus: null, detail: channels.error || "Discord bot credential is not configured" }
-      : checkFromResponse(channels.status, channels.body, "CHECK_OK")
+      : checkFromResponse(channels.status, channels.body, "CHECK_OK", channels.headers)
     const rolesCheck = roles.status === null
       ? { classification: "BOT_AUTHENTICATION_FAILURE" as const, httpStatus: null, detail: roles.error || "Discord bot credential is not configured" }
-      : checkFromResponse(roles.status, roles.body, "CHECK_OK")
+      : checkFromResponse(roles.status, roles.body, "CHECK_OK", roles.headers)
     const infrastructureFailed = [botCheck, channelsCheck, rolesCheck].some((check) => check.classification !== "CHECK_OK")
     const memberFailure = members.find((member) => member.classification !== "CONFIRMED_GUILD_MEMBER")
     return {

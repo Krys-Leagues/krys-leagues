@@ -88,6 +88,8 @@ export async function POST(request: Request) {
           classification: result.classification,
           httpStatus: result.httpStatus,
           discordCode: result.discordCode ?? null,
+          retryAfterMs: result.retryAfterMs ?? null,
+          globalRateLimit: result.globalRateLimit ?? false,
           detail: result.detail || null,
         }
       })
