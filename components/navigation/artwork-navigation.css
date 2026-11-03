@@ -73,14 +73,14 @@
 .artwork-navigation__mga-link {
   display: block;
   width: 52%;
-  height: auto;
+  aspect-ratio: 2048 / 430;
   margin-inline: auto;
+  overflow: hidden;
   transition: filter 160ms ease, transform 160ms ease;
 }
 
 .artwork-navigation__mga-section {
   width: 100%;
-  margin-top: -30px;
 }
 
 .artwork-navigation__mga-link:hover,
@@ -97,9 +97,9 @@
 .artwork-navigation__mga-artwork {
   display: block;
   width: 100%;
-  height: auto;
-  object-fit: contain;
-  object-position: center;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 52%;
   user-select: none;
 }
 
@@ -368,14 +368,11 @@
 
   .artwork-navigation__mga-link {
     width: 92%;
+    aspect-ratio: 2048 / 430;
   }
 
   .artwork-navigation__course-challenges-preview-banner {
     width: 92%;
-  }
-
-  .artwork-navigation__mga-section {
-    margin-top: -14px;
   }
 
 
