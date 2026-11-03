@@ -44,7 +44,7 @@ test("active Main Hub route is artwork-only and keeps the approved destinations"
     ["KWT", "/kwt"],
     ["Monthlies", "https://dqvo64m7q9ujvqa-wmgt23ai.adb.us-ashburn-1.oraclecloudapps.com/ords/r/wmgt/monthly/home"],
     ["Bracket Tournaments", "https://54321.krysleagues.com"],
-    ["Overall Leaderboards", "https://krys-leagues-all-time-records-krys-leagues-projects.vercel.app/"],
+    ["Overall Leaderboards", "/records"],
     ["Major Championships", "/majors"],
     ["Hall of Champions", "/champions"],
     ["Admin Login", "/admin"],
@@ -112,7 +112,7 @@ test("main hub has exactly the approved destinations", () => {
     "/kwt",
     "https://dqvo64m7q9ujvqa-wmgt23ai.adb.us-ashburn-1.oraclecloudapps.com/ords/r/wmgt/monthly/home",
     "https://54321.krysleagues.com",
-    "https://krys-leagues-all-time-records-krys-leagues-projects.vercel.app/",
+    "/records",
     "/majors",
     "/champions",
     "/admin",
@@ -125,8 +125,8 @@ test("Main Hub Overall Leaderboards opens the current page, not the legacy hub",
   const alias = read("app/leaderboards/page.tsx")
   const page = read("app/records/page.tsx")
 
-  assert.equal(target?.href, "https://krys-leagues-all-time-records-krys-leagues-projects.vercel.app/")
-  assert.equal(target?.external, true)
+  assert.equal(target?.href, "/records")
+  assert.equal(target?.external, false)
   assert.match(alias, /redirect\("\/records"\)/)
   assert.match(page, /ArtworkNavigation/)
   assert.match(page, /overallLeaderboardsArtwork/)
