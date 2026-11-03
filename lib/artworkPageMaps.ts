@@ -12,7 +12,7 @@ export const mainHubArtwork: ArtworkPageDefinition = {
     { id: "league-play", label: "League Play", href: "/league-play", x: 64.0, y: 58.7, width: 24.8, height: 8.5 },
     { id: "kwt", label: "KWT", href: "/kwt", x: 11.9, y: 69.3, width: 24.8, height: 8.5 },
     { id: "monthlies", label: "Monthlies", href: "https://dqvo64m7q9ujvqa-wmgt23ai.adb.us-ashburn-1.oraclecloudapps.com/ords/r/wmgt/monthly/home", external: true, x: 38.2, y: 69.3, width: 24.8, height: 8.5 },
-    { id: "bracket-tournaments", label: "Bracket Tournaments", href: "/tournaments", x: 64.0, y: 69.3, width: 24.8, height: 8.5 },
+    { id: "bracket-tournaments", label: "Bracket Tournaments", href: "https://54321.krysleagues.com", external: true, x: 64.0, y: 69.3, width: 24.8, height: 8.5 },
     { id: "overall-leaderboards", label: "Overall Leaderboards", href: "https://krys-leagues-all-time-records-krys-leagues-projects.vercel.app/", external: true, x: 11.9, y: 80.2, width: 24.8, height: 8.5 },
     { id: "invitationals", label: "Invitationals", href: "/invitationals", x: 38.2, y: 80.2, width: 24.8, height: 8.5 },
     { id: "hall-of-champions", label: "Hall of Champions", href: "/champions", x: 64.0, y: 80.2, width: 24.8, height: 8.5 },

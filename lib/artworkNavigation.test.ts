@@ -42,12 +42,13 @@ test("active Main Hub route is artwork-only and keeps the approved destinations"
     ["League Play", "/league-play"],
     ["KWT", "/kwt"],
     ["Monthlies", "https://dqvo64m7q9ujvqa-wmgt23ai.adb.us-ashburn-1.oraclecloudapps.com/ords/r/wmgt/monthly/home"],
-    ["Bracket Tournaments", "/tournaments"],
+    ["Bracket Tournaments", "https://54321.krysleagues.com"],
     ["Overall Leaderboards", "https://krys-leagues-all-time-records-krys-leagues-projects.vercel.app/"],
     ["Invitationals", "/invitationals"],
     ["Hall of Champions", "/champions"],
     ["Admin Login", "/admin"],
   ])
+  assert.equal(mainHubArtwork.targets.find(({ id }) => id === "bracket-tournaments")?.external, true)
 })
 
 test("Course Challenges banner preview precedes the preserved Admin Login action", () => {
@@ -103,7 +104,7 @@ test("main hub has exactly the approved destinations", () => {
     "/league-play",
     "/kwt",
     "https://dqvo64m7q9ujvqa-wmgt23ai.adb.us-ashburn-1.oraclecloudapps.com/ords/r/wmgt/monthly/home",
-    "/tournaments",
+    "https://54321.krysleagues.com",
     "https://krys-leagues-all-time-records-krys-leagues-projects.vercel.app/",
     "/invitationals",
     "/champions",
