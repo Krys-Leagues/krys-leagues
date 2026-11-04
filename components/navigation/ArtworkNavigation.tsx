@@ -6,6 +6,7 @@ import { artworkTargetStyle, validateArtworkTargets } from "@/lib/artworkNavigat
 
 export function ArtworkNavigation({
   definition,
+  artworkTreatment,
   overlay,
   afterFrame,
   afterTargets,
@@ -15,6 +16,7 @@ export function ArtworkNavigation({
   frameClassName,
 }: {
   definition: ArtworkPageDefinition
+  artworkTreatment?: ReactNode
   overlay?: ReactNode
   afterFrame?: ReactNode
   afterTargets?: ReactNode
@@ -47,6 +49,7 @@ export function ArtworkNavigation({
           sizes="(max-width: 1664px) 100vw, 1664px"
           draggable={false}
         />
+        {artworkTreatment}
         {overlay ? <div className="artwork-navigation__overlay">{overlay}</div> : null}
         <nav aria-label={`${definition.title} navigation`} className="artwork-navigation__targets">
           {definition.targets.filter((target) => !hiddenTargetIds.includes(target.id)).map((target) => (
