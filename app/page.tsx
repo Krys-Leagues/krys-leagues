@@ -1,6 +1,5 @@
 
 import { ArtworkNavigation } from "@/components/navigation/ArtworkNavigation"
-import { MainHubButtonClarity } from "@/components/navigation/MainHubButtonClarity"
 import CupSignupAnnouncement from "@/components/announcements/CupSignupAnnouncement"
 import MastersLiveAnnouncement from "@/components/announcements/MastersLiveAnnouncement"
 import MastersWinnerVideo from "@/components/announcements/MastersWinnerVideo"
@@ -21,7 +20,6 @@ export default function HomePage() {
       </main>
       <ArtworkNavigation
         definition={mainHubArtwork}
-        artworkTreatment={<MainHubButtonClarity imageSrc={mainHubArtwork.imageSrc} />}
         unoptimized
         hiddenTargetIds={[mainHubAdminTarget.id]}
         afterTargets={

@@ -16,8 +16,8 @@ test("approved artwork maps are valid and non-overlapping", () => {
 test("Main Hub uses the full approved artwork and preserves existing functionality", () => {
   const page = read("app/page.tsx")
   assert.equal(mainHubArtwork.id, "main-hub")
-  assert.equal(mainHubArtwork.imageSrc, "/approved-pages/main-hub-owner-approved.png")
-  assert.equal(mainHubArtwork.aspectRatio, "792 / 686")
+  assert.equal(mainHubArtwork.imageSrc, "/approved-pages/main-hub-neon-master.png")
+  assert.equal(mainHubArtwork.aspectRatio, "1336 / 1177")
   assert.match(page, /ArtworkNavigation/)
   assert.match(page, /mainHubArtwork/)
   assert.doesNotMatch(page, /Season 59|Player Dashboard|League Records|card-grid|fallback/i)
@@ -119,10 +119,10 @@ test("KWT artwork scopes the real public destinations", () => {
 test("percentage mapping is responsive and deterministic", () => {
   const target = mainHubArtwork.targets.find((item) => item.id === "kwt")!
   assert.deepEqual(artworkTargetStyle(target), {
-    left: `${(50 / 792) * 100}%`,
-    top: `${(329 / 686) * 100}%`,
-    width: `${(216 / 792) * 100}%`,
-    height: `${(48 / 686) * 100}%`,
+    left: `${(99 / 1336) * 100}%`,
+    top: `${(488 / 1177) * 100}%`,
+    width: `${(378 / 1336) * 100}%`,
+    height: `${(87 / 1177) * 100}%`,
   })
 })
 
