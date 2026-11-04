@@ -13,12 +13,17 @@ test("approved artwork maps are valid and non-overlapping", () => {
   assert.deepEqual(validateArtworkTargets(kwtArtwork.targets), [])
 })
 
-test("active Main Hub route is artwork-only and keeps the approved destinations", () => {
+test("Main Hub uses the full approved artwork and preserves existing functionality", () => {
   const page = read("app/page.tsx")
   assert.equal(mainHubArtwork.id, "main-hub")
+  assert.equal(mainHubArtwork.imageSrc, "/approved-pages/main-hub-owner-approved.png")
+  assert.equal(mainHubArtwork.aspectRatio, "792 / 686")
   assert.match(page, /ArtworkNavigation/)
   assert.match(page, /mainHubArtwork/)
   assert.doesNotMatch(page, /Season 59|Player Dashboard|League Records|card-grid|fallback/i)
+  for (const component of ["MastersWinnerVideo", "CupSignupAnnouncement", "MastersLiveAnnouncement", "YouTubeLiveLauncher"]) {
+    assert.match(page, new RegExp(`<${component}\\b`))
+  }
   assert.deepEqual(mainHubArtwork.targets.map(({ label, href }) => [label, href]), [
     ["Player Profiles", "/players"],
     ["Join Leagues", "/join"],
@@ -27,8 +32,9 @@ test("active Main Hub route is artwork-only and keeps the approved destinations"
     ["Monthlies", "/monthlies"],
     ["Bracket Tournaments", "/tournaments"],
     ["Overall Leaderboards", "/leaderboards"],
-    ["Invitationals", "/invitationals"],
+    ["Major Championships", "/invitationals"],
     ["Hall of Champions", "/champions"],
+    ["Course Challenges", "/course-challenges"],
     ["Admin Login", "/admin"],
   ])
 })
@@ -63,7 +69,7 @@ test("artwork navigation exposes stable page identity markers", () => {
   assert.match(component, /definition\.imageSrc/)
 })
 
-test("main hub has exactly the approved destinations", () => {
+test("main hub keeps the Production destinations", () => {
   assert.deepEqual(mainHubArtwork.targets.map((target) => target.href), [
     "/players",
     "/join",
@@ -74,6 +80,7 @@ test("main hub has exactly the approved destinations", () => {
     "/leaderboards",
     "/invitationals",
     "/champions",
+    "/course-challenges",
     "/admin",
   ])
   assert.equal(mainHubArtwork.targets.some((target) => ["/dashboard", "/standings"].includes(target.href)), false)
@@ -111,7 +118,12 @@ test("KWT artwork scopes the real public destinations", () => {
 
 test("percentage mapping is responsive and deterministic", () => {
   const target = mainHubArtwork.targets.find((item) => item.id === "kwt")!
-  assert.deepEqual(artworkTargetStyle(target), { left: "11.9%", top: "69.3%", width: "24.8%", height: "8.5%" })
+  assert.deepEqual(artworkTargetStyle(target), {
+    left: `${(50 / 792) * 100}%`,
+    top: `${(329 / 686) * 100}%`,
+    width: `${(216 / 792) * 100}%`,
+    height: `${(48 / 686) * 100}%`,
+  })
 })
 
 test("overlapping targets are rejected", () => {

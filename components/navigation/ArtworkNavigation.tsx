@@ -8,6 +8,8 @@ export function ArtworkNavigation({
   definition,
   overlay,
   afterFrame,
+  afterTargets,
+  unoptimized,
   hiddenTargetIds = [],
   frameAspectRatio,
   frameClassName,
@@ -15,6 +17,8 @@ export function ArtworkNavigation({
   definition: ArtworkPageDefinition
   overlay?: ReactNode
   afterFrame?: ReactNode
+  afterTargets?: ReactNode
+  unoptimized?: boolean
   hiddenTargetIds?: readonly string[]
   frameAspectRatio?: string
   frameClassName?: string
@@ -38,6 +42,7 @@ export function ArtworkNavigation({
           src={definition.imageSrc}
           alt={definition.imageAlt}
           fill
+          unoptimized={unoptimized}
           priority
           sizes="(max-width: 1664px) 100vw, 1664px"
           draggable={false}
@@ -56,6 +61,7 @@ export function ArtworkNavigation({
               <span className="sr-only">{target.label}</span>
             </Link>
           ))}
+          {afterTargets}
         </nav>
       </div>
       {afterFrame ? <div className="artwork-navigation__after-frame">{afterFrame}</div> : null}

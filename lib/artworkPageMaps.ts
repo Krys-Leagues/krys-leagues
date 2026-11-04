@@ -1,22 +1,51 @@
 import type { ArtworkPageDefinition, ArtworkTarget } from "./artworkNavigation"
 
+const mainHubWidth = 792
+const mainHubHeight = 686
+
+function mainHubTarget(
+  destination: Omit<ArtworkTarget, "x" | "y" | "width" | "height">,
+  [x, y, width, height]: readonly [number, number, number, number],
+): ArtworkTarget {
+  return {
+    ...destination,
+    x: (x / mainHubWidth) * 100,
+    y: (y / mainHubHeight) * 100,
+    width: (width / mainHubWidth) * 100,
+    height: (height / mainHubHeight) * 100,
+  }
+}
+
+export const mainHubAdminTarget = mainHubTarget(
+  { id: "admin-login", label: "Admin Login", href: "/admin" },
+  [315, 639, 119, 32],
+)
+
+export const mainHubYouTubeStyle = {
+  left: `${(300 / mainHubWidth) * 100}%`,
+  top: `${(605 / mainHubHeight) * 100}%`,
+  width: `${(149 / mainHubWidth) * 100}%`,
+  height: `${(24 / mainHubHeight) * 100}%`,
+}
+
 export const mainHubArtwork: ArtworkPageDefinition = {
   id: "main-hub",
   title: "Krys Leagues Main Hub",
-  imageSrc: "/main-hub-approved.jpg",
-  imageAlt: "Krys Leagues main hub with nine navigation panels and an Admin Login panel",
-  aspectRatio: "1664 / 938",
+  imageSrc: "/approved-pages/main-hub-owner-approved.png",
+  imageAlt: "Krys Leagues. The MGA Championship — Registration Now Open.",
+  aspectRatio: `${mainHubWidth} / ${mainHubHeight}`,
   targets: [
-    { id: "player-profiles", label: "Player Profiles", href: "/players", x: 11.9, y: 58.7, width: 24.8, height: 8.5 },
-    { id: "join-leagues", label: "Join Leagues", href: "/join", x: 38.2, y: 58.7, width: 24.8, height: 8.5 },
-    { id: "league-play", label: "League Play", href: "/league-play", x: 64.0, y: 58.7, width: 24.8, height: 8.5 },
-    { id: "kwt", label: "KWT", href: "/kwt", x: 11.9, y: 69.3, width: 24.8, height: 8.5 },
-    { id: "monthlies", label: "Monthlies", href: "/monthlies", x: 38.2, y: 69.3, width: 24.8, height: 8.5 },
-    { id: "bracket-tournaments", label: "Bracket Tournaments", href: "/tournaments", x: 64.0, y: 69.3, width: 24.8, height: 8.5 },
-    { id: "overall-leaderboards", label: "Overall Leaderboards", href: "/leaderboards", x: 11.9, y: 80.2, width: 24.8, height: 8.5 },
-    { id: "invitationals", label: "Invitationals", href: "/invitationals", x: 38.2, y: 80.2, width: 24.8, height: 8.5 },
-    { id: "hall-of-champions", label: "Hall of Champions", href: "/champions", x: 64.0, y: 80.2, width: 24.8, height: 8.5 },
-    { id: "admin-login", label: "Admin Login", href: "/admin", x: 42.8, y: 90.7, width: 14.4, height: 7.0 },
+    mainHubTarget({ id: "player-profiles", label: "Player Profiles", href: "/players" }, [50, 277, 216, 50]),
+    mainHubTarget({ id: "join-leagues", label: "Join Leagues", href: "/join" }, [270, 277, 212, 50]),
+    mainHubTarget({ id: "league-play", label: "League Play", href: "/league-play" }, [486, 277, 212, 50]),
+    mainHubTarget({ id: "kwt", label: "KWT", href: "/kwt" }, [50, 329, 216, 48]),
+    mainHubTarget({ id: "monthlies", label: "Monthlies", href: "/monthlies" }, [270, 329, 212, 48]),
+    mainHubTarget({ id: "bracket-tournaments", label: "Bracket Tournaments", href: "/tournaments" }, [486, 329, 212, 48]),
+    mainHubTarget({ id: "overall-leaderboards", label: "Overall Leaderboards", href: "/leaderboards" }, [50, 379, 216, 51]),
+    mainHubTarget({ id: "invitationals", label: "Major Championships", href: "/invitationals" }, [274, 378, 200, 49]),
+    mainHubTarget({ id: "hall-of-champions", label: "Hall of Champions", href: "/champions" }, [486, 379, 212, 51]),
+    mainHubTarget({ id: "course-challenges", label: "Course Challenges", href: "/course-challenges" }, [177, 443, 393, 64]),
+    mainHubAdminTarget,
   ],
 }
 
