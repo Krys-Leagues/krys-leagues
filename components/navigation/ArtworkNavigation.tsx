@@ -58,6 +58,16 @@ export function ArtworkNavigation({
               style={artworkTargetStyle(target)}
               data-artwork-target-id={target.id}
             >
+              {target.artworkSrc && (
+                <Image
+                  src={target.artworkSrc}
+                  alt=""
+                  fill
+                  unoptimized
+                  draggable={false}
+                  className="pointer-events-none select-none object-contain"
+                />
+              )}
               <span className="sr-only">{target.label}</span>
             </Link>
           ))}

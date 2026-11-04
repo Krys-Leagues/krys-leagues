@@ -42,7 +42,12 @@ export const mainHubArtwork: ArtworkPageDefinition = {
     mainHubTarget({ id: "monthlies", label: "Monthlies", href: "/monthlies" }, [270, 329, 212, 48]),
     mainHubTarget({ id: "bracket-tournaments", label: "Bracket Tournaments", href: "/tournaments" }, [486, 329, 212, 48]),
     mainHubTarget({ id: "overall-leaderboards", label: "Overall Leaderboards", href: "/leaderboards" }, [50, 379, 216, 51]),
-    mainHubTarget({ id: "invitationals", label: "Major Championships", href: "/invitationals" }, [274, 378, 200, 49]),
+    mainHubTarget({
+      id: "invitationals",
+      label: "Major Championships",
+      href: "/invitationals",
+      artworkSrc: "/approved-pages/main-hub-major-championships-gold.png",
+    }, [270, 379, 212, 51]),
     mainHubTarget({ id: "hall-of-champions", label: "Hall of Champions", href: "/champions" }, [486, 379, 212, 51]),
     mainHubTarget({ id: "course-challenges", label: "Course Challenges", href: "/course-challenges" }, [177, 443, 393, 64]),
     mainHubAdminTarget,

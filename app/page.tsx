@@ -8,6 +8,9 @@ import { artworkTargetStyle } from "@/lib/artworkNavigation"
 import { mainHubAdminTarget, mainHubArtwork, mainHubYouTubeStyle } from "@/lib/artworkPageMaps"
 import Link from "next/link"
 
+const showCupSignupPromotion = process.env.MAIN_HUB_SHOW_CUP_SIGNUPS === "true"
+const showMastersPromotion = process.env.MAIN_HUB_SHOW_MASTERS_PROMOTION === "true"
+
 export default function HomePage() {
   return (
     <>
@@ -35,10 +38,12 @@ export default function HomePage() {
           </div>
         }
       />
-      <div className="artwork-navigation__hub-utility-stack" aria-label="Players Hub utilities">
-        <CupSignupAnnouncement />
-        <MastersLiveAnnouncement />
-      </div>
+      {(showCupSignupPromotion || showMastersPromotion) && (
+        <div className="artwork-navigation__hub-utility-stack" aria-label="Players Hub utilities">
+          {showCupSignupPromotion && <CupSignupAnnouncement />}
+          {showMastersPromotion && <MastersLiveAnnouncement />}
+        </div>
+      )}
     </>
   )
 }

@@ -2,6 +2,7 @@ export type ArtworkTarget = {
   id: string
   label: string
   href: string
+  artworkSrc?: string
   x: number
   y: number
   width: number
