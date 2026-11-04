@@ -14,6 +14,18 @@ const buttonAreas = [
 
 const tone = "0 0.13 0.34 0.56 0.74 0.88 0.97 1"
 
+// Keep the original line breaks and left edge of each printed label.
+const buttonLabels = [
+  { x: 141, y: 299.5, lines: ["PLAYER", "PROFILES"] },
+  { x: 346, y: 299.5, lines: ["JOIN", "LEAGUES"] },
+  { x: 552, y: 299.5, lines: ["LEAGUE", "PLAY"] },
+  { x: 151, y: 359, lines: ["KWT"] },
+  { x: 337, y: 359, lines: ["MONTHLIES"] },
+  { x: 551, y: 352.5, lines: ["BRACKET", "TOURNAMENTS"] },
+  { x: 142, y: 402.5, lines: ["OVERALL", "LEADERBOARDS"] },
+  { x: 560, y: 402.5, lines: ["HALL OF", "CHAMPIONS"] },
+] as const
+
 export function MainHubButtonClarity({ imageSrc }: { imageSrc: string }) {
   return (
     <>
@@ -47,19 +59,57 @@ export function MainHubButtonClarity({ imageSrc }: { imageSrc: string }) {
           </filter>
         </defs>
       </svg>
-      <Image
-        src={imageSrc}
-        alt=""
+      <div
         aria-hidden="true"
-        fill
-        unoptimized
-        draggable={false}
-        className="artwork-navigation__image pointer-events-none"
+        className="pointer-events-none absolute inset-0"
         style={{
           clipPath: "url(#main-hub-button-areas)",
           filter: "url(#main-hub-button-clarity)",
         }}
-      />
+      >
+        <Image src={imageSrc} alt="" fill unoptimized draggable={false} className="artwork-navigation__image" />
+        <Image
+          src="/approved-pages/main-hub-label-backgrounds.png"
+          alt=""
+          fill
+          unoptimized
+          draggable={false}
+          className="artwork-navigation__image"
+        />
+      </div>
+      <svg
+        viewBox="0 0 792 686"
+        preserveAspectRatio="none"
+        className="pointer-events-none absolute inset-0 h-full w-full"
+        aria-hidden="true"
+        style={{ fontFamily: "var(--font-geist-sans), Arial, sans-serif" }}
+      >
+        <defs>
+          <linearGradient id="main-hub-label-ink" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor="#fff" />
+            <stop offset="68%" stopColor="#fff" />
+            <stop offset="100%" stopColor="#e9f6ff" />
+          </linearGradient>
+        </defs>
+        <g
+          fill="url(#main-hub-label-ink)"
+          stroke="#070811"
+          strokeWidth="1.6"
+          strokeLinejoin="round"
+          paintOrder="stroke fill"
+          fontSize="10.5"
+          fontWeight="850"
+          letterSpacing="0.12"
+        >
+          {buttonLabels.map(({ x, y, lines }) => (
+            <text key={lines[0]} x={x} y={y}>
+              {lines.map((line, index) => (
+                <tspan key={line} x={x} dy={index === 0 ? 0 : 11.5}>{line}</tspan>
+              ))}
+            </text>
+          ))}
+        </g>
+      </svg>
     </>
   )
 }
