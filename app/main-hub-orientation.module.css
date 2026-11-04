@@ -1,0 +1,30 @@
+.rotateNotice {
+  display: none;
+}
+
+.hub {
+  display: contents;
+}
+
+@media (max-width: 767px) and (orientation: portrait) {
+  .hub {
+    display: none;
+  }
+
+  .rotateNotice {
+    display: grid;
+    min-height: 100vh;
+    min-height: 100dvh;
+    place-items: center;
+    padding: 1.5rem;
+    background: #000;
+    color: #fff;
+    font-size: 1.25rem;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .rotateNotice p {
+    max-width: 24ch;
+  }
+}
