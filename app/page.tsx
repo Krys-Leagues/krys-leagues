@@ -19,39 +19,37 @@ export default function HomePage() {
       <main className={styles.rotateNotice}>
         <p>Please turn your phone sideways to view Krys&apos; Leagues.</p>
       </main>
-      <div className={styles.hub}>
-        <ArtworkNavigation
-          definition={mainHubArtwork}
-          artworkTreatment={<MainHubButtonClarity imageSrc={mainHubArtwork.imageSrc} />}
-          unoptimized
-          hiddenTargetIds={[mainHubAdminTarget.id]}
-          afterTargets={
-            <>
-              <YouTubeLiveLauncher artworkStyle={mainHubYouTubeStyle} />
-              <Link
-                href={mainHubAdminTarget.href}
-                aria-label={mainHubAdminTarget.label}
-                className="artwork-navigation__target"
-                style={artworkTargetStyle(mainHubAdminTarget)}
-                data-artwork-target-id={mainHubAdminTarget.id}
-              >
-                <span className="sr-only">{mainHubAdminTarget.label}</span>
-              </Link>
-            </>
-          }
-          afterFrame={
-            <div className="artwork-navigation__hub-after-frame-layout">
-              <MastersWinnerVideo />
-            </div>
-          }
-        />
-        {(showCupSignupPromotion || showMastersPromotion) && (
-          <div className="artwork-navigation__hub-utility-stack" aria-label="Players Hub utilities">
-            {showCupSignupPromotion && <CupSignupAnnouncement />}
-            {showMastersPromotion && <MastersLiveAnnouncement />}
+      <ArtworkNavigation
+        definition={mainHubArtwork}
+        artworkTreatment={<MainHubButtonClarity imageSrc={mainHubArtwork.imageSrc} />}
+        unoptimized
+        hiddenTargetIds={[mainHubAdminTarget.id]}
+        afterTargets={
+          <>
+            <YouTubeLiveLauncher artworkStyle={mainHubYouTubeStyle} />
+            <Link
+              href={mainHubAdminTarget.href}
+              aria-label={mainHubAdminTarget.label}
+              className="artwork-navigation__target"
+              style={artworkTargetStyle(mainHubAdminTarget)}
+              data-artwork-target-id={mainHubAdminTarget.id}
+            >
+              <span className="sr-only">{mainHubAdminTarget.label}</span>
+            </Link>
+          </>
+        }
+        afterFrame={
+          <div className="artwork-navigation__hub-after-frame-layout">
+            <MastersWinnerVideo />
           </div>
-        )}
-      </div>
+        }
+      />
+      {(showCupSignupPromotion || showMastersPromotion) && (
+        <div className="artwork-navigation__hub-utility-stack" aria-label="Players Hub utilities">
+          {showCupSignupPromotion && <CupSignupAnnouncement />}
+          {showMastersPromotion && <MastersLiveAnnouncement />}
+        </div>
+      )}
     </>
   )
 }
