@@ -38,7 +38,7 @@ type UnresolvedObservationRow = {
   historical_player_name: string
 }
 
-export function individualCourseLabel(course: AllTimeCourse) {
+function individualCourseLabel(course: AllTimeCourse) {
   const name = course.display_name.toLowerCase().endsWith(course.difficulty.toLowerCase())
     ? course.display_name
     : `${course.display_name} ${course.difficulty}`

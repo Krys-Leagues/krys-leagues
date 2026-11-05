@@ -5,18 +5,17 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 
 import ExistingPlayerPicker from "@/app/admin/import/csv/components/ExistingPlayerPicker"
 import type { ExistingPlayerSearchResult } from "@/lib/importer/historicalMatchIdentity"
+import { HISTORICAL_PYP_PARSER_VERSION } from "@/lib/importer/historicalPypConstants"
 import {
-  HISTORICAL_PYP_PARSER_VERSION,
-  historicalPypPreviewFingerprint,
   type HistoricalPypPairingReview,
   type HistoricalPypPreview,
   type HistoricalPypRow,
 } from "@/lib/importer/adapters/historicalPypParser"
 import {
-  historicalPypCommitFingerprint,
   type HistoricalPypIdentityDecision,
   type HistoricalPypPairingDecision,
 } from "@/lib/importer/historicalPypCommit"
+import { historicalPypClientCommitFingerprint } from "@/lib/importer/historicalPypClientCommitFingerprint"
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser"
 
 const supabase = createBrowserSupabaseClient()
@@ -133,7 +132,8 @@ export default function HistoricalPypReviewPage() {
         if (!response.ok || !next.preview) throw new Error(next.error || "Historical PYP review could not be loaded.")
         let stored: StoredReview | null = null
         try { stored = JSON.parse(localStorage.getItem(storageKey(next.sourceSha256)) || "null") as StoredReview | null } catch { stored = null }
-        const fingerprint = next.previewFingerprint || historicalPypPreviewFingerprint(next.preview)
+        if (!next.previewFingerprint) throw new Error("Historical PYP review fingerprint is missing. Refresh the review source.")
+        const fingerprint = next.previewFingerprint
         const saved = stored?.parserVersion === HISTORICAL_PYP_PARSER_VERSION && stored.previewFingerprint === fingerprint ? stored : null
         if (!cancelled) {
           setPayload(next)
@@ -224,7 +224,7 @@ export default function HistoricalPypReviewPage() {
       const token = data.session?.access_token
       if (!token) throw new Error("Your admin session expired. Sign in again.")
       const identityPayload: Record<string, HistoricalPypIdentityDecision> = Object.fromEntries(Object.entries(identityDecisions).map(([name, decision]) => [name, { ...decision, selectionSource: "manual" as const }]))
-      const fingerprint = historicalPypCommitFingerprint(payload.preview, payload.identityReviews.map((review) => ({ historicalPlayerName: review.historicalPlayerName, status: review.status, canonicalPlayerId: review.canonicalPlayerId, canonicalPlayerName: review.canonicalPlayerName })), identityPayload, pairingDecisions)
+      const fingerprint = await historicalPypClientCommitFingerprint(payload.previewFingerprint, payload.identityReviews.map((review) => ({ historicalPlayerName: review.historicalPlayerName, status: review.status, canonicalPlayerId: review.canonicalPlayerId, canonicalPlayerName: review.canonicalPlayerName })), identityPayload, pairingDecisions)
       const response = await fetch("/api/admin/historical-pyp/apply", { method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: JSON.stringify({ sourceSha256: payload.sourceSha256, commitFingerprint: fingerprint, identityDecisions: identityPayload, pairingDecisions }) })
       const result = await response.json() as { error?: string; result?: unknown }
       if (!response.ok) throw new Error(result.error || "Historical PYP commit failed.")

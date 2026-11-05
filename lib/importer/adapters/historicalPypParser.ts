@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto"
+import { HISTORICAL_PYP_PARSER_VERSION } from "../historicalPypConstants.ts"
 
-export const HISTORICAL_PYP_PARSER_VERSION = "historical-pyp-review-v2-nonblocking-unknown-opponents"
+export { HISTORICAL_PYP_PARSER_VERSION } from "../historicalPypConstants.ts"
 
 export type HistoricalPypSourceState = "PLAYED" | "UNPLAYED"
 export type HistoricalPypPairingState = "KNOWN" | "AMBIGUOUS" | "UNKNOWN" | "UNUSABLE"

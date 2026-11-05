@@ -32,9 +32,10 @@ test("Main Hub uses the full approved artwork and preserves existing functionali
     ["Monthlies", "/monthlies"],
     ["Bracket Tournaments", "/tournaments"],
     ["Overall Leaderboards", "/leaderboards"],
-    ["Major Championships", "/invitationals"],
+    ["Major Championships", "https://four-majors-hub-krys-leagues-projects.vercel.app/"],
     ["Hall of Champions", "/champions"],
     ["Course Challenges", "/course-challenges"],
+    ["The MGA Championship — Registration Now Open", "https://mga-championship-independent.vercel.app/"],
     ["Admin Login", "/admin"],
   ])
 })
@@ -78,9 +79,10 @@ test("main hub keeps the Production destinations", () => {
     "/monthlies",
     "/tournaments",
     "/leaderboards",
-    "/invitationals",
+    "https://four-majors-hub-krys-leagues-projects.vercel.app/",
     "/champions",
     "/course-challenges",
+    "https://mga-championship-independent.vercel.app/",
     "/admin",
   ])
   assert.equal(mainHubArtwork.targets.some((target) => ["/dashboard", "/standings"].includes(target.href)), false)

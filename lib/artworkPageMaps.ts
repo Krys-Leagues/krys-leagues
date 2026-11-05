@@ -42,9 +42,10 @@ export const mainHubArtwork: ArtworkPageDefinition = {
     mainHubTarget({ id: "monthlies", label: "Monthlies", href: "/monthlies" }, [478, 488, 373, 87]),
     mainHubTarget({ id: "bracket-tournaments", label: "Bracket Tournaments", href: "/tournaments" }, [852, 488, 384, 87]),
     mainHubTarget({ id: "overall-leaderboards", label: "Overall Leaderboards", href: "/leaderboards" }, [99, 578, 378, 94]),
-    mainHubTarget({ id: "invitationals", label: "Major Championships", href: "/invitationals" }, [478, 578, 373, 94]),
+    mainHubTarget({ id: "invitationals", label: "Major Championships", href: "https://four-majors-hub-krys-leagues-projects.vercel.app/" }, [478, 578, 373, 94]),
     mainHubTarget({ id: "hall-of-champions", label: "Hall of Champions", href: "/champions" }, [852, 578, 384, 94]),
     mainHubTarget({ id: "course-challenges", label: "Course Challenges", href: "/course-challenges" }, [186, 690, 963, 138]),
+    mainHubTarget({ id: "mga-registration", label: "The MGA Championship — Registration Now Open", href: "https://mga-championship-independent.vercel.app/" }, [171, 842, 994, 184]),
     mainHubAdminTarget,
   ],
 }

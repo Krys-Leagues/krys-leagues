@@ -3,7 +3,10 @@ import { readFileSync } from "node:fs"
 import test from "node:test"
 
 import { historicalPypCommitBlockers, historicalPypCommitRows, type HistoricalPypIdentityReview } from "./historicalPypCommit.ts"
+import { historicalPypCommitFingerprint } from "./historicalPypCommit.ts"
+import { historicalPypClientCommitFingerprint } from "./historicalPypClientCommitFingerprint.ts"
 import { parseHistoricalPypPackage } from "./adapters/historicalPypParser.ts"
+import { historicalPypPreviewFingerprint } from "./adapters/historicalPypParser.ts"
 
 const root = "docs/historical-sources/pyp/google-sheets-recovery"
 const preview = parseHistoricalPypPackage(
@@ -25,6 +28,21 @@ test("PYP commit readiness does not block unknown or unusable opponents", () => 
   assert.deepEqual(
     historicalPypCommitBlockers(preview, true, identityReviews(), {}, {}),
     [],
+  )
+})
+
+test("browser PYP commit fingerprint matches the server fingerprint", async () => {
+  const identities = identityReviews()
+  const decisions = Object.fromEntries(identities.map((review) => [review.historicalPlayerName, {
+    historicalPlayerName: review.historicalPlayerName,
+    canonicalPlayerId: review.canonicalPlayerId,
+    canonicalPlayerName: review.canonicalPlayerName ?? null,
+    selectionSource: "manual" as const,
+  }]))
+  const pairings = {}
+  assert.equal(
+    await historicalPypClientCommitFingerprint(historicalPypPreviewFingerprint(preview), identities, decisions, pairings),
+    historicalPypCommitFingerprint(preview, identities, decisions, pairings),
   )
 })
 
