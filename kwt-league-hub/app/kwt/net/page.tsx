@@ -90,7 +90,7 @@ function Board({ title, rows, allRows, season, seasonAvailable, seasonNumber, vi
       <div><p className={styles.sectionKicker}>{season ? `KWT SEASON ${seasonNumber}` : "LIVE NET RESULTS"}</p><h2 id={title.toLowerCase().replaceAll(" ", "-")}>{title}{!season && <span className={styles.scoreFormula}>Your Gross Score + Playing Handicap = NET Score</span>}</h2></div>
       <nav className={styles.periodNav} aria-label="Leaderboard period">
         <button className={view === "WEEKLY" ? styles.activeTab : ""} onClick={() => setView("WEEKLY")}>CURRENT WEEK</button>
-        <Link href="/kwt/history">PAST WEEKS</Link>
+        <Link href="/kwt/net/history">PAST WEEKS</Link>
         <button className={view === "SEASON" ? styles.activeTab : ""} onClick={() => setView("SEASON")}>SEASON NET</button>
       </nav>
     </div>
@@ -128,7 +128,7 @@ function BoardRows({ rows, allRows, divisionFilter, season = false, loading = fa
         return <tr key={row.playerId}>
           {divisionFilter === "ALL" ? <td className={styles.rank}>{overall ?? "—"}</td> : <><td className={styles.rank}>{rank ?? "—"}</td><td className={styles.rank}>{overall ?? "—"}</td></>}
           <td><Link href={`/players/${row.playerId}`} className={`${styles.player} ${divisionClass}`}>{row.screenName}</Link></td>
-          <td className={rankingStyles.handicapCell}><span>{handicapDisplay}</span>{Number.isFinite(row.handicapIndex) && <small className={row.handicapStatus === "PROVISIONAL" ? styles.provisional : rankingStyles.official}>{row.handicapStatus}</small>}</td>
+          <td className={rankingStyles.handicapCell}><span>{handicapDisplay}</span>{Number.isFinite(row.handicapIndex) ? <small className={row.handicapStatus === "PROVISIONAL" ? styles.provisional : rankingStyles.official}>{row.handicapStatus}</small> : row.handicapStatus === "UNPUBLISHED" ? <small className={styles.provisional}>UNPUBLISHED</small> : null}</td>
           <td>{row.easyNet ?? "—"}</td><td>{row.hardNet ?? "—"}</td><td><strong>{row.combinedNet ?? "—"}</strong></td><td>{points ?? "—"}</td>
           <td className={rankingStyles.badgeCell}><span className={rankingStyles.badgeContent}>{medal && <span className={`${rankingStyles.divisionMedal} ${badgeClass}`} role="img" aria-label={`${division} division ${placement} place medal`}>{medal}</span>}{otherBadges.map((badge) => badge === "KIWI_HARD" ? <span className={rankingStyles.specialBadge} role="img" aria-label="Bogey-free Hard round" key={badge}><Image className={rankingStyles.goldKiwi} src="/kwt/gold-kiwi-sticker.png" alt="" width={128} height={128} /></span> : badge === "KIWI_EASY" ? <span className={rankingStyles.specialBadge} role="img" aria-label="Bogey-free Easy round" key={badge}><Image className={rankingStyles.goldKiwi} src="/kwt/green-kiwi-sticker.png" alt="" width={128} height={128} /></span> : <span className={rankingStyles.specialBadge} role="img" aria-label="Bogey-free Easy and Hard round" key={badge}><Image className={rankingStyles.goldKiwi} src="/kwt/coconut-sticker.png" alt="" width={128} height={128} /></span>)}{!medal && !otherBadges.length ? "—" : null}</span></td>
         </tr>

@@ -14,8 +14,8 @@ export type KwtNetResult = {
   combinedNet: number | null
   easyStrokes: CourseStrokeAllowance | null
   hardStrokes: CourseStrokeAllowance | null
-  handicapIndex: number
-  handicapStatus: "OFFICIAL" | "PROVISIONAL"
+  handicapIndex: number | null
+  handicapStatus: "OFFICIAL" | "PROVISIONAL" | "UNPUBLISHED"
   resultStatus: "PENDING" | "VERIFIED" | "FINAL"
   division?: KwtDivision | "PROVISIONAL"
   points?: number | null
@@ -29,8 +29,8 @@ export type KwtNetInput = {
   screenName: string
   easyGross?: number | null
   hardGross?: number | null
-  handicapIndex: number
-  handicapStatus: "OFFICIAL" | "PROVISIONAL"
+  handicapIndex: number | null
+  handicapStatus: "OFFICIAL" | "PROVISIONAL" | "UNPUBLISHED"
   resultStatus?: "PENDING" | "VERIFIED" | "FINAL"
   division?: KwtDivision | "PROVISIONAL"
   badges?: readonly KwtNetBadge[]
@@ -48,6 +48,20 @@ export function buildKwtNetResults(event: VerifiedKwtEvent | null | undefined, i
     const hasEasy = Number.isInteger(input.easyGross)
     const hasHard = Number.isInteger(input.hardGross)
     if (!hasEasy && !hasHard) return []
+    if (input.handicapIndex === null || !Number.isFinite(input.handicapIndex)) {
+      return [{
+        ...input,
+        easyGross: hasEasy ? input.easyGross! : null,
+        hardGross: hasHard ? input.hardGross! : null,
+        combinedGross: hasEasy && hasHard ? input.easyGross! + input.hardGross! : null,
+        easyNet: null,
+        hardNet: null,
+        combinedNet: null,
+        easyStrokes: null,
+        hardStrokes: null,
+        resultStatus: input.resultStatus ?? "PENDING",
+      }]
+    }
     const easyStrokes = hasEasy ? calculateCourseStrokeAllowance(input.handicapIndex, event.easySlope) : null
     const hardStrokes = hasHard ? calculateCourseStrokeAllowance(input.handicapIndex, event.hardSlope) : null
     if ((hasEasy && !easyStrokes) || (hasHard && !hardStrokes)) return []

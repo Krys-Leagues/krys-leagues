@@ -1,0 +1,19 @@
+.backdrop{position:fixed;inset:0;z-index:120;display:grid;place-items:center;padding:18px;background:rgba(1,9,14,.7);backdrop-filter:blur(5px)}
+.dialog{position:relative;width:min(700px,100%);max-height:min(90vh,780px);overflow:auto;border:1px solid rgba(155,238,255,.46);border-radius:24px;padding:clamp(24px,5vw,42px);background:linear-gradient(145deg,#071b24f5,#10182af5);color:#f8fafc;box-shadow:0 28px 90px #000b}
+.close{position:absolute;top:12px;right:14px;width:38px;height:38px;border:1px solid #9beeff80;border-radius:50%;background:#061820;color:#f8fafc;font:inherit;font-size:1.6rem;line-height:1;cursor:pointer}
+.close:focus-visible,.primary:focus-visible,.secondary:focus-visible{outline:3px solid #f7d77b;outline-offset:3px}
+.eyebrow{margin:0;color:#9beeff;font-size:.72rem;font-weight:950;letter-spacing:.18em;text-align:center}
+.dialog h2{margin:10px 30px 0;color:#f7d77b;font-size:clamp(1.35rem,4vw,2.35rem);line-height:1.08;text-align:center}
+.message{margin:16px auto 0;max-width:590px;color:#d9edf0;line-height:1.55;text-align:center}
+.competitions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:22px}
+.competitions article{display:grid;gap:5px;padding:15px;border:1px solid #ffffff24;border-radius:14px;background:#04131c99}
+.competitions strong{color:#f7d77b;letter-spacing:.1em}
+.competitions span{color:#c7dce0;font-size:.9rem;line-height:1.4}
+.badges{display:flex;justify-content:center;gap:18px;margin:20px 0 4px}
+.badges img{width:72px;height:72px;object-fit:contain}
+.actions{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin-top:24px}
+.primary,.secondary{display:inline-flex;align-items:center;justify-content:center;min-height:42px;border-radius:999px;padding:10px 16px;font:inherit;font-size:.8rem;font-weight:950;letter-spacing:.04em;text-decoration:none;cursor:pointer}
+.primary{border:1px solid #f7d77b;background:#f7d77b;color:#09151a}
+.secondary{border:1px solid #78d9e6;background:#09232d;color:#f5fbfc}
+@media(max-width:600px){.dialog{padding:24px 18px 22px;border-radius:20px}.competitions{grid-template-columns:1fr}.badges{gap:10px}.actions{display:grid}.primary,.secondary{width:100%}}
+@media(prefers-reduced-motion:reduce){.backdrop{scroll-behavior:auto}}

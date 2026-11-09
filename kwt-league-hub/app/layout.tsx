@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import KwtNetLaunchAnnouncement from "@/components/announcements/KwtNetLaunchAnnouncement"
 import "./globals.css"
 import "../components/navigation/artwork-navigation.css"
 
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>{children}<KwtNetLaunchAnnouncement /></body>
     </html>
   )
 }

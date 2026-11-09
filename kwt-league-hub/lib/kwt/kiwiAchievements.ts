@@ -29,10 +29,15 @@ export function calculateKwtKiwiAchievements(input: {
   if ("error" in hard) errors.push(`Hard: ${hard.error}`)
   if ("error" in easy || "error" in hard) return { badges: [], easyBogeys: null, hardBogeys: null, easyRelativeToPar: null, hardRelativeToPar: null, errors }
 
-  const badges: KwtKiwiBadge[] = []
-  if (easy.bogeys === 0) badges.push("KIWI_EASY")
-  if (hard.bogeys === 0) badges.push("KIWI_HARD")
-  if (easy.bogeys === 0 && hard.bogeys === 0) badges.push("COCONUT")
+  const easyOverParHoles = input.easyHoles.filter((score, index) => score > input.easyPars[index]).length
+  const hardOverParHoles = input.hardHoles.filter((score, index) => score > input.hardPars[index]).length
+  const badges: KwtKiwiBadge[] = easyOverParHoles === 0 && hardOverParHoles === 0
+    ? ["COCONUT"]
+    : easyOverParHoles === 0
+      ? ["KIWI_EASY"]
+      : hardOverParHoles === 0
+        ? ["KIWI_HARD"]
+        : []
   return { badges, easyBogeys: easy.bogeys, hardBogeys: hard.bogeys, easyRelativeToPar: easy.scoreRelativeToPar, hardRelativeToPar: hard.scoreRelativeToPar, errors }
 }
 
