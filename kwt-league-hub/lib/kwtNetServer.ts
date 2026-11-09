@@ -2,7 +2,7 @@ import "server-only"
 
 import { createClient } from "@supabase/supabase-js"
 import { calculateCourseStrokeAllowance, type VerifiedKwtEvent } from "@/lib/handicap/courseStrokeAllowance"
-import { buildKwtNetResults, type KwtNetResult } from "@/lib/kwtNetLeaderboard"
+import { buildKwtNetResults, type KwtNetBadge, type KwtNetInput, type KwtNetResult } from "@/lib/kwtNetLeaderboard"
 import { pointsForVerifiedRank, standardCompetitionRanks } from "@/lib/kwtNetCompetition"
 import { adaptProductionOperationalRows, selectFrozenPublishedHandicaps, validateVerifiedWeekSetup, type KwtWeekSetupMetadata, type ProductionOperationalResult, type ProductionPlayer, type PublishedHandicap, type VerifiedWeekSetup } from "@/lib/kwtNetProductionAdapter"
 import { createServerSupabaseClient } from "@/lib/supabase/server"
@@ -33,6 +33,130 @@ function trustedClient() {
   if (!url || !key) throw new Error("KWT operational data is not configured.")
   return createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } })
 }
+
+type PublicKwtNetSourceRow = {
+  playerId: string
+  screenName: string
+  division?: string | null
+  easyGross?: number | null
+  hardGross?: number | null
+  handicapIndex?: number | string | null
+  handicapStatus?: string | null
+  resultStatus?: string | null
+  badges?: unknown
+}
+
+type PublicKwtNetSource = {
+  state: "AVAILABLE" | "UNAVAILABLE"
+  reason?: string
+  event?: {
+    eventIdentifier: string
+    season: number
+    week: number
+    courseName: string
+    freezeCutoff: string | null
+    easySlope: number
+    hardSlope: number
+  } | null
+  rows?: PublicKwtNetSourceRow[]
+}
+
+function publicClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!url || !key) return null
+  return createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } })
+}
+
+function publicReason(value: string | undefined): KwtNetPublicPayload["reason"] {
+  return value === "NO_VERIFIED_RESULTS" || value === "NO_VERIFIED_RATINGS" ? value : "NO_VERIFIED_EVENT"
+}
+
+function publicDivision(value: string | null | undefined): KwtNetInput["division"] {
+  const normalized = value?.trim().toLocaleUpperCase()
+  if (normalized === "ELITE" || normalized === "PRO" || normalized === "AMATEUR" || normalized === "PROVISIONAL") return normalized
+  if (normalized === "SEMI" || normalized === "SEMI PRO" || normalized === "SEMI-PRO") return "SEMI-PRO"
+  return undefined
+}
+
+function publicHandicapStatus(value: string | null | undefined): KwtNetInput["handicapStatus"] {
+  if (value === "OFFICIAL" || value === "OFFICIAL_ELIGIBLE") return "OFFICIAL"
+  if (value === "PROVISIONAL") return "PROVISIONAL"
+  return "UNPUBLISHED"
+}
+
+function publicResultStatus(value: string | null | undefined): KwtNetInput["resultStatus"] {
+  if (value?.toLocaleLowerCase() === "final" || value?.toLocaleLowerCase() === "official") return "FINAL"
+  if (value?.toLocaleLowerCase() === "verified") return "VERIFIED"
+  return "PENDING"
+}
+
+function publicBadges(value: unknown): readonly KwtNetBadge[] {
+  if (!Array.isArray(value)) return []
+  return value.filter((badge): badge is KwtNetBadge => badge === "KIWI_EASY" || badge === "KIWI_HARD" || badge === "COCONUT")
+}
+
+/**
+ * Read the explicit public KWT reader when it is installed. The RPC is the
+ * only path that may use the publishable browser key for operational NET
+ * data; it returns a whitelist of display fields and never exposes source
+ * evidence, hole arrays, or private database columns. Until the approved RPC
+ * exists, the legacy server-only reader remains available as a fallback.
+ */
+async function loadPublicKwtNetPayload(): Promise<KwtNetPublicPayload | null> {
+  const client = publicClient()
+  if (!client) return null
+  try {
+    const response = await client.rpc("get_public_kwt_net_week")
+    if (response.error || !response.data || typeof response.data !== "object") return null
+    const source = response.data as PublicKwtNetSource
+    if (source.state !== "AVAILABLE") {
+      return {
+        state: "UNAVAILABLE",
+        event: source.event ? {
+          eventIdentifier: source.event.eventIdentifier,
+          season: source.event.season,
+          week: source.event.week,
+          courseName: source.event.courseName,
+          freezeCutoff: source.event.freezeCutoff,
+        } : null,
+        viewerAllowance: null,
+        rows: [],
+        season: { season: source.event?.season ?? 0, rows: [], state: "UNAVAILABLE" },
+        reason: publicReason(source.reason),
+      }
+    }
+    const event = source.event
+    if (!event || !Number.isFinite(event.easySlope) || !Number.isFinite(event.hardSlope)) return null
+    const verifiedEvent: VerifiedKwtEvent = { eventIdentifier: event.eventIdentifier, courseName: event.courseName, easySlope: event.easySlope, hardSlope: event.hardSlope }
+    const inputs: KwtNetInput[] = (source.rows ?? []).flatMap((row) => {
+      if (!row.playerId || !row.screenName) return []
+      const handicapIndex = row.handicapIndex === null || row.handicapIndex === undefined ? null : Number(row.handicapIndex)
+      return [{
+        playerId: row.playerId,
+        screenName: row.screenName,
+        easyGross: Number.isInteger(row.easyGross) ? row.easyGross : null,
+        hardGross: Number.isInteger(row.hardGross) ? row.hardGross : null,
+        handicapIndex: Number.isFinite(handicapIndex) ? handicapIndex : null,
+        handicapStatus: publicHandicapStatus(row.handicapStatus),
+        resultStatus: publicResultStatus(row.resultStatus),
+        division: publicDivision(row.division),
+        badges: publicBadges(row.badges),
+      }]
+    })
+    const baseRows = buildKwtNetResults(verifiedEvent, inputs)
+    const completed = baseRows.filter((row) => row.combinedNet !== null)
+    const ranks = standardCompetitionRanks(completed.map((row) => row.combinedNet!))
+    const rankById = new Map(completed.map((row, index) => [row.playerId, ranks[index]]))
+    const rows = baseRows.map((row) => ({ ...row, points: rankById.has(row.playerId) ? pointsForVerifiedRank(rankById.get(row.playerId)!) : null }))
+    const safeEvent = { eventIdentifier: event.eventIdentifier, season: event.season, week: event.week, courseName: event.courseName, freezeCutoff: event.freezeCutoff }
+    const seasonRows = completed.map((row, index) => ({ ...publicResult(rows.find((candidate) => candidate.playerId === row.playerId) ?? row), seasonRank: ranks[index], seasonPoints: pointsForVerifiedRank(ranks[index]) }))
+    return { state: "AVAILABLE", event: safeEvent, viewerAllowance: null, rows: rows.map(publicResult), season: { season: event.season, rows: seasonRows, state: seasonRows.length ? "AVAILABLE" : "UNAVAILABLE" } }
+  } catch {
+    return null
+  }
+}
+
 const publicResult = (result: KwtNetResult): KwtNetPublicResult => {
   const { easyGross: _easyGross, hardGross: _hardGross, combinedGross: _combinedGross, easyStrokes, hardStrokes, ...safe } = result
   void _easyGross
@@ -48,6 +172,8 @@ const publicResult = (result: KwtNetResult): KwtNetPublicResult => {
 export async function loadVerifiedKwtNetPayload(): Promise<KwtNetPublicPayload> {
   const unavailable = (reason: KwtNetPublicPayload["reason"], event: KwtNetPublicPayload["event"] = null): KwtNetPublicPayload => ({ state: "UNAVAILABLE", event, viewerAllowance: null, rows: [], season: { season: event?.season ?? 0, rows: [], state: "UNAVAILABLE" }, reason })
   try {
+    const publicPayload = await loadPublicKwtNetPayload()
+    if (publicPayload) return publicPayload
     const client = trustedClient()
     const setupResponse = await client.from("kwt_public_content").select("label,start_date,end_date,season_number,week_number,active").eq("content_type", "kwt_week_setup").eq("active", true).order("season_number", { ascending: false }).order("week_number", { ascending: false }).limit(1).maybeSingle()
     if (setupResponse.error || !setupResponse.data) return unavailable("NO_VERIFIED_EVENT")
