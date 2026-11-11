@@ -1,8 +1,11 @@
 import type { Metadata } from "next"
 import Link from "next/link"
+import Image from "next/image"
 import { loadVerifiedKwtNetPayload, type KwtNetPublicResult } from "@/lib/kwtNetServer"
 import { formatGolfHandicapIndex } from "@/lib/handicap/indexDisplay"
+import { buildKwtDisplayRanks, divisionMedalEmoji } from "@/lib/kwtNetCompetition"
 import styles from "../page.module.css"
+import rankingStyles from "../ranking.module.css"
 
 export const metadata: Metadata = {
   title: "KWT NET Past Weeks | Krys Leagues",
@@ -13,6 +16,14 @@ export const dynamic = "force-dynamic"
 
 function badgeLabel(badge: string) {
   return badge === "KIWI_EASY" ? "Green Kiwi" : badge === "KIWI_HARD" ? "Gold Kiwi" : "Coconut"
+}
+
+const divisionBadgeClasses: Record<string, string> = {
+  ELITE: rankingStyles.eliteBadge,
+  PRO: rankingStyles.proBadge,
+  "SEMI-PRO": rankingStyles.semiProBadge,
+  AMATEUR: rankingStyles.amateurBadge,
+  PROVISIONAL: rankingStyles.provisionalBadge,
 }
 
 function rowKey(row: KwtNetPublicResult) {
@@ -31,6 +42,7 @@ export default async function KwtNetHistoryPage() {
   const rows = payload?.rows.filter((row) => row.combinedNet !== null) ?? []
   const waitingRows = payload?.rows.filter((row) => row.combinedNet === null) ?? []
   const event = payload?.event
+  const ranks = buildKwtDisplayRanks(rows)
 
   return (
     <main className={`${styles.page} ${event?.courseName.toLowerCase().includes("raptor") ? styles.raptorTheme : styles.seasonTheme}`}>
@@ -50,9 +62,10 @@ export default async function KwtNetHistoryPage() {
           <div className={styles.boardHeading}><div><p className={styles.sectionKicker}>VERIFIED NET HISTORY</p><h2 id="net-history-results">NET results</h2></div><span>{rows.length} players</span></div>
           <div className={styles.tableWrap}>
             <table className={styles.table}>
-              <thead><tr><th>WEEK</th><th>PLAYER</th><th>DIVISION</th><th>HANDICAP</th><th>EASY NET</th><th>HARD NET</th><th>TOTAL NET</th><th>POINTS</th><th>BADGES</th></tr></thead>
+              <thead><tr><th>WEEK</th><th>RANK</th><th>PLAYER</th><th>DIVISION</th><th>HANDICAP</th><th>EASY NET</th><th>HARD NET</th><th>TOTAL NET</th><th>POINTS</th><th>BADGES</th></tr></thead>
               <tbody>{rows.map((row) => <tr key={rowKey(row)}>
                 <td>{event?.week ?? "—"}</td>
+                <td className={styles.rank}>{ranks.overall.get(row.playerId) ?? "—"}</td>
                 <td><Link href={`/players/${row.playerId}`} className={styles.player}>{row.screenName}</Link></td>
                 <td>{row.division ?? "PROVISIONAL"}</td>
                 <td>{Number.isFinite(row.handicapIndex) ? formatGolfHandicapIndex(row.handicapIndex) : "UNPUBLISHED"}</td>
@@ -60,7 +73,19 @@ export default async function KwtNetHistoryPage() {
                 <td>{row.hardNet ?? "—"}</td>
                 <td><strong>{row.combinedNet ?? "—"}</strong></td>
                 <td>{row.points ?? "—"}</td>
-                <td>{row.badges?.length ? row.badges.map(badgeLabel).join(" · ") : "—"}</td>
+                <td className={rankingStyles.badgeCell}><span className={rankingStyles.badgeContent}>
+                  {(() => {
+                    const division = row.division ?? "PROVISIONAL"
+                    const divisionRank = ranks.byDivision.get(division)?.get(row.playerId) ?? null
+                    const medal = divisionMedalEmoji(divisionRank)
+                    const placement = divisionRank === 1 ? "1st" : divisionRank === 2 ? "2nd" : divisionRank === 3 ? "3rd" : ""
+                    return medal ? <span className={`${rankingStyles.divisionMedal} ${divisionBadgeClasses[division] ?? styles.provisional}`} role="img" aria-label={`${division} division ${placement} place medal`} title={`${division} division ${placement} place medal`}>{medal}</span> : null
+                  })()}
+                  {row.badges?.map((badge) => <span className={rankingStyles.specialBadge} role="img" aria-label={badgeLabel(badge)} title={badgeLabel(badge)} key={badge}>
+                    <Image src={badge === "KIWI_HARD" ? "/kwt/gold-kiwi-sticker.png" : badge === "KIWI_EASY" ? "/kwt/green-kiwi-sticker.png" : "/kwt/coconut-sticker.png"} alt="" width={128} height={128} />
+                  </span>)}
+                  {!row.badges?.length && !ranks.byDivision.get(row.division ?? "PROVISIONAL")?.get(row.playerId) ? "—" : null}
+                </span></td>
               </tr>)}</tbody>
             </table>
           </div>
