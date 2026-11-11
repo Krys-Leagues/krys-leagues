@@ -107,8 +107,10 @@ export function adaptProductionOperationalRows(
     }
     const screenName = row.player_id ? playerNames.get(row.player_id) : null
     const handicap = row.player_id ? published.get(row.player_id) : undefined
-    const handicapIndex = finite(handicap?.resulting_index)
-    const handicapStatus = handicap?.handicap_status === "OFFICIAL_ELIGIBLE" ? "OFFICIAL" : handicap?.handicap_status === "PROVISIONAL" ? "PROVISIONAL" : "UNPUBLISHED"
+    const publishedStatus = handicap?.handicap_status
+    const handicapEligible = publishedStatus === "OFFICIAL_ELIGIBLE" || publishedStatus === "PROVISIONAL"
+    const handicapIndex = handicapEligible ? finite(handicap?.resulting_index) : null
+    const handicapStatus = publishedStatus === "OFFICIAL_ELIGIBLE" ? "OFFICIAL" : publishedStatus === "PROVISIONAL" ? "PROVISIONAL" : "UNPUBLISHED"
     if (!row.player_id || !screenName) {
       rejected.push(`${row.player_id ?? "unknown"}: canonical player name is unavailable.`)
       continue
