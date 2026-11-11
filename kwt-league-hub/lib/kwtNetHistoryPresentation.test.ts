@@ -14,6 +14,8 @@ test("NET History preserves verified ranks, tie handling, and approved badge art
   assert.match(page, /title=\{badgeLabel\(badge\)\}/)
   assert.match(page, /styles\.historyBadgeImage/)
   assert.match(page, /styles\.historyPlacementMedal/)
+  assert.match(page, /styles\.historyPlayer/)
+  assert.match(page, /divisionNameClasses/)
   for (const asset of ["public/kwt/green-kiwi-sticker.png", "public/kwt/gold-kiwi-sticker.png", "public/kwt/coconut-sticker.png"]) {
     assert.equal(existsSync(asset), true)
   }
@@ -27,4 +29,8 @@ test("NET History keeps the approved course-photo and responsive presentation ho
   assert.match(css, /\.historyBadgeImage\{display:block;width:40px;height:40px/)
   assert.match(css, /\.historyPlacementMedal\{display:inline-flex[\s\S]*width:32px;height:32px/)
   assert.match(css, /\.historyBadgeContent\{display:flex[\s\S]*flex-wrap:wrap/)
+  for (const colorRule of ["historyPlayer.elite:link", "historyPlayer.pro:visited", "historyPlayer.semiPro:link", "historyPlayer.amateur:visited", "historyPlayer.provisional:link"]) {
+    assert.match(css, new RegExp(`\\.${colorRule.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\\\$&")}`))
+  }
+  assert.match(css, /historyPlayer:focus-visible/)
 })

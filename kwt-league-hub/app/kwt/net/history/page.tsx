@@ -26,6 +26,14 @@ const divisionBadgeClasses: Record<string, string> = {
   PROVISIONAL: rankingStyles.provisionalBadge,
 }
 
+const divisionNameClasses: Record<string, string> = {
+  ELITE: styles.elite,
+  PRO: styles.pro,
+  "SEMI-PRO": styles.semiPro,
+  AMATEUR: styles.amateur,
+  PROVISIONAL: styles.provisional,
+}
+
 function rowKey(row: KwtNetPublicResult) {
   return `${row.playerId}-${row.screenName}`
 }
@@ -66,7 +74,7 @@ export default async function KwtNetHistoryPage() {
               <tbody>{rows.map((row) => <tr key={rowKey(row)}>
                 <td>{event?.week ?? "—"}</td>
                 <td className={styles.rank}>{ranks.overall.get(row.playerId) ?? "—"}</td>
-                <td><Link href={`/players/${row.playerId}`} className={styles.player}>{row.screenName}</Link></td>
+                <td><Link href={`/players/${row.playerId}`} className={`${styles.player} ${styles.historyPlayer} ${divisionNameClasses[row.division ?? "PROVISIONAL"] ?? styles.provisional}`}>{row.screenName}</Link></td>
                 <td>{row.division ?? "PROVISIONAL"}</td>
                 <td>{Number.isFinite(row.handicapIndex) ? formatGolfHandicapIndex(row.handicapIndex) : "UNPUBLISHED"}</td>
                 <td>{row.easyNet ?? "—"}</td>
