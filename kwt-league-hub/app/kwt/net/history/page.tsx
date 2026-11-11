@@ -73,16 +73,16 @@ export default async function KwtNetHistoryPage() {
                 <td>{row.hardNet ?? "—"}</td>
                 <td><strong>{row.combinedNet ?? "—"}</strong></td>
                 <td>{row.points ?? "—"}</td>
-                <td className={rankingStyles.badgeCell}><span className={rankingStyles.badgeContent}>
+                <td className={styles.historyBadgeCell}><span className={styles.historyBadgeContent}>
                   {(() => {
                     const division = row.division ?? "PROVISIONAL"
                     const divisionRank = ranks.byDivision.get(division)?.get(row.playerId) ?? null
                     const medal = divisionMedalEmoji(divisionRank)
                     const placement = divisionRank === 1 ? "1st" : divisionRank === 2 ? "2nd" : divisionRank === 3 ? "3rd" : ""
-                    return medal ? <span className={`${rankingStyles.divisionMedal} ${divisionBadgeClasses[division] ?? styles.provisional}`} role="img" aria-label={`${division} division ${placement} place medal`} title={`${division} division ${placement} place medal`}>{medal}</span> : null
+                    return medal ? <span className={`${styles.historyPlacementMedal} ${divisionBadgeClasses[division] ?? styles.provisional}`} role="img" aria-label={`${division} division ${placement} place medal`} title={`${division} division ${placement} place medal`}>{medal}</span> : null
                   })()}
-                  {row.badges?.map((badge) => <span className={rankingStyles.specialBadge} role="img" aria-label={badgeLabel(badge)} title={badgeLabel(badge)} key={badge}>
-                    <Image src={badge === "KIWI_HARD" ? "/kwt/gold-kiwi-sticker.png" : badge === "KIWI_EASY" ? "/kwt/green-kiwi-sticker.png" : "/kwt/coconut-sticker.png"} alt="" width={128} height={128} />
+                  {row.badges?.map((badge) => <span className={styles.historyBadge} role="img" aria-label={badgeLabel(badge)} title={badgeLabel(badge)} key={badge}>
+                    <Image className={styles.historyBadgeImage} src={badge === "KIWI_HARD" ? "/kwt/gold-kiwi-sticker.png" : badge === "KIWI_EASY" ? "/kwt/green-kiwi-sticker.png" : "/kwt/coconut-sticker.png"} alt="" width={128} height={128} />
                   </span>)}
                   {!row.badges?.length && !ranks.byDivision.get(row.division ?? "PROVISIONAL")?.get(row.playerId) ? "—" : null}
                 </span></td>

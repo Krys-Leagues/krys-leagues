@@ -3,6 +3,12 @@
  .raptorTheme .backdrop{background-image:url("/kwt/raptor-cliffs-season15-week01.png");background-position:center top;background-size:100% auto;background-color:#071017}
  .raptorTheme .backdrop::after{background:rgba(0,0,0,.12)}
  .raptorTheme .board{background:rgba(5,22,29,.64)}
+.historyBadgeCell{vertical-align:middle;white-space:normal}
+.historyBadgeContent{display:flex;align-items:center;flex-wrap:wrap;gap:6px;min-height:42px}
+.historyBadge{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;flex:0 0 40px}
+.historyBadgeImage{display:block;width:40px;height:40px;max-width:100%;max-height:100%;object-fit:contain}
+.historyPlacementMedal{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;flex:0 0 32px;border-radius:6px;font-size:1.15rem;line-height:1;box-shadow:0 1px 5px #0006}
+@media(max-width:700px){.historyBadge{width:36px;height:36px;flex-basis:36px}.historyBadgeImage{width:36px;height:36px}.historyPlacementMedal{width:30px;height:30px;flex-basis:30px;font-size:1.08rem}}
  .badgeKey{margin-top:18px;padding:18px;border:1px solid #4b7b84;border-radius:18px;background:rgba(5,22,29,.56);backdrop-filter:blur(13px);box-shadow:0 15px 38px #0003;text-align:center}
  .badgeKey h2{margin:0;color:#9beeff;font-size:.82rem;letter-spacing:.14em}
  .badgeKeyGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:14px}
