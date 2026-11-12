@@ -1,9 +1,10 @@
-"use client"
+﻿"use client"
 
 import Link from "next/link"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { formatMgaLocalTime, MGA_DAYS, MGA_REGULAR_EVENT_ID, type MgaDayKey, type MgaRoom, type MgaRoomSelection, type MgaRoomSnapshot } from "@/lib/mgaRegular"
 import { canMoveRoomAssignment, makeMgaRoomDraft, roomAssignmentChoices, roomAssignmentConflicts, roomDraftChanged, roomSaveRegistrationIds, roomSeatsAvailable, type MgaRoomDraft } from "@/lib/mgaRoomDraft"
+import { canMoveEmptyMgaRoom, sameDayEmptyRoomMoveSlots } from "@/lib/mgaEmptyRoomMove"
 import { supabase } from "@/lib/supabase"
 import styles from "./page.module.css"
 
@@ -24,6 +25,7 @@ export default function MgaRoomAdminPage() {
   const [moveRegistrationId, setMoveRegistrationId] = useState<string | null>(null)
   const [moveTimeSlotId, setMoveTimeSlotId] = useState("")
   const [moveRoomId, setMoveRoomId] = useState("")
+  const [roomMoveDestinationIds, setRoomMoveDestinationIds] = useState<Record<string, string>>({})
   const [message, setMessage] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(true)
@@ -58,6 +60,7 @@ export default function MgaRoomAdminPage() {
           room.id,
           makeMgaRoomDraft(room, next.assignments || [], next.room_capacity || 4),
         ])))
+        setRoomMoveDestinationIds(Object.fromEntries((next.rooms || []).map((room) => [room.id, room.time_slot_id])))
         if (moveOptions.error) setError(`Roster loaded, but the full destination slot list is unavailable: ${moveOptions.error.message}`)
       }
     } catch (cause) {
@@ -243,6 +246,29 @@ export default function MgaRoomAdminPage() {
     if (ok) setMoveRegistrationId(null)
   }
 
+  async function moveEmptyRoom(room: MgaRoom) {
+    const destinationId = roomMoveDestinationIds[room.id] || room.time_slot_id
+    const destination = (snapshot?.time_slots || []).find((slot) => slot.time_slot_id === destinationId)
+    const destinations = sameDayEmptyRoomMoveSlots(room, snapshot?.time_slots || [])
+    if (!snapshot || !destination || !destinations.some((slot) => slot.time_slot_id === destinationId)) {
+      setError("Choose a different available time slot on the same tournament day.")
+      return
+    }
+    if (!canMoveEmptyMgaRoom(room, Boolean(publishedAt)) || dirtyRoomIds.length > 0) {
+      setError("Only a saved, empty, unpublished room on an unpublished day can be moved.")
+      return
+    }
+    const confirmed = window.confirm(
+      `Move ${room.room_name} (room number ${room.room_number}) to ${formatEventDate(destination.event_date)}, Time Slot ${destination.slot_number} at ${formatMgaLocalTime(destination.starts_at, "America/New_York")} Eastern? The room ID, number, name, capacity, assignments, registrations, and counter will not change.`,
+    )
+    if (!confirmed) return
+    await perform("mga_regular_room_move_empty_v1", {
+      p_event_id: MGA_REGULAR_EVENT_ID,
+      p_room_id: room.id,
+      p_destination_time_slot_id: destination.time_slot_id,
+    }, `${room.room_name} moved to Time Slot ${destination.slot_number}. Its number and identity were preserved.`)
+  }
+
   function publishDay() {
     const prompt = publishedAt
       ? `Unpublish ${day.label} room assignments and hide them from players?`
@@ -297,6 +323,8 @@ export default function MgaRoomAdminPage() {
                   const draft = draftFor(room)
                   const roomPublishedAt = room.published_at || publishedAt
                   const roomLocked = Boolean(roomPublishedAt)
+                  const roomMoveSlots = sameDayEmptyRoomMoveSlots(room, snapshot.time_slots || [])
+                  const roomMoveEligible = canMoveEmptyMgaRoom(room, Boolean(publishedAt))
                   const selectedIds = new Set(draft.registration_ids)
                   const changed = roomDraftChanged(room, draft, snapshot.assignments, snapshot.room_capacity || 4)
                   const otherRoomDirty = dirtyRoomIds.some((id) => id !== room.id)
@@ -309,6 +337,28 @@ export default function MgaRoomAdminPage() {
                       <label>Room name<input aria-label={`Room name ${room.room_name}`} maxLength={40} value={draft.room_name} disabled={busy || roomLocked || otherRoomDirty} onChange={(event) => patchRoomDraft(room, { room_name: event.target.value })} /></label>
                       <label>Capacity<input aria-label={`Capacity for ${room.room_name}`} type="number" min={1} max={100} value={draft.capacity} disabled={busy || roomLocked || otherRoomDirty} onChange={(event) => patchRoomDraft(room, { capacity: event.target.value })} /></label>
                     </div>
+                    {roomMoveEligible && roomMoveSlots.length > 0 && <div className={styles.roomMove}>
+                      <label>
+                        Move empty room to time slot
+                        <select
+                          aria-label={`Move ${room.room_name} to time slot`}
+                          value={roomMoveDestinationIds[room.id] || room.time_slot_id}
+                          disabled={busy || dirtyRoomIds.length > 0}
+                          onChange={(event) => setRoomMoveDestinationIds((current) => ({ ...current, [room.id]: event.target.value }))}
+                        >
+                          <option value={room.time_slot_id}>Current · Time Slot {slot.slot_number} · {formatMgaLocalTime(slot.starts_at, "America/New_York")} ET</option>
+                          {roomMoveSlots.map((destination) => <option key={destination.time_slot_id} value={destination.time_slot_id}>
+                            Time Slot {destination.slot_number} · {formatMgaLocalTime(destination.starts_at, "America/New_York")} ET
+                          </option>)}
+                        </select>
+                      </label>
+                      <button
+                        className={styles.secondary}
+                        disabled={busy || dirtyRoomIds.length > 0 || (roomMoveDestinationIds[room.id] || room.time_slot_id) === room.time_slot_id}
+                        onClick={() => void moveEmptyRoom(room)}
+                      >Move Room to Time Slot</button>
+                    </div>}
+                    {roomMoveEligible && roomMoveSlots.length === 0 && <p className={styles.muted}>No other available time slots on this day.</p>}
                     <fieldset className={styles.memberPicker} disabled={busy || roomLocked || otherRoomDirty}>
                       <legend>Assigned players · Draft {saveIds.length}/{Number.isFinite(capacity) ? capacity : "—"}</legend>
                       {roomAssignmentChoices(room, slot.players, snapshot.assignments).map((player) => <label key={player.registration_id}>
