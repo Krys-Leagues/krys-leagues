@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { formatMgaLocalTime, MGA_DAYS, MGA_REGULAR_EVENT_ID, type MgaDayKey, type MgaRoom, type MgaRoomSelection, type MgaRoomSnapshot } from "@/lib/mgaRegular"
-import { makeMgaRoomDraft, roomDraftChanged, roomSaveRegistrationIds, roomSeatsAvailable, type MgaRoomDraft } from "@/lib/mgaRoomDraft"
+import { canMoveRoomAssignment, makeMgaRoomDraft, roomAssignmentChoices, roomAssignmentConflicts, roomDraftChanged, roomSaveRegistrationIds, roomSeatsAvailable, type MgaRoomDraft } from "@/lib/mgaRoomDraft"
 import { supabase } from "@/lib/supabase"
 import styles from "./page.module.css"
 
@@ -130,6 +130,10 @@ export default function MgaRoomAdminPage() {
     const selectedIds = roomSaveRegistrationIds(draft, slotPlayers)
       .filter((registrationId) => slotPlayers.some((player) => player.registration_id === registrationId
         && player.selections.some((selection) => selection.day_key === room.day_key && selection.time_slot_id === room.time_slot_id)))
+    if (roomAssignmentConflicts(room, selectedIds, snapshot?.assignments || []).length > 0) {
+      setError("One or more selected players are already assigned to another room on this day. Use Move time / room to transfer a player before saving.")
+      return
+    }
     if (selectedIds.length > Number(draft.capacity)) {
       setError(`Room capacity is ${draft.capacity}; reduce the selected players or increase the room capacity.`)
       return
@@ -170,12 +174,14 @@ export default function MgaRoomAdminPage() {
 
   const movePlayer = snapshot?.players.find((item) => item.registration_id === moveRegistrationId) || null
   const moveCurrentTimeSlotId = movePlayer?.selections.find((selection) => selection.day_key === dayKey)?.time_slot_id || ""
+  const moveCurrentRoomId = snapshot?.assignments.find((item) => item.registration_id === moveRegistrationId && item.day_key === dayKey)?.room_id || null
   const timeSlots = (snapshot?.time_slots || snapshot?.players.flatMap((player) => player.selections) || [])
     .filter((slot) => slot.day_key === dayKey)
     .filter((slot, index, all) => all.findIndex((candidate) => candidate.time_slot_id === slot.time_slot_id) === index)
     .sort((a, b) => a.slot_number - b.slot_number)
   const destinationSlot = timeSlots.find((slot) => slot.time_slot_id === moveTimeSlotId) || null
   const destinationRooms = (snapshot?.rooms || []).filter((room) => room.day_key === dayKey && room.time_slot_id === moveTimeSlotId)
+  const moveCanSave = canMoveRoomAssignment(moveCurrentTimeSlotId || null, moveCurrentRoomId, destinationSlot?.time_slot_id || null, destinationRooms.some((room) => room.id === moveRoomId) ? moveRoomId : null)
 
   async function createDestinationRoom() {
     if (!destinationSlot || publishedAt || dirtyRoomIds.length) return
@@ -211,6 +217,10 @@ export default function MgaRoomAdminPage() {
       setError("The selected room is no longer available in the destination time slot.")
       return
     }
+    if (!canMoveRoomAssignment(moveCurrentTimeSlotId || null, moveCurrentRoomId, destinationSlot.time_slot_id, room?.id || null)) {
+      setError("Choose a different time slot or room. A player already in this room does not need to be moved.")
+      return
+    }
     if (room && roomSeatsAvailable(room, snapshot.assignments, movePlayer.registration_id) < 1) {
       setError("That room has no available capacity. Choose another room or increase its capacity.")
       return
@@ -219,7 +229,8 @@ export default function MgaRoomAdminPage() {
     const destination = room
       ? `in ${room.room_name} (${room.player_count}/${room.capacity} seats currently used)`
       : "and leave them unassigned to a room"
-    if (!window.confirm(`Move ${movePlayer.screen_name} on ${day.label} from ${prior ? formatMgaLocalTime(prior.starts_at, "America/New_York") : "their current slot"} to ${formatEventDate(destinationSlot.event_date)} at ${formatMgaLocalTime(destinationSlot.starts_at, "America/New_York")} ${destination}? This updates only this day's authoritative saved time and room assignment. Their identity and other tournament days stay unchanged.`)) return
+    const sameTimeSlot = destinationSlot.time_slot_id === moveCurrentTimeSlotId
+    if (!window.confirm(`Move ${movePlayer.screen_name} on ${day.label} ${sameTimeSlot ? "between rooms at" : `from ${prior ? formatMgaLocalTime(prior.starts_at, "America/New_York") : "their current slot"} to`} ${formatEventDate(destinationSlot.event_date)} at ${formatMgaLocalTime(destinationSlot.starts_at, "America/New_York")} ${destination}? ${sameTimeSlot ? "The saved time stays unchanged." : "This updates only this day's authoritative saved time."} Their identity and other tournament days stay unchanged.`)) return
     const ok = await perform("mga_regular_player_move_time_slot_v1", {
       p_event_id: MGA_REGULAR_EVENT_ID,
       p_registration_id: movePlayer.registration_id,
@@ -300,7 +311,7 @@ export default function MgaRoomAdminPage() {
                     </div>
                     <fieldset className={styles.memberPicker} disabled={busy || roomLocked || otherRoomDirty}>
                       <legend>Assigned players · Draft {saveIds.length}/{Number.isFinite(capacity) ? capacity : "—"}</legend>
-                      {slot.players.map((player) => <label key={player.registration_id}>
+                      {roomAssignmentChoices(room, slot.players, snapshot.assignments).map((player) => <label key={player.registration_id}>
                         <input type="checkbox" checked={selectedIds.has(player.registration_id)} onChange={(event) => changeAssignmentDraft(room, player.registration_id, event.target.checked)} />
                         <span>{player.screen_name}</span>
                       </label>)}
@@ -331,7 +342,7 @@ export default function MgaRoomAdminPage() {
       </>}
       {movePlayer && <div className={styles.dialogBackdrop} role="presentation"><section className={styles.moveDialog} role="dialog" aria-modal="true" aria-labelledby="move-title">
         <h2 id="move-title">Move {movePlayer.screen_name}</h2>
-        <p>This changes only the player’s saved time and room for {day.label}. Their registration identity and other days remain unchanged.</p>
+        <p>Move {movePlayer.screen_name} to another room or time on {day.label}. A room-only move keeps the booked time unchanged; other tournament days remain unchanged.</p>
         <label>Destination date and time
           <select value={moveTimeSlotId} disabled={busy || Boolean(publishedAt)} onChange={(event) => { setMoveTimeSlotId(event.target.value); setMoveRoomId("") }}>
             {timeSlots.map((slot) => <option key={slot.time_slot_id} value={slot.time_slot_id}>{formatEventDate(slot.event_date)} · {formatMgaLocalTime(slot.starts_at, "America/New_York")} · Slot {slot.slot_number}</option>)}
@@ -350,7 +361,7 @@ export default function MgaRoomAdminPage() {
         {destinationRooms.length === 0 && <p className={styles.muted}>No room exists for this time yet.</p>}
         <div className={styles.dialogActions}>
           <button className={styles.secondary} disabled={busy || Boolean(publishedAt) || dirtyRoomIds.length > 0 || !destinationSlot || destinationSlot.time_slot_id === moveCurrentTimeSlotId} onClick={() => void createDestinationRoom()}>Create destination room</button>
-          <button disabled={busy || Boolean(publishedAt) || !destinationSlot || destinationSlot.time_slot_id === moveCurrentTimeSlotId} onClick={() => void confirmMove()}>Confirm move</button>
+          <button disabled={busy || Boolean(publishedAt) || !destinationSlot || !moveCanSave} onClick={() => void confirmMove()}>Confirm move</button>
           <button className={styles.secondary} disabled={busy} onClick={() => setMoveRegistrationId(null)}>Cancel</button>
         </div>
       </section></div>}

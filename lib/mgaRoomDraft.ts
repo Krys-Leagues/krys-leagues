@@ -25,6 +25,26 @@ export function roomDraftChanged(room: MgaRoom, draft: MgaRoomDraft, assignments
     || JSON.stringify([...new Set(draft.registration_ids)].sort()) !== JSON.stringify(saved.registration_ids)
 }
 
+export function roomAssignmentChoices(room: Pick<MgaRoom, "id" | "day_key">, players: MgaRoomPlayer[], assignments: MgaRoomAssignment[]) {
+  const assignedElsewhere = new Set(assignments
+    .filter((item) => item.day_key === room.day_key && item.room_id !== room.id)
+    .map((item) => item.registration_id))
+  return players.filter((player) => !assignedElsewhere.has(player.registration_id))
+}
+
+export function roomAssignmentConflicts(room: Pick<MgaRoom, "id" | "day_key">, registrationIds: string[], assignments: MgaRoomAssignment[]) {
+  const selected = new Set(registrationIds)
+  return [...new Set(assignments
+    .filter((item) => item.day_key === room.day_key && item.room_id !== room.id && selected.has(item.registration_id))
+    .map((item) => item.registration_id))]
+}
+
+export function canMoveRoomAssignment(currentTimeSlotId: string | null, currentRoomId: string | null, destinationTimeSlotId: string | null, destinationRoomId: string | null) {
+  if (!currentTimeSlotId || !destinationTimeSlotId) return false
+  if (currentTimeSlotId !== destinationTimeSlotId) return true
+  return currentRoomId !== destinationRoomId && (currentRoomId !== null || destinationRoomId !== null)
+}
+
 export function roomSeatsAvailable(room: MgaRoom, assignments: MgaRoomAssignment[], registrationId: string) {
   const occupied = assignments.filter((item) => item.room_id === room.id && item.registration_id !== registrationId).length
   return Math.max(0, room.capacity - occupied)
