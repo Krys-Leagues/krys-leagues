@@ -34,7 +34,9 @@ export type MgaRoom = {
   time_slot_id: string
   room_number: number
   room_name: string
+  capacity: number
   player_count: number
+  published_at?: string | null
 }
 
 export type MgaRoomAssignment = {
@@ -49,6 +51,7 @@ export type MgaRoomSnapshot = {
   room_capacity: number
   next_room_number: number
   days: Array<{ day_key: MgaDayKey; published_at: string | null }>
+  time_slots: MgaRoomSelection[]
   players: MgaRoomPlayer[]
   rooms: MgaRoom[]
   assignments: MgaRoomAssignment[]
