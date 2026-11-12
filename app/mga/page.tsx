@@ -81,8 +81,8 @@ export default function MgaChampionshipPage() {
       <header className={styles.hero}>
         <p className={styles.eyebrow}>Krys Leagues · Four Majors</p>
         <h1>The MGA Championship</h1>
-        <p>Gardens of Babylon · November 12–15, 2026</p>
-        <div className={styles.actions}><span aria-disabled="true" title="MGA player scorecard integration is not yet available">Scorecards unavailable</span><span aria-disabled="true" title="MGA results integration is not yet available">Results unavailable</span><Link href="#rooms">My Rooms</Link></div>
+        <p>4 Rounds Combined · Gardens of Babylon Easy · November 12–15, 2026</p>
+        <div className={styles.actions}><Link href="/scoring-studio">Open live scoring preview</Link><Link href="#rooms">My Tournament / My Schedule</Link></div>
       </header>
       <section className={styles.panel}>
         <div><p className={styles.eyebrow}>Player access</p><h2>Your tournament cards and room updates</h2><p>Sign in with the Discord account connected to your MGA registration. Room alerts appear here after Admin publishes each day.</p></div>
@@ -106,7 +106,7 @@ export default function MgaChampionshipPage() {
       </section>}
       <section className={styles.panel}>
         <p className={styles.eyebrow}>Four tournament rounds</p><h2>Gardens of Babylon</h2>
-        <div className={styles.dayList}>{MGA_DAYS.map((day) => <div key={day.key}><strong>{day.label}</strong><span>{day.round}</span><span>{day.key === "thursday" || day.key === "friday" ? "Gardens of Babylon Easy" : "Gardens of Babylon Hard"}</span></div>)}</div>
+        <div className={styles.dayList}>{MGA_DAYS.map((day) => <div key={day.key}><strong>{day.label}</strong><span>{day.round}</span><span>Gardens of Babylon Easy</span></div>)}</div>
       </section>
     </div>
     {activeNotice && <div className={styles.scrim} role="presentation">

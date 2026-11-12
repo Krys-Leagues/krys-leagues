@@ -15,7 +15,8 @@
     "test:kwt-import": "node --experimental-strip-types --test lib/importer/adapters/kwtAdapter.test.ts",
     "test:monthly-import": "node --experimental-strip-types --test lib/importer/adapters/monthlyWebsiteAdapter.test.ts",
     "test:trophy-import": "node --experimental-strip-types --test lib/trophies/trophyImport.test.ts lib/trophies/trophyMedia.test.ts lib/trophies/pendingTrophyAssignments.test.ts",
-    "test:all-time": "node --experimental-strip-types --test tests/all-time/*.test.ts"
+    "test:all-time": "node --experimental-strip-types --test tests/all-time/*.test.ts",
+    "test:live-scoring": "node --experimental-strip-types --test lib/liveScoring/engine.test.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",
