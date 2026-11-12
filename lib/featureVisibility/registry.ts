@@ -9,6 +9,7 @@ export const FEATURE_ROUTES: readonly FeatureRoute[] = [
   { key: "skins", path: "/skins", visibility: "private" },
   { key: "records", path: "/records", visibility: "private" },
   { key: "tournaments", path: "/tournaments", visibility: "private" },
+  { key: "tournaments", path: "/scoring-studio", visibility: "tester" },
   { key: "invitationals", path: "/invitationals", visibility: "private" },
   { key: "kwt", path: "/kwt", visibility: "private" },
   { key: "monthlies", path: "/monthlies", visibility: "live" },

@@ -35,9 +35,9 @@ test("nested routes inherit the parent feature state", () => {
   assert.equal(matchesFeatureRoute("/player-dashboard", "/players"), false)
 })
 
-test("initial registry contains no generic tester feature and exact V1 private routes", () => {
-  assert.equal(FEATURE_ROUTES.some((route) => route.visibility === "tester"), false)
-  for (const path of ["/amateur-pro", "/solo", "/skins", "/records", "/tournaments", "/invitationals", "/kwt", "/monthlies"]) {
+test("scoring studio is limited to approved testers while existing private routes stay private", () => {
+  assert.equal(FEATURE_ROUTES.find((route) => route.path === "/scoring-studio")?.visibility, "tester")
+  for (const path of ["/amateur-pro", "/solo", "/skins", "/records", "/tournaments", "/invitationals", "/kwt"]) {
     assert.equal(FEATURE_ROUTES.find((route) => route.path === path)?.visibility, "private")
   }
 })
