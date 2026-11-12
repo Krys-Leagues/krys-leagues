@@ -96,6 +96,18 @@ export default function MajorDetailPage() {
   if (loading) return <main className={styles.loading}>Loading Major…</main>
   if (!event) return <main className={styles.loading}><Link href="/majors">← Four Majors</Link>{slug === "test" ? <><h1>TEST EVENT</h1><p>Authenticated trusted-tester access is required. TEST DATA — NOT OFFICIAL.</p><button onClick={signIn} className={styles.primaryButton}>Sign in with Discord</button></> : <p>{message}</p>}</main>
 
+  // MGA registration remains authoritative in the independent MGA system.
+  // Keep the shared Four Majors hub unchanged, but route this event's detail
+  // surface to the Main-site player room portal instead of the unrelated
+  // major_entries signup flow.
+  if (slug === "major-2") return <main className={styles.loading}>
+    <Link href="/majors">← Four Majors</Link>
+    <h1>The MGA Championship</h1>
+    <p>Gardens of Babylon · November 12–15, 2026</p>
+    <p>MGA registrations and booked times remain in the MGA registration system.</p>
+    <Link href="/mga" className={styles.primaryButton}>Open MGA player room page</Link>
+  </main>
+
   const masters = isMastersScorecardTheme(event)
   const mgaOpen = event.slug.trim().toLowerCase() === "major-2" || event.name.trim().toLowerCase().includes("mga open")
   const displayDescription = mgaOpen ? "The MGA Open — Four rounds, November 12–15, 2026." : event.description

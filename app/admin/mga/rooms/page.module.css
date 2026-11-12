@@ -1,0 +1,39 @@
+.page{min-height:100vh;padding:18px;color:#f8f5e9;background:radial-gradient(circle at 80% 0,#18382e 0,transparent 34%),#07120d}
+.shell{width:min(1320px,100%);margin:0 auto}
+.nav{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 18px}
+.nav a,.controls button,.slotHeading button,.rename button,.dayTabs button,.publishBar button{min-height:42px;padding:10px 14px;border:1px solid rgba(243,199,95,.4);border-radius:10px;color:#f8f5e9;background:#0d2419;text-decoration:none;font:inherit;font-weight:800;cursor:pointer}
+.nav a{display:inline-flex;align-items:center}
+.hero{padding:clamp(20px,4vw,38px);border:1px solid rgba(243,199,95,.38);border-radius:20px;background:linear-gradient(120deg,rgba(5,17,11,.88),rgba(10,34,25,.84)),url("/mga/gardens-of-babylon.png") center 48%/cover;margin-bottom:16px}
+.hero h1{margin:4px 0 8px;font-size:clamp(30px,5vw,54px);line-height:1.05}
+.hero p:last-child{max-width:750px;color:#e4eee7;line-height:1.55}
+.eyebrow{margin:0;color:#ffdf7c;font-size:12px;font-weight:900;letter-spacing:.13em;text-transform:uppercase}
+.controls{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:14px;border:1px solid rgba(83,211,207,.25);border-radius:14px;background:#0b1d15}
+.controls>div{flex:1 1 220px}.controls>label{display:grid;gap:5px;color:#b7c9be;font-size:12px;font-weight:800}
+.controls input,.rename input,.playerRow select{min-height:42px;padding:8px 10px;border:1px solid rgba(83,211,207,.38);border-radius:9px;color:#fff;background:#06110c;font:inherit}
+.controls button,.slotHeading button{background:linear-gradient(135deg,#ffdf7c,#f3c75f);color:#1d1404;border-color:#ffdf7c}
+.controls button:disabled,.slotHeading button:disabled,.rename button:disabled,.publishBar button:disabled{opacity:.55;cursor:not-allowed}
+.controls .secondary,.publishBar .secondary{background:#102d33;color:#e9ffff;border-color:#53d3cf}
+.dayTabs{display:flex;overflow:auto;gap:8px;margin:14px 0}
+.dayTabs button{white-space:nowrap}.dayTabs .selectedTab{background:#176b68;border-color:#53d3cf}
+.privacy,.notice{padding:12px 14px;border:1px solid rgba(243,199,95,.3);border-radius:10px;background:#3a2b13;color:#ffdf7c}
+.error{padding:12px 14px;border:1px solid #ff8f8f77;border-radius:10px;background:#421e1e;color:#ffd1d1;overflow-wrap:anywhere}
+.slots{display:grid;gap:14px;margin-top:14px}
+.slot,.panel{padding:16px;border:1px solid rgba(83,211,207,.27);border-radius:16px;background:linear-gradient(145deg,rgba(13,36,25,.96),rgba(5,18,12,.95));box-shadow:0 12px 36px #0005}
+.slotHeading{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px}
+.slotHeading h2{margin:5px 0;font-size:22px}.slotHeading p:last-child{margin:0;color:#b7c9be}
+.columns{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:14px}
+.columns h3{display:flex;justify-content:space-between;margin:0 0 9px;font-size:16px}.columns h3 span{color:#ffdf7c}
+.playerList,.roomList{display:grid;gap:8px}
+.playerRow,.roomCard{min-width:0;padding:11px;border:1px solid rgba(83,211,207,.2);border-radius:11px;background:rgba(2,12,8,.62)}
+.playerRow{display:grid;grid-template-columns:minmax(0,1fr) minmax(150px,220px);align-items:center;gap:10px}
+.playerRow>div{min-width:0}.playerRow strong,.playerRow span{display:block;overflow-wrap:anywhere}.playerRow span{margin-top:4px;color:#b7c9be;font-size:12px}
+.playerRow select{width:100%}
+.roomHeader{display:flex;justify-content:space-between;gap:10px}.roomHeader strong{color:#ffdf7c;font-size:18px}.roomHeader span{color:#b7c9be}
+.rename{display:grid;grid-template-columns:minmax(100px,1fr) auto auto;gap:7px;margin-top:8px}.rename input{min-width:0}.rename button{min-height:38px;padding:7px 10px;font-size:12px}
+.rename .danger{border-color:#ff8f8f66;background:#3b1717;color:#ffd1d1}
+.roomCard p,.muted{color:#b7c9be;line-height:1.45;overflow-wrap:anywhere}
+.publishBar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;margin:16px 0;padding:15px;border:1px solid rgba(243,199,95,.4);border-radius:14px;background:#0b1d15}
+.publishBar div span,.publishBar div strong{display:block}.publishBar div span{margin-top:4px;color:#b7c9be;font-size:13px}
+.publishBar .publish{background:linear-gradient(135deg,#ffdf7c,#f3c75f);color:#1d1404;border-color:#ffdf7c}
+@media(max-width:800px){.columns{grid-template-columns:1fr}.slotHeading{align-items:flex-start;flex-direction:column}.playerRow{grid-template-columns:minmax(0,1fr) minmax(120px,180px)}}
+@media(max-width:520px){.page{padding:12px}.controls{align-items:stretch}.controls>div,.controls>label,.controls button{width:100%}.playerRow{grid-template-columns:1fr}.rename{grid-template-columns:1fr 1fr}.rename input{grid-column:1/-1}.publishBar button{width:100%}}
