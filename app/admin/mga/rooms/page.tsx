@@ -134,7 +134,7 @@ export default function MgaRoomAdminPage() {
             return <section className={styles.slot} key={slot.time_slot_id}>
               <header className={styles.slotHeading}>
                 <div><p className={styles.eyebrow}>{day.label} · Time Slot {slot.slot_number}</p><h2>{slot.course_name || "Gardens of Babylon"}</h2><p>{formatMgaLocalTime(slot.starts_at, "America/New_York")} · Eastern event time</p></div>
-                <button disabled={busy || Boolean(publishedAt)} onClick={() => void perform("mga_regular_room_create_v1", { p_event_id: MGA_REGULAR_EVENT_ID, p_day_key: dayKey, p_time_slot_id: slot.time_slot_id, p_room_name: null }, "Room created.")}>Create KMGM{snapshot.next_room_number}</button>
+                <button disabled={busy || Boolean(publishedAt)} onClick={() => void perform("mga_regular_room_create_v1", { p_event_id: MGA_REGULAR_EVENT_ID, p_day_key: dayKey, p_time_slot_id: slot.time_slot_id, p_room_name: null }, "Room created.")}>Create KMGA{snapshot.next_room_number}</button>
               </header>
               <div className={styles.columns}>
                 <section><h3>Booked players <span>{slot.players.length}</span></h3><div className={styles.playerList}>
