@@ -9,13 +9,26 @@ const read = (path) => readFileSync(new URL(path, `file://${root.replaceAll("\\"
 test("admin score entry is selected-player only and saves through the audited Studio RPC", () => {
   const source = read("components/liveScoring/LiveStudio.tsx")
   assert.match(source, /adminView === "scores"/)
-  assert.match(source, /Registered Global Player<select value=\{playerId\}/)
+  assert.match(source, /Search registered Global Players/)
+  assert.match(source, /aria-label="Scoring round" value=\{roundId\}/)
+  assert.match(source, /players\.filter\(\(player\) => player\.screenName\.toLocaleLowerCase\(\)\.includes\(adminPlayerSearch/)
+  assert.match(source, /setPlayerId\(exactMatches\.length === 1 \? exactMatches\[0\]\.id : ""\)/)
+  assert.match(source, /const fieldKey = `\$\{roundId\}:\$\{currentPlayer\.id\}`; const rowValues = adminFieldHoles\[fieldKey\] \?\? Array\.from\(\{ length: 18 \}/)
   assert.match(source, /activeRound\.par_by_hole\.map/)
   assert.match(source, /rowValues\.map\(\(value, index\)/)
   assert.match(source, /saveFieldScore\(currentPlayer\.id, rowValues, false\)/)
   assert.match(source, /saveFieldScore\(currentPlayer\.id, rowValues, true\)/)
   assert.match(source, /scoring_studio_save_score_v1/)
+  assert.match(source, /adminView === "rooms" \? <label className=\{styles\.playerPicker\}>Registered Global Player/)
   assert.doesNotMatch(source, /players\.map\(\(fieldPlayer\)/)
+})
+
+test("score-entry player and round selectors live in the score card instead of the page toolbar", () => {
+  const source = read("components/liveScoring/LiveStudio.tsx")
+  assert.match(source, /adminView === "scores" && <section className=\{styles\.panel\}>[\s\S]*?className=\{styles\.adminScoreSelectors\}[\s\S]*?className=\{styles\.adminScoreEntry\}/)
+  assert.match(source, /\(!adminOnly \|\| adminView === "rooms" \|\| adminView === "leaderboard"\) && <section className=\{styles\.toolbar\}/)
+  assert.match(source, /<button type="button" disabled=\{busy \|\| !running\.holes\} onClick=\{\(\) => void saveFieldScore\(currentPlayer\.id, rowValues, false\)\}>Save provisional/)
+  assert.match(source, /<button type="button" className=\{styles\.primary\} disabled=\{busy \|\| !running\.holes\} onClick=\{\(\) => void saveFieldScore\(currentPlayer\.id, rowValues, true\)\}>Save verified/)
 })
 
 test("Admin workflow routes are distinct and continue using instance-scoped Admin authorization", () => {
