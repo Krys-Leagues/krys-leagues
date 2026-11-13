@@ -47,6 +47,7 @@ export type RoomAssignment = {
   roomRoster: string[]
   publishedVersion: number
   published: boolean
+  roomSource?: "studio" | "mga_regular"
 }
 
 export type RoomRecord = {
