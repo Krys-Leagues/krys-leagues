@@ -106,7 +106,7 @@ export default function MgaChampionshipPage() {
       </section>}
       <section className={styles.panel}>
         <p className={styles.eyebrow}>Four tournament rounds</p><h2>Gardens of Babylon</h2>
-        <div className={styles.dayList}>{MGA_DAYS.map((day) => <div key={day.key}><strong>{day.label}</strong><span>{day.round}</span><span>Gardens of Babylon Easy</span></div>)}</div>
+        <div className={styles.dayList}>{MGA_DAYS.map((day) => <div key={day.key}><strong>{day.label}</strong><span>{day.round}</span><span>Gardens of Babylon {day.key === "thursday" || day.key === "friday" ? "Easy" : "Hard"}</span></div>)}</div>
       </section>
     </div>
     {activeNotice && <div className={styles.scrim} role="presentation">
