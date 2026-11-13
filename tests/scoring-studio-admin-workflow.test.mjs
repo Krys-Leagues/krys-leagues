@@ -46,6 +46,12 @@ test("Admin workflow routes are distinct and continue using instance-scoped Admi
   assert.match(read("components/liveScoring/LiveStudio.tsx"), /scoring_studio_is_admin/)
 })
 
+test("Admin Leaderboard renders one board while other Admin views retain their current board rendering", () => {
+  const source = read("components/liveScoring/LiveStudio.tsx")
+  assert.match(source, /\(adminOnly \? adminView !== "leaderboard" : tab === "leaderboard"\) && <section id="scoring-board"/)
+  assert.match(source, /\(\(!adminOnly && tab === "leaderboard"\) \|\| \(adminOnly && adminView === "leaderboard"\)\) && <section id="scoring-board"/)
+})
+
 test("room RLS migration removes the recursive subqueries and grants only own canonical identity resolution", () => {
   const sql = read("supabase/migrations/20261113180000_scoring_studio_admin_access_and_room_rls_fix.sql")
   assert.match(sql, /drop policy if exists scoring_studio_rooms_read/i)

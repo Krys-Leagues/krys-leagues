@@ -337,7 +337,7 @@ export default function LiveStudio({ adminOnly = false, adminView = "scores", in
       {!adminOnly && userId && !playerAccessReady && tab !== "submission" && <p className={styles.toast} role="alert">This account is signed in but is not linked to a registered Global Player for this tournament. Room details, score entry, and uploads are unavailable.</p>}
       {!adminOnly && schedule.length > 0 && <details className={styles.roomAccess}><summary>Published rooms · {schedule.length}</summary><div>{schedule.map((room) => <article key={room.roundId + ":" + room.roomId}><span><strong>{room.roomName}</strong> · {rounds.find((round) => round.id === room.roundId)?.label} · {room.course} · {room.difficulty.toUpperCase()}</span><button type="button" onClick={() => setOpenedRoom(room)}>Open room details</button></article>)}</div></details>}
       {adminOnly && <div className={styles.adminBadge}>{isAdmin ? "Authorized Tournament Admin · audited writes" : "Admin access required"}</div>}
-      {(tab === "leaderboard" || adminOnly) && <section id="scoring-board" className={`${styles.panel} ${styles.leaderboardPanel}`}>
+      {(adminOnly ? adminView !== "leaderboard" : tab === "leaderboard") && <section id="scoring-board" className={`${styles.panel} ${styles.leaderboardPanel}`}>
         {isMGAChampionship && <header className={`${styles.mgaHeader} ${styles.boardChampionshipHeader}`}>
           <Image className={styles.mgaLogo} src="/krys-leagues-logo.png" width={824} height={824} alt="Krys Leagues" priority />
           <div className={styles.mgaHeaderCopy}>
