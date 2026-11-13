@@ -2,7 +2,7 @@ import assert from "node:assert/strict"
 import { readFileSync } from "node:fs"
 import test from "node:test"
 import { MGA_DEMO_PLAYERS, MGA_STUDIO_CONFIG } from "./config.ts"
-import { activeRoomNotices, calculateLeaderboard, canPlayerSubmitRound, dateTimeInputInZone, dateTimeInputToUtc, formatToPar, publishedRoomAssignments, roomNoticeKey, setRoomPublished, transferRoomPlayer, tournamentStorageKey, updateRoomRecord } from "./engine.ts"
+import { activeRoomNotices, calculateLeaderboard, canPlayerSubmitRound, combinedScoreDisplayStatus, dateTimeInputInZone, dateTimeInputToUtc, formatToPar, publishedRoomAssignments, roomNoticeKey, scoreDisplayStatus, setRoomPublished, transferRoomPlayer, tournamentStorageKey, updateRoomRecord } from "./engine.ts"
 import type { RoomAssignment, RoomRecord, RoundScore } from "./types.ts"
 
 test("combined scoring sums only played rounds, ranks low totals first, and preserves ties", () => {
@@ -97,7 +97,18 @@ test("configured capacity can be raised above four without an implicit software 
   assert.equal(result.rooms[0].playerIds.length, 5)
 })
 
-test("admin scoring route remains inside the site-admin protected app segment", () => {
-  const adminLayout = readFileSync(new URL("../../app/admin/layout.tsx", import.meta.url), "utf8")
-  assert.match(adminLayout, /permissions\.siteAdmin/)
+test("live and verified numbers use distinct colors, and mixed totals stay live", () => {
+  assert.equal(scoreDisplayStatus("provisional"), "live")
+  assert.equal(scoreDisplayStatus("official"), "verified")
+  assert.equal(scoreDisplayStatus(null), "missing")
+  assert.equal(combinedScoreDisplayStatus(["official", "provisional", null, null]), "live")
+  assert.equal(combinedScoreDisplayStatus(["official", "official", null, null]), "verified")
+  assert.equal(combinedScoreDisplayStatus([null, null, null, null]), "missing")
+})
+
+test("tournament Admin route checks the instance-scoped scoring Admin permission", () => {
+  const proxy = readFileSync(new URL("../../proxy.ts", import.meta.url), "utf8")
+  assert.match(proxy, /scoringAdminMatch/)
+  assert.match(proxy, /scoring_studio_is_admin/)
+  assert.match(proxy, /instanceSlug/)
 })

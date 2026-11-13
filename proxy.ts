@@ -29,6 +29,24 @@ export async function proxy(request: NextRequest) {
   // production continues through the normal feature-access boundary.
   if (pathname === "/masters/results/preview" && process.env.VERCEL_ENV === "preview") return session.response
 
+  // Tournament Admin authority is instance-scoped and resolved by the scoring
+  // module's database policy, so MGA event Admins do not need site-wide access.
+  const scoringAdminMatch = /^\/scoring-studio\/([^/]+)\/admin$/.exec(pathname)
+  if (/^\/scoring-studio\/[^/]+\/admin-login$/.test(pathname)) return session.response
+  if (scoringAdminMatch) {
+    const instanceSlug = scoringAdminMatch[1]
+    if (!session.user) {
+      const loginUrl = new URL(`/scoring-studio/${encodeURIComponent(instanceSlug)}/admin-login`, request.url)
+      return withSessionCookies(session.response, NextResponse.redirect(loginUrl))
+    }
+    const { data: instance, error: instanceError } = await session.supabase
+      .from("scoring_studio_instances").select("id").eq("slug", instanceSlug).maybeSingle()
+    if (instanceError || !instance) return withSessionCookies(session.response, NextResponse.redirect(new URL("/access-denied?reason=scoring-admin", request.url)))
+    const { data: authorized, error } = await session.supabase.rpc("scoring_studio_is_admin", { p_instance_id: instance.id })
+    if (error || !authorized) return withSessionCookies(session.response, NextResponse.redirect(new URL("/access-denied?reason=scoring-admin", request.url)))
+    return session.response
+  }
+
   if (pathname === "/admin" || pathname.startsWith("/admin/")) {
     if (!session.user) {
       if (pathname === "/admin") return session.response

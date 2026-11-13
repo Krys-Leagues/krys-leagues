@@ -1,7 +1,7 @@
-import DemoStudio from "@/components/liveScoring/DemoStudio"
+import LiveStudio from "@/components/liveScoring/LiveStudio"
 
 export const metadata = { title: "Scoring Studio Admin Preview | Krys Leagues" }
 
 export default function ScoringStudioAdminPreviewPage() {
-  return <DemoStudio adminOnly />
+  return <LiveStudio adminOnly />
 }

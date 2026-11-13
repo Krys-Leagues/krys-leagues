@@ -117,6 +117,19 @@ export function formatToPar(score: number | null) {
   return score > 0 ? `+${score}` : `${score}`
 }
 
+export type ScoreDisplayStatus = "live" | "verified" | "missing"
+
+export function scoreDisplayStatus(scoreKind: "provisional" | "official" | null): ScoreDisplayStatus {
+  if (scoreKind === "official") return "verified"
+  return scoreKind === "provisional" ? "live" : "missing"
+}
+
+export function combinedScoreDisplayStatus(scoreKinds: Array<"provisional" | "official" | null>): ScoreDisplayStatus {
+  const recorded = scoreKinds.filter((kind): kind is "provisional" | "official" => kind !== null)
+  if (!recorded.length) return "missing"
+  return recorded.every((kind) => kind === "official") ? "verified" : "live"
+}
+
 export function formatRoundDate(round: RoundConfig) {
   return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" }).format(new Date(`${round.date}T12:00:00Z`))
 }

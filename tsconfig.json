@@ -33,6 +33,7 @@
   ],
   "exclude": [
     "node_modules",
+    "supabase/functions",
     ".all-time-admin-launch",
     ".codex",
     ".join-monthly-guard",
