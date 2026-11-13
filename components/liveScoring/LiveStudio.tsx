@@ -284,7 +284,7 @@ export default function LiveStudio({ adminOnly = false, instanceSlug = MGA_PREVI
   const popupRoom: RoomAssignment | null = popup ? { eventId: popup.eventId, roomId: popup.roomId, playerId: popup.playerId, roundId: popup.roundId, screenName: popup.screenName, roomName: popup.roomName, course: popup.course, difficulty: popup.difficulty, startsAt: popup.startsAt, timeZone: popup.timeZone, roomRoster: popup.roomRoster, publishedVersion: popup.publishedVersion, published: true, roomSource: popup.roomSource } : null
   const isMGAChampionship = instanceSlug === MGA_PREVIEW_SLUG
 
-  return <main className={`${styles.page} ${large ? styles.large : ""}`} style={{ "--accent": config.theme.accent, "--surface": config.theme.surface, "--ink": config.theme.text, "--muted": config.theme.muted, "--artwork": `url(${config.artwork})` } as CSSProperties}>
+  return <main className={`${styles.page} ${large ? styles.large : ""}`} style={{ "--accent": config.theme.accent, "--surface": config.theme.surface, "--ink": config.theme.text, "--muted": config.theme.muted, "--artwork": `url(${isMGAChampionship ? "/mga/babylonian-gardens-panorama.png" : config.artwork})` } as CSSProperties}>
     <div className={styles.shell}>
       {isMGAChampionship ? <header className={styles.mgaHeader}>
         <Image className={styles.mgaLogo} src="/krys-leagues-logo.png" width={824} height={824} alt="Krys Leagues" priority />

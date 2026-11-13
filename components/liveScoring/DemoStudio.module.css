@@ -25,10 +25,9 @@
 @media(max-width:900px){.adminScoreWorkspace{grid-template-columns:1fr}.adminEvidence{height:45vh}}
 
 /* MGA Championship visual system: approved course art, existing logo and trophy */
-.page{padding:12px 14px 28px;background:radial-gradient(ellipse at 50% 0,rgba(38,125,155,.16),transparent 46%),linear-gradient(180deg,rgba(3,20,32,.32),rgba(3,20,32,.52)),var(--artwork) center 30%/cover fixed,#071823}
+.page{padding:12px 14px 28px;background:linear-gradient(180deg,rgba(3,20,32,.22),rgba(3,20,32,.34)),var(--artwork) center 30%/cover fixed,#071823}
 .shell{width:min(1640px,100%)}
-.mgaHeader{position:relative;isolation:isolate;display:grid;grid-template-columns:clamp(88px,13vw,170px) minmax(0,1fr) clamp(88px,13vw,170px);align-items:center;gap:clamp(12px,2vw,28px);min-height:210px;margin:2px 0 12px;padding:clamp(16px,2.6vw,32px) clamp(18px,4vw,56px);overflow:hidden;border:1px solid rgba(245,207,112,.66);border-radius:14px;background:linear-gradient(90deg,rgba(4,29,45,.22),rgba(4,29,45,.16) 58%,rgba(4,29,45,.27)),var(--artwork) center 34%/cover;box-shadow:0 12px 30px rgba(0,8,18,.22)}
-.mgaHeader::after{position:absolute;z-index:-1;inset:0;content:"";background:linear-gradient(90deg,rgba(2,18,30,.32),transparent 46%,rgba(2,18,30,.2))}
+.mgaHeader{position:relative;display:grid;grid-template-columns:clamp(88px,13vw,170px) minmax(0,1fr) clamp(88px,13vw,170px);align-items:center;gap:clamp(12px,2vw,28px);min-height:210px;margin:2px 0 12px;padding:clamp(16px,2.6vw,32px) clamp(18px,4vw,56px);overflow:hidden;border:1px solid transparent;border-radius:14px;background:transparent;box-shadow:none}
 .mgaLogo{display:block;width:100%;height:auto;max-height:148px;object-fit:contain;filter:drop-shadow(0 5px 12px rgba(0,0,0,.45))}
 .mgaTrophy{display:block;width:100%;height:auto;max-height:168px;object-fit:contain;filter:drop-shadow(0 8px 14px rgba(0,0,0,.46))}
 .mgaHeaderCopy{min-width:0;text-shadow:0 2px 8px rgba(0,0,0,.5)}
@@ -40,18 +39,18 @@
 .mgaHeaderCopy>strong{display:block;margin-top:6px;color:#fffdf6;font-size:clamp(17px,2vw,26px);letter-spacing:.055em}
 .mgaRounds{color:#ffda79;font-size:clamp(11px,1.2vw,16px)}
 .headerToggle{position:absolute;top:10px;right:10px;z-index:2;padding:7px 9px;font-size:11px;backdrop-filter:blur(8px)}
-.panel{border-color:rgba(115,211,224,.44);background:linear-gradient(135deg,rgba(7,54,72,.53),rgba(6,36,55,.47));backdrop-filter:blur(7px);box-shadow:0 12px 32px rgba(0,11,22,.2)}
-.leaderboardPanel{padding:clamp(12px,1.8vw,20px);border-radius:12px;background:linear-gradient(135deg,rgba(7,55,75,.48),rgba(7,37,56,.42))}
+.panel{border-color:rgba(115,211,224,.36);background:linear-gradient(135deg,rgba(7,54,72,.29),rgba(6,36,55,.23));backdrop-filter:blur(3px);box-shadow:0 8px 24px rgba(0,11,22,.12)}
+.leaderboardPanel{padding:clamp(12px,1.8vw,20px);border-radius:12px;background:linear-gradient(135deg,rgba(7,55,75,.23),rgba(7,37,56,.19))}
 .panelHeading h2,.panel h2{color:#fffdf6;font-size:clamp(22px,2.5vw,30px)}
 .panelHeading>span{padding:5px 8px;border-color:rgba(245,207,112,.42);color:#f7dfa0;font-size:12px}
 .scoreLegend{gap:12px;margin:7px 0;color:#e1eef0;font-size:11px}
 .tableWrap{margin-top:9px;border-color:rgba(159,222,231,.45);border-radius:8px;background:rgba(3,24,39,.18)}
 .compactBoard table{min-width:700px}
-.compactBoard thead{background:rgba(6,36,51,.62);color:#e7f1f3;font-size:10px;letter-spacing:.07em}
+.compactBoard thead{background:rgba(6,36,51,.42);color:#e7f1f3;font-size:10px;letter-spacing:.07em}
 .compactBoard :is(th,td){padding:5px 9px;border-bottom-color:rgba(176,225,231,.25);line-height:1.15}
 .compactBoard thead th{color:#e7f1f3;font-weight:800;white-space:nowrap}
-.compactBoard tbody tr{background:rgba(8,43,57,.28)}
-.compactBoard tbody tr:nth-child(even){background:rgba(8,48,64,.38)}
+.compactBoard tbody tr{background:rgba(8,43,57,.12)}
+.compactBoard tbody tr:nth-child(even){background:rgba(8,48,64,.2)}
 .compactBoard tbody tr:hover{background:rgba(25,101,119,.28)}
 .compactBoard tbody td,.compactBoard tbody th{font-size:14px}
 .compactBoard tbody th{color:#f5fbfc}
