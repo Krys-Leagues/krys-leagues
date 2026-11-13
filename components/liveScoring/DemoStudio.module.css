@@ -74,3 +74,23 @@
 @media(max-width:700px){.mgaHeader{grid-template-columns:58px minmax(0,1fr) 58px;min-height:130px;padding:20px 8px 10px}.mgaHeaderCopy h1{font-size:clamp(20px,5vw,32px);white-space:normal}.mgaLogo{max-height:58px}.mgaTrophy{max-height:68px}.imageWorkspace{height:52vh;min-height:320px}.playerGrid .scoreEntryGrid{grid-template-columns:44px repeat(18,42px) 62px;min-width:max-content}.roomAccess article{flex-wrap:wrap}.roomAccess article>span{width:100%}}
 
 .large .mgaHeaderCopy h1{font-size:clamp(28px,3.7vw,50px)}
+
+/* Final MGA leaderboard alignment: championship identity is part of the board. */
+.leaderboardPanel>.mgaHeader{grid-template-columns:minmax(110px,1fr) minmax(0,2.5fr) minmax(110px,1fr);min-height:158px;margin:0 0 5px;padding:10px clamp(18px,4vw,56px);border-color:rgba(196,235,242,.4);border-radius:12px;background:linear-gradient(100deg,rgba(3,29,43,.45),rgba(4,39,51,.2),rgba(3,29,43,.45));box-shadow:none}
+.leaderboardPanel>.mgaHeader .mgaLogo{max-height:104px}
+.leaderboardPanel>.mgaHeader .mgaTrophy{max-height:108px}
+.leaderboardPanel>.mgaHeader .headerToggle{top:7px;right:8px}
+.leaderboardPanel>.scoreLegend{margin:0 0 6px;padding:0 2px;gap:13px}
+.compactBoard table{width:100%;min-width:1040px;table-layout:fixed}
+.positionColumn{width:8%}.playerColumn{width:34%}.roundColumn{width:9.5%}.combinedColumn{width:20%}
+.compactBoard thead th:first-child,.compactBoard tbody td:first-child{text-align:center}
+.compactBoard thead th:nth-child(2){text-align:left;padding-left:14px}
+.compactBoard tbody th{padding-left:14px;text-align:left;white-space:nowrap;font-size:clamp(16px,1.35vw,19px);font-weight:900}
+.compactBoard tbody td:first-child{font-size:15px;font-weight:750;font-variant-numeric:tabular-nums}
+.compactBoard tbody td>strong{font-size:clamp(19px,1.55vw,23px);font-weight:900;font-variant-numeric:tabular-nums}
+.compactBoard tbody td.total{font-size:clamp(20px,1.7vw,25px);font-weight:950}
+.compactBoard tbody td.total strong{font-size:inherit}
+.large .leaderboardPanel>.mgaHeader{min-height:158px}
+.large .compactBoard tbody td>strong{font-size:25px}
+.large .compactBoard tbody td.total{font-size:27px}
+@media(max-width:700px){.leaderboardPanel>.mgaHeader{grid-template-columns:48px minmax(0,1fr) 48px;min-height:128px;padding:22px 8px 9px}.leaderboardPanel>.mgaHeader .mgaLogo{max-height:52px}.leaderboardPanel>.mgaHeader .mgaTrophy{max-height:60px}.leaderboardPanel>.mgaHeader .headerToggle{top:4px;right:4px}.leaderboardPanel>.mgaHeader .mgaHeaderCopy h1{font-size:clamp(18px,5vw,30px)}.compactBoard table{min-width:1040px}}
