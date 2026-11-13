@@ -35,8 +35,8 @@ test("nested routes inherit the parent feature state", () => {
   assert.equal(matchesFeatureRoute("/player-dashboard", "/players"), false)
 })
 
-test("scoring studio leaderboard is public while existing private routes stay private", () => {
-  assert.equal(FEATURE_ROUTES.find((route) => route.path === "/scoring-studio")?.visibility, "live")
+test("scoring studio stays private while existing private routes stay private", () => {
+  assert.equal(FEATURE_ROUTES.find((route) => route.path === "/scoring-studio")?.visibility, "private")
   for (const path of ["/amateur-pro", "/solo", "/skins", "/records", "/tournaments", "/invitationals", "/kwt"]) {
     assert.equal(FEATURE_ROUTES.find((route) => route.path === path)?.visibility, "private")
   }

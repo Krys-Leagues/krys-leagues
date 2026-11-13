@@ -81,8 +81,8 @@ export default function MgaChampionshipPage() {
       <header className={styles.hero}>
         <p className={styles.eyebrow}>Krys Leagues · Four Majors</p>
         <h1>The MGA Championship</h1>
-        <p>4 Rounds Combined · Gardens of Babylon Easy · November 12–15, 2026</p>
-        <div className={styles.actions}><Link href="/scoring-studio">Open live scoring preview</Link><Link href="#rooms">My Tournament / My Schedule</Link></div>
+        <p>Gardens of Babylon · November 12–15, 2026</p>
+        <div className={styles.actions}><span aria-disabled="true" title="MGA player scorecard integration is not yet available">Scorecards unavailable</span><span aria-disabled="true" title="MGA results integration is not yet available">Results unavailable</span><Link href="#rooms">My Rooms</Link></div>
       </header>
       <section className={styles.panel}>
         <div><p className={styles.eyebrow}>Player access</p><h2>Your tournament cards and room updates</h2><p>Sign in with the Discord account connected to your MGA registration. Room alerts appear here after Admin publishes each day.</p></div>
