@@ -323,7 +323,7 @@ export default function LiveStudio({ adminOnly = false, instanceSlug = MGA_PREVI
             <strong>November 12–15, 2026</strong>
             <p className={styles.mgaRounds}>4 Rounds · Thursday–Sunday</p>
           </div>
-          <Image className={styles.mgaTrophy} src="/approved-pages/mga-cup.png" width={2064} height={2752} alt="MGA Championship trophy" priority sizes="(max-width: 700px) 54px, 216px" />
+          <Image className={styles.mgaTrophy} src="/approved-pages/mga-cup.png" width={1148} height={1371} alt="MGA Championship trophy" priority sizes="(max-width: 400px) 44px, (max-width: 700px) 12vw, 11.4vw" />
           <button className={`${styles.toggle} ${styles.headerToggle}`} onClick={() => setLarge((v) => !v)}>{large ? "Compact display" : "Large display"}</button>
         </header>}
         {!isMGAChampionship && <div className={styles.panelHeading}><div><p className={styles.eyebrow}>One championship · {rounds.length} rounds</p><h2>Combined leaderboard</h2></div></div>}

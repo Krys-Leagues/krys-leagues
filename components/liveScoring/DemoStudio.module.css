@@ -96,3 +96,15 @@
 .large .compactBoard tbody td>strong{font-size:25px}
 .large .compactBoard tbody td.total{font-size:27px}
 @media(max-width:700px){.leaderboardPanel>.boardChampionshipHeader{grid-template-columns:48px minmax(0,1fr) 48px;min-height:128px;padding:22px 8px 9px}.leaderboardPanel>.boardChampionshipHeader .mgaLogo{max-height:50px}.leaderboardPanel>.boardChampionshipHeader .mgaTrophy{width:auto;height:54px;max-width:100%;max-height:none}.leaderboardPanel>.boardChampionshipHeader .headerToggle{top:4px;right:4px}.leaderboardPanel>.boardChampionshipHeader .mgaHeaderCopy h1{font-size:clamp(18px,5vw,30px)}.compactBoard table{min-width:1040px}}
+
+/* Scale the complete MGA header composition from the leaderboard's width. */
+.leaderboardPanel{container-type:inline-size}
+.leaderboardPanel>.boardChampionshipHeader{grid-template-columns:minmax(0,1fr) minmax(0,2.5fr) minmax(0,1fr);gap:clamp(5px,.75cqw,12px);min-height:clamp(100px,11.25cqw,180px);padding:clamp(4px,.625cqw,10px) clamp(8px,4cqw,64px)}
+.leaderboardPanel>.boardChampionshipHeader .mgaLogo{width:clamp(44px,9.6cqw,144px);height:clamp(44px,9.6cqw,144px);max-width:100%;max-height:none;justify-self:center;object-fit:contain}
+.leaderboardPanel>.boardChampionshipHeader .mgaTrophy{width:auto;height:clamp(52px,14.6cqw,216px);max-width:100%;max-height:none;align-self:center;justify-self:center;object-fit:contain}
+.leaderboardPanel>.boardChampionshipHeader .mgaHeaderCopy h1{font-size:clamp(16px,3.125cqw,50px);line-height:.98;white-space:normal;text-wrap:balance}
+.leaderboardPanel>.boardChampionshipHeader .mgaHeaderCopy .eyebrow{font-size:clamp(5px,.6875cqw,11px)}
+.leaderboardPanel>.boardChampionshipHeader .mgaIdentity{font-size:clamp(7px,1.125cqw,18px)}
+.leaderboardPanel>.boardChampionshipHeader .mgaCourse{font-size:clamp(8px,1.1875cqw,19px)}
+.leaderboardPanel>.boardChampionshipHeader .mgaHeaderCopy>strong{font-size:clamp(9px,1.3125cqw,21px)}
+.leaderboardPanel>.boardChampionshipHeader .mgaRounds{font-size:clamp(6px,1cqw,16px)}
