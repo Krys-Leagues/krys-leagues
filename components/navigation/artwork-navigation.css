@@ -23,7 +23,9 @@
 
 .artwork-navigation__after-frame {
   position: relative;
-  z-index: 1;
+  /* Keep launcher content below the artwork, but above the frame's stacking
+     context so fixed dialogs rendered here can cover the Hub navigation. */
+  z-index: 3;
   width: min(94.2%, 1568px);
   margin: clamp(8px, 1vw, 16px) auto 0;
 }
