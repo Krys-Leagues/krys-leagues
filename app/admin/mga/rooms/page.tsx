@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { formatMgaLocalTime, MGA_DAYS, MGA_REGULAR_EVENT_ID, type MgaDayKey, type MgaRoom, type MgaRoomSelection, type MgaRoomSnapshot } from "@/lib/mgaRegular"
 import { canMoveRoomAssignment, makeMgaRoomDraft, roomAssignmentChoices, roomAssignmentConflicts, roomDraftChanged, roomSaveRegistrationIds, roomSeatsAvailable, type MgaRoomDraft } from "@/lib/mgaRoomDraft"
+import { MGA_ROOM_PREFIX, normalizeMgaRoomNameInput, roomNumberName } from "@/lib/mgaRoomNumber"
 import { supabase } from "@/lib/supabase"
 import styles from "./page.module.css"
 
@@ -20,7 +21,7 @@ export default function MgaRoomAdminPage() {
   const [snapshot, setSnapshot] = useState<MgaRoomSnapshot | null>(null)
   const [dayKey, setDayKey] = useState<MgaDayKey>("thursday")
   const [capacityDraft, setCapacityDraft] = useState("4")
-  const [roomNameQuery, setRoomNameQuery] = useState("")
+  const [roomNumberInput, setRoomNumberInput] = useState("")
   const [roomSearchAttempted, setRoomSearchAttempted] = useState(false)
   const [newRoomTimeSlotId, setNewRoomTimeSlotId] = useState("")
   const [newRoomCapacity, setNewRoomCapacity] = useState("4")
@@ -29,6 +30,7 @@ export default function MgaRoomAdminPage() {
   const [moveRegistrationId, setMoveRegistrationId] = useState<string | null>(null)
   const [moveTimeSlotId, setMoveTimeSlotId] = useState("")
   const [moveRoomId, setMoveRoomId] = useState("")
+  const [moveRoomNumber, setMoveRoomNumber] = useState("")
   const [message, setMessage] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(true)
@@ -134,6 +136,12 @@ export default function MgaRoomAdminPage() {
 
   async function saveRoom(room: MgaRoom, slotPlayers: MgaRoomSnapshot["players"]) {
     const draft = draftFor(room)
+    const duplicateNumber = (snapshot?.rooms || []).find((candidate) => candidate.id !== room.id
+      && roomNumberName(candidate.room_name) === roomNumberName(draft.room_name))
+    if (roomNumberName(draft.room_name) && duplicateNumber) {
+      setError(`${draft.room_name.trim()} already exists as ${duplicateNumber.room_name}. Choose a different room number before saving.`)
+      return
+    }
     const selectedIds = roomSaveRegistrationIds(draft, slotPlayers)
       .filter((registrationId) => slotPlayers.some((player) => player.registration_id === registrationId
         && player.selections.some((selection) => selection.day_key === room.day_key && selection.time_slot_id === room.time_slot_id)))
@@ -175,6 +183,7 @@ export default function MgaRoomAdminPage() {
     setMoveRegistrationId(playerId)
     setMoveTimeSlotId(booked?.time_slot_id || "")
     setMoveRoomId("")
+    setMoveRoomNumber("")
     setError("")
     setMessage("")
   }
@@ -190,10 +199,12 @@ export default function MgaRoomAdminPage() {
   const destinationRooms = (snapshot?.rooms || []).filter((room) => room.day_key === dayKey && room.time_slot_id === moveTimeSlotId)
   const moveCanSave = canMoveRoomAssignment(moveCurrentTimeSlotId || null, moveCurrentRoomId, destinationSlot?.time_slot_id || null, destinationRooms.some((room) => room.id === moveRoomId) ? moveRoomId : null)
   const exactRoomMatches = useMemo(() => {
-    const query = roomNameQuery.trim().toLocaleLowerCase()
-    if (!query) return []
-    return (snapshot?.rooms || []).filter((room) => room.room_name.trim().toLocaleLowerCase() === query)
-  }, [roomNameQuery, snapshot])
+    const name = normalizeMgaRoomNameInput(roomNumberInput)
+    if (!name) return []
+    return (snapshot?.rooms || []).filter((room) => roomNumberName(room.room_name) === name)
+  }, [roomNumberInput, snapshot])
+  const newRoomName = normalizeMgaRoomNameInput(roomNumberInput)
+  const newMoveRoomName = normalizeMgaRoomNameInput(moveRoomNumber)
   const newRoomSlots = timeSlots
   const newRoomSlot = newRoomSlots.find((slot) => slot.time_slot_id === newRoomTimeSlotId) || null
 
@@ -206,14 +217,13 @@ export default function MgaRoomAdminPage() {
   }
 
   function searchRoom() {
-    const query = roomNameQuery.trim()
     setRoomSearchAttempted(true)
-    if (!query) {
-      setError("Type an exact MGA room name, such as KMGA27.")
+    if (!newRoomName) {
+      setError(`Enter a room number after the fixed ${MGA_ROOM_PREFIX} prefix, such as 27.`)
       return
     }
     if (exactRoomMatches.length > 1) {
-      setError(`More than one authoritative room is named ${query}. Creation is blocked until the duplicate records are resolved.`)
+      setError(`More than one authoritative room is numbered ${newRoomName}. Creation is blocked until the duplicate records are resolved.`)
       return
     }
     if (exactRoomMatches.length === 1) {
@@ -221,21 +231,21 @@ export default function MgaRoomAdminPage() {
       return
     }
     setNewRoomTimeSlotId((current) => current || newRoomSlots[0]?.time_slot_id || "")
-    setMessage(`${query} does not exist in the MGA room records. Choose the booked slot below, then confirm creation.`)
+    setMessage(`${newRoomName} does not exist in the MGA room records. Choose the booked slot below, then confirm creation.`)
     setError("")
   }
 
   async function createNamedRoom() {
-    const name = roomNameQuery.trim()
+    const name = newRoomName
     const capacity = Number(newRoomCapacity)
     if (!name || !newRoomSlot || !Number.isInteger(capacity) || capacity < 1 || capacity > 100) {
-      setError("Choose an authoritative booked time slot and a room capacity from 1 to 100.")
+      setError(`Enter a valid ${MGA_ROOM_PREFIX} room number, then choose an authoritative booked time slot and a room capacity from 1 to 100.`)
       return
     }
-    const duplicate = (snapshot?.rooms || []).find((room) => room.room_name.trim().toLocaleLowerCase() === name.toLocaleLowerCase())
+    const duplicate = (snapshot?.rooms || []).find((room) => roomNumberName(room.room_name) === name)
     if (duplicate) {
       focusRoom(duplicate)
-      setError(`${name} already exists. The existing room was loaded; no second room was created.`)
+      setError(`${name} already exists as ${duplicate.room_name}. The existing room was loaded; no second room was created.`)
       return
     }
     if (publishedAt) {
@@ -288,6 +298,16 @@ export default function MgaRoomAdminPage() {
 
   async function createDestinationRoom() {
     if (!destinationSlot || publishedAt || dirtyRoomIds.length) return
+    if (!newMoveRoomName) {
+      setError(`Enter the new destination room number after the fixed ${MGA_ROOM_PREFIX} prefix.`)
+      return
+    }
+    const duplicate = (snapshot?.rooms || []).find((room) => roomNumberName(room.room_name) === newMoveRoomName)
+    if (duplicate) {
+      if (duplicate.day_key === destinationSlot.day_key && duplicate.time_slot_id === destinationSlot.time_slot_id) setMoveRoomId(duplicate.id)
+      setError(`${newMoveRoomName} already exists as ${duplicate.room_name}. The existing room was selected; no second room was created.`)
+      return
+    }
     setBusy(true)
     setError("")
     setMessage("")
@@ -296,7 +316,7 @@ export default function MgaRoomAdminPage() {
         p_event_id: MGA_REGULAR_EVENT_ID,
         p_day_key: dayKey,
         p_time_slot_id: destinationSlot.time_slot_id,
-        p_room_name: null,
+        p_room_name: newMoveRoomName,
       })
       if (response.error) {
         setError(response.error.message)
@@ -382,16 +402,16 @@ export default function MgaRoomAdminPage() {
             <p className={styles.muted}>Searches the authoritative MGA rooms and loads their real assignments. Course, difficulty, date, and start time stay tied to the selected registered booking slot; no Studio room is created.</p>
           </div>
           <div className={styles.roomLookupForm}>
-            <label>Exact room name<input aria-label="Exact MGA room name" value={roomNameQuery} maxLength={40} placeholder="KMGA27" onChange={(event) => { setRoomNameQuery(event.target.value); setRoomSearchAttempted(false); setError("") }} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); searchRoom() } }} /></label>
+            <label>Room number <span aria-hidden="true">({MGA_ROOM_PREFIX})</span><input aria-label="MGA room number" inputMode="numeric" pattern="[0-9]*" value={roomNumberInput} maxLength={5} placeholder="27" onChange={(event) => { setRoomNumberInput(event.target.value.replace(/\D/g, "").slice(0, 5)); setRoomSearchAttempted(false); setError("") }} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); searchRoom() } }} /></label>
             <button disabled={busy || dirtyRoomIds.length > 0} onClick={searchRoom}>Find exact room</button>
           </div>
           {exactRoomMatches.map((room) => <div className={styles.lookupResult} key={room.id}><span><strong>{room.room_name}</strong> · {MGA_DAYS.find((item) => item.key === room.day_key)?.label} · {room.player_count}/{room.capacity} assigned</span><button className={styles.secondary} disabled={busy || dirtyRoomIds.length > 0} onClick={() => focusRoom(room)}>Load room</button></div>)}
-          {roomSearchAttempted && roomNameQuery.trim() && exactRoomMatches.length === 0 && <div className={styles.createRoomPrompt}>
-            <p><strong>{roomNameQuery.trim()}</strong> is not an existing room. Confirm below only if this exact name should be created.</p>
+          {roomSearchAttempted && roomNumberInput.trim() && newRoomName && exactRoomMatches.length === 0 && <div className={styles.createRoomPrompt}>
+            <p><strong>{newRoomName}</strong> is not an existing room. Confirm below only if this exact number should be created.</p>
             <label>Authoritative booked date and start time<select value={newRoomTimeSlotId} disabled={busy || Boolean(publishedAt)} onChange={(event) => setNewRoomTimeSlotId(event.target.value)}>{newRoomSlots.map((slot) => <option key={slot.time_slot_id} value={slot.time_slot_id}>{formatEventDate(slot.event_date)} · {formatMgaLocalTime(slot.starts_at, "America/New_York")} · {slot.course_name || "Gardens of Babylon"}</option>)}</select></label>
             <label>Capacity<input type="number" min={1} max={100} value={newRoomCapacity} disabled={busy || Boolean(publishedAt)} onChange={(event) => setNewRoomCapacity(event.target.value)} /></label>
             <p className={styles.muted}>Difficulty is inherited from the authoritative MGA round configuration. Player assignment remains manual and uses the Global Player roster below.</p>
-            <button disabled={busy || Boolean(publishedAt) || dirtyRoomIds.length > 0 || !newRoomSlot} onClick={() => void createNamedRoom()}>Confirm and create {roomNameQuery.trim()}</button>
+            <button disabled={busy || Boolean(publishedAt) || dirtyRoomIds.length > 0 || !newRoomSlot} onClick={() => void createNamedRoom()}>Confirm and create {newRoomName}</button>
           </div>}
         </section>
         <p className={styles.privacy}>{publishedAt ? `Published ${new Date(publishedAt).toLocaleString()}. Unpublish before changing rooms or time slots.` : "Draft assignments are private to authorized Admins."}</p>
@@ -402,7 +422,7 @@ export default function MgaRoomAdminPage() {
             return <section className={styles.slot} key={slot.time_slot_id}>
               <header className={styles.slotHeading}>
                 <div><p className={styles.eyebrow}>{day.label} · Time Slot {slot.slot_number}</p><h2>{slot.course_name || "Gardens of Babylon"}</h2><p>{formatMgaLocalTime(slot.starts_at, "America/New_York")} · Eastern event time</p></div>
-                <button disabled={busy || Boolean(publishedAt) || dirtyRoomIds.length > 0} onClick={() => void perform("mga_regular_room_create_v1", { p_event_id: MGA_REGULAR_EVENT_ID, p_day_key: dayKey, p_time_slot_id: slot.time_slot_id, p_room_name: null }, `KMGA${snapshot.next_room_number} created.`)}>Create KMGA{snapshot.next_room_number}</button>
+                <p className={styles.muted}>Enter a {MGA_ROOM_PREFIX} number above to create a room for this booked slot.</p>
               </header>
               <section className={styles.bookedPlayers}><h3>Booked players <span>{slot.players.length}</span></h3><div className={styles.playerList}>
                 {slot.players.map((player) => {
@@ -481,6 +501,9 @@ export default function MgaRoomAdminPage() {
           </select>
         </label>
         {destinationRooms.length === 0 && <p className={styles.muted}>No room exists for this time yet.</p>}
+        <label>New destination room number <span aria-hidden="true">({MGA_ROOM_PREFIX})</span>
+          <input aria-label="New destination MGA room number" inputMode="numeric" pattern="[0-9]*" value={moveRoomNumber} maxLength={5} placeholder="31" onChange={(event) => { setMoveRoomNumber(event.target.value.replace(/\D/g, "").slice(0, 5)); setError("") }} />
+        </label>
         <div className={styles.dialogActions}>
           <button className={styles.secondary} disabled={busy || Boolean(publishedAt) || dirtyRoomIds.length > 0 || !destinationSlot || destinationSlot.time_slot_id === moveCurrentTimeSlotId} onClick={() => void createDestinationRoom()}>Create destination room</button>
           <button disabled={busy || Boolean(publishedAt) || !destinationSlot || !moveCanSave} onClick={() => void confirmMove()}>Confirm move</button>

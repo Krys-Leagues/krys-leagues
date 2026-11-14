@@ -6,7 +6,11 @@ const sql = readFileSync(new URL("../supabase/migrations/20261111193000_mga_defa
 const page = readFileSync(new URL("../app/admin/mga/rooms/page.tsx", import.meta.url), "utf8")
 
 test("new MGA rooms display and generate the KMGA prefix", () => {
-  assert.match(page, /Create KMGA\{snapshot\.next_room_number\}/)
+  assert.match(page, /MGA_ROOM_PREFIX/)
+  assert.match(page, /aria-label="MGA room number"/)
+  assert.match(page, /Enter a \{MGA_ROOM_PREFIX\} number above to create a room/)
+  assert.doesNotMatch(page, /Create KMGA\{snapshot\.next_room_number\}/)
+  assert.doesNotMatch(page, /p_room_name: null/)
   assert.match(sql, /'KMGA'\s*\|\|\s*v_number::text/)
 })
 
