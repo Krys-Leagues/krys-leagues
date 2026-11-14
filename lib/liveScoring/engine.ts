@@ -59,7 +59,17 @@ export function canPlayerSubmitRound(status: "submitted" | "verified" | null | u
 }
 
 export function roomNoticeKey(room: RoomAssignment) {
-  return `${room.eventId}:${room.roomId}:${room.playerId}:${room.roundId}:v${room.publishedVersion}`
+  return `${room.eventId}:${room.roomSource || "studio"}:${room.roomId}:${room.playerId}:${room.roundId}:v${room.publishedVersion}`
+}
+
+export function dateKeyInTimeZone(value: Date | string, timeZone = "America/New_York") {
+  const parts = new Intl.DateTimeFormat("en-US", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date(value))
+  const values = Object.fromEntries(parts.filter((part) => part.type !== "literal").map((part) => [part.type, part.value]))
+  return values.year && values.month && values.day ? `${values.year}-${values.month}-${values.day}` : ""
+}
+
+export function currentEventDate(now = new Date()) {
+  return dateKeyInTimeZone(now, "America/New_York")
 }
 
 export function publishedRoomAssignments(rooms: RoomRecord[], players: StudioPlayer[]): RoomAssignment[] {
@@ -107,8 +117,9 @@ export function setRoomPublished(rooms: RoomRecord[], roomId: string, publish: b
   return rooms.map((room) => room.id === roomId ? { ...room, published: publish, publishedVersion: publish ? room.publishedVersion + 1 : room.publishedVersion } : room)
 }
 
-export function activeRoomNotices(rooms: RoomAssignment[], dismissedKeys: string[]) {
-  return rooms.filter((room) => room.published && !dismissedKeys.includes(roomNoticeKey(room)))
+export function activeRoomNotices(rooms: RoomAssignment[], dismissedKeys: string[], now = new Date()) {
+  const today = currentEventDate(now)
+  return rooms.filter((room) => room.published && room.eventDate === today && !dismissedKeys.includes(roomNoticeKey(room)))
 }
 
 export function formatToPar(score: number | null) {

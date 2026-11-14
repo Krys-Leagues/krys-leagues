@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import Image from "next/image"
 import type { CSSProperties } from "react"
 import { supabase } from "@/lib/supabase"
-import { combinedScoreDisplayStatus, formatToPar, formatRoundDate, dateTimeInputInZone, dateTimeInputToUtc, scoreDisplayStatus } from "@/lib/liveScoring/engine"
+import { combinedScoreDisplayStatus, currentEventDate, formatToPar, formatRoundDate, dateTimeInputInZone, dateTimeInputToUtc, roomNoticeKey, scoreDisplayStatus } from "@/lib/liveScoring/engine"
 import type { ScoreDisplayStatus } from "@/lib/liveScoring/engine"
 import type { RoomAssignment, StudioPlayer, TournamentScoringConfig } from "@/lib/liveScoring/types"
 import RoomNotificationPopup from "@/components/liveScoring/RoomNotificationPopup"
@@ -27,7 +27,7 @@ const roundDayLabel = (round: RoundRow) => {
 }
 
 const mapPublishedRoom = (room: Record<string, unknown>): AckRoom => ({
-  eventId: String(room.instance_id), roomId: String(room.room_id), playerId: String(room.player_id), roundId: String(room.round_id),
+  eventId: String(room.instance_id), roomId: String(room.room_id), playerId: String(room.player_id), roundId: String(room.round_id), eventDate: String(room.round_date),
   screenName: String(room.screen_name), roomName: String(room.room_name), course: String(room.course_name),
   difficulty: room.difficulty as "easy" | "hard", startsAt: String(room.starts_at), timeZone: String(room.time_zone),
   roomRoster: Array.isArray(room.room_roster) ? room.room_roster as string[] : [],
@@ -35,8 +35,6 @@ const mapPublishedRoom = (room: Record<string, unknown>): AckRoom => ({
   roomSource: String(room.room_source || "studio") as "studio" | "mga_regular",
 })
 const ROOM_NOTIFICATION_STORAGE_KEY = "krys-leagues:mga-room-notifications:dismissed"
-const roomNotificationKey = (room: Pick<AckRoom, "eventId" | "roomId" | "roomSource" | "publishedVersion">) =>
-  [room.eventId, room.roomSource || "studio", room.roomId, room.publishedVersion].join(":")
 const readDismissedRoomNotificationKeys = () => {
   if (typeof window === "undefined") return new Set<string>()
   try {
@@ -110,7 +108,7 @@ export default function LiveStudio({ adminOnly = false, adminView = "scores", in
   const currentRoundId = currentPlayerRoom?.roundId || ""
   const currentRoomSource = currentPlayerRoom?.roomSource || "studio"
   const sharedCardReady = Boolean(currentRoomId && sharedCardPath.split("/")[2] === "room:" + currentRoomSource + ":" + currentRoomId)
-  const popup = schedule.find((r) => r.notification_pending && !dismissedRoomNotificationKeys.has(roomNotificationKey(r))) || openedRoom
+  const popup = schedule.find((r) => r.notification_pending && r.eventDate === currentEventDate() && !dismissedRoomNotificationKeys.has(roomNoticeKey(r))) || openedRoom
 
   useEffect(() => {
     try { window.localStorage.setItem(ROOM_NOTIFICATION_STORAGE_KEY, JSON.stringify([...dismissedRoomNotificationKeys].slice(-50))) } catch { /* optional client-side fallback */ }
@@ -341,7 +339,7 @@ export default function LiveStudio({ adminOnly = false, adminView = "scores", in
   }
 
   async function dismiss(room: AckRoom) {
-    const key = roomNotificationKey(room)
+    const key = roomNoticeKey(room)
     setDismissedRoomNotificationKeys((current) => {
       const next = new Set(current)
       next.add(key)
@@ -366,7 +364,7 @@ export default function LiveStudio({ adminOnly = false, adminView = "scores", in
 
   if (!config) return <main className={styles.page}><div className={styles.shell}><h1>Live Scoring Studio</h1><p role="status">{message}</p></div></main>
   const roster = (room: RoomRow) => members.filter((m) => m.room_id === room.id).map((m) => players.find((p) => p.id === m.canonical_player_id)?.screenName).filter(Boolean).join(", ") || "None"
-  const popupRoom: RoomAssignment | null = popup ? { eventId: popup.eventId, roomId: popup.roomId, playerId: popup.playerId, roundId: popup.roundId, screenName: popup.screenName, roomName: popup.roomName, course: popup.course, difficulty: popup.difficulty, startsAt: popup.startsAt, timeZone: popup.timeZone, roomRoster: popup.roomRoster, publishedVersion: popup.publishedVersion, published: true, roomSource: popup.roomSource } : null
+  const popupRoom: RoomAssignment | null = popup ? { eventId: popup.eventId, roomId: popup.roomId, playerId: popup.playerId, roundId: popup.roundId, eventDate: popup.eventDate, screenName: popup.screenName, roomName: popup.roomName, course: popup.course, difficulty: popup.difficulty, startsAt: popup.startsAt, timeZone: popup.timeZone, roomRoster: popup.roomRoster, publishedVersion: popup.publishedVersion, published: true, roomSource: popup.roomSource } : null
   const isMGAChampionship = instanceSlug === MGA_PREVIEW_SLUG
 
   return <main className={`${styles.page} ${large ? styles.large : ""}`} style={{ "--accent": config.theme.accent, "--surface": config.theme.surface, "--ink": config.theme.text, "--muted": config.theme.muted, "--artwork": `url(${isMGAChampionship ? "/mga/babylonian-gardens-panorama.png" : config.artwork})` } as CSSProperties}>

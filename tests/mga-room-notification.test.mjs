@@ -6,7 +6,7 @@ test("room notifications are dismissed per published assignment version and neve
   const source = await readFile(new URL("../components/liveScoring/LiveStudio.tsx", import.meta.url), "utf8")
   assert.match(source, /ROOM_NOTIFICATION_STORAGE_KEY/)
   assert.match(source, /localStorage\.setItem\(ROOM_NOTIFICATION_STORAGE_KEY/)
-  assert.match(source, /r\.notification_pending && !dismissedRoomNotificationKeys\.has\(roomNotificationKey\(r\)\)/)
+  assert.match(source, /r\.notification_pending && r\.eventDate === currentEventDate\(\) && !dismissedRoomNotificationKeys\.has\(roomNoticeKey\(r\)\)/)
   assert.match(source, /scoring_studio_ack_room_v2/)
   assert.match(source, /!adminOnly && popupRoom && <RoomNotificationPopup/)
 })

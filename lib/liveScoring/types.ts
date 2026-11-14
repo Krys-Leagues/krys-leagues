@@ -38,6 +38,7 @@ export type RoomAssignment = {
   roomId: string
   playerId: string
   roundId: string
+  eventDate?: string
   screenName: string
   roomName: string
   course: string

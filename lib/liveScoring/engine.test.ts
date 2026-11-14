@@ -2,7 +2,7 @@ import assert from "node:assert/strict"
 import { readFileSync } from "node:fs"
 import test from "node:test"
 import { MGA_DEMO_PLAYERS, MGA_STUDIO_CONFIG } from "./config.ts"
-import { activeRoomNotices, calculateLeaderboard, canPlayerSubmitRound, combinedScoreDisplayStatus, dateTimeInputInZone, dateTimeInputToUtc, formatToPar, publishedRoomAssignments, roomNoticeKey, scoreDisplayStatus, setRoomPublished, transferRoomPlayer, tournamentStorageKey, updateRoomRecord } from "./engine.ts"
+import { activeRoomNotices, calculateLeaderboard, canPlayerSubmitRound, combinedScoreDisplayStatus, currentEventDate, dateKeyInTimeZone, dateTimeInputInZone, dateTimeInputToUtc, formatToPar, publishedRoomAssignments, roomNoticeKey, scoreDisplayStatus, setRoomPublished, transferRoomPlayer, tournamentStorageKey, updateRoomRecord } from "./engine.ts"
 import type { RoomAssignment, RoomRecord, RoundScore } from "./types.ts"
 
 test("combined scoring sums only played rounds, ranks low totals first, and preserves ties", () => {
@@ -29,15 +29,34 @@ test("combined scoring sums only played rounds, ranks low totals first, and pres
 })
 
 test("room notices target one published room and refresh on assignment changes", () => {
-  const base: RoomAssignment = { eventId: "event-a", roomId: "room-11", playerId: "demo-aria", roundId: "r1", screenName: "Aria Demo", roomName: "KMGA11", course: "Gardens of Babylon", difficulty: "easy", startsAt: "2026-11-12T12:30:00Z", timeZone: "America/Los_Angeles", roomRoster: ["Aria Demo", "Blake Demo"], publishedVersion: 1, published: true }
+  const base: RoomAssignment = { eventId: "event-a", roomId: "room-11", playerId: "demo-aria", roundId: "r1", eventDate: "2026-11-12", screenName: "Aria Demo", roomName: "KMGA11", course: "Gardens of Babylon", difficulty: "easy", startsAt: "2026-11-12T12:30:00Z", timeZone: "America/Los_Angeles", roomRoster: ["Aria Demo", "Blake Demo"], publishedVersion: 1, published: true }
   const otherRoom = { ...base, roomId: "room-12", playerId: "demo-casey", roomName: "KMGA12", published: false }
   const moved = { ...base, roomName: "KMGA13", publishedVersion: 2 }
-  assert.deepEqual(activeRoomNotices([base, otherRoom], []), [base])
-  assert.deepEqual(activeRoomNotices([base], [roomNoticeKey(base)]), [])
-  assert.deepEqual(activeRoomNotices([moved], [roomNoticeKey(base)]), [moved])
-  assert.deepEqual(activeRoomNotices([{ ...base, published: false }], []), [])
+  const thursdayMorningEastern = new Date("2026-11-12T13:00:00Z")
+  assert.deepEqual(activeRoomNotices([base, otherRoom], [], thursdayMorningEastern), [base])
+  assert.deepEqual(activeRoomNotices([base], [roomNoticeKey(base)], thursdayMorningEastern), [])
+  assert.deepEqual(activeRoomNotices([moved], [roomNoticeKey(base)], thursdayMorningEastern), [moved])
+  assert.deepEqual(activeRoomNotices([{ ...base, published: false }], [], thursdayMorningEastern), [])
   assert.notEqual(roomNoticeKey({ ...base, eventId: "event-b" }), roomNoticeKey(base))
   assert.notEqual(tournamentStorageKey("event-a"), tournamentStorageKey("event-b"))
+})
+
+test("room notices use the Eastern event-day boundary and never announce other days", () => {
+  assert.equal(dateKeyInTimeZone("2026-11-14T04:59:59Z"), "2026-11-13")
+  assert.equal(dateKeyInTimeZone("2026-11-14T05:00:00Z"), "2026-11-14")
+  assert.equal(currentEventDate(new Date("2026-11-14T15:00:00Z")), "2026-11-14")
+
+  const thursday = { eventId: "event-a", roomId: "thursday", playerId: "demo-aria", roundId: "r1", eventDate: "2026-11-12", screenName: "Aria Demo", roomName: "KMGA10", course: "Raptor Cliffs", difficulty: "easy" as const, startsAt: "2026-11-12T13:00:00Z", timeZone: "America/New_York", roomRoster: ["Aria Demo"], publishedVersion: 1, published: true }
+  const friday = { ...thursday, roomId: "friday", roundId: "r2", eventDate: "2026-11-13", publishedVersion: 2 }
+  const saturday = { ...thursday, roomId: "saturday", roundId: "r3", eventDate: "2026-11-14", publishedVersion: 3 }
+  const sunday = { ...thursday, roomId: "sunday", roundId: "r4", eventDate: "2026-11-15", publishedVersion: 4 }
+  const rooms = [thursday, friday, saturday, sunday]
+  assert.deepEqual(activeRoomNotices(rooms, [], new Date("2026-11-13T16:00:00Z")).map((room) => room.roomId), ["friday"])
+  assert.deepEqual(activeRoomNotices(rooms, [], new Date("2026-11-14T04:59:59Z")).map((room) => room.roomId), ["friday"])
+  assert.deepEqual(activeRoomNotices(rooms, [], new Date("2026-11-14T05:00:00Z")).map((room) => room.roomId), ["saturday"])
+  assert.deepEqual(activeRoomNotices(rooms, [], new Date("2026-11-15T15:00:00Z")).map((room) => room.roomId), ["sunday"])
+  assert.deepEqual(activeRoomNotices(rooms, [roomNoticeKey(saturday)], new Date("2026-11-14T15:00:00Z")), [])
+  assert.notEqual(roomNoticeKey({ ...saturday, playerId: "demo-blake" }), roomNoticeKey(saturday))
 })
 
 test("duplicate player submissions are blocked until an Admin reopens the round", () => {
