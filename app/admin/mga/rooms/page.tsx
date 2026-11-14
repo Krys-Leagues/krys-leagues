@@ -3,13 +3,10 @@
 import Link from "next/link"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { formatMgaLocalTime, MGA_DAYS, MGA_REGULAR_EVENT_ID, type MgaDayKey, type MgaRoom, type MgaRoomSelection, type MgaRoomSnapshot } from "@/lib/mgaRegular"
+import { groupMgaRoomSlots } from "@/lib/mgaRoomSlotGroups"
 import { canMoveRoomAssignment, makeMgaRoomDraft, roomAssignmentChoices, roomAssignmentConflicts, roomDraftChanged, roomSaveRegistrationIds, roomSeatsAvailable, type MgaRoomDraft } from "@/lib/mgaRoomDraft"
 import { supabase } from "@/lib/supabase"
 import styles from "./page.module.css"
-
-type SlotGroup = NonNullable<MgaRoomSnapshot["players"]>[number]["selections"][number] & {
-  players: MgaRoomSnapshot["players"]
-}
 
 function formatEventDate(value: string) {
   return new Intl.DateTimeFormat(undefined, { weekday: "long", month: "long", day: "numeric", timeZone: "UTC" })
@@ -74,18 +71,10 @@ export default function MgaRoomAdminPage() {
 
   const day = MGA_DAYS.find((item) => item.key === dayKey) || MGA_DAYS[0]
   const publishedAt = snapshot?.days?.find((item) => item.day_key === dayKey)?.published_at || null
-  const slotGroups = useMemo(() => {
-    const grouped = new Map<string, SlotGroup>()
-    for (const player of snapshot?.players || []) {
-      for (const selection of player.selections || []) {
-        if (selection.day_key !== dayKey) continue
-        const group = grouped.get(selection.time_slot_id) || { ...selection, players: [] }
-        group.players.push(player)
-        grouped.set(selection.time_slot_id, group)
-      }
-    }
-    return [...grouped.values()].sort((a, b) => a.event_date.localeCompare(b.event_date) || a.slot_number - b.slot_number)
-  }, [dayKey, snapshot])
+  const slotGroups = useMemo(
+    () => groupMgaRoomSlots(snapshot?.time_slots || [], snapshot?.players || [], dayKey),
+    [dayKey, snapshot],
+  )
 
   const dirtyRoomIds = useMemo(() => (snapshot?.rooms || [])
     .filter((room) => roomDraftChanged(room, roomDrafts[room.id] || makeMgaRoomDraft(room, snapshot?.assignments || [], snapshot?.room_capacity || 4), snapshot?.assignments || [], snapshot?.room_capacity || 4))
