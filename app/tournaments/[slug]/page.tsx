@@ -21,15 +21,11 @@ type Match = {
   id: string
   round_number: number
   match_number: number
-  stable_key: string
-  status: string
   player_a_id: string | null
   player_b_id: string | null
   winner_player_id: string | null
-  scheduled_at: string | null
-  match_timezone: string | null
 }
-type MatchResult = { match_id: string; winner_player_id: string | null; loser_player_id: string | null; score_label: string | null }
+type MatchResult = { match_id: string; winner_player_id: string | null }
 
 const MATCH_CENTER_ORIGIN = "https://krys-leagues-match-center.vercel.app"
 
@@ -58,7 +54,7 @@ export default async function PublicTournamentPage({ params }: { params: Promise
   const tournamentRow = tournament as Tournament
   const [{ data: rounds, error: roundsError }, { data: matches, error: matchesError }] = await Promise.all([
     client.from("tournament_rounds").select("round_number,name,deadline_at,is_final").eq("tournament_id", tournamentRow.id).order("round_number"),
-    client.from("tournament_matches").select("id,round_number,match_number,stable_key,status,player_a_id,player_b_id,winner_player_id,scheduled_at,match_timezone").eq("tournament_id", tournamentRow.id).order("round_number").order("match_number"),
+    client.from("tournament_matches").select("id,round_number,match_number,player_a_id,player_b_id,winner_player_id").eq("tournament_id", tournamentRow.id).order("round_number").order("match_number"),
   ])
 
   if (roundsError || matchesError) {
@@ -69,7 +65,7 @@ export default async function PublicTournamentPage({ params }: { params: Promise
   const roundRows = (rounds ?? []) as Round[]
   const matchIds = matchRows.map((match) => match.id)
   const { data: results, error: resultsError } = matchIds.length
-    ? await client.from("tournament_match_results").select("match_id,winner_player_id,loser_player_id,score_label").in("match_id", matchIds)
+    ? await client.from("tournament_match_results").select("match_id,winner_player_id").in("match_id", matchIds)
     : { data: [], error: null }
   if (resultsError) return <main className={styles.page}><section className={styles.card}><h1>Current brackets unavailable</h1><p>The authoritative match results could not be read. No bracket records were changed.</p><Link href="/tournaments">← Bracket Tournaments</Link></section></main>
   const playerIds = [...new Set(matchRows.flatMap((match) => [match.player_a_id, match.player_b_id, match.winner_player_id].filter((id): id is string => Boolean(id)) ))]
@@ -80,7 +76,7 @@ export default async function PublicTournamentPage({ params }: { params: Promise
   const roundsByNumber = new Map<number, Match[]>()
   for (const match of matchRows) roundsByNumber.set(match.round_number, [...(roundsByNumber.get(match.round_number) ?? []), match])
 
-  function playerName(id: string | null) { return (id && names.get(id)) || "Waiting for advancement" }
+  function playerName(id: string | null) { return (id && names.get(id)) || "TBD" }
   function winnerName(id: string | null) { return id ? playerName(id) : null }
 
   const visualRounds: VisualBracketRound[] = roundRows.map((round) => ({
@@ -89,18 +85,14 @@ export default async function PublicTournamentPage({ params }: { params: Promise
     deadlineLabel: round.deadline_at ? formatDate(round.deadline_at) : null,
     matches: (roundsByNumber.get(round.round_number) ?? []).map((match) => {
       const result = resultByMatch.get(match.id)
+      const winnerId = match.winner_player_id ?? result?.winner_player_id ?? null
       const playerAName = playerName(match.player_a_id)
       const playerBName = playerName(match.player_b_id)
       return {
         id: match.id,
-        matchNumber: match.match_number,
-        stableKey: match.stable_key,
-        status: match.status,
         playerAName,
         playerBName,
-        winnerName: winnerName(match.winner_player_id),
-        scoreLabel: result?.score_label ?? null,
-        scheduledLabel: match.scheduled_at ? formatDate(match.scheduled_at, match.match_timezone) : null,
+        winnerName: winnerName(winnerId),
         matchCenterHref: match.player_a_id && match.player_b_id ? `${MATCH_CENTER_ORIGIN}/tournaments/${TOURNAMENT_SLUG}/matches/${encodeURIComponent(match.id)}` : null,
       }
     }),
@@ -109,7 +101,7 @@ export default async function PublicTournamentPage({ params }: { params: Promise
   return <main className={styles.page}>
     <div className={styles.shell}>
       <nav className={styles.breadcrumbs} aria-label="Tournament navigation"><Link href="/">← Krys Leagues</Link><span>/</span><Link href="/tournaments">Bracket Tournaments</Link></nav>
-      <header className={styles.hero}><p className={styles.kicker}>Area 15 · Current Brackets</p><h1>{tournamentRow.name}</h1><p className={styles.subtitle}>Published read-only view of the existing tournament bracket. Results and advancement remain protected Admin operations.</p><div className={styles.summary}><div><span>Status</span><strong>{tournamentRow.status.replaceAll("_", " ")}</strong></div><div><span>Format</span><strong>{tournamentRow.bracket_size}-player {tournamentRow.format.replaceAll("_", " ")}</strong></div><div><span>Matches</span><strong>{matchRows.length}</strong></div><div><span>Start</span><strong>{formatDate(tournamentRow.start_at)}</strong></div></div></header>
+      <header className={styles.hero}><p className={styles.kicker}>Area 15 · Current Brackets</p><h1>{tournamentRow.name}</h1><p className={styles.subtitle}>Published read-only view of the existing five-round tournament bracket. Results and advancement remain protected Admin operations.</p></header>
       <section className={styles.notice}><strong>Read-only player view</strong><span>This page displays the authoritative bracket records and does not create, reset, or advance matches.</span></section>
       <section className={styles.bracket} aria-label="Current tournament bracket">
         {roundRows.length === 0 || matchRows.length === 0 ? <div className={styles.card}><h2>Bracket not yet published</h2><p>The tournament exists, but no current match rows are available for display.</p></div> : <VisualBracket rounds={visualRounds} />}

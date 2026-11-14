@@ -2,14 +2,9 @@ import styles from "./VisualBracket.module.css"
 
 export type VisualBracketMatch = {
   id: string
-  matchNumber: number
-  stableKey: string
-  status: string
   playerAName: string
   playerBName: string
   winnerName: string | null
-  scoreLabel: string | null
-  scheduledLabel: string | null
   matchCenterHref: string | null
 }
 
@@ -45,21 +40,15 @@ export default function VisualBracket({ rounds }: { rounds: VisualBracketRound[]
             </header>
             <div className={styles.matches}>
               {round.matches.map((match) => (
-                <article className={styles.match} data-match-id={match.id} key={match.id}>
-                  <div className={styles.matchHeader}>
-                    <strong>{match.stableKey || `Match ${match.matchNumber}`}</strong>
-                    <span className={styles.status}>{match.status.replaceAll("_", " ")}</span>
-                  </div>
+                <a className={styles.matchLink} href={match.matchCenterHref || undefined} aria-label={match.matchCenterHref ? `Open private Match Center for ${match.playerAName} versus ${match.playerBName}` : undefined} key={match.id}>
+                  <article className={styles.match} data-match-id={match.id}>
                   <div className={styles.playerRow}>
                     <span className={match.winnerName === match.playerAName ? styles.winner : ""}>{match.playerAName}</span>
                     <span className={styles.vs}>vs</span>
                     <span className={match.winnerName === match.playerBName ? styles.winner : ""}>{match.playerBName}</span>
                   </div>
-                  {match.winnerName ? <p className={styles.result}>Winner: <strong>{match.winnerName}</strong></p> : <p className={styles.pending}>Pending advancement</p>}
-                  {match.scoreLabel ? <p className={styles.score}>Result: {match.scoreLabel}</p> : null}
-                  {match.scheduledLabel ? <p className={styles.schedule}>Scheduled: {match.scheduledLabel}</p> : null}
-                  {match.matchCenterHref ? <a className={styles.link} href={match.matchCenterHref}>Open private Match Center</a> : <span className={styles.privateNote}>Players required before private access is available.</span>}
-                </article>
+                  </article>
+                </a>
               ))}
             </div>
           </section>
