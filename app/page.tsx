@@ -1,6 +1,7 @@
 
 import { ArtworkNavigation } from "@/components/navigation/ArtworkNavigation"
 import CupSignupAnnouncement from "@/components/announcements/CupSignupAnnouncement"
+import MgaPublicLeaderboardPopup from "@/components/announcements/MgaPublicLeaderboardPopup"
 import MastersLiveAnnouncement from "@/components/announcements/MastersLiveAnnouncement"
 import MastersWinnerVideo from "@/components/announcements/MastersWinnerVideo"
 import YouTubeLiveLauncher from "@/components/announcements/YouTubeLiveLauncher"
@@ -39,6 +40,7 @@ export default function HomePage() {
         afterFrame={
           <div className="artwork-navigation__hub-after-frame-layout">
             <MastersWinnerVideo />
+            <MgaPublicLeaderboardPopup />
           </div>
         }
       />

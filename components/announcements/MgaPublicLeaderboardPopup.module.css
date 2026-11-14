@@ -1,0 +1,159 @@
+.launcherDock {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding: 8px 0 18px;
+}
+
+.launcher {
+  min-height: 48px;
+  max-width: min(100%, 460px);
+  padding: 11px 22px;
+  border: 1px solid rgba(249, 205, 104, .88);
+  border-radius: 999px;
+  color: #fff8e7;
+  background: linear-gradient(135deg, rgba(7, 49, 69, .96), rgba(9, 78, 91, .96));
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .42), 0 0 18px rgba(56, 189, 199, .2);
+  cursor: pointer;
+  font: inherit;
+  font-size: .85rem;
+  font-weight: 950;
+  letter-spacing: .045em;
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: max(16px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  background: rgba(3, 13, 22, .76);
+  backdrop-filter: blur(8px);
+}
+
+.dialog {
+  position: relative;
+  width: min(1160px, 100%);
+  max-height: min(94dvh, 980px);
+  overflow: auto;
+  padding: clamp(12px, 2vw, 24px);
+  border: 1px solid rgba(184, 222, 239, .72);
+  border-radius: 20px;
+  color: #f8f5e9;
+  background: linear-gradient(145deg, rgba(5, 40, 57, .9), rgba(5, 27, 42, .88));
+  box-shadow: 0 24px 88px rgba(0, 0, 0, .66), inset 0 1px rgba(255, 255, 255, .14);
+}
+
+.close {
+  position: absolute;
+  z-index: 3;
+  top: 12px;
+  right: 12px;
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, .55);
+  border-radius: 50%;
+  color: #fff;
+  background: rgba(2, 19, 30, .72);
+  cursor: pointer;
+  font: inherit;
+  font-size: 26px;
+  line-height: 1;
+}
+
+.championshipHeader {
+  display: grid;
+  grid-template-columns: minmax(100px, 170px) minmax(0, 1fr) minmax(100px, 170px);
+  align-items: center;
+  gap: clamp(10px, 2vw, 28px);
+  min-height: 210px;
+  padding: 20px 58px;
+  border: 1px solid rgba(179, 221, 239, .62);
+  border-radius: 15px;
+  background-image: linear-gradient(112deg, rgba(9, 45, 65, .8), rgba(11, 47, 61, .62)), url("/mga/babylonian-gardens-panorama.png");
+  background-position: center;
+  background-size: cover;
+  box-shadow: inset 0 1px rgba(255, 255, 255, .18);
+  text-align: center;
+}
+
+.logo,
+.trophy {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: 150px;
+  object-fit: contain;
+  justify-self: center;
+  filter: drop-shadow(0 5px 10px rgba(0, 0, 0, .5));
+}
+
+.trophy { height: 166px; }
+
+.titleBlock { min-width: 0; text-shadow: 0 2px 8px rgba(0, 0, 0, .76); }
+.kicker { margin: 0 0 8px; color: #c3f4f5; font-size: .72rem; font-weight: 950; letter-spacing: .15em; }
+.titleBlock h2 { margin: 0; color: #fffdf5; font: 900 clamp(1.55rem, 4vw, 2.65rem)/1 Georgia, "Times New Roman", serif; }
+.series { margin: 9px 0 0; font: 800 .95rem/1.2 Georgia, "Times New Roman", serif; }
+.course { margin: 7px 0 0; color: #ffcf61; font-size: .98rem; font-weight: 950; letter-spacing: .08em; }
+.dates { margin: 6px 0 0; font-size: 1.02rem; font-weight: 900; }
+.rounds { margin: 4px 0 0; color: #ffcf61; font-size: .82rem; font-weight: 950; letter-spacing: .04em; }
+
+.boardHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 16px 0 8px;
+  padding: 10px 12px;
+  border: 1px solid rgba(176, 217, 230, .52);
+  border-radius: 10px 10px 0 0;
+  background: rgba(3, 30, 45, .78);
+}
+
+.boardHeading h3 { margin: 0; color: #fff; font-size: 1.05rem; }
+.boardHeading .kicker { margin-bottom: 3px; font-size: .62rem; }
+.legend { display: inline-flex; align-items: center; gap: 8px; margin: 0; color: #eaf4f4; font-size: .78rem; font-weight: 800; white-space: nowrap; }
+.legend span { width: 9px; height: 9px; border-radius: 50%; background: #4ee18a; box-shadow: 0 0 10px rgba(78, 225, 138, .45); }
+
+.tableWrap { overflow-x: auto; border: 1px solid rgba(176, 217, 230, .5); border-radius: 0 0 10px 10px; background: rgba(4, 32, 42, .48); }
+.table { width: 100%; min-width: 760px; border-collapse: collapse; table-layout: fixed; }
+.table th,.table td { height: 42px; padding: 7px 10px; border-bottom: 1px solid rgba(207, 230, 239, .24); text-align: center; }
+.table thead th { color: #dcebf0; background: rgba(202, 224, 235, .13); font-size: .72rem; font-weight: 950; letter-spacing: .04em; }
+.table tbody tr:last-child td,.table tbody tr:last-child th { border-bottom: 0; }
+.table tbody tr:hover { background: rgba(120, 208, 220, .1); }
+.table tbody td:first-child { font-size: .9rem; font-weight: 800; }
+.table tbody th { color: #fff; font-size: .98rem; font-weight: 900; text-align: left; overflow-wrap: anywhere; }
+.positionCol { width: 72px; }
+.playerCol { width: 32%; }
+.combinedCol { width: 16%; }
+.verified { color: #55e789; font-size: 1.12rem; font-weight: 950; text-shadow: 0 0 10px rgba(85, 231, 137, .22); }
+.missing { color: #c3ccd0; font-size: 1rem; }
+.message { margin: 18px 10px; color: #f1f6f8; text-align: center; }
+.refreshNote { margin: 10px 2px 0; color: rgba(237, 248, 250, .72); font-size: .75rem; text-align: right; }
+
+.launcher:focus-visible,.close:focus-visible { outline: 3px solid #ffe08b; outline-offset: 3px; }
+
+@media (max-width: 700px) {
+  .dialog { border-radius: 14px; }
+  .championshipHeader { grid-template-columns: 60px minmax(0, 1fr) 60px; gap: 8px; min-height: 148px; padding: 20px 10px 12px; }
+  .logo { height: 58px; }
+  .trophy { height: 72px; }
+  .titleBlock h2 { font-size: clamp(1.1rem, 5.6vw, 1.8rem); }
+  .kicker { font-size: .55rem; letter-spacing: .1em; }
+  .series,.course { font-size: .7rem; }
+  .dates { font-size: .76rem; }
+  .rounds { font-size: .62rem; }
+  .table { min-width: 700px; }
+  .positionCol { width: 54px; }
+  .playerCol { width: 29%; }
+  .table tbody th { font-size: .85rem; }
+  .table tbody td { font-size: .95rem; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dialog { animation: appear .16s ease-out both; }
+  @keyframes appear { from { opacity: .5; transform: translateY(8px) scale(.995); } to { opacity: 1; transform: none; } }
+}
