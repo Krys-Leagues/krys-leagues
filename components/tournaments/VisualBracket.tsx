@@ -42,7 +42,7 @@ export default function VisualBracket({ rounds }: { rounds: VisualBracketRound[]
               {round.matches.map((match) => (
                 <a className={styles.matchLink} href={match.matchCenterHref || undefined} aria-label={match.matchCenterHref ? `Open private Match Center for ${match.playerAName} versus ${match.playerBName}` : undefined} key={match.id}>
                   <article className={styles.match} data-match-id={match.id}>
-                  <div className={styles.playerRow}>
+                  <div className={styles.playerStack}>
                     <span className={match.winnerName === match.playerAName ? styles.winner : ""}>{match.playerAName}</span>
                     <span className={styles.vs}>vs</span>
                     <span className={match.winnerName === match.playerBName ? styles.winner : ""}>{match.playerBName}</span>
