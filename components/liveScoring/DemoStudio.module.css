@@ -79,6 +79,8 @@
 .leaderboardPanel>.boardChampionshipHeader{grid-template-columns:minmax(140px,1fr) minmax(0,2.5fr) minmax(140px,1fr);min-height:180px;margin:0;padding:10px clamp(22px,4.5vw,64px);border:0;border-radius:0;background:transparent;box-shadow:none}
 .leaderboardPanel>.boardChampionshipHeader .mgaLogo{max-height:144px}
 .leaderboardPanel>.boardChampionshipHeader .mgaTrophy{width:auto;height:216px;max-width:none;max-height:none;align-self:center;justify-self:center;object-fit:contain}
+.publicationControl{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:10px 0;padding:12px 14px;border:1px solid #f3c75f66;border-radius:12px;background:#302712;color:#ffdf7c}.publicationControl div{display:grid;gap:4px}.publicationControl span,.publicationControl small{color:var(--muted);font-size:12px}.publicationControl button{white-space:nowrap}
+@media(max-width:700px){.publicationControl{align-items:stretch;flex-direction:column}.publicationControl button{width:100%}}
 .displayToggleFooter{display:flex;justify-content:flex-end;margin-top:10px}
 .compactBoard table{width:100%;min-width:1040px;table-layout:fixed}
 .positionColumn{width:8%}.playerColumn{width:34%}.roundColumn{width:9.5%}.combinedColumn{width:20%}

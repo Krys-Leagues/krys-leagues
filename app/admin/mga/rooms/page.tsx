@@ -20,6 +20,11 @@ export default function MgaRoomAdminPage() {
   const [snapshot, setSnapshot] = useState<MgaRoomSnapshot | null>(null)
   const [dayKey, setDayKey] = useState<MgaDayKey>("thursday")
   const [capacityDraft, setCapacityDraft] = useState("4")
+  const [roomNameQuery, setRoomNameQuery] = useState("")
+  const [roomSearchAttempted, setRoomSearchAttempted] = useState(false)
+  const [newRoomTimeSlotId, setNewRoomTimeSlotId] = useState("")
+  const [newRoomCapacity, setNewRoomCapacity] = useState("4")
+  const [focusedRoomId, setFocusedRoomId] = useState<string | null>(null)
   const [roomDrafts, setRoomDrafts] = useState<Record<string, MgaRoomDraft>>({})
   const [moveRegistrationId, setMoveRegistrationId] = useState<string | null>(null)
   const [moveTimeSlotId, setMoveTimeSlotId] = useState("")
@@ -54,6 +59,8 @@ export default function MgaRoomAdminPage() {
         }
         setSnapshot(next)
         setCapacityDraft(String(next.room_capacity || 4))
+        setNewRoomCapacity(String(next.room_capacity || 4))
+        setNewRoomTimeSlotId((current) => current || next.time_slots[0]?.time_slot_id || "")
         setRoomDrafts(Object.fromEntries((next.rooms || []).map((room) => [
           room.id,
           makeMgaRoomDraft(room, next.assignments || [], next.room_capacity || 4),
@@ -182,6 +189,102 @@ export default function MgaRoomAdminPage() {
   const destinationSlot = timeSlots.find((slot) => slot.time_slot_id === moveTimeSlotId) || null
   const destinationRooms = (snapshot?.rooms || []).filter((room) => room.day_key === dayKey && room.time_slot_id === moveTimeSlotId)
   const moveCanSave = canMoveRoomAssignment(moveCurrentTimeSlotId || null, moveCurrentRoomId, destinationSlot?.time_slot_id || null, destinationRooms.some((room) => room.id === moveRoomId) ? moveRoomId : null)
+  const exactRoomMatches = useMemo(() => {
+    const query = roomNameQuery.trim().toLocaleLowerCase()
+    if (!query) return []
+    return (snapshot?.rooms || []).filter((room) => room.room_name.trim().toLocaleLowerCase() === query)
+  }, [roomNameQuery, snapshot])
+  const newRoomSlots = timeSlots
+  const newRoomSlot = newRoomSlots.find((slot) => slot.time_slot_id === newRoomTimeSlotId) || null
+
+  function focusRoom(room: MgaRoom) {
+    setDayKey(room.day_key)
+    setFocusedRoomId(room.id)
+    setMessage(`${room.room_name} loaded from its authoritative MGA record.`)
+    setError("")
+    window.setTimeout(() => document.getElementById(`mga-room-${room.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" }), 0)
+  }
+
+  function searchRoom() {
+    const query = roomNameQuery.trim()
+    setRoomSearchAttempted(true)
+    if (!query) {
+      setError("Type an exact MGA room name, such as KMGA27.")
+      return
+    }
+    if (exactRoomMatches.length > 1) {
+      setError(`More than one authoritative room is named ${query}. Creation is blocked until the duplicate records are resolved.`)
+      return
+    }
+    if (exactRoomMatches.length === 1) {
+      focusRoom(exactRoomMatches[0])
+      return
+    }
+    setNewRoomTimeSlotId((current) => current || newRoomSlots[0]?.time_slot_id || "")
+    setMessage(`${query} does not exist in the MGA room records. Choose the booked slot below, then confirm creation.`)
+    setError("")
+  }
+
+  async function createNamedRoom() {
+    const name = roomNameQuery.trim()
+    const capacity = Number(newRoomCapacity)
+    if (!name || !newRoomSlot || !Number.isInteger(capacity) || capacity < 1 || capacity > 100) {
+      setError("Choose an authoritative booked time slot and a room capacity from 1 to 100.")
+      return
+    }
+    const duplicate = (snapshot?.rooms || []).find((room) => room.room_name.trim().toLocaleLowerCase() === name.toLocaleLowerCase())
+    if (duplicate) {
+      focusRoom(duplicate)
+      setError(`${name} already exists. The existing room was loaded; no second room was created.`)
+      return
+    }
+    if (publishedAt) {
+      setError(`Unpublish ${day.label} before creating a room for that day.`)
+      return
+    }
+    const slotDescription = `${formatEventDate(newRoomSlot.event_date)} at ${formatMgaLocalTime(newRoomSlot.starts_at, "America/New_York")}`
+    if (!window.confirm(`Create ${name} in the existing MGA room records for ${slotDescription}? Course, difficulty, and booking time remain inherited from this authoritative schedule slot. This does not create a Studio room.`)) return
+    setBusy(true)
+    setError("")
+    setMessage("")
+    try {
+      const response = await supabase.rpc("mga_regular_room_create_v1", {
+        p_event_id: MGA_REGULAR_EVENT_ID,
+        p_day_key: dayKey,
+        p_time_slot_id: newRoomSlot.time_slot_id,
+        p_room_name: name,
+      })
+      if (response.error) {
+        setError(response.error.message)
+        return
+      }
+      const created = Array.isArray(response.data) ? response.data[0] : response.data
+      if (!created?.id) {
+        setError("The room service did not return the created authoritative room.")
+        return
+      }
+      const saveResponse = await supabase.rpc("mga_regular_room_save_v1", {
+        p_event_id: MGA_REGULAR_EVENT_ID,
+        p_room_id: created.id,
+        p_room_name: name,
+        p_room_capacity: capacity,
+        p_registration_ids: [],
+      })
+      if (saveResponse.error) {
+        setError(`${name} was created, but its requested capacity was not saved: ${saveResponse.error.message}`)
+        await load()
+        return
+      }
+      await load()
+      setFocusedRoomId(String(created.id))
+      setMessage(`${name} was created in the authoritative MGA room records. Assign Global Players, then save and publish it.`)
+      window.setTimeout(() => document.getElementById(`mga-room-${created.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" }), 0)
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "The named MGA room could not be created.")
+    } finally {
+      setBusy(false)
+    }
+  }
 
   async function createDestinationRoom() {
     if (!destinationSlot || publishedAt || dirtyRoomIds.length) return
@@ -270,8 +373,27 @@ export default function MgaRoomAdminPage() {
           <button className={styles.secondary} disabled={busy || dirtyRoomIds.length > 0} onClick={() => void load()}>Refresh roster</button>
         </section>
         <div className={styles.dayTabs} role="tablist" aria-label="Tournament day">
-          {MGA_DAYS.map((item) => <button key={item.key} role="tab" aria-selected={dayKey === item.key} className={dayKey === item.key ? styles.selectedTab : ""} disabled={busy || dirtyRoomIds.length > 0} onClick={() => setDayKey(item.key)}>{item.label}</button>)}
+          {MGA_DAYS.map((item) => <button key={item.key} role="tab" aria-selected={dayKey === item.key} className={dayKey === item.key ? styles.selectedTab : ""} disabled={busy || dirtyRoomIds.length > 0} onClick={() => { setDayKey(item.key); setNewRoomTimeSlotId(snapshot?.time_slots.find((slot) => slot.day_key === item.key)?.time_slot_id || "") }}>{item.label}</button>)}
         </div>
+        <section className={styles.roomLookup} aria-labelledby="mga-room-lookup-title">
+          <div>
+            <p className={styles.eyebrow}>Existing MGA room records</p>
+            <h2 id="mga-room-lookup-title">Find or create a named room</h2>
+            <p className={styles.muted}>Searches the authoritative MGA rooms and loads their real assignments. Course, difficulty, date, and start time stay tied to the selected registered booking slot; no Studio room is created.</p>
+          </div>
+          <div className={styles.roomLookupForm}>
+            <label>Exact room name<input aria-label="Exact MGA room name" value={roomNameQuery} maxLength={40} placeholder="KMGA27" onChange={(event) => { setRoomNameQuery(event.target.value); setRoomSearchAttempted(false); setError("") }} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); searchRoom() } }} /></label>
+            <button disabled={busy || dirtyRoomIds.length > 0} onClick={searchRoom}>Find exact room</button>
+          </div>
+          {exactRoomMatches.map((room) => <div className={styles.lookupResult} key={room.id}><span><strong>{room.room_name}</strong> · {MGA_DAYS.find((item) => item.key === room.day_key)?.label} · {room.player_count}/{room.capacity} assigned</span><button className={styles.secondary} disabled={busy || dirtyRoomIds.length > 0} onClick={() => focusRoom(room)}>Load room</button></div>)}
+          {roomSearchAttempted && roomNameQuery.trim() && exactRoomMatches.length === 0 && <div className={styles.createRoomPrompt}>
+            <p><strong>{roomNameQuery.trim()}</strong> is not an existing room. Confirm below only if this exact name should be created.</p>
+            <label>Authoritative booked date and start time<select value={newRoomTimeSlotId} disabled={busy || Boolean(publishedAt)} onChange={(event) => setNewRoomTimeSlotId(event.target.value)}>{newRoomSlots.map((slot) => <option key={slot.time_slot_id} value={slot.time_slot_id}>{formatEventDate(slot.event_date)} · {formatMgaLocalTime(slot.starts_at, "America/New_York")} · {slot.course_name || "Gardens of Babylon"}</option>)}</select></label>
+            <label>Capacity<input type="number" min={1} max={100} value={newRoomCapacity} disabled={busy || Boolean(publishedAt)} onChange={(event) => setNewRoomCapacity(event.target.value)} /></label>
+            <p className={styles.muted}>Difficulty is inherited from the authoritative MGA round configuration. Player assignment remains manual and uses the Global Player roster below.</p>
+            <button disabled={busy || Boolean(publishedAt) || dirtyRoomIds.length > 0 || !newRoomSlot} onClick={() => void createNamedRoom()}>Confirm and create {roomNameQuery.trim()}</button>
+          </div>}
+        </section>
         <p className={styles.privacy}>{publishedAt ? `Published ${new Date(publishedAt).toLocaleString()}. Unpublish before changing rooms or time slots.` : "Draft assignments are private to authorized Admins."}</p>
         {slotGroups.length === 0 && <section className={styles.panel}>No registered players have a saved {day.label} selection.</section>}
         <div className={styles.slots}>
@@ -303,7 +425,7 @@ export default function MgaRoomAdminPage() {
                   const capacity = Number(draft.capacity)
                   const saveIds = roomSaveRegistrationIds(draft, slot.players)
                   const capacityValid = Number.isInteger(capacity) && capacity >= 1 && capacity <= 100 && saveIds.length <= capacity
-                  return <article className={styles.roomCard} key={room.id}>
+                  return <article className={`${styles.roomCard} ${focusedRoomId === room.id ? styles.roomCardFocused : ""}`} id={`mga-room-${room.id}`} key={room.id}>
                     <div className={styles.roomHeader}><strong>{room.room_name}</strong><span>Saved {room.player_count}/{room.capacity}</span></div>
                     <div className={styles.roomEditor}>
                       <label>Room name<input aria-label={`Room name ${room.room_name}`} maxLength={40} value={draft.room_name} disabled={busy || roomLocked || otherRoomDirty} onChange={(event) => patchRoomDraft(room, { room_name: event.target.value })} /></label>

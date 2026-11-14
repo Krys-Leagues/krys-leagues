@@ -40,6 +40,8 @@ export default function LiveStudio({ adminOnly = false, adminView = "scores", in
 
   const [config, setConfig] = useState<TournamentScoringConfig | null>(null)
   const [instanceId, setInstanceId] = useState("")
+  const [instanceStatus, setInstanceStatus] = useState("")
+  const [publicResults, setPublicResults] = useState(false)
   const [rounds, setRounds] = useState<RoundRow[]>([])
   const [players, setPlayers] = useState<StudioPlayer[]>([])
   const [scores, setScores] = useState<ScoreRow[]>([])
@@ -162,7 +164,7 @@ export default function LiveStudio({ adminOnly = false, adminView = "scores", in
         const admin = Boolean(authorized)
         if (adminOnly && !admin) throw new Error("Tournament Admin access is required.")
         if (!alive) return
-        setInstanceId(instance.id); setUserId(user?.id || ""); setIsAdmin(admin)
+        setInstanceId(instance.id); setInstanceStatus(String(instance.status || "")); setPublicResults(Boolean(instance.public_results)); setUserId(user?.id || ""); setIsAdmin(admin)
         const rawConfig = instance.config as Record<string, unknown>
         setConfig({ id: instance.id, name: instance.name, subtitle: String(rawConfig.subtitle || "Tournament scoring · live results"), artwork: String(rawConfig.artwork || "/mga/gardens-of-babylon.png"), theme: (rawConfig.theme || { background: "#07120d", surface: "#0d2419", accent: "#f3c75f", text: "#f8f5e9", muted: "#b9c9be" }) as TournamentScoringConfig["theme"], scoring: (rawConfig.scoring || { method: "sum-relative-to-par", missingRound: "omit", tieRule: "competition" }) as TournamentScoringConfig["scoring"], defaultRoomCapacity: instance.default_room_capacity, rounds: [] })
         const registeredPlayers = await refresh(instance.id, admin || Boolean(user))
@@ -231,6 +233,22 @@ export default function LiveStudio({ adminOnly = false, adminView = "scores", in
     try { await action(); if (instanceId) await refresh(instanceId, adminOnly || Boolean(userId)); setMessage(success); return true }
     catch (error) { setMessage(error instanceof Error ? error.message : "The request failed. Try again."); return false }
     finally { setBusy(false) }
+  }
+
+  async function publishInstance(publish: boolean) {
+    if (!instanceId || !isAdmin) return
+    const question = publish
+      ? "Publish the verified MGA leaderboard to the public Main Hub? Player score submissions remain disabled."
+      : "Remove the MGA leaderboard from the public Main Hub? Existing scores and room records are not changed."
+    if (!window.confirm(question)) return
+    const ok = await run(async () => {
+      const { error } = await supabase.rpc("scoring_studio_publish_instance_v1", { p_instance_id: instanceId, p_publish: publish })
+      if (error) throw error
+    }, publish ? "Public MGA leaderboard enabled. Score submissions remain disabled." : "Public MGA leaderboard disabled. Scores and rooms were not changed.")
+    if (ok) {
+      setInstanceStatus(publish ? "live" : "draft")
+      setPublicResults(publish)
+    }
   }
 
   async function uploadSharedCard() {
@@ -337,6 +355,10 @@ export default function LiveStudio({ adminOnly = false, adminView = "scores", in
       {!adminOnly && userId && !playerAccessReady && tab !== "submission" && <p className={styles.toast} role="alert">This account is signed in but is not linked to a registered Global Player for this tournament. Room details, score entry, and uploads are unavailable.</p>}
       {!adminOnly && schedule.length > 0 && <details className={styles.roomAccess}><summary>Published rooms · {schedule.length}</summary><div>{schedule.map((room) => <article key={room.roundId + ":" + room.roomId}><span><strong>{room.roomName}</strong> · {rounds.find((round) => round.id === room.roundId)?.label} · {room.course} · {room.difficulty.toUpperCase()}</span><button type="button" onClick={() => setOpenedRoom(room)}>Open room details</button></article>)}</div></details>}
       {adminOnly && <div className={styles.adminBadge}>{isAdmin ? "Authorized Tournament Admin · audited writes" : "Admin access required"}</div>}
+      {adminOnly && isAdmin && <section className={styles.publicationControl} aria-label="Public MGA leaderboard publication">
+        <div><strong>{publicResults ? "Public leaderboard enabled" : "Public leaderboard private"}</strong><span>{publicResults ? "Main Hub visitors can read verified scores." : `Instance status: ${instanceStatus || "draft"}. No public scores are exposed.`}</span><small>Player score submissions: disabled</small></div>
+        <button type="button" className={styles.primary} disabled={busy} onClick={() => void publishInstance(!publicResults)}>{publicResults ? "Unpublish public leaderboard" : "Publish verified leaderboard"}</button>
+      </section>}
       {(adminOnly ? adminView !== "leaderboard" : tab === "leaderboard") && <section id="scoring-board" className={`${styles.panel} ${styles.leaderboardPanel}`}>
         {isMGAChampionship && <header className={`${styles.mgaHeader} ${styles.boardChampionshipHeader}`}>
           <Image className={styles.mgaLogo} src="/krys-leagues-logo.png" width={824} height={824} alt="Krys Leagues" priority />
