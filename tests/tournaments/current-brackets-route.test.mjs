@@ -12,7 +12,7 @@ test("Current Brackets uses the authoritative read-only tournament records", () 
   assert.match(route, /from\("players"\)/u)
   assert.match(route, /tournament_match_results/u)
   assert.match(route, /VisualBracket/u)
-  assert.match(route, /54321\.krysleagues\.com/u)
+  assert.match(route, /krys-leagues-match-center\.vercel\.app/u)
   assert.doesNotMatch(route, /insert\(|update\(|upsert\(|delete\(/u)
 })
 

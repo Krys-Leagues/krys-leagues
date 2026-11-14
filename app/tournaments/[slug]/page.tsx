@@ -31,7 +31,7 @@ type Match = {
 }
 type MatchResult = { match_id: string; winner_player_id: string | null; loser_player_id: string | null; score_label: string | null }
 
-const MATCH_CENTER_ORIGIN = "https://54321.krysleagues.com"
+const MATCH_CENTER_ORIGIN = "https://krys-leagues-match-center.vercel.app"
 
 function formatDate(value: string | null, timeZone: string | null = "America/New_York") {
   if (!value) return "Not scheduled"
