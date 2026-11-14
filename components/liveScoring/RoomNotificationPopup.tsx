@@ -16,7 +16,7 @@ export default function RoomNotificationPopup({ config, room, onDismiss, onOpenS
     <p>{room.course} · {room.difficulty.toUpperCase()}</p><p>{round?.label || "Tournament round"} · {round ? formatRoundDate(round) : "Date unavailable"}</p>
     <p><strong>Eastern:</strong> {formatTime(room.startsAt, "America/New_York")}<br /><strong>Your local time ({room.timeZone}):</strong> {formatTime(room.startsAt, room.timeZone)}</p>
     <h3>Players in {room.roomName}</h3><ul>{room.roomRoster.map((name) => <li key={name}>{name}</li>)}</ul>
-    <div className={styles.modalActions}><a href="#submission" onClick={() => { onOpenScorecard(); onDismiss() }}>Enter My Score</a><button onClick={onDismiss}>Dismiss</button></div>
+    <div className={styles.modalActions}><a href="#submission" onClick={(event) => { event.preventDefault(); onOpenScorecard(); onDismiss() }}>Enter My Score</a><button type="button" onClick={onDismiss}>Dismiss</button></div>
   </section></div>
 }
 

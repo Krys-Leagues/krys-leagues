@@ -34,6 +34,18 @@ const mapPublishedRoom = (room: Record<string, unknown>): AckRoom => ({
   publishedVersion: Number(room.published_version), notification_pending: Boolean(room.notification_pending), published: true,
   roomSource: String(room.room_source || "studio") as "studio" | "mga_regular",
 })
+const ROOM_NOTIFICATION_STORAGE_KEY = "krys-leagues:mga-room-notifications:dismissed"
+const roomNotificationKey = (room: Pick<AckRoom, "eventId" | "roomId" | "roomSource" | "publishedVersion">) =>
+  [room.eventId, room.roomSource || "studio", room.roomId, room.publishedVersion].join(":")
+const readDismissedRoomNotificationKeys = () => {
+  if (typeof window === "undefined") return new Set<string>()
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(ROOM_NOTIFICATION_STORAGE_KEY) || "[]")
+    return new Set(Array.isArray(stored) ? stored.filter((value): value is string => typeof value === "string") : [])
+  } catch {
+    return new Set<string>()
+  }
+}
 type AdminView = "scores" | "rooms" | "leaderboard"
 
 export default function LiveStudio({ adminOnly = false, adminView = "scores", instanceSlug = MGA_PREVIEW_SLUG }: { adminOnly?: boolean; adminView?: AdminView; instanceSlug?: string }) {
@@ -49,6 +61,7 @@ export default function LiveStudio({ adminOnly = false, adminView = "scores", in
   const [rooms, setRooms] = useState<RoomRow[]>([])
   const [members, setMembers] = useState<MemberRow[]>([])
   const [schedule, setSchedule] = useState<AckRoom[]>([])
+  const [dismissedRoomNotificationKeys, setDismissedRoomNotificationKeys] = useState<Set<string>>(readDismissedRoomNotificationKeys)
   const [userId, setUserId] = useState("")
   const [playerId, setPlayerId] = useState("")
   const [adminPlayerSearch, setAdminPlayerSearch] = useState("")
@@ -97,7 +110,11 @@ export default function LiveStudio({ adminOnly = false, adminView = "scores", in
   const currentRoundId = currentPlayerRoom?.roundId || ""
   const currentRoomSource = currentPlayerRoom?.roomSource || "studio"
   const sharedCardReady = Boolean(currentRoomId && sharedCardPath.split("/")[2] === "room:" + currentRoomSource + ":" + currentRoomId)
-  const popup = schedule.find((r) => r.notification_pending) || openedRoom
+  const popup = schedule.find((r) => r.notification_pending && !dismissedRoomNotificationKeys.has(roomNotificationKey(r))) || openedRoom
+
+  useEffect(() => {
+    try { window.localStorage.setItem(ROOM_NOTIFICATION_STORAGE_KEY, JSON.stringify([...dismissedRoomNotificationKeys].slice(-50))) } catch { /* optional client-side fallback */ }
+  }, [dismissedRoomNotificationKeys])
 
   useEffect(() => {
     let active = true
@@ -324,8 +341,15 @@ export default function LiveStudio({ adminOnly = false, adminView = "scores", in
   }
 
   async function dismiss(room: AckRoom) {
+    const key = roomNotificationKey(room)
+    setDismissedRoomNotificationKeys((current) => {
+      const next = new Set(current)
+      next.add(key)
+      return next
+    })
+    setSchedule((rows) => rows.map((r) => r.roomId === room.roomId && r.roomSource === room.roomSource ? { ...r, notification_pending: false } : r))
     const { error } = await supabase.rpc("scoring_studio_ack_room_v2", { p_instance_id: room.eventId, p_round_id: room.roundId, p_room_source: room.roomSource || "studio", p_room_id: room.roomId, p_published_version: room.publishedVersion })
-    if (error) setMessage(error.message); else setSchedule((rows) => rows.map((r) => r.roomId === room.roomId && r.roomSource === room.roomSource ? { ...r, notification_pending: false } : r))
+    if (error) setMessage(error.message)
   }
 
   function openRoomScorecard(room: RoomAssignment) {
@@ -451,6 +475,6 @@ export default function LiveStudio({ adminOnly = false, adminView = "scores", in
       {adminOnly && isAdmin && adminView === "rooms" && <section className={styles.panel}><p className={styles.eyebrow}>Manual room management · canonical Global Players</p><h2>Universal Room Builder</h2><div className={styles.roomAdmin}><label>Select room<select value={roomId} onChange={(event) => { const room = rooms.find((item) => item.id === event.target.value); setRoomId(event.target.value); if (room) { setRoundId(room.round_id); setRoomName(room.room_name); setCourse(room.course_name); setDifficulty(room.difficulty); setStartsAt(dateTimeInputInZone(room.starts_at, room.time_zone)); setCapacity(room.capacity) } }}><option value="">Create a new room</option>{rooms.map((room) => <option key={room.id} value={room.id}>R{rounds.find((round) => round.id === room.round_id)?.round_number ?? "?"} · {room.room_name}{room.published ? " · Published" : " · Draft"}</option>)}</select></label><label>Exact room name<input value={roomName} onChange={(event) => setRoomName(event.target.value)} /></label><label>Course<input value={course} onChange={(event) => setCourse(event.target.value)} /></label><label>Difficulty<select value={difficulty} onChange={(event) => setDifficulty(event.target.value as "easy" | "hard")}><option value="easy">Easy</option><option value="hard">Hard</option></select></label><label>Start time · Eastern<input type="datetime-local" value={startsAt} onChange={(event) => setStartsAt(event.target.value)} /></label><label>Capacity<input type="number" min="1" value={capacity} onChange={(event) => setCapacity(Number(event.target.value))} /></label><p>Assigned: {selectedRoom ? roster(selectedRoom) : "Select or create a room."}</p><div className={styles.roomActions}><button type="button" onClick={() => void saveRoom(true)}>Create draft room</button>{selectedRoom && <><button type="button" onClick={() => void saveRoom(false)}>Save room changes</button><button type="button" onClick={() => void assignPlayer(true)}>Add / transfer selected Global Player</button><button type="button" onClick={() => void assignPlayer(false)}>Remove selected Global Player</button><button type="button" className={styles.primary} onClick={() => void publishRoom(!selectedRoom.published)}>{selectedRoom.published ? "Unpublish room" : "Publish room"}</button></>}</div></div></section>}
       {message && <p className={styles.toast} role="status">{message}</p>}
     </div>
-    {popupRoom && <RoomNotificationPopup config={config} room={popupRoom} onDismiss={() => { if (popup?.notification_pending) void dismiss(popup); setOpenedRoom(null) }} onOpenScorecard={() => openRoomScorecard(popupRoom)} />}
+    {!adminOnly && popupRoom && <RoomNotificationPopup config={config} room={popupRoom} onDismiss={() => { if (popup?.notification_pending) void dismiss(popup); setOpenedRoom(null) }} onOpenScorecard={() => openRoomScorecard(popupRoom)} />}
   </main>
 }
