@@ -60,3 +60,11 @@ test("room RLS migration removes the recursive subqueries and grants only own ca
   assert.match(sql, /grant execute on function public\.current_major_player_id\(\) to authenticated/i)
   assert.doesNotMatch(sql, /\b(delete from|truncate|drop table|alter table|update public\.)/i)
 })
+
+test("Room Builder lists rooms from every round and selects the room's round before editing", () => {
+  const source = read("components/liveScoring/LiveStudio.tsx")
+  assert.match(source, /rooms\.map\(\(room\) => <option key=\{room\.id\} value=\{room\.id\}>R\{rounds\.find\(\(round\) => round\.id === room\.round_id\)\?\.round_number \?\? "\?"\}/)
+  assert.doesNotMatch(source, /rooms\.filter\(\(room\) => room\.round_id === roundId\)/)
+  assert.match(source, /setRoomId\(event\.target\.value\); if \(room\) \{ setRoundId\(room\.round_id\); setRoomName\(room\.room_name\)/)
+  assert.match(source, /setRoundId\(r\.id\); if \(selectedRoom && selectedRoom\.round_id !== r\.id\) \{ setRoomId\(""\)/)
+})
