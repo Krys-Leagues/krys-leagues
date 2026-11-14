@@ -8,7 +8,9 @@ export const FEATURE_ROUTES: readonly FeatureRoute[] = [
   { key: "skins", path: "/skins-standings", visibility: "private" },
   { key: "skins", path: "/skins", visibility: "private" },
   { key: "records", path: "/records", visibility: "private" },
-  { key: "tournaments", path: "/tournaments", visibility: "private" },
+  // The Bracket Tournaments hub and its published player bracket are read-only
+  // player surfaces. Admin controls remain under /admin and /scoring-studio.
+  { key: "tournaments", path: "/tournaments", visibility: "live" },
   { key: "tournaments", path: "/scoring-studio", visibility: "private" },
   { key: "invitationals", path: "/invitationals", visibility: "private" },
   { key: "kwt", path: "/kwt", visibility: "private" },
