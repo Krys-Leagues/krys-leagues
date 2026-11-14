@@ -22,6 +22,11 @@ export default function KrysTourneyAdminPage() {
           <span>Track current matches and player progress.</span>
         </Link>
 
+        <Link href="/admin/tournaments/bracket" style={card}>
+          <strong>5-4-3-2-1 Bracket Admin</strong>
+          <span>Review the live bracket, confirmations, and audited result actions.</span>
+        </Link>
+
         <Link href="/admin/players" style={card}>
           <strong>Players</strong>
           <span>View global player list used across all leagues.</span>
