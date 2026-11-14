@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { trustedTournamentClient } from "@/lib/tournaments/server"
+import VisualBracket, { labelForRound, type VisualBracketRound } from "@/components/tournaments/VisualBracket"
 import styles from "./page.module.css"
 
 const TOURNAMENT_SLUG = "5-4-3-2-1"
@@ -28,6 +29,9 @@ type Match = {
   scheduled_at: string | null
   match_timezone: string | null
 }
+type MatchResult = { match_id: string; winner_player_id: string | null; loser_player_id: string | null; score_label: string | null }
+
+const MATCH_CENTER_ORIGIN = "https://54321.krysleagues.com"
 
 function formatDate(value: string | null, timeZone: string | null = "America/New_York") {
   if (!value) return "Not scheduled"
@@ -63,14 +67,44 @@ export default async function PublicTournamentPage({ params }: { params: Promise
 
   const matchRows = (matches ?? []) as Match[]
   const roundRows = (rounds ?? []) as Round[]
+  const matchIds = matchRows.map((match) => match.id)
+  const { data: results, error: resultsError } = matchIds.length
+    ? await client.from("tournament_match_results").select("match_id,winner_player_id,loser_player_id,score_label").in("match_id", matchIds)
+    : { data: [], error: null }
+  if (resultsError) return <main className={styles.page}><section className={styles.card}><h1>Current brackets unavailable</h1><p>The authoritative match results could not be read. No bracket records were changed.</p><Link href="/tournaments">← Bracket Tournaments</Link></section></main>
   const playerIds = [...new Set(matchRows.flatMap((match) => [match.player_a_id, match.player_b_id, match.winner_player_id].filter((id): id is string => Boolean(id)) ))]
   const { data: players, error: playersError } = playerIds.length ? await client.from("players").select("id,screen_name").in("id", playerIds) : { data: [], error: null }
   if (playersError) return <main className={styles.page}><section className={styles.card}><h1>Current brackets unavailable</h1><p>Player identities could not be read. No bracket records were changed.</p><Link href="/tournaments">← Bracket Tournaments</Link></section></main>
   const names = new Map((players ?? []).map((player) => [player.id, player.screen_name]))
+  const resultByMatch = new Map(((results ?? []) as MatchResult[]).map((result) => [result.match_id, result]))
   const roundsByNumber = new Map<number, Match[]>()
   for (const match of matchRows) roundsByNumber.set(match.round_number, [...(roundsByNumber.get(match.round_number) ?? []), match])
 
   function playerName(id: string | null) { return (id && names.get(id)) || "Waiting for advancement" }
+  function winnerName(id: string | null) { return id ? playerName(id) : null }
+
+  const visualRounds: VisualBracketRound[] = roundRows.map((round) => ({
+    roundNumber: round.round_number,
+    label: labelForRound(round.round_number, round.name),
+    deadlineLabel: round.deadline_at ? formatDate(round.deadline_at) : null,
+    matches: (roundsByNumber.get(round.round_number) ?? []).map((match) => {
+      const result = resultByMatch.get(match.id)
+      const playerAName = playerName(match.player_a_id)
+      const playerBName = playerName(match.player_b_id)
+      return {
+        id: match.id,
+        matchNumber: match.match_number,
+        stableKey: match.stable_key,
+        status: match.status,
+        playerAName,
+        playerBName,
+        winnerName: winnerName(match.winner_player_id),
+        scoreLabel: result?.score_label ?? null,
+        scheduledLabel: match.scheduled_at ? formatDate(match.scheduled_at, match.match_timezone) : null,
+        matchCenterHref: match.player_a_id && match.player_b_id ? `${MATCH_CENTER_ORIGIN}/tournaments/${TOURNAMENT_SLUG}/matches/${encodeURIComponent(match.id)}` : null,
+      }
+    }),
+  }))
 
   return <main className={styles.page}>
     <div className={styles.shell}>
@@ -78,7 +112,7 @@ export default async function PublicTournamentPage({ params }: { params: Promise
       <header className={styles.hero}><p className={styles.kicker}>Area 15 · Current Brackets</p><h1>{tournamentRow.name}</h1><p className={styles.subtitle}>Published read-only view of the existing tournament bracket. Results and advancement remain protected Admin operations.</p><div className={styles.summary}><div><span>Status</span><strong>{tournamentRow.status.replaceAll("_", " ")}</strong></div><div><span>Format</span><strong>{tournamentRow.bracket_size}-player {tournamentRow.format.replaceAll("_", " ")}</strong></div><div><span>Matches</span><strong>{matchRows.length}</strong></div><div><span>Start</span><strong>{formatDate(tournamentRow.start_at)}</strong></div></div></header>
       <section className={styles.notice}><strong>Read-only player view</strong><span>This page displays the authoritative bracket records and does not create, reset, or advance matches.</span></section>
       <section className={styles.bracket} aria-label="Current tournament bracket">
-        {roundRows.length === 0 || matchRows.length === 0 ? <div className={styles.card}><h2>Bracket not yet published</h2><p>The tournament exists, but no current match rows are available for display.</p></div> : [...roundsByNumber.entries()].map(([roundNumber, roundMatches]) => { const round = roundRows.find((item) => item.round_number === roundNumber); return <section className={styles.round} id={`round-${roundNumber}`} key={roundNumber}><div className={styles.roundHeading}><div><p className={styles.kicker}>Round {roundNumber}</p><h2>{round?.name || (round?.is_final ? "Final" : `Round ${roundNumber}`)}</h2></div>{round?.deadline_at ? <span>Deadline {formatDate(round.deadline_at)}</span> : null}</div>{roundMatches.map((match) => <article className={styles.match} key={match.id}><div className={styles.matchHeading}><strong>{match.stable_key || `Match ${match.match_number}`}</strong><span>{match.status.replaceAll("_", " ")}</span></div><div className={styles.players}><strong>{playerName(match.player_a_id)}</strong><span>vs</span><strong>{playerName(match.player_b_id)}</strong></div>{match.winner_player_id ? <p className={styles.result}>Winner: <strong>{playerName(match.winner_player_id)}</strong></p> : null}{match.scheduled_at ? <p className={styles.schedule}>Scheduled: {formatDate(match.scheduled_at, match.match_timezone)}</p> : null}</article>)}</section> })}
+        {roundRows.length === 0 || matchRows.length === 0 ? <div className={styles.card}><h2>Bracket not yet published</h2><p>The tournament exists, but no current match rows are available for display.</p></div> : <VisualBracket rounds={visualRounds} />}
       </section>
     </div>
   </main>
